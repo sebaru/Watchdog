@@ -1,0 +1,64 @@
+/**********************************************************************************************************/
+/* Include/Reseaux_mnemonique.h:   Sous_tag de mnemonique pour watchdog 2.0 par lefevre Sebastien         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+
+#ifndef _RESEAUX_MNEMONIQUE_H_
+ #define _RESEAUX_MNEMONIQUE_H_
+
+ #include "Cst_mnemoniques.h"
+
+ struct CMD_SHOW_MNEMONIQUE
+  { guint id;                                                      /* Numero du message dans la structure */
+    guint type;
+    guint num;
+    gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
+    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+  };
+ struct CMD_EDIT_MNEMONIQUE
+  { guint id;                                                      /* Numero du message dans la structure */
+    guint type;
+    guint num;
+    gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
+    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+  };
+
+ struct CMD_ADD_MNEMONIQUE
+  { guint type;
+    guint num;
+    gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
+    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+  };
+
+ struct CMD_ID_MNEMONIQUE
+  { guint id;                                                      /* Numero du message dans la structure */
+    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+  };
+ struct CMD_TYPE_NUM_MNEMONIQUE
+  { guint type;
+    guint num;
+  };
+
+ enum 
+  { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                      /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE,
+    SSTAG_CLIENT_ADD_MNEMONIQUE,                           /* Le client desire ajouter un groupe watchdog */
+    SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,                                   /* L'ajout du groupe est un succes */
+
+    SSTAG_CLIENT_DEL_MNEMONIQUE,                                    /* Le client desire retirer un groupe */
+    SSTAG_SERVEUR_DEL_MNEMONIQUE_OK,                                   /* L'ajout du groupe est un succes */
+
+    SSTAG_CLIENT_EDIT_MNEMONIQUE,                              /* Le client demande l'edition d'un groupe */
+    SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,          /* Le serveur accepte et envoi les données correspondantes */
+    SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,                         /* Le client renvoie les données editées */
+    SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                   /* Le serveur valide les nouvelles données */
+  };
+
+#endif
+/*--------------------------------------------------------------------------------------------------------*/
+

@@ -1,0 +1,31 @@
+/********************************************************************************************************/
+/* 56.dls: NIV-1 / CAVEA - Alarme    Alarme Cave SSOL                                                   */
+/* DLS Noeud Esclave */        
+/*                                                                 Elaboré le 18 Aout 2007              */
+/********************************************************************************************************/
+
+ MDEF_PORTE         <-> B508;                    /* Mémorisation Défaut Général Volet Salle de Bains RdC */
+ MALR_PORTE         <-> B508;                    /* Mémorisation Défaut Général Volet Salle de Bains RdC */
+ MV_PORTE         <-> B506;
+ MDEF_FUMEE         <-> B519;                  /* Mémorisation Défaut Général Fenêtre Salle de Bains RdC */  
+ MALR_FUMEE         <-> B508;                    /* Mémorisation Défaut Général Volet Salle de Bains RdC */
+ MV_FUMEE         <-> B002;
+                       
+ MDEF_CAVEA         <-> B500;                          /* Mémorisation Défaut Général Salle de Bains RdC */
+ MALR_CAVEA         <-> B508;                    /* Mémorisation Défaut Général Volet Salle de Bains RdC */
+ MV_CAVEA         <-> B501;                         /* Mémorisation Veille Générale Salle de Bains RdC */
+
+/* Animations des Objets de la Supervision */
+
+ - MDEF_PORTE + MDEF_FUMEE -> MDEF_CAVEA;                                              /* Synthese defaut */
+ - /MDEF_PORTE . /MDEF_FUMEE -> /MDEF_CAVEA;
+
+ - MALR_PORTE + MALR_FUMEE -> MALR_CAVEA;                                              /* Synthese defaut */
+ - /MALR_PORTE . /MALR_FUMEE -> /MALR_CAVEA;
+
+ - MV_PORTE . MV_FUMEE -> MV_CAVEA;
+ - /MV_PORTE + /MV_FUMEE -> /MV_CAVEA;
+
+/*CodeC printf(" PORTE %d FUMME %d \n", MVG_PORTE, MVG_FUMEE );*/
+
+/*------------------------------------------------------------------------------------------------------*/

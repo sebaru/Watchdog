@@ -1,0 +1,132 @@
+/**********************************************************************************************************/
+/* Client/protocole_utilisateur.c   Gestion du protocole_utilisateur pour la connexion au serveur Watchdog*/
+/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 14:07:22 CET */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+
+ #include <glib.h>
+ #include "Erreur.h"
+ #include "Reseaux.h"
+
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
+
+ extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+
+/**********************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
+/* Entrée: la connexion avec le serveur                                                                   */
+/* Sortie: Kedal                                                                                          */
+/**********************************************************************************************************/
+ void Gerer_protocole_utilisateur ( struct CONNEXION *connexion )
+  { static GList *Arrivee_util = NULL;
+    static GList *Arrivee_groupe = NULL;
+    static GList *Arrivee_groupe_for_util = NULL;
+
+    switch ( Reseau_ss_tag ( connexion ) )
+     { case SSTAG_SERVEUR_ADD_UTIL_OK:
+             { struct CMD_SHOW_UTILISATEUR *util;
+               util = (struct CMD_SHOW_UTILISATEUR *)connexion->donnees;
+               Proto_afficher_un_utilisateur( util );
+             }
+            break;
+       case SSTAG_SERVEUR_DEL_UTIL_OK:
+             { struct CMD_ID_UTILISATEUR *util;
+               util = (struct CMD_ID_UTILISATEUR *)connexion->donnees;
+               Proto_cacher_un_utilisateur( util );
+             }
+            break;
+       case SSTAG_SERVEUR_EDIT_UTIL_OK:
+             { struct CMD_EDIT_UTILISATEUR *util;
+               util = (struct CMD_EDIT_UTILISATEUR *)connexion->donnees;
+               Menu_ajouter_editer_utilisateur( util );
+             }
+            break;
+       case SSTAG_SERVEUR_VALIDE_EDIT_UTIL_OK:
+             { struct CMD_SHOW_UTILISATEUR *util;
+               util = (struct CMD_SHOW_UTILISATEUR *)connexion->donnees;
+               Proto_rafraichir_un_utilisateur( util );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_UTIL:
+             { struct CMD_SHOW_UTILISATEUR *util;
+               Set_progress_plusun();
+
+               util = (struct CMD_SHOW_UTILISATEUR *)g_malloc0( sizeof( struct CMD_SHOW_UTILISATEUR ) );
+               if (!util) return; 
+               memcpy( util, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               Arrivee_util = g_list_append( Arrivee_util, util );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_UTIL_FIN:
+             { g_list_foreach( Arrivee_util, (GFunc)Proto_afficher_un_utilisateur, NULL );
+               g_list_foreach( Arrivee_util, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_util );
+               Arrivee_util = NULL;
+               Chercher_page_notebook( TYPE_PAGE_UTIL, 0, TRUE );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL:
+             { struct CMD_SHOW_GROUPE *groupe;
+               Set_progress_plusun();
+
+               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               if (!groupe) return; 
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               Arrivee_groupe_for_util = g_list_append( Arrivee_groupe_for_util, groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL_FIN:
+             { g_list_foreach( Arrivee_groupe, (GFunc)Proto_afficher_un_groupe_existant, NULL );
+               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_groupe );
+               Arrivee_groupe = NULL;
+               Proto_fin_affichage_groupes_existants();
+             }
+            break;
+
+       case SSTAG_SERVEUR_ADD_GROUPE_OK:
+             { struct CMD_SHOW_GROUPE *groupe;
+               groupe = (struct CMD_SHOW_GROUPE *)connexion->donnees;
+               Proto_afficher_un_groupe( groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_DEL_GROUPE_OK:
+             { struct CMD_ID_GROUPE *groupe;
+               groupe = (struct CMD_ID_GROUPE *)connexion->donnees;
+               Proto_cacher_un_groupe( groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_EDIT_GROUPE_OK:
+             { struct CMD_EDIT_GROUPE *groupe;
+               groupe = (struct CMD_EDIT_GROUPE *)connexion->donnees;
+               Menu_ajouter_editer_groupe( groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_VALIDE_EDIT_GROUPE_OK:
+             { struct CMD_SHOW_GROUPE *groupe;
+               groupe = (struct CMD_SHOW_GROUPE *)connexion->donnees;
+               Proto_rafraichir_un_groupe( groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE:
+             { struct CMD_SHOW_GROUPE *groupe;
+               Set_progress_plusun();
+
+               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               if (!groupe) return; 
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FIN:
+             { g_list_foreach( Arrivee_groupe, (GFunc)Proto_afficher_un_groupe, NULL );
+               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_groupe );
+               Arrivee_groupe = NULL;
+               Chercher_page_notebook( TYPE_PAGE_GROUPE, 0, TRUE );
+             }
+            break;
+     }
+  }
+/*--------------------------------------------------------------------------------------------------------*/

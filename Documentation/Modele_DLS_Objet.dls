@@ -1,0 +1,108 @@
+/*************************************************************************************************************/
+/* 17.dls  -> Gestion du Congélateur                         01.12.2007                                      */
+/* Créé par le module d'édition des programmes DLS                                                           */
+/* En accord avec le projet WatchDog V2.0.1, et LEFEVRE Sébastien@sallecti.fr                                */
+/*************************************************************************************************************/
+ 
+/* Bits Bistables de mémorisations d'évènements */
+ MV_OBJET      <-> B555;                                             /* Mémorisation Veille Congélateur Office */
+ MDEF_OBJET      <-> B556;                                             /* Mémorisation Défaut Congélateur Office */
+ MALR_OBJET      <-> B558;                                             /* Mémorisation Défaut Congélateur Office */
+ MACQ_OBJET     <-> B557;                                    /* Mémorisation d'Acquit Alarme Congélateur Office */ 
+
+/* Monostables */
+ SDEF_OBJET      <-> M016;
+ SALR_OBJET      <-> M017;
+
+/* Sorties Physiques */
+ ACTV_OBJET    <-> A0025;                                       /* Activation Voyant veille Congélateur Office */
+ 
+/* Entrées Physiques */
+ PPM_OBJET     <-> E0034;				       /*Position Physique marche compresseur du congélateur */
+ PPPT_SEC    <-> E0022;                         /* Position Physique Présence Tension sur Congélateur Office */
+ T_OBJET       <-> EA001;                                        /* Température interne du Congélateur Office */
+ 
+
+/* Retour sur imprimante fil de l'eau */
+ AMDEFT_OBJET  <-> MSG0200;     /* Activation du message DEFAUT TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */
+ AMALT_OBJET   <-> MSG0201;     /* Activation du message ALARME TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */ 
+ AMMT_OBJET    <-> MSG0202;  /* Activation du message ALARME MANQUE TENSION 220V SUR LE CONGELATEUR DE L'OFFICE*/
+ AMDT_OBJET    <-> MSG0203;     /* Activation du message DERIVE TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */ 
+ AMM_OBJET     <-> MSG0204;                             /* Activation du message MARCHE CONGELATEUR DE L'OFFICE*/ 
+ AMA_OBJET     <-> MSG0205;                              /* Activation du message ARRÊT CONGELATEUR DE L'OFFICE*/ 
+ AMACT_OBJET   <-> MSG0219; /* Activation du message ANOMALIE DU CAPTEUR DE TEMPERATURE CONGELATEUR DE L'OFFICE*/ 
+
+
+/* Alias Etats des Objets sur le Synoptique */
+ ASYNOBJET     <-> I0032;                                 /* Apparence Synoptique du Congélateur de l'Office */ 
+
+Si capacité "Synoptique" !!
+ ASYNAACQ      <-> I0030;                   /* Apparence Synoptique du Bouton "Acquit Défaut" du Congélateur */
+                                   /* Apparence Synoptique du Drapeau "Anomalies" des Boutons de Passerelles */
+ ASYNDRAP      <-> I0031; 
+
+/* Alias Contrôle depuis le Synoptique */
+ ESYNCADEF     <-> M0015;           /* Envoi depuis le synoptique la Commande "Acquit Défaut" du Congélateur */
+ 
+ 
+/*---------------------------------------------PARTIE FONCTIONNELLE------------------------------------------*/ 
+ 
+/* Gestion des Informations du Congélateur */
+
+/* Synthese de la veille */
+ - B2 -> MV_OBJET;
+
+/* Synthese des préalarmes */
+ - T_OBJET > -19.5 -> SPRE_OBJET;                                /* Température interne plus chaude que -18°C */
+
+/* Synthese + Activation des Défauts */
+ - T_OBJET > -19 -> SDEF_OBJET;                               /* Température interne plus chaude que -18°C */
+ - SDEF_OBJET -> MDEF_OBJET;
+
+/* Synthese + Activation des Alarmes */
+ - T_OBJET > -18 -> SALR_OBJET;                                       /* Température interne plus chaude que -18°C */
+ - SALR_OBJET -> MALR_OBJET;
+
+/* Ordres d'Acquits défauts depuis le synoptique */
+ - (MDEF_OBJET+MALR_OBJET) . ESYNCADEF . (SDEF_OBJET+SALR_OBJET)  ->  MACQ_OBJET;      
+ - (MDEF_OBJET+MALR_OBJET) . ESYNCADEF . /(SDEF_OBJET+SALR_OBJET) ->  /MDEF_OBJET, /MALR_OBJET, /MACQ_OBJET;      
+
+/* Retour Voyant Activation veille Congélateur */
+ - (/(MDEF_OBJET+MALR_OBJET) . MV_OBJET)  + (MDEF_OBJET + MALR_OBJET . B4)   -> ACTV_OBJET;
+ - (/(MDEF_OBJET+MALR_OBJET) . /MV_OBJET) + (MDEF_OBJET + MALR_OBJET . /B4) -> /ACTV_OBJET;
+                         
+/*------------------------------------ANIMATIONS DES OBJETS DE LA SUPERVISION----------------------------------*/
+
+ /* Visu retour ETATS Congélateur de l'Office */
+                                                         /* Congélateur en Service en Veille et sous contrôles */ 
+ - /(MDEF_OBJET+MALR_OBJET)              -> ASYNOBJET(mode=0,color=vert);
+ - MDEF_OBJET . /MALR_OBJET . /MACQ_OBJET  -> ASYNOBJET(mode=0,color=jaune,cligno=1);
+ - MDEF_OBJET . /MALR_OBJET .  MACQ_OBJET  -> ASYNOBJET(mode=0,color=jaune);
+ - MALR_OBJET . /MACQ_OBJET              -> ASYNOBJET(mode=0,color=rouge,cligno=1);
+ - MALR_OBJET .  MACQ_OBJET              -> ASYNOBJET(mode=0,color=rouge);
+
+ - MDEF_OBJET + MALR_OBJET    -> ASYNAACQ(mode=1, color=bleu);
+ - /(MDEF_OBJET + MALR_OBJET) -> ASYNAACQ(mode=0, color=gris);
+ 
+/*-----------------------------------------Messages du fil de l'eau--------------------------------------------*/
+
+ -  PPM_OBJET       ->  AMM_OBJET;     /* Activation message DEFAUT TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */
+ - /PPM_OBJET       ->  AMA_OBJET;     /* Activation message DEFAUT TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */
+ -  MALR_OBJET      ->  AMALT_OBJET;   /* Activation message ALARME TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */  
+
+
+/*----------------------------------------- Noeud Syn !! ------------------------------------------------------*/
+/* Animation du Drapeau Anomalies du NIV-1 */
+ -  MALR_OBJET . /MACQ_OBJET                       -> ASYNDRAP(mode=0,color=rouge,cligno=1);
+ -  MALR_OBJET .  MACQ_OBJET                       -> ASYNDRAP(mode=0,color=rouge);
+ - /MALR_OBJET . (MDEF_OBJET+SPRE_OBJET) . /MACQ_OBJET -> ASYNDRAP(mode=0,color=jaune,cligno=1);
+ - /MALR_OBJET . (MDEF_OBJET+SPRE_OBJET) .  MACQ_OBJET -> ASYNDRAP(mode=0,color=jaune);
+ - /MALR_OBJET . /(MDEF_OBJET+SPRE_OBJET) . MV_OBJET   -> ASYNDRAP(mode=0,color=vert);
+ - /MALR_OBJET . /(MDEF_OBJET+SPRE_OBJET) . /MV_OBJET  -> ASYNDRAP(mode=0,color=jaune,cligno=1);
+
+/* Bouton d'acquit synoptique */
+
+ -   MDEF_OBJET + MALR_OBJET -> ASYNAACQ(mode=1,color=bleu);
+ - /(MDEF_OBJET+MALR_OBJET)  -> ASYNAACQ(mode=0,color=gris);
+
+/*-------------------------------------------------------------------------------------------------------------*/

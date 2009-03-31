@@ -1,0 +1,20 @@
+\subsection{Les groupes}
+Chaque utilisateur Watchdog enregistré à la possibilité d'appartenir à des groupes. A chaque groupe doit être associée une entitée physique, technique, ou morale. Par exemple, dans le cas d'une entreprise, il est conseillé de posséder les groupes {\it Direction}, {\it Annuaire}, et possible d'avoir un groupe {\it Entrée 3} pour limiter les accès à l'entrée 3 du site.
+
+\begin{description}
+\item[Groupe] Un {\bf groupe} permet de regrouper dans une même entité un ensemble d'utilisateurs ayant des droits identiques.
+\end{description}
+
+
+
+Ces groupes ont les particularités de ne pouvoir subir aucune modification quelle qu'elle soit, et de ne pas pouvoir être éliminés.
+
+\subsubsection{Les groupes normaux}
+Seuls une catégorie d'utilisateurs ont la possibilités de gérer la database {\bf groups} associées aux groupes Watchdog. Ces utilisateurs sont tous dans le groupe système {\bf Admin-userDB}. Leurs différents actions possibles sont présentées dans la table \ref{Action_groupe}
+
+\begin{tablseb}{Actions sur les groupes}{ll}{Actions & Désignations}{Action_groupe}
+Ajouter & Création d'un nouveau groupe \\
+Enlever & Elimination d'un groupe existant \\
+Editer  & Modification d'un groupe existant \\
+\end{tablseb}
+

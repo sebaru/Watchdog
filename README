@@ -1,0 +1,13 @@
+
+ To install before compiling :
+
+ 1015  urpmi gcc-c++
+ 1016  urpmi libtool
+ 1020  urpmi libgnomeui2-devel
+ 1025  urpmi glib2-devel
+ 1026  urpmi bison flex
+ 1027  urpmi unixODBC-devel
+ 1029  urpmi libmyodbc1
+       urpmi gtkdatabox
+       urpmi gtksourceview-devel
+       urpmi libungif4-devel

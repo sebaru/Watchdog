@@ -1,0 +1,94 @@
+/*************************************************************************************************************/
+/* 17.dls  -> Gestion du Congélateur                         01.12.2007                                      */
+/* Créé par le module d'édition des programmes DLS                                                           */
+/* En accord avec le projet WatchDog V2.0.1, et LEFEVRE Sébastien@sallecti.fr                                */
+/*************************************************************************************************************/
+ 
+/* Bits Bistables de mémorisations d'évènements */
+ MV_COF      <-> B555;                                             /* Mémorisation Veille Congélateur Office */
+ MD_COF      <-> B556;                                             /* Mémorisation Défaut Congélateur Office */
+ MAA_COF     <-> B557;                                    /* Mémorisation d'Acquit Alarme Congélateur Office */ 
+ MAT_COF     <-> B558;                               /* Mémorisation d'Acquit Trouble sur Congélateur Office */
+ MT_COF      <-> B559;                                        /* Mémorisation Trouble sur Congélateur Office */
+ MAL_COF     <-> B560;                                         /* Mémorisation Alarme sur Congélateur Office */
+
+ MAA         <-> B911;                                                     /* Mémorisation Activation Alarme */
+
+/* Monostables */
+ SD_COF      <-> M556;
+
+/* Sorties Physiques */
+ ACTV_COF    <-> A0025;                                       /* Activation Voyant veille Congélateur Office */
+ 
+/* Entrées Physiques */
+ PPM_COF     <-> E0034;				       /*Position Physique marche compresseur du congélateur */
+ PPPT_SEC    <-> E0022;                         /* Position Physique Présence Tension sur Congélateur Office */
+ T_COF       <-> EA001;                                        /* Température interne du Congélateur Office */
+ 
+
+/* Retour sur imprimante fil de l'eau */
+ AMDEFT_COF  <-> MSG0200;     /* Activation du message DEFAUT TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */
+ AMALT_COF   <-> MSG0201;     /* Activation du message ALARME TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */ 
+ AMMT_COF    <-> MSG0202;  /* Activation du message ALARME MANQUE TENSION 220V SUR LE CONGELATEUR DE L'OFFICE*/
+ AMDT_COF    <-> MSG0203;     /* Activation du message DERIVE TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */ 
+ AMM_COF     <-> MSG0204;                             /* Activation du message MARCHE CONGELATEUR DE L'OFFICE*/ 
+ AMA_COF     <-> MSG0205;                              /* Activation du message ARRÊT CONGELATEUR DE L'OFFICE*/ 
+ AMACT_COF   <-> MSG0219; /* Activation du message ANOMALIE DU CAPTEUR DE TEMPERATURE CONGELATEUR DE L'OFFICE*/ 
+
+
+/* Alias Etats des Objets sur le Synoptique */
+ ASYNOBJET     <-> I0032;                                 /* Apparence Synoptique du Congélateur de l'Office */ 
+ ASYNAACQ      <-> I0030;                   /* Apparence Synoptique du Bouton "Acquit Défaut" du Congélateur */
+                                   /* Apparence Synoptique du Drapeau "Anomalies" des Boutons de Passerelles */
+ ASYNDRAP      <-> I0031; 
+
+/* Alias Contrôle depuis le Synoptique */
+ ESYNCADEF     <-> M0015;           /* Envoi depuis le synoptique la Commande "Acquit Défaut" du Congélateur */
+ 
+ 
+/*---------------------------------------------PARTIE FONCTIONNELLE------------------------------------------*/ 
+ 
+/* Gestion des Informations du Congélateur */
+
+/* Synthese de la veille */
+ - B2 -> MV_COF;
+
+/* Synthese + Activation des Défauts et Préalarmes */
+ - T_COF > -19 -> SDEF_COF;                                       /* Température interne plus chaude que -18°C */
+ - SDEF_COF -> MDEF_COF;
+
+/* Synthese + Activation des Alarmes */
+ - T_COF > -18 -> SALR_COF;                                       /* Température interne plus chaude que -18°C */
+ - SALR_COF -> MALR_COF;
+
+/* Ordres d'Acquits défauts depuis le synoptique */
+ - (MDEF_COF+MALR_COF) . ESYNCADEF . (SDEF_COF+SALR_COF)  ->  MACQ_COF;      
+ - (MDEF_COF+MALR_COF) . ESYNCADEF . /(SDEF_COF+SALR_COF) ->  /MDEF_COF, /MALR_COF, /MACQ_COF;      
+
+/* Retour Voyant Activation veille Congélateur */
+ - (/(MDEF_COF+MALR_COF) . MV_COF)  + (MDEF_COF + MALR_COF . B4)   -> ACTV_COF;
+ - (/(MDEF_COF+MALR_COF) . /MV_COF) + (MDEF_COF + MALR_COF . /B4) -> /ACTV_COF;
+                         
+/*------------------------------------ANIMATIONS DES OBJETS DE LA SUPERVISION----------------------------------*/
+
+ /* Visu retour ETATS Congélateur de l'Office */
+                                                         /* Congélateur en Service en Veille et sous contrôles */ 
+ - /(MDEF_COF+MALR_COF)              -> ASYNOBJET(mode=0,color=vert);
+ - MDEF_COF . /MALR_COF . /MACQ_COF  -> ASYNOBJET(mode=0,color=jaune,cligno=1);
+ - MDEF_COF . /MALR_COF .  MACQ_COF  -> ASYNOBJET(mode=0,color=jaune);
+ - MALR_COF . /MACQ_COF              -> ASYNOBJET(mode=0,color=rouge,cligno=1);
+ - MALR_COF .  MACQ_COF              -> ASYNOBJET(mode=0,color=rouge);
+
+ - MDEF_COF + MALR_COF    -> ASYNAACQ(mode=1, color=bleu);
+ - /(MDEF_COF + MALR_COF) -> ASYNAACQ(mode=0, color=gris);
+
+ 
+/*-----------------------------------------Messages du fil de l'eau--------------------------------------------*/
+/* Messages du fil de l'eau */
+
+ -  PPM_COF       ->  AMM_COF;     /* Activation message DEFAUT TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */
+ - /PPM_COF       ->  AMA_COF;     /* Activation message DEFAUT TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */
+ -  MD_COF        ->  AMALT_COF;   /* Activation message ALARME TEMPERATURE INTERNE DU CONGELATEUR DE L'OFFICE */  
+/*-------------------------------------------------------------------------------------------------------------*/
+ 
+

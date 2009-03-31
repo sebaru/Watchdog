@@ -1,0 +1,11 @@
+\select@language {french}
+\contentsline {chapter}{\numberline {1}Introduction/Pr^^e9sentation}{3}
+\contentsline {section}{\numberline {1.1}Architecture g^^e9n^^e9rale}{3}
+\contentsline {section}{\numberline {1.2}Conventions}{3}
+\contentsline {section}{\numberline {1.3}Les databases Watchdog}{4}
+\contentsline {section}{\numberline {1.4}Utilisateurs, groupes, droits et privil^^e8ges}{4}
+\contentsline {subsection}{\numberline {1.4.1}Les utilisateurs syst^^e8mes}{5}
+\contentsline {subsection}{\numberline {1.4.2}Les groupes syst^^e8mes}{6}
+\contentsline {subsubsection}{Le groupe Everybody}{6}
+\contentsline {subsubsection}{Le groupe Log}{6}
+\contentsline {chapter}{\numberline {2}Conclusions}{8}

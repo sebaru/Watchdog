@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rsync --progress -arv Include Watchdogd Client Commun WatchdogdAdmin horus:/home/Sebastien/SQL/

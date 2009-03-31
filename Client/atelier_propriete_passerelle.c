@@ -1,0 +1,164 @@
+/**********************************************************************************************************/
+/* Client/atelier_propriete_passerelle.c         gestion des passerelles                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 12 mai 2007 21:01:15 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+ #include <gnome.h>
+ #include <string.h>
+ #include <stdlib.h>
+
+ #include "Reseaux.h"
+ #include "trame.h"
+ #include "motifs.h"
+ #include "Cst_mnemoniques.h"
+
+ extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
+
+ extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;                         /* Des pitites boules ! */
+ extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
+ extern GtkWidget *F_trame;                       /* C'est bien le widget referencant la trame synoptique */
+
+ static GtkWidget *F_propriete;                                      /* Pour acceder la fenetre graphique */
+ static GtkWidget *Spin_ctrl_1 = NULL;                          /* Fenetre graphique de choix de passaire */
+ static GtkWidget *Spin_ctrl_2 = NULL;                          /* Fenetre graphique de choix de passaire */
+ static GtkWidget *Entry_ctrl_1 = NULL;                         /* Fenetre graphique de choix de passaire */
+ static GtkWidget *Entry_ctrl_2 = NULL;                         /* Fenetre graphique de choix de passaire */
+
+ static struct TRAME_ITEM_PASS *Trame_pass;
+
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ void Proto_afficher_mnemo_atelier_pass_2 ( struct CMD_SHOW_MNEMONIQUE *mnemo )
+  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
+    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
+              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
+    gtk_entry_set_text( GTK_ENTRY(Entry_ctrl_1), chaine );
+  }
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ void Proto_afficher_mnemo_atelier_pass ( struct CMD_SHOW_MNEMONIQUE *mnemo )
+  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
+    gint num;
+
+    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
+              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
+
+    num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_1) );
+    if (mnemo->num == num)
+     { gtk_entry_set_text( GTK_ENTRY(Entry_ctrl_1), chaine ); }
+
+    num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_2) );
+    if (mnemo->num == num)
+     { gtk_entry_set_text( GTK_ENTRY(Entry_ctrl_2), chaine ); }
+  }
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Demander_mnemo_bit_ctrl_1 ( void )
+  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
+    mnemo.type = MNEMO_MOTIF;
+    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_1) );
+    
+    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS,
+                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
+  }
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Demander_mnemo_bit_ctrl_2 ( void )
+  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
+    mnemo.type = MNEMO_MOTIF;
+    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_2) );
+    
+    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS,
+                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
+  }
+/**********************************************************************************************************/
+/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* sortie: TRUE                                                                                           */
+/**********************************************************************************************************/
+ static gboolean CB_editer_propriete_pass ( GtkDialog *dialog, gint reponse )
+  { struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+   
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);         /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    switch(reponse)
+     { case GTK_RESPONSE_OK:
+            Trame_pass->pass->bit_controle_1 = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_1) );
+            Trame_pass->pass->bit_controle_2 = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_2) );
+            break;
+       case GTK_RESPONSE_CLOSE:
+            break;
+     }
+    gtk_widget_destroy( F_propriete );
+    F_propriete = NULL;
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Creer_fenetre_propriete_TOR: Creation de la fenetre d'edition des proprietes TOR                       */
+/* Entrée: niet                                                                                           */
+/* Sortie: niet                                                                                           */
+/**********************************************************************************************************/
+ void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass )
+  { GtkWidget *table;
+
+    F_propriete = gtk_dialog_new_with_buttons( _("Edit a gateway"),
+                                               GTK_WINDOW(F_client),
+                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                               GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                               NULL);
+    g_signal_connect( F_propriete, "response",
+                      G_CALLBACK(CB_editer_propriete_pass), FALSE );
+/*    gtk_widget_set_usize( F_propriete, 600, 100 );*/
+    Trame_pass = trame_pass;
+/*********************************** Frame de representation du motif actif *******************************/
+    table = gtk_table_new( 2, 4, TRUE );
+    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_propriete)->vbox ), table, FALSE, FALSE, 0 );
+
+    gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Bit de controle 1") ), 0, 1, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Bit de controle 2") ), 0, 1, 1, 2 );
+
+    Spin_ctrl_1 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    g_signal_connect( G_OBJECT(Spin_ctrl_1), "changed",
+                      G_CALLBACK(Demander_mnemo_bit_ctrl_1), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ctrl_1, 1, 2, 0, 1 );
+
+    Entry_ctrl_1 = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_ctrl_1), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ctrl_1, 2, 4, 0, 1 );
+
+    Spin_ctrl_2 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    g_signal_connect( G_OBJECT(Spin_ctrl_2), "changed",
+                      G_CALLBACK(Demander_mnemo_bit_ctrl_2), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ctrl_2, 1, 2, 1, 2 );
+
+    Entry_ctrl_2 = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_ctrl_2), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ctrl_2, 2, 4, 1, 2 );
+
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_1), (gdouble) Trame_pass->pass->bit_controle_1 );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_2), (gdouble) Trame_pass->pass->bit_controle_2 );
+
+    Demander_mnemo_bit_ctrl_1();                                           /* Mise à jour des mnemoniques */
+    gtk_widget_show_all( F_propriete );
+  }
+/*--------------------------------------------------------------------------------------------------------*/

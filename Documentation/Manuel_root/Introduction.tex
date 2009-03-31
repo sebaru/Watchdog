@@ -1,0 +1,76 @@
+\chapter{Introduction/Présentation}
+Watchdog est un système de controle/commande d'un habitat, extensible aux petites et moyennes entreprises. Articulé autour d'un modèle client-serveur, un protocole de communication est nécessaire pour acheminer les informations au serveur, et commander les différents actionneurs du système. Ce support se décompose en plusieurs sections décrivant les différentes possibilités de configuration que possède l'utilisateur privilégié {\bf root}, ensuite qu'un chapitre entier consacré au protocole Watchdog lui-même et enfin un chapitre dédié à l'installation d'un système {\bf Watchdog}.
+
+\section{Architecture générale}
+Nous pouvons scindé un système {\bf Watchdog} selon 3 entités distinctes sur le papier, mais qui peuvent être identiques physiquement. Ces 3 entités sont: le serveur de base de données, le serveur Watchdog, et les clients. Nous avons donc l'architecture de la figure \ref{Schema_principe}. 
+
+\dessin{Schema_principe}{L'architecture Watchdog}
+
+Remarque: Il se peut que le serveur Watchdog et celui de base de données soient effectivement sur la même machine physique.
+
+%******************* Conventions *************************
+\section{Conventions}
+Nous aurons besoin tout au long de ce rapport de quelques conventions que nous précisons dans la table \ref{conventions}.
+
+\begin{tablseb}{Conventions du rapport}{l}{}{conventions}
+ - Une entité sera représenté graphiquement dans un carré aux coins arrondis.
+\end{tablseb}
+
+%**********************************************************
+\section{Les databases Watchdog}
+Le système Watchdog doit pouvoir communiquer avec une base de données appelée {\bf WatchdogDB} par défaut, 
+dans laquelle les tables suivantes doivent être présentes (table \ref{DBs}).
+
+\begin{tablseb}{Tables de la base WatchdogDB}{ll}{Noms & Désignations}{DBs}
+users  & Les utilisateurs du système \\
+groups & Les groupes du système \\
+msgs   & Les messages au fil de l'eau du système \\
+icons  & La base graphique du système \\
+syns   & L'ensemble des synoptiques du système \\
+\end{tablseb}
+Nous avons donc le schema de principe de la figure \ref{Schema_db}.
+\dessin{Schema_db}{Schema de principe de la DB Watchdog}
+
+%**********************************************************
+\section{Utilisateurs, groupes, droits et privilèges}
+Chaque utilisateur du système Watchdog doit être déclaré dans la base {\bf users} et possède un mot de passe.
+
+Chaque utilisateur Watchdog enregistré à la possibilité d'appartenir à des groupes. A chaque groupe doit être associée une entitée physique, technique, ou morale. Par exemple, dans le cas d'une entreprise, il est conseillé de posséder les groupes {\it Direction}, {\it Annuaire}, et possible d'avoir un groupe {\it Entrée 3} pour limiter les accès à l'entrée 3 du site.
+
+\begin{description}
+\item[Groupe] Un {\bf groupe} permet de regrouper dans une même entité un ensemble d'utilisateurs ayant des droits identiques.
+\item[Utilisateur] Un {\bf utilisateur} est un triplet (nom, mot de passe, groupes). 
+\end{description}
+
+Un exemple d'utilisateurs et de groupes est présenté dans la figure \ref{Exemple_utilgroupe}.
+\dessin{Exemple_utilgroupe}{Exemple d'utilisateurs et de groupes}
+
+Dans cet exemple nous voyons que l'utilisateur Bruno fait parti de la direction et ne peut rentrer que par l'entrée 1. Jean est aussi de la direction mais rentre par l'entrée 2. Olivier fait parti du service finance et peut entrer par l'entrée 1 aussi bien que par l'entrée 2.
+
+\subsection{Les utilisateurs systèmes}
+Certains utilisateurs (ou comptes) sont dits {\bf systèmes}. Ce sont des utilisateurs qu'il n'est pas possible de modifier ou d'éliminer. Par exemple, le compte {\bf root} est un compte système et ne peut pas être détruit. Ces utilisateurs ont des responsabilités exigeant des droits d'administrateurs et c'est pourquoi ils doivent être utilisés avec parcimonie.
+Les utilisateurs systèmes sont présentés dans la table \ref{Util_systeme}
+ 
+\begin{tablseb}{Les utilisateurs systèmes}{lp{250pt}}{Noms & Désignations}{Util_systeme}
+root     &  Administration générale système \\
+\end{tablseb}
+
+\subsection{Les groupes systèmes}
+Certains groupes sont dits {\bf systèmes}. Ces groupes sont présentés dans la table \ref{Groupe_systeme}
+
+\begin{tablseb}{Les groupes systèmes}{lp{250pt}}{Noms & Désignations}{Groupe_systeme}
+Everybody     &  Tout le monde appartient à ce groupe \\
+Admin-userDB  &  Ses utilisateurs ont l'autorisation d'accès aux DBs {\bf users} et {\bf groups} \\
+Admin-msgDB   &  Ses utilisateurs ont l'autorisation d'accès à la DB {\bf msgs} \\
+Admin-iconDB  &  Ses utilisateurs ont l'autorisation d'accès à la DB {\bf icons} \\
+Admin-synopDB &  Ses utilisateurs ont l'autorisation d'accès à la DB {\bf synops} \\
+Log           &  Ses utilisateurs ont l'autorisation d'accès à la DB {\bf logs} \\
+\end{tablseb}
+
+Comme indiqué, à chaque groupe système du type Admin, est associée une table de la database WatchdogDB. Cela permet un controle simple et exhaustif des accès en {\bf écriture} à ses différentes tables.
+
+\subsubsection{Le groupe Everybody}
+Ce groupe est spécial car il est le groupe dans lequel nous pouvons trouver tous les utilisateurs du système, sans exception. Bien sûr, l'élimination du groupe Everybody d'un utilisateur est impossible.
+
+\subsubsection{Le groupe Log}
+Seule la table {\bf logs} est une table à {\bf lecture} controlée. En effet, tous les utilisateurs n'ont pas forcement le droit de lire les logs du systèmes. Afin de les autoriser à lire les logs, il faudra donc les placer dans le groupe {\bf Log}.

@@ -1,0 +1,109 @@
+/**********************************************************************************************************/
+/* Watchdogd/Serveur/envoi_bit_init.c        Envoi des bits synoptiques initiaux au client                */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       mer 01 fév 2006 18:30:05 CET */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+ #include <glib.h>
+ #include <bonobo/bonobo-i18n.h>
+ #include <sys/time.h>
+ #include <string.h>
+ #include <unistd.h>
+
+ #include "Reseaux.h"
+ #include "Synoptiques_DB.h"
+ #include "Erreur.h"
+ #include "Config.h"
+ #include "Client.h"
+
+ #include "watchdogd.h"
+ extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
+ extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
+/******************************************** Prototypes de fonctions *************************************/
+ #include "proto_srv.h"
+/**********************************************************************************************************/
+/* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                            */
+/* Entrée: L'element                                                                                      */
+/* Sortie: 0 si present, 1 sinon                                                                          */
+/**********************************************************************************************************/
+ gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche )
+  { if (element->bit_controle == cherche->bit_controle &&
+        element->type == cherche->type)
+         return 0;
+    else return 1;
+  }
+/**********************************************************************************************************/
+/* Envoyer_ixxx_supervision: Envoi des etats initiaux motifs dans la trame supervision                    */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Envoyer_bit_init_supervision_thread ( struct CLIENT *client )
+  { struct CMD_ETAT_BIT_CTRL init_etat;
+    GList *liste;
+    guint bit_controle;
+
+    if (client->bit_init_syn)
+     { liste = client->bit_init_syn;                                                    /* Debut de liste */
+       while(liste)
+        { bit_controle = GPOINTER_TO_INT( liste->data );
+    
+          if ( ! g_list_find(client->bit_syns, GINT_TO_POINTER(bit_controle) ) )
+           { client->bit_syns = g_list_append( client->bit_syns, GINT_TO_POINTER(bit_controle) );
+             Info_n( Config.log, DEBUG_INFO , "       liste des bit_syns", bit_controle );
+           }
+
+          if (bit_controle>=NBR_BIT_CONTROLE) bit_controle=0;                  /* Verification des bornes */
+
+          init_etat.num    = bit_controle;                                  /* Prévoir le champ cligno !! */
+          init_etat.etat   = Partage->i[ bit_controle ].etat;
+          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
+          init_etat.vert   = Partage->i[ bit_controle ].vert;
+          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
+          init_etat.cligno = Partage->i[ bit_controle ].cligno;
+
+          while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+
+          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
+          liste = liste->next;
+        }
+       g_list_free( client->bit_init_syn );
+       client->bit_init_syn = NULL;
+     }
+
+    if (client->bit_init_capteur)
+     { liste = client->bit_init_capteur;                                                /* Debut de liste */
+       while(liste)
+        { struct CAPTEUR *capteur;
+          struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
+
+          if ( !g_list_find_custom(client->bit_capteurs, liste->data,
+                                   (GCompareFunc) Chercher_bit_capteurs) )
+           { capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
+             if (!capteur) 
+              { Unref_client( client );                               /* Déréférence la structure cliente */
+                pthread_exit(NULL);
+              }
+             memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
+             client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
+           }
+
+          while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+
+          init_capteur = Formater_capteur(capteur);                    /* Formatage de la chaine associée */
+
+          if (init_capteur)                                                               /* envoi client */
+           { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
+                           init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+             g_free(init_capteur);                                                /* On libere la mémoire */
+           }
+          liste = liste->next;
+        }
+       g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
+       g_list_free( client->bit_init_capteur );
+       client->bit_init_capteur = NULL;
+     }
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit( NULL );
+  }
+/*--------------------------------------------------------------------------------------------------------*/
+

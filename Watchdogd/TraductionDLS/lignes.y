@@ -1,0 +1,597 @@
+/**********************************************************************************************************/
+/* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:32:59 CET */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+/*
+ * lignes.y
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2007 - Sébastien Lefevre
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ 
+%{
+#include <stdio.h>
+#include <string.h>
+#include <glib.h>
+#include "Proto_traductionDLS.h"
+#include "lignes.h"
+
+extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
+int erreur;                                                             /* Compteur d'erreur du programme */
+#define  NON_DEFINI         "Ligne %d: %s is not defined\n"
+#define  DEJA_DEFINI        "Ligne %d: %s is already defined\n"
+#define  INTERDIT_GAUCHE    "Ligne %d: %s interdit en position gauche\n"
+#define  INTERDIT_DROITE    "Ligne %d: %s interdit en position droite\n"
+#define  INTERDIT_MSG_BARRE "Ligne %d: %s interdit en complement\n"
+#define  INTERDIT_REL_ORDRE "Ligne %d: %s interdit dans la relation d'ordre\n"
+#define  ERR_SYNTAXE        "Ligne %d: Erreur de syntaxe -> %s\n"
+
+
+%}
+
+%union { int val;
+         int couleur;
+         double valf;
+         char *chaine;
+         GList *gliste;
+         struct OPTION *option;
+         struct ACTION *action;
+       };
+
+%token <val>         PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL
+%token <val>         BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA
+%token <val>         INF SUP INF_OU_EGAL SUP_OU_EGAL
+%token <val>         ENTIER
+%token <valf>        VALF
+%token <couleur>     ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
+%token <chaine>      ID
+
+%type  <val>     barre alias_bit modulateur ordre
+%type  <couleur> couleur
+%type  <gliste>  liste_options options
+%type  <option>  une_option
+%type  <chaine>  unite facteur expr suite_id
+%type  <action>  action une_action
+
+%token   CONTACTEUR FENETRE
+%token   HEURE APRES AVANT
+
+%token   OU ET BARRE
+%%
+fichier: ligne_source_dls;
+
+ligne_source_dls:         listeAlias listeInstr
+                        | listeAlias
+                        | listeInstr
+                        |
+                        ;
+
+/************************************************* Gestion des alias **************************************/
+listeAlias:     un_alias listeAlias
+                | un_alias          {{ Emettre_init_alias(); }}
+                ;
+                
+un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
+                {{ char *chaine;
+                   int taille;
+                   switch($4)
+                    { case BI    :
+                      case MONO  :
+                      case ENTREE:
+                      case SORTIE:
+                      case TEMPO :
+                      case EANA  :
+                      case MSG   : if ( New_alias($1, $4, $5, $3, $6) == FALSE )         /* Deja defini ? */
+                                    { taille = strlen($1) + strlen(DEJA_DEFINI) + 1;
+                                      chaine = New_chaine(taille);
+                                      g_snprintf( chaine, taille, DEJA_DEFINI, ligne_source_dls, $1 );
+                                      Emettre_erreur(chaine); g_free(chaine);
+                                      erreur++;
+                                    }
+                                   break;
+                      case CPT_H:
+                      case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
+                                    { taille = strlen($1) + strlen(ERR_SYNTAXE) + 1;
+                                      chaine = New_chaine(taille);
+                                      g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, $1 );
+                                      Emettre_erreur(chaine); g_free(chaine);
+                                      erreur++;
+                                    }
+                                   else
+                                    { if (New_alias($1, $4, $5, 0, $6) == FALSE)
+                                       { taille = strlen($1) + strlen(DEJA_DEFINI) + 1;
+                                         chaine = New_chaine(taille);
+                                         g_snprintf( chaine, taille, DEJA_DEFINI, ligne_source_dls, $1 );
+                                         Emettre_erreur(chaine); g_free(chaine);
+                                         erreur++;
+                                       }
+                                    }
+                                   break;
+                      default: taille = strlen($1) + strlen(ERR_SYNTAXE) + 1;
+                               chaine = New_chaine(taille);
+                               g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, $1 );
+                               Emettre_erreur(chaine); g_free(chaine);
+                               erreur++;
+                               break;
+                    }
+                   if ($4==ENTREE || $4==BI || $4==MONO)   /* Optimisation des bits par util. de variable */
+                    { taille = strlen($1)+10;
+                      chaine = New_chaine(taille);
+                      g_snprintf( chaine, taille, "int %s;\n", $1 );
+                      Emettre(chaine); g_free(chaine);
+                    }
+                }}
+                ;
+alias_bit:      BI | MONO | ENTREE | SORTIE | MSG | TEMPO | ICONE | CPT_H | EANA
+                ;
+/******************************************* Gestion des instructions *************************************/
+listeInstr:     une_instr listeInstr
+                | une_instr
+                ;
+
+une_instr:      MOINS expr DONNE action PVIRGULE
+                {{ int taille;
+                   char *instr;
+                   taille = strlen($2)+strlen($4->alors)+11;
+                   if ($4->sinon)
+                    { taille += (strlen($4->sinon) + 10);
+                      instr = New_chaine( taille );
+                      g_snprintf( instr, taille, "if(%s) { %s }\nelse { %s }\n", $2, $4->alors, $4->sinon );
+                    }
+                   else
+                    { instr = New_chaine( taille );
+                      g_snprintf( instr, taille, "if(%s) { %s }\n", $2, $4->alors );
+                    }
+
+                   Emettre( instr ); g_free(instr);
+                   if ($4->sinon) g_free($4->sinon); 
+                   g_free($4->alors); g_free($4);
+                   g_free($2);
+                }}
+
+/******************************************* Gestion des contacteurs **************************************/
+                | MOINS CONTACTEUR POUV  ENTREE ENTIER VIRGULE ENTREE ENTIER VIRGULE ENTREE ENTIER
+                  VIRGULE SORTIE ENTIER VIRGULE SORTIE ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MONO ENTIER VIRGULE MONO ENTIER VIRGULE MONO ENTIER
+                  VIRGULE MONO ENTIER VIRGULE MONO ENTIER VIRGULE MONO ENTIER VIRGULE BI ENTIER 
+                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER 
+                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE TEMPO ENTIER VIRGULE TEMPO ENTIER
+                  VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER
+                  VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER
+                  VIRGULE ICONE ENTIER
+                  PFERM PVIRGULE
+                {{ int taille;
+                   char *instr;
+                   taille = 300;
+                   instr = New_chaine( taille );
+                   g_snprintf( instr, taille, "Gerer_contacteur("
+                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,"
+                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d);",
+                                            $5, $8, $11, $14, $17, $20, $23, $26, $29, $32, $35, $38, $41,
+                                            $44, $47, $50, $53, $56, $59, $62, $65, $68, $71, $74, $77,
+                                            $80, $83, $86, $89, $92, $95, $98, $101, $104, $107, $110, $113,
+                                            $116, $119, $122 );
+                   Emettre( instr ); g_free(instr);
+                }}
+/*************************************** Module de gestion des fenetres ***********************************/
+                | MOINS FENETRE POUV
+                  ENTREE ENTIER VIRGULE ENTREE ENTIER VIRGULE ENTREE ENTIER VIRGULE ENTREE ENTIER
+                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER 
+                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER 
+                  VIRGULE BI ENTIER
+                  VIRGULE MONO ENTIER VIRGULE MONO ENTIER
+                  VIRGULE TEMPO ENTIER
+                  VIRGULE SORTIE ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER
+                  PFERM PVIRGULE
+                {{ int taille;
+                   char *instr;
+                   taille = 300;
+                   instr = New_chaine( taille );
+                   g_snprintf( instr, taille, "Gerer_fenetre("
+                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,"
+                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d);",
+                                            $5, $8, $11, $14, $17, $20, $23, $26, $29, $32, $35, $38, $41,
+                                            $44, $47, $50, $53, $56, $59, $62, $65, $68, $71, $74, $77,
+                                            $80, $83, $86, $89, $92, $95 );
+                   Emettre( instr ); g_free(instr);
+                }}
+                ;
+
+expr:           expr OU facteur
+                {{ int taille;
+                   taille = strlen($1)+strlen($3)+5;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "%s || %s", $1, $3 );
+                   g_free($1); g_free($3);
+                }}
+
+                | facteur
+                ;
+facteur:        facteur ET unite
+                {{ int taille;
+                   taille = strlen($1)+strlen($3)+7;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "(%s && %s)", $1, $3 );
+                   g_free($1); g_free($3);
+                }}
+                | unite
+                ;
+
+unite:          modulateur ENTIER HEURE ENTIER
+                {{ int taille;
+                   taille = 20;
+                   $$ = New_chaine(taille);
+                   if ($2>23) $2=23;
+                   if ($4>59) $4=59;
+                   switch ($1)
+                    { case 0    : g_snprintf( $$, taille, "Heure(%d,%d)", $2, $4 );
+                                  break;
+                      case APRES: g_snprintf( $$, taille, "Heure_apres(%d,%d)", $2, $4 );
+                                  break;
+                      case AVANT: g_snprintf( $$, taille, "Heure_avant(%d,%d)", $2, $4 );
+                                  break;
+                    }
+                }}
+                | barre BI ENTIER
+                {{ int taille;
+                   struct ALIAS *alias;
+                   alias = Get_alias_par_bit( BI, $3 );
+                   if (!alias) { taille = 10;
+                                 $$ = New_chaine( taille ); /* 10 caractères max */
+                                 if ($1) g_snprintf( $$, taille, "!B(%d)", $3 );
+                                    else g_snprintf( $$, taille, "B(%d)", $3 );
+                               }
+                          else { taille = strlen(alias->nom)+2;
+                                 $$ = New_chaine( taille ); /* 10 caractères max */
+                                 if ($1) g_snprintf( $$, taille, "!%s", alias->nom );
+                                    else g_snprintf( $$, taille, "%s", alias->nom );
+                               }
+                }}
+                | barre MONO ENTIER
+                {{ int taille;
+                   struct ALIAS *alias;
+                   alias = Get_alias_par_bit( MONO, $3 );
+                   if (!alias) { taille = 10;
+                                 $$ = New_chaine( taille ); /* 10 caractères max */
+                                 if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
+                                    else g_snprintf( $$, taille, "M(%d)", $3 );
+                               }
+                          else { taille = strlen(alias->nom)+2;
+                                 $$ = New_chaine( taille ); /* 10 caractères max */
+                                 if ($1) g_snprintf( $$, taille, "!%s", alias->nom );
+                                    else g_snprintf( $$, taille, "%s", alias->nom );
+                               }
+                }}
+                | barre ENTREE ENTIER
+                {{ int taille;
+                   struct ALIAS *alias;
+                   alias = Get_alias_par_bit( ENTREE, $3 );
+                   if (!alias) { taille = 10;
+                                 $$ = New_chaine( taille ); /* 10 caractères max */
+                                 if ($1) g_snprintf( $$, taille, "!E(%d)", $3 );
+                                    else g_snprintf( $$, taille, "E(%d)", $3 );
+                               }
+                          else { taille = strlen(alias->nom)+2;
+                                 $$ = New_chaine( taille ); /* 10 caractères max */
+                                 if ($1) g_snprintf( $$, taille, "!%s", alias->nom );
+                                    else g_snprintf( $$, taille, "%s", alias->nom );
+                               }
+                }}
+               | EANA ENTIER ordre VALF
+                {{ int taille;
+                   taille = 30;
+                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   switch( $3 )
+                    { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
+                      case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
+                      case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
+                      case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
+                    }
+                }}
+                | barre POUV expr PFERM
+                {{ int taille;
+                   taille = strlen($3)+5;
+                   $$ = New_chaine( taille );
+                   if ($1) { g_snprintf( $$, taille, "!(%s)", $3 ); }
+                   else    { g_snprintf( $$, taille, "(%s)", $3 ); }
+                   g_free($3);
+                }}
+                | barre TEMPO ENTIER
+                {{ int taille;
+                   if ($1) { taille = 15;
+                             $$ = New_chaine( taille ); /* 10 caractères max */
+                             g_snprintf( $$, taille, "TRbarre(%d)", $3 );
+                           }
+                      else { taille = 15;
+                             $$ = New_chaine( taille ); /* 10 caractères max */
+                             g_snprintf( $$, taille, "TR(%d)", $3 );
+                           }
+                }}
+                | barre ID suite_id
+                {{ struct ALIAS *alias;
+                   char *chaine;
+                   int taille;
+                   alias = Get_alias_par_nom($2);                                /* On recupere l'alias */
+                   if (alias)
+                    { if (alias->bit == TEMPO)
+                       { taille = 15;
+                         $$ = New_chaine( taille ); /* 10 caractères max */
+                         if (!$1) g_snprintf( $$, taille, "TR(%d)", alias->num );
+                             else g_snprintf( $$, taille, "TRbarre(%d)", alias->num );
+                       }
+                      else
+                       { switch(alias->bit) /* On traite que ce qui peut passer en "condition" */
+                          { case ENTREE:
+                            case BI    :
+                            case MONO  : taille = strlen(alias->nom)+2;
+                                         $$ = New_chaine( taille ); /* 10 caractères max */
+                                         if (!$1) g_snprintf( $$, taille, "%s", alias->nom );
+                                         else g_snprintf( $$, taille, "!%s", alias->nom );
+                                         break;
+                            case EANA  : taille = strlen(alias->nom)+strlen($3)+20;
+                                         $$ = New_chaine( taille ); /* 10 caractères max */
+                                         g_snprintf( $$, taille, "EA_ech%s,%d)", $3, alias->num );
+                                         break;
+                            default:     taille = strlen($2) + strlen(INTERDIT_GAUCHE) + 1;
+                                         chaine = New_chaine(taille);
+                                         g_snprintf(chaine, taille, INTERDIT_GAUCHE, ligne_source_dls, $2 );
+                                         Emettre_erreur(chaine); g_free(chaine);
+                                         erreur++;
+                                         $$=New_chaine(2);
+                                         g_snprintf( $$, 2, "0" );
+                          }
+                       }
+                    }
+                   else { taille = strlen($2) + strlen(NON_DEFINI) + 1;
+                          chaine = New_chaine(taille);
+                          g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $2 );
+                          Emettre_erreur(chaine); g_free(chaine);
+                          erreur++;
+                          
+                          $$=New_chaine(2);
+                          g_snprintf( $$, 2, "0" );
+                        }
+                   g_free($2);                                     /* On n'a plus besoin de l'identifiant */
+                   if ($3) g_free($3);
+                }}
+                ;
+/********************************************* Gestion des actions ****************************************/
+action:         action VIRGULE une_action
+                {{ int taille;
+                   $$=New_action();
+                   taille = strlen($1->alors)+strlen($3->alors)+1;
+                   $$->alors = New_chaine( taille );
+                   g_snprintf( $$->alors, taille, "%s%s", $1->alors, $3->alors );
+                   taille = 1;
+                   if ($1->sinon) taille += strlen($1->sinon);
+                   if ($3->sinon) taille += strlen($3->sinon);
+                   if (taille>1)
+                    { $$->sinon = New_chaine( taille );
+                      if ($1->sinon && $3->sinon)
+                       { g_snprintf( $$->sinon, taille, "%s%s", $1->sinon, $3->sinon ); }
+                      else if ($1->sinon)
+                       { g_snprintf( $$->sinon, taille, "%s", $1->sinon ); }
+                      else
+                       { g_snprintf( $$->sinon, taille, "%s", $3->sinon ); }
+                    }
+                   g_free($1->alors); if ($1->sinon) { g_free($1->sinon); }
+                   g_free($3->alors); if ($3->sinon) { g_free($3->sinon); }
+                   g_free($1); g_free($3);
+                }}
+                | une_action
+                ;
+
+une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);     }}
+                | barre BI ENTIER             {{ $$=New_action_bi($3, $1);         }}
+                | MONO ENTIER                 {{ $$=New_action_mono($2);           }}
+                | ICONE ENTIER liste_options
+                  {{ gint mode, coul;
+                     mode = Get_option_entier( $3, "mode" );
+                     coul = Get_option_entier( $3, "color" );
+                     $$=New_action_icone($2, $3);
+                     Liberer_options($3);
+                  }}
+                | TEMPO ENTIER liste_options
+                  {{ $$=New_action_tempo($2, $3);
+                     Liberer_options($3);
+                  }}
+                | CPT_H ENTIER                {{ $$=New_action_cpt_h($2);          }}
+                | MSG ENTIER                  {{ $$=New_action_msg($2);            }}
+                | barre ID liste_options
+                {{ struct ALIAS *alias;                               /* Definition des actions via alias */
+                   int taille;
+                   alias = Get_alias_par_nom( $2 );
+                   if (!alias)
+                    { char *chaine;
+                      taille = strlen($2) + strlen(NON_DEFINI) + 1;
+                      chaine = New_chaine(taille);
+                      g_snprintf( chaine, taille, NON_DEFINI, ligne_source_dls, $2 );
+                      Emettre_erreur(chaine); g_free(chaine);
+                      erreur++;
+
+                      $$=New_action();
+                      taille = 2;
+                      $$->alors = New_chaine( taille );
+                      g_snprintf( $$->alors, taille, " " ); 
+                      $$->sinon = NULL;
+                    }
+                   else
+                    { GList *options, *options_g, *options_d;
+                      options_g = g_list_copy( $3 );
+                      options_d = g_list_copy( alias->options );
+                      options = g_list_concat( options_g, options_d );/* Concaténation des listes d'options */
+                      switch(alias->bit)
+                       { case TEMPO : $$=New_action_tempo( alias->num, options );  break;
+                         case MSG   : if ($1)
+                                       { char *chaine;
+                                         taille = strlen(alias->nom) + strlen(INTERDIT_MSG_BARRE) + 1;
+                                         chaine = New_chaine(taille);
+                                         g_snprintf( chaine, taille, INTERDIT_MSG_BARRE,
+                                                     ligne_source_dls, alias->nom );
+                                         Emettre_erreur(chaine); g_free(chaine);
+                                         erreur++;
+
+                                         $$=New_action();
+                                         taille = 2;
+                                         $$->alors = New_chaine( taille );
+                                         g_snprintf( $$->alors, taille, " " ); 
+                                         $$->sinon = NULL;
+                                       }
+                                      else $$=New_action_msg( alias->num );
+                                      break;
+                         case SORTIE: $$=New_action_sortie( alias->num, $1 );      break;
+                         case BI    : $$=New_action_bi( alias->num, $1 );          break;
+                         case MONO  : $$=New_action_mono( alias->num );            break;
+                         case CPT_H : $$=New_action_cpt_h( alias->num );           break;
+                         case ICONE : $$=New_action_icone( alias->num, options );  break;
+                         default: { char *chaine;
+                                    taille = strlen(alias->nom) + strlen(INTERDIT_DROITE) + 1;
+                                    chaine = New_chaine(taille);
+                                    g_snprintf( chaine, taille, INTERDIT_DROITE, ligne_source_dls, alias->nom );
+                                    Emettre_erreur(chaine); g_free(chaine);
+                                    erreur++;
+
+                                    $$=New_action();
+                                    taille = 2;
+                                    $$->alors = New_chaine( taille );
+                                    g_snprintf( $$->alors, taille, " " ); 
+                                    $$->sinon = NULL;
+                                  }
+                       }
+                      g_list_free(options);
+                    }
+                   Liberer_options($3);                                /* On libére les options "locales" */
+                   g_free($2);
+                }}
+                ;
+
+suite_id:       ordre VALF
+                {{ char *chaine;
+                   int taille;
+                   taille = 30;
+                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   switch( $1 )
+                    { case INF        : g_snprintf( $$, taille, "_inf(%f", $2 );  break;
+                      case SUP        : g_snprintf( $$, taille, "_sup(%f", $2 );  break;
+                      case INF_OU_EGAL: g_snprintf( $$, taille, "_inf_egal(%f", $2 ); break;
+                      case SUP_OU_EGAL: g_snprintf( $$, taille, "_sup_egal(%f", $2 ); break;
+                    }
+                }}
+                |     {{ $$=NULL; }}
+                ;
+
+barre:          BARRE {{ $$=1; }}
+                |     {{ $$=0; }}
+                ;
+
+couleur:        ROUGE        {{ $$=ROUGE;  }}
+                | VERT       {{ $$=VERT;   }}
+                | BLEU       {{ $$=BLEU;   }}
+                | JAUNE      {{ $$=JAUNE;  }}
+                | NOIR       {{ $$=NOIR;   }}
+                | BLANC      {{ $$=BLANC;  }}
+                | GRIS       {{ $$=GRIS;   }}
+                | ORANGE     {{ $$=ORANGE; }}
+                ;
+modulateur:     APRES        {{ $$=APRES;  }}
+                | AVANT      {{ $$=AVANT;  }}
+                |            {{ $$=0;      }}
+                ;
+ordre:          INF           {{ $$=INF;         }}
+                | SUP         {{ $$=SUP;         }}
+                | INF_OU_EGAL {{ $$=INF_OU_EGAL; }}
+                | SUP_OU_EGAL {{ $$=SUP_OU_EGAL; }}
+                ;
+/********************************************* Gestion des options ****************************************/
+liste_options:  POUV options PFERM   {{ $$ = $2; printf("une liste d'option\n");   }}
+                |                    {{ $$ = NULL; }}
+                ;
+
+options:        options VIRGULE une_option
+                {{ $$ = g_list_append( $1, $3 );
+                }}
+                | une_option    {{ $$ = g_list_append( NULL, $1 ); printf("une option\n"); }}
+                ;
+
+une_option:     ID EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = OPTION_ENTIER;
+                   g_snprintf( $$->id, sizeof($$->id), "%s", $1 );
+                   $$->entier = $3;
+                   g_free($1);
+                }}
+                | ID EGAL couleur
+                {{ $$=New_option();
+                   $$->type = OPTION_ENTIER;
+                   g_snprintf( $$->id, sizeof($$->id), "%s", $1 );
+                   $$->entier = $3;
+                   g_free($1);
+                }}
+                ;
+%%
+/**********************************************************************************************************/
+/* yyerror: Gestion des erreurs de syntaxe                                                                */
+/**********************************************************************************************************/
+ int Dls_error ( char *s )
+  { int taille;
+    char *chaine;
+    taille = strlen(ERR_SYNTAXE) + strlen(s) + 5;
+    chaine = New_chaine( taille );
+    g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, s );
+    Emettre_erreur( chaine );
+    g_free(chaine);
+    erreur++;
+    return(0);
+  }
+/**********************************************************************************************************/
+/* Interpreter: lecture et production de code intermedaire a partir du fichier en parametre               */
+/* Entrée: le nom du fichier originel                                                                     */
+/**********************************************************************************************************/
+ gboolean Interpreter_source_dls ( gchar *source )
+  { gchar chaine[80];
+    gint retour;
+    FILE *rc;
+
+    ligne_source_dls  = 1;                                       /* Initialisation des variables globales */
+
+    erreur=0;
+    rc = fopen(source, "r");
+    if (rc)
+     { Emettre(" #include <Module_dls.h>\n void Go ( void )\n {\n");
+       Dls_restart(rc);
+       retour = Dls_parse();
+       Emettre(" }\n");
+       fclose(rc);
+       if (erreur)
+        { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (retour>1 ? 'c' : ' ') );
+          Emettre_erreur( chaine );
+          return(FALSE);
+        }
+       return(TRUE);
+     } else printf("ouverture plugin impossible: niet\n");
+    return(FALSE);
+  }
+/*--------------------------------------------------------------------------------------------------------*/
