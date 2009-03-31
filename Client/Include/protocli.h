@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/protocli.h     Définition des prototypes de fonctions                                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 29 mar 2009 09:57:10 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 29 mar 2009 09:57:11 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
