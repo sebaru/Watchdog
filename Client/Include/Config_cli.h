@@ -7,6 +7,7 @@
 #ifndef _CONFIG_CLI_H_
  #define _CONFIG_CLI_H_
 
+ #include "Cst_utilisateur.h"
  #include "Erreur.h"
 
  #define TAILLE_NOM_SERVEUR        40
@@ -14,6 +15,7 @@
  struct CONFIG_CLI
   { gint  port;                                                    /* Port d'ecoute des requetes clientes */
     gint  taille_bloc_reseau;
+    gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
     gchar serveur[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
     gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
     guint debug_level;                                                    /* Niveau de debug du programme */
@@ -22,7 +24,8 @@
   };
 
  #define DEFAUT_FICHIER_CONFIG_CLI      "watchdog-client.conf"
- #define DEFAUT_SERVEUR                 "SalleCTI.watchdog.fr"
+ #define DEFAUT_USER                    "supervision"
+ #define DEFAUT_SERVEUR                 "localhost"
  #define DEFAUT_PORT                    5558
  #define DEFAUT_SSL_CRYPT               0
  #define DEFAUT_DEBUG_LEVEL             0

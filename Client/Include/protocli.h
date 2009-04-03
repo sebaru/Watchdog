@@ -431,6 +431,9 @@
  extern void Menu_changer_echelle3 ( struct TYPE_INFO_COURBE *infos );
  extern void Menu_changer_echelle4 ( struct TYPE_INFO_COURBE *infos );
  extern void Menu_changer_echelle5 ( struct TYPE_INFO_COURBE *infos );
+ extern void Proto_ajouter_histo_courbe( struct CMD_ID_COURBE *courbe );
+ extern void Proto_append_histo_courbe( struct CMD_APPEND_COURBE *append_courbe );
+
 
  extern void Proto_afficher_un_scenario( struct CMD_SHOW_SCENARIO *scenario );   /* Dans liste_scenario.c */
  extern void Proto_cacher_un_scenario( struct CMD_ID_SCENARIO *scenario );

@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/liste_scenario.c        Configuration des scenarios de Watchdog v2.0                              */
+/* Client/liste_scenario.c        Configuration des scenarios de Watchdog v2.0                            */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 10 aoû 2008 11:13:33 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -202,9 +202,7 @@
                         GtkPrintContext   *context,
                         gint               page_nr,
                         GtkTreeIter *iter)
-  { gchar *num, *type_string, *objet, *libelle;
-    guint enable, type_int, sms;
-    GtkTreeModel *store;
+  { GtkTreeModel *store;
     gboolean valide;
     cairo_t *cr;
     gdouble y;

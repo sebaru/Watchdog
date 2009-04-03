@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
-/* Client/Config_cli_cli/Config_cli_cli_lignes.y        Définitions des lignes de config du client Watchdog       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 07 jun 2003 14:46:48 CEST */
+/* Client/Config_cli_cli/Config_cli_cli_lignes.y     Définitions des lignes de config du client Watchdog  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      ven 03 avr 2009 19:02:58 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 
@@ -26,7 +26,7 @@ static struct CONFIG_CLI *Config_cli;
 %token <chaine>  CHAINE
 
 %token   EGAL VIRGULE
-%token   SERVEUR PORT SSL_CRYPT
+%token   SERVEUR PORT SSL_CRYPT USER
 %token   TAILLE_BLOC_RESEAU
 %token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_FORK
 %token   D_CONNEXION
@@ -55,6 +55,10 @@ une_ligne:      PORT EGAL ENTIER
                 }
                 | SERVEUR EGAL CHAINE
                 { g_snprintf( Config_cli->serveur, sizeof(Config_cli->serveur), "%s", $3 );
+                  g_free($3);
+                }
+                | USER EGAL CHAINE
+                { g_snprintf( Config_cli->user, sizeof(Config_cli->user), "%s", $3 );
                   g_free($3);
                 }
                 ;

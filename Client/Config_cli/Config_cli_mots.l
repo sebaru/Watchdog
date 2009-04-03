@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/Config_cli/Config_cli_mots.l        Définitions des mots de config du client Watchdog           */
-/* Projet WatchDog version 1.7       Gestion d'habitat                      sam 07 jun 2003 14:44:47 CEST */
+/* Projet WatchDog version 1.7       Gestion d'habitat                      ven 03 avr 2009 19:03:13 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 
@@ -29,6 +29,9 @@ blanc         [\t ]+
                            }
 "serveur"                  { yylval.val = SERVEUR;
                              return SERVEUR;
+                           }
+"user"                     { yylval.val = USER;
+                             return USER;
                            }
 "SSL_crypt"                { yylval.val = SSL_CRYPT;
                              return SSL_CRYPT;

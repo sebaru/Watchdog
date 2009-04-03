@@ -135,8 +135,7 @@
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Menu_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce )
-  { GtkWidget *frame, *table, *texte, *hboite, *bouton, *menu;
-    gint cpt;
+  { GtkWidget *frame, *table, *texte, *hboite;
 
     if (edit_sce)
      { memcpy( &Edit_sce, edit_sce, sizeof(struct CMD_EDIT_SCENARIO) );    /* Save pour utilisation future */

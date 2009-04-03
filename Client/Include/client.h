@@ -39,7 +39,7 @@
     guint32 id;
     GList *gids;
     struct CONNEXION *connexion;
-    gchar nom[NBR_CARAC_LOGIN_UTF8+1]; /* encore utile ??? */
+    gchar user[NBR_CARAC_LOGIN_UTF8+1]; /* encore utile ??? */
     gchar password[NBR_CARAC_LOGIN_UTF8+1]; /* idem */
     gchar serveur[TAILLE_NOM_SERVEUR+1]; /* idem */
     struct

@@ -40,10 +40,10 @@
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
  extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
 
- static GnomeUIInfo Menu_popup[]=
+/* static GnomeUIInfo Menu_popup[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("synoptique..."), NULL, NULL, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
-  };
+  };*/
 
 /**********************************************************************************************************/
 /* Chercher_histo_hard: Envoie d'une requete au serveur                                                   */

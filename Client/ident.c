@@ -48,7 +48,7 @@
  void Envoyer_identification ( void )
   { struct REZO_CLI_IDENT ident;
 
-    memcpy( &ident.nom, &Client_en_cours.nom, sizeof(ident.nom) );
+    memcpy( &ident.nom, &Client_en_cours.user, sizeof(ident.nom) );
     memcpy( &ident.password, &Client_en_cours.password, sizeof(ident.password) );
     memcpy( &ident.version, VERSION, sizeof(ident.version) );
     

@@ -1,8 +1,30 @@
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/ident.c        Gestion du logon user sur module Client Watchdog                      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 19 oct 2003 09:45:43 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      ven 03 avr 2009 19:46:29 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * ident.c
+ * This file is part of <Watchdog>
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * <Watchdog> is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * <Watchdog> is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with <Watchdog>; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
@@ -26,7 +48,7 @@
 /**********************************************************************************************************/
  static void Autoriser_client ( gint Id_serveur, struct CLIENT *client )
   { struct REZO_SRV_IDENT ident;
-    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog 2.2.1" );
+    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog %s", WATCHDOG_VERSION );
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
@@ -60,12 +82,14 @@
     if (!clef)
      { Info_c( Config.log, DEBUG_CONNEXION,
                _("Tester_autorisation: Unable to retrieve the key of user"), client->ident.nom );
+       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
     client->util = Rechercher_utilisateurDB( Config.log, client->Db_watchdog, id );
     if (!client->util)
      { Info_c( Config.log, DEBUG_CONNEXION,
                _("Tester_autorisation: Unable to retrieve the user"), client->ident.nom );
+       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
     memcpy( client->util->code, clef, sizeof( client->util->code ) );    

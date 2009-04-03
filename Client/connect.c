@@ -254,7 +254,6 @@ one_again:
 
     texte = gtk_label_new( _("Serveur") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-
     Entry_serveur = gtk_entry_new();
 #warning "To be cleaned UP"
     gtk_entry_set_text( GTK_ENTRY(Entry_serveur), Config_cli.serveur );
@@ -262,16 +261,14 @@ one_again:
 
     texte = gtk_label_new( _("Name") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
-
     Entry_nom = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_LOGIN );
 #warning "To be cleaned UP"
-    gtk_entry_set_text( GTK_ENTRY(Entry_nom), "root" );
+    gtk_entry_set_text( GTK_ENTRY(Entry_nom), Config_cli.user );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, 1, 2 );
 
     texte = gtk_label_new( _("Password") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
-
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
     gtk_entry_set_max_length( GTK_ENTRY(Entry_code), NBR_CARAC_LOGIN );
@@ -289,8 +286,8 @@ one_again:
          { gtk_widget_destroy( F_ident );
            return;
          }
-    else { memcpy( Client_en_cours.nom,     gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
-                   sizeof(Client_en_cours.nom) );
+    else { memcpy( Client_en_cours.user,    gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
+                   sizeof(Client_en_cours.user) );
            memcpy( Client_en_cours.password,gtk_entry_get_text( GTK_ENTRY(Entry_code) ),
                    sizeof(Client_en_cours.password) );
            memcpy( Client_en_cours.serveur ,gtk_entry_get_text( GTK_ENTRY(Entry_serveur) ),

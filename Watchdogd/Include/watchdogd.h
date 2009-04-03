@@ -34,6 +34,8 @@
  #define FICHIER_FIFO_ADMIN_READ     "admin.fifo.read"
  #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
 
+ #define WATCHDOG_VERSION            "2.5.1"
+
  enum
   { TYPE_INFO_VIDE,                                                     /* Le fils a traité l'information */ 
     TYPE_INFO_NEW_HISTO,                                   /* Le fils doit traiter un nouveau message DLS */
