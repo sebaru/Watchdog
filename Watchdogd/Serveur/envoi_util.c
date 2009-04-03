@@ -224,9 +224,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-                                                                              /* Récupération des groupes */ 
-       Groupe_get_groupe_utilDB ( Config.log, Db_watchdog, util->id, (guint *)&util->gids );
-
        rezo_util = Preparer_envoi_utilisateur ( util );
        g_free(util);
        if (rezo_util)

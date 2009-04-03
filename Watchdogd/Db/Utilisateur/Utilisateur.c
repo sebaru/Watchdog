@@ -659,7 +659,7 @@
     util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
     if (!util) Info( log, DEBUG_MEM, "Rechercher_utilisateurDB: Erreur allocation mémoire" );
     else
-     { g_snprintf( util->nom, sizeof(util->nom), "%s", nom );             /* Recopie dans la structure */
+     { g_snprintf( util->nom, sizeof(util->nom), "%s", nom );                /* Recopie dans la structure */
        g_snprintf( util->commentaire, sizeof(util->commentaire), "%s", comment_from_sql );
        util->id            = id;
        util->date_creation = atoi(date_create);
@@ -669,6 +669,8 @@
        util->date_expire   = atoi(date_expire);
        util->cansetpass    = atoi(cansetpass);
        util->date_modif    = atoi(date_modif);
+                                                                              /* Récupération des groupes */ 
+       Groupe_get_groupe_utilDB ( log, db, util->id, (guint *)&util->gids );
      }
     return( util );
   }

@@ -150,7 +150,7 @@
 
     retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );
     if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "Groupe_get_groupe_utilDB: recherche failed" );
+     { Info_c( log, DEBUG_DB, "Groupe_get_groupe_utilDB: recherche failed", requete );
        PrintErrQueryDB( log, db, hquery );
        EndQueryDB( log, db, hquery );
        return(FALSE);
