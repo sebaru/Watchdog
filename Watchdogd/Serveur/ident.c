@@ -29,6 +29,7 @@
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  
+ #include "sysconfig.h"
  #include "Reseaux.h"
  #include "Db.h"
  #include "Config.h"
@@ -48,7 +49,7 @@
 /**********************************************************************************************************/
  static void Autoriser_client ( gint Id_serveur, struct CLIENT *client )
   { struct REZO_SRV_IDENT ident;
-    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog %s", WATCHDOG_VERSION );
+    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog %s", VERSION );
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
