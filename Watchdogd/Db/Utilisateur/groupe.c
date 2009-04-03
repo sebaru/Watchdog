@@ -124,7 +124,7 @@
 /* Entrées: un log, une db, un id, un tableau d'entiers                                                   */
 /* Sortie: une structure GROUPE                                                                           */
 /**********************************************************************************************************/
- gboolean Groupe_get_groupe_utilDB( struct LOG *log, struct DB *db, gint id, guint *gids )
+ gboolean Groupe_get_groupe_utilDB( struct LOG *log, struct DB *db, guint id, guint *gids )
   { gchar gid[20];
     gchar requete[200];
     SQLHSTMT hquery;                                                          /* Handle SQL de la requete */

@@ -67,6 +67,7 @@
  extern struct GROUPEDB *Rechercher_groupeDB( struct LOG *log, struct DB *db, gint id );
  extern gboolean Modifier_groupeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_GROUPE *groupe );
  extern gboolean Groupe_set_groupe_utilDB( struct LOG *log, struct DB *db, guint id_util, guint *gids );
+ extern gboolean Groupe_get_groupe_utilDB( struct LOG *log, struct DB *db, guint id, guint *gids );
 
  extern gboolean Creer_db_util ( struct LOG *log, gchar *clef, struct DB *db );     /* Dans Utilisateur.c */
  extern gboolean Creer_db_gids ( struct LOG *log, struct DB *db );
