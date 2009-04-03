@@ -9,7 +9,7 @@
 
  #include "Erreur.h"
 
- #define NBR_MAX_GROUPE_PAR_UTIL  50
+ #define NBR_MAX_GROUPE_PAR_UTIL  100
 
  #define NBR_CARAC_LOGIN             16                           /* Idem pour la longueur max du password */
  #define NBR_CARAC_LOGIN_UTF8        (NBR_CARAC_LOGIN * 6)

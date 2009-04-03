@@ -25,8 +25,8 @@
     gboolean setpassnow;
     gchar    code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
     gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    time_t   date_modif;
-    time_t   date_expire;
+    guint    date_modif;
+    guint    date_expire;
     gboolean actif;
     gboolean expire;
     gboolean changepass;
@@ -37,7 +37,7 @@
   { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
     gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
     gchar  code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
-    time_t date_expire;
+    guint  date_expire;
     gboolean expire;
     gboolean changepass;
     gboolean actif;

@@ -1,8 +1,30 @@
 /**********************************************************************************************************/
 /* Watchdogd/Db/Utilisateur/clef.c             Recuperation ID et clef utilisateur                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 26 jun 2003 13:09:19 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     ven 03 avr 2009 20:31:01 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * clef.c
+ * This file is part of <Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * <Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * <Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with <Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <sql.h>                                             /* Entetes de gestion de la base de données */
  #include <sqlext.h> 
  #include <sqltypes.h>
@@ -55,7 +77,7 @@
 
     retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );          /* Execution de la requete SQL */
     if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info_n( log, DEBUG_DB, "Set_password: update failed", util->id );
+     { Info_c( log, DEBUG_DB, "Set_password: update failed", requete );
        PrintErrQueryDB( log, db, hquery );
        EndQueryDB( log, db, hquery );
        g_free(crypt);
