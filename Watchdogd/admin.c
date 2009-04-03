@@ -335,6 +335,7 @@
           Write_admin ( Socket_write, "  getb xxx             - Get Bxxx\n" );
           Write_admin ( Socket_write, "  setb xxx i           - Set Bxxx = i\n" );
           Write_admin ( Socket_write, "  seta xxx i           - Set Axxx = i\n" );
+          Write_admin ( Socket_write, "  msgs message         - Envoi d'un message a tous les clients\n" );
           Write_admin ( Socket_write, "  ping                 - Ping Watchdog\n" );
           Write_admin ( Socket_write, "  help                 - This help\n" );
           Write_admin ( Socket_write, "  -- Watchdog ADMIN -- Use with CAUTION\n" );

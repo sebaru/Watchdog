@@ -213,7 +213,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading users") );
+    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading %d users"), nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 

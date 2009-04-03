@@ -358,6 +358,7 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_utilisateur ( struct CMD_EDIT_UTILISATEUR *edit_util )
   { GtkWidget *bouton, *frame, *vboite, *table, *texte, *scroll, *separateur;
+    time_t temps;
 
     if (edit_util)
      { memcpy( &Edit_util, edit_util, sizeof(struct CMD_EDIT_UTILISATEUR) );/*Save pour utilisation future*/
@@ -518,7 +519,8 @@
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpass), edit_util->cansetpass );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_expire), edit_util->expire );
 
-       strftime( chaine, sizeof(chaine), "%c", localtime((time_t *)&edit_util->date_modif) );
+       temps = edit_util->date_modif;
+       strftime( chaine, sizeof(chaine), "%c", localtime((time_t *)&temps) );
        date = g_locale_to_utf8( chaine, -1, NULL, NULL, 0 ); 
        gtk_entry_set_text( GTK_ENTRY(Entry_last), date );
        g_free(date);
