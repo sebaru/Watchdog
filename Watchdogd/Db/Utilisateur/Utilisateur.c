@@ -181,6 +181,7 @@
     if(g_utf8_strlen(util->code_en_clair, -1))
          { crypt = Crypter( log, clef, util->code_en_clair ); }
     else { crypt = Crypter( log, clef, "bouh" ); }
+
     if (crypt)
      { gchar *nom, *comment, *code_crypt;
 
@@ -216,14 +217,14 @@
           return(-1);
         }
        else Info_c( log, DEBUG_DB, "Ajouter_utilisateurDB: succes creation user", util->nom );
+       EndQueryDB( log, db, hquery );
 
-       Groupe_set_groupe_utilDB ( log, db, id, (guint *)&util->gids );
-     
+       Groupe_set_groupe_utilDB ( log, db, id, (guint *)&util->gids );      /* Positionnement des groupes */ 
+
      } else { Info_c( log, DEBUG_DB, "Ajouter_utilisateurDB: failed to encrypt password for", util->nom );
               EndQueryDB( log, db, hquery );
               return(-1);
             }
-    EndQueryDB( log, db, hquery );
     return(id);
   }
 /**********************************************************************************************************/
