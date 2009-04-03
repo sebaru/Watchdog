@@ -99,9 +99,7 @@
      }
 				   
     for ( cpt=0; cpt<NBR_MAX_GROUPE_PAR_UTIL; cpt++ )
-     { if ( *(gids + cpt) == 0 ) break;
-
-       g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "INSERT INTO %s"
                    "(id_util,gids)"
 	           "VALUES (%d, %d);",
@@ -114,6 +112,7 @@
           EndQueryDB( log, db, hquery );
           return(FALSE);
         }
+       if ( *(gids + cpt) == 0 ) break;                             /* Le groupe "0" est le groupe de fin */
      }
 
     Info_n( log, DEBUG_DB, "Groupe_set_groupe_utilDB: set groupe succes", id_util );
