@@ -3,6 +3,28 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 22 mai 2005 18:03:34 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * envoi_synoptique.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <sys/time.h>
@@ -197,7 +219,7 @@
     Db_watchdog = client->Db_watchdog;
  
     hquery = Recuperer_synoptiqueDB( Config.log, Db_watchdog );
-    if (!hquery) return;
+    if (!hquery) return(NULL);
 
     SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
     g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading synoptiques") );
@@ -208,7 +230,7 @@
      { syn = Recuperer_synoptiqueDB_suite( Config.log, Db_watchdog, hquery );
        if (!syn)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          return;
+          return(NULL);
         }
 
        rezo_syn = Preparer_envoi_synoptique( syn );

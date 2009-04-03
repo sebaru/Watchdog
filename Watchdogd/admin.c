@@ -258,6 +258,36 @@
           g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
           Write_admin ( Socket_write, chaine );
         } else
+       if ( ! strcmp ( commande, "msgs" ) )
+        { char chaine[128], msg[128];
+          GList *liste;
+          gint i;
+
+          memset( msg, 0, sizeof(msg) );
+          sscanf ( ligne, "%s %s", commande, msg );                  /* Découpage de la ligne de commande */
+
+          for (i=0; i<Config.max_serveur; i++)
+            { if (Partage->Sous_serveur[i].pid == -1) continue;
+
+              liste = Partage->Sous_serveur[i].Clients;
+              while(liste)                                            /* Parcours de la liste des clients */
+               { struct CMD_GTK_MESSAGE erreur;
+                 struct CLIENT *client;
+                 client = (struct CLIENT *)liste->data;
+
+
+                 g_snprintf( erreur.message, sizeof(erreur.message), msg );
+                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+
+                 g_snprintf( chaine, sizeof(chaine), " Envoi du message a %s@%s\n",
+                             client->util->nom, client->machine );
+                 Write_admin ( Socket_write, chaine );
+
+                 liste = liste->next;
+               }
+            }
+        } else
        if ( ! strcmp ( commande, "ident" ) )
         { char chaine[128], nom[128];
           gethostname( nom, sizeof(nom) );
