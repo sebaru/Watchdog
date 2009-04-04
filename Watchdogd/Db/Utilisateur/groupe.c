@@ -115,7 +115,7 @@
        if ( *(gids + cpt) == 0 ) break;                             /* Le groupe "0" est le groupe de fin */
      }
 
-    Info_n( log, DEBUG_DB, "Groupe_set_groupe_utilDB: set groupe succes", id_util );
+    Info_c( log, DEBUG_DB, "Groupe_set_groupe_utilDB: set groupe succes", requete );
     EndQueryDB( log, db, hquery );
     return(TRUE);
   }
@@ -160,9 +160,12 @@
     cpt=0;
     
     while ( SQLFetch( hquery ) != SQL_NO_DATA && cpt<NBR_MAX_GROUPE_PAR_UTIL)
-     { * (gids + cpt) = atoi(gid);
-       cpt++;
+     { if (atoi(gid) != 0)
+        { *(gids + cpt) = atoi(gid);
+          cpt++;
+        }
      }
+    *(gids + cpt) = 0;                                         /* Fin de tableau = groupe "tout le monde" */
 
     EndQueryDB( log, db, hquery );
     return(TRUE);
@@ -211,6 +214,7 @@
     if (nbr!=0)
      { SQLFetch( hquery );
        id = atoi(id_from_sql) + 1;
+       if (id<100) id = 100;                                        /* On se reserve 100 groupes spéciaux */
      }
     else id = 0;
     EndQueryDB( log, db, hquery );
@@ -256,7 +260,7 @@
 
     retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );
     if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "Rechercher_groupeDB: recherche failed" );
+     { Info_c( log, DEBUG_DB, "Rechercher_groupeDB: recherche failed", requete );
        PrintErrQueryDB( log, db, hquery );
        EndQueryDB( log, db, hquery );
        return(NULL);
@@ -302,7 +306,7 @@
 
     retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );
     if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "Recuperer_groupesDB: recherche failed" );
+     { Info_c( log, DEBUG_DB, "Recuperer_groupesDB: recherche failed", requete );
        PrintErrQueryDB( log, db, hquery );
        EndQueryDB( log, db, hquery );
        return(NULL);

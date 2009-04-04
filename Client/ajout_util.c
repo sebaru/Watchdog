@@ -133,12 +133,14 @@
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grps) );
     cible  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grp_util) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
+
     cpt = 0;
-    while ( valide )                                     /* Parcours de la liste des groupes utilisateurs */
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       cpt=0;
-       while ( cpt<NBR_MAX_GROUPE_PAR_UTIL )
-        { if (gids[cpt] == id)                                        /* Le groupe fait parti des gids ?? */
+    while ( cpt<NBR_MAX_GROUPE_PAR_UTIL )                /* On parcours tous les groupes de l'utilisateur */
+     {
+       valide = gtk_tree_model_get_iter_first( store, &iter );
+       while ( valide )                                   /* On parcours l'ensemble des groupes existants */
+        {
+          if (gids[cpt] == id)                                        /* Le groupe fait parti des gids ?? */
            { gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
              gtk_tree_model_get( store, &iter, COLONNE_COMMENTAIRE, &comment, -1 );
              gtk_list_store_append ( GTK_LIST_STORE(cible), &iter_cible );       /* Acquisition iterateur */
@@ -153,9 +155,10 @@
              break;
            }
           if (!gids[cpt]) break;                                                        /* Fin de tableau */
-          cpt++;
+          valide = gtk_tree_model_iter_next( store, &iter );
         }
-       valide = gtk_tree_model_iter_next( store, &iter );
+       if (!gids[cpt]) break;                                                           /* Fin de tableau */
+       cpt++;
      }
   }
 /**********************************************************************************************************/
