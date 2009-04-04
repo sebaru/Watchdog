@@ -515,7 +515,7 @@
 /**********************************************************************************************************/
  void Modbus_state ( int id, gchar *chaine, int size )
   { g_snprintf( chaine, size,
-                " MODBUS[%02d] - Running = %d, transaction_id = %d, request = %d, nbr_deconnect = %d\n",
+                " MODBUS[%02d] - Running = %d, transaction_id = %d, request = %d, nbr_deconnect = %d\n", id,
                 Comm_MODBUS[id].started, Comm_MODBUS[id].transaction_id,
                 Comm_MODBUS[id].request, Comm_MODBUS[id].nbr_deconnect );
   } 
