@@ -29,9 +29,11 @@
  #include "Erreur.h"
  #include "Reseaux.h"
  #include "Client.h"
+ #include "Synoptiques_DB.h"
 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "proto_srv.h"
+ extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
@@ -56,8 +58,16 @@
              { struct CMD_ID_SYNOPTIQUE *syn;
                syn = (struct CMD_ID_SYNOPTIQUE *)connexion->donnees;
                printf("Le client desire le synoptique de supervision\n" );
-               client->num_supervision = syn->id;             /* Sauvegarde du syn voulu pour envoi motif */
-               Client_mode( client, ENVOI_MOTIF_SUPERVISION );
+
+               if ( ! Tester_groupe_synoptique( Config.log, client->Db_watchdog, client->util, syn->id) )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                }
+               else { client->num_supervision = syn->id;      /* Sauvegarde du syn voulu pour envoi motif */
+                      Client_mode( client, ENVOI_MOTIF_SUPERVISION );
+                    }
              }
             break;
        case SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN:
@@ -89,14 +99,30 @@
             break;
        case SSTAG_CLIENT_SUP_ADD_SCENARIO:
              { struct CMD_ADD_SCENARIO *sce;
-               sce = (struct CMD_ADD_SCENARIO *)connexion->donnees;
-               Proto_ajouter_scenario_sup( client, sce );
+
+               if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SCENARIO) )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                }
+               else { sce = (struct CMD_ADD_SCENARIO *)connexion->donnees;
+                      Proto_ajouter_scenario_sup( client, sce );
+                    }
              }
             break;
        case SSTAG_CLIENT_SUP_DEL_SCENARIO:
              { struct CMD_ID_SCENARIO *sce;
-               sce = (struct CMD_ID_SCENARIO *)connexion->donnees;
-               Proto_effacer_scenario_sup( client, sce );
+
+               if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SCENARIO) )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                }
+               else { sce = (struct CMD_ID_SCENARIO *)connexion->donnees;
+                      Proto_effacer_scenario_sup( client, sce );
+                    }
              }
             break;
        case SSTAG_CLIENT_SUP_VALIDE_EDIT_SCENARIO:

@@ -10,6 +10,7 @@
  #include "Reseaux.h"
  #include "Db.h"
  #include "Cst_synoptiques.h"
+ #include "Utilisateur_DB.h"
 
  #define NOM_TABLE_SYNOPTIQUE     "syns"
  #define NOM_TABLE_MOTIF          "syns_motifs"
@@ -91,6 +92,8 @@
     gfloat angle;
   };
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db,
+                                           struct UTILISATEURDB *util, guint syn_id );
  extern struct SYNOPTIQUEDB *Rechercher_synoptiqueDB ( struct LOG *log, struct DB *db, guint id );
  extern SQLHSTMT Recuperer_synoptiqueDB ( struct LOG *log, struct DB *db );
  extern struct SYNOPTIQUEDB *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );

@@ -40,6 +40,31 @@
  #include "Icones_DB.h"
 
 /**********************************************************************************************************/
+/* Tester_groupe_synoptique: renvoie true si l'utilisateur fait partie du groupe en parametre             */
+/* Entrées: un id utilisateur, une liste de groupe, un id de groupe                                       */
+/* Sortie: false si pb                                                                                    */
+/**********************************************************************************************************/
+ gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db, struct UTILISATEURDB *util, guint syn_id )
+  { struct SYNOPTIQUEDB *syn;
+    gint cpt;
+
+    if (util->id==UID_ROOT) return(TRUE);                            /* Le tech est dans tous les groupes */
+
+    syn = Rechercher_synoptiqueDB ( log, db, syn_id );
+    if (!syn) return(FALSE);
+
+    cpt=0;
+    while( util->gids[cpt] )
+     { if( util->gids[cpt] == syn->groupe )
+        { g_free(syn);
+          return(TRUE);
+        }
+       cpt++;
+     }
+    g_free(syn);
+    return(FALSE);
+  }
+/**********************************************************************************************************/
 /* Retirer_msgDB: Elimination d'un synoptique                                                             */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
