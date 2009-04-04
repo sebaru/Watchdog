@@ -52,10 +52,14 @@
 
     syn = Rechercher_synoptiqueDB ( log, db, syn_id );
     if (!syn) return(FALSE);
+    if (syn->groupe == GID_TOUTLEMONDE) return(TRUE);
+
+printf(" Groupe syn = %d\n", syn->groupe );
 
     cpt=0;
     while( util->gids[cpt] )
-     { if( util->gids[cpt] == syn->groupe )
+     { printf("utils->gids[%d] = %d\n", cpt, util->gids[cpt] );
+       if( util->gids[cpt] == syn->groupe )
         { g_free(syn);
           return(TRUE);
         }

@@ -47,7 +47,7 @@
 
     if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_TOUTLEMONDE) )
      { struct CMD_GTK_MESSAGE gtkmessage;
-       g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
+       g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for user..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        return;
