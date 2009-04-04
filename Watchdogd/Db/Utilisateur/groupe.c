@@ -145,7 +145,7 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete), "SELECT gids FROM %s WHERE id_util=%d",
+    g_snprintf( requete, sizeof(requete), "SELECT gids FROM %s WHERE id_util=%d ORBER BY gids DESC",
                 NOM_TABLE_GIDS, id );
 
     retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );

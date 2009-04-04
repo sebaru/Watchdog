@@ -139,7 +139,7 @@
      {
        valide = gtk_tree_model_get_iter_first( store, &iter );
        while ( valide )                                   /* On parcours l'ensemble des groupes existants */
-        {
+        { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
           if (gids[cpt] == id)                                        /* Le groupe fait parti des gids ?? */
            { gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
              gtk_tree_model_get( store, &iter, COLONNE_COMMENTAIRE, &comment, -1 );
