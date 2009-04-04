@@ -39,14 +39,15 @@
  #include "Utilisateur_DB.h"
 
  static gchar *GROUPE_RESERVE[NBR_GROUPE_RESERVE][2]=
-  { { N_("Everybody"),     N_("The default group") },
-    { N_("Admin-UserDB"),  N_("Members can add/remove/edit users/groups") },
-    { N_("Admin-MsgDB"),   N_("Members can add/remove/edit Msgs") },
-    { N_("Admin-iconDB"),  N_("Members can add/remove/edit icons") },
-    { N_("Admin-synopDB"), N_("Members can add/remove/edit syn") },
-    { N_("Log"),           N_("Members can see the log") },
-    { N_("Admin-dlsDB"),   N_("Members can add/remove/edit DLS plugins") },
-    { N_("Admin-histoDB"), N_("Members can ack/query histo") }
+  { { N_("Everybody"),        N_("The default group") },
+    { N_("Admin-UserDB"),     N_("Members can add/remove/edit users/groups") },
+    { N_("Admin-MsgDB"),      N_("Members can add/remove/edit Msgs") },
+    { N_("Admin-iconDB"),     N_("Members can add/remove/edit icons") },
+    { N_("Admin-synopDB"),    N_("Members can add/remove/edit syn") },
+    { N_("Log"),              N_("Members can see the log") },
+    { N_("Admin-dlsDB"),      N_("Members can add/remove/edit DLS plugins") },
+    { N_("Admin-histoDB"),    N_("Members can ack/query histo") },
+    { N_("Admin-scenarioDB"), N_("Members can add/remove Scenario") }
   };
 /************************************ Prototypes des fonctions ********************************************/
  #include "proto_util.h"

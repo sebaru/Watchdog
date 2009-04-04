@@ -53,6 +53,7 @@
     GID_HISTORIQUE,
     GID_DLS,
     GID_HISTO,
+    GID_SCENARIO,
     NBR_GROUPE_RESERVE
   };
 

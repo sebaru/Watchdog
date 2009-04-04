@@ -43,9 +43,9 @@
     pthread_t tid;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SYNOPTIQUE) )
+    if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_HISTO) )
      { struct CMD_GTK_MESSAGE gtkmessage;
-       g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Non Autorisé..." );
+       g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        return;

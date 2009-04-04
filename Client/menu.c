@@ -20,8 +20,6 @@
  void Menu_want_plugin_dls ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_PLUGIN_DLS, 0, TRUE )) return;
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_PAGE_DLS, NULL, 0 );
-    Creer_page_plugin_dls();
-    Chercher_page_notebook( TYPE_PAGE_PLUGIN_DLS, 0, TRUE );
   }
 /**********************************************************************************************************/
 /* Menu_want_util: l'utilisateur desire editer les bases users                                            */
@@ -46,8 +44,6 @@
  void Menu_want_message ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE )) return;
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_PAGE_MESSAGE, NULL, 0 );
-    Creer_page_message();
-    Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE );
   }
 /**********************************************************************************************************/
 /* Menu_want_icone: l'utilisateur desire editer la base icons                                             */
@@ -80,8 +76,6 @@
  void Menu_want_entreeANA ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_ENTREEANA, 0, TRUE )) return;
     Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_WANT_PAGE_ENTREEANA, NULL, 0 );
-    Creer_page_entreeANA();
-    Chercher_page_notebook( TYPE_PAGE_ENTREEANA, 0, TRUE );
   }
 /**********************************************************************************************************/
 /* Menu_want_histo_hard: l'utilisateur desire voir l'historique                                           */
