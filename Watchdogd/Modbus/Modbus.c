@@ -510,6 +510,16 @@
     return(cpt_borne);
   }
 /**********************************************************************************************************/
+/* Modbus_state : Renvoie l'etat du modbus num id en tant que chaine de caractere                         */
+/* Entrée : Le numéro du module et la chaine a remplir                                                    */
+/**********************************************************************************************************/
+ void Modbus_state ( int id, gchar *chaine, int size )
+  { g_snprintf( chaine, size,
+                " MODBUS[%02d] - Running = %d, transaction_id = %d, request = %d, nbr_deconnect = %d\n",
+                Comm_MODBUS[id].started, Comm_MODBUS[id].transaction_id,
+                Comm_MODBUS[id].request, Comm_MODBUS[id].nbr_deconnect );
+  } 
+/**********************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                    */
 /**********************************************************************************************************/
  void Run_modbus ( void )
