@@ -118,7 +118,7 @@
     if (Client_en_cours.mode != VALIDE) return(TRUE);
 
     page = Page_actuelle();
-    if (page->type != TYPE_PAGE_SUPERVISION) return(TRUE);
+    if (! (page && page->type == TYPE_PAGE_SUPERVISION) ) return(TRUE);
 
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (! (infos && infos->Trame) ) return(TRUE);
