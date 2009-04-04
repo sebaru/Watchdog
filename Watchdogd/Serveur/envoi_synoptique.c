@@ -48,7 +48,7 @@
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_SYNOPTIQUE *Preparer_envoi_synoptique ( struct SYNOPTIQUEDB *syn )
+ struct CMD_SHOW_SYNOPTIQUE *Preparer_envoi_synoptique ( struct SYNOPTIQUEDB *syn )
   { struct CMD_SHOW_SYNOPTIQUE *rezo_syn;
 
     rezo_syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_SHOW_SYNOPTIQUE) );

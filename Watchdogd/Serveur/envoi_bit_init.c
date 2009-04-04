@@ -93,7 +93,7 @@
 
           if (init_capteur)                                                               /* envoi client */
            { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                           init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+                           (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
              g_free(init_capteur);                                                /* On libere la mémoire */
            }
           liste = liste->next;

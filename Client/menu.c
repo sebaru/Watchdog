@@ -120,9 +120,11 @@
   { struct CMD_ID_SYNOPTIQUE cmd;
     cmd.id = 0;
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, cmd.id, TRUE )) return;
+#ifdef bouh
     Creer_page_supervision( "Site", cmd.id );            /* Creation de la page de supervision synoptique */
     Chercher_page_notebook( TYPE_PAGE_SUPERVISION, cmd.id, TRUE );                /* Affichage de la page */
     g_snprintf( cmd.libelle, sizeof(cmd.libelle), "Site" );
+#endif
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
                    (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
   }

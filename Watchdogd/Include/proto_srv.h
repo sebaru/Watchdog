@@ -9,6 +9,7 @@
  #include <glib.h>
  #include "Client.h"
  #include "watchdogd.h"
+ #include "Synoptiques_DB.h"
 /*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/
 
                                                                                         /* Dans serveur.c */
@@ -97,6 +98,7 @@
  extern void *Envoyer_synoptiques_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_atelier_palette_thread ( struct CLIENT *client );
+ extern struct CMD_SHOW_SYNOPTIQUE *Preparer_envoi_synoptique ( struct SYNOPTIQUEDB *syn );
  extern void Proto_editer_synoptique_thread ( struct CLIENT *client, struct CMD_ID_SYNOPTIQUE *rezo_syn );
  extern void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_EDIT_SYNOPTIQUE *rezo_syn );
  extern void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_ID_SYNOPTIQUE *rezo_syn );

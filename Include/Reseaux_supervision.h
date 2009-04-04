@@ -30,6 +30,7 @@
 
  enum 
   { SSTAG_CLIENT_WANT_PAGE_SUPERVISION,              /* Le client desire la page de supervision graphique */
+    SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,          /* Le serveur envoi des motifs page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN,      /* Le serveur envoi des motifs page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,      /* Le serveur envoi des comments page supervision */
