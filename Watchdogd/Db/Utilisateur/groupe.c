@@ -303,7 +303,7 @@
        return(NULL);
      }
 
-    g_snprintf( requete, sizeof(requete), "SELECT id, name, comment FROM %s", NOM_TABLE_GROUPE );
+    g_snprintf( requete, sizeof(requete), "SELECT id, name, comment FROM %s ORDER BY name", NOM_TABLE_GROUPE );
 
     retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );
     if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))

@@ -1,8 +1,29 @@
 /**********************************************************************************************************/
 /* Client/supervision_passerelle.c        Affichage du synoptique de supervision                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 15 mai 2005 20:25:04 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 12:29:01 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * supervision_passerelle.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
 
  #include <gnome.h>
  #include <sys/time.h>
@@ -28,22 +49,14 @@
  static gboolean Changer_vue (GooCanvasItem *canvasitem, GooCanvasItem *target,
                               GdkEvent          *event, struct PASSERELLE *pass )
   { struct CMD_ID_SYNOPTIQUE cmd;
-printf("Changer_vue -> %d\n", pass->syn_cible_id );
-
     if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
        )
     return(FALSE);
 
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, pass->syn_cible_id, TRUE )) return(TRUE);
-printf("Changer_vue -> creation\n" );
 
     cmd.id = pass->syn_cible_id;
-    g_snprintf( cmd.libelle, sizeof(cmd.libelle), "Site/%s", pass->libelle );
-
-    Creer_page_supervision( cmd.libelle, pass->syn_cible_id );      /* Creation de la page de supervision */
-    Chercher_page_notebook( TYPE_PAGE_SUPERVISION, pass->syn_cible_id, TRUE );    /* Affichage de la page */
-
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
                    (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
     return(TRUE);

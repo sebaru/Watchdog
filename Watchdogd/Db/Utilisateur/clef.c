@@ -138,7 +138,7 @@
 
     SQLRowCount( hquery, &nbr );
     if (nbr==0)
-     { Info_n( log, DEBUG_DB, "Recuperer_clef: Clef non trouvé dans la BDD", id );
+     { Info_n( log, DEBUG_DB, "Recuperer_clef: Clef non trouvé dans la BDD", *id );
        EndQueryDB( log, db, hquery );
        return(NULL);
      }

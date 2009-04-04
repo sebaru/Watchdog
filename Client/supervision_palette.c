@@ -30,15 +30,9 @@
     const gchar *libelle;
     gint syn_cible_id;
     syn_cible_id = GPOINTER_TO_INT(data);
-printf("----------------------- Changer_vue: cible = %d\n", syn_cible_id );
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, syn_cible_id, TRUE )) return;
 
-    libelle = gtk_button_get_label(GTK_BUTTON(bouton));
     cmd.id = syn_cible_id;
-    g_snprintf( cmd.libelle, sizeof(cmd.libelle), "Site/%s", libelle );
-
-    Creer_page_supervision( cmd.libelle, syn_cible_id );                                 /* Creation page */
-    Chercher_page_notebook( TYPE_PAGE_SUPERVISION, syn_cible_id, TRUE );          /* Affichage de la page */
 
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
                    (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );

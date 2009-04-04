@@ -1,8 +1,29 @@
 /**********************************************************************************************************/
 /* Client/liste_groupe.c        Configuration des groupes de Watchdog v2.0                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      lun 30 jun 2003 13:57:24 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 12:44:13 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * liste_groupe.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
 
  #include <gnome.h>
  
@@ -207,7 +228,7 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                         /* Id de l'utilisateur */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                /* Id du groupe */
                                               G_TYPE_STRING,                                       /* Nom */
                                               G_TYPE_STRING                                /* Commentaire */
                                );

@@ -276,6 +276,7 @@ one_again:
     gtk_entry_set_text( GTK_ENTRY(Entry_code), "bouh" );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_code, 1, 3, 2, 3 );
 
+    g_signal_connect_swapped( Entry_serveur, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
     g_signal_connect_swapped( Entry_nom, "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
 
     gtk_widget_grab_focus( Entry_nom );
