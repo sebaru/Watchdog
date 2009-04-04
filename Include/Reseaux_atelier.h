@@ -263,6 +263,8 @@
     SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE,        /* Affichage des groupes pour appartenance synoptique */
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE,      /* Envoi des groupes pour l'edition utilisateur */
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN,                      /* Le transfert est terminé */
+    SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,  /* Envoi des groupes pour l'edition motif */
+    SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN,            /* Le transfert est terminé */
     SSTAG_CLIENT_ADD_SYNOPTIQUE,                           /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,                                   /* L'ajout du groupe est un succes */
 

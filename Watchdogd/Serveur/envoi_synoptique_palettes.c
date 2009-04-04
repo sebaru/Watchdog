@@ -186,7 +186,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_palette_atelier" );
   { Envoyer_palette_atelier_thread_tag ( client, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
                                                  SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
-    Client_mode( client, VALIDE );
+    Client_mode( client, ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE );
     pthread_exit ( NULL );
   }
 /**********************************************************************************************************/

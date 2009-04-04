@@ -367,6 +367,14 @@
                                                           (void *)Envoyer_groupes_pour_synoptique_thread, client );
                                           pthread_detach( tid );
                                           break;
+                case ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
+                                          Client_mode( client, VALIDE );
+                                          Ref_client( client );  /* Indique que la structure est utilisée */
+                                          pthread_create( &tid, NULL,
+                                                  (void *)Envoyer_groupes_pour_propriete_synoptique_thread,
+                                                          client );
+                                          pthread_detach( tid );
+                                          break;
                 case ENVOI_UTIL         : Client_mode( client, VALIDE );
                                           Ref_client( client );  /* Indique que la structure est utilisée */
                                           pthread_create( &tid, NULL,
@@ -436,15 +444,7 @@
                                           pthread_detach( tid );
                                           break;
                 case ENVOI_PALETTE_ATELIER:
-                                          Client_mode( client, VALIDE );
-                                          Client_mode( client, ENVOI_CAPTEUR_ATELIER );                /* Si pas de comments ... */
-    
-#ifdef bouh
-Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_palette_atelier_thread, client );
-                                          pthread_detach( tid );
-#endif 
+                                          Client_mode( client, ENVOI_CAPTEUR_ATELIER );
                                           break;
                 case ENVOI_CAPTEUR_ATELIER: Client_mode( client, VALIDE );
                                           Ref_client( client );  /* Indique que la structure est utilisée */

@@ -54,6 +54,7 @@
     ENVOI_CAPTEUR_SUPERVISION,                                     /* Envoi des capteurs à la supervision */
     ENVOI_IXXX_SUPERVISION,
     ENVOI_GROUPE_FOR_SYNOPTIQUE,
+    ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,      /* Envoi des groupes pour la fenetre propriete synoptique */
     ENVOI_ICONE,
     ENVOI_ICONE_FOR_ATELIER,
     ENVOI_CLASSE,

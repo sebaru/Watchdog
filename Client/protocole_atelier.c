@@ -52,6 +52,7 @@
     static GList *Arrivee_capteur = NULL;
     static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
+    static GList *Arrivee_groupe_propriete_syn = NULL;
     static int save_id;
            
     switch ( Reseau_ss_tag ( connexion ) )
@@ -113,6 +114,22 @@
                g_list_free( Arrivee_groupe );
                Arrivee_groupe = NULL;
                Proto_fin_affichage_groupes_pour_synoptique();
+             }
+       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
+             { struct CMD_SHOW_GROUPE *groupe;
+               Set_progress_plusun();
+
+               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               if (!groupe) return; 
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               Arrivee_groupe_propriete_syn = g_list_append( Arrivee_groupe_propriete_syn, groupe );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN:
+             { Proto_afficher_les_groupes_pour_propriete_synoptique( Arrivee_groupe_propriete_syn );
+               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_groupe_propriete_syn );
+               Arrivee_groupe_propriete_syn = NULL;
              }
 /**********************************************************************************************************/
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:

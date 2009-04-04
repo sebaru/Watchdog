@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/atelier_propriete.c         gestion des selections synoptique                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 18 mai 2004 10:49:42 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 13:43:20 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -24,7 +24,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
  
  #include <gnome.h>
  #include <string.h>
@@ -92,7 +91,7 @@
  static struct MOTIF Motif_preview0;
  static struct MOTIF Motif_preview1;
  static gint Tag_timer, ok_timer;                             /* Gestion des motifs cycliques/indicateurs */
-    
+ static GList *Liste_index_groupe; /* Pour correspondance index de l'option menu/Id du groupe en question */
 /**********************************************************************************************************/
 /* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
 /* Entrée: le numero du type                                                                              */
@@ -188,16 +187,19 @@
                                gtk_widget_set_sensitive( Entry_bit_clic, FALSE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, FALSE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, FALSE );
+                               gtk_widget_set_sensitive( Combo_groupe, FALSE );
                                break;
        case ACTION_IMMEDIATE : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, FALSE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, FALSE );
+                               gtk_widget_set_sensitive( Combo_groupe, TRUE );
                                break;
        case ACTION_PROGRAMME : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, TRUE );
+                               gtk_widget_set_sensitive( Combo_groupe, FALSE );
                                break;
      }
   }
@@ -235,20 +237,17 @@
     printf("dialog = %s\n", Type_dialog_cde( Trame_motif->motif->type_gestion ) );
     Rafraichir_sensibilite();                           /* Pour mettre a jour les sensibility des widgets */
   }
-#ifdef bouh
 /**********************************************************************************************************/
 /* Changer_groupe: Change le groupe du motif                                                              */
 /* Entrée: rien                                                                                           */
 /* Sortie: la base de données est mise à jour                                                             */
 /**********************************************************************************************************/
  static void Changer_groupe ( void )
-  { struct GROUPE *groupe;
-    gchar *texte;
-    texte = gtk_entry_get_text( GTK_ENTRY( GTK_COMBO(Combo_groupe)->entry ) );
-    groupe = g_tree_lookup( Db_util->groupes, texte );
-    if (groupe) { Trame_motif->motif->gid = groupe->gid; }
+  { gint index_groupe;
+
+    index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_groupe) );
+    Trame_motif->motif->gid = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data);
   }
-#endif
 /**********************************************************************************************************/
 /* Changer_rafraich: Changement du taux de rafraichissement du motif                                      */
 /* Entrée: widget, data                                                                                   */
@@ -336,7 +335,8 @@ printf("Changer_couleur %p\n", data);
  static void Rafraichir_propriete ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct MOTIF *motif;
     GtkWidget *menu;
-    gint choix;
+    GList *liste;
+    gint choix,cpt;
 
     Trame_motif = trame_motif;                  /* Sauvegarde pour les futurs changements d'environnement */
  
@@ -434,12 +434,35 @@ printf("Changer_couleur %p\n", data);
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_dialog_cde), motif->type_dialog );
     printf("Rafraichir_proprietes8:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
-  /*  groupe = Gid_vers_groupe( Db_util, motif->gid );
-    if (groupe) gtk_entry_set_text( GTK_ENTRY( GTK_COMBO(Combo_groupe)->entry), groupe->nom );
-           else gtk_entry_set_text( GTK_ENTRY( GTK_COMBO(Combo_groupe)->entry), _("Inconnu") );*/
+    cpt = 0;
+    liste = Liste_index_groupe; 
+    while (liste)
+     { if ( liste->data == GINT_TO_POINTER(trame_motif->motif->gid) ) break;
+       cpt++;
+       liste = liste->next;
+     }
+    if (liste)
+     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_groupe), cpt );
+       printf("Set history %d\n", cpt );
+     }
 
     Rafraichir_sensibilite();  /* test 18/01/2006 */
     printf("rafraichir_propriete Oktimer = %d\n", ok_timer );
+  }
+/**********************************************************************************************************/
+/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
+/* Entrée: rien                                                                                           */
+/* sortie: kedal                                                                                          */
+/**********************************************************************************************************/
+ void Proto_afficher_les_groupes_pour_propriete_synoptique ( GList *liste )
+  { struct CMD_SHOW_GROUPE *groupe;
+
+    while( liste )
+     { groupe = (struct CMD_SHOW_GROUPE *)liste->data;
+       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
+       Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
+       liste = liste->next;
+     }
   }
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */

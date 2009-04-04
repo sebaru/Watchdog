@@ -56,6 +56,7 @@
  extern void *Envoyer_groupes_thread ( struct CLIENT *client );                    /* Dans envoi_groupe.c */
  extern void *Envoyer_groupes_pour_util_thread ( struct CLIENT *client );
  extern void *Envoyer_groupes_pour_synoptique_thread ( struct CLIENT *client );
+ extern void *Envoyer_groupes_pour_propriete_synoptique_thread ( struct CLIENT *client );
  extern void Proto_ajouter_groupe ( struct CLIENT *client, struct CMD_ADD_GROUPE *rezo_groupe );
  extern void Proto_effacer_groupe ( struct CLIENT *client, struct CMD_ID_GROUPE *rezo_groupe );
  extern void Proto_editer_groupe ( struct CLIENT *client, struct CMD_ID_GROUPE *rezo_groupe );

@@ -130,7 +130,7 @@
                               G_CALLBACK(Detruire_page), page );
 
 /*********************************************** Zoom *****************************************************/
-    frame = gtk_frame_new ( _("Zoom/Grille") );
+    frame = gtk_frame_new ( _("Zoom") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
 

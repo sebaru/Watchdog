@@ -282,4 +282,14 @@
                                               SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN );
     pthread_exit(NULL);
   }
+/**********************************************************************************************************/
+/* Envoyer_groupes: Envoi des groupes au client GID_USERS                                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_groupes_pour_propriete_synoptique_thread ( struct CLIENT *client )
+  { Envoyer_groupes_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,
+                                              SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN );
+    pthread_exit(NULL);
+  }
 /*--------------------------------------------------------------------------------------------------------*/

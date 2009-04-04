@@ -1,9 +1,31 @@
 /**********************************************************************************************************/
 /* Client/ajout_synoptique.c        Addition/Edition d'un synoptique Watchdog2.0                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 27 sep 2003 14:37:38 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 13:54:48 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * ajout_synoptique.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ 
  #include <gnome.h>
  
  #include "Reseaux.h"
@@ -36,8 +58,8 @@
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   g_snprintf( Edit_syn.mnemo, sizeof(Edit_syn.mnemo),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_mnemo) ) );
-                  index_groupe = gtk_option_menu_get_history( GTK_OPTION_MENU(Combo_groupe) );
-                  Edit_syn.groupe = GPOINTER_TO_INT ( g_list_nth_data( Liste_index_groupe, index_groupe ) );
+                  index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_groupe) );
+                  Edit_syn.groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data);
 
                   Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE,
                                 (gchar *)&Edit_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
