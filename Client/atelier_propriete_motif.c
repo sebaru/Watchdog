@@ -247,6 +247,7 @@
 
     index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_groupe) );
     Trame_motif->motif->gid = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data);
+printf("Changer groupe = %d\n", Trame_motif->motif->gid );
   }
 /**********************************************************************************************************/
 /* Changer_rafraich: Changement du taux de rafraichissement du motif                                      */
@@ -590,7 +591,6 @@ printf("Detruire_fenetre_propriete_TOR: fin\n");
     F_propriete = gtk_dialog_new_with_buttons( _("Edit a item"),
                                                GTK_WINDOW(F_client),
                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                                GTK_STOCK_OK, GTK_RESPONSE_OK,
                                                NULL);
     g_signal_connect( F_propriete, "response",
@@ -717,7 +717,9 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
 
     texte = gtk_label_new( _("Control group") );                                  /* Combo du type d'acces */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 8, 9 );
-    Combo_groupe = gtk_combo_box_new();
+    Combo_groupe = gtk_combo_box_new_text();
+    g_signal_connect( G_OBJECT(Combo_groupe), "changed",
+                      G_CALLBACK(Changer_groupe), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 2, 4, 8, 9 );
 
     ok_timer = TIMER_OFF;                                                       /* Timer = OFF par défaut */
