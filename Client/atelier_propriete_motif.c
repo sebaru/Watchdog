@@ -456,11 +456,12 @@ printf("Changer_couleur %p\n", data);
 /**********************************************************************************************************/
  void Proto_afficher_les_groupes_pour_propriete_synoptique ( GList *liste )
   { struct CMD_SHOW_GROUPE *groupe;
-
+printf("Print groupe pour propriete synoptique \n");
     while( liste )
      { groupe = (struct CMD_SHOW_GROUPE *)liste->data;
        gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
        Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
+printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id);
        liste = liste->next;
      }
   }
@@ -716,6 +717,8 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
 
     texte = gtk_label_new( _("Control group") );                                  /* Combo du type d'acces */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 8, 9 );
+    Combo_groupe = gtk_combo_box_new();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 2, 4, 8, 9 );
 
     ok_timer = TIMER_OFF;                                                       /* Timer = OFF par défaut */
     Tag_timer = gtk_timeout_add( RESOLUTION_TIMER, Timer_preview, NULL );      /* Enregistrement du timer */

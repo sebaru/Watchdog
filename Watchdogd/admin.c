@@ -291,7 +291,7 @@
        if ( ! strcmp ( commande, "ident" ) )
         { char chaine[128], nom[128];
           gethostname( nom, sizeof(nom) );
-          g_snprintf( chaine, sizeof(chaine), " Watchdog %s on %s\n", VERSION, nom );
+          g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
           Write_admin ( Socket_write, chaine );
         } else
        if ( ! strcmp ( commande, "audit" ) )

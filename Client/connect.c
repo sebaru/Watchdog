@@ -255,7 +255,6 @@ one_again:
     texte = gtk_label_new( _("Serveur") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
     Entry_serveur = gtk_entry_new();
-#warning "To be cleaned UP"
     gtk_entry_set_text( GTK_ENTRY(Entry_serveur), Config_cli.serveur );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_serveur, 1, 3, 0, 1 );
 
@@ -263,7 +262,6 @@ one_again:
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_LOGIN );
-#warning "To be cleaned UP"
     gtk_entry_set_text( GTK_ENTRY(Entry_nom), Config_cli.user );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, 1, 2 );
 
