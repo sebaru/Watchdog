@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/TraductionDLS/Interp.c          Interpretation du langage DLS                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:33:31 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 12:47:37 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -24,7 +24,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
  
  #include <glib.h>
  #include <sys/types.h>
@@ -139,7 +138,7 @@ printf("Gte_option_entier: --> test %s\n", option->id );
        liste = liste->next;
      }
 printf("Gte_option_entier: --> pas trouvé\n" );
-    return(0);
+    return(-1);
   }
 #ifdef bouh
 /**********************************************************************************************************/
@@ -256,9 +255,9 @@ printf("Gte_option_entier: --> pas trouvé\n" );
   { struct ACTION *action;
     int taille, rouge, vert, bleu, val, coul, cligno;
 
-    val    = Get_option_entier ( options, "mode" );
-    coul   = Get_option_entier ( options, "color" );
-    cligno = Get_option_entier ( options, "cligno" );
+    val    = Get_option_entier ( options, "mode" );   if (val    == -1) val = 0;
+    coul   = Get_option_entier ( options, "color" );  if (coul   == -1) coul = 0;
+    cligno = Get_option_entier ( options, "cligno" ); if (cligno == -1) cligno = 0;
     taille = 40;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -286,6 +285,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
     int taille, consigne;
 
     consigne = Get_option_entier( options, "consigne" );
+    if (consigne == -1) consigne = 10;
     taille = 24;
     action = New_action();
     action->alors = New_chaine( taille );

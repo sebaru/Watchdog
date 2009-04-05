@@ -414,8 +414,8 @@
   }
 /**********************************************************************************************************/
 /* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
-/* Entrée: rien                                                                                     */
-/* Sortie: rien                                                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Exporter ( void )
   { int fd;
@@ -424,12 +424,13 @@
     if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
                 Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
               }
+    else      { Info_c( Config.log, DEBUG_FORK, "Could not export", FICHIER_EXPORT ); }
     close (fd);
   }
 /**********************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
-/* Entrée: rien                                                                                     */
-/* Sortie: rien                                                                          */
+/* Importet : Tente d'importer les données de base Watchdog juste apres le reload                         */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Importer ( void )
   { int fd;
@@ -550,8 +551,7 @@
 encore:   
        Db_watchdog = ConnexionDB( Config.log, Config.db_name,        /* Connexion en tant que user normal */
                                   Config.db_admin_username, Config.db_password );
-printf("test 5\n");
- 
+
        if (!Db_watchdog)
         { Info_c( Config.log, DEBUG_DB, _("Pb acces DB: Unable to open database (dsn)"), Config.db_name ); }
        else

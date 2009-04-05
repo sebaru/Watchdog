@@ -408,10 +408,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                 | barre BI ENTIER             {{ $$=New_action_bi($3, $1);         }}
                 | MONO ENTIER                 {{ $$=New_action_mono($2);           }}
                 | ICONE ENTIER liste_options
-                  {{ gint mode, coul;
-                     mode = Get_option_entier( $3, "mode" );
-                     coul = Get_option_entier( $3, "color" );
-                     $$=New_action_icone($2, $3);
+                  {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
                   }}
                 | TEMPO ENTIER liste_options
@@ -584,6 +581,7 @@ une_option:     ID EGAL ENTIER
        Dls_restart(rc);
        retour = Dls_parse();
        Emettre(" }\n");
+
        fclose(rc);
        if (erreur)
         { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (retour>1 ? 'c' : ' ') );

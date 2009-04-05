@@ -57,20 +57,8 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Shm_stop ( struct PARTAGE *partage )
-  { gint shmid;
-#ifdef bouh
-    if (partage)
-     { shmid = partage->shmid;
-       shmctl( shmid, IPC_RMID, 0 );
-       if ( shmdt( (void *) partage ) == -1)
-        { Info(Config.log, DEBUG_MEM, "Shm_stop: shmdt failed" );
-          return(FALSE);
-        }
-       Info_n(Config.log, DEBUG_MEM, "Shm_stop: shmid", shmid );
-     }
-#endif
-g_free(Partage);
-
+  { Info(Config.log, DEBUG_MEM, "Shm_stop: freeing meme" );
+    g_free(Partage);
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/
