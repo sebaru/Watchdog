@@ -521,14 +521,13 @@
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        Partage->top              = 0;
        Partage->top_cdg_plugin_dls = 0;
-printf("test 3\n");
        
+       Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)
         { Partage->Sous_serveur[i].pid = -1;
           Partage->Sous_serveur[i].nb_client = -1;
           Partage->Sous_serveur[i].type_info = TYPE_INFO_VIDE;                    /* Pas d'info à traiter */
         }
-printf("test 4\n");
 
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );

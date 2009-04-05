@@ -1,9 +1,30 @@
 /**********************************************************************************************************/
 /* Watchdogd/shm.c        Gestion de la mémoire partagée                                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:45:52 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 12:32:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * shm.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
  #include <sys/ipc.h>
  #include <sys/shm.h>
@@ -27,28 +48,7 @@
              sizeof( struct SOUS_SERVEUR ) * Config.max_serveur;         /* Nombre de connexions par fils */
     Info_n( Config.log, DEBUG_MEM, "Shm_init: size required", taille );
 
-#ifdef bouh
-    g_snprintf( nom, sizeof(nom), "%s/%s", Config.home, VERROU_SERVEUR );
-    k = ftok( nom, 0);
-    if (k==-1)
-     { Info( Config.log, DEBUG_MEM, "Shm_init: ftok failed" );
-       return(NULL);
-     }
-
-    shmid = shmget( k, taille, 0600 );                                  /* Test si le segment existe deja */
-    if (shmid==-1)
-     { shmid = shmget( k, taille, IPC_CREAT | 0600 );                          /* Creation le cas échéant */
-       if (shmid==-1)
-        { Info( Config.log, DEBUG_MEM, "Shm_init: Shmget failed" );
-          return(NULL);
-        }
-     }
-    Info_n( Config.log, DEBUG_MEM, "Shm_init: shmid", shmid );
-    partage = shmat( shmid, NULL, 0 );
-    partage->shmid = shmid;
-#endif
     partage = g_malloc0( taille );
-    partage->Sous_serveur = &partage->ss_serveur;
     return(partage);
   }
 /**********************************************************************************************************/
