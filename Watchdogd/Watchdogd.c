@@ -512,7 +512,7 @@
     else
      { gint i;
 
-       memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
+       memset( &Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
        Importer();                                  /* Tente d'importer les données juste après un reload */
 
        memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
