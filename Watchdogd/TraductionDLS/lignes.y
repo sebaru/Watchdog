@@ -56,7 +56,7 @@ int erreur;                                                             /* Compt
        };
 
 %token <val>         PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL
-%token <val>         BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA
+%token <val>         BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA START
 %token <val>         INF SUP INF_OU_EGAL SUP_OU_EGAL
 %token <val>         ENTIER
 %token <valf>        VALF
@@ -146,7 +146,18 @@ listeInstr:     une_instr listeInstr
                 | une_instr
                 ;
 
-une_instr:      MOINS expr DONNE action PVIRGULE
+une_instr:      START DONNE action PVIRGULE
+                {{ int taille;
+                   char *instr;
+                   taille = strlen($3->alors)+20;
+                   instr = New_chaine( taille );
+                   g_snprintf( instr, taille, "if(start) { %s }\n", $2, $3->alors );
+
+                   Emettre( instr ); g_free(instr);
+                   if ($3->sinon) g_free($3->sinon); 
+                   g_free($3->alors); g_free($3);
+                }}
+                | MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
                    taille = strlen($2)+strlen($4->alors)+11;
@@ -577,7 +588,7 @@ une_option:     ID EGAL ENTIER
     erreur=0;
     rc = fopen(source, "r");
     if (rc)
-     { Emettre(" #include <Module_dls.h>\n void Go ( void )\n {\n");
+     { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
        Dls_restart(rc);
        retour = Dls_parse();
        Emettre(" }\n");

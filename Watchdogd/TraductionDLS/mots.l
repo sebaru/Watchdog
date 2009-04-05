@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/TraductionDLS/mots.l        Définitions des mots DLS                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:33:10 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 19:53:34 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -76,8 +76,11 @@ blanc         [\t ]+
 "_CH"                       { Dls_lval.val = CPT_H;
                              return CPT_H;
                            }
-"_MSG"                      { Dls_lval.val = MSG;
+"_MSG"                     { Dls_lval.val = MSG;
                              return MSG;
+                           }
+"_START"                   { Dls_lval.val = START;
+                             return START;
                            }
 
  /***************************************** Methodes speciales ********************************************/

@@ -1,9 +1,31 @@
 /**********************************************************************************************************/
 /* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 31 jui 2003 10:42:38 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 19:54:47 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * plugins.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ 
  #include <glib.h>
  #include <string.h>
  #include <stdio.h>
@@ -26,7 +48,7 @@
  static gboolean Charger_un_plugin ( gint id, gint on )
   { struct PLUGIN_DLS_DL *plugin;
     gchar nom_fichier_absolu[80];
-    void (*Go)(void);
+    void (*Go)(int);
     void *handle;
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, id );
@@ -54,6 +76,7 @@
     plugin->go      = Go;
     plugin->actif   = on;
     plugin->id      = id;
+    plugin->start   = 1;
     Plugins = g_list_append( Plugins, plugin );
     return(TRUE);
   }
@@ -130,6 +153,7 @@
         { Info_n( Config.log, DEBUG_INFO, "DLS: Activer_plugins: plugin", plugin->id );
           Info_c( Config.log, DEBUG_INFO, "                            " ,(actif ? "enable" : "disable") );
           plugin->actif = actif;
+          plugin->start = 1;
           break;
         }
        plugins = plugins->next;

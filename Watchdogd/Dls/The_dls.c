@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 11 mar 2007 14:56:27 CET  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 19:54:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -462,10 +462,11 @@ Info( Config.log, DEBUG_DLS, "dls: plugin reset fin" );
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
              pthread_mutex_lock( &Partage->com_dls_rs.synchro );
-             plugin_actuel->go();                                                   /* On appel le plugin */
+             plugin_actuel->go( plugin_actuel->start );                             /* On appel le plugin */
              pthread_mutex_unlock( &Partage->com_dls_rs.synchro );
              gettimeofday( &tv_apres, NULL );
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
+             plugin_actuel->start = 0;
            }
           plugins = plugins->next;
         }

@@ -10,8 +10,9 @@
  struct PLUGIN_DLS_DL
   { gchar nom_fichier[60];                                                              /* Nom du fichier */
     gint actif;
+    gint start;                     /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     void *handle;                                                          /* Handle du fichier librairie */
-    void (*go)(void);                                                 /* Fonction de traitement du module */
+    void (*go)(int);                                                  /* Fonction de traitement du module */
     float conso;                                                     /* Consommation temporelle du plugin */
     gint id;                                                                      /* Numero du plugin DLS */
   };

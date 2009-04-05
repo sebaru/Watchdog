@@ -7,8 +7,6 @@
  #ifndef _MODULE_DLS_H_
  #define _MODULE_DLS_H_
 
- extern char *TRdetail( int num ); /* bidouille a virer */
-
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );
