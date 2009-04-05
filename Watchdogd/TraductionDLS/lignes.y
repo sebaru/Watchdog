@@ -146,16 +146,16 @@ listeInstr:     une_instr listeInstr
                 | une_instr
                 ;
 
-une_instr:      START DONNE action PVIRGULE
+une_instr:      MOINS START DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
-                   taille = strlen($3->alors)+20;
+                   taille = strlen($4->alors)+20;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(start) { %s }\n", $2, $3->alors );
+                   g_snprintf( instr, taille, "if(start) { %s }\n", $4->alors );
 
                    Emettre( instr ); g_free(instr);
-                   if ($3->sinon) g_free($3->sinon); 
-                   g_free($3->alors); g_free($3);
+                   if ($4->sinon) g_free($4->sinon); 
+                   g_free($4->alors); g_free($4);
                 }}
                 | MOINS expr DONNE action PVIRGULE
                 {{ int taille;
