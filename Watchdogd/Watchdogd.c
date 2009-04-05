@@ -511,9 +511,11 @@
      { Info( Config.log, DEBUG_MEM, _("Shared memory failed to allocate") ); }
     else
      { gint i;
-
+printf("test 1\n");
        memset( &Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
+printf("test 2\n");
        Importer();                                  /* Tente d'importer les données juste après un reload */
+printf("test 3\n");
 
        memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
