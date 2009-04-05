@@ -421,9 +421,9 @@
   { int fd;
     unlink ( FICHIER_EXPORT );
     fd = open( FICHIER_EXPORT, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR );
-    if (fd) { write (fd, Partage, sizeof(struct PARTAGE) );
-              Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
-            }
+    if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
+                Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
+              }
     close (fd);
   }
 /**********************************************************************************************************/
@@ -434,10 +434,10 @@
  static void Importer ( void )
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
-    if (fd) { read (fd, Partage, sizeof(struct PARTAGE) );
-              Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
-              unlink ( FICHIER_EXPORT );
-            }
+    if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
+                Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
+                unlink ( FICHIER_EXPORT );
+              }
     close (fd);
   }
 /**********************************************************************************************************/
@@ -496,18 +496,6 @@
 
     Info( Config.log, DEBUG_INFO, _("Start") );
     Print_config( &Config );
-     { char *ptr;
-       int cpt;
-       for (cpt = 0; cpt < argc; cpt++)
-        { Info_c( Config.log, DEBUG_INFO, "Argv = ", argv[cpt] ); }
-       cpt = 0;
-       ptr = envp[0];
-       while (ptr)
-        { Info_c( Config.log, DEBUG_INFO, "Envp = ", ptr );
-          cpt++;
-          ptr = envp[cpt];
-        }
-     }
 
     if ( ! Activer_ecoute_admin() )            
      { Info( Config.log, DEBUG_INFO, _("FIFO_Admin down, Local Admin disabled") ); }
