@@ -33,6 +33,7 @@
  #define FICHIER_CLEF_SEC_RSA        "watchdogd.sec.rsa" 
  #define FICHIER_FIFO_ADMIN_READ     "admin.fifo.read"
  #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
+ #define FICHIER_EXPORT              "export.wdg"
 
  enum
   { TYPE_INFO_VIDE,                                                     /* Le fils a traité l'information */ 

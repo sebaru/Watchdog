@@ -413,6 +413,34 @@
     return(fg);
   }
 /**********************************************************************************************************/
+/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
+/* Entrée: rien                                                                                     */
+/* Sortie: rien                                                                          */
+/**********************************************************************************************************/
+ static void Exporter ( void )
+  { int fd;
+    unlink ( FICHIER_EXPORT );
+    fd = open( FICHIER_EXPORT, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR );
+    if (fd) { write (fd, Partage, sizeof(struct PARTAGE) );
+              Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
+            }
+    close (fd);
+  }
+/**********************************************************************************************************/
+/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
+/* Entrée: rien                                                                                     */
+/* Sortie: rien                                                                          */
+/**********************************************************************************************************/
+ static void Importer ( void )
+  { int fd;
+    fd = open( FICHIER_EXPORT, O_RDONLY );
+    if (fd) { read (fd, Partage, sizeof(struct PARTAGE) );
+              Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
+              unlink ( FICHIER_EXPORT );
+            }
+    close (fd);
+  }
+/**********************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                          */
 /* Entrée: argc, argv                                                                                     */
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
@@ -496,18 +524,15 @@
     else
      { gint i;
 
+       memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
+       Importer();                                  /* Tente d'importer les données juste après un reload */
+
+       memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
+       memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
        Partage->Arret            = 0;                     /* On n'arrete pas tout de suite le serveur ;-) */
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        Partage->top              = 0;
        Partage->top_cdg_plugin_dls = 0;
-
-       memset( Partage->m, 0, sizeof(Partage->m) );                              /* RAZ des bits internes */
-       memset( Partage->ea, 0, sizeof(Partage->ea) );
-       memset( Partage->i, 0, sizeof(Partage->i) );
-       memset( Partage->b, 0, sizeof(Partage->b) );
-       memset( Partage->e, 0, sizeof(Partage->e) );
-       memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
-       memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
        
        for (i=0; i<Config.max_serveur; i++)
         { Partage->Sous_serveur[i].pid = -1;
@@ -608,6 +633,7 @@ encore:
     if (Partage->Arret == RELOAD)
      { gint pid;
        Info( Config.log, DEBUG_INFO, _("Reloading ...") );
+       Exporter();                                           /* Tente d'exporter les données avant reload */
        pid = fork();
        if (pid<0) { Info( Config.log, DEBUG_INFO, _("Fork Failed on reload") );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
