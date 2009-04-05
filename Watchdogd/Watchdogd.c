@@ -428,18 +428,20 @@
     close (fd);
   }
 /**********************************************************************************************************/
-/* Importet : Tente d'importer les données de base Watchdog juste apres le reload                         */
+/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Importer ( void )
+ static gint Importer ( void )
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
                 Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
                 unlink ( FICHIER_EXPORT );
+                close (fd);
+                return(1);
               }
-    close (fd);
+    return(0);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                          */
@@ -511,10 +513,11 @@
     if (!Partage)
      { Info( Config.log, DEBUG_MEM, _("Shared memory failed to allocate") ); }
     else
-     { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
+     { gint import;
+       pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        gint i;
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
-       Importer();                                  /* Tente d'importer les données juste après un reload */
+       import = Importer();                         /* Tente d'importer les données juste après un reload */
 
        memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
@@ -563,10 +566,12 @@ encore:
           Charger_scenario( Db_watchdog );
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
 
-          Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
-          Clear_histoDB ( Config.log, Db_watchdog );                   /* Clear de la table histo au boot */
-          Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
-          
+          if (!import)
+           { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
+             Clear_histoDB ( Config.log, Db_watchdog );                   /* Clear de la table histo au boot */
+             Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
+           } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
+
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
           Charger_cpth( Db_watchdog );
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
