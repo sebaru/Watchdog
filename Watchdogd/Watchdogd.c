@@ -512,7 +512,7 @@
     else
      { gint i;
 printf("test 1\n");
-       memset( &Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
+       memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
 printf("test 2\n");
        Importer();                                  /* Tente d'importer les données juste après un reload */
 printf("test 3\n");
