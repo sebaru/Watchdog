@@ -510,12 +510,10 @@
     if (!Partage)
      { Info( Config.log, DEBUG_MEM, _("Shared memory failed to allocate") ); }
     else
-     { gint i;
-printf("test 1\n");
+     { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
+       gint i;
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
-printf("test 2\n");
        Importer();                                  /* Tente d'importer les données juste après un reload */
-printf("test 3\n");
 
        memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
@@ -523,14 +521,15 @@ printf("test 3\n");
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        Partage->top              = 0;
        Partage->top_cdg_plugin_dls = 0;
+printf("test 3\n");
        
        for (i=0; i<Config.max_serveur; i++)
         { Partage->Sous_serveur[i].pid = -1;
           Partage->Sous_serveur[i].nb_client = -1;
           Partage->Sous_serveur[i].type_info = TYPE_INFO_VIDE;                    /* Pas d'info à traiter */
         }
+printf("test 4\n");
 
-       pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_dls_rs.synchro, &attr );
@@ -552,6 +551,7 @@ printf("test 3\n");
 encore:   
        Db_watchdog = ConnexionDB( Config.log, Config.db_name,        /* Connexion en tant que user normal */
                                   Config.db_admin_username, Config.db_password );
+printf("test 5\n");
  
        if (!Db_watchdog)
         { Info_c( Config.log, DEBUG_DB, _("Pb acces DB: Unable to open database (dsn)"), Config.db_name ); }
