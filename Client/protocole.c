@@ -70,8 +70,10 @@
                       gtk_widget_show_all(dialog);
                       Deconnecter();
                       Log ( _("Disconnected by server shutdown") );
+                      break;
                     }
-               break;
+               default : printf("recu SSTAG %d\n", Reseau_ss_tag ( connexion ) );
+                         break;
              }
             break;
      }

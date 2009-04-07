@@ -139,7 +139,7 @@ one_again:
 /* Deconnecter: libere la mémoire et deconnecte le client                                                 */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static void Deconnecter_sale ( void )
+ void Deconnecter_sale ( void )
   { Fermer_connexion(Connexion);
     Connexion = NULL;
     Log ( _("Disconnected") );
