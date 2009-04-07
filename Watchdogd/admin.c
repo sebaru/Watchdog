@@ -312,17 +312,22 @@
        if ( ! strcmp ( commande, "ping" ) )
         { Write_admin ( Socket_write, " Pong !\n" );
         } else
-       if ( ! strcmp ( commande, "shutdown" ) )
+       if ( ! strcmp ( commande, "SHUTDOWN" ) )
         { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : SHUTDOWN demandé" );
           Write_admin ( Socket_write, "SHUTDOWN in progress\n" );
           Partage->Arret = FIN;
         } else
-       if ( ! strcmp ( commande, "restart" ) )
-        { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : RESTART demandé" );
-          Write_admin ( Socket_write, "RESTART in progress\n" );
-          Partage->Arret = RESTART;
+       if ( ! strcmp ( commande, "REBOOT" ) )
+        { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : REBOOT demandé" );
+          Write_admin ( Socket_write, "REBOOT in progress\n" );
+          Partage->Arret = REBOOT;
         } else
-       if ( ! strcmp ( commande, "reload" ) )
+       if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
+        { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : CLEAR-REBOOT demandé" );
+          Write_admin ( Socket_write, "CLEAR-REBOOT in progress\n" );
+          Partage->Arret = CLEARREBOOT;
+        } else
+       if ( ! strcmp ( commande, "RELOAD" ) )
         { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : RELOAD demandé" );
           Write_admin ( Socket_write, "RELOAD in progress\n" );
           Partage->Arret = RELOAD;
@@ -349,9 +354,10 @@
           Write_admin ( Socket_write, "  ping                 - Ping Watchdog\n" );
           Write_admin ( Socket_write, "  help                 - This help\n" );
           Write_admin ( Socket_write, "  -- Watchdog ADMIN -- Use with CAUTION\n" );
-          Write_admin ( Socket_write, "  restart              - Restart processes\n" );
-          Write_admin ( Socket_write, "  reload               - Shutdown and Restart processes\n" );
-          Write_admin ( Socket_write, "  shutdown             - Stop processes\n" );
+          Write_admin ( Socket_write, "  RELOAD               - Reload configuration\n" );
+          Write_admin ( Socket_write, "  REBOOT               - Restart all processes\n" );
+          Write_admin ( Socket_write, "  CLEAR-REBOOT         - Restart all processes with no DATA import/expot\n" );
+          Write_admin ( Socket_write, "  SHUTDOWN             - Stop processes\n" );
         } else
        if ( ! strcmp ( commande, "nocde" ) )
         { 

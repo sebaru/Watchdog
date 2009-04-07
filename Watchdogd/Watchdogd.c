@@ -112,8 +112,8 @@
                        Partage->com_arch.sigusr1 = TRUE;          
                      }
                      break;
-       case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Restarting THREAD in progress" );
-                     Partage->Arret = RESTART;
+       case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
+                     Partage->Arret = RELOAD;
                      break;
        default: Info_n( Config.log, DEBUG_INFO, "Recu signal", num ); break;
      }
@@ -607,7 +607,7 @@ encore:
            }
          }
 
-       if (Partage->Arret == RESTART)
+       if (Partage->Arret == RELOAD)
         { Lire_config( &Config, NULL );                     /* Lecture sur le fichier /etc/watchdogd.conf */
           Partage->Arret = TOURNE;
           goto encore;
@@ -624,21 +624,21 @@ encore:
     Desactiver_ecoute_admin();
     if (Config.rsa) RSA_free( Config.rsa );
 
-    if (Partage->Arret == RELOAD)
+    if (Partage->Arret != CLEARREBOOT) Exporter();           /* Tente d'exporter les données avant reload */
+    if (Partage->Arret == REBOOT)
      { gint pid;
-       Info( Config.log, DEBUG_INFO, _("Reloading ...") );
-       Exporter();                                           /* Tente d'exporter les données avant reload */
+       Info( Config.log, DEBUG_INFO, _("Rebooting ...") );
        pid = fork();
-       if (pid<0) { Info( Config.log, DEBUG_INFO, _("Fork Failed on reload") );
+       if (pid<0) { Info( Config.log, DEBUG_INFO, _("Fork Failed on reboot") );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
        if (pid>0)
         { Shm_stop( Partage );                                             /* Libération mémoire partagée */
           exit(EXIT_OK);                                                               /* On kill le père */
         }
-       Info_c( Config.log, DEBUG_INFO, _("Reloading in progress"), argv[0] );
+       Info_c( Config.log, DEBUG_INFO, _("Rebooting in progress"), argv[0] );
        sleep(5);
        execvp ( argv[0], argv );
-       Info_c( Config.log, DEBUG_INFO, _("Reloading ERROR !"), strerror(errno) );
+       Info_c( Config.log, DEBUG_INFO, _("Rebooting ERROR !"), strerror(errno) );
        exit(EXIT_ERREUR);
      }
 

@@ -17,8 +17,9 @@
  enum
   { TOURNE,
     FIN,                                                                            /* Arret des serveurs */
-    RESTART,                                                                      /* Relance des serveurs */
-    RELOAD,                                                     /* Déchargement librairies + Rechargement */
+    RELOAD,                                              /* Déchargement librairies/Config + Rechargement */
+    REBOOT,                                                                       /* Relance des serveurs */
+    CLEARREBOOT,                                                       /* Relance sans import des données */
   };
  
  #define EXIT_ERREUR       -1                                               /* Sortie sur erreur inconnue */
