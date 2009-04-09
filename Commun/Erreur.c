@@ -69,7 +69,7 @@
 /* Entrée: Le niveau de debuggage, et le texte a afficher                                                 */
 /**********************************************************************************************************/
  void Info( struct LOG *log, guint niveau, gchar *texte )
-  { gchar *nom;
+  { gchar nom[20];
     if (!log) return;
 
     prctl( PR_GET_NAME, &nom, 0, 0, 0);
