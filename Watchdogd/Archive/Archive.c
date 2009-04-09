@@ -80,7 +80,7 @@
 /**********************************************************************************************************/
  void Run_arch ( void )
   { guint top;
-    prctl(PR_SET_NAME, "Watchdogd-Arch", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "ARCH: demarrage" );
 

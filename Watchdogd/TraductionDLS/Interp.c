@@ -409,7 +409,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
   { gchar source[80], source_ok[80], cible[80], log[80];
     gboolean retour;
 
-    prctl(PR_SET_NAME, "Watchdogd-T.DLS", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
     g_snprintf( source,    sizeof(source),    "%d.dls.new", id );
     g_snprintf( source_ok, sizeof(source_ok), "%d.dls", id );
     g_snprintf( cible,     sizeof(cible),     "%d.c",   id );

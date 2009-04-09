@@ -526,7 +526,7 @@
  void Run_modbus ( void )
   { guint id_en_cours;
 
-    prctl(PR_SET_NAME, "Watchdogd-MODBUS", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
 
     if ( Nbr_borne() == 0 )
