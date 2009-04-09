@@ -36,6 +36,7 @@
  #include <openssl/ssl.h>
  #include <openssl/rand.h>
  #include <sys/socket.h>
+ #include <sys/prctl.h>
  #include <netinet/tcp.h>
  #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
  #include <arpa/inet.h>
@@ -200,6 +201,10 @@
     guint taille_distant, id;
     struct CLIENT *client;
     struct hostent *host;
+    gchar nom[16];
+
+    g_snprintf(nom, sizeof(nom), "Watchdogd-SRV%d", ss_id );
+    prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
     if (!Socket_ecoute)                       /* Si la connexion n'est pas activée, on ne peut rien faire */
      { Info_n( Config.log, DEBUG_CONNEXION, "SSRV: Accueillir_nouveaux_client: Socket_ecoute=NULL -> return", id );

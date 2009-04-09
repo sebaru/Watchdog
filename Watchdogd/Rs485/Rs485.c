@@ -31,6 +31,7 @@
  #include <sys/types.h>
  #include <sys/time.h>
  #include <sys/stat.h>
+ #include <sys/prctl.h>
  #include <termios.h>
  #include <unistd.h>
  #include <string.h>
@@ -271,6 +272,7 @@
     struct timeval tv;
     fd_set fdselect;
 
+    prctl(PR_SET_NAME, "Watchdogd-RS485", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "RS485: demarrage" );
 
     for (cpt=0; cpt<NBR_ID_RS485; cpt++)

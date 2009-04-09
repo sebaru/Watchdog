@@ -28,6 +28,7 @@
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
+ #include <sys/prctl.h>
  #include <fcntl.h>
  #include <stdio.h>
  #include <unistd.h>
@@ -408,6 +409,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
   { gchar source[80], source_ok[80], cible[80], log[80];
     gboolean retour;
 
+    prctl(PR_SET_NAME, "Watchdogd-TradDLS", 0, 0, 0 );
     g_snprintf( source,    sizeof(source),    "%d.dls.new", id );
     g_snprintf( source_ok, sizeof(source_ok), "%d.dls", id );
     g_snprintf( cible,     sizeof(cible),     "%d.c",   id );

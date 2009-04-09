@@ -34,6 +34,7 @@
  #include <unistd.h>
  #include <stdlib.h>
  #include <sys/time.h>
+ #include <sys/prctl.h>
  #include <semaphore.h>
 
  #include "Erreur.h"
@@ -378,6 +379,7 @@ if (num<8) printf("Update EA%d = %d, inrange=%d\n", num, val_int, inrange );
     gint Update_heure=0;
     GList *plugins;
 
+    prctl(PR_SET_NAME, "Watchdogd-DLS", 0, 0, 0 );
     timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                   /* Tous les 100 millisecondes */
     timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                /* = 10 fois par secondes */
     setitimer( ITIMER_REAL, &timer, NULL );                                            /* Active le timer */

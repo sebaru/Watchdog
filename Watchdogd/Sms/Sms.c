@@ -3,9 +3,32 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 16 avr 2006 19:00:46 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * Sms.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <sys/time.h>
+ #include <sys/prctl.h>
  #include <string.h>
  #include <unistd.h>
  #include <gnokii.h>
@@ -59,6 +82,7 @@
     static gn_sms sms;
     static gint sms_index;
 
+    prctl(PR_SET_NAME, "Watchdogd-SMS", 0, 0, 0 );
     Info ( Config.log, DEBUG_INFO, "SMS: Run_sms: Demarrage" );
 
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                  /* Read config file */

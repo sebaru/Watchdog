@@ -10,6 +10,7 @@
  #include <sys/types.h>
  #include <sys/time.h>
  #include <sys/stat.h>
+ #include <sys/prctl.h>
  #include <termios.h>
  #include <unistd.h>
  #include <string.h>
@@ -525,6 +526,7 @@
  void Run_modbus ( void )
   { guint id_en_cours;
 
+    prctl(PR_SET_NAME, "Watchdogd-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
 
     if ( Nbr_borne() == 0 )
