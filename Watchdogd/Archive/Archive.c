@@ -105,7 +105,7 @@
 
        if (!Partage->com_arch.liste_arch)                                 /* Si pas de message, on tourne */
         { sched_yield();
-          usleep(1000);
+          usleep(10000);
           continue;
         }
 

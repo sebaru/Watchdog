@@ -203,7 +203,7 @@
     struct hostent *host;
     gchar nom[16];
 
-    g_snprintf(nom, sizeof(nom), "Watchdogd-SRV%d", ss_id );
+    g_snprintf(nom, sizeof(nom), "Watchdogd-SRV%03d", ss_id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
     if (!Socket_ecoute)                       /* Si la connexion n'est pas activée, on ne peut rien faire */
