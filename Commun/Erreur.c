@@ -74,7 +74,7 @@
 
     prctl( PR_GET_NAME, &nom, 0, 0, 0);
     if ( log->debug_level & niveau )
-     { syslog( LOG_INFO, "%s %d -> %s\n", niveau, texte );
+     { syslog( LOG_INFO, "%s %d -> %s\n", nom, niveau, texte );
      }
   }
 
