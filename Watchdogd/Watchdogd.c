@@ -30,6 +30,7 @@
  #include <bonobo/bonobo-i18n.h>
  #include <openssl/ssl.h>
  #include <openssl/err.h>
+ #include <sys/prctl.h>
  #include <string.h>
  #include <stdio.h>  /* Pour printf */
  #include <stdlib.h> /* Pour exit */
@@ -236,6 +237,7 @@
     gint cpth_prochain_save_db;
     gint scenario_test_date;
 
+    prctl(PR_SET_NAME, "Watchdogd-MSRV", 0, 0, 0 );
     Info( Config.log, DEBUG_INFO, _("MSRV: Boucle_pere: Debut boucle sans fin") );
     Db_watchdog = ConnexionDB( Config.log, Config.db_name,        /* Connexion en tant que user normal */
                                Config.db_admin_username, Config.db_password );
