@@ -1,8 +1,29 @@
 /**********************************************************************************************************/
 /* Commun/Erreur.c        Gestion des logs systemes                                                       */
-/* Projet WatchDog version 1.7       Gestion d'habitat                      lun 02 jun 2003 14:13:50 CEST */
+/* Projet WatchDog version 1.7       Gestion d'habitat                      jeu 09 avr 2009 22:08:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * Erreur.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
 
  #include <glib.h>
  #include <stdio.h>
@@ -11,6 +32,7 @@
  #include <syslog.h>
  #include <string.h>
  #include <time.h>
+ #include <sys/prctl.h>
 
  #include "Erreur.h"
 
@@ -47,10 +69,12 @@
 /* Entrée: Le niveau de debuggage, et le texte a afficher                                                 */
 /**********************************************************************************************************/
  void Info( struct LOG *log, guint niveau, gchar *texte )
-  { if (!log) return;
+  { gchar *nom;
+    if (!log) return;
 
+    prctl( PR_GET_NAME, &nom, 0, 0, 0);
     if ( log->debug_level & niveau )
-     { syslog( LOG_INFO, "type %d -> %s\n", niveau, texte );
+     { syslog( LOG_INFO, "%s %d -> %s\n", niveau, texte );
      }
   }
 
