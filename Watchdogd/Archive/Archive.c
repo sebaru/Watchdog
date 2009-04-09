@@ -27,6 +27,7 @@
 
  #include <glib.h>
  #include <sys/time.h>
+ #include <sys/prctl.h>
  #include <unistd.h>
 
  #include "Erreur.h"
@@ -79,6 +80,8 @@
 /**********************************************************************************************************/
  void Run_arch ( void )
   { guint top;
+    prctl(PR_SET_NAME, "Watchdogd-Arch", 0, 0, 0 );
+
     Info( Config.log, DEBUG_FORK, "ARCH: demarrage" );
 
     sleep(5);                                                      /* A l'init, nous attendons 5 secondes */
@@ -100,14 +103,6 @@
           Info( Config.log, DEBUG_INFO, "ARCH: Run_arch: SIGUSR1" );
         }
 
-#ifdef bouh
- 24/02/2009
-       if (top + 100 < Partage->top )                                          /* Toutes les 10 secondes ! */
-        { Archiver_temporel();
-          top = Partage->top;
-        }
-#endif
-
        if (!Partage->com_arch.liste_arch)                                 /* Si pas de message, on tourne */
         { sched_yield();
           usleep(1000);
@@ -117,8 +112,10 @@
        pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
        Partage->com_arch.liste_arch = g_list_remove ( Partage->com_arch.liste_arch, arch );
+#ifdef DEBUG
        Info_n( Config.log, DEBUG_INFO, "ARCH: Run_arch: Reste a traiter",
                                        g_list_length(Partage->com_arch.liste_arch) );
+#endif
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
        Ajouter_archDB ( Config.log, Db_watchdog, arch );
