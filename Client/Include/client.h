@@ -13,7 +13,6 @@
  #include "Config_cli.h"
 
  #define PROGRAMME          "Watchdog-client"
- #define VERSION            "2.3.2"
 
  #define EXIT_ERREUR       -1                                               /* Sortie sur erreur inconnue */
  #define EXIT_OK           0                                                            /* Sortie normale */
