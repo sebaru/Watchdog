@@ -321,19 +321,18 @@ if (num<8) printf("Update EA%d = %d, inrange=%d\n", num, val_int, inrange );
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
-  { gint numero, bit, test, nbr;
+  { gint numero, bit, nbr;
 
     if ( num>=NBR_MESSAGE_ECRITS ) return;
     numero = num>>3;
     bit = 1<<(num & 0x07);
-    test = 0;
     if (etat)
      { if (Partage->g[numero] & bit) return;
        Partage->g[numero] |= bit;
 
        pthread_mutex_lock( &Partage->com_dls_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
        nbr = g_list_length(Partage->com_dls_msrv.liste_msg_on);
-       if ( nbr < 100 && ! g_list_find( Partage->com_dls_msrv.liste_msg_on, GINT_TO_POINTER(num) ) )
+       if ( nbr < 200 && ! g_list_find( Partage->com_dls_msrv.liste_msg_on, GINT_TO_POINTER(num) ) )
         { Partage->com_dls_msrv.liste_msg_on = g_list_append( Partage->com_dls_msrv.liste_msg_on,
                                                               GINT_TO_POINTER(num) );
         }
@@ -345,7 +344,7 @@ if (num<8) printf("Update EA%d = %d, inrange=%d\n", num, val_int, inrange );
 
        pthread_mutex_lock( &Partage->com_dls_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
        nbr = g_list_length(Partage->com_dls_msrv.liste_msg_off);
-       if ( nbr < 100 && ! g_list_find( Partage->com_dls_msrv.liste_msg_off, GINT_TO_POINTER(num) ) )
+       if ( nbr < 200 && ! g_list_find( Partage->com_dls_msrv.liste_msg_off, GINT_TO_POINTER(num) ) )
         { Partage->com_dls_msrv.liste_msg_off = g_list_append( Partage->com_dls_msrv.liste_msg_off,
                                                                GINT_TO_POINTER(num) );
         }

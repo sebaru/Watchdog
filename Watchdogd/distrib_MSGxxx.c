@@ -3,6 +3,28 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       jeu 22 jan 2009 20:01:50 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * distrib_MSGxxx.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
@@ -83,7 +105,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog )
-  { gint i, num, on;
+  { gint i, num, etat;
 
     if (! (Partage->com_dls_msrv.liste_msg_on  ||
            Partage->com_dls_msrv.liste_msg_off)
@@ -92,7 +114,7 @@
     pthread_mutex_lock( &Partage->com_dls_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
     if (Partage->com_dls_msrv.liste_msg_off)
      { num = GPOINTER_TO_INT(Partage->com_dls_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
-       on  = FALSE;
+       etat  = FALSE;
        Partage->com_dls_msrv.liste_msg_off = g_list_remove ( Partage->com_dls_msrv.liste_msg_off,
                                                              GINT_TO_POINTER(num) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter OFF",
@@ -100,7 +122,7 @@
      }
     else
      { num = GPOINTER_TO_INT(Partage->com_dls_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
-       on  = TRUE;
+       etat  = TRUE;
        Partage->com_dls_msrv.liste_msg_on = g_list_remove ( Partage->com_dls_msrv.liste_msg_on,
                                                             GINT_TO_POINTER(num) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter ON",
@@ -110,7 +132,7 @@
 
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Recu message DLS", num );
 
-    if (on)                                                           /* Le message est une apparition ?? */
+    if (etat)                                                         /* Le message est une apparition ?? */
      { Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
      }
     else                                                   /* Le message doit disparaitre de l'historique */
@@ -121,7 +143,7 @@
      { if (Partage->Sous_serveur[i].pid == -1 || 
            Partage->Sous_serveur[i].nb_client == 0)
            continue;                                                               /* Si offline, on swap */
-       Partage->Sous_serveur[i].type_info = (on ? TYPE_INFO_NEW_HISTO : TYPE_INFO_DEL_HISTO);
+       Partage->Sous_serveur[i].type_info = (etat ? TYPE_INFO_NEW_HISTO : TYPE_INFO_DEL_HISTO);
      }
     for (i=0; i<Config.max_serveur; i++)                              /* Attente traitement info par fils */
      { if (Partage->Sous_serveur[i].pid == -1 || 
@@ -129,5 +151,6 @@
            continue;                                                               /* Si offline, on swap */
        while(Partage->Arret!=FIN && Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
      }
+    Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: traitement fini", num );
   }
 /*--------------------------------------------------------------------------------------------------------*/
