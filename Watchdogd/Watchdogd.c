@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- 
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <openssl/ssl.h>
@@ -423,7 +422,7 @@
  static void Exporter ( void )
   { int fd;
     unlink ( FICHIER_EXPORT );
-    fd = open( FICHIER_EXPORT, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR );
+    fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
                 Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
               }

@@ -132,7 +132,7 @@
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
-                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, "--stdout", NULL );
+                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
@@ -148,7 +148,7 @@
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar cible[80];
                 g_snprintf( cible, sizeof(nom_fichier), "%d.au", msg->id );
-                execlp( "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
+                execlp( "mbrola-linux-i386", "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement mbrola failed", pid );
                 _exit(0);
               }
