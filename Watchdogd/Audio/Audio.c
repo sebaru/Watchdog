@@ -29,7 +29,12 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <unistd.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/wait.h>
+ #include <fcntl.h>
 
+ #include "Message_DB.h"
  #include "Erreur.h"
  #include "Config.h"
  #include "proto_dls.h"
@@ -44,10 +49,7 @@
 /* Entrées: le numéro du message a prononcer                                                              */
 /**********************************************************************************************************/
  void Ajouter_audio( gint id )
-  {
-    struct timeval tv;
-    struct AUDIODB *audio;
-    gint taille;
+  { gint taille;
 
     pthread_mutex_lock( &Partage->com_audio.synchro );          /* Ajout dans la liste de audio a traiter */
     taille = g_list_length( Partage->com_audio.liste_audio );
@@ -66,7 +68,8 @@
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_audio ( void )
-  { guint num;
+  { guint id;
+    struct MSGDB *msg;
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "Audio: demarrage" );
@@ -82,9 +85,7 @@
      }
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { struct AUDIODB *audio;
-
-       if (Partage->com_audio.sigusr1)                                             /* On a recu sigusr1 ?? */
+     { if (Partage->com_audio.sigusr1)                                             /* On a recu sigusr1 ?? */
         { Partage->com_audio.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "AUDIO: Run_audio: SIGUSR1" );
         }
@@ -96,15 +97,46 @@
         }
 
        pthread_mutex_lock( &Partage->com_audio.synchro );                                /* lockage futex */
-       num = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
-       Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio, GINT_TO_POINTER(num) );
+       id = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
+       Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio, GINT_TO_POINTER(id) );
 #ifdef DEBUG
        Info_n( Config.log, DEBUG_INFO, "AUDIO: Run_audio: Reste a traiter",
                                        g_list_length(Partage->com_audio.liste_audio) );
 #endif
        pthread_mutex_unlock( &Partage->com_audio.synchro );
 
-       /* A programmer */
+       Info_n( Config.log, DEBUG_INFO, "AUDIO : Préparation du message id", id );
+
+       msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
+       if (msg)
+        { gchar nom_fichier[128];
+          gint fd;
+          g_snprintf( nom_fichier, sizeof(nom_fichier), "%05d.au", msg->id );
+          fd = open ( nom_fichier, O_RDONLY, 0 );
+
+          if (fd) { close(fd); }                  /* Si le fichier au existe, on ne le créé pas à nouveau */
+          else
+           { gint pid;
+
+             pid = fork();
+             if (pid<0)
+              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
+             else if (!pid)                                        /* Création du .au en passant par .pho */
+              { gchar texte[80], cible[80];
+
+                g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
+                g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );
+                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte,
+                        ">", cible, NULL );
+                Info( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed" );
+                _exit(0);
+              }
+
+             Info_n( Config.log, DEBUG_FORK, "AUDIO: waiting for espeak to finish pid", pid );
+             wait4(pid, NULL, 0, NULL );
+           }
+          g_free(msg);
+        }
      }
     DeconnexionDB( Config.log, &Db_watchdog );                                  /* Deconnexion de la base */
     Info_n( Config.log, DEBUG_FORK, "AUDIO: Run_audio: Down", pthread_self() );

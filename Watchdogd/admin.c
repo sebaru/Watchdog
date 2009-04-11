@@ -191,8 +191,7 @@
             }
         } else
        if ( ! strcmp ( commande, "mbus" ) )
-        { char chaine[128], nom[128];
-          int i;
+        { int i;
           for (i=0; i<NBR_ID_MODBUS; i++)
            { gchar chaine[256];
              Modbus_state( i, chaine, sizeof(chaine) );
@@ -265,6 +264,14 @@
           sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
           SA ( num, val );
           g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
+          Write_admin ( Socket_write, chaine );
+        } else
+       if ( ! strcmp ( commande, "tell" ) )
+        { char chaine[128];
+          int num;
+          sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+          Ajouter_audio ( num );
+          g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
           Write_admin ( Socket_write, chaine );
         } else
        if ( ! strcmp ( commande, "msgs" ) )
@@ -349,6 +356,7 @@
           Write_admin ( Socket_write, "  getb xxx             - Get Bxxx\n" );
           Write_admin ( Socket_write, "  setb xxx i           - Set Bxxx = i\n" );
           Write_admin ( Socket_write, "  seta xxx i           - Set Axxx = i\n" );
+          Write_admin ( Socket_write, "  tell message_id      - Envoi AUDIO id\n" );
           Write_admin ( Socket_write, "  msgs message         - Envoi d'un message a tous les clients\n" );
           Write_admin ( Socket_write, "  mbus                 - Affiche les status des equipements MODBUS\n" );
           Write_admin ( Socket_write, "  ping                 - Ping Watchdog\n" );
