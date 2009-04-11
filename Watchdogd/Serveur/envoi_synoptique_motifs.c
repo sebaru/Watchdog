@@ -87,6 +87,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
+    rezo_motif->gid = GID_TOUTLEMONDE;               /* Par défaut, tout le monde peut acceder a ce motif */
     id = Ajouter_motifDB ( Config.log, Db_watchdog, rezo_motif );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
