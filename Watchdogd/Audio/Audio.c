@@ -110,16 +110,16 @@
        msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
        if (msg)
         { gchar nom_fichier[128];
-          gint fd;
+          gint fd_cible;
 
           g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.au", msg->id );
-          fd = open ( nom_fichier, O_RDONLY, 0 );
-          if (fd>0)
+          fd_cible = open ( nom_fichier, O_RDONLY, 0 );
+          if (fd_cible>0)
            { Info_c( Config.log, DEBUG_INFO, "AUDIO : le .au existe deja", nom_fichier );
-             close(fd);
+             close(fd_cible);
            }                  /* Si le fichier au existe, on ne le créé pas à nouveau */
           else
-           { gint pid;
+           { gint pid, fd[2];
 
              Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
              pid = fork();
@@ -127,14 +127,17 @@
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar texte[80], cible[80];
-
-                g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
                 g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );
-                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, ">", cible,
-                        NULL );
+                fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+                dup2( fd_cible, 1 );
+                g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
+                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
+             close(fd[1]);                                                /* Fermeture du tube d'écriture */
+
+   /*             g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );*/
 
              Info_n( Config.log, DEBUG_FORK, "AUDIO: waiting for espeak to finish pid", pid );
              wait4(pid, NULL, 0, NULL );
