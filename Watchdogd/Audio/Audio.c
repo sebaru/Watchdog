@@ -109,20 +109,19 @@
 
        msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
        if (msg)
-        { gchar nom_fichier[128];
-          gint fd_cible;
+        { gchar nom_fichier[128], cible[128];
+          gint fd_cible, pid;
 
-          g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.au", msg->id );
-          fd_cible = open ( nom_fichier, O_RDONLY, 0 );
+          g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->id );
+          g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->id );
+          fd_cible = open ( cible, O_RDONLY, 0 );
           if (fd_cible>0)
            { Info_c( Config.log, DEBUG_INFO, "AUDIO : le .au existe deja", nom_fichier );
              close(fd_cible);
            }                  /* Si le fichier au existe, on ne le créé pas à nouveau */
           else
-           { gint pid;
-
+           { 
 /***************************************** Création du PHO ************************************************/
-             g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->id );
              Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
              pid = fork();
              if (pid<0)
@@ -146,9 +145,7 @@
              if (pid<0)
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
-              { gchar cible[80];
-                g_snprintf( cible, sizeof(nom_fichier), "%d.au", msg->id );
-                execlp( "mbrola-linux-i386", "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
+              { execlp( "mbrola-linux-i386", "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement mbrola failed", pid );
                 _exit(0);
               }
@@ -157,6 +154,20 @@
              Info_n( Config.log, DEBUG_FORK, "AUDIO: mbrola finished pid", pid );
 
            }
+/****************************************** Lancement de l'audio ******************************************/
+          Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de APLAY", id );
+          pid = fork();
+          if (pid<0)
+           { Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement APLAY failed", id ); }
+          else if (!pid)
+           { execlp( "aplay", "aplay", cible, NULL );
+             Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement APLAY failed", pid );
+             _exit(0);
+           }
+          Info_n( Config.log, DEBUG_FORK, "AUDIO: waiting for APLAY to finish pid", pid );
+          wait4(pid, NULL, 0, NULL );
+          Info_n( Config.log, DEBUG_FORK, "AUDIO: APLAY finished pid", pid );
+
           g_free(msg);
         }
      }
