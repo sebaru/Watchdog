@@ -130,7 +130,7 @@
                 Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
                 g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );
-                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte,
+                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, ">", cible,
                         NULL );
                 Info( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed" );
                 _exit(0);
