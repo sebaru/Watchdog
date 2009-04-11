@@ -119,15 +119,16 @@
              close(fd_cible);
            }                  /* Si le fichier au existe, on ne le créé pas à nouveau */
           else
-           { gint pid, fd[2];
+           { gint pid;
 
+/***************************************** Création du PHO ************************************************/
+             g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->id );
              Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
              pid = fork();
              if (pid<0)
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .pho failed", id ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
-              { gchar texte[80], cible[80];
-                g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->id );
+              { gchar texte[80];
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
@@ -135,13 +136,26 @@
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
-             close(fd[1]);                                                /* Fermeture du tube d'écriture */
-
-   /*             g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );*/
-
              Info_n( Config.log, DEBUG_FORK, "AUDIO: waiting for espeak to finish pid", pid );
              wait4(pid, NULL, 0, NULL );
              Info_n( Config.log, DEBUG_FORK, "AUDIO: espeak finished pid", pid );
+
+/****************************************** Création du AU ************************************************/
+             Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de MBROLA", id );
+             pid = fork();
+             if (pid<0)
+              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
+             else if (!pid)                                        /* Création du .au en passant par .pho */
+              { gchar cible[80];
+                g_snprintf( cible, sizeof(nom_fichier), "%d.au", msg->id );
+                execlp( "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
+                Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement mbrola failed", pid );
+                _exit(0);
+              }
+             Info_n( Config.log, DEBUG_FORK, "AUDIO: waiting for mbrola to finish pid", pid );
+             wait4(pid, NULL, 0, NULL );
+             Info_n( Config.log, DEBUG_FORK, "AUDIO: mbrola finished pid", pid );
+
            }
           g_free(msg);
         }
