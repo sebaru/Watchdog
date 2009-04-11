@@ -124,10 +124,10 @@
              Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
              pid = fork();
              if (pid<0)
-              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
+              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .pho failed", id ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar texte[80], cible[80];
-                g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );
+                g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->id );
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
