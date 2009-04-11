@@ -131,7 +131,7 @@
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
-                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, NULL );
+                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, "--stdout", NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
@@ -141,6 +141,7 @@
 
              Info_n( Config.log, DEBUG_FORK, "AUDIO: waiting for espeak to finish pid", pid );
              wait4(pid, NULL, 0, NULL );
+             Info_n( Config.log, DEBUG_FORK, "AUDIO: espeak finished pid", pid );
            }
           g_free(msg);
         }
