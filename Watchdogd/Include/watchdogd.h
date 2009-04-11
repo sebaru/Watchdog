@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/watchdogd.h      Déclarations générale watchdog                                              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       lun 15 mar 2004 17:09:35 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 
@@ -77,6 +77,12 @@
     gboolean sigusr1;
   };
 
+ struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
+  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *liste_audio;                                                   /* liste de message a prononcer */
+    gboolean sigusr1;
+  };
+
  struct COM_MSRV_SMS                                                   /* Communication entre MSRV et SMS */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_sms;                                              /* liste de struct MSGDB msg a envoyer */
@@ -146,6 +152,7 @@
     struct COM_MSRV_SMS com_msrv_sms;                                                    /* Comm msrv/sms */
     struct COM_SSRV_DLS com_ssrv_dls;                                         /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
+    struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
     struct SCENARIO_DB scenario [ NBR_SCENARIO ];

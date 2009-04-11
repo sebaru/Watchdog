@@ -111,6 +111,7 @@
                        Partage->com_msrv_sms.sigusr1 = TRUE;
                        Partage->com_modbus.sigusr1 = TRUE;
                        Partage->com_arch.sigusr1 = TRUE;          
+                       Partage->com_audio.sigusr1 = TRUE;          
                      }
                      break;
        case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
@@ -598,6 +599,9 @@ encore:
           else
           if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
+          else
+          if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
+           { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
           else
            { pthread_t TID;
 

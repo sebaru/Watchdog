@@ -1,8 +1,30 @@
 /**********************************************************************************************************/
 /* Watchdogd/process.c        Gestion des process                                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 22 jun 2004 16:17:15 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 11 avr 2009 12:21:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * process.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - sebastien
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <sys/wait.h>
@@ -21,6 +43,7 @@
  static pthread_t TID_rs485;                                      /* Le tid du rs485 en cours d'execution */
  static pthread_t TID_arch;                                        /* Le tid du ARCH en cours d'execution */
  static pthread_t TID_modbus;                                    /* Le tid du MODBUS en cours d'execution */
+ static pthread_t TID_audio;                                     /* Le tid du MODBUS en cours d'execution */
 
  extern int errno;
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -73,7 +96,8 @@
      { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_rs485: thread rs485 seems to be running", TID_rs485 ); }
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_rs485: thread rs485 seems to be running",
+                   TID_rs485 ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -91,7 +115,22 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_sms: Thread un process sms                                                                    */
+/* Demarrer_audio: Thread un process sms                                                                    */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_audio ( void )
+  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_audio: Demande de demarrage"), getpid() );
+    if (pthread_create( &TID_audio, NULL, (void *)Run_audio, NULL ))
+     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_audio: pthread_create failed") );
+       return(FALSE);
+     }
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_audio: thread audio seems to be running",
+                   TID_audio ); }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Demarrer_arch: Thread un process sms                                                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
@@ -115,7 +154,8 @@
      { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_modbus: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_modbus: thread modbus seems to be running", TID_arch ); }
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_modbus: thread modbus seems to be running",
+                   TID_arch ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -266,6 +306,10 @@
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), TID_arch );
     pthread_join( TID_arch, NULL );                                                   /* Attente fin ARCH */
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ARCH is down"), TID_arch );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
+    pthread_join( TID_audio, NULL );                                                   /* Attente fin ARCH */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
 
     for (i=0; i<Config.max_serveur; i++)                   /* Arret de tous les fils en cours d'execution */
      { if (Partage->Sous_serveur[i].pid != -1)                             /* Attente de la fin du fils i */

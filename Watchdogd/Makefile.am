@@ -3,7 +3,7 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config Db Serveur Dls TraductionDLS Rs485 Sms Archive Modbus
+SUBDIRS = Include Config Db Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -21,6 +21,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Sms/libsms.la \
 		    Archive/libarchive.la \
 		    Modbus/libmodbus.la \
+		    Audio/libaudio.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 Watchdogd_LDFLAGS = -lodbc -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS)

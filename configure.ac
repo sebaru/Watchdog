@@ -90,6 +90,7 @@ Client/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Sms/Makefile \
+Watchdogd/Audio/Makefile \
 Watchdogd/Rs485/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \

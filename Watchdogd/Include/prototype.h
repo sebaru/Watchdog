@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/prototype.h      Définition d'un client watchdog                                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 03 jun 2003 10:39:28 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 11 avr 2009 12:13:50 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 
@@ -35,6 +35,7 @@
  extern gboolean Demarrer_modbus ( void );
  extern gboolean Demarrer_sms ( void );
  extern gboolean Demarrer_arch ( void );
+ extern gboolean Demarrer_audio ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
 
@@ -58,6 +59,9 @@
 
  extern void Run_arch ( void );                                                         /* Dans Archive.c */
  extern void Ajouter_arch( gint type, gint num, gint etat );
+
+ extern void Run_audio ( void );                                                          /* Dans Audio.c */
+ extern void Ajouter_audio( gint id );
 
  extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
  #endif

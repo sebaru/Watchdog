@@ -57,8 +57,9 @@
     else if (msg->not_inhibe)                                /* Distribution du message aux sous serveurs */
      { struct HISTODB histo;
 
-/***************************************** Envoi de SMS le cas echeant ************************************/
+/***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
        if (msg->sms) Envoyer_sms ( msg->libelle );
+       if (msg->num_voc) Ajouter_audio ( msg->id );
 
 /***************************** Création de la structure interne de stockage *******************************/   
        gettimeofday( &tv, NULL );
