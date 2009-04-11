@@ -116,7 +116,7 @@
           g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->id );
           fd_cible = open ( cible, O_RDONLY, 0 );
           if (fd_cible>0)
-           { Info_c( Config.log, DEBUG_INFO, "AUDIO : le .au existe deja", nom_fichier );
+           { Info_c( Config.log, DEBUG_INFO, "AUDIO : le .au existe deja", cible );
              close(fd_cible);
            }                  /* Si le fichier au existe, on ne le créé pas à nouveau */
           else
