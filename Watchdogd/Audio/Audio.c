@@ -112,7 +112,7 @@
         { gchar nom_fichier[128];
           gint fd;
 
-          g_snprintf( nom_fichier, sizeof(nom_fichier), "%05d.au", msg->id );
+          g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.au", msg->id );
           fd = open ( nom_fichier, O_RDONLY, 0 );
           if (fd>0)
            { Info_c( Config.log, DEBUG_INFO, "AUDIO : le .au existe deja", nom_fichier );
@@ -121,18 +121,18 @@
           else
            { gint pid;
 
+             Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
              pid = fork();
              if (pid<0)
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar texte[80], cible[80];
 
-                Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
                 g_snprintf( cible,  sizeof(cible),  "%d.pho", msg->id );
                 execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, ">", cible,
                         NULL );
-                Info( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed" );
+                Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
 
