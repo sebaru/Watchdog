@@ -3,6 +3,9 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 31 jui 2003 09:37:12 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+#ifndef _RS485_H_
+ #define _RS485_H_
+
  #define FCT_IDENT      0x01
  #define FCT_ENTRE_TOR  0x02
  #define FCT_ENTRE_ANA  0x03
@@ -30,4 +33,9 @@
     unsigned char nbr_entre_choc;
     unsigned char nbr_sortie_tor;
   };
+
+/*********************************************** Déclaration des prototypes *******************************/
+ void Rs485_state ( int id, gchar *chaine, int size );
+
+#endif
 /*--------------------------------------------------------------------------------------------------------*/

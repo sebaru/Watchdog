@@ -264,6 +264,16 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
+/* Modbus_state : Renvoie l'etat du modbus num id en tant que chaine de caractere                         */
+/* Entrée : Le numéro du module et la chaine a remplir                                                    */
+/**********************************************************************************************************/
+ void Rs485_state ( int id, gchar *chaine, int size )
+  { g_snprintf( chaine, size,
+                " RS485[%02d] - Requete %d, Retente %d, Ana %d\n", id,
+                Comm_RS485[id].date_requete, Comm_RS485[id].date_retente,
+                Comm_RS485[id].date_ana );
+  }
+/**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_rs485 ( void )

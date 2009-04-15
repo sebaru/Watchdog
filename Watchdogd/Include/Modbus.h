@@ -73,8 +73,9 @@
     struct MODULE_MODBUS_BORNE borne[NBR_ID_MODBUS_BORNE];
   };
 
-#endif
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Modbus_state ( int id, gchar *chaine, int size );
 
+#endif
 /*--------------------------------------------------------------------------------------------------------*/
+

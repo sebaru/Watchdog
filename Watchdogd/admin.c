@@ -198,6 +198,14 @@
              Write_admin ( Socket_write, chaine );
            }
         } else
+       if ( ! strcmp ( commande, "rs" ) )
+        { int i;
+          for (i=0; i<NBR_ID_RS485; i++)
+           { gchar chaine[256];
+             Rs485_state( i, chaine, sizeof(chaine) );
+             Write_admin ( Socket_write, chaine );
+           }
+        } else
        if ( ! strcmp ( commande, "dlson" ) )
         { char chaine[20];
           int num;
@@ -359,6 +367,7 @@
           Write_admin ( Socket_write, "  tell message_id      - Envoi AUDIO id\n" );
           Write_admin ( Socket_write, "  msgs message         - Envoi d'un message a tous les clients\n" );
           Write_admin ( Socket_write, "  mbus                 - Affiche les status des equipements MODBUS\n" );
+          Write_admin ( Socket_write, "  rs                   - Affiche les status des equipements RS485\n" );
           Write_admin ( Socket_write, "  ping                 - Ping Watchdog\n" );
           Write_admin ( Socket_write, "  help                 - This help\n" );
           Write_admin ( Socket_write, "  -- Watchdog ADMIN -- Use with CAUTION\n" );
