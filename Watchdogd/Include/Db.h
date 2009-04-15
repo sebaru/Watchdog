@@ -26,6 +26,7 @@
     gchar db_password[ TAILLE_DB_PASSWORD + 1 ];
   };
 /************************************* Prototypes de fonctions ********************************************/
+ extern gchar *Init_db_watchdog( void );                                                 /* Dans initdb.c */
  extern SQLHSTMT NewQueryDB ( struct LOG *log, struct DB *db );
  extern void EndQueryDB ( struct LOG *log, struct DB *db, SQLHSTMT hquery );
  extern void PrintErrDB ( struct LOG *log, struct DB *db );

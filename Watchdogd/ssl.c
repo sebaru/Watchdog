@@ -17,7 +17,7 @@
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  SSL_CTX *Ssl_ctx;                                                 /* Contexte de cryptage des connexions */
 /******************************************** Prototypes de fonctions *************************************/
- #include "prototype.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Init_SSL: Initialisation de l'environnement SSL                                                        */

@@ -45,7 +45,6 @@
  #include "Config.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
  #include "proto_dls.h"                                                             /* Acces a A(x), E(x) */   
- #include "Module_DLS.h"                                                     /* Accès a SB(x), SA(x), ... */
  #include "Modbus.h"
 
  static struct COMM_MODBUS                                /* Etat de la connexion avec les modules MODBUS */

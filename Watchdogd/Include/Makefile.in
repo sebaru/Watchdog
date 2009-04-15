@@ -200,12 +200,12 @@ noinst_HEADERS = Db.h Message_DB.h Histo_DB.h \
 		    Icones_DB.h EntreeANA_DB.h ValANA_DB.h\
 		    Synoptiques_DB.h \
 		    Mnemonique_DB.h \
-                    Client.h prototype.h \
+                    Client.h \
 		    proto_dls.h \
 		    proto_srv.h \
 		    Proto_traductionDLS.h \
                     watchdogd.h Dls_DB.h \
-		    Rs485.h Cpth_DB.h \
+		    Rs485.h Sms.h Audio.h Cpth_DB.h \
                     Archive_DB.h proto_arch.h Modbus.h Scenario_DB.h
 
 include_HEADERS = Module_dls.h 

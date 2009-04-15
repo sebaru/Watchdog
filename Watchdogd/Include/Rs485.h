@@ -35,7 +35,8 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
- void Rs485_state ( int id, gchar *chaine, int size );
+ extern void Rs485_state ( int id, gchar *chaine, int size );
+ extern void Run_rs485 ( void );                                                          /* Dans Rs485.c */
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -11,7 +11,6 @@
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "prototype.h"                                                          /* Acces à Connecter_ssl */
  #include "proto_srv.h"
  #include "proto_dls.h"
 

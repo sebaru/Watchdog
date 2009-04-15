@@ -27,7 +27,6 @@
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
- #include "prototype.h"                                                               /* Acces à Traduire */
  #include "proto_srv.h"
 
 /**********************************************************************************************************/

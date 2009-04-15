@@ -17,7 +17,7 @@
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
- #include "prototype.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */

@@ -31,6 +31,7 @@
  #include <unistd.h>
  #include <time.h>
 
+/******************************************** Prototypes de fonctions *************************************/
  #include "Erreur.h"
  #include "Config.h"
  #include "watchdogd.h"
@@ -38,8 +39,6 @@
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-/******************************************** Prototypes de fonctions *************************************/
- #include "prototype.h"
 
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */

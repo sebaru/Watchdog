@@ -48,8 +48,7 @@
  static gint Socket_write;                                                     /* Socket d'administration */
 
  #include "watchdogd.h"
- #include "prototype.h"                                      /* Mise en place des prototypes de fonctions */
- #include "Module_DLS.h"
+ #include "proto_dls.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
  extern GList *Plugins;
@@ -364,7 +363,7 @@
           Write_admin ( Socket_write, "  getb xxx             - Get Bxxx\n" );
           Write_admin ( Socket_write, "  setb xxx i           - Set Bxxx = i\n" );
           Write_admin ( Socket_write, "  seta xxx i           - Set Axxx = i\n" );
-          Write_admin ( Socket_write, "  tell message_id      - Envoi AUDIO id\n" );
+          Write_admin ( Socket_write, "  tell message num     - Envoi AUDIO num\n" );
           Write_admin ( Socket_write, "  msgs message         - Envoi d'un message a tous les clients\n" );
           Write_admin ( Socket_write, "  mbus                 - Affiche les status des equipements MODBUS\n" );
           Write_admin ( Socket_write, "  rs                   - Affiche les status des equipements RS485\n" );

@@ -48,7 +48,7 @@
 /* Ajouter_audio: Ajoute un message audio a prononcer                                                     */
 /* Entrées: le numéro du message a prononcer                                                              */
 /**********************************************************************************************************/
- void Ajouter_audio( gint id )
+ void Ajouter_audio( gint num )
   { gint taille;
 
     pthread_mutex_lock( &Partage->com_audio.synchro );          /* Ajout dans la liste de audio a traiter */
@@ -56,19 +56,19 @@
     pthread_mutex_unlock( &Partage->com_audio.synchro );
 
     if (taille > 150)
-     { Info_n( Config.log, DEBUG_INFO, "AUDIO: Ajouter_audio: DROP audio (taille>150)", id);
+     { Info_n( Config.log, DEBUG_INFO, "AUDIO: Ajouter_audio: DROP audio (taille>150)", num);
        return;
      }
 
     pthread_mutex_lock( &Partage->com_audio.synchro );           /* Ajout dans la liste de audio a traiter */
-    Partage->com_audio.liste_audio = g_list_append( Partage->com_audio.liste_audio, GINT_TO_POINTER(id) );
+    Partage->com_audio.liste_audio = g_list_append( Partage->com_audio.liste_audio, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_audio.synchro );
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_audio ( void )
-  { guint id;
+  { guint num;
     struct MSGDB *msg;
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
 
@@ -97,23 +97,23 @@
         }
 
        pthread_mutex_lock( &Partage->com_audio.synchro );                                /* lockage futex */
-       id = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
-       Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio, GINT_TO_POINTER(id) );
+       num = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
+       Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio, GINT_TO_POINTER(num) );
 #ifdef DEBUG
        Info_n( Config.log, DEBUG_INFO, "AUDIO: Run_audio: Reste a traiter",
                                        g_list_length(Partage->com_audio.liste_audio) );
 #endif
        pthread_mutex_unlock( &Partage->com_audio.synchro );
 
-       Info_n( Config.log, DEBUG_INFO, "AUDIO : Préparation du message id", id );
+       Info_n( Config.log, DEBUG_INFO, "AUDIO : Préparation du message id", num );
 
-       msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
+       msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
        if (msg)
         { gchar nom_fichier[128], cible[128];
           gint fd_cible, pid;
 
-          g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->id );
-          g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->id );
+          g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
+          g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
           fd_cible = open ( cible, O_RDONLY, 0 );
           if (fd_cible>0)
            { Info_c( Config.log, DEBUG_INFO, "AUDIO : le .au existe deja", cible );
@@ -122,10 +122,10 @@
           else
            { 
 /***************************************** Création du PHO ************************************************/
-             Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", id );
+             Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de ESPEAK", num );
              pid = fork();
              if (pid<0)
-              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .pho failed", id ); }
+              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .pho failed", num ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar texte[80];
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
@@ -140,10 +140,10 @@
              Info_n( Config.log, DEBUG_FORK, "AUDIO: espeak finished pid", pid );
 
 /****************************************** Création du AU ************************************************/
-             Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de MBROLA", id );
+             Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de MBROLA", num );
              pid = fork();
              if (pid<0)
-              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", id ); }
+              { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", num ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { execlp( "mbrola-linux-i386", "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement mbrola failed", pid );
@@ -155,10 +155,10 @@
 
            }
 /****************************************** Lancement de l'audio ******************************************/
-          Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de APLAY", id );
+          Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement de APLAY", num );
           pid = fork();
           if (pid<0)
-           { Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement APLAY failed", id ); }
+           { Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement APLAY failed", num ); }
           else if (!pid)
            { execlp( "aplay", "aplay", "-R", "1", cible, NULL );
              Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement APLAY failed", pid );

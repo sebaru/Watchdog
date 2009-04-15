@@ -22,7 +22,7 @@
  extern struct CONFIG Config;
  extern int errno;
 
- #include "prototype.h"                                      /* Mise en place des prototypes de fonctions */
+ #include "watchdogd.h"                                      /* Mise en place des prototypes de fonctions */
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */

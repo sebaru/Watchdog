@@ -57,7 +57,7 @@
  struct CONFIG Config;                   /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  struct PARTAGE *Partage;                                    /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
- #include "prototype.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */

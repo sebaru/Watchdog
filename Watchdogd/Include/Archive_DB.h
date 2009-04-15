@@ -21,6 +21,7 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern void Run_arch ( void );                                                         /* Dans Archive.c */
  extern void Ajouter_archDB ( struct LOG *log, struct DB *db, struct ARCHDB *arch );
  extern SQLHSTMT Recuperer_archDB ( struct LOG *log, struct DB *db, guint type, guint num,
                                     time_t date_deb, time_t date_fin );
