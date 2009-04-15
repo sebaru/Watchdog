@@ -131,7 +131,7 @@
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
-                execlp( "espeak", "espeak", "-s", "120", "-v", "mb/mb-fr4", texte, NULL );
+                execlp( "espeak", "espeak", "-s", "150", "-v", "mb/mb-fr4", texte, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
@@ -160,7 +160,7 @@
           if (pid<0)
            { Info_n( Config.log, DEBUG_INFO, "AUDIO : Lancement APLAY failed", id ); }
           else if (!pid)
-           { execlp( "aplay", "aplay", cible, NULL );
+           { execlp( "aplay", "aplay", "-R", "1", cible, NULL );
              Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement APLAY failed", pid );
              _exit(0);
            }
