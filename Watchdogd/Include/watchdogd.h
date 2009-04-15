@@ -13,6 +13,7 @@
  #include "Cst_dls.h"
  #include "Cpth_DB.h"
  #include "Scenario_DB.h"
+ #include "Client.h"
  #include "Audio.h"
  #include "proto_dls.h"
  #include "Archive_DB.h"
