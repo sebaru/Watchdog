@@ -22,8 +22,12 @@
   { BORNE_INPUT_TOR,
     BORNE_OUTPUT_TOR,
     BORNE_INPUT_ANA,
-    BORNE_OUTPUT_ANA
+    BORNE_OUTPUT_ANA,
+    NBR_MODE_BORNE
   };
+
+ extern gchar *Mode_borne[NBR_MODE_BORNE];
+
 
  struct TRAME_MODBUS_REQUETE_ETOR                                        /* Definition d'une trame MODBUS */
   { guint16 transaction_id;

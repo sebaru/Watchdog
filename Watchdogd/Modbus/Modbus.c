@@ -47,6 +47,9 @@
  #include "proto_dls.h"                                                             /* Acces a A(x), E(x) */   
  #include "Modbus.h"
 
+ gchar *Mode_borne[NBR_MODE_BORNE] =
+  { "input_TOR", "output_TOR", "input_ANA", "output_ANA" };
+
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 

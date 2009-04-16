@@ -59,8 +59,8 @@
         { struct BORNE_MODBUS *borne;
           borne = (struct BORNE_MODBUS *)liste_bornes->data;
           g_snprintf( chaine, sizeof(chaine),
-                      " - Borne %02d -> type=%d, adresse=%d, min=%d, nbr=%d\n",
-                      borne->id, borne->type, borne->adresse, borne->min, borne->nbr
+                      " - Borne %02d -> type='%s', adresse=%d, min=%d, nbr=%d\n",
+                      borne->id, Mode_borne[borne->type], borne->adresse, borne->min, borne->nbr
                     );
           Write_admin ( client->connexion, chaine );
           liste_bornes = liste_bornes->next;
