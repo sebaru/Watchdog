@@ -30,6 +30,7 @@
  #include <sys/un.h>                                               /* Description de la structure AF UNIX */
  #include <sys/types.h>
  #include <sys/prctl.h>
+ #include <fcntl.h>
  #include <unistd.h>
  #include <errno.h>
 
@@ -39,16 +40,11 @@
  #include "proto_dls.h"
  #include "proto_srv.h"
 
- extern struct CONFIG Config;
-
- static gint Socket_read;                                                      /* Socket d'administration */
- static gint Socket_write;                                                     /* Socket d'administration */
-
  #include "watchdogd.h"
  #include "proto_dls.h"
 
+ extern struct CONFIG Config;
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern GList *Plugins;
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -132,6 +128,7 @@
                     }
 
        client->connexion = id;
+       fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
 
        Partage->com_admin.Clients = g_list_append( Partage->com_admin.Clients, client );
        Info_n( Config.log, DEBUG_ADMIN, "Connexion acceptée ID", id);
