@@ -83,7 +83,7 @@
        close(ecoute);
        return(-1);
      }
-/*    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                            /* Mode non bloquant */
+    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                            /* Mode non bloquant */
     return( ecoute );
   }
 /**********************************************************************************************************/
