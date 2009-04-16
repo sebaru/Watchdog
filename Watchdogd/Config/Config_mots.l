@@ -50,6 +50,9 @@ blanc         [\t ]+
 "db_host"                  { Config_lval.val = DB_HOST;
                              return DB_HOST;
                            }
+"db_port"                  { Config_lval.val = DB_PORT;
+                             return DB_PORT;
+                           }
 "db_database"              { Config_lval.val = DB_DATABASE;
                              return DB_DATABASE;
                            }

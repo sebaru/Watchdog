@@ -34,7 +34,7 @@ static struct MODULE_MODBUS_BORNE Config_modbus_borne;
 %token   PORT MAX_CLIENT MAX_MSG_VISU
 %token   MIN_SERVEUR MAX_SERVEUR MAX_INACTIVITE
 %token   HOME TIMEOUT_CONNEXION MAX_LOGIN_FAILED TAILLE_BLOC_RESEAU
-%token   DB_HOST DB_DATABASE DB_PASSWORD DB_USERNAME
+%token   DB_HOST DB_DATABASE DB_PASSWORD DB_USERNAME DB_PORT
 %token   PORT_RS485 DEF_MODULE_RS485 ID INPUT_ANA INPUT_TOR INPUT_CHOC OUTPUT_TOR OUTPUT_ANA
 %token   CRYPTO_KEY TAILLE_CLEF_DH TAILLE_CLEF_RSA
 %token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_FORK D_MODBUS
@@ -75,6 +75,8 @@ une_ligne:      PORT EGAL ENTIER
                 { snprintf( Config->port_RS485, TAILLE_PORT_RS485, "%s", $3 );
                   free($3);
                 }
+                | DB_PORT EGAL ENTIER
+                { Config->db_port = $3; }
                 | DB_HOST EGAL CHAINE
                 { snprintf( Config->db_host, TAILLE_DB_HOST, "%s", $3 );
                   free($3);

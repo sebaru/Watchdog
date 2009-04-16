@@ -46,6 +46,7 @@
     snprintf( config->db_database, sizeof(config->db_database), "%s", DEFAUT_DB_DATABASE );
     snprintf( config->db_password, sizeof(config->db_password), "%s", DEFAUT_DB_PASSWORD );
     snprintf( config->db_username, sizeof(config->db_username), "%s", DEFAUT_DB_USERNAME );
+    config->db_port               = DEFAUT_DB_PORT;
 
     for ( cpt=0; cpt < NBR_ID_RS485; cpt++)
      { config->module_rs485[cpt].id = -1; }

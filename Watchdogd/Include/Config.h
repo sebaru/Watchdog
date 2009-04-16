@@ -43,6 +43,7 @@
     gint  taille_clef_dh;                                       /* Taille en bits de la clef DH de codage */
     gint  taille_clef_rsa;                                     /* Taille en bits de la clef RSA de codage */
     gint  taille_bloc_reseau;
+    gint  db_port;
     gchar db_host    [ TAILLE_DB_HOST+1 ];                            /* Nom du host de la base de donnes */
     gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
@@ -71,6 +72,7 @@
  #define DEFAUT_DB_DATABASE             "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
  #define DEFAUT_DB_USERNAME             "Watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
+ #define DEFAUT_DB_PORT                 3306
  #define DEFAUT_DEBUG_LEVEL             0
  #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
