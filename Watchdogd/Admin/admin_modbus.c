@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/Admin/Admin.c        Gestion des connexions Admin au serveur watchdog                        */
+/* Watchdogd/Admin/admin_modbus.c        Gestion des connexions Admin MODBUS au serveur watchdog          */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 18 jan 2009 14:43:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * admin.c
+ * admin_modbus.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2008 - sebastien
@@ -26,26 +26,10 @@
  */
  
  #include <glib.h>
- #include <sys/socket.h>
- #include <sys/un.h>                                               /* Description de la structure AF UNIX */
- #include <sys/types.h>
- #include <sys/prctl.h>
- #include <fcntl.h>
- #include <unistd.h>
- #include <errno.h>
 
- #include "sysconfig.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "proto_dls.h"
- #include "proto_srv.h"
-
+ #include "Modbus.h"
  #include "watchdogd.h"
- #include "proto_dls.h"
 
- gchar *Mode_admin[NBR_MODE_ADMIN] =
-  { "running", "modbus" };
- 
  extern struct CONFIG Config;
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /**********************************************************************************************************/
@@ -53,7 +37,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static gint Activer_ecoute_admin ( void )
+ void Admin_modbus ( gchar *ligne )
   { struct sockaddr_un local;
     gint opt, ecoute;
 
@@ -163,17 +147,7 @@
        Info_c( Config.log, DEBUG_ADMIN, "Admin : received command", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
-       if ( ! strcmp ( commande, "mode" ) )
-        { gchar mode[128];
-          int i;
-          memset( mode, 0, sizeof(mode) );
-          sscanf ( ligne, "%s %s", commande, mode );                 /* Découpage de la ligne de commande */
-          i = 0;
-          while ( i < NBR_MODE_ADMIN && strcmp ( mode, Mode_admin[i] ) ) i++;
-          if ( i == NBR_MODE_ADMIN ) i = MODE_ADMIN_RUNNING;
-          client->mode = i;
-        }
-       else if ( ! strcmp ( commande, "help" ) )
+       if ( ! strcmp ( commande, "help" ) )
         { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'RUNNING'\n" );
           Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
           Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
@@ -195,8 +169,6 @@
           Write_admin ( client->connexion, "  mbus                 - Affiche les status des equipements MODBUS\n" );
           Write_admin ( client->connexion, "  rs                   - Affiche les status des equipements RS485\n" );
           Write_admin ( client->connexion, "  ping                 - Ping Watchdog\n" );
-          Write_admin ( client->connexion, "  mode type_mode       - Change de mode\n" );
-          Write_admin ( client->connexion, "  exit                 - Revient au mode RUNNING\n" );
           Write_admin ( client->connexion, "  help                 - This help\n" );
           Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Use with CAUTION\n" );
           Write_admin ( client->connexion, "  RELOAD               - Reload configuration\n" );
@@ -444,10 +416,7 @@
           Write_admin ( client->connexion, chaine );
         }
 
-       if (client->mode == MODE_ADMIN_RUNNING)
-        { g_snprintf( chaine, sizeof(chaine), " #%s> ", Mode_admin[client->mode] ); }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " # - WARNING - %s> ", Mode_admin[client->mode] ); }
+       g_snprintf( chaine, sizeof(chaine), " #%s> ", Mode_admin[client->mode] );
        Write_admin ( client->connexion, chaine );
      }
   }
