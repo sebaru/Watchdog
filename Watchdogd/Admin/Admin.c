@@ -27,6 +27,7 @@
  
  #include <glib.h>
  #include <sys/socket.h>
+ #include <sys/un.h>                                               /* Description de la structure AF UNIX */
  #include <sys/types.h>
  #include <sys/prctl.h>
  #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
@@ -55,7 +56,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static gint Activer_ecoute_admin ( void )
-  { struct sockaddr local;
+  { struct sockaddr_un local;
     gint opt, ecoute;
 
     if ( (ecoute = socket ( AF_UNIX, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
@@ -77,8 +78,8 @@
      { Info_c( Config.log, DEBUG_ADMIN, "TCP_NODELAY failed", strerror(errno) ); return(-1); }*/
 
     memset( &local, 0, sizeof(local) );
-    local.sa_family = AF_UNIX;
-    g_snprintf( local.sa_data, sizeof(local.sa_data), "socket.wdg" );
+    local.sun_family = AF_UNIX;
+    g_snprintf( local.sun_path, sizeof(local.sun_path), "socket.wdg" );
 /*    local.sin_port = htons(Config.port);                      /* Attention: en mode network, pas host !!! */
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
      { Info_c( Config.log, DEBUG_ADMIN, "Bind failure...", strerror(errno) );
@@ -127,8 +128,8 @@
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
 
     Partage->com_admin.ecoute = Activer_ecoute_admin ();
-    if ( ! Partage->com_admin.ecoute )
-     { Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
+    if ( Partage->com_admin.ecoute < 0 )
+     { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
