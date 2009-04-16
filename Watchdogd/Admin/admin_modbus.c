@@ -57,7 +57,7 @@
        liste_bornes = module->Bornes;
        while ( liste_bornes )
         { struct BORNE_MODBUS *borne;
-          borne = (struct BORNE_MODBUS *)liste_modules->data;
+          borne = (struct BORNE_MODBUS *)liste_bornes->data;
           g_snprintf( chaine, sizeof(chaine),
                       " - Borne %02d -> type=%d, adresse=%d, min=%d, nbr=%d\n",
                       borne->id, borne->type, borne->adresse, borne->min, borne->nbr

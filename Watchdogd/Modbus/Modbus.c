@@ -174,11 +174,11 @@
        module->Bornes = g_list_append ( module->Bornes, borne );
                                                                         /* Ajout dans la liste de travail */
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-       Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS borne id = ", borne->id      );
-       Info_n( Config.log, DEBUG_MODBUS, "                           type = ", borne->type    );
-       Info_n( Config.log, DEBUG_MODBUS, "                        adresse = ", borne->adresse );
-       Info_n( Config.log, DEBUG_MODBUS, "                            min = ", borne->min     );
-       Info_n( Config.log, DEBUG_MODBUS, "                            nbr = ", borne->nbr     );
+       Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  borne id = ", borne->id      );
+       Info_n( Config.log, DEBUG_MODBUS, "                             type = ", borne->type    );
+       Info_n( Config.log, DEBUG_MODBUS, "                          adresse = ", borne->adresse );
+       Info_n( Config.log, DEBUG_MODBUS, "                              min = ", borne->min     );
+       Info_n( Config.log, DEBUG_MODBUS, "                              nbr = ", borne->nbr     );
      }
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
     mysql_free_result( db->result );
