@@ -85,6 +85,7 @@
     Info_c( config->log, DEBUG_CONFIG, "Config db database          ", config->db_database );
     Info_c( config->log, DEBUG_CONFIG, "Config db username          ", config->db_username );
     Info_c( config->log, DEBUG_CONFIG, "Config db password          ", config->db_password );
+    Info_n( config->log, DEBUG_CONFIG, "Config db port              ", config->db_port );
     Info_c( config->log, DEBUG_CONFIG, "Config crypto key           ", config->crypto_key );
     for ( cpt=0; cpt < NBR_ID_RS485; cpt++)
      { if (config->module_rs485[cpt].id != -1)

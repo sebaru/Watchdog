@@ -74,7 +74,7 @@
     gint cpt;
     
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.port );
+                      Config.db_username, Config.db_password, Config.db_port );
     if (!db)
      { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: impossible d'ouvrir la Base de données",
                Config.db_database );
