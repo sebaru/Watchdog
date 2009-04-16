@@ -25,21 +25,50 @@
  * Boston, MA  02110-1301  USA
  */
  #include <glib.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>                                               /* Description de la structure AF UNIX */
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <fcntl.h>
- #include <sys/types.h>
  #include <unistd.h>
  #include <popt.h>
  #include <string.h>
  #include <stdio.h>
 
+ #include "sysconfig.h"
+
  #define PROMPT      "#> "
 
- static gint Socket_read;                                                      /* Socket d'administration */
- static gint Socket_write;                                                     /* Socket d'administration */
- static gchar Fifo_file_read[128], Fifo_file_write[128];
+ static gint Socket;                                                           /* Socket d'administration */
+ static gchar Socket_file[128];
 
+/**********************************************************************************************************/
+/* Connecter: Tentative de connexion au serveur                                                           */
+/* Entrée: une nom et un password                                                                         */
+/* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
+/**********************************************************************************************************/
+ static gboolean Connecter_au_serveur ( void )
+  { struct sockaddr_un src;                                            /* Données locales: pas le serveur */
+    int connexion;
+
+    src.sun_family = AF_UNIX;
+    g_snprintf( src.sun_path, sizeof(src.sun_path), Socket_file );
+
+    if ( (connexion = socket( AF_UNIX, SOCK_STREAM, 0)) == -1)                          /* Protocol = TCP */
+     { printf("Creation socket impossible\n");
+       return(FALSE);
+     }
+
+    if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
+     { printf("Connexion impossible\n");
+       close(connexion);
+       return(FALSE);
+     }
+    fcntl( connexion, F_SETFL, O_NONBLOCK );     /* Mode non bloquant, ça aide pour une telle application */
+
+    Socket = connexion;
+    return(TRUE);
+  }
 /**********************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                            */
 /* Entrée: argc, argv                                                                                     */
@@ -47,12 +76,10 @@
 /**********************************************************************************************************/
  static void Lire_ligne_commande( int argc, char *argv[] )
   { gint help;
-    gchar *file, *file2;
+    gchar *file;
     struct poptOption Options[]= 
-     { { "readfile",   'r', POPT_ARG_STRING,
-         &file,             0, "Admin FIFO READ", "FILE" },
-       { "writefile",  'w', POPT_ARG_STRING,
-         &file2,            0, "Admin FIFO WRITE", "FILE" },
+     { { "socket",   's', POPT_ARG_STRING,
+         &file,        0, "Admin Socket", "FILE" },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
        POPT_TABLEEND
@@ -60,7 +87,7 @@
     poptContext context;
     int rc;
 
-    file = file2 = NULL;
+    file = NULL;
     help           = 0;
 
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
@@ -72,8 +99,7 @@
         }
      }
 
-    if (file)  g_snprintf( Fifo_file_read,  sizeof(Fifo_file_read),  "%s", file );
-    if (file2) g_snprintf( Fifo_file_write, sizeof(Fifo_file_write), "%s", file2 );
+    if (file)  g_snprintf( Socket_file, sizeof(Socket_file),  "%s", file );
 
     if (help)                                                             /* Affichage de l'aide en ligne */
      { poptPrintHelp(context, stdout, 0);
@@ -93,35 +119,22 @@
     struct timeval tv;
     fd_set fdselect;
 
+    g_snprintf( Socket_file, sizeof(Socket_file), "socket.wdg" );                           /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
-    Socket_read = open( Fifo_file_read, O_RDWR );
-    if ( Socket_read < 0 )
-     { perror("Failed : ");
-       printf("WatchdogdAdmin: impossible d'ouvrir le FIFO READ\n");
-       return(-1);
-     }
-    fcntl( Socket_read, F_SETFL, O_NONBLOCK );   /* Mode non bloquant, ça aide pour une telle application */
+    printf("  --  WatchdogdAdmin  v%s \n", VERSION );
+    if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
 
-    Socket_write = open( Fifo_file_write, O_WRONLY );
-    if ( Socket_write < 0 )
-     { perror("Failed : ");
-       printf("WatchdogdAdmin: impossible d'ouvrir le FIFO READ\n");
-       close( Socket_read );
-       return(-1);
-     }
-
-    printf(" WatchdogdAdmin  v1.0 \n");
-    write ( Socket_write, "ident", 6 );
+    write ( Socket, "ident", 6 );
     g_snprintf( commande_hold, sizeof(commande_hold), "nocde");
 
     for ( ; ; )
      { FD_ZERO(&fdselect);
        FD_SET(0, &fdselect);
-       FD_SET(Socket_read, &fdselect );
+       FD_SET(Socket, &fdselect );
        tv.tv_sec = 0;
        tv.tv_usec= 100;
-       retval = select(Socket_read+1, &fdselect, NULL, NULL, &tv );            /* Attente d'un caractere */
+       retval = select(Socket+1, &fdselect, NULL, NULL, &tv );            /* Attente d'un caractere */
 
        if (retval>=0)
 	{ if (FD_ISSET(0, &fdselect))                                             /* Est-ce au clavier ?? */
@@ -132,19 +145,18 @@
              if ( ! strcmp ( commande, "quit" ) ) break;
              else { if (taille) memcpy( commande_hold, commande, sizeof(commande_hold) );
                            else memcpy( commande, commande_hold, sizeof(commande) );
-                    write ( Socket_write, commande, strlen(commande) );
+                    write ( Socket, commande, strlen(commande) );
                   }
 	   }
-	  else if (FD_ISSET(Socket_read, &fdselect))                 /* Est-ce sur la ligne d'admin local */
-           { taille = read( Socket_read, reponse, sizeof(reponse) );
+	  else if (FD_ISSET(Socket, &fdselect))                 /* Est-ce sur la ligne d'admin local */
+           { taille = read( Socket, reponse, sizeof(reponse) );
              reponse[taille] = 0;
              printf("%s", reponse ); fflush(stdout);
            }
 	}
      }
 
-    close( Socket_read );
-    close (Socket_write);
+    close( Socket );
     return(0);
   }
 /*--------------------------------------------------------------------------------------------------------*/

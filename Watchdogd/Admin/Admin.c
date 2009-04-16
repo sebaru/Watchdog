@@ -30,7 +30,6 @@
  #include <sys/un.h>                                               /* Description de la structure AF UNIX */
  #include <sys/types.h>
  #include <sys/prctl.h>
- #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
  #include <unistd.h>
  #include <errno.h>
 
