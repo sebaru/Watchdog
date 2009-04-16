@@ -165,7 +165,9 @@
           while ( i < NBR_MODE_ADMIN && strcmp ( mode, Mode_admin[i] ) ) i++;
           if ( i == NBR_MODE_ADMIN ) i = MODE_ADMIN_RUNNING;
           client->mode = i;
-        }
+        } else
+       if ( ! strcmp ( commande, "exit" ) )
+        { client->mode = MODE_ADMIN_RUNNING; }
 
        switch ( client->mode )
         {

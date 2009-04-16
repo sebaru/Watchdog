@@ -46,7 +46,7 @@
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { gint i;
-       Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help standard\n" );
+       Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
        Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
        Write_admin ( client->connexion, "  dls                  - D.L.S. Status\n" );
@@ -76,6 +76,7 @@
           i++;
         }
        Write_admin ( client->connexion, "running)\n" );
+       Write_admin ( client->connexion, "  exit                 - Revient au mode RUNNING\n" );
 
        Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Use with CAUTION\n" );
        Write_admin ( client->connexion, "  RELOAD               - Reload configuration\n" );
@@ -313,9 +314,6 @@
      } else
     if ( ! strcmp ( commande, "nocde" ) )
      { 
-     } else
-     { g_snprintf( chaine, sizeof(chaine), " - command %s not found -\n", commande );
-       Write_admin ( client->connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
