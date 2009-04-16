@@ -637,14 +637,17 @@
 /**********************************************************************************************************/
  void Run_modbus ( void )
   { guint id_en_cours;
+    guint cpt;
 
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
 
-    if ( Charger_MODBUS() == 0 )                                         /* Chargement des modules modbus */
+    if ( (cpt = Charger_MODBUS()) == 0 )                                 /* Chargement des modules modbus */
      { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
+    else Info_n( Config.log, DEBUG_INFO, "MODBUS: Run_modbus:  modules MODBUS found  !", cpt );
+       
 
     memset( &Comm_MODBUS, 0, sizeof( Comm_MODBUS ) );
 
