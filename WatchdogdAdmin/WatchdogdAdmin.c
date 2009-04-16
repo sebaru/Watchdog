@@ -146,9 +146,10 @@
              else { if (taille) memcpy( commande_hold, commande, sizeof(commande_hold) );
                            else memcpy( commande, commande_hold, sizeof(commande) );
                     write ( Socket, commande, strlen(commande) );
+                    fsync(Socket);                                                   /* Flush la sortie ! */
                   }
 	   }
-	  else if (FD_ISSET(Socket, &fdselect))                 /* Est-ce sur la ligne d'admin local */
+	  else if (FD_ISSET(Socket, &fdselect))                      /* Est-ce sur la ligne d'admin local */
            { taille = read( Socket, reponse, sizeof(reponse) );
              reponse[taille] = 0;
              printf("%s", reponse ); fflush(stdout);
