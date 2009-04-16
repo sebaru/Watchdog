@@ -75,6 +75,11 @@
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
   };
 
+ struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */
+  { gboolean sigusr1; 
+    gint ecoute;                                                       /* Socket d'ecoute du thread ADMIN */
+  };
+
  struct COM_DLS_RS                                                 /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean sigusr1;
@@ -162,6 +167,8 @@
     struct COM_SSRV_DLS com_ssrv_dls;                                         /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
+    struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
+
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
     struct SCENARIO_DB scenario [ NBR_SCENARIO ];

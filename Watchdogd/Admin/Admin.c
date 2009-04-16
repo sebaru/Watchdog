@@ -26,15 +26,12 @@
  */
  
  #include <glib.h>
- #include <stdlib.h>
- #include <string.h>
- #include <fcntl.h>
- #include <unistd.h>
- #include <stdio.h>
- #include <errno.h>
+ #include <sys/socket.h>
  #include <sys/types.h>
- #include <sys/stat.h>
  #include <sys/prctl.h>
+ #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
+ #include <unistd.h>
+ #include <errno.h>
 
  #include "sysconfig.h"
  #include "Erreur.h"
@@ -43,7 +40,6 @@
  #include "proto_srv.h"
 
  extern struct CONFIG Config;
- extern int errno;
 
  static gint Socket_read;                                                      /* Socket d'administration */
  static gint Socket_write;                                                     /* Socket d'administration */
@@ -58,15 +54,46 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static gboolean Activer_ecoute_admin ( void )
-  { mkfifo( FICHIER_FIFO_ADMIN_READ,  S_IRUSR | S_IWUSR );
-    mkfifo( FICHIER_FIFO_ADMIN_WRITE, S_IRUSR | S_IWUSR );
-    Socket_read  = open( FICHIER_FIFO_ADMIN_WRITE, O_RDWR );
-    if ( Socket_read < 0 ) return(FALSE);
+ static gint Activer_ecoute_admin ( void )
+  { struct sockaddr local;
+    gint opt, ecoute;
 
-    fcntl( Socket_read, F_SETFL, O_NONBLOCK );                                 /* Mode non bloquant */
-    Info( Config.log, DEBUG_INFO, "Ecoute Fifo Admin ON" );
-    return( TRUE );                                                              /* Tout s'est bien passé */
+    if ( (ecoute = socket ( AF_UNIX, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
+     { Info_c( Config.log, DEBUG_NETWORK, "Socket failure...", strerror(errno) ); return(-1); }
+
+    opt = 1;
+    if ( setsockopt( ecoute, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE,
+                     (char*)&opt, sizeof(opt) ) == -1 )
+     { Info_c( Config.log, DEBUG_NETWORK, "Set option failed", strerror(errno) ); return(-1); }
+
+    opt = 16834;
+    if ( setsockopt( ecoute, SOL_SOCKET, SO_SNDBUF,(char*)&opt, sizeof(opt) ) == -1 )
+     { Info_c( Config.log, DEBUG_NETWORK, "SO_SNDBUF failed", strerror(errno) ); return(-1); }
+    if ( setsockopt( ecoute, SOL_SOCKET, SO_RCVBUF,(char*)&opt, sizeof(opt) ) == -1 )
+     { Info_c( Config.log, DEBUG_NETWORK, "SO_RCVBUF failed", strerror(errno) ); return(-1); }
+
+/*    opt = 1;
+    if ( setsockopt( ecoute, SOL_TCP, TCP_NODELAY,(char*)&opt, sizeof(opt) ) == -1 )
+     { Info_c( Config.log, DEBUG_NETWORK, "TCP_NODELAY failed", strerror(errno) ); return(-1); }*/
+
+    memset( &local, 0, sizeof(local) );
+    local.sa_family = AF_UNIX;
+    g_snprintf( local.sa_data, sizeof(local.sa_data), "socket.wdg" );
+/*    local.sin_port = htons(Config.port);                      /* Attention: en mode network, pas host !!! */
+    if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
+     { Info_c( Config.log, DEBUG_NETWORK, "Bind failure...", strerror(errno) );
+       close(ecoute);
+       return(-1);
+     }
+
+    if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
+     { Info_c( Config.log, DEBUG_NETWORK, "Listen failure...", strerror(errno));
+       close(ecoute);
+       return(-1);
+     }
+/*    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                            /* Mode non bloquant */
+    Info_n( Config.log, DEBUG_NETWORK, "        socket", ecoute );
+    return( ecoute );
   }
 /**********************************************************************************************************/
 /* Desactiver_ecoute_admin: Ferme la socker fifo d'administration                                         */
@@ -99,6 +126,21 @@
 
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
 
+    Partage->com_admin.ecoute = Activer_ecoute_admin ();
+    if ( ! Partage->com_admin.ecoute )
+     { Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
+       pthread_exit(GINT_TO_POINTER(-1));
+     }
+
+    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+     { if (Partage->com_admin.sigusr1)                                             /* On a recu sigusr1 ?? */
+        { Partage->com_admin.sigusr1 = FALSE;
+          Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
+        }
+
+       sched_yield();
+       usleep(10000);
+#ifdef bouh
     taille = read ( Socket_read, ligne, sizeof(ligne) );
 
     if ( taille > 0 )
@@ -391,6 +433,8 @@
 
        Write_admin( Socket_write, "#> " );
        close (Socket_write);
+     }
+#endif
      }
     Info_n( Config.log, DEBUG_FORK, "Admin: Run_admin: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
