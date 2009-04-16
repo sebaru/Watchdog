@@ -15,6 +15,7 @@
                                                                                         /* Dans serveur.c */
  extern void Unref_client ( struct CLIENT *client );
  extern void Ref_client ( struct CLIENT *client );
+ extern void Run_serveur ( gint id );                                                   /* Dans serveur.c */
 
  extern void Envoyer_commande_dls ( int num );                                  /* Dans distrib_cde_dls.c */
 

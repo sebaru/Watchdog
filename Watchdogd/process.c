@@ -37,13 +37,15 @@
  #include "Erreur.h"
  #include "Config.h"
  #include "watchdogd.h"
+ #include "proto_srv.h"
 
  static pthread_t TID_sms;                                          /* Le tid du SMS en cours d'execution */
  static pthread_t TID_dls;                                          /* Le tid du DLS en cours d'execution */
  static pthread_t TID_rs485;                                      /* Le tid du rs485 en cours d'execution */
  static pthread_t TID_arch;                                        /* Le tid du ARCH en cours d'execution */
  static pthread_t TID_modbus;                                    /* Le tid du MODBUS en cours d'execution */
- static pthread_t TID_audio;                                     /* Le tid du MODBUS en cours d'execution */
+ static pthread_t TID_audio;                                     /* Le tid du AUDIO  en cours d'execution */
+ static pthread_t TID_admin;                                     /* Le tid du ADMIN  en cours d'execution */
 
  extern int errno;
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -127,6 +129,21 @@
      }
     else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_audio: thread audio seems to be running",
                    TID_audio ); }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Demarrer_audio: Thread un process sms                                                                    */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_admin ( void )
+  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_admin: Demande de demarrage"), getpid() );
+    if (pthread_create( &TID_admin, NULL, (void *)Run_admin, NULL ))
+     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_admin: pthread_create failed") );
+       return(FALSE);
+     }
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_admin: thread audio seems to be running",
+                   TID_admin ); }
     return(TRUE);
   }
 /**********************************************************************************************************/

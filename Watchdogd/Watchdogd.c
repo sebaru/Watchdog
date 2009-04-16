@@ -249,7 +249,7 @@
     while( Partage->Arret < FIN )
      { Gerer_jeton();                                          /* Don du jeton au serveur le moins chargé */
        Gerer_manque_process();                               /* Detection du manque de serveurs en ecoute */
-       Gerer_fifo_admin();                                       /* Gestion de l'interface d'admin locale */
+/*     Gerer_fifo_admin();                                       /* Gestion de l'interface d'admin locale */
 
        Gerer_arrive_MSGxxx_dls( Db_watchdog );/* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
@@ -502,9 +502,6 @@
     Info( Config.log, DEBUG_INFO, _("Start") );
     Print_config( &Config );
 
-    if ( ! Activer_ecoute_admin() )            
-     { Info( Config.log, DEBUG_INFO, _("FIFO_Admin down, Local Admin disabled") ); }
-
     Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
     if ( Socket_ecoute<0 )            
      { Info( Config.log, DEBUG_INFO, _("Network down, foreign connexions disabled") );
@@ -602,6 +599,9 @@ encore:
           if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
           else
+          if (!Demarrer_admin())                                                   /* Démarrage A.U.D.I.O */
+           { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+          else
            { pthread_t TID;
 
              /*sigaction( SIGCHLD, &sig, NULL );*/
@@ -626,7 +626,6 @@ encore:
     close(fd_lock);
 
     if (Socket_ecoute>0) close(Socket_ecoute);
-    Desactiver_ecoute_admin();
     if (Config.rsa) RSA_free( Config.rsa );
 
     if (Partage->Arret != CLEARREBOOT) Exporter();           /* Tente d'exporter les données avant reload */

@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/admin.c        Gestion des connexions Admin au serveur watchdog                              */
+/* Watchdogd/Admin/Admin.c        Gestion des connexions Admin au serveur watchdog                        */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 18 jan 2009 14:43:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -34,6 +34,7 @@
  #include <errno.h>
  #include <sys/types.h>
  #include <sys/stat.h>
+ #include <sys/prctl.h>
 
  #include "sysconfig.h"
  #include "Erreur.h"
@@ -57,7 +58,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- gboolean Activer_ecoute_admin ( void )
+ static gboolean Activer_ecoute_admin ( void )
   { mkfifo( FICHIER_FIFO_ADMIN_READ,  S_IRUSR | S_IWUSR );
     mkfifo( FICHIER_FIFO_ADMIN_WRITE, S_IRUSR | S_IWUSR );
     Socket_read  = open( FICHIER_FIFO_ADMIN_WRITE, O_RDWR );
@@ -72,7 +73,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Desactiver_ecoute_admin ( void )
+ static void Desactiver_ecoute_admin ( void )
   { close (Socket_read);
     Socket_read  = 0;
     Info( Config.log, DEBUG_INFO, "Desactivation Fifo Admin" );
@@ -89,9 +90,14 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Gerer_fifo_admin ( void )
+ void Run_admin ( void )
   { gchar ligne[128], commande[20];
+    static gint new_id = 0;                                                  /* Numéro du prochain client */
     gint taille;
+
+    prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
+
+    Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
 
     taille = read ( Socket_read, ligne, sizeof(ligne) );
 
@@ -386,5 +392,7 @@
        Write_admin( Socket_write, "#> " );
        close (Socket_write);
      }
+    Info_n( Config.log, DEBUG_FORK, "Admin: Run_admin: Down", pthread_self() );
+    pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

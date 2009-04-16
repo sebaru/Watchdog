@@ -47,15 +47,14 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_Watchdogd_OBJECTS = Watchdogd.$(OBJEXT) process.$(OBJEXT) \
-	ecoute.$(OBJEXT) shm.$(OBJEXT) admin.$(OBJEXT) \
-	initdb.$(OBJEXT) ssl.$(OBJEXT) distrib_MSGxxx.$(OBJEXT) \
-	distrib_Ixxx.$(OBJEXT)
+	ecoute.$(OBJEXT) shm.$(OBJEXT) initdb.$(OBJEXT) ssl.$(OBJEXT) \
+	distrib_MSGxxx.$(OBJEXT) distrib_Ixxx.$(OBJEXT)
 Watchdogd_OBJECTS = $(am_Watchdogd_OBJECTS)
 Watchdogd_DEPENDENCIES = Config/libconfig.la Db/libdb.la \
 	Serveur/libserveur.la Dls/libdls.la \
 	TraductionDLS/libtradDLS.la Rs485/librs485.la \
 	Modbus/libmodbus.la Sms/libsms.la Archive/libarchive.la \
-	Modbus/libmodbus.la Audio/libaudio.la \
+	Modbus/libmodbus.la Audio/libaudio.la Admin/libadmin.la \
 	$(top_srcdir)/Commun/libwatchdog.la
 Watchdogd_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -227,9 +226,9 @@ top_srcdir = @top_srcdir@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config Db Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio
+SUBDIRS = Include Config Db Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin
 Watchdogd_SOURCES = Watchdogd.c process.c \
-                    ecoute.c shm.c admin.c \
+                    ecoute.c shm.c \
                     initdb.c ssl.c \
                     distrib_MSGxxx.c distrib_Ixxx.c
 
@@ -244,6 +243,7 @@ Watchdogd_LDADD = Config/libconfig.la \
 		    Archive/libarchive.la \
 		    Modbus/libmodbus.la \
 		    Audio/libaudio.la \
+		    Admin/libadmin.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 Watchdogd_LDFLAGS = -lodbc -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)
@@ -326,7 +326,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Watchdogd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/admin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distrib_Ixxx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distrib_MSGxxx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecoute.Po@am__quote@

@@ -12,7 +12,7 @@ noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h \
 		    proto_dls.h \
 		    proto_srv.h \
 		    Proto_traductionDLS.h \
-                    watchdogd.h Dls_DB.h \
+                    watchdogd.h Dls_DB.h Admin.h \
 		    Rs485.h Sms.h Audio.h Cpth_DB.h \
                     Archive_DB.h proto_arch.h Modbus.h Scenario_DB.h
 

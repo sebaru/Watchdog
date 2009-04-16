@@ -15,6 +15,7 @@
  #include "Scenario_DB.h"
  #include "Client.h"
  #include "Audio.h"
+ #include "Admin.h"
  #include "proto_dls.h"
  #include "Archive_DB.h"
  #include "Sms.h"
@@ -188,10 +189,6 @@
 
  extern gint Activer_ecoute ( void );                                                    /* Dans ecoute.c */
 
- extern gboolean Activer_ecoute_admin ( void );                                           /* Dans Admin.c */
- extern void Desactiver_ecoute_admin ( void );
- extern void Gerer_fifo_admin ( void );
-
  extern struct PARTAGE *Shm_init ( void );                                                  /* Dans shm.c */
  extern gboolean Shm_stop ( struct PARTAGE *partage );
 
@@ -205,12 +202,11 @@
  extern gboolean Demarrer_sms ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_audio ( void );
+ extern gboolean Demarrer_admin ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                       /* Dans distrib_Ixxx.c */
-
- extern void Run_serveur ( gint id );                                                   /* Dans serveur.c */
 
  extern SSL_CTX *Init_ssl ( void );                                                         /* Dans ssl.c */
  extern void Connecter_ssl( struct CLIENT *client );
