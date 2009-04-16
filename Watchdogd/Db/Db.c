@@ -163,12 +163,14 @@
     g_snprintf( db->db_password, sizeof(db->db_password), "%s", password );
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
-     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme d'initialisation mysql_init", db->db_database );
+     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme d'initialisation mysql_init",
+                              (char *) mysql_error(db->mysql)  );
        g_free(db);
        return (NULL);
      }
     if ( ! mysql_real_connect( db->mysql, host, user, password, database, port, NULL, 0 ) )
-     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base", db->db_database );
+     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base",
+                              (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
        g_free(db);
        return (NULL);
