@@ -200,15 +200,7 @@
     guint taille_distant, id;
     struct CLIENT *client;
     struct hostent *host;
-    gchar nom[16];
 
-    g_snprintf(nom, sizeof(nom), "W-SRV%03d", ss_id );
-    prctl(PR_SET_NAME, nom, 0, 0, 0 );
-
-    if (!Socket_ecoute)                       /* Si la connexion n'est pas activée, on ne peut rien faire */
-     { Info_n( Config.log, DEBUG_CONNEXION, "SSRV: Accueillir_nouveaux_client: Socket_ecoute=NULL -> return", id );
-       return(FALSE);
-     }
     taille_distant = sizeof(distant);
     if ( (id=accept( Socket_ecoute, (struct sockaddr *)&distant, &taille_distant )) != -1)  /* demande ?? */
      { Info_n( Config.log, DEBUG_CONNEXION, "SSRV: Accueillir_nouveaux_client: Connexion wanted. ID", id );
@@ -270,6 +262,10 @@
     struct sigaction sig;
     guint Top, Arret;
     pthread_t tid;
+    gchar nom[16];
+
+    g_snprintf(nom, sizeof(nom), "W-SRV%03d", id );
+    prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
     sig.sa_handler = SIG_IGN;
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */

@@ -75,11 +75,6 @@
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
   };
 
- struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */
-  { gboolean sigusr1; 
-    gint ecoute;                                                       /* Socket d'ecoute du thread ADMIN */
-  };
-
  struct COM_DLS_RS                                                 /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean sigusr1;

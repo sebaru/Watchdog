@@ -540,6 +540,8 @@
        pthread_mutex_init( &Partage->com_dls_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_ssrv_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
+       pthread_mutex_init( &Partage->com_audio.synchro, &attr );
+       pthread_mutex_init( &Partage->com_admin.synchro, &attr );
              
        sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
        sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
@@ -591,9 +593,6 @@ encore:
           if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
           else
-          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
-          else
           if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
           else
@@ -602,6 +601,9 @@ encore:
           else
           if (!Demarrer_admin())                                                   /* Démarrage A.U.D.I.O */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+          else
+          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+           { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
           else
            { pthread_t TID;
 
@@ -624,6 +626,8 @@ encore:
     pthread_mutex_destroy( &Partage->com_dls_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_ssrv_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
+    pthread_mutex_destroy( &Partage->com_audio.synchro );
+    pthread_mutex_destroy( &Partage->com_admin.synchro );
     close(fd_lock);
 
     if (Socket_ecoute>0) close(Socket_ecoute);

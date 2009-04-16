@@ -73,15 +73,10 @@
     if ( setsockopt( ecoute, SOL_SOCKET, SO_RCVBUF,(char*)&opt, sizeof(opt) ) == -1 )
      { Info_c( Config.log, DEBUG_ADMIN, "SO_RCVBUF failed", strerror(errno) ); return(-1); }
 
-/*    opt = 1;
-    if ( setsockopt( ecoute, SOL_TCP, TCP_NODELAY,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_ADMIN, "TCP_NODELAY failed", strerror(errno) ); return(-1); }*/
-
     memset( &local, 0, sizeof(local) );
     unlink(NOM_SOCKET);
     local.sun_family = AF_UNIX;
     g_snprintf( local.sun_path, sizeof(local.sun_path), NOM_SOCKET );
-/*    local.sin_port = htons(Config.port);                      /* Attention: en mode network, pas host !!! */
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
      { Info_c( Config.log, DEBUG_ADMIN, "Bind failure...", strerror(errno) );
        close(ecoute);
@@ -94,7 +89,6 @@
        return(-1);
      }
 /*    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                            /* Mode non bloquant */
-    Info_n( Config.log, DEBUG_ADMIN, "        socket", ecoute );
     return( ecoute );
   }
 /**********************************************************************************************************/
@@ -103,9 +97,60 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Desactiver_ecoute_admin ( void )
-  { close (Socket_read);
-    Socket_read  = 0;
-    Info( Config.log, DEBUG_INFO, "Desactivation Fifo Admin" );
+  { close (Partage->com_admin.ecoute);
+    Partage->com_admin.ecoute = 0;
+    Info( Config.log, DEBUG_ADMIN, "Desactivation socket" );
+  }
+/**********************************************************************************************************/
+/* Deconnecter_admin: Ferme la socket admin en parametre                                                  */
+/* Entrée: le client                                                                                      */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
+  { close ( client->connexion );
+    g_free(client);
+    Partage->com_admin.Clients = g_list_remove ( Partage->com_admin.Clients, client );
+  }
+/**********************************************************************************************************/
+/* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
+/* Entrée: rien                                                                                           */
+/* Sortie: TRUE si un nouveau client est arrivé                                                           */
+/**********************************************************************************************************/
+ static gboolean Accueillir_un_admin( gint ecoute )
+  { struct CLIENT_ADMIN *client;
+    struct sockaddr_un distant;
+    guint taille_distant, id;
+ 
+    taille_distant = sizeof(distant);
+    if ( (id=accept( ecoute, (struct sockaddr *)&distant, &taille_distant )) != -1)         /* demande ?? */
+     { Info_n( Config.log, DEBUG_ADMIN, "Accueillir_un_admin: Connexion wanted. ID", id );
+
+       client = g_malloc0( sizeof(struct CLIENT_ADMIN) );/* On alloue donc une nouvelle structure cliente */
+       if (!client) { Info_n ( Config.log, DEBUG_MEM,
+                               "SSRV: Accueillir_un_admin: Not enought memory to connect", id );
+                      close(id);
+                      return(FALSE);                                    /* On traite bien sûr les erreurs */
+                    }
+
+       client->connexion = id;
+
+       Partage->com_admin.Clients = g_list_append( Partage->com_admin.Clients, client );
+       Info_n( Config.log, DEBUG_ADMIN, "Connexion acceptée ID", id);
+       return(TRUE);
+     }
+    return(FALSE);
+  }
+/**********************************************************************************************************/
+/* Ecouter_admin: Ecoute ce que dis le client                                                             */
+/* Entrée: le client                                                                                      */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Ecouter_admin ( struct CLIENT_ADMIN *client )
+  { gchar chaine[128];
+    gint taille;
+    taille = read( client->connexion, chaine, sizeof(chaine) );
+
+    printf("Recu %d octets du client %d = %s\n", taille, client->connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Gerer_fifo_admin: Ecoute les commandes d'admin locale et les traite                                    */
@@ -120,9 +165,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Run_admin ( void )
-  { gchar ligne[128], commande[20];
-    static gint new_id = 0;                                                  /* Numéro du prochain client */
-    gint taille;
+  { 
 
     prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
@@ -132,14 +175,28 @@
     if ( Partage->com_admin.ecoute < 0 )
      { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
-     }
+     } else Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: En ecoute !" );
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { if (Partage->com_admin.sigusr1)                                             /* On a recu sigusr1 ?? */
+     { if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
         { Partage->com_admin.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
         }
 
+       Accueillir_un_admin( Partage->com_admin.ecoute );                  /* Accueille les nouveaux admin */
+
+       if ( Partage->com_admin.Clients )                                          /* Ecoutons nos clients */
+        { struct CLIENT_ADMIN *client;
+          GList *liste;
+
+          liste = Partage->com_admin.Clients;
+          while (liste)
+           { client = (struct CLIENT_ADMIN *)liste->data;
+
+             Ecouter_admin( client );
+             liste=liste->next;
+           }
+        }
        sched_yield();
        usleep(10000);
 #ifdef bouh
@@ -438,6 +495,14 @@
      }
 #endif
      }
+
+    while(Partage->com_admin.Clients)                                 /* Parcours de la liste des clients */
+     { struct CLIENT_ADMIN *client;                                   /* Deconnection de tous les clients */
+       client = (struct CLIENT_ADMIN *)Partage->com_admin.Clients->data;
+       Deconnecter_admin ( client );
+     }
+
+    Desactiver_ecoute_admin ();
     Info_n( Config.log, DEBUG_FORK, "Admin: Run_admin: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
