@@ -24,10 +24,10 @@
     guint nbr_query;
     gchar *dsn;
     gchar last_err[ TAILLE_MAX_MSG_ERREURDB + 1 ];
-    gchar db_username[ TAILLE_DB_USERNAME + 1 ];
-    gchar db_password[ TAILLE_DB_PASSWORD + 1 ];
-    gchar db_database [ TAILLE_DB_DATABASE + 1 ];
-    guint port;
+    gchar db_username[ TAILLE_DB_USERNAME + 1 ]; /* a virer */
+    gchar db_password[ TAILLE_DB_PASSWORD + 1 ];/* a virer */
+    gchar db_database [ TAILLE_DB_DATABASE + 1 ];/* a virer */
+    guint port;/* a virer */
     MYSQL *mysql;
     MYSQL_RES *result;
     MYSQL_ROW row;
@@ -43,7 +43,8 @@
 
  extern gchar *Normaliser_chaine( struct LOG *log, gchar *pre_comment );
 
- extern struct DB *Init_DB_SQL ( struct LOG *log, gchar *database, gchar *user, gchar *password, guint port );
+ extern struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
+                                 gchar *user, gchar *password, guint port );
  extern void Libere_DB_SQL( struct LOG *log, struct DB **adr_db );
 
  #endif

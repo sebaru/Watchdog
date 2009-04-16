@@ -47,6 +47,9 @@ blanc         [\t ]+
 "taille_clef_rsa"          { Config_lval.val = TAILLE_CLEF_RSA;
                              return TAILLE_CLEF_RSA;
                            }
+"db_host"                  { Config_lval.val = DB_HOST;
+                             return DB_HOST;
+                           }
 "db_database"              { Config_lval.val = DB_DATABASE;
                              return DB_DATABASE;
                            }

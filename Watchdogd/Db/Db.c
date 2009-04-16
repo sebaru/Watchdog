@@ -148,7 +148,8 @@
 /* ConnexionDB: essai de connexion à la DataBase db via le DSN db                                         */
 /* Sortie: une structure DB ou NULL si erreur                                                             */
 /**********************************************************************************************************/
- struct DB *Init_DB_SQL ( struct LOG *log, gchar *database, gchar *user, gchar *password, guint port )
+ struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
+                          gchar *user, gchar *password, guint port )
   { struct DB *db;
     db = (struct DB *)g_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
@@ -166,7 +167,7 @@
        g_free(db);
        return (NULL);
      }
-    if ( ! mysql_real_connect( db->mysql, "localhost", user, password, database, port, NULL, 0 ) )
+    if ( ! mysql_real_connect( db->mysql, host, user, password, database, port, NULL, 0 ) )
      { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base", db->db_database );
        mysql_close( db->mysql );
        g_free(db);

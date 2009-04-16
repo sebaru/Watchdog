@@ -11,6 +11,7 @@
  #define NBR_ID_RS485             16
 
  #define TAILLE_PORT_RS485        30
+ #define TAILLE_DB_HOST           30
  #define TAILLE_DB_USERNAME       30
  #define TAILLE_DB_PASSWORD       30
  #define TAILLE_DB_DATABASE       20
@@ -42,6 +43,7 @@
     gint  taille_clef_dh;                                       /* Taille en bits de la clef DH de codage */
     gint  taille_clef_rsa;                                     /* Taille en bits de la clef RSA de codage */
     gint  taille_bloc_reseau;
+    gchar db_host    [ TAILLE_DB_HOST+1 ];                            /* Nom du host de la base de donnes */
     gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
