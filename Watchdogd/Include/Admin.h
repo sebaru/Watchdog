@@ -7,14 +7,16 @@
 #ifndef _ADMIN_H_
  #define _ADMIN_H_
 
+ #include <pthread.h>
 
  #define NOM_SOCKET "socket.wdg"
 
  enum
-  { MODE_ADMIN_ROOT,
+  { MODE_ADMIN_RUNNING,
     MODE_ADMIN_MODBUS,
     NBR_MODE_ADMIN
   };
+ extern gchar *Mode_admin[NBR_MODE_ADMIN];
 
  struct CLIENT_ADMIN
   { gint connexion;
@@ -28,7 +30,11 @@
     GList *Clients;
   };
 
+
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Audio.c */
+ extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Write_admin ( gint fd, gchar *chaine );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
