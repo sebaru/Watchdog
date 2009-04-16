@@ -34,6 +34,7 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Audio.c */
  extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_modbus_list ( struct CLIENT_ADMIN *client );
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Write_admin ( gint fd, gchar *chaine );
 #endif

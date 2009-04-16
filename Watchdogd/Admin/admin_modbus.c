@@ -38,6 +38,41 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
+ void Admin_modbus_list ( struct CLIENT_ADMIN *client )
+  { GList *liste_modules, *liste_bornes;
+    gchar chaine[128];
+
+    liste_modules = Partage->com_modbus.Modules_MODBUS;
+    while ( liste_modules )
+     { struct MODULE_MODBUS *module;
+       module = (struct MODULE_MODBUS *)liste_modules->data;
+
+       g_snprintf( chaine, sizeof(chaine),
+                   "\n MODBUS[%02d] -> IP=%s, bit=%d, started=%d, transaction=%d, nbr_deconnect=%d, request=%d \n",
+                   module->id, module->ip, module->bit, module->started,
+                   module->transaction_id, module->nbr_deconnect, module->request
+                 );
+       Write_admin ( client->connexion, chaine );
+
+       liste_bornes = module->Bornes;
+       while ( liste_bornes )
+        { struct BORNE_MODBUS *borne;
+          borne = (struct BORNE_MODBUS *)liste_modules->data;
+          g_snprintf( chaine, sizeof(chaine),
+                      " - Borne %02d -> type=%d, adresse=%d, min=%d, nbr=%d\n",
+                      borne->id, borne->type, borne->adresse, borne->min, borne->nbr
+                    );
+          Write_admin ( client->connexion, chaine );
+          liste_bornes = liste_bornes->next;
+        }
+       liste_modules = liste_modules->next;
+     }
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
  void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
@@ -53,7 +88,8 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Write_admin ( client->connexion, "  list                 - Liste les modules MODBUS+Borne\n" );
+       Write_admin ( client->connexion, "  add                - Ajoute un module modbus\n" );
+       Write_admin ( client->connexion, "  apply              - Applique la configuration\n" );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

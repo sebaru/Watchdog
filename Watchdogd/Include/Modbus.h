@@ -85,7 +85,6 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
- extern void Modbus_state ( int id, gchar *chaine, int size );
  extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
 
 #endif

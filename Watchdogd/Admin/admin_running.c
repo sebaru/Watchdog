@@ -46,7 +46,7 @@
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { gint i;
-       Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'RUNNING'\n" );
+       Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help standard\n" );
        Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
        Write_admin ( client->connexion, "  dls                  - D.L.S. Status\n" );
@@ -64,7 +64,7 @@
        Write_admin ( client->connexion, "  seta xxx i           - Set Axxx = i\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
-       Write_admin ( client->connexion, "  mbus                 - Affiche les status des equipements MODBUS\n" );
+       Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
        Write_admin ( client->connexion, "  rs                   - Affiche les status des equipements RS485\n" );
        Write_admin ( client->connexion, "  ping                 - Ping Watchdog\n" );
        Write_admin ( client->connexion, "  help                 - This help\n" );
@@ -175,14 +175,9 @@
             }
         } else
 #endif
-/*       if ( ! strcmp ( commande, "mbus" ) )
-        { int i;
-          for (i=0; i<NBR_ID_MODBUS; i++)
-           { gchar chaine[256];
-             Modbus_state( i, chaine, sizeof(chaine) );
-             Write_admin ( client->connexion, chaine );
-           }
-        } else*/
+    if ( ! strcmp ( commande, "mbus" ) )
+     { Admin_modbus_list ( client );
+     } else
     if ( ! strcmp ( commande, "rs" ) )
      { int i;
        for (i=0; i<NBR_ID_RS485; i++)

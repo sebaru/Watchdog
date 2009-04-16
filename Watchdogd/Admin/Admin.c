@@ -31,6 +31,7 @@
  #include <sys/types.h>
  #include <sys/prctl.h>
  #include <fcntl.h>
+ #include <unistd.h>
  #include <errno.h>
 
  #include "watchdogd.h"
@@ -171,9 +172,9 @@
           case MODE_ADMIN_MODBUS : Admin_modbus ( client, ligne ); break;
 
           case MODE_ADMIN_RUNNING:
-          default:                 Admin_running( client, ligne );
-               
+          default:                 break;
         }
+       Admin_running( client, ligne );
 
        if (client->mode == MODE_ADMIN_RUNNING)
         { g_snprintf( chaine, sizeof(chaine), " #%s> ", Mode_admin[client->mode] ); }
