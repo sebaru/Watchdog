@@ -73,7 +73,7 @@
     struct DB *db;
     gint cpt;
     
-    db = Init_DB_SQL( Config.log, Config.db_database,                /* Connexion en tant que user normal */
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.port );
     if (!db)
      { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: impossible d'ouvrir la Base de données",
