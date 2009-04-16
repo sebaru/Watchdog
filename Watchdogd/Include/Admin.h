@@ -10,8 +10,15 @@
 
  #define NOM_SOCKET "socket.wdg"
 
+ enum
+  { MODE_ADMIN_ROOT,
+    MODE_ADMIN_MODBUS,
+    NBR_MODE_ADMIN
+  };
+
  struct CLIENT_ADMIN
   { gint connexion;
+    gint mode;
   };
 
  struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */

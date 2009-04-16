@@ -43,6 +43,9 @@
  #include "watchdogd.h"
  #include "proto_dls.h"
 
+ gchar *Mode_admin[NBR_MODE_ADMIN] =
+  { "root", "conf modbus" };
+ 
  extern struct CONFIG Config;
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /**********************************************************************************************************/
@@ -128,6 +131,7 @@
                     }
 
        client->connexion = id;
+       client->mode = MODE_ADMIN_ROOT;
        fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
 
        Partage->com_admin.Clients = g_list_append( Partage->com_admin.Clients, client );
@@ -149,7 +153,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Ecouter_admin ( struct CLIENT_ADMIN *client )
-  { gchar ligne[128], commande[128];
+  { gchar ligne[128], commande[128], chaine[128];
     gint taille;
     taille = read( client->connexion, ligne, sizeof(ligne) );
 
@@ -189,7 +193,7 @@
           Write_admin ( client->connexion, "  SHUTDOWN             - Stop processes\n" );
         } else
        if ( ! strcmp ( commande, "ident" ) )
-        { char chaine[128], nom[128];
+        { char nom[128];
           gethostname( nom, sizeof(nom) );
           g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
           Write_admin ( client->connexion, chaine );
@@ -212,8 +216,7 @@
         } else
 #endif
        if ( ! strcmp ( commande, "ssrv" ) )
-        { char chaine[128];
-          int i;
+        { int i;
 
           g_snprintf( chaine, sizeof(chaine), " Jeton au SSRV %02d\n", Partage->jeton );
           Write_admin ( client->connexion, chaine );
@@ -226,7 +229,7 @@
         } else
 #ifdef bouh
        if ( ! strcmp ( commande, "kick" ) )
-        { char chaine[128], nom[128], machine[128];
+        { char nom[128], machine[128];
           GList *liste;
           gint i;
 
@@ -298,76 +301,66 @@
            }
         } else
        if ( ! strcmp ( commande, "dlson" ) )
-        { char chaine[20];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           Activer_plugins ( num, TRUE );
           g_snprintf( chaine, sizeof(chaine), " Plugin %d started\n", num );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "dlsoff" ) )
-        { char chaine[20];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           Activer_plugins ( num, FALSE );
           g_snprintf( chaine, sizeof(chaine), " Plugin %d stopped\n", num );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "getm" ) )
-        { char chaine[20];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, M(num) );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "gete" ) )
-        { char chaine[20];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "getea" ) )
-        { char chaine[20];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           g_snprintf( chaine, sizeof(chaine), " EA%03d = %d, inrange=%d\n", num, EA_int(num), EA_inrange(num) );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "setm" ) )
-        { char chaine[20];
-          int num, val;
+        { int num, val;
           sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
           SM ( num, val );
           g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, val );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "getb" ) )
-        { char chaine[20];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, B(num) );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "setb" ) )
-        { char chaine[20];
-          int num, val;
+        { int num, val;
           sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
           SB ( num, val );
           g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, val );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "seta" ) )
-        { char chaine[20];
-          int num, val;
+        { int num, val;
           sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
           SA ( num, val );
           g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "tell" ) )
-        { char chaine[128];
-          int num;
+        { int num;
           sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
           Ajouter_audio ( num );
           g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
@@ -406,9 +399,7 @@
         } else
 #endif
        if ( ! strcmp ( commande, "audit" ) )
-        { char chaine[128], nom[128];
-          gethostname( nom, sizeof(nom) );
-          g_snprintf( chaine, sizeof(chaine), " Bit/s : %d\n", Partage->audit_bit_interne_per_sec_hold );
+        { g_snprintf( chaine, sizeof(chaine), " Bit/s : %d\n", Partage->audit_bit_interne_per_sec_hold );
           Write_admin ( client->connexion, chaine );
         } else
        if ( ! strcmp ( commande, "ping" ) )
@@ -437,12 +428,12 @@
        if ( ! strcmp ( commande, "nocde" ) )
         { 
         } else
-        { char chaine[128];
-          g_snprintf( chaine, sizeof(chaine), " - command %s not found -\n", commande );
+        { g_snprintf( chaine, sizeof(chaine), " - command %s not found -\n", commande );
           Write_admin ( client->connexion, chaine );
         }
 
-       Write_admin( client->connexion, "#> " );
+       g_snprintf( chaine, sizeof(chaine), " #%s> ", Mode_admin[client->mode] );
+       Write_admin ( client->connexion, chaine );
      }
   }
 /**********************************************************************************************************/

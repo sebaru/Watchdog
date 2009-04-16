@@ -37,8 +37,6 @@
 
  #include "sysconfig.h"
 
- #define PROMPT      "#> "
-
  static gint Socket;                                                           /* Socket d'administration */
  static gchar Socket_file[128];
 
@@ -142,7 +140,8 @@
              taille--;                                                       /* -1 car caractère "entrée" */
              commande[taille] = 0;                                           /* Caractère de fin de ligne */
 
-             if ( ! strcmp ( commande, "quit" ) ) break;
+             if ( ! strcmp ( commande, "quit" ) ) break;                                 /* On s'arrete ? */
+             else if ( ! strcmp ( commande, "exit" ) ) break;
              else { if (taille) memcpy( commande_hold, commande, sizeof(commande_hold) );
                            else memcpy( commande, commande_hold, sizeof(commande) );
                     write ( Socket, commande, strlen(commande) );
