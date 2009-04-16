@@ -114,10 +114,10 @@
           continue;
         }
 
-       module->id       = (gint)db->row[0];
+       module->id       = atoi (db->row[0]);
        g_snprintf( module->ip, sizeof(module->ip), "%s", db->row[1] );
-       module->bit      = (gint)db->row[2];          /* Bit interne B d'etat communication avec le module */
-       module->watchdog = (gint)db->row[3];
+       module->bit      = atoi (db->row[2]);         /* Bit interne B d'etat communication avec le module */
+       module->watchdog = atoi (db->row[3]);
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
                                                                         /* Ajout dans la liste de travail */
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
