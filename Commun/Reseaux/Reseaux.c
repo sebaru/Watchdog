@@ -42,7 +42,6 @@
  #include "Reseaux.h"
  #include "Erreur.h"
 
- extern int errno;
 /**********************************************************************************************************/
 /* Attendre_envoi_disponible: Attend que le reseau se libere pour envoi futur                             */
 /* Entrée: log, connexion                                                                                 */

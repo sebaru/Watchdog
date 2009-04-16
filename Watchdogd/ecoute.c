@@ -20,7 +20,6 @@
  #include "Config.h"
 
  extern struct CONFIG Config;
- extern int errno;
 
  #include "watchdogd.h"                                      /* Mise en place des prototypes de fonctions */
 /**********************************************************************************************************/

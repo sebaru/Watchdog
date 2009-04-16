@@ -47,7 +47,6 @@
  static pthread_t TID_audio;                                     /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin;                                     /* Le tid du ADMIN  en cours d'execution */
 
- extern int errno;
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
