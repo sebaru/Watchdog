@@ -64,7 +64,7 @@
 /* Entrée: une config !! -> le champ log doit etre initialisé via la librairie Erreur                     */
 /**********************************************************************************************************/
  void Print_config ( struct CONFIG *config )
-  { int cpt, cpt_borne;
+  { int cpt;
 
     if (!config->log) return;
     Info_n( config->log, DEBUG_CONFIG, "Config port                 ", config->port );

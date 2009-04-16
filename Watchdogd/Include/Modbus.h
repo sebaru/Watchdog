@@ -12,11 +12,8 @@
  #define MBUS_SORTIE_TOR 0x06
  #define MBUS_SORTIE_ANA 0x06
  
- #define NBR_ID_MODBUS             4
- #define NBR_ID_MODBUS_BORNE       8
-
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */
- #define MODBUS_RETRY       5                         /* 2 secondes entre chaque retry si pb de connexion */
+ #define MODBUS_RETRY       10                       /* 10 secondes entre chaque retry si pb de connexion */
 
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
  #define NOM_TABLE_BORNE_MODBUS    "modbus_bornes"

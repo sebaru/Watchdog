@@ -189,14 +189,14 @@
                }
             }
         } else
-       if ( ! strcmp ( commande, "mbus" ) )
+/*       if ( ! strcmp ( commande, "mbus" ) )
         { int i;
           for (i=0; i<NBR_ID_MODBUS; i++)
            { gchar chaine[256];
              Modbus_state( i, chaine, sizeof(chaine) );
              Write_admin ( Socket_write, chaine );
            }
-        } else
+        } else*/
        if ( ! strcmp ( commande, "rs" ) )
         { int i;
           for (i=0; i<NBR_ID_RS485; i++)
