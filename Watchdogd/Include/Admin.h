@@ -14,6 +14,7 @@
  enum
   { MODE_ADMIN_RUNNING,
     MODE_ADMIN_MODBUS,
+    MODE_ADMIN_PROCESS,
     NBR_MODE_ADMIN
   };
  extern gchar *Mode_admin[NBR_MODE_ADMIN];
@@ -36,6 +37,8 @@
  extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_modbus_list ( struct CLIENT_ADMIN *client );
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Write_admin ( gint fd, gchar *chaine );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

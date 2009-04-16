@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Admin/admin_modbus.c        Gestion des connexions Admin MODBUS au serveur watchdog          */
+/* Watchdogd/Admin/admin_running.c        Gestion des connexions Admin RUNNING au serveur watchdog        */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 18 jan 2009 14:43:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -77,12 +77,6 @@
         }
        Write_admin ( client->connexion, "running)\n" );
        Write_admin ( client->connexion, "  exit                 - Revient au mode RUNNING\n" );
-
-       Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Use with CAUTION\n" );
-       Write_admin ( client->connexion, "  RELOAD               - Reload configuration\n" );
-       Write_admin ( client->connexion, "  REBOOT               - Restart all processes\n" );
-       Write_admin ( client->connexion, "  CLEAR-REBOOT         - Restart all processes with no DATA import/expot\n" );
-       Write_admin ( client->connexion, "  SHUTDOWN             - Stop processes\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
@@ -291,26 +285,6 @@
      } else
     if ( ! strcmp ( commande, "ping" ) )
      { Write_admin ( client->connexion, " Pong !\n" );
-     } else
-    if ( ! strcmp ( commande, "SHUTDOWN" ) )
-     { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : SHUTDOWN demandé" );
-       Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
-       Partage->Arret = FIN;
-     } else
-    if ( ! strcmp ( commande, "REBOOT" ) )
-     { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : REBOOT demandé" );
-       Write_admin ( client->connexion, "REBOOT in progress\n" );
-       Partage->Arret = REBOOT;
-     } else
-    if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
-     { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : CLEAR-REBOOT demandé" );
-       Write_admin ( client->connexion, "CLEAR-REBOOT in progress\n" );
-       Partage->Arret = CLEARREBOOT;
-     } else
-    if ( ! strcmp ( commande, "RELOAD" ) )
-     { Info( Config.log, DEBUG_INFO, "Gerer_fifo_admin : RELOAD demandé" );
-       Write_admin ( client->connexion, "RELOAD in progress\n" );
-       Partage->Arret = RELOAD;
      } else
     if ( ! strcmp ( commande, "nocde" ) )
      { 

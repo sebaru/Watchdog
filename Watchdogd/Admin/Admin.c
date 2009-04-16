@@ -37,7 +37,7 @@
  #include "watchdogd.h"
 
  gchar *Mode_admin[NBR_MODE_ADMIN] =
-  { "running", "modbus" };
+  { "running", "modbus", "process" };
  
  extern struct CONFIG Config;
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
@@ -171,7 +171,8 @@
 
        switch ( client->mode )
         {
-          case MODE_ADMIN_MODBUS : Admin_modbus ( client, ligne ); break;
+          case MODE_ADMIN_MODBUS : Admin_modbus  ( client, ligne ); break;
+          case MODE_ADMIN_PROCESS: Admin_process ( client, ligne ); break;
 
           case MODE_ADMIN_RUNNING:
           default:                 break;
