@@ -18,6 +18,9 @@
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */
  #define MODBUS_RETRY       5                         /* 2 secondes entre chaque retry si pb de connexion */
 
+ #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
+ #define NOM_TABLE_BORNE_MODBUS    "modbus_bornes"
+
  enum
   { BORNE_INPUT_TOR,
     BORNE_OUTPUT_TOR,
@@ -63,14 +66,15 @@
     guint16 adresse;
     guint16 min;
     guint16 nbr;
+    struct MODULE_MODBUS *module;
   };
 
  struct MODULE_MODBUS
-  { gboolean actif;
+  { guint id;                                                 /* Numéro du module dans la base de données */
+    gboolean actif;                                                                    /* Est-il actif ?? */
     guint watchdog;                       /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
     guint bit;                                       /* Bit interne B d'etat communication avec le module */
     gchar ip[32];                                                         /* Adresses IP du module MODBUS */
-    struct MODULE_MODBUS_BORNE borne[NBR_ID_MODBUS_BORNE];
   };
 
 /*********************************************** Déclaration des prototypes *******************************/

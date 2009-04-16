@@ -218,7 +218,7 @@ one_again:
     Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
     Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
 
-    Connecter_ssl();                                                           /* Gere les parametres SSL */
+    if ( ! Connecter_ssl() ) return(FALSE);                                    /* Gere les parametres SSL */
     Envoyer_identification();                                        /* Envoi l'identification au serveur */
 
     return(TRUE);

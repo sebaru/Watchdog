@@ -38,51 +38,6 @@ blanc         [\t ]+
 "module_rs485"             { Config_lval.val = DEF_MODULE_RS485;
                              return DEF_MODULE_RS485;
                            }
-"module_modbus"            { Config_lval.val = T_DEF_MODULE_MODBUS;
-                             return T_DEF_MODULE_MODBUS;
-                           }
-"id"                       { Config_lval.val = 0;
-                             return ID;
-                           }
-"ip"                       { Config_lval.val = T_IP;
-                             return T_IP;
-                           }
-"bit"                      { Config_lval.val = T_BIT;
-                             return T_BIT;
-                           }
-"type"                     { Config_lval.val = T_TYPE;
-                             return T_TYPE;
-                           }
-"borne"                    { Config_lval.val = T_BORNE;
-                             return T_BORNE;
-                           }
-"adresse"                  { Config_lval.val = T_ADRESSE;
-                             return T_ADRESSE;
-                           }
-"min"                      { Config_lval.val = T_MIN;
-                             return T_MIN;
-                           }
-"nbr"                      { Config_lval.val = T_NBR;
-                             return T_NBR;
-                           }
-"watchdog"                 { Config_lval.val = T_WATCHDOG;
-                             return T_WATCHDOG;
-                           }
-"inputTOR"                 { Config_lval.val = INPUT_TOR;
-                             return INPUT_TOR;
-                           }
-"inputANA"                 { Config_lval.val = INPUT_ANA;
-                             return INPUT_ANA;
-                           }
-"inputCHOC"                { Config_lval.val = INPUT_CHOC;
-                             return INPUT_CHOC;
-                           }
-"outputTOR"                { Config_lval.val = OUTPUT_TOR;
-                             return OUTPUT_TOR;
-                           }
-"outputANA"                { Config_lval.val = OUTPUT_ANA;
-                             return OUTPUT_ANA;
-                           }
 "home_dir"                 { Config_lval.val = HOME;
                              return HOME;
                            }
@@ -92,14 +47,14 @@ blanc         [\t ]+
 "taille_clef_rsa"          { Config_lval.val = TAILLE_CLEF_RSA;
                              return TAILLE_CLEF_RSA;
                            }
-"db_name"                  { Config_lval.val = DB_NAME;
-                             return DB_NAME;
+"db_database"              { Config_lval.val = DB_DATABASE;
+                             return DB_DATABASE;
                            }
 "db_password"              { Config_lval.val = DB_PASSWORD;
                              return DB_PASSWORD;
                            }
-"db_admin_username"        { Config_lval.val = DB_ADMIN_USERNAME;
-                             return DB_ADMIN_USERNAME;
+"db_username"              { Config_lval.val = DB_USERNAME;
+                             return DB_USERNAME;
                            }
 "crypto_key"               { Config_lval.val = CRYPTO_KEY;
                              return CRYPTO_KEY;
@@ -169,6 +124,9 @@ blanc         [\t ]+
                            }
 "FORK"                     { Config_lval.val = D_FORK;
                              return(D_FORK);
+                           }
+"MODBUS"                   { Config_lval.val = D_MODBUS;
+                             return(D_MODBUS);
                            }
 "CONNEXION"                { Config_lval.val = D_CONNEXION;
                              return(D_CONNEXION);

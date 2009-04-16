@@ -242,11 +242,11 @@
        pthread_mutex_init( &client->mutex_struct_used, NULL );
        client->struct_used = 0;                            /* Par défaut, personne n'utilise la structure */
 
-       client->Db_watchdog = ConnexionDB( Config.log, Config.db_name,
-                                          Config.db_admin_username, Config.db_password );
+       client->Db_watchdog = ConnexionDB( Config.log, Config.db_database,
+                                          Config.db_username, Config.db_password );
        if (!client->Db_watchdog)
         { Info_c( Config.log, DEBUG_DB,
-                  _("SSRV: Accueillir_nouveaux_client: Unable to open database (dsn)"), Config.db_name );
+                  _("SSRV: Accueillir_nouveaux_client: Unable to open database (dsn)"), Config.db_database );
           Deconnecter( client );
         }
        else

@@ -29,6 +29,7 @@
  #define  DEBUG_FORK                (1<<9 ) /* Debug fork process */
  #define  DEBUG_CONNEXION           (1<<10) /* Debug connexions clientes */
  #define  DEBUG_DLS                 (1<<11) /* Debug modules DLS */
+ #define  DEBUG_MODBUS              (1<<12) /* Debug modules MODBUS */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

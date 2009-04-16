@@ -11,6 +11,7 @@ libutil_la_SOURCES = Utilisateur.c groupe.c login_failed.c \
 INCLUDES= -I$(top_srcdir) -I$(includedir) \
 	  $(GLIB_CFLAGS) \
 	  $(BONOBO_CFLAGS) \
+	  $(MYSQL_CFLAGS) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
 	  -I../../Include

@@ -122,7 +122,7 @@
 /* Connecter_ssl: Tentative de connexion sécurisée au serveur                                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Connecter_ssl ( void )
+ gboolean Connecter_ssl ( void )
   { gint retour;
     X509 *certif;
 
@@ -135,8 +135,9 @@
         }
        else
         { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_new failed" );
+          Log( "Impossible de creer le contexte SSL" );
           Deconnecter();
-          return;
+          return(FALSE);
         }
      }
 encore:
@@ -156,8 +157,9 @@ encore:
     certif = SSL_get_peer_certificate( Connexion->ssl );             /* On prend le certificat du serveur */
     if (!certif)
      { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: no certificate received" );
+       Log( "Aucun certificat reçu" );
        Deconnecter();
-       return;
+       return(FALSE);
      }
     Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: certificate received" );
 
@@ -169,8 +171,9 @@ encore:
     retour = SSL_get_verify_result( Connexion->ssl );                       /* Verification du certificat */
     if ( retour != X509_V_OK )                                      /* Si erreur, on se deconnecte presto */
      { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: unauthorized certificate" );
+       Log( "Impossible de vérifier le certificat" );
        Deconnecter();
-       return;
+       return(FALSE);
      }
 
     Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: partenaire", Nom_certif ( certif ) );
@@ -178,5 +181,6 @@ encore:
     
     Client_en_cours.mode = ENVOI_IDENT;
     Info( Config_cli.log, DEBUG_CONNEXION, "client en mode ENVOI_IDENT" );
+    return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -60,11 +60,11 @@
     memcpy ( &rezo_courbe, &client->courbe, sizeof( rezo_courbe ) );
     client->courbe.id=-1;
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,
-                               Config.db_admin_username, Config.db_password );
+    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
+                               Config.db_username, Config.db_password );
     if (!Db_watchdog)
      { Info_c( Config.log, DEBUG_DB,
-               _("SSRV: Proto_ajouter_courbe_thread: Unable to open database (dsn)"), Config.db_name );
+               _("SSRV: Proto_ajouter_courbe_thread: Unable to open database (dsn)"), Config.db_database );
        Unref_client( client );                                           /* Déréférence la structure cliente */
        pthread_exit(NULL);
      }

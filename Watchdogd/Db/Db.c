@@ -145,6 +145,51 @@
     return(db);
   }
 /**********************************************************************************************************/
+/* ConnexionDB: essai de connexion à la DataBase db via le DSN db                                         */
+/* Sortie: une structure DB ou NULL si erreur                                                             */
+/**********************************************************************************************************/
+ struct DB *Init_DB_SQL ( struct LOG *log, gchar *database, gchar *user, gchar *password, guint port )
+  { struct DB *db;
+    db = (struct DB *)g_malloc0( sizeof(struct DB) );
+    if (!db)                                                          /* Si probleme d'allocation mémoire */
+     { Info( log, DEBUG_DB, "Init_DB_SQL: Erreur allocation mémoire struct DB" );
+       return(NULL);
+     }
+
+    db->port = port;                                                           /* Sauvegarde des donnéees */
+    g_snprintf( db->db_database, sizeof(db->db_database), "%s", database );
+    g_snprintf( db->db_username, sizeof(db->db_username), "%s", user );
+    g_snprintf( db->db_password, sizeof(db->db_password), "%s", password );
+    db->mysql = mysql_init(NULL);
+    if (!db->mysql)
+     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme d'initialisation mysql_init", db->db_database );
+       g_free(db);
+       return (NULL);
+     }
+    if ( ! mysql_real_connect( db->mysql, "localhost", user, password, database, port, NULL, 0 ) )
+     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base", db->db_database );
+       mysql_close( db->mysql );
+       g_free(db);
+       return (NULL);
+     }
+    Info_c( log, DEBUG_DB, "Init_DB_SQL: Connexion effective DB", db->db_database );
+    Info_c( log, DEBUG_DB, "                          avec user", db->db_username );
+    return(db);
+  }
+/**********************************************************************************************************/
+/* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
+/**********************************************************************************************************/
+ void Libere_DB_SQL( struct LOG *log, struct DB **adr_db )
+  { struct DB *db;
+    if (!(adr_db && *adr_db)) return;
+
+    db = *adr_db;
+    mysql_close( db->mysql );
+    Info_c( log, DEBUG_DB, "DeconnexionDB: Deconnexion effective", db->db_database );
+    g_free( db );
+    *adr_db = NULL;
+  }
+/**********************************************************************************************************/
 /* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
 /**********************************************************************************************************/
  void DeconnexionDB( struct LOG *log, struct DB **adr_db )
@@ -165,6 +210,38 @@
 /* sortie: un pointeur query, ou null si pb                                                               */
 /**********************************************************************************************************/
  SQLHSTMT NewQueryDB ( struct LOG *log, struct DB *db )
+  { SQLHSTMT hquery;
+    long retour;
+
+    /*Info_n( log, DEBUG_DB, "DB: NewqueryDB: db = ", db );*/
+    if ( db->nbr_query != 0 )
+     { Info_n( log, DEBUG_DB, "DB: NewqueryDB: nbr_query!=0 !!", db->nbr_query );
+     }
+
+    retour = SQLConnect( db->hdb, (SQLCHAR*) db->dsn, SQL_NTS,                       /* DSN -> DBWatchdog */
+                             (SQLCHAR*) db->db_username, SQL_NTS,                             /* Username */
+                             (SQLCHAR*) db->db_password, SQL_NTS);                            /* Password */
+    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
+     { PrintErrDB( log, db->hdb );
+       Info_n( log, DEBUG_DB, "DB: NewqueryDB: Erreur de connexion", retour );
+       return(NULL);
+     }
+
+    retour = SQLAllocHandle( SQL_HANDLE_STMT, db->hdb, &hquery );
+    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
+     { Info( log, DEBUG_DB, "DB: NewQueryDB: pb allocation pointeur" );
+       PrintErrQueryDB( log, db, hquery );
+       return(NULL);
+     }
+    db->nbr_query++;
+    return(hquery);
+  }
+/**********************************************************************************************************/
+/* NewQueryDB: renvoie un pointeur sur la nouvelle requete db                                             */
+/* entrée: un log et une db                                                                               */
+/* sortie: un pointeur query, ou null si pb                                                               */
+/**********************************************************************************************************/
+ MYSQL *NewQueryDB_new ( struct LOG *log, struct DB *db )
   { SQLHSTMT hquery;
     long retour;
 

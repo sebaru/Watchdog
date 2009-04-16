@@ -16,4 +16,5 @@ INCLUDES= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
 	  -I../Include \
+	  $(MYSQL_CFLAGS) \
           $(GLIB_CFLAGS)

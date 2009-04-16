@@ -86,11 +86,11 @@
 
     sleep(5);                                                      /* A l'init, nous attendons 5 secondes */
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,           /* Connexion en tant que user normal */
-                               Config.db_admin_username, Config.db_password );
+    Db_watchdog = ConnexionDB( Config.log, Config.db_database,       /* Connexion en tant que user normal */
+                               Config.db_username, Config.db_password );
 
     if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "ARCH: Run_arch: Unable to open database (dsn)", Config.db_name );
+     { Info_c( Config.log, DEBUG_DB, "ARCH: Run_arch: Unable to open database (dsn)", Config.db_database );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 

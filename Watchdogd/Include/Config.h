@@ -11,9 +11,9 @@
  #define NBR_ID_RS485             16
 
  #define TAILLE_PORT_RS485        30
- #define TAILLE_DB_NAME           30
+ #define TAILLE_DB_USERNAME       30
  #define TAILLE_DB_PASSWORD       30
- #define TAILLE_DB_ADMIN_USERNAME 12
+ #define TAILLE_DB_DATABASE       20
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
  #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
 
@@ -42,8 +42,8 @@
     gint  taille_clef_dh;                                       /* Taille en bits de la clef DH de codage */
     gint  taille_clef_rsa;                                     /* Taille en bits de la clef RSA de codage */
     gint  taille_bloc_reseau;
-    gchar db_admin_username[ TAILLE_DB_ADMIN_USERNAME+1 ];/* Nom de l'administrateur de la base de données*/
-    gchar db_name[ TAILLE_DB_NAME+1 ];                                  /* Chemin d'acces aux DB watchdog */
+    gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
+    gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
     gchar crypto_key[TAILLE_CRYPTO_KEY+1];            /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
@@ -66,8 +66,8 @@
  #define DEFAUT_TAILLE_CLEF_DH          512
  #define DEFAUT_TAILLE_CLEF_RSA         2048
  #define DEFAUT_SSL_CRYPT               0
- #define DEFAUT_DB_NAME                 "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
- #define DEFAUT_DB_ADMIN_USERNAME       "Watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
+ #define DEFAUT_DB_DATABASE             "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
+ #define DEFAUT_DB_USERNAME             "Watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
  #define DEFAUT_DEBUG_LEVEL             0
  #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */

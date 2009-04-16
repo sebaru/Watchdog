@@ -12,4 +12,5 @@ INCLUDES= $(GNOME2_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
-	  -I../Include
+	  -I../Include \
+          $(MYSQL_CFLAGS)

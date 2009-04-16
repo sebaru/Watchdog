@@ -24,11 +24,12 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Audio/libaudio.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -lodbc -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS)
+Watchdogd_LDFLAGS = -lodbc -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 $(GLIB_CFLAGS) \
-	 $(BONOBO_CFLAGS)
+	 $(BONOBO_CFLAGS) \
+	 $(MYSQL_CFLAGS)
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -210,7 +210,7 @@
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
 
 
- extern void Connecter_ssl ( void );                                                        /* Dans ssl.c */
+ extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
  extern SSL_CTX *Init_ssl ( void );
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */

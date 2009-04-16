@@ -10,9 +10,11 @@
  #include <sql.h>                                             /* Entetes de gestion de la base de données */
  #include <sqlext.h> 
  #include <sqltypes.h>
+ #include <mysql.h>
 
  #include "Erreur.h"
  #include "Config.h"
+
 
  #define TAILLE_MAX_MSG_ERREURDB   2048
 
@@ -22,8 +24,13 @@
     guint nbr_query;
     gchar *dsn;
     gchar last_err[ TAILLE_MAX_MSG_ERREURDB + 1 ];
-    gchar db_username[ TAILLE_DB_NAME + 1 ];
+    gchar db_username[ TAILLE_DB_USERNAME + 1 ];
     gchar db_password[ TAILLE_DB_PASSWORD + 1 ];
+    gchar db_database [ TAILLE_DB_DATABASE + 1 ];
+    guint port;
+    MYSQL *mysql;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Init_db_watchdog( void );                                                 /* Dans initdb.c */
@@ -35,6 +42,9 @@
  extern void DeconnexionDB( struct LOG *log, struct DB **adr_db );
 
  extern gchar *Normaliser_chaine( struct LOG *log, gchar *pre_comment );
+
+ extern struct DB *Init_DB_SQL ( struct LOG *log, gchar *database, gchar *user, gchar *password, guint port );
+ extern void Libere_DB_SQL( struct LOG *log, struct DB **adr_db );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

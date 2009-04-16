@@ -240,7 +240,9 @@
      { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
 
     if (chdir( REPERTOIR_CONF ))                                    /* Positionnement à la bonne position */
-     { printf( "Chdir %s failed\n", REPERTOIR_CONF ); exit(EXIT_ERREUR); }
+     { mkdir ( REPERTOIR_CONF, 0700 );
+       chdir ( REPERTOIR_CONF );
+     }
 
     Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
     if (port!=-1)        Config_cli.port        = port;                /* Priorite à la ligne de commande */
@@ -254,7 +256,6 @@
     Ssl_ctx = Init_ssl();
     if (!Ssl_ctx)
      { Info( Config_cli.log, DEBUG_CRYPTO, _("Can't initialise SSL") );
-       return(EXIT_ERREUR);
      }
     
     sig.sa_handler = Traitement_signaux;

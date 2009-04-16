@@ -30,6 +30,12 @@ AC_SUBST(BONOBO_CFLAGS)
 GNOME2_LIBS="`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0`"
 AC_SUBST(GNOME2_LIBS)
 
+MYSQL_CFLAGS=`mysql_config --cflags`
+AC_SUBST(MYSQL_CFLAGS)
+
+MYSQL_LIBS=`mysql_config --libs`
+AC_SUBST(MYSQL_LIBS)
+
 BONOBO_LIBS=`pkg-config --libs libbonobo-2.0`
 AC_SUBST(BONOBO_LIBS)
 

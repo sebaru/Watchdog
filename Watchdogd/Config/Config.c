@@ -40,19 +40,15 @@
     config->debug_level           = DEFAUT_DEBUG_LEVEL;
     config->timeout_connexion     = DEFAUT_TIMEOUT_CONNEXION;
     config->max_login_failed      = DEFAUT_MAX_LOGIN_FAILED;
-    snprintf( config->port_RS485,        sizeof(config->port_RS485),  "%s", DEFAUT_PORT_RS485   );
-    snprintf( config->crypto_key,        sizeof(config->crypto_key),  "%s", DEFAUT_CRYPTO_KEY   );
-    snprintf( config->home,              sizeof(config->home),        "%s", DEFAUT_HOME         );
-    snprintf( config->db_name,           sizeof(config->db_name),     "%s", DEFAUT_DB_NAME      );
-    snprintf( config->db_password,       sizeof(config->db_password), "%s", DEFAUT_DB_PASSWORD  );
-    snprintf( config->db_admin_username, sizeof(config->db_admin_username),
-                                        "%s", DEFAUT_DB_ADMIN_USERNAME );
+    snprintf( config->port_RS485,  sizeof(config->port_RS485),  "%s", DEFAUT_PORT_RS485  );
+    snprintf( config->crypto_key,  sizeof(config->crypto_key),  "%s", DEFAUT_CRYPTO_KEY  );
+    snprintf( config->home,        sizeof(config->home),        "%s", DEFAUT_HOME        );
+    snprintf( config->db_database, sizeof(config->db_database), "%s", DEFAUT_DB_DATABASE );
+    snprintf( config->db_password, sizeof(config->db_password), "%s", DEFAUT_DB_PASSWORD );
+    snprintf( config->db_username, sizeof(config->db_username), "%s", DEFAUT_DB_USERNAME );
 
     for ( cpt=0; cpt < NBR_ID_RS485; cpt++)
      { config->module_rs485[cpt].id = -1; }
-
-    for ( cpt=0; cpt < NBR_ID_MODBUS; cpt++)
-     { config->module_modbus[cpt].actif = FALSE; }
 
     if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;
                     else fichier = fichier_config;
@@ -85,8 +81,8 @@
     Info_n( config->log, DEBUG_CONFIG, "Config timeout connexion    ", config->timeout_connexion );
     Info_n( config->log, DEBUG_CONFIG, "Config max login failed     ", config->max_login_failed );
     Info_c( config->log, DEBUG_CONFIG, "Config home                 ", config->home );
-    Info_c( config->log, DEBUG_CONFIG, "Config db name              ", config->db_name );
-    Info_c( config->log, DEBUG_CONFIG, "Config db admin username    ", config->db_admin_username );
+    Info_c( config->log, DEBUG_CONFIG, "Config db database          ", config->db_database );
+    Info_c( config->log, DEBUG_CONFIG, "Config db username          ", config->db_username );
     Info_c( config->log, DEBUG_CONFIG, "Config db password          ", config->db_password );
     Info_c( config->log, DEBUG_CONFIG, "Config crypto key           ", config->crypto_key );
     for ( cpt=0; cpt < NBR_ID_RS485; cpt++)
@@ -114,33 +110,5 @@
            }
         }
      }
-  
-    for ( cpt = 0; cpt < NBR_ID_MODBUS; cpt++)
-     { if (config->module_modbus[cpt].actif)
-        { Info_n( config->log, DEBUG_CONFIG, "Config Module MODBUS  actif = ", cpt );
-
-          Info_c( config->log, DEBUG_CONFIG, "                         ip = ", config->module_modbus[cpt].ip );
-
-          Info_n( config->log, DEBUG_CONFIG, "                        bit = ", config->module_modbus[cpt].bit );
-
-          Info_c( config->log, DEBUG_CONFIG, "                   watchdog = ",
-                  (config->module_modbus[cpt].watchdog ? "on" : "off") );
-
-          for (cpt_borne = 0; cpt_borne < NBR_ID_MODBUS_BORNE; cpt_borne++)
-           { if (config->module_modbus[cpt].borne[cpt_borne].actif)
-              { Info_n( config->log, DEBUG_CONFIG, "Config Module MODBUS borne  actif = ", cpt_borne );
-                Info_n( config->log, DEBUG_CONFIG, "                             type = ",
-                        config->module_modbus[cpt].borne[cpt_borne].type );
-                Info_n( config->log, DEBUG_CONFIG, "                          adresse = ",
-                        config->module_modbus[cpt].borne[cpt_borne].adresse );
-                Info_n( config->log, DEBUG_CONFIG, "                              min = ",
-                        config->module_modbus[cpt].borne[cpt_borne].min );
-                Info_n( config->log, DEBUG_CONFIG, "                              nbr = ",
-                        config->module_modbus[cpt].borne[cpt_borne].nbr );
-              }
-           }
-        }
-     }
-
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -190,10 +190,10 @@
     struct PLUGIN_DLS *dls;
     gint cpt;
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,           /* Connexion en tant que user normal */
-                               Config.db_admin_username, Config.db_password );
+    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
+                               Config.db_username, Config.db_password );
     if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "DLS: Charger_plugins: Unable to open database (dsn)", Config.db_name );
+     { Info_c( Config.log, DEBUG_DB, "DLS: Charger_plugins: Unable to open database (dsn)", Config.db_database );
        return;
      }
 

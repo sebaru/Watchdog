@@ -9,6 +9,7 @@ noinst_LTLIBRARIES     = libarchive.la
 libarchive_la_SOURCES    = Archive.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
+	  $(MYSQL_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \

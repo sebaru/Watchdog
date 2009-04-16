@@ -54,11 +54,11 @@
     gchar chaine[2048];
     struct LOG *log;
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,            /* Oui: connexion en tant que Admin */
-                               Config.db_admin_username, Config.db_password );
+    Db_watchdog = ConnexionDB( Config.log, Config.db_database,        /* Oui: connexion en tant que Admin */
+                               Config.db_username, Config.db_password );
     if (!Db_watchdog)
      { g_snprintf( chaine, sizeof(chaine), _("Init_db_watchdog: Failed to open dsn %s, user %s\n"),
-                   Config.db_name, Config.db_admin_username );
+                   Config.db_database, Config.db_username );
        return( strdup(chaine) );
      }
        

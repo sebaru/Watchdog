@@ -239,8 +239,8 @@
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
     Info( Config.log, DEBUG_INFO, _("MSRV: Boucle_pere: Debut boucle sans fin") );
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,        /* Connexion en tant que user normal */
-                               Config.db_admin_username, Config.db_password );
+    Db_watchdog = ConnexionDB( Config.log, Config.db_database,       /* Connexion en tant que user normal */
+                               Config.db_username, Config.db_password );
 
     cpth_prochain_save_db = Partage->top + 3000;
     scenario_test_date = Partage->top + 100;
@@ -554,11 +554,11 @@
        sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
        sigaction( SIGTERM, &sig, NULL );
 encore:   
-       Db_watchdog = ConnexionDB( Config.log, Config.db_name,        /* Connexion en tant que user normal */
-                                  Config.db_admin_username, Config.db_password );
+       Db_watchdog = ConnexionDB( Config.log, Config.db_database,    /* Connexion en tant que user normal */
+                                  Config.db_username, Config.db_password );
 
        if (!Db_watchdog)
-        { Info_c( Config.log, DEBUG_DB, _("Pb acces DB: Unable to open database (dsn)"), Config.db_name ); }
+        { Info_c( Config.log, DEBUG_DB, _("Pb acces DB: Unable to open database (dsn)"), Config.db_database ); }
        else
         { Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
           Charger_eana( Db_watchdog );

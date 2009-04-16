@@ -298,11 +298,11 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,           /* Connexion en tant que user normal */
-                               Config.db_admin_username, Config.db_password );
+    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
+                               Config.db_username, Config.db_password );
 
     if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "RS485: Run_rs485: Unable to open database (dsn)", Config.db_name );
+     { Info_c( Config.log, DEBUG_DB, "RS485: Run_rs485: Unable to open database (dsn)", Config.db_database );
        close(fd_rs485);
        pthread_exit(GINT_TO_POINTER(-1));
      }

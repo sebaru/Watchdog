@@ -11,6 +11,7 @@ INCLUDES= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
 	  -I../../Include \
-          $(GNOME2_CFLAGS)
+          $(MYSQL_CFLAGS) \
+	  $(GNOME2_CFLAGS)
 # \
 #          -D_UTILISATEUR_IHM_

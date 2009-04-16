@@ -64,6 +64,97 @@
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
 /**********************************************************************************************************/
+/* Charger_MODBUS: Requete la DB pour charger les modules et les bornes modbus                            */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static gint Charger_MODBUS ( void  )
+  { gchar requete[128];
+    struct DB *db;
+    gint cpt;
+    
+    db = Init_DB_SQL( Config.log, Config.db_database,                /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return(0);
+     }
+
+    g_snprintf( requete, sizeof(requete), "SELECT id,ip,bit,watchdog FROM %s WHERE actif=1",
+                NOM_TABLE_MODULE_MODBUS
+              );
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: requete failed",
+               (char *)mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return(0);
+     }
+
+    db->result = mysql_use_result ( db->mysql );
+    if ( ! db->result )
+     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: use_result failed",
+               (char *) mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return(0);
+     }
+
+/********************************************** Chargement des modules ************************************/
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
+    Partage->com_modbus.Modules_MODBUS = NULL;
+    cpt = 0;
+    while ((db->row = mysql_fetch_row(db->result)))
+     { struct MODULE_MODBUS *module;
+
+       module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
+       if (!module)                                                   /* Si probleme d'allocation mémoire */
+        { Info( Config.log, DEBUG_MODBUS,
+                "Charger_modules_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
+          continue;
+        }
+
+       module->id       = (gint)db->row[0];
+       g_snprintf( module->ip, sizeof(module->ip), "%s", db->row[1] );
+       module->bit      = (gint)db->row[2];          /* Bit interne B d'etat communication avec le module */
+       module->watchdog = (gint)db->row[3];
+       Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
+                                                                        /* Ajout dans la liste de travail */
+       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+       Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->id       );
+       Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->ip       );
+       Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
+       Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
+     }
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
+    mysql_free_result( db->result );
+/******************************************* Chargement des bornes ****************************************/
+
+    Libere_DB_SQL( Config.log, &db );
+    return(cpt);
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_MODBUS ( void  )
+  { pthread_mutex_lock( &Partage->com_modbus.synchro );
+    if (Partage->com_modbus.Modules_MODBUS)
+     { g_list_foreach( Partage->com_modbus.Modules_MODBUS, (GFunc) g_free, NULL );
+       g_list_free( Partage->com_modbus.Modules_MODBUS );
+       Partage->com_modbus.Modules_MODBUS = NULL;
+     }
+    if (Partage->com_modbus.Bornes_MODBUS)
+     { g_list_foreach( Partage->com_modbus.Bornes_MODBUS, (GFunc) g_free, NULL );
+       g_list_free( Partage->com_modbus.Bornes_MODBUS );
+       Partage->com_modbus.Bornes_MODBUS = NULL;
+     }
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
+  }
+
+#ifdef bouh
+/**********************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                     */
 /* Entrée: un id                                                                                          */
 /* Sortie: néant                                                                                          */
@@ -530,6 +621,7 @@
      }
     return(cpt_borne);
   }
+#endif
 /**********************************************************************************************************/
 /* Modbus_state : Renvoie l'etat du modbus num id en tant que chaine de caractere                         */
 /* Entrée : Le numéro du module et la chaine a remplir                                                    */
@@ -549,8 +641,8 @@
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
 
-    if ( Nbr_borne() == 0 )
-     { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: No module MODBUS found in config -> stop" );
+    if ( Charger_MODBUS() == 0 )                                         /* Chargement des modules modbus */
+     { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -565,7 +657,7 @@
        close(fd_modbus);
        pthread_exit(GINT_TO_POINTER(-1));
      }
-#endif
+
 
 /*    nbr_oct_lu = 0; */
     id_en_cours = 0;
@@ -632,7 +724,8 @@
     /* printf("Interroger borne   %d:%d  request=%d\n", id_en_cours, Comm_MODBUS[id_en_cours].borne_en_cours, Comm_MODBUS[id_en_cours].request );*/
        Interroger_borne ( id_en_cours, Comm_MODBUS[id_en_cours].borne_en_cours );
      }
-
+#endif
+    Decharger_MODBUS();
     Info_n( Config.log, DEBUG_FORK, "MODBUS: Run_modbus: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

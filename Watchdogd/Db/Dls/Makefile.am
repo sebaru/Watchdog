@@ -10,6 +10,7 @@ libdls_la_SOURCES = Dls_db.c
 INCLUDES= -I$(top_srcdir) -I$(includedir) \
           $(GLIB_CFLAGS) \
           $(BONOBO_CFLAGS) \
-          -I$(top_srcdir)/Include \
+          $(MYSQL_CFLAGS) \
+	  -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
 	  -I../../Include
