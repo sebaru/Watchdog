@@ -134,6 +134,9 @@ blanc         [\t ]+
 "MODBUS"                   { Config_lval.val = D_MODBUS;
                              return(D_MODBUS);
                            }
+"ADMIN"                    { Config_lval.val = D_ADMIN;
+                             return(D_ADMIN);
+                           }
 "CONNEXION"                { Config_lval.val = D_CONNEXION;
                              return(D_CONNEXION);
                            }

@@ -59,40 +59,40 @@
     gint opt, ecoute;
 
     if ( (ecoute = socket ( AF_UNIX, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
-     { Info_c( Config.log, DEBUG_NETWORK, "Socket failure...", strerror(errno) ); return(-1); }
+     { Info_c( Config.log, DEBUG_ADMIN, "Socket failure...", strerror(errno) ); return(-1); }
 
     opt = 1;
     if ( setsockopt( ecoute, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE,
                      (char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_NETWORK, "Set option failed", strerror(errno) ); return(-1); }
+     { Info_c( Config.log, DEBUG_ADMIN, "Set option failed", strerror(errno) ); return(-1); }
 
     opt = 16834;
     if ( setsockopt( ecoute, SOL_SOCKET, SO_SNDBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_NETWORK, "SO_SNDBUF failed", strerror(errno) ); return(-1); }
+     { Info_c( Config.log, DEBUG_ADMIN, "SO_SNDBUF failed", strerror(errno) ); return(-1); }
     if ( setsockopt( ecoute, SOL_SOCKET, SO_RCVBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_NETWORK, "SO_RCVBUF failed", strerror(errno) ); return(-1); }
+     { Info_c( Config.log, DEBUG_ADMIN, "SO_RCVBUF failed", strerror(errno) ); return(-1); }
 
 /*    opt = 1;
     if ( setsockopt( ecoute, SOL_TCP, TCP_NODELAY,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_NETWORK, "TCP_NODELAY failed", strerror(errno) ); return(-1); }*/
+     { Info_c( Config.log, DEBUG_ADMIN, "TCP_NODELAY failed", strerror(errno) ); return(-1); }*/
 
     memset( &local, 0, sizeof(local) );
     local.sa_family = AF_UNIX;
     g_snprintf( local.sa_data, sizeof(local.sa_data), "socket.wdg" );
 /*    local.sin_port = htons(Config.port);                      /* Attention: en mode network, pas host !!! */
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
-     { Info_c( Config.log, DEBUG_NETWORK, "Bind failure...", strerror(errno) );
+     { Info_c( Config.log, DEBUG_ADMIN, "Bind failure...", strerror(errno) );
        close(ecoute);
        return(-1);
      }
 
     if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
-     { Info_c( Config.log, DEBUG_NETWORK, "Listen failure...", strerror(errno));
+     { Info_c( Config.log, DEBUG_ADMIN, "Listen failure...", strerror(errno));
        close(ecoute);
        return(-1);
      }
 /*    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                            /* Mode non bloquant */
-    Info_n( Config.log, DEBUG_NETWORK, "        socket", ecoute );
+    Info_n( Config.log, DEBUG_ADMIN, "        socket", ecoute );
     return( ecoute );
   }
 /**********************************************************************************************************/

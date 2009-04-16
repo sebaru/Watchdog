@@ -141,7 +141,7 @@
      { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_admin: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_admin: thread audio seems to be running",
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_admin: thread admin seems to be running",
                    TID_admin ); }
     return(TRUE);
   }

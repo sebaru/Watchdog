@@ -36,6 +36,7 @@ static struct MODULE_RS485 Config_rs485;
 %token   PORT_RS485 DEF_MODULE_RS485 ID INPUT_ANA INPUT_TOR INPUT_CHOC OUTPUT_TOR OUTPUT_ANA
 %token   CRYPTO_KEY TAILLE_CLEF_DH TAILLE_CLEF_RSA
 %token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_FORK D_MODBUS
+%token   D_ADMIN
 %token   D_CONNEXION D_DLS
 
 
@@ -149,6 +150,7 @@ one_debug:
                 | D_CONNEXION { $$ = DEBUG_CONNEXION; }
                 | D_DLS       { $$ = DEBUG_DLS;       }
                 | D_MODBUS    { $$ = DEBUG_MODBUS;    }
+                | D_ADMIN     { $$ = DEBUG_ADMIN;     }
                 | D_ALL       { $$ = ~0; }
 		;
 liste_rs485:	one_rs485 VIRGULE liste_rs485

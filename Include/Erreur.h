@@ -30,6 +30,7 @@
  #define  DEBUG_CONNEXION           (1<<10) /* Debug connexions clientes */
  #define  DEBUG_DLS                 (1<<11) /* Debug modules DLS */
  #define  DEBUG_MODBUS              (1<<12) /* Debug modules MODBUS */
+ #define  DEBUG_ADMIN               (1<<13) /* Debug connexion ADMIN */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );
