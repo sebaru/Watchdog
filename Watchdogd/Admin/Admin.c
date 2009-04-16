@@ -146,7 +146,9 @@
     gint taille;
     taille = read( client->connexion, chaine, sizeof(chaine) );
 
-    printf("Recu %d octets du client %d = %s\n", taille, client->connexion, chaine );
+    if (taille > 0)
+     {    printf("Recu %d octets du client %d = %s\n", taille, client->connexion, chaine );
+     }
   }
 /**********************************************************************************************************/
 /* Gerer_fifo_admin: Ecoute les commandes d'admin locale et les traite                                    */
