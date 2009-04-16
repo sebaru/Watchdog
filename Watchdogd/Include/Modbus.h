@@ -60,21 +60,31 @@
     guint8 data[16]; /* max = 8*2octets ANA */
   };
 
- struct MODULE_MODBUS_BORNE
-  { gboolean actif;
+ struct BORNE_MODBUS
+  { gint id;
     gint type;
-    guint16 adresse;
-    guint16 min;
-    guint16 nbr;
-    struct MODULE_MODBUS *module;
+    gint adresse;
+    gint min;
+    gint nbr;
   };
 
  struct MODULE_MODBUS
   { guint id;                                                 /* Numéro du module dans la base de données */
-    gboolean actif;                                                                    /* Est-il actif ?? */
     guint watchdog;                       /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
     guint bit;                                       /* Bit interne B d'etat communication avec le module */
     gchar ip[32];                                                         /* Adresses IP du module MODBUS */
+
+    gboolean started;                                                                  /* Est-il actif ?? */
+    gint connexion;                                                                 /* FD de connexion IP */
+    gint nbr_oct_lu;                                                            /* Nombre d'octet deja lu */
+    guint16 transaction_id;
+    guint nbr_deconnect;
+    time_t date_retente;
+    time_t date_last_reponse;
+    gboolean request;
+    struct TRAME_MODBUS_REPONSE response;
+    GList *Bornes;
+    GList *borne_en_cours;
   };
 
 /*********************************************** Déclaration des prototypes *******************************/

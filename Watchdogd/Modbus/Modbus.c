@@ -68,11 +68,27 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
+ static struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
+  { GList *liste;
+    liste = Partage->com_modbus.Modules_MODBUS;
+    while ( liste )
+     { struct MODULE_MODBUS *module;
+       module = ((struct MODULE_MODBUS *)liste->data);
+       if (module->id == id) return(module);
+       liste = liste->next;
+     }
+    return(NULL);
+  }
+/**********************************************************************************************************/
+/* Charger_MODBUS: Requete la DB pour charger les modules et les bornes modbus                            */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
  static gint Charger_MODBUS ( void  )
   { gchar requete[128];
     struct DB *db;
     gint cpt;
-    
+
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
@@ -81,7 +97,8 @@
        return(0);
      }
 
-    g_snprintf( requete, sizeof(requete), "SELECT id,ip,bit,watchdog FROM %s WHERE actif=1",
+/********************************************** Chargement des modules ************************************/
+    g_snprintf( requete, sizeof(requete), "SELECT id,ip,bit,watchdog FROM %s",
                 NOM_TABLE_MODULE_MODBUS
               );
 
@@ -100,10 +117,8 @@
        return(0);
      }
 
-/********************************************** Chargement des modules ************************************/
     pthread_mutex_lock( &Partage->com_modbus.synchro );
     Partage->com_modbus.Modules_MODBUS = NULL;
-    cpt = 0;
     while ((db->row = mysql_fetch_row(db->result)))
      { struct MODULE_MODBUS *module;
 
@@ -120,7 +135,6 @@
        module->watchdog = atoi (db->row[3]);
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
                                                                         /* Ajout dans la liste de travail */
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
        Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->id       );
        Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->ip       );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
@@ -129,6 +143,54 @@
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
     mysql_free_result( db->result );
 /******************************************* Chargement des bornes ****************************************/
+    g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr,module FROM %s WHERE actif=1",
+                NOM_TABLE_BORNE_MODBUS
+              );
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: requete failed",
+               (char *)mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return(0);
+     }
+
+    db->result = mysql_use_result ( db->mysql );
+    if ( ! db->result )
+     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: use_result failed",
+               (char *) mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return(0);
+     }
+
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
+    cpt = 0;
+    while ((db->row = mysql_fetch_row(db->result)))
+     { struct MODULE_MODBUS *module;
+       struct BORNE_MODBUS *borne;
+
+       module = Chercher_module_by_id ( atoi(db->row[5]) );
+       if (!module) continue;
+
+       borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
+       if (!borne)                                                   /* Si probleme d'allocation mémoire */
+        { Info( Config.log, DEBUG_MODBUS,
+                "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
+          continue;
+        }
+
+       borne->id       = atoi (db->row[0]);
+       borne->type     = atoi (db->row[1]);
+       borne->adresse  = atoi (db->row[2]);
+       borne->min      = atoi (db->row[3]);
+       borne->nbr      = atoi (db->row[4]);
+
+       module->Bornes = g_list_append ( module->Bornes, borne );
+                                                                        /* Ajout dans la liste de travail */
+       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+       Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS borne id = ", borne->id );
+     }
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
+    mysql_free_result( db->result );
 
     Libere_DB_SQL( Config.log, &db );
     return(cpt);
@@ -139,17 +201,23 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  static void Decharger_MODBUS ( void  )
-  { pthread_mutex_lock( &Partage->com_modbus.synchro );
-    if (Partage->com_modbus.Modules_MODBUS)
-     { g_list_foreach( Partage->com_modbus.Modules_MODBUS, (GFunc) g_free, NULL );
-       g_list_free( Partage->com_modbus.Modules_MODBUS );
-       Partage->com_modbus.Modules_MODBUS = NULL;
+  { GList *liste;
+
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
+    liste = Partage->com_modbus.Modules_MODBUS;
+    while ( liste )
+     { struct MODULE_MODBUS *module;
+       module = (struct MODULE_MODBUS *)liste->data;
+       if (module->Bornes)
+        { g_list_foreach( module->Bornes, (GFunc) g_free, NULL );
+          g_list_free( module->Bornes );
+        }
+       liste = liste->next;
      }
-    if (Partage->com_modbus.Bornes_MODBUS)
-     { g_list_foreach( Partage->com_modbus.Bornes_MODBUS, (GFunc) g_free, NULL );
-       g_list_free( Partage->com_modbus.Bornes_MODBUS );
-       Partage->com_modbus.Bornes_MODBUS = NULL;
-     }
+
+    g_list_foreach( Partage->com_modbus.Modules_MODBUS, (GFunc) g_free, NULL );
+    g_list_free ( Partage->com_modbus.Modules_MODBUS );
+    Partage->com_modbus.Modules_MODBUS = NULL;
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 
@@ -646,20 +714,13 @@
      { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else Info_n( Config.log, DEBUG_INFO, "MODBUS: Run_modbus:  modules MODBUS found  !", cpt );
+    else Info_n( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: modules MODBUS found  !", cpt );
        
 
     memset( &Comm_MODBUS, 0, sizeof( Comm_MODBUS ) );
 
 #ifdef bouh
-    Db_watchdog = ConnexionDB( Config.log, Config.db_name,           /* Connexion en tant que user normal */
-                               Config.db_admin_username, Config.db_password );
 
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "MODBUS: Run_modbus: Unable to open database (dsn)", Config.db_name );
-       close(fd_modbus);
-       pthread_exit(GINT_TO_POINTER(-1));
-     }
 
 
 /*    nbr_oct_lu = 0; */

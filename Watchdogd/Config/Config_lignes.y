@@ -16,8 +16,6 @@ extern int ligne;
 int erreur;                                                             /* Compteur d'erreur du programme */
 static struct CONFIG *Config;
 static struct MODULE_RS485 Config_rs485;
-static struct MODULE_MODBUS Config_modbus;
-static struct MODULE_MODBUS_BORNE Config_modbus_borne;
 
 %}
 
