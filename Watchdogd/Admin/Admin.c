@@ -78,8 +78,9 @@
      { Info_c( Config.log, DEBUG_ADMIN, "TCP_NODELAY failed", strerror(errno) ); return(-1); }*/
 
     memset( &local, 0, sizeof(local) );
+    unlink(NOM_SOCKET);
     local.sun_family = AF_UNIX;
-    g_snprintf( local.sun_path, sizeof(local.sun_path), "socket.wdg" );
+    g_snprintf( local.sun_path, sizeof(local.sun_path), NOM_SOCKET );
 /*    local.sin_port = htons(Config.port);                      /* Attention: en mode network, pas host !!! */
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
      { Info_c( Config.log, DEBUG_ADMIN, "Bind failure...", strerror(errno) );

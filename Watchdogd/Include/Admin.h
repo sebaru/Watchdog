@@ -7,6 +7,8 @@
 #ifndef _ADMIN_H_
  #define _ADMIN_H_
 
+ #define NOM_SOCKET "socket.wdg"
+
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Audio.c */
 #endif
