@@ -219,8 +219,6 @@
     Partage->com_modbus.Modules_MODBUS = NULL;
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
-
-
 /**********************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                     */
 /* Entrée: un id                                                                                          */
@@ -648,7 +646,7 @@
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
 
-       if (Partage->com_modbus.reload)
+       if (Partage->com_modbus.reload == TRUE)
         { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_MODBUS();
           Charger_MODBUS();
