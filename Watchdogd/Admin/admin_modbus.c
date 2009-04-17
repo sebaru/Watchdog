@@ -169,7 +169,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_add ( struct CLIENT_ADMIN *client, gchar *ip_orig, gint bit, gint watchdog )
+ static void Admin_modbus_add ( struct CLIENT_ADMIN *client, gchar *ip_orig, guint bit, guint watchdog )
   { gchar chaine[128], requete[128], *ip;
     struct DB *db;
     gint id;
@@ -232,9 +232,11 @@
      }
     else if ( ! strcmp ( commande, "add" ) )
      { gchar ip[128];
-       int bit, watchdog;
+       guint bit, watchdog;
        sscanf ( ligne, "%s %s %d %d", commande, ip, &bit, &watchdog );/* Découpage de la ligne de commande */
-       Admin_modbus_add ( client, ip, bit, watchdog );
+       if ( bit >= NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " bit should be < NBR_BIT_DLS\n" ); }
+       else Admin_modbus_add ( client, ip, bit, watchdog );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
