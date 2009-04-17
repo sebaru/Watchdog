@@ -233,7 +233,7 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = time(NULL) + MODBUS_RETRY;
-    Info_n( Config.log, DEBUG_INFO, "MODBUS: Deconnecter_module", module->id );
+    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Deconnecter_module", module->id );
     SB( module->bit, 0 );                                     /* Mise a zero du bit interne lié au module */
   }
 /**********************************************************************************************************/
@@ -247,7 +247,7 @@
     int connexion;
 
     if ( !(host = gethostbyname( module->ip )) )                                  /* On veut l'adresse IP */
-     { Info( Config.log, DEBUG_INFO, "MODBUS: Connecter_module: DNS_Failed" );
+     { Info( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module: DNS_Failed" );
        return(FALSE);
      }
 
@@ -256,12 +256,12 @@
     src.sin_port = htons( MODBUS_PORT_TCP );                                /* Port d'attaque des modules */
 
     if ( (connexion = socket( AF_INET, SOCK_STREAM, 0)) == -1)                          /* Protocol = TCP */
-     { Info( Config.log, DEBUG_INFO, "MODBUS: Connecter_module: Socket creation failed" );
+     { Info( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module: Socket creation failed" );
        return(FALSE);
      }
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
-     { Info_c( Config.log, DEBUG_INFO, "MODBUS: Connecter_module: connexion refused by module",
+     { Info_c( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module: connexion refused by module",
                module->ip );
        close(connexion);
        return(FALSE);
@@ -270,7 +270,7 @@
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                          /* Sauvegarde du fd */
     module->date_last_reponse = time(NULL);
-    Info_n( Config.log, DEBUG_INFO, "MODBUS: Connecter_module", module->id );
+    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module", module->id );
     SB( module->bit, 1 );                                        /* Mise a 1 du bit interne lié au module */
 
     return(TRUE);
@@ -295,7 +295,7 @@
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_INFO, "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->id );
+     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->id );
        Deconnecter_module( module );
      }
 
@@ -310,7 +310,7 @@
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_INFO,
+     { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->id );
        Deconnecter_module( module );
      }
@@ -326,7 +326,7 @@
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_INFO, "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->id );
+     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->id );
        Deconnecter_module( module );
      }
 
@@ -341,7 +341,7 @@
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_INFO, "MODBUS: Init_watchdog_modbus: watchdog start failed", module->id );
+     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: watchdog start failed", module->id );
        Deconnecter_module( module );
      }
 
@@ -428,7 +428,7 @@
                if ( A(cpt_a++) ) valeur |= 128;
                requete.valeur = htons( valeur );
                break;
-       default: Info_n( Config.log, DEBUG_INFO,
+       default: Info_n( Config.log, DEBUG_MODBUS,
                         "MODBUS: Interroger_borne_output_tor: borne InputTOR non gérée", borne->nbr
                       );
      }
@@ -455,7 +455,7 @@
        case BORNE_OUTPUT_TOR: Interroger_borne_output_tor( module );                /* Borne de sortie ?? */
             break;
 
-       default: Info(Config.log, DEBUG_INFO, "MODBUS: Interroger_borne: type de borne non reconnu" );
+       default: Info(Config.log, DEBUG_MODBUS, "MODBUS: Interroger_borne: type de borne non reconnu" );
      }
 
     module->nbr_oct_lu = 0;
@@ -471,9 +471,9 @@
     borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
 
     if (module->transaction_id != ntohs(module->response.transaction_id))
-     { Info_n( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: wrong transaction_id  attendu",
+     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  attendu",
                module->transaction_id );
-       Info_n( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: wrong transaction_id  reponse",
+       Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  reponse",
                module->response.transaction_id );
                                             /* On laisse tomber la trame recue, et on attends la suivante */
        memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
@@ -481,7 +481,7 @@
      }
 
     if ( (guint16) module->response.proto_id )
-     { Info( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: wrong proto_id" );
+     { Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong proto_id" );
        Deconnecter_module( module );
      }
 
@@ -504,7 +504,7 @@
                           SE( cpt_e++, ( module->response.data[0] & 32 ) );
                           SE( cpt_e++, ( module->response.data[0] & 128) );
                           break;
-                  default: Info_n( Config.log, DEBUG_INFO,
+                  default: Info_n( Config.log, DEBUG_MODBUS,
                                    "MODBUS: Processer_trame: borne InputTOR non gérée",
                                    borne->nbr
                                  );
@@ -554,7 +554,7 @@
 
                           }
                           break;
-                  default: Info_n( Config.log, DEBUG_INFO,
+                  default: Info_n( Config.log, DEBUG_MODBUS,
                                    "MODBUS: Processer_trame: borne InputANA non gérée", 
                                    borne->nbr
                                  );
@@ -563,15 +563,15 @@
 
 
           case 0x80 + MBUS_ENTRE_TOR:
-               Info( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: Erreur ENTRE_TOR" );
+               Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur ENTRE_TOR" );
                break;
           case 0x80 + MBUS_SORTIE_TOR:
-               Info( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: Erreur SORTIE_TOR" );
+               Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur SORTIE_TOR" );
                break;
           case 0x80 + MBUS_ENTRE_ANA:
-               Info( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: Erreur ENTRE_ANA" );
+               Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur ENTRE_ANA" );
                break;
-          default: Info( Config.log, DEBUG_INFO, "MODBUS: Processer_trame: fct inconnu" );
+          default: Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: fct inconnu" );
         }
      }
 
@@ -590,7 +590,7 @@
     gint retval, cpt;
 
     if (module->date_last_reponse + 10 < time(NULL))              /* Detection attente trop longue */
-     { Info_n( Config.log, DEBUG_INFO, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
+     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
                module->id );
        Deconnecter_module( module );
        return;
@@ -622,7 +622,7 @@
            }
          } 
         else
-         { Info_n( Config.log, DEBUG_FORK, "MODBUS: Recuperer_borne: wrong trame", module->id );
+         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: wrong trame", module->id );
            Deconnecter_module ( module );
          }
       }
@@ -635,10 +635,10 @@
     GList *liste;
 
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
-    Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
+    Info( Config.log, DEBUG_MODBUS, "MODBUS: demarrage" );
 
     if ( Charger_MODBUS() == FALSE )                                    /* Chargement des modules modbus */
-     { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
+     { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -647,7 +647,7 @@
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
 
        if (Partage->com_modbus.reload == TRUE)
-        { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Reloading conf" );
+        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_MODBUS();
           Charger_MODBUS();
           liste = Partage->com_modbus.Modules_MODBUS;
@@ -683,7 +683,7 @@
              module->started = TRUE;
            }
           else
-           { Info_n( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Module DOWN", module->id );
+           { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->id );
              module->date_retente = date + MODBUS_RETRY;
              continue;
            }
@@ -704,7 +704,7 @@
      }
 
     Decharger_MODBUS();
-    Info_n( Config.log, DEBUG_FORK, "MODBUS: Run_modbus: Down", pthread_self() );
+    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
