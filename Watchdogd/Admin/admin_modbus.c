@@ -78,17 +78,23 @@
  void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
-    if ( ! strcmp ( commande, "reload" ) )
+    if ( ! strcmp ( commande, "start" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, num );                     /* Découpage de la ligne de commande */
+       /*Modbus_start ( id );*/
+     }
+    else if ( ! strcmp ( commande, "reload" ) )
      { Partage->com_modbus.reload = TRUE;
        Write_admin ( client->connexion, " MODBUS Reloading in progress\n" );
-/*       while (Partage->com_modbus.reload) sched_yield();
-       Write_admin ( client->connexion, " MODBUS Reloading done\n" );*/
+       while (Partage->com_modbus.reload) sched_yield();
+       Write_admin ( client->connexion, " MODBUS Reloading done\n" );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Write_admin ( client->connexion, "  add                  - Ajoute un module modbus\n" );
+       Write_admin ( client->connexion, "  start id             - Demarre le module id\n" );
+       Write_admin ( client->connexion, "  stop id              - Demarre le module id\n" );
        Write_admin ( client->connexion, "  reload               - Recharge la configuration\n" );
      }
   }

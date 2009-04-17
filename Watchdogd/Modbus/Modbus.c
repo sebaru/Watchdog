@@ -656,7 +656,7 @@
         }
 
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { sleep(1); continue; }
+        { sleep(1); continue; }                        /* Si pas de module, on ne sollicite pas le proc ! */
 
        liste = liste->next;
        if (!liste)                                       /* On vient de faire un tour de tous les modules */
@@ -667,9 +667,7 @@
 
 /*********************************** Début de l'interrogation du module ***********************************/
        if ( date < module->date_retente )                      /* Si attente retente, on change de module */
-        { usleep(1);
-          sched_yield();
-          continue;
+        { continue;
         }
 
        date = time(NULL);                                                 /* On recupere l'heure actuelle */
