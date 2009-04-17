@@ -48,9 +48,11 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n MODBUS[%02d] -> IP=%s, bit=%d, started=%d, transaction=%d, nbr_deconnect=%d, request=%d \n",
+                   "\n MODBUS[%02d] -> IP=%s, bit=%d, started=%d, transaction=%d, "
+                   "nbr_deconnect=%d, request=%d, date_retente=%d \n",
                    module->id, module->ip, module->bit, module->started,
-                   module->transaction_id, module->nbr_deconnect, module->request
+                   module->transaction_id, module->nbr_deconnect, module->request,
+                   (int)module->date_retente
                  );
        Write_admin ( client->connexion, chaine );
 

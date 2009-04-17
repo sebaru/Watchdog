@@ -88,7 +88,7 @@
      }
 
 /********************************************** Chargement des modules ************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT id,ip,bit,watchdog FROM %s",
+    g_snprintf( requete, sizeof(requete), "SELECT id,actif,ip,bit,watchdog FROM %s",
                 NOM_TABLE_MODULE_MODBUS
               );
 
@@ -120,12 +120,14 @@
         }
 
        module->id       = atoi (db->row[0]);
-       g_snprintf( module->ip, sizeof(module->ip), "%s", db->row[1] );
-       module->bit      = atoi (db->row[2]);         /* Bit interne B d'etat communication avec le module */
-       module->watchdog = atoi (db->row[3]);
+       module->actif    = atoi (db->row[1]);
+       g_snprintf( module->ip, sizeof(module->ip), "%s", db->row[2] );
+       module->bit      = atoi (db->row[3]);         /* Bit interne B d'etat communication avec le module */
+       module->watchdog = atoi (db->row[4]);
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
                                                                         /* Ajout dans la liste de travail */
        Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->id       );
+       Info_n( Config.log, DEBUG_MODBUS, "                      -  actif    = ", module->actif    );
        Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->ip       );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
@@ -660,10 +662,12 @@
 #endif
         }
 
-       liste = liste->next;
-       if (!liste)                                    /* On vient de faire un tour de tous les modules */
-        { liste = Partage->com_modbus.Modules_MODBUS; }
-       module = (struct MODULE_MODBUS *)liste->data;
+       do { liste = liste->next;
+            if (!liste)                                  /* On vient de faire un tour de tous les modules */
+             { liste = Partage->com_modbus.Modules_MODBUS; }
+            module = (struct MODULE_MODBUS *)liste->data;
+          }
+       while (module->actif != TRUE);
 
 /*********************************** Début de l'interrogation du module ***********************************/
        if ( date < module->date_retente )                      /* Si attente retente, on change de module */
