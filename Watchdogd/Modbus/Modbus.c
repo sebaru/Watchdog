@@ -635,7 +635,6 @@
  void Run_modbus ( void )
   { struct MODULE_MODBUS *module;
     GList *liste;
-    guint cpt;
 
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
@@ -650,10 +649,10 @@
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
 
        if (Partage->com_modbus.reload)
-        { int i;
-          Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Reloading conf" );
+        { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_MODBUS();
           Charger_MODBUS();
+          liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.reload = FALSE;
         }
 
