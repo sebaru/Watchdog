@@ -75,6 +75,88 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
+ static void Admin_modbus_start ( struct CLIENT_ADMIN *client, gint id )
+  { struct MODULE_MODBUS *module;
+    gchar chaine[128], requete[128];
+    struct DB *db;
+
+    module = Chercher_module_by_id ( id );
+    if ( !module );
+     { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d not found", id );
+       Write_admin ( client->connexion, chaine );
+       return;
+     }
+
+    module->actif = TRUE;
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_start: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=1 WHERE id=%d",
+                NOM_TABLE_MODULE_MODBUS, id
+              );
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_start: requete failed",
+               (char *)mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+    Libere_DB_SQL( Config.log, &db );
+
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started", id );
+    Write_admin ( client->connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ static void Admin_modbus_stop ( struct CLIENT_ADMIN *client, gint id )
+  { struct MODULE_MODBUS *module;
+    gchar chaine[128], requete[128];
+    struct DB *db;
+
+    module = Chercher_module_by_id ( id );
+    if ( !module );
+     { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d not found", id );
+       Write_admin ( client->connexion, chaine );
+       return;
+     }
+
+    module->actif = FALSE;
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_stop: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=0 WHERE id=%d",
+                NOM_TABLE_MODULE_MODBUS, id
+              );
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_stop: requete failed",
+               (char *)mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+    Libere_DB_SQL( Config.log, &db );
+
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started", id );
+    Write_admin ( client->connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
  void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
@@ -82,8 +164,13 @@
 
     if ( ! strcmp ( commande, "start" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, num );                     /* Découpage de la ligne de commande */
-       /*Modbus_start ( id );*/
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_modbus_start ( client, num );
+     }
+    else if ( ! strcmp ( commande, "stop" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_modbus_stop ( client, num );
      }
     else if ( ! strcmp ( commande, "reload" ) )
      { Partage->com_modbus.reload = TRUE;

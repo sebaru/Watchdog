@@ -97,6 +97,7 @@
 
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
+ extern struct MODULE_MODBUS *Chercher_module_by_id ( gint id );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

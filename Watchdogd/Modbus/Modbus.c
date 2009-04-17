@@ -58,7 +58,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
+ struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
   { GList *liste;
     liste = Partage->com_modbus.Modules_MODBUS;
     while ( liste )
@@ -663,7 +663,10 @@
         { liste = Partage->com_modbus.Modules_MODBUS; }
 
        module = (struct MODULE_MODBUS *)liste->data;
-       if (module->actif != TRUE) continue;
+       if (module->actif != TRUE)
+        { if (module->started == TRUE) Deconnecter_module ( module );
+          continue;
+        }
 
 /*********************************** Début de l'interrogation du module ***********************************/
        if ( date < module->date_retente )                      /* Si attente retente, on change de module */
