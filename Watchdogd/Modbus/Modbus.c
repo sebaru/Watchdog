@@ -645,6 +645,7 @@
     liste = Partage->com_modbus.Modules_MODBUS;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
+       sched_yield();
 
        if (Partage->com_modbus.reload == TRUE)
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
@@ -655,17 +656,14 @@
         }
 
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { sleep(1);
-          sched_yield();
-          continue;
-        }
+        { sleep(1); continue; }
 
-       do { liste = liste->next;
-            if (!liste)                                  /* On vient de faire un tour de tous les modules */
-             { liste = Partage->com_modbus.Modules_MODBUS; }
-            module = (struct MODULE_MODBUS *)liste->data;
-          }
-       while (module->actif != TRUE);
+       liste = liste->next;
+       if (!liste)                                       /* On vient de faire un tour de tous les modules */
+        { liste = Partage->com_modbus.Modules_MODBUS; }
+
+       module = (struct MODULE_MODBUS *)liste->data;
+       if (module->actif != TRUE) continue;
 
 /*********************************** Début de l'interrogation du module ***********************************/
        if ( date < module->date_retente )                      /* Si attente retente, on change de module */
