@@ -80,12 +80,6 @@
     gboolean sigusr1;
   };
 
- struct COM_MODBUS                                                 /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *Modules_MODBUS;
-    gboolean sigusr1;
-  };
-
  struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_audio;                                                   /* liste de message a prononcer */

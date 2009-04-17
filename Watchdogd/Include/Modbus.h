@@ -18,6 +18,12 @@
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
  #define NOM_TABLE_BORNE_MODBUS    "modbus_bornes"
 
+ struct COM_MODBUS                                                 /* Communication entre DLS et la RS485 */
+  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *Modules_MODBUS;
+    gboolean reload;
+  };
+
  enum
   { BORNE_INPUT_TOR,
     BORNE_OUTPUT_TOR,

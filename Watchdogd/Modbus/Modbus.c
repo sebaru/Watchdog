@@ -637,6 +637,7 @@
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "MODBUS: demarrage" );
 
+reload:
     if ( (cpt = Charger_MODBUS()) == 0 )                                 /* Chargement des modules modbus */
      { Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
@@ -647,19 +648,12 @@
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
 
-       if (Partage->com_modbus.sigusr1)
+       if (Partage->com_modbus.reload)
         { int i;
-#ifdef bouh
-          Partage->com_modbus.sigusr1 = FALSE;
-               Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: SIGUSR1" );
-          for (i=0; i<NBR_ID_MODBUS; i++)
-           { Info_n( Config.log, DEBUG_INFO, "       ------ module_modbus", i );
-             Info_n( Config.log, DEBUG_INFO, "                    started", Comm_MODBUS[i].started );
-             Info_n( Config.log, DEBUG_INFO, "             transaction_id", Comm_MODBUS[i].transaction_id );
-             Info_n( Config.log, DEBUG_INFO, "                    request", Comm_MODBUS[i].request );
-             Info_n( Config.log, DEBUG_INFO, "              nbr_deconnect", Comm_MODBUS[i].nbr_deconnect );
-           }
-#endif
+          Partage->com_modbus.reload = FALSE;
+          Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Reloading conf" );
+          Decharger_MODBUS();
+          goto reload;
         }
 
        do { liste = liste->next;

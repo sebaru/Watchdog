@@ -108,7 +108,7 @@
                        Partage->com_ssrv_dls.sigusr1 = TRUE;
                        Partage->com_dls_rs.sigusr1   = TRUE;
                        Partage->com_msrv_sms.sigusr1 = TRUE;
-                       Partage->com_modbus.sigusr1 = TRUE;
+                       Partage->com_modbus.reload = TRUE;
                        Partage->com_arch.sigusr1 = TRUE;          
                        Partage->com_audio.sigusr1 = TRUE;          
                        Partage->com_admin.sigusr1 = TRUE;          

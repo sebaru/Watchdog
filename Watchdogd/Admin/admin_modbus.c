@@ -80,18 +80,13 @@
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
-    if ( ! strcmp ( commande, "add" ) )
-     { int i;
-      /* for (i=0; i<NBR_ID_MODBUS; i++)
-        { gchar chaine[256];
-          Modbus_state( i, chaine, sizeof(chaine) );
-          Write_admin ( client->connexion, chaine );
-        }*/
+    if ( ! strcmp ( commande, "reload" ) )
+     { Partage->com_modbus.reload = TRUE;
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
        Write_admin ( client->connexion, "  add                  - Ajoute un module modbus\n" );
-       Write_admin ( client->connexion, "  apply                - Applique la configuration\n" );
+       Write_admin ( client->connexion, "  reload               - Recharge la configuration\n" );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
