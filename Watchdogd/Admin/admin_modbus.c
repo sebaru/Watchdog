@@ -60,8 +60,8 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, transaction=%d, "
-                   "nbr_deconnect=%d, request=%d, date_retente=%d \n",
+                   "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, trans.=%d, "
+                   "deco.=%d, request=%d, retente=%d \n",
                    module->id, module->ip, module->bit, module->actif, module->started,
                    module->transaction_id, module->nbr_deconnect, module->request,
                    (int)module->date_retente
@@ -88,16 +88,11 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_modbus_start ( struct CLIENT_ADMIN *client, gint id )
-  { struct MODULE_MODBUS *module;
-    gchar chaine[128], requete[128];
+  { gchar chaine[128], requete[128];
     struct DB *db;
 
-    module = Chercher_module_by_id ( id );
-    if ( !module )
-     { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d not found", id );
-       Write_admin ( client->connexion, chaine );
-       return;
-     }
+    while (Partage->com_modbus.admin_start) sched_yield();
+    Partage->com_modbus.admin_start = id;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -119,7 +114,6 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    module->actif = TRUE;
     g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started", id );
     Write_admin ( client->connexion, chaine );
   }
@@ -129,16 +123,11 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_modbus_stop ( struct CLIENT_ADMIN *client, gint id )
-  { struct MODULE_MODBUS *module;
-    gchar chaine[128], requete[128];
+  { gchar chaine[128], requete[128];
     struct DB *db;
 
-    module = Chercher_module_by_id ( id );
-    if ( !module );
-     { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d not found", id );
-       Write_admin ( client->connexion, chaine );
-       return;
-     }
+    while (Partage->com_modbus.admin_stop) sched_yield();
+    Partage->com_modbus.admin_stop = id;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -160,7 +149,6 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    module->actif = FALSE;
     g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started", id );
     Write_admin ( client->connexion, chaine );
   }
@@ -177,7 +165,7 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_stop: impossible d'ouvrir la Base de données",
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_add: impossible d'ouvrir la Base de données",
                Config.db_database );
        return(-1);
      }
@@ -203,8 +191,56 @@
      }
     id = mysql_insert_id(db->mysql);
     Libere_DB_SQL( Config.log, &db );
-    Admin_modbus_reload ( client );
+    while (Partage->com_modbus.admin_add) sched_yield();
+    Partage->com_modbus.admin_add = id;
     return(id);
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ static void Admin_modbus_del ( struct CLIENT_ADMIN *client, gint id )
+  { struct MODULE_MODBUS *module;
+    gchar requete[128], chaine[128];
+    struct DB *db;
+
+    while (Partage->com_modbus.admin_del) sched_yield();
+    Partage->com_modbus.admin_del = id;
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE id = %d",
+                NOM_TABLE_MODULE_MODBUS, id
+              );
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: requete failed",
+               (char *)mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE module = %d",
+                NOM_TABLE_BORNE_MODBUS, id
+              );
+
+    if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: requete failed",
+               (char *)mysql_error(db->mysql) );
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    Libere_DB_SQL( Config.log, &db );
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted", id );
+    Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */

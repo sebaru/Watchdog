@@ -58,7 +58,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
+ static struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
   { GList *liste;
     liste = Partage->com_modbus.Modules_MODBUS;
     while ( liste )
@@ -107,7 +107,6 @@
        return(FALSE);
      }
 
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
     Partage->com_modbus.Modules_MODBUS = NULL;
     cpt = 0;
     while ((db->row = mysql_fetch_row(db->result)))
@@ -134,7 +133,6 @@
        Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
      }
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
     mysql_free_result( db->result );
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: module MODBUS found  !", cpt );
 /******************************************* Chargement des bornes ****************************************/
@@ -157,7 +155,6 @@
        return(FALSE);
      }
 
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
     cpt = 0;
     while ((db->row = mysql_fetch_row(db->result)))
      { struct MODULE_MODBUS *module;
@@ -187,7 +184,6 @@
        Info_n( Config.log, DEBUG_MODBUS, "                              min = ", borne->min     );
        Info_n( Config.log, DEBUG_MODBUS, "                              nbr = ", borne->nbr     );
      }
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
     mysql_free_result( db->result );
 
     Libere_DB_SQL( Config.log, &db );
@@ -199,25 +195,24 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static void Decharger_MODBUS ( void  )
-  { GList *liste;
-
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
-    liste = Partage->com_modbus.Modules_MODBUS;
-    while ( liste )
-     { struct MODULE_MODBUS *module;
-       module = (struct MODULE_MODBUS *)liste->data;
-       if (module->Bornes)
-        { g_list_foreach( module->Bornes, (GFunc) g_free, NULL );
-          g_list_free( module->Bornes );
-        }
-       liste = liste->next;
+ static void Decharger_un_MODBUS ( struct MODULE_MODBUS *module )
+  {if (module->Bornes)
+     { g_list_foreach( module->Bornes, (GFunc) g_free, NULL );
+       g_list_free( module->Bornes );
      }
-
-    g_list_foreach( Partage->com_modbus.Modules_MODBUS, (GFunc) g_free, NULL );
-    g_list_free ( Partage->com_modbus.Modules_MODBUS );
-    Partage->com_modbus.Modules_MODBUS = NULL;
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
+    Partage->com_modbus.Modules_MODBUS = g_list_remove ( Partage->com_modbus.Modules_MODBUS, module );
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_MODBUS ( void  )
+  { struct MODULE_MODBUS *module;
+    while ( Partage->com_modbus.Modules_MODBUS )
+     { module = (struct MODULE_MODBUS *)Partage->com_modbus.Modules_MODBUS->data;
+       Decharger_un_MODBUS ( module );
+     }
   }
 /**********************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                     */
@@ -653,6 +648,14 @@
           Charger_MODBUS();
           liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.reload = FALSE;
+        }
+
+       if (Partage->com_modbus.admin_del)
+        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting module" );
+          module = Chercher_module_by_id ( Partage->com_modbus.admin_del );
+          Deconnecter_module  ( module );
+          Decharger_un_MODBUS ( module );
+          Partage->com_modbus.admin_del = 0;
         }
 
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */

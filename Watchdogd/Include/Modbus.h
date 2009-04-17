@@ -22,6 +22,10 @@
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_MODBUS;
     gboolean reload;
+    guint admin_del;                                                            /* Demande de deconnexion */
+    guint admin_start;                                                          /* Demande de deconnexion */
+    guint admin_stop;                                                           /* Demande de deconnexion */
+    guint admin_add;                                                            /* Demande de deconnexion */
   };
 
  enum
@@ -97,7 +101,6 @@
 
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
- extern struct MODULE_MODBUS *Chercher_module_by_id ( gint id );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
