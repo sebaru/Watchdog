@@ -60,9 +60,9 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n MODBUS[%02d] -> IP=%s, bit=%d, started=%d, transaction=%d, "
+                   "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, transaction=%d, "
                    "nbr_deconnect=%d, request=%d, date_retente=%d \n",
-                   module->id, module->ip, module->bit, module->started,
+                   module->id, module->ip, module->bit, module->actif, module->started,
                    module->transaction_id, module->nbr_deconnect, module->request,
                    (int)module->date_retente
                  );
@@ -201,8 +201,8 @@
        Libere_DB_SQL( Config.log, &db );
        return;
      }
-    Libere_DB_SQL( Config.log, &db );
     id = mysql_insert_id(db->mysql);
+    Libere_DB_SQL( Config.log, &db );
     g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id );
     Write_admin ( client->connexion, chaine );
     Admin_modbus_reload ( client );
@@ -238,6 +238,7 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
+       Write_admin ( client->connexion, "  add ip bit watchdog  - Ajoute un module MODBUS\n" );
        Write_admin ( client->connexion, "  start id             - Demarre le module id\n" );
        Write_admin ( client->connexion, "  stop id              - Demarre le module id\n" );
        Write_admin ( client->connexion, "  reload               - Recharge la configuration\n" );

@@ -669,11 +669,10 @@
         }
 
 /*********************************** Début de l'interrogation du module ***********************************/
+       date = time(NULL);                                                 /* On recupere l'heure actuelle */
        if ( date < module->date_retente )                      /* Si attente retente, on change de module */
         { continue;
         }
-
-       date = time(NULL);                                                 /* On recupere l'heure actuelle */
 
        if ( ! module->started )                                              /* Communication OK ou non ? */
         { if ( Connecter_module( module ) )
