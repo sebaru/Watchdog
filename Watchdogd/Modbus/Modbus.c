@@ -138,7 +138,7 @@
     mysql_free_result( db->result );
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: module MODBUS found  !", cpt );
 /******************************************* Chargement des bornes ****************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr,module FROM %s WHERE actif=1",
+    g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr,module FROM %s",
                 NOM_TABLE_BORNE_MODBUS
               );
 

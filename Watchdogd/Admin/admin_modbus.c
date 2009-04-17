@@ -93,7 +93,7 @@
     struct DB *db;
 
     module = Chercher_module_by_id ( id );
-    if ( !module );
+    if ( !module )
      { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d not found", id );
        Write_admin ( client->connexion, chaine );
        return;
