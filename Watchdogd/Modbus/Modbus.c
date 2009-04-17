@@ -651,10 +651,10 @@
 
        if (Partage->com_modbus.reload)
         { int i;
-          Partage->com_modbus.reload = FALSE;
           Info( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_MODBUS();
           Charger_MODBUS();
+          Partage->com_modbus.reload = FALSE;
         }
 
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */

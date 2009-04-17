@@ -82,6 +82,9 @@
 
     if ( ! strcmp ( commande, "reload" ) )
      { Partage->com_modbus.reload = TRUE;
+       Write_admin ( client->connexion, " MODBUS Reloading in progress\n" );
+       while (Partage->com_modbus.reload) sched_yield();
+       Write_admin ( client->connexion, " MODBUS Reloading done\n" );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
