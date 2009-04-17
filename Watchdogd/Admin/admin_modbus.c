@@ -169,8 +169,8 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_add ( struct CLIENT_ADMIN *client, gchar *ip_orig, guint bit, guint watchdog )
-  { gchar chaine[128], requete[128], *ip;
+ static gint Admin_modbus_add ( struct CLIENT_ADMIN *client, gchar *ip_orig, guint bit, guint watchdog )
+  { gchar requete[128], *ip;
     struct DB *db;
     gint id;
 
@@ -179,14 +179,14 @@
     if (!db)
      { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_stop: impossible d'ouvrir la Base de données",
                Config.db_database );
-       return;
+       return(-1);
      }
 
     ip = Normaliser_chaine ( Config.log, ip_orig );                      /* Formatage correct des chaines */
     if (!ip)
      { Info( Config.log, DEBUG_ADMIN, "Admin_modbus_add: Normalisation impossible" );
        Libere_DB_SQL( Config.log, &db );
-       return;
+       return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),
@@ -199,13 +199,12 @@
      { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_add: requete failed",
                (char *)mysql_error(db->mysql) );
        Libere_DB_SQL( Config.log, &db );
-       return;
+       return(-1);
      }
     id = mysql_insert_id(db->mysql);
     Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id );
-    Write_admin ( client->connexion, chaine );
     Admin_modbus_reload ( client );
+    return(id);
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
@@ -231,12 +230,18 @@
      { Admin_modbus_reload(client);
      }
     else if ( ! strcmp ( commande, "add" ) )
-     { gchar ip[128];
+     { gchar ip[128], chaine[128];
        guint bit, watchdog;
        sscanf ( ligne, "%s %s %d %d", commande, ip, &bit, &watchdog );/* Découpage de la ligne de commande */
        if ( bit >= NBR_BIT_DLS )
         { Write_admin ( client->connexion, " bit should be < NBR_BIT_DLS\n" ); }
-       else Admin_modbus_add ( client, ip, bit, watchdog );
+       else
+        { int id;
+          id = Admin_modbus_add ( client, ip, bit, watchdog );
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id ); }
+          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
+          Write_admin ( client->connexion, chaine );
+        }
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
