@@ -95,6 +95,7 @@
     while ( Recuperer_ligne_SQL (Config.log, db) )
      { struct MODULE_MODBUS *module;
 printf("1 %s\n", db->row[0]);
+printf("1bis %d\n", atoi(db->row[0]));
        module->id       = id;
        module->actif    = atoi (db->row[0]);
 printf("2\n");
