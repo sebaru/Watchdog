@@ -47,12 +47,21 @@
  #include "proto_dls.h"                                                             /* Acces a A(x), E(x) */   
  #include "Modbus.h"
 
- gchar *Mode_borne[NBR_MODE_BORNE] =
-  { "input_TOR", "output_TOR", "input_ANA", "output_ANA" };
+ gchar *Mode_borne[NBR_MODE_BORNE+1] =
+  { "input_TOR", "output_TOR", "input_ANA", "output_ANA", "unknown" };
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-
+/**********************************************************************************************************/
+/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ gint Mode_borne_vers_id ( gchar *mode )
+  { gint i;
+    for (i = 0; i<NBR_MODE_BORNE; i++)
+     { if ( ! strcmp ( mode, Mode_borne[i] ) ) break;
+     }
+    return(i);
+  }
 /**********************************************************************************************************/
 /* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
@@ -195,6 +204,56 @@
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Charger_une_borne_MODBUS ( gint id )
+  { struct MODULE_MODBUS *module;
+    struct BORNE_MODBUS *borne;
+    gchar requete[128];
+    struct DB *db;
+    
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db) return;
+
+    g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr,module FROM %s WHERE id=%d",
+                NOM_TABLE_BORNE_MODBUS, id
+              );
+
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    if ( Recuperer_ligne_SQL (Config.log, db) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
+    if (!borne)                                                   /* Si probleme d'allocation mémoire */
+     { Info( Config.log, DEBUG_MEM,
+             "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    borne->id       = atoi (db->row[0]);
+    borne->type     = atoi (db->row[1]);
+    borne->adresse  = atoi (db->row[2]);
+    borne->min      = atoi (db->row[3]);
+    borne->nbr      = atoi (db->row[4]);
+
+    module = Chercher_module_by_id ( atoi(db->row[5]) );
+    if (module)
+     { module->Bornes = g_list_append ( module->Bornes, borne ); }      /* Ajout dans la liste de travail */
+    else g_free(borne);                                                   /* Sinon, on oublie, tant pis ! */
+    Liberer_resultat_SQL ( Config.log, db );
+    Libere_DB_SQL( Config.log, &db );
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -687,6 +746,12 @@
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module" );
           Charger_un_MODBUS ( Partage->com_modbus.admin_add );
           Partage->com_modbus.admin_add = 0;
+        }
+
+       if (Partage->com_modbus.admin_add_borne)
+        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module une borne" );
+          Charger_une_borne_MODBUS ( Partage->com_modbus.admin_add_borne );
+          Partage->com_modbus.admin_add_borne = 0;
         }
 
        if (Partage->com_modbus.admin_start)

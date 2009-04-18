@@ -26,6 +26,7 @@
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     guint admin_add;                                                            /* Demande de deconnexion */
+    guint admin_add_borne;                                                      /* Demande de deconnexion */
   };
 
  enum
@@ -36,7 +37,7 @@
     NBR_MODE_BORNE
   };
 
- extern gchar *Mode_borne[NBR_MODE_BORNE];
+ extern gchar *Mode_borne[NBR_MODE_BORNE+1];
 
 
  struct TRAME_MODBUS_REQUETE_ETOR                                        /* Definition d'une trame MODBUS */
@@ -101,7 +102,7 @@
 
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
-
+ extern gint Mode_borne_vers_id ( gchar *mode );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

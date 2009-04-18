@@ -192,6 +192,41 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
+ static gint Admin_modbus_add_borne ( struct CLIENT_ADMIN *client, gchar *type,
+                                      guint adresse, guint min, guint nbr, guint module )
+  { gchar requete[128];
+    struct DB *db;
+    gint id;
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_add: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+                "INSERT INTO %s(type,adresse,min,nbr,module) VALUES (%d,%d,%d,%d,%d)",
+                NOM_TABLE_BORNE_MODBUS, Mode_borne_vers_id(type), adresse, min, nbr, module
+              );
+
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( Config.log, db );
+    Libere_DB_SQL( Config.log, &db );
+
+    while (Partage->com_modbus.admin_add_borne) sched_yield();
+    Partage->com_modbus.admin_add_borne = id;
+    return(id);
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
  static void Admin_modbus_del ( struct CLIENT_ADMIN *client, gint id )
   { gchar requete[128], chaine[128];
     struct DB *db;
@@ -266,6 +301,22 @@
           Write_admin ( client->connexion, chaine );
         }
      }
+    else if ( ! strcmp ( commande, "addborne" ) )
+     { gchar type[128], chaine[128];
+       guint adresse, min, nbr, module;
+       sscanf ( ligne, "%s %s %d %d %d", commande, type, &adresse, &min, &nbr, &module );
+       if ( min >= NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " min should be < NBR_BIT_DLS\n" ); }
+       else if ( nbr > 8 )
+        { Write_admin ( client->connexion, " nbr should be <= 8\n" ); }
+       else
+        { int id;
+          id = Admin_modbus_add_borne ( client, type, adresse, min, nbr, module );
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id ); }
+          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
+          Write_admin ( client->connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "delete" ) )
      { gchar chaine[128];
        guint num;
@@ -273,12 +324,20 @@
        Admin_modbus_del ( client, num );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Write_admin ( client->connexion, "  add ip bit watchdog  - Ajoute un module MODBUS\n" );
-       Write_admin ( client->connexion, "  delete id            - Supprime le module id\n" );
-       Write_admin ( client->connexion, "  start id             - Demarre le module id\n" );
-       Write_admin ( client->connexion, "  stop id              - Demarre le module id\n" );
-       Write_admin ( client->connexion, "  reload               - Recharge la configuration\n" );
+     { Write_admin ( client->connexion,
+                     "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
+       Write_admin ( client->connexion,
+                     "  addborne type adresse min nbr moduleID - Ajoute une borne a un module\n" );
+       Write_admin ( client->connexion,
+                     "  add ip bit watchdog                    - Ajoute un module MODBUS\n" );
+       Write_admin ( client->connexion,
+                     "  delete id                              - Supprime le module id\n" );
+       Write_admin ( client->connexion,
+                     "  start id                               - Demarre le module id\n" );
+       Write_admin ( client->connexion,
+                     "  stop id                                - Demarre le module id\n" );
+       Write_admin ( client->connexion,
+                     "  reload                                 - Recharge la configuration\n" );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
