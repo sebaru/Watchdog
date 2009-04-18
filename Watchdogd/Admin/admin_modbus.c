@@ -31,9 +31,6 @@
  #include "Modbus.h"
  #include "watchdogd.h"
 
- extern struct CONFIG Config;
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-
 /**********************************************************************************************************/
 /* Admin_modbus_reload: Demande le rechargement des conf MODBUS                                           */
 /* Entrée: le client                                                                                      */
@@ -106,10 +103,8 @@
                 NOM_TABLE_MODULE_MODBUS, id
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_start: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return;
      }
     Libere_DB_SQL( Config.log, &db );
@@ -141,10 +136,8 @@
                 NOM_TABLE_MODULE_MODBUS, id
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_stop: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return;
      }
     Libere_DB_SQL( Config.log, &db );
@@ -183,14 +176,13 @@
               );
     g_free(ip);
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_add: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
-    id = mysql_insert_id(db->mysql);
+    id = Recuperer_last_ID_SQL ( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
+
     while (Partage->com_modbus.admin_add) sched_yield();
     Partage->com_modbus.admin_add = id;
     return(id);
@@ -219,10 +211,8 @@
                 NOM_TABLE_MODULE_MODBUS, id
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return;
      }
 
@@ -230,10 +220,8 @@
                 NOM_TABLE_BORNE_MODBUS, id
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return;
      }
 
