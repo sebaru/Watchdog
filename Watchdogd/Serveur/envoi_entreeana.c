@@ -26,7 +26,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -91,7 +91,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate entree %s:\n%s"), rezo_entree->libelle, Db_watchdog->last_err);
+                   "Unable to locate entree %s:\n%s", rezo_entree->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -111,7 +111,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit entree %s:\n%s"), rezo_entree->libelle, Db_watchdog->last_err);
+                   "Unable to edit entree %s:\n%s", rezo_entree->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -126,7 +126,7 @@
               if (!entree)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -139,7 +139,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate entree %s:\n%s"), rezo_entree->libelle, Db_watchdog->last_err);
+                          "Unable to locate entree %s:\n%s", rezo_entree->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -165,7 +165,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete entree %s:\n%s"), rezo_entree->libelle, Db_watchdog->last_err);
+                   "Unable to delete entree %s:\n%s", rezo_entree->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -185,7 +185,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add entree %d:\n%s"), rezo_entree->num, Db_watchdog->last_err);
+                   "Unable to add entree %d:\n%s", rezo_entree->num, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -193,7 +193,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate entree %d:\n%s"), rezo_entree->num, Db_watchdog->last_err);
+                          "Unable to locate entree %d:\n%s", rezo_entree->num, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -204,7 +204,7 @@
               if (!entree)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                  Charger_eana ( Db_watchdog );
@@ -217,7 +217,7 @@
          }
   }
 /**********************************************************************************************************/
-/* Envoyer_entrees: Envoi des entrees au client GID_ENTREEANA                                             */
+/* Envoyer_entreeANA_tag : Envoie les entreANA au client. Attention, c'est un thread !                    */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -225,24 +225,30 @@
   { struct CMD_SHOW_ENTREEANA *rezo_entree;
     struct CMD_ENREG nbr;
     struct ENTREEANA_DB *entree;
-    struct DB *Db_watchdog;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_entreeANADB( Config.log, Db_watchdog );
-    if (!hquery)
+    prctl(PR_SET_NAME, "W-EnvoiANA", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading entrees") );
+    if (!Recuperer_entreeANADB( Config.log, db ))
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       return;
+     }                                                                           /* Si pas de histos (??) */
+
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d entrees", db->nbr_result );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { entree = Recuperer_entreeANADB_suite( Config.log, Db_watchdog, hquery );
+     { entree = Recuperer_entreeANADB_suite( Config.log, db );
        if (!entree)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

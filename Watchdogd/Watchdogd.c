@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
  #include <openssl/ssl.h>
  #include <openssl/err.h>
  #include <sys/prctl.h>
@@ -66,16 +65,16 @@
  static void Traitement_signaux( int num )
   { switch (num)
      { case SIGQUIT:
-       case SIGINT:  Info_n( Config.log, DEBUG_INFO, _("SIGINT Caught" ), Partage->Arret );
+       case SIGINT:  Info_n( Config.log, DEBUG_INFO, "SIGINT Caught", Partage->Arret );
                      Partage->Arret = FIN;                   /* On demande l'arret de la boucle programme */
                      Info_n( Config.log, DEBUG_INFO, "Arret=fin", Partage->Arret );
                      break;
-       case SIGTERM: Info_n( Config.log, DEBUG_INFO, _("SIGTERM Caught" ), Partage->Arret );
+       case SIGTERM: Info_n( Config.log, DEBUG_INFO, "SIGTERM Caught", Partage->Arret );
                                                                            /* Si arret demandé du serveur */
                      Partage->Arret = FIN;                   /* On demande l'arret de la boucle programme */
                      Info_n( Config.log, DEBUG_INFO, "Arret=fin", Partage->Arret );
                      break;
-       case SIGCHLD: Info( Config.log, DEBUG_INFO, _("SIGCHLD Caught" ) ); /* Si arret demandé du serveur */
+       case SIGCHLD: Info( Config.log, DEBUG_INFO, "SIGCHLD Caught" ); /* Si arret demandé du serveur */
                      break;
        case SIGALRM: Partage->top++;
                      if (!Partage->top) /* Si on passe par zero, on le dit (DEBUG interference) */
@@ -239,7 +238,7 @@
     gint scenario_test_date;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
-    Info( Config.log, DEBUG_INFO, _("MSRV: Boucle_pere: Debut boucle sans fin") );
+    Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Debut boucle sans fin" );
     Db_watchdog = ConnexionDB( Config.log, Config.db_database,       /* Connexion en tant que user normal */
                                Config.db_username, Config.db_password );
 
@@ -272,7 +271,7 @@
      }
 
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
-    Info( Config.log, DEBUG_INFO, _("MSRV: Boucle_pere: fin boucle sans fin") );
+    Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: fin boucle sans fin" );
     DeconnexionDB( Config.log, &Db_watchdog );                                  /* Deconnexion de la base */
     pthread_exit( NULL );
   }
@@ -289,23 +288,23 @@
     FILE *fd;
     struct poptOption Options[]= 
      { { "port", 'p',       POPT_ARG_INT,
-         &port,             0, _("Port to listen to"), "PORT" },
+         &port,             0, "Port to listen to", "PORT" },
        { "foreground", 'f', POPT_ARG_NONE,
-         &fg,               0, _("Run in foreground"), NULL },
+         &fg,               0, "Run in foreground", NULL },
        { "initdb",     'i', POPT_ARG_NONE,
-         &initdb,           0, _("Database initialisation"), NULL },
+         &initdb,           0, "Database initialisation", NULL },
        { "initrsa",    'r', POPT_ARG_NONE,
-         &initrsa,          0, _("RSA initialisation"), NULL },
+         &initrsa,          0, "RSA initialisation", NULL },
        { "debug",'d',       POPT_ARG_INT,
-         &debug_level,      0, _("Debug level"), "LEVEL" },
+         &debug_level,      0, "Debug level", "LEVEL" },
        { "max_client", 'm', POPT_ARG_INT,
-         &max_client,       0, _("Maximum of connexions allowed"), "MAX" },
+         &max_client,       0, "Maximum of connexions allowed", "MAX" },
        { "home",       'H', POPT_ARG_STRING,
-         &home,             0, _("Home directory"), "HOME" },
+         &home,             0, "Home directory", "HOME" },
        { "conffile",   'c', POPT_ARG_STRING,
-         &file,             0, _("Configuration file"), "FILE" },
+         &file,             0, "Configuration file", "FILE" },
        { "help",       'h', POPT_ARG_NONE,
-         &help,             0, _("Help"), NULL },
+         &help,             0, "Help", NULL },
        POPT_TABLEEND
      };
     poptContext context;
@@ -324,7 +323,7 @@
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
     while ( (rc = poptGetNextOpt( context )) != -1)                      /* Parse de la ligne de commande */
      { switch (rc)
-        { case POPT_ERROR_BADOPT: printf( _("Option %s unknown\n"), poptBadOption(context, 0) );
+        { case POPT_ERROR_BADOPT: printf( "Option %s unknown\n", poptBadOption(context, 0) );
                                   help=1; break;
           default: printf("Erreur de parsing ligne de commande\n");
         }
@@ -351,17 +350,17 @@
        Config.log = Info_init( "Watchdogd", Config.debug_level );                  /* Init msgs d'erreurs */
        Print_config( &Config );
        chaine = Init_db_watchdog();
-       if (chaine) { printf( _(" Initialisation of Databases: \n %s\n"), chaine );
+       if (chaine) { printf( " Initialisation of Databases: \n %s\n", chaine );
                      g_free(chaine);
                    }
-              else { printf( _(" Initialisation of Databases OK\n") ); }
+              else { printf( " Initialisation of Databases OK\n" ); }
        exit(EXIT_OK);
      }
 
     nbr_bytes = Config.taille_clef_rsa>>3;
     chaine = g_malloc0( nbr_bytes );
     if (!chaine)
-     { printf( _(" Not enough memory\n") );
+     { printf( " Not enough memory\n" );
        exit(EXIT_OK);
      }
 
@@ -370,27 +369,27 @@
 
        rsa = RSA_generate_key( Config.taille_clef_rsa, 65537, NULL, NULL );
        if (!rsa)
-        { printf( _(" Could not generate RSA keys: %s\n"), ERR_error_string( ERR_get_error(), NULL ) );
+        { printf( " Could not generate RSA keys: %s\n", ERR_error_string( ERR_get_error(), NULL ) );
         }
        else 
-        { printf( _(" RSA keys generation OK\n") );
+        { printf( " RSA keys generation OK\n" );
           fd = fopen( FICHIER_CLEF_SEC_RSA, "w+" );
           if (!fd)
-           { printf( _("Could not open file %s\n"), FICHIER_CLEF_SEC_RSA ); }
+           { printf( "Could not open file %s\n", FICHIER_CLEF_SEC_RSA ); }
           else
            { gint ok;
              ok = PEM_write_RSAPrivateKey( fd, rsa, NULL, NULL, 0, NULL, NULL );
-             if (!ok) printf( _("Could not write into %s\n"), FICHIER_CLEF_SEC_RSA );
+             if (!ok) printf( "Could not write into %s\n", FICHIER_CLEF_SEC_RSA );
              fclose(fd);
            }
 
           fd = fopen( FICHIER_CLEF_PUB_RSA, "w+" );
           if (!fd)
-           { printf( _("Could not open file %s\n"), FICHIER_CLEF_PUB_RSA ); }
+           { printf( "Could not open file %s\n", FICHIER_CLEF_PUB_RSA ); }
           else
            { gint ok;
              ok = PEM_write_RSAPublicKey( fd, rsa );
-             if (!ok) printf( _("Could not write into %s\n"), FICHIER_CLEF_PUB_RSA );
+             if (!ok) printf( "Could not write into %s\n", FICHIER_CLEF_PUB_RSA );
              fclose(fd);
            }
         }
@@ -401,14 +400,14 @@
     Config.rsa = NULL;
     fd = fopen( FICHIER_CLEF_PUB_RSA, "r" );
     if (!fd)
-     { printf( _("Could not open file %s\n"), FICHIER_CLEF_PUB_RSA ); exit(EXIT_OK); }
+     { printf( "Could not open file %s\n", FICHIER_CLEF_PUB_RSA ); exit(EXIT_OK); }
     Config.rsa = PEM_read_RSAPublicKey( fd, NULL, NULL, NULL );
     if (!Config.rsa) printf("Unable to load %s\n", FICHIER_CLEF_PUB_RSA );
     fclose(fd); 
 
     fd = fopen( FICHIER_CLEF_SEC_RSA, "r" );
     if (!fd)
-     { printf( _("Could not open file %s\n"), FICHIER_CLEF_SEC_RSA ); exit(EXIT_OK); }
+     { printf( "Could not open file %s\n", FICHIER_CLEF_SEC_RSA ); exit(EXIT_OK); }
     Config.rsa = PEM_read_RSAPrivateKey( fd, &Config.rsa, NULL, NULL );
     if (!Config.rsa) printf("Unable to load %s\n", FICHIER_CLEF_SEC_RSA );
     fclose(fd); 
@@ -452,9 +451,9 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
-  { struct DB *Db_watchdog;
-    struct sigaction sig;
+  { struct sigaction sig;
     gchar strpid[12];
+    struct DB *db;
     gint fd_lock;
     gboolean fg;
 
@@ -462,11 +461,11 @@
 
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );
     if (fd_lock<0)
-     { printf( _("Lock file creation failed: %s/%s\n"), Config.home, VERROU_SERVEUR );
+     { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
        exit(EXIT_ERREUR);
      }
     if (lockf( fd_lock, F_TLOCK, 0 )<0)                            /* Creation d'un verrou sur le fichier */
-     { printf( _("Cannot lock %s/%s. Probably another daemon is running\n"), Config.home, VERROU_SERVEUR );
+     { printf( "Cannot lock %s/%s. Probably another daemon is running\n", Config.home, VERROU_SERVEUR );
        close(fd_lock);
        exit(EXIT_ERREUR);
      }
@@ -500,18 +499,18 @@
 
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
-    Info( Config.log, DEBUG_INFO, _("Start") );
+    Info( Config.log, DEBUG_INFO, "Start" );
     Print_config( &Config );
 
     Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
     if ( Socket_ecoute<0 )            
-     { Info( Config.log, DEBUG_INFO, _("Network down, foreign connexions disabled") );
+     { Info( Config.log, DEBUG_INFO, "Network down, foreign connexions disabled" );
        return(EXIT_OK);
      }
 
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
-     { Info( Config.log, DEBUG_MEM, _("Shared memory failed to allocate") ); }
+     { Info( Config.log, DEBUG_MEM, "Shared memory failed to allocate" ); }
     else
      { gint import;
        pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
@@ -554,31 +553,34 @@
        sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
        sigaction( SIGTERM, &sig, NULL );
 encore:   
-       Db_watchdog = ConnexionDB( Config.log, Config.db_database,    /* Connexion en tant que user normal */
-                                  Config.db_username, Config.db_password );
 
-       if (!Db_watchdog)
-        { Info_c( Config.log, DEBUG_DB, _("Pb acces DB: Unable to open database (dsn)"), Config.db_database ); }
+       db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database,/* Connexion en tant que user normal*/
+                         Config.db_username, Config.db_password, Config.db_port );
+
+       if (!db)
+        { Info_c( Config.log, DEBUG_DB, "Pb acces DB: Unable to open database (dsn)",
+                                        Config.db_database );
+        }
        else
         { Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
-          Charger_eana( Db_watchdog );
+          Charger_eana( db );
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
 
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
-          Charger_scenario( Db_watchdog );
+          Charger_scenario( db );
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
 
           if (!import)
            { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
-             Clear_histoDB ( Config.log, Db_watchdog );                   /* Clear de la table histo au boot */
+             Clear_histoDB ( Config.log, db );                         /* Clear de la table histo au boot */
              Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
            } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
-          Charger_cpth( Db_watchdog );
+          Charger_cpth( db );
           Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
 
-          DeconnexionDB( Config.log, &Db_watchdog );                            /* Deconnexion de la base */
+          Libere_DB_SQL( Config.log, &db );                                     /* Deconnexion de la base */
 
           Ssl_ctx = Init_ssl();                                                     /* Initialisation SSL */
           if (!Ssl_ctx)
@@ -636,23 +638,23 @@ encore:
     if (Partage->Arret != CLEARREBOOT) Exporter();           /* Tente d'exporter les données avant reload */
     if (Partage->Arret == REBOOT)
      { gint pid;
-       Info( Config.log, DEBUG_INFO, _("Rebooting ...") );
+       Info( Config.log, DEBUG_INFO, "Rebooting ..." );
        pid = fork();
-       if (pid<0) { Info( Config.log, DEBUG_INFO, _("Fork Failed on reboot") );
+       if (pid<0) { Info( Config.log, DEBUG_INFO, "Fork Failed on reboot" );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
        if (pid>0)
         { Shm_stop( Partage );                                             /* Libération mémoire partagée */
           exit(EXIT_OK);                                                               /* On kill le père */
         }
-       Info_c( Config.log, DEBUG_INFO, _("Rebooting in progress"), argv[0] );
+       Info_c( Config.log, DEBUG_INFO, "Rebooting in progress", argv[0] );
        sleep(5);
        execvp ( argv[0], argv );
-       Info_c( Config.log, DEBUG_INFO, _("Rebooting ERROR !"), strerror(errno) );
+       Info_c( Config.log, DEBUG_INFO, "Rebooting ERROR !", strerror(errno) );
        exit(EXIT_ERREUR);
      }
 
     Shm_stop( Partage );                                                   /* Libération mémoire partagée */
-    Info( Config.log, DEBUG_INFO, _("Stopped") );
+    Info( Config.log, DEBUG_INFO, "Stopped" );
     return(EXIT_OK);
   }
 /*--------------------------------------------------------------------------------------------------------*/

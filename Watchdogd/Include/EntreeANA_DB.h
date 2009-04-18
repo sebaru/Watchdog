@@ -24,14 +24,11 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct ENTREEANA_DB *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id );
- extern SQLHSTMT Recuperer_entreeANADB ( struct LOG *log, struct DB *db );
- extern struct ENTREEANA_DB *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db );
+ extern struct ENTREEANA_DB *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db );
  extern gint Ajouter_entreeANADB ( struct LOG *log, struct DB *db, struct CMD_ADD_ENTREEANA *entreeana );
  extern gboolean Retirer_entreeANADB ( struct LOG *log, struct DB *db, struct CMD_ID_ENTREEANA *entreeana );
  extern gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_EDIT_ENTREEANA *entreeana );
  extern struct ENTREEANA_DB *Rechercher_entreeANADB_par_num ( struct LOG *log, struct DB *db, guint num );
-
- extern gboolean Creer_db_entreeANA ( struct LOG *log, struct DB *db );
-
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

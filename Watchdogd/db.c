@@ -165,8 +165,9 @@
     return(db);
   }
 /**********************************************************************************************************/
-/* ConnexionDB: essai de connexion à la DataBase db via le DSN db                                         */
-/* Sortie: une structure DB ou NULL si erreur                                                             */
+/* Init_DB_SQL: essai de connexion à la DataBase db                                                       */
+/* Entrée: toutes les infos necessaires a la connexion                                                    */
+/* Sortie: une structure DB de référence                                                                  */
 /**********************************************************************************************************/
  struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
                           gchar *user, gchar *password, guint port )
@@ -196,7 +197,8 @@
     return(db);
   }
 /**********************************************************************************************************/
-/* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
+/* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                       */
+/* Entrée: La DB                                                                                          */
 /**********************************************************************************************************/
  void Libere_DB_SQL( struct LOG *log, struct DB **adr_db )
   { struct DB *db;
@@ -207,6 +209,54 @@
     Info( log, DEBUG_DB, "DeconnexionDB: Deconnexion effective" );
     g_free( db );
     *adr_db = NULL;
+  }
+/**********************************************************************************************************/
+/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                     */
+/* Entrée: La DB, la requete                                                                              */
+/* Sortie: TRUE si pas de souci                                                                           */
+/**********************************************************************************************************/
+ gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete )
+  { if ( mysql_query ( db->mysql, requete ) )
+     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed",
+               (char *)mysql_error(db->mysql) );
+       return(FALSE);
+     }
+    else 
+     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete OK", requete ); }
+
+    db->result = mysql_store_result ( db->mysql );
+    if ( ! db->result )
+     { Info_c( Config.log, DEBUG_DB, "Recuperer_resultat_SQL: store_result failed",
+               (char *) mysql_error(db->mysql) );
+       return(FALSE);
+     }
+    db->nbr_result = mysql_num_rows ( db->result );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                          */
+/* Entrée: la DB                                                                                          */
+/* Sortie: La ligne ou NULL si il n'y en en plus                                                          */
+/**********************************************************************************************************/
+ MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db )
+  { db->row = mysql_fetch_row(db->result);
+    return( db->row );
+  }
+/**********************************************************************************************************/
+/* Recuperer_last_ID_SQL: Renvoie le dernier ID inséré                                                    */
+/* Entrée: la DB                                                                                          */
+/* Sortie: Le dernier ID                                                                                  */
+/**********************************************************************************************************/
+ guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db )
+  { return ( mysql_insert_id(db->mysql) );
+  }
+/**********************************************************************************************************/
+/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                       */
+/* Entrée: la DB                                                                                          */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
+  { mysql_free_result( db->result );
   }
 /**********************************************************************************************************/
 /* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
@@ -321,34 +371,7 @@
 /* sortie: Un pointeur sur une chaine de caractere si probleme, null sinon                                */
 /**********************************************************************************************************/
  gchar *Init_db_watchdog( void )
-  { gchar *chaine_globale, *old;
-    struct DB *Db_watchdog;
-    gchar chaine[2048];
-    struct LOG *log;
-
-#ifdef bouh
-/*********************************** Gestion des utilisateurs Watchdog ************************************/
-    if (! Creer_db_gids( log, Db_watchdog ))
-    if (! Creer_db_groupe( log, Db_watchdog ))            /* Si pb lors de la creation de la table groups */
-    if (! Creer_db_util( log, Config.crypto_key, Db_watchdog ))
-    if (! Creer_db_msg( log, Db_watchdog ))                  /* Si pb lors de la creation de la table msg */
-    if (! Creer_db_dls( log, Db_watchdog ))                  /* Si pb lors de la creation de la table msg */
-    if (! Creer_db_histo( log, Db_watchdog ))                /* Si pb lors de la creation de la table msg */
-    if (! Creer_db_histo_hard( log, Db_watchdog ))           /* Si pb lors de la creation de la table msg */
-    if (! Creer_db_classe( log, Db_watchdog ))            /* Si pb lors de la creation de la table classe */
-    if (! Creer_db_icone( log, Db_watchdog ))              /* Si pb lors de la creation de la table icone */
-    if (! Creer_db_synoptique( log, Db_watchdog ))    /* Si pb lors de la creation de la table synoptique */
-    if (! Creer_db_mnemo( log, Db_watchdog ))         /* Si pb lors de la creation de la table mnemonique */
-    if (! Creer_db_motif( log, Db_watchdog ))              /* Si pb lors de la creation de la table motif */
-    if (! Creer_db_comment ( log, Db_watchdog ))         /* Si pb lors de la creation de la table comment */
-    if (! Creer_db_passerelle ( log, Db_watchdog ))         /* Si pb lors de la creation de la table pass */
-    if (! Creer_db_palette ( log, Db_watchdog ))            /* Si pb lors de la creation de la table pass */
-    if (! Creer_db_capteur( log, Db_watchdog ))              /* Si pb lors de la creation de la table motif */
-    if (! Creer_db_entreeANA ( log, Db_watchdog ))          /* Si pb lors de la creation de la table eana */
-    if (! Creer_db_valANA ( log, Db_watchdog ))           /* Si pb lors de la creation de la table valana */
-    if (! Creer_db_cpth ( log, Db_watchdog ))               /* Si pb lors de la creation de la table cpth */
-    if (! Creer_db_arch ( log, Db_watchdog ))               /* Si pb lors de la creation de la table arch */
-#endif
+  { 
 return("test");
   } 
 /*--------------------------------------------------------------------------------------------------------*/

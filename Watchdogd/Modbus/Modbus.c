@@ -54,7 +54,7 @@
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
 /**********************************************************************************************************/
-/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                            */
+/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -70,7 +70,7 @@
     return(NULL);
   }
 /**********************************************************************************************************/
-/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                            */
+/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -80,33 +80,19 @@
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_un_MODBUS_DB: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return(FALSE);
-     }
+    if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
     g_snprintf( requete, sizeof(requete), "SELECT actif,ip,bit,watchdog FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_MODBUS, id
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_un_MODBUS_DB: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
 
-    db->result = mysql_use_result ( db->mysql );
-    if ( ! db->result )
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_un_MODBUS_DB: use_result failed",
-               (char *) mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
-       return(FALSE);
-     }
-
-    while ((db->row = mysql_fetch_row(db->result)))
+    while ( Recuperer_ligne_SQL (Config.log, db) )
      { struct MODULE_MODBUS *module;
 
        module->id       = id;
@@ -121,34 +107,24 @@
        Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
      }
-    mysql_free_result( db->result );
+    Liberer_resultat_SQL ( Config.log, db );
 /******************************************* Chargement des bornes ****************************************/
     g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr FROM %s WHERE module=%d",
                 NOM_TABLE_BORNE_MODBUS, id
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_un_MODBUS_DB: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
 
-    db->result = mysql_use_result ( db->mysql );
-    if ( ! db->result )
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_un_MODBUS_DB: use_result failed",
-               (char *) mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
-       return(FALSE);
-     }
-
-    while ((db->row = mysql_fetch_row(db->result)))
+    while ( Recuperer_ligne_SQL (Config.log, db) )
      { struct MODULE_MODBUS *module;
        struct BORNE_MODBUS *borne;
 
        borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
        if (!borne)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MODBUS,
+        { Info( Config.log, DEBUG_MEM,
                 "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
           continue;
         }
@@ -166,7 +142,7 @@
        Info_n( Config.log, DEBUG_MODBUS, "                            min = ", borne->min     );
        Info_n( Config.log, DEBUG_MODBUS, "                            nbr = ", borne->nbr     );
      }
-    mysql_free_result( db->result );
+    Liberer_resultat_SQL ( Config.log, db );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -183,40 +159,26 @@
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return(FALSE);
-     }
+    if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
     g_snprintf( requete, sizeof(requete), "SELECT id FROM %s",
                 NOM_TABLE_MODULE_MODBUS
               );
 
-    if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: requete failed",
-               (char *)mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
-       return(FALSE);
-     }
-
-    db->result = mysql_use_result ( db->mysql );
-    if ( ! db->result )
-     { Info_c( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS: use_result failed",
-               (char *) mysql_error(db->mysql) );
-       Libere_DB_SQL( Config.log, &db );
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
 
     Partage->com_modbus.Modules_MODBUS = NULL;
     cpt = 0;
-    while ((db->row = mysql_fetch_row(db->result)))
+    while ( Recuperer_ligne_SQL (Config.log, db) )
      { struct MODULE_MODBUS *module;
 
        module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MODBUS,
+        { Info( Config.log, DEBUG_MEM,
                 "Charger_modules_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           continue;
         }
@@ -231,8 +193,8 @@
        Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
      }
-    mysql_free_result( db->result );
-    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: module MODBUS found  !", cpt );
+    Liberer_resultat_SQL ( Config.log, db );
+    Info_n( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: module MODBUS found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -247,7 +209,7 @@
     
     module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
     if (!module)                                                   /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MODBUS,
+     { Info( Config.log, DEBUG_MEM,
             "Charger_un_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
        return;
      }

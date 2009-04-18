@@ -31,6 +31,7 @@
     gchar db_database [ TAILLE_DB_DATABASE + 1 ];/* a virer */
     MYSQL *mysql;
     MYSQL_RES *result;
+    gint nbr_result;
     MYSQL_ROW row;
   };
 /************************************* Prototypes de fonctions ********************************************/
@@ -47,6 +48,10 @@
  extern struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
                                  gchar *user, gchar *password, guint port );
  extern void Libere_DB_SQL( struct LOG *log, struct DB **adr_db );
+ extern gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete );
+ extern MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db );
+ extern void Liberer_resultat_SQL ( struct LOG *log, struct DB *db );
+ extern guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
