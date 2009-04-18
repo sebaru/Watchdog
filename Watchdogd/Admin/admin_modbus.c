@@ -278,7 +278,7 @@
           Write_admin ( client->connexion, chaine );
         }
      }
-    else if ( ! strcmp ( commande, "del" ) )
+    else if ( ! strcmp ( commande, "delete" ) )
      { gchar chaine[128];
        guint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
@@ -287,6 +287,7 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
        Write_admin ( client->connexion, "  add ip bit watchdog  - Ajoute un module MODBUS\n" );
+       Write_admin ( client->connexion, "  delete id            - Supprime le module id\n" );
        Write_admin ( client->connexion, "  start id             - Demarre le module id\n" );
        Write_admin ( client->connexion, "  stop id              - Demarre le module id\n" );
        Write_admin ( client->connexion, "  reload               - Recharge la configuration\n" );
