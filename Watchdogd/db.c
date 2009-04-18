@@ -229,10 +229,12 @@
 
     db->result = mysql_store_result ( db->mysql );
     if ( ! db->result )
-     { Info_c( Config.log, DEBUG_DB, "Recuperer_resultat_SQL: store_result failed",
+     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result failed",
                (char *) mysql_error(db->mysql) );
        return(FALSE);
      }
+    else 
+     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK", requete ); }
     db->nbr_result = mysql_num_rows ( db->result );
     return(TRUE);
   }
