@@ -244,9 +244,7 @@
 /* Sortie: La ligne ou NULL si il n'y en en plus                                                          */
 /**********************************************************************************************************/
  MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db )
-  { Info( Config.log, DEBUG_DB, "Recuperer_ligne_SQL: begin" );
-    db->row = mysql_fetch_row(db->result);
-    Info( Config.log, DEBUG_DB, "Recuperer_ligne_SQL: end" );
+  { db->row = mysql_fetch_row(db->result);
     return( db->row );
   }
 /**********************************************************************************************************/
@@ -263,9 +261,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
-  { Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: begin" );
-    mysql_free_result( db->result );
-    Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: end" );
+  { mysql_free_result( db->result );
   }
 /**********************************************************************************************************/
 /* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
