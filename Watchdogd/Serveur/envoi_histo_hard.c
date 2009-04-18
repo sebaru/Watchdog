@@ -3,8 +3,30 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       sam 13 mar 2004 18:41:14 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * envoi_histo_hard.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <string.h>
 
  #include "Reseaux.h"
@@ -14,8 +36,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -49,28 +69,35 @@
   { struct CMD_SHOW_HISTO_HARD *rezo_histo;
     struct CMD_REQUETE_HISTO_HARD requete;
     struct HISTO_HARDDB *histo;
-    struct DB *Db_watchdog;
     struct CMD_ENREG nbr;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
     memcpy ( &requete, &client->requete, sizeof( requete ) );
 
-    hquery = Rechercher_histo_hardDB( Config.log, Db_watchdog, &requete );
-    if (!hquery)
+    prctl(PR_SET_NAME, "W-EnvoiHISTOHARD", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Rechercher_histo_hardDB( Config.log, db, &requete ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading histo_hard") );
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d histo_hard", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for ( ; ; )
-     { histo = Rechercher_histo_hardDB_suite( Config.log, Db_watchdog, hquery );
+     { histo = Rechercher_histo_hardDB_suite( Config.log, db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
@@ -82,8 +109,8 @@
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          printf("Envoi_histo_hard: num %d, type %d nom_ack %s, objet %s, libelle %s\n",
-                  rezo_histo->num,rezo_histo->type,rezo_histo->nom_ack,rezo_histo->objet,rezo_histo->libelle );
+          /*printf("Envoi_histo_hard: num %d, type %d nom_ack %s, objet %s, libelle %s\n",
+                  rezo_histo->num,rezo_histo->type,rezo_histo->nom_ack,rezo_histo->objet,rezo_histo->libelle );*/
           Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,
                          (gchar *)rezo_histo, sizeof(struct CMD_SHOW_HISTO_HARD) );
           g_free(rezo_histo);

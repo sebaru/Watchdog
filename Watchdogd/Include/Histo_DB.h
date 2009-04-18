@@ -39,9 +39,9 @@
 
  extern gboolean Ajouter_histo_hardDB ( struct LOG *log, struct DB *db, struct HISTO_HARDDB *histo );
  extern gboolean Creer_db_histo_hard ( struct LOG *log, struct DB *db );
- extern  SQLHSTMT Rechercher_histo_hardDB ( struct LOG *log, struct DB *db,
+ extern gboolean Rechercher_histo_hardDB ( struct LOG *log, struct DB *db,
                                            struct CMD_REQUETE_HISTO_HARD *critere );
- extern struct HISTO_HARDDB *Rechercher_histo_hardDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern struct HISTO_HARDDB *Rechercher_histo_hardDB_suite( struct LOG *log, struct DB *db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
