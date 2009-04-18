@@ -234,7 +234,7 @@
        return(FALSE);
      }
     else 
-     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK", requete ); }
+     { Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" ); }
     db->nbr_result = mysql_num_rows ( db->result );
     return(TRUE);
   }
@@ -261,7 +261,9 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
-  { mysql_free_result( db->result );
+  { Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: begin" );
+    mysql_free_result( db->result );
+    Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: end" );
   }
 /**********************************************************************************************************/
 /* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
