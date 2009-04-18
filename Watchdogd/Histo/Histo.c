@@ -201,7 +201,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_histoDB: EntreANA non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_DB, "Rechercher_histoDB: histo non trouvé dans la BDD", id );
        return(NULL);
      }
 

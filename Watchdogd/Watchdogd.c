@@ -120,26 +120,6 @@
      }
   }
 /**********************************************************************************************************/
-/* Charger_cpth: Chargement des infos sur les compteurs horaires depuis la DB                             */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Charger_cpth ( struct DB *Db_watchdog )
-  { gint i;
-
-    for (i = 0; i<NBR_COMPTEUR_H; i++)
-     { struct CPTH_DB *cpth;
-       cpth = Rechercher_cpthDB( Config.log, Db_watchdog, i );
-       if (cpth)
-        { memcpy ( &Partage->ch[cpth->id].cpthdb, cpth, sizeof(struct CPTH_DB) );
-          g_free(cpth);
-        }
-       else
-        { Partage->ch[cpth->id].cpthdb.valeur = 0;
-        }
-     }
-  }
-/**********************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -482,7 +462,7 @@ encore:
         } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
-       Charger_cpth( db );
+       Charger_cpth();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
 
        Ssl_ctx = Init_ssl();                                                        /* Initialisation SSL */
