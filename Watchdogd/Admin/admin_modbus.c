@@ -309,6 +309,8 @@
         { Write_admin ( client->connexion, " min should be < NBR_BIT_DLS\n" ); }
        else if ( nbr > 8 )
         { Write_admin ( client->connexion, " nbr should be <= 8\n" ); }
+       else if ( module > 255 )
+        { Write_admin ( client->connexion, " nbr should be <= 256\n" ); }
        else
         { int id;
           id = Admin_modbus_add_borne ( client, type, adresse, min, nbr, module );
