@@ -18,6 +18,8 @@
  #include "Db.h"
  #include "Modbus.h"
 
+ extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
+
  struct MODULE_RS485
   { gint id;
     gint ea_min, ea_max;
@@ -77,8 +79,9 @@
  #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
 
 /******************************************* Prototypes de fonctions **************************************/
- extern void Lire_config ( struct CONFIG *config, char *fichier_config );
- extern void Print_config ( struct CONFIG *config );
+ extern void Lire_config ( char *fichier_config );
+ extern void Print_config ( void );
+ extern void Interpreter_config ( FILE *rc );
 
 #endif
   

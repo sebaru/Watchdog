@@ -33,10 +33,43 @@
  #include <fcntl.h>
  #include <string.h>
 
- #include "Erreur.h"
+ #include "watchdogd.h"
  #include "EntreeANA_DB.h"
  #include "Mnemonique_DB.h"
 
+/**********************************************************************************************************/
+/* Charger_eana: Chargement des infos sur les Entrees analogiques                                         */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Charger_eana ( struct LOG *log )
+  { struct DB *db;
+    gint i;
+
+    db = Init_DB_SQL( log, Config.db_host,Config.db_database,        /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info( log, DEBUG_INFO, "Charger_eana: Connexion DB failed" );
+       return;
+     }                                                                           /* Si pas de histos (??) */
+
+    for (i = 0; i<NBR_ENTRE_ANA; i++)
+     { struct ENTREEANA_DB *eana;
+       eana = Rechercher_entreeANADB_par_num ( log, db, i );
+       if (eana)
+        { Partage->ea[i].min = eana->min;
+          Partage->ea[i].max = eana->max;
+          Partage->ea[i].unite = eana->unite;
+          g_free(eana);
+        }
+       else
+        { Partage->ea[i].min = 0.0;
+          Partage->ea[i].max = 100.0;
+          Partage->ea[i].unite = 0;
+        }
+     }
+    Libere_DB_SQL( Config.log, &db );
+  }
 /**********************************************************************************************************/
 /* Retirer_entreeanaDB: Elimination d'un entreeANA                                                        */
 /* Entrée: un log et une database                                                                         */

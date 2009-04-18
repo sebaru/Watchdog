@@ -119,30 +119,7 @@
        default: Info_n( Config.log, DEBUG_INFO, "Recu signal", num ); break;
      }
   }
-/**********************************************************************************************************/
-/* Charger_eana: Chargement des infos sur les Entrees analogiques                                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Charger_eana ( struct DB *Db_watchdog )
-  { gint i;
 
-    for (i = 0; i<NBR_ENTRE_ANA; i++)
-     { struct ENTREEANA_DB *eana;
-       eana = Rechercher_entreeANADB_par_num ( Config.log, Db_watchdog, i );
-       if (eana)
-        { Partage->ea[i].min = eana->min;
-          Partage->ea[i].max = eana->max;
-          Partage->ea[i].unite = eana->unite;
-          g_free(eana);
-        }
-       else
-        { Partage->ea[i].min = 0.0;
-          Partage->ea[i].max = 100.0;
-          Partage->ea[i].unite = 0;
-        }
-     }
-  }
 /**********************************************************************************************************/
 /* Charger_scenario: Chargement des infos sur les scenario depuis la DB                                   */
 /* Entrée: rien                                                                                           */
@@ -336,7 +313,7 @@
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
 
-    Lire_config( &Config, file );                           /* Lecture sur le fichier /etc/watchdogd.conf */
+    Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
     if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
     if (debug_level!=-1) Config.debug_level = debug_level;
     if (max_client!=-1)  Config.max_client  = max_client;
@@ -348,7 +325,7 @@
     if (initdb)                                                   /* Doit-on initialiser les databases ?? */
      { gchar *chaine;
        Config.log = Info_init( "Watchdogd", Config.debug_level );                  /* Init msgs d'erreurs */
-       Print_config( &Config );
+       Print_config();
        chaine = Init_db_watchdog();
        if (chaine) { printf( " Initialisation of Databases: \n %s\n", chaine );
                      g_free(chaine);
@@ -500,7 +477,7 @@
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
     Info( Config.log, DEBUG_INFO, "Start" );
-    Print_config( &Config );
+    Print_config();
 
     Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
     if ( Socket_ecoute<0 )            
@@ -554,75 +531,65 @@
        sigaction( SIGTERM, &sig, NULL );
 encore:   
 
-       db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database,/* Connexion en tant que user normal*/
-                         Config.db_username, Config.db_password, Config.db_port );
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
+       Charger_eana( Config.log );
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
 
-       if (!db)
-        { Info_c( Config.log, DEBUG_DB, "Pb acces DB: Unable to open database (dsn)",
-                                        Config.db_database );
-        }
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
+       Charger_scenario( db );
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
+
+       if (!import)
+        { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
+          Clear_histoDB ( Config.log, db );                            /* Clear de la table histo au boot */
+          Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
+        } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
+
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
+       Charger_cpth( db );
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
+
+       Ssl_ctx = Init_ssl();                                                        /* Initialisation SSL */
+       if (!Ssl_ctx)
+        { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
        else
-        { Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
-          Charger_eana( db );
-          Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
+       if (!Demarrer_arch())                                               /* Demarrage gestion Archivage */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
+       else
+       if (!Demarrer_rs485())                                           /* Demarrage gestion module RS485 */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
+       else
+       if (!Demarrer_modbus())                                         /* Demarrage gestion module MODBUS */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
+       else
+       if (!Demarrer_sms())                                                           /* Démarrage S.M.S. */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
+       else
+       if (!Demarrer_audio())                                                      /* Démarrage A.U.D.I.O */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
+       else
+       if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+       else
+       if (!Demarrer_dls())                                                           /* Démarrage D.L.S. */
+        { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
+       else
+        { pthread_t TID;
 
-          Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
-          Charger_scenario( db );
-          Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
-
-          if (!import)
-           { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
-             Clear_histoDB ( Config.log, db );                         /* Clear de la table histo au boot */
-             Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
-           } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
-
-          Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
-          Charger_cpth( db );
-          Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
-
-          Libere_DB_SQL( Config.log, &db );                                     /* Deconnexion de la base */
-
-          Ssl_ctx = Init_ssl();                                                     /* Initialisation SSL */
-          if (!Ssl_ctx)
-           { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
-          else
-          if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
-          else
-          if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
-          else
-          if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
-          else
-          if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
-          else
-          if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
-          else
-          if (!Demarrer_admin())                                                   /* Démarrage A.U.D.I.O */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
-          else
-          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
-          else
-           { pthread_t TID;
-
-             /*sigaction( SIGCHLD, &sig, NULL );*/
-             pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
-             pthread_join( TID, NULL );
-             Stopper_fils();                                           /* Arret de tous les fils watchdog */
-             SSL_CTX_free( Ssl_ctx );                                               /* Libération mémoire */
-           }
-         }
-
-       if (Partage->Arret == RELOAD)
-        { Lire_config( &Config, NULL );                     /* Lecture sur le fichier /etc/watchdogd.conf */
-          Partage->Arret = TOURNE;
-          goto encore;
+          /*sigaction( SIGCHLD, &sig, NULL );*/
+          pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
+          pthread_join( TID, NULL );
+          Stopper_fils();                                              /* Arret de tous les fils watchdog */
+          SSL_CTX_free( Ssl_ctx );                                                  /* Libération mémoire */
         }
+      }
+
+    if (Partage->Arret == RELOAD)
+     { Lire_config( NULL );                                 /* Lecture sur le fichier /etc/watchdogd.conf */
+       Partage->Arret = TOURNE;
+       goto encore;
      }
+
     pthread_mutex_destroy( &Partage->com_dls_rs.synchro );
     pthread_mutex_destroy( &Partage->com_msrv_sms.synchro );
     pthread_mutex_destroy( &Partage->com_dls_msrv.synchro );

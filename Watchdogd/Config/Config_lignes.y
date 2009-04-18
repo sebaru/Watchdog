@@ -14,7 +14,6 @@
 
 extern int ligne;
 int erreur;                                                             /* Compteur d'erreur du programme */
-static struct CONFIG *Config;
 static struct MODULE_RS485 Config_rs485;
 
 %}
@@ -53,74 +52,74 @@ lignes:         une_ligne lignes
                 ;
 
 une_ligne:      PORT EGAL ENTIER
-                { Config->port = $3; }
+                { Config.port = $3; }
                 | MAX_CLIENT EGAL ENTIER
-                { Config->max_client = $3; }
+                { Config.max_client = $3; }
                 | MIN_SERVEUR EGAL ENTIER
-                { Config->min_serveur = $3; }
+                { Config.min_serveur = $3; }
                 | MAX_SERVEUR EGAL ENTIER
-                { Config->max_serveur = $3; }
+                { Config.max_serveur = $3; }
                 | MAX_INACTIVITE EGAL ENTIER
-                { Config->max_inactivite = $3; }
+                { Config.max_inactivite = $3; }
                 | TAILLE_CLEF_DH EGAL ENTIER
-                { Config->taille_clef_dh = $3; }
+                { Config.taille_clef_dh = $3; }
                 | TAILLE_CLEF_RSA EGAL ENTIER
-                { Config->taille_clef_rsa = $3; }
+                { Config.taille_clef_rsa = $3; }
                 | MAX_MSG_VISU EGAL ENTIER
-                { Config->max_msg_visu = $3; }
+                { Config.max_msg_visu = $3; }
                 | TAILLE_BLOC_RESEAU EGAL ENTIER
-                { Config->taille_bloc_reseau = $3; }
+                { Config.taille_bloc_reseau = $3; }
                 | PORT_RS485 EGAL CHAINE
-                { snprintf( Config->port_RS485, TAILLE_PORT_RS485, "%s", $3 );
+                { snprintf( Config.port_RS485, TAILLE_PORT_RS485, "%s", $3 );
                   free($3);
                 }
                 | DB_PORT EGAL ENTIER
-                { Config->db_port = $3; }
+                { Config.db_port = $3; }
                 | DB_HOST EGAL CHAINE
-                { snprintf( Config->db_host, TAILLE_DB_HOST, "%s", $3 );
+                { snprintf( Config.db_host, TAILLE_DB_HOST, "%s", $3 );
                   free($3);
                 }
                 | DB_DATABASE EGAL CHAINE
-                { snprintf( Config->db_database, TAILLE_DB_DATABASE, "%s", $3 );
+                { snprintf( Config.db_database, TAILLE_DB_DATABASE, "%s", $3 );
                   free($3);
                 }
                 | DB_PASSWORD EGAL CHAINE
-                { snprintf( Config->db_password, TAILLE_DB_PASSWORD, "%s", $3 );
+                { snprintf( Config.db_password, TAILLE_DB_PASSWORD, "%s", $3 );
                   free($3);
                 }
                 | DB_USERNAME EGAL CHAINE
-                { snprintf( Config->db_username, TAILLE_DB_USERNAME, "%s", $3 );
+                { snprintf( Config.db_username, TAILLE_DB_USERNAME, "%s", $3 );
                   free($3);
                 }
                 | CRYPTO_KEY EGAL CHAINE
-                { memcpy( Config->crypto_key, $3, strlen($3) );
+                { memcpy( Config.crypto_key, $3, strlen($3) );
                   free($3);
                 }
                 | MAX_LOGIN_FAILED EGAL ENTIER
-                { Config->max_login_failed = $3; }
+                { Config.max_login_failed = $3; }
                 | TIMEOUT_CONNEXION EGAL ENTIER
-                { Config->timeout_connexion = $3; }
+                { Config.timeout_connexion = $3; }
                 | HOME EGAL CHAINE
-                { snprintf( Config->home, TAILLE_HOME, "%s", $3 );
+                { snprintf( Config.home, TAILLE_HOME, "%s", $3 );
                   free($3);
                 }
                 | DEBUG EGAL liste_debug
-                { Config->debug_level = $3;
+                { Config.debug_level = $3;
                 }
                 | DEF_MODULE_RS485 DPOINT liste_rs485
                 { if ( (0 <= Config_rs485.id) &&
                             (Config_rs485.id < NBR_ID_RS485) )
-                   { Config->module_rs485[ Config_rs485.id ].id     = Config_rs485.id;
-                     Config->module_rs485[ Config_rs485.id ].ea_min = Config_rs485.ea_min;
-                     Config->module_rs485[ Config_rs485.id ].ea_max = Config_rs485.ea_max;
-                     Config->module_rs485[ Config_rs485.id ].e_min  = Config_rs485.e_min;
-                     Config->module_rs485[ Config_rs485.id ].e_max  = Config_rs485.e_max;
-                     Config->module_rs485[ Config_rs485.id ].ec_min = Config_rs485.ec_min;
-                     Config->module_rs485[ Config_rs485.id ].ec_max = Config_rs485.ec_max;
-                     Config->module_rs485[ Config_rs485.id ].s_min  = Config_rs485.s_min;
-                     Config->module_rs485[ Config_rs485.id ].s_max  = Config_rs485.s_max;
-                     Config->module_rs485[ Config_rs485.id ].sa_min = Config_rs485.sa_min;
-                     Config->module_rs485[ Config_rs485.id ].sa_max = Config_rs485.sa_max;
+                   { Config.module_rs485[ Config_rs485.id ].id     = Config_rs485.id;
+                     Config.module_rs485[ Config_rs485.id ].ea_min = Config_rs485.ea_min;
+                     Config.module_rs485[ Config_rs485.id ].ea_max = Config_rs485.ea_max;
+                     Config.module_rs485[ Config_rs485.id ].e_min  = Config_rs485.e_min;
+                     Config.module_rs485[ Config_rs485.id ].e_max  = Config_rs485.e_max;
+                     Config.module_rs485[ Config_rs485.id ].ec_min = Config_rs485.ec_min;
+                     Config.module_rs485[ Config_rs485.id ].ec_max = Config_rs485.ec_max;
+                     Config.module_rs485[ Config_rs485.id ].s_min  = Config_rs485.s_min;
+                     Config.module_rs485[ Config_rs485.id ].s_max  = Config_rs485.s_max;
+                     Config.module_rs485[ Config_rs485.id ].sa_min = Config_rs485.sa_min;
+                     Config.module_rs485[ Config_rs485.id ].sa_max = Config_rs485.sa_max;
                    }
                   Config_rs485.id = -1;
                   Config_rs485.ea_min = -1;
@@ -180,16 +179,8 @@ one_rs485:
 /* Entrée: un FILE *rc                                                                                    */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Interpreter_config ( FILE *rc, struct CONFIG *config )
-  { if (!config) return;
-    Config_rs485.id = -1;
-    Config_rs485.ea_min = -1;
-    Config_rs485.e_min  = -1;
-    Config_rs485.ec_min = -1;
-    Config_rs485.s_min  = -1;
-    Config_rs485.sa_min = -1;
-    Config = config;
-    Config_restart(rc);
+ void Interpreter_config ( FILE *rc )
+  { Config_restart(rc);
     Config_parse();
   }
 /*--------------------------------------------------------------------------------------------------------*/

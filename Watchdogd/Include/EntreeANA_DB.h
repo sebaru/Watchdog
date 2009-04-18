@@ -23,6 +23,7 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern void Charger_eana ( struct LOG *log );
  extern struct ENTREEANA_DB *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db );
  extern struct ENTREEANA_DB *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db );

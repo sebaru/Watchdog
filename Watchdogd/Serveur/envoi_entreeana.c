@@ -39,8 +39,6 @@
  #include "watchdogd.h"
  #include "Cst_entreeana.h"
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 

@@ -23,6 +23,8 @@
  #include "Sms.h"
  #include "proto_dls.h"
 
+ extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
+
  enum
   { TOURNE,
     FIN,                                                                            /* Arret des serveurs */
@@ -175,7 +177,6 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Charger_eana ( struct DB *Db_watchdog );
  extern void Charger_scenario ( struct DB *Db_watchdog );
 
  extern gint Activer_ecoute ( void );                                                    /* Dans ecoute.c */
