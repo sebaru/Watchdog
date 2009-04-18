@@ -244,7 +244,9 @@
 /* Sortie: La ligne ou NULL si il n'y en en plus                                                          */
 /**********************************************************************************************************/
  MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db )
-  { db->row = mysql_fetch_row(db->result);
+  { Info( Config.log, DEBUG_DB, "Recuperer_ligne_SQL: begin" );
+    db->row = mysql_fetch_row(db->result);
+    Info( Config.log, DEBUG_DB, "Recuperer_ligne_SQL: end" );
     return( db->row );
   }
 /**********************************************************************************************************/
