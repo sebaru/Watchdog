@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 noinst_LTLIBRARIES     = libarchive.la
-libarchive_la_SOURCES    = Archive.c
+libarchive_la_SOURCES    = Archive.c archiveDB.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
 	  $(MYSQL_CFLAGS) \

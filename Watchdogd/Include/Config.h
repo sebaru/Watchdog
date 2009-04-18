@@ -11,14 +11,11 @@
  #define NBR_ID_RS485             16
 
  #define TAILLE_PORT_RS485        30
- #define TAILLE_DB_HOST           30
- #define TAILLE_DB_USERNAME       30
- #define TAILLE_DB_PASSWORD       30
- #define TAILLE_DB_DATABASE       20
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
  #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
 
  #include "Erreur.h"
+ #include "Db.h"
  #include "Modbus.h"
 
  struct MODULE_RS485

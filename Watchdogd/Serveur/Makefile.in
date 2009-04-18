@@ -43,7 +43,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/sysconfig.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libserveur_la_DEPENDENCIES = ../Db/libdb.la
+libserveur_la_LIBADD =
 am_libserveur_la_OBJECTS = Serveur.lo protocole.lo ident.lo envoi.lo \
 	protocole_utilisateur.lo protocole_dls.lo protocole_message.lo \
 	protocole_entreeana.lo protocole_entreeana.lo \
@@ -246,7 +246,6 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         accept.c liste.c envoi_histo_hard.c \
                         distrib_cde_dls.c capteur.c
 
-libserveur_la_LIBADD = ../Db/libdb.la
 INCLUDES = -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \

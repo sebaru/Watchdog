@@ -16,6 +16,12 @@
     guint  valeur;                                                                  /* Valeur du compteur */
   };
 
+ struct CPT_HORAIRE
+  { struct CPTH_DB cpthdb;
+    guint old_top;
+    gboolean actif;
+  };
+
 /*************************************** Définitions des prototypes ***************************************/
  extern void Updater_cpthDB ( struct LOG *log, struct DB *db, struct CPTH_DB *val );
  extern struct CPTH_DB *Rechercher_cpthDB( struct LOG *log, struct DB *db, guint id );

@@ -7,7 +7,6 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #include "Reseaux.h"
  #include "Db.h"
 
  #define NOM_TABLE_ARCH    "histo_bit"

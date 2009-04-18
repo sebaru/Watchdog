@@ -3,16 +3,17 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config Db Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin
+SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
+          CptHoraire EntreeANA Message Mnemonique Scenario Icones Histo ValANA Utilisateur \
+	  Synoptiques
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
                     ecoute.c shm.c \
-                    initdb.c ssl.c \
+                    db.c ssl.c \
                     distrib_MSGxxx.c distrib_Ixxx.c
 
 Watchdogd_LDADD   = Config/libconfig.la \
-		    Db/libdb.la \
 		    Serveur/libserveur.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
@@ -23,6 +24,16 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Modbus/libmodbus.la \
 		    Audio/libaudio.la \
 		    Admin/libadmin.la \
+		    CptHoraire/libcpth.la \
+		    EntreeANA/libeana.la \
+		    Message/libmsg.la \
+		    Mnemonique/libmnemo.la \
+		    Scenario/libscenario.la \
+		    Icones/libico.la \
+		    Histo/libhisto.la \
+		    ValANA/libvalana.la \
+		    Utilisateur/libutil.la \
+		    Synoptiques/libsyn.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 Watchdogd_LDFLAGS = -lodbc -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)

@@ -9,18 +9,19 @@
 
  #include <pthread.h>
  #include "Reseaux.h"
- #include "Cst_entreeana.h"
- #include "Cst_dls.h"
- #include "Cpth_DB.h"
- #include "Scenario_DB.h"
- #include "Client.h"
+/* #include "Cst_entreeana.h"
+ #include "Cst_dls.h"*/
+
+ #include "Archive_DB.h"
  #include "Audio.h"
  #include "Admin.h"
- #include "proto_dls.h"
- #include "Archive_DB.h"
- #include "Sms.h"
+ #include "Client.h"
+ #include "Cpth_DB.h"
  #include "Modbus.h"
  #include "Rs485.h"
+ #include "Scenario_DB.h"
+ #include "Sms.h"
+ #include "proto_dls.h"
 
  enum
   { TOURNE,
@@ -119,12 +120,6 @@
   { gint    type;                                                              /* type du bit de controle */
     guint bit_controle;
     gdouble val_ech;
-  };
-
- struct CPT_HORAIRE
-  { struct CPTH_DB cpthdb;
-    guint old_top;
-    gboolean actif;
   };
 
  struct I_MOTIF

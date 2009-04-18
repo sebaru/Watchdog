@@ -44,7 +44,7 @@ CONFIG_HEADER = $(top_builddir)/sysconfig.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libarchive_la_LIBADD =
-am_libarchive_la_OBJECTS = Archive.lo
+am_libarchive_la_OBJECTS = Archive.lo archiveDB.lo
 libarchive_la_OBJECTS = $(am_libarchive_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -215,7 +215,7 @@ top_srcdir = @top_srcdir@
 #**********************************************************************************************************/
 SUBDIRS = 
 noinst_LTLIBRARIES = libarchive.la
-libarchive_la_SOURCES = Archive.c
+libarchive_la_SOURCES = Archive.c archiveDB.c
 INCLUDES = $(GNOME2_CFLAGS) \
 	  $(MYSQL_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
@@ -275,6 +275,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Archive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archiveDB.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

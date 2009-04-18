@@ -13,21 +13,22 @@
  #include <mysql.h>
 
  #include "Erreur.h"
- #include "Config.h"
 
-
+ #define TAILLE_DB_HOST           30
+ #define TAILLE_DB_USERNAME       30
+ #define TAILLE_DB_PASSWORD       30
+ #define TAILLE_DB_DATABASE       20
  #define TAILLE_MAX_MSG_ERREURDB   2048
 
  struct DB
-  { SQLHDBC hdb;
-    SQLHENV hodbc;
-    guint nbr_query;
-    gchar *dsn;
-    gchar last_err[ TAILLE_MAX_MSG_ERREURDB + 1 ];
+  { SQLHDBC hdb;/* a virer */
+    SQLHENV hodbc;/* a virer */
+    guint nbr_query;/* a virer */
+    gchar *dsn;/* a virer */
+    gchar last_err[ TAILLE_MAX_MSG_ERREURDB + 1 ];/* a virer */
     gchar db_username[ TAILLE_DB_USERNAME + 1 ]; /* a virer */
     gchar db_password[ TAILLE_DB_PASSWORD + 1 ];/* a virer */
     gchar db_database [ TAILLE_DB_DATABASE + 1 ];/* a virer */
-    guint port;/* a virer */
     MYSQL *mysql;
     MYSQL_RES *result;
     MYSQL_ROW row;

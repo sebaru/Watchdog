@@ -1,17 +1,11 @@
 #**********************************************************************************************************/
-#* Watchdogd/Config/Makefile.am          Profil de compilation de l'outil de configuration                */
-#* Projet WatchDog version 1.7       Gestion d'habitat                      lun 02 jun 2003 14:41:53 CEST */
+#* Commun/Message/Makefile.am          Profil de compilation de la librairies de gestion message          */
+#* Projet WatchDog version 1.7       Gestion d'habitat                      ven 30 mai 2003 10:51:35 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_LTLIBRARIES   = libconfig.la
-libconfig_la_SOURCES = Config_lignes.y Config_mots.l Config.c
-AM_LFLAGS = -PConfig_ -olex.yy.c
-AM_YFLAGS = -p Config_
-
-#Pour LEX et YACC
-libconfig_la_LIBADD  = @LEXLIB@
-
+noinst_LTLIBRARIES = libmsg.la
+libmsg_la_SOURCES = Message.c
 
 INCLUDES= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
@@ -20,4 +14,3 @@ INCLUDES= -I$(top_srcdir) -I$(includedir) \
 	  $(MYSQL_CFLAGS) \
           $(GLIB_CFLAGS)
 
-CLEANFILES = Config_lignes.h Config_lignes.c Config_mots.c
