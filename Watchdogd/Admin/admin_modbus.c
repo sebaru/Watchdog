@@ -201,8 +201,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_modbus_del ( struct CLIENT_ADMIN *client, gint id )
-  { struct MODULE_MODBUS *module;
-    gchar requete[128], chaine[128];
+  { gchar requete[128], chaine[128];
     struct DB *db;
 
     while (Partage->com_modbus.admin_del) sched_yield();
@@ -278,6 +277,12 @@
           else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
           Write_admin ( client->connexion, chaine );
         }
+     }
+    else if ( ! strcmp ( commande, "del" ) )
+     { gchar chaine[128];
+       guint num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_modbus_del ( client, num );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
