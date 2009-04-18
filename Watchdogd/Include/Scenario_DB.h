@@ -64,6 +64,7 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern void Checker_scenario ( guint num );
  extern void Charger_scenario ( void );
  extern gint Ajouter_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_ADD_SCENARIO *sc );
  extern gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_EDIT_SCENARIO *scenario );

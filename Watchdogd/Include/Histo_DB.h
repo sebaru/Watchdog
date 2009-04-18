@@ -29,15 +29,13 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern gboolean Clear_histoDB ( struct LOG *log, struct DB *db );
+ extern void Clear_histoDB ( void );
  extern gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_ID_HISTO *histo );
  extern gboolean Ajouter_histoDB ( struct LOG *log, struct DB *db, struct HISTODB *histo );
- extern SQLHSTMT Recuperer_histoDB ( struct LOG *log, struct DB *db );
- extern struct HISTODB *Recuperer_histoDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_histoDB ( struct LOG *log, struct DB *db );
+ extern struct HISTODB *Recuperer_histoDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_EDIT_HISTO *histo );
  extern struct HISTODB *Rechercher_histoDB( struct LOG *log, struct DB *db, gint id );
-
- extern gboolean Creer_db_histo ( struct LOG *log, struct DB *db );
 
  extern gboolean Ajouter_histo_hardDB ( struct LOG *log, struct DB *db, struct HISTO_HARDDB *histo );
  extern gboolean Creer_db_histo_hard ( struct LOG *log, struct DB *db );

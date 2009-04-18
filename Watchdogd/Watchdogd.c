@@ -140,52 +140,6 @@
      }
   }
 /**********************************************************************************************************/
-/* Charger_scenario: Applique un scenario si celui-ci est dans la période requise                         */
-/* Entrée: le numéro du scenario                                                                          */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Checker_scenario ( guint num )
-  { struct tm *temps;
-    time_t timet;
-
-    if ( !Partage->scenario[num].actif ) return;
-
-    time(&timet);                                                     /* On récupère la date et heure NOW */
-    temps = localtime( (time_t *)&timet );
-
-    if ( ! (temps->tm_min == Partage->scenario[num].minute &&
-            temps->tm_hour == Partage->scenario[num].heure ) ) return;
-
-    if ( ! Partage->scenario[num].ts_mois )
-     { if ( temps->tm_mon == 0  && ! Partage->scenario[num].janvier   ) return;
-       if ( temps->tm_mon == 1  && ! Partage->scenario[num].fevrier   ) return;
-       if ( temps->tm_mon == 2  && ! Partage->scenario[num].mars      ) return;
-       if ( temps->tm_mon == 3  && ! Partage->scenario[num].avril     ) return;
-       if ( temps->tm_mon == 4  && ! Partage->scenario[num].mai       ) return;
-       if ( temps->tm_mon == 5  && ! Partage->scenario[num].juin      ) return;
-       if ( temps->tm_mon == 6  && ! Partage->scenario[num].juillet   ) return;
-       if ( temps->tm_mon == 7  && ! Partage->scenario[num].aout      ) return;
-       if ( temps->tm_mon == 8  && ! Partage->scenario[num].septembre ) return;
-       if ( temps->tm_mon == 9  && ! Partage->scenario[num].octobre   ) return;
-       if ( temps->tm_mon == 10 && ! Partage->scenario[num].novembre  ) return;
-       if ( temps->tm_mon == 11 && ! Partage->scenario[num].decembre  ) return;
-     }
-    if ( ! Partage->scenario[num].ts_jour )
-     { if ( temps->tm_wday == 1  && ! Partage->scenario[num].lundi    ) return;
-       if ( temps->tm_wday == 2  && ! Partage->scenario[num].mardi    ) return;
-       if ( temps->tm_wday == 3  && ! Partage->scenario[num].mercredi ) return;
-       if ( temps->tm_wday == 4  && ! Partage->scenario[num].jeudi    ) return;
-       if ( temps->tm_wday == 5  && ! Partage->scenario[num].vendredi ) return;
-       if ( temps->tm_wday == 6  && ! Partage->scenario[num].samedi   ) return;
-       if ( temps->tm_wday == 0  && ! Partage->scenario[num].dimanche ) return;
-     }
-
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Scenario Active num", num );
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Scenario Active bit", Partage->scenario[num].bit_m );
-    Envoyer_commande_dls( Partage->scenario[num].bit_m );
-
-  }
-/**********************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -523,7 +477,7 @@ encore:
 
        if (!import)
         { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
-          Clear_histoDB ( Config.log, db );                            /* Clear de la table histo au boot */
+          Clear_histoDB ();                            /* Clear de la table histo au boot */
           Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
         } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 

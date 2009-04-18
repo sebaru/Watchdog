@@ -42,13 +42,11 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
 /**********************************************************************************************************/
-/* Preparer_envoi_scenario: convertit une structure MSG en structure CMD_SHOW_SCENARIO                      */
+/* Preparer_envoi_scenario: convertit une structure MSG en structure CMD_SHOW_SCENARIO                    */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
@@ -86,8 +84,8 @@
     return( rezo_sc );
   }
 /**********************************************************************************************************/
-/* Proto_editer_sc: Le client desire editer un sc                                                       */
-/* Entrée: le client demandeur et le sc en question                                                      */
+/* Proto_editer_sc: Le client desire editer un sc                                                         */
+/* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_scenario ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc )
@@ -129,7 +127,7 @@
 
        Envoi_client( client, TAG_SCENARIO, SSTAG_SERVEUR_EDIT_SCENARIO_OK,
                   (gchar *)&edit_sc, sizeof(struct CMD_EDIT_SCENARIO) );
-       g_free(sc);                                                                 /* liberation mémoire */
+       g_free(sc);                                                                  /* liberation mémoire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -140,8 +138,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Proto_valider_editer_sc: Le client valide l'edition d'un sc                                          */
-/* Entrée: le client demandeur et le sc en question                                                      */
+/* Proto_valider_editer_sc: Le client valide l'edition d'un sc                                            */
+/* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_EDIT_SCENARIO *rezo_sc )
@@ -186,8 +184,8 @@
          }
   }
 /**********************************************************************************************************/
-/* Proto_effacer_sc: Retrait du sc en parametre                                                         */
-/* Entrée: le client demandeur et le sc en question                                                      */
+/* Proto_effacer_sc: Retrait du sc en parametre                                                           */
+/* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc,
@@ -212,16 +210,16 @@
      }
   }
 /**********************************************************************************************************/
-/* Proto_effacer_sc: Retrait du sc en parametre                                                         */
-/* Entrée: le client demandeur et le sc en question                                                      */
+/* Proto_effacer_sc: Retrait du sc en parametre                                                           */
+/* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_scenario ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc )
   { Proto_effacer_scenario_tag (client, rezo_sc, TAG_SCENARIO, SSTAG_SERVEUR_DEL_SCENARIO_OK );
   }
 /**********************************************************************************************************/
-/* Proto_ajouter_sc: Un client nous demande d'ajouter un sc Watchdog                                    */
-/* Entrée: le sc à créer                                                                                 */
+/* Proto_ajouter_sc: Un client nous demande d'ajouter un sc Watchdog                                      */
+/* Entrée: le sc à créer                                                                                  */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_ADD_SCENARIO *rezo_sc )
@@ -266,7 +264,7 @@
          }
   }
 /**********************************************************************************************************/
-/* Envoyer_scs: Envoi des scs au client GID_SCENARIO                                                     */
+/* Envoyer_scs: Envoi des scs au client GID_SCENARIO                                                      */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/

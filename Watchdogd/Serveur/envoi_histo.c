@@ -3,8 +3,30 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       sam 13 mar 2004 18:41:14 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * envoi_histo.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <string.h>
  #include <pthread.h>
 
@@ -15,8 +37,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -69,7 +89,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to ack histo %d:\n%s"), rezo_histo->id, Db_watchdog->last_err);
+                   "Unable to ack histo %d:\n%s", rezo_histo->id, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -81,7 +101,7 @@
               if (!histo)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -93,7 +113,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate histo %d:\n%s"), rezo_histo->id, Db_watchdog->last_err);
+                          "Unable to locate histo %d:\n%s", rezo_histo->id, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -107,22 +127,28 @@
  void *Envoyer_histo_thread ( struct CLIENT *client )
   { struct CMD_SHOW_HISTO *rezo_histo;
     struct HISTODB *histo;
-    SQLHSTMT hquery;                                                   /* Requete SQL en cours d'emission */
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_histoDB( Config.log, Db_watchdog );
-    if (!hquery)
+    prctl(PR_SET_NAME, "W-EnvoiHISTO", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_histoDB( Config.log, db ) )
      { Client_mode( client, VALIDE );         /* Le client est maintenant valide aux yeux du sous-serveur */
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
     for( ; ; )
-     { histo = Recuperer_histoDB_suite( Config.log, Db_watchdog, hquery );
+     { histo = Recuperer_histoDB_suite( Config.log, db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
-          Info( Config.log, DEBUG_INFO, "Envoyer_histo: fin" );
+          Libere_DB_SQL( Config.log, &db );
           Client_mode( client, VALIDE );      /* Le client est maintenant valide aux yeux du sous-serveur */
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
@@ -133,7 +159,6 @@
        if (rezo_histo)
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Info_c( Config.log, DEBUG_INFO, "Envoyer_histo: ", rezo_histo->libelle );
           Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO,
                           (gchar *)rezo_histo, sizeof(struct CMD_SHOW_HISTO) );
           g_free(rezo_histo);
