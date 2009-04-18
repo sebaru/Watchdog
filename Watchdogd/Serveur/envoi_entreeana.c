@@ -131,7 +131,7 @@
               else { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,
                                    (gchar *)entree, sizeof(struct CMD_SHOW_ENTREEANA) );
                      g_free(entree);
-                     Charger_eana ( Db_watchdog );
+                     Charger_eana ();
                    }
             }
            else
@@ -158,7 +158,7 @@
     if (retour)
      { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_DEL_ENTREEANA_OK,
                      (gchar *)rezo_entree, sizeof(struct CMD_ID_ENTREEANA) );
-       Charger_eana ( Db_watchdog );
+       Charger_eana ();
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -205,7 +205,7 @@
                              "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                 Charger_eana ( Db_watchdog );
+                 Charger_eana ();
                }
               else { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_ADD_ENTREEANA_OK,
                                    (gchar *)entree, sizeof(struct CMD_SHOW_ENTREEANA) );
@@ -239,7 +239,8 @@
        return;
      }                                                                           /* Si pas de histos (??) */
 
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d entrees", db->nbr_result );
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d entrees", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )

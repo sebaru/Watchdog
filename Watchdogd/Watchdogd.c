@@ -119,24 +119,6 @@
        default: Info_n( Config.log, DEBUG_INFO, "Recu signal", num ); break;
      }
   }
-
-/**********************************************************************************************************/
-/* Charger_scenario: Chargement des infos sur les scenario depuis la DB                                   */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Charger_scenario ( struct DB *Db_watchdog )
-  { gint i;
-
-    for (i = 0; i<NBR_SCENARIO; i++)
-     { struct SCENARIO_DB *sc;
-       sc = Rechercher_scenarioDB ( Config.log, Db_watchdog, i );
-       if (sc)
-        { memcpy ( &Partage->scenario[i], sc, sizeof(struct SCENARIO_DB) );
-          g_free(sc);
-        } else Partage->scenario[i].actif = FALSE;
-     }
-  }
 /**********************************************************************************************************/
 /* Charger_cpth: Chargement des infos sur les compteurs horaires depuis la DB                             */
 /* Entrée: rien                                                                                           */
@@ -532,11 +514,11 @@
 encore:   
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
-       Charger_eana( Config.log );
+       Charger_eana();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
-       Charger_scenario( db );
+       Charger_scenario();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
 
        if (!import)

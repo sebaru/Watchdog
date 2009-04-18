@@ -177,8 +177,6 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Charger_scenario ( struct DB *Db_watchdog );
-
  extern gint Activer_ecoute ( void );                                                    /* Dans ecoute.c */
 
  extern struct PARTAGE *Shm_init ( void );                                                  /* Dans shm.c */

@@ -29,7 +29,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -136,7 +136,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate scenario %s:\n%s"), rezo_sc->libelle, Db_watchdog->last_err);
+                   "Unable to locate scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -156,7 +156,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit scenario %s:\n%s"), rezo_sc->libelle, Db_watchdog->last_err);
+                   "Unable to edit scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -168,20 +168,20 @@
               if (!sc)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_VALIDE_EDIT_SCENARIO_OK,
                                    (gchar *)sc, sizeof(struct CMD_SHOW_SCENARIO) );
                      g_free(sc);
-                     Charger_scenario ( Db_watchdog );
+                     Charger_scenario ();
                    }
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate scenario %s:\n%s"), rezo_sc->libelle, Db_watchdog->last_err);
+                          "Unable to locate scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -202,7 +202,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add scenario %s:\n%s"), rezo_sc->libelle, Db_watchdog->last_err);
+                   "Unable to add scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -210,7 +210,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate scenario %s:\n%s"), rezo_sc->libelle, Db_watchdog->last_err);
+                          "Unable to locate scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -221,14 +221,14 @@
               if (!sc)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_ADD_SCENARIO_OK,
                                    (gchar *)sc, sizeof(struct CMD_SHOW_SCENARIO) );
                      g_free(sc);
-                     Charger_scenario ( Db_watchdog );
+                     Charger_scenario ();
                    }
             }
          }
@@ -251,25 +251,32 @@
     struct CMD_ENREG nbr;
     struct SCENARIO_DB *sc;
     SQLHSTMT hquery;                                                   /* Requete SQL en cours d'emission */
-    gint cpt;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_scenarioDB_par_bitm( Config.log, Db_watchdog, &client->sce );
-    if (!hquery)                                                                 /* Si pas de histos (??) */
+    prctl(PR_SET_NAME, "W-EnvoiSUPSCE", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_scenarioDB_par_bitm( Config.log, db, &client->sce ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading %d scenarios"), nbr.num );
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d scenarios", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { sc = Recuperer_scenarioDB_suite( Config.log, Db_watchdog, hquery );
+     { sc = Recuperer_scenarioDB_suite( Config.log, db );
        if (!sc)
         { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
