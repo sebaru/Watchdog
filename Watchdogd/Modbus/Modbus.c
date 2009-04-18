@@ -94,12 +94,16 @@
 
     while ( Recuperer_ligne_SQL (Config.log, db) )
      { struct MODULE_MODBUS *module;
-
+printf("1\n");
        module->id       = id;
        module->actif    = atoi (db->row[0]);
+printf("2\n");
        g_snprintf( module->ip, sizeof(module->ip), "%s", db->row[1] );
+printf("3\n");
        module->bit      = atoi (db->row[2]);         /* Bit interne B d'etat communication avec le module */
+printf("4\n");
        module->watchdog = atoi (db->row[3]);
+printf("5\n");
                                                                         /* Ajout dans la liste de travail */
        Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->id       );
        Info_n( Config.log, DEBUG_MODBUS, "                      -  actif    = ", module->actif    );
