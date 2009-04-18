@@ -117,8 +117,7 @@
      }
 
     while ( Recuperer_ligne_SQL (Config.log, db) )
-     { struct MODULE_MODBUS *module;
-       struct BORNE_MODBUS *borne;
+     { struct BORNE_MODBUS *borne;
 
        borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
        if (!borne)                                                   /* Si probleme d'allocation mémoire */
