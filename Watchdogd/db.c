@@ -160,6 +160,9 @@
     db->hodbc       = Odbc;                                                    /* Sauvegarde des donnéees */
     db->hdb         = Db;
     db->dsn         = g_strdup( dsn );
+    g_snprintf( db->db_username, sizeof(db->db_username), "%s", user );
+    g_snprintf( db->db_database, sizeof(db->db_database), "%s", db->dsn );
+    g_snprintf( db->db_password, sizeof(db->db_password), "%s", password );
     Info_c( log, DEBUG_DB, "ConnexionDB: Connexion effective DB", db->dsn );
     Info_c( log, DEBUG_DB, "                          avec user", user );
     return(db);
