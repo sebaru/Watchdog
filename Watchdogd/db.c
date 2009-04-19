@@ -244,8 +244,7 @@
           db->nbr_result = 0;
         }
        else 
-        { Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );
-          db->nbr_result = mysql_num_rows ( db->result );
+        { db->nbr_result = mysql_num_rows ( db->result );
         }
      }
     return(TRUE);
@@ -261,7 +260,7 @@
        mysql_free_result( db->result );
        db->result = NULL;
        db->free = TRUE;
-       Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: free OK" );
+      /*Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: free OK" );*/
      }
   }
 /**********************************************************************************************************/
