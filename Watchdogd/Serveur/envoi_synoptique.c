@@ -26,7 +26,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -38,8 +38,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -86,7 +84,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate synoptique %s:\n%s"), rezo_syn->libelle, Db_watchdog->last_err);
+                   "Unable to locate synoptique %s", rezo_syn->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -106,7 +104,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit synoptique %s:\n%s"), rezo_syn->libelle, Db_watchdog->last_err);
+                   "Unable to edit synoptique %s", rezo_syn->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -118,7 +116,7 @@
               if (!syn)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -130,7 +128,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate synoptique %s:\n%s"), rezo_syn->libelle, Db_watchdog->last_err);
+                          "Unable to locate synoptique %s", rezo_syn->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -155,7 +153,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete synoptique %s:\n%s"), rezo_syn->libelle, Db_watchdog->last_err);
+                   "Unable to delete synoptique %s", rezo_syn->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -175,7 +173,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add synoptique %s:\n%s"), rezo_syn->libelle, Db_watchdog->last_err);
+                   "Unable to add synoptique %s", rezo_syn->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -183,7 +181,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate synoptique %s:\n%s"), rezo_syn->libelle, Db_watchdog->last_err);
+                          "Unable to locate synoptique %s", rezo_syn->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -194,7 +192,7 @@
               if (!syn)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -210,27 +208,36 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void *Envoyer_synoptiques_tag ( struct CLIENT *client, int tag, gint sstag, gint sstag_fin )
+ static void Envoyer_synoptiques_tag ( struct CLIENT *client, int tag, gint sstag, gint sstag_fin )
   { struct CMD_SHOW_SYNOPTIQUE *rezo_syn;
     struct CMD_ENREG nbr;
     struct SYNOPTIQUEDB *syn;
-    SQLHSTMT hquery;                                                   /* Requete SQL en cours d'emission */
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
- 
-    hquery = Recuperer_synoptiqueDB( Config.log, Db_watchdog );
-    if (!hquery) return(NULL);
+    struct DB *db;
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading synoptiques") );
+    prctl(PR_SET_NAME, "W-EnvoiSYN", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { return;
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_synoptiqueDB( Config.log, db ) )
+     { Libere_DB_SQL( Config.log, &db );
+       return;
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d synoptiques", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { syn = Recuperer_synoptiqueDB_suite( Config.log, Db_watchdog, hquery );
+     { syn = Recuperer_synoptiqueDB_suite( Config.log, db );
        if (!syn)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          return(NULL);
+          Libere_DB_SQL( Config.log, &db );
+          return;
         }
 
        rezo_syn = Preparer_envoi_synoptique( syn );

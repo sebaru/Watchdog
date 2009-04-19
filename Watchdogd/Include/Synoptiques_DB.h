@@ -95,8 +95,8 @@
  extern gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db,
                                            struct UTILISATEURDB *util, guint syn_id );
  extern struct SYNOPTIQUEDB *Rechercher_synoptiqueDB ( struct LOG *log, struct DB *db, guint id );
- extern SQLHSTMT Recuperer_synoptiqueDB ( struct LOG *log, struct DB *db );
- extern struct SYNOPTIQUEDB *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_synoptiqueDB ( struct LOG *log, struct DB *db );
+ extern struct SYNOPTIQUEDB *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db );
  extern gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_ADD_SYNOPTIQUE *syn );
  extern gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_ID_SYNOPTIQUE *syn );
  extern gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_EDIT_SYNOPTIQUE *syn );
