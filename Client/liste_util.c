@@ -136,12 +136,11 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_util.id, -1 );                     /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
-
+printf("Want edit user %s %d\n", nom, rezo_util.id );
     memcpy( &rezo_util.nom, nom, sizeof(rezo_util.nom) );
     g_free( nom );
     Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_EDIT_UTIL,
                    (gchar *)&rezo_util, sizeof(struct CMD_ID_UTILISATEUR) );
-    Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL, NULL, 0 );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
