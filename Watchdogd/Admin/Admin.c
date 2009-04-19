@@ -100,7 +100,7 @@
  static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
   { close ( client->connexion );
     g_free(client);
-    Info_n( Config.log, DEBUG_ADMIN, "Connexion terminée ID", id);
+    Info_n( Config.log, DEBUG_ADMIN, "Connexion terminée ID", client->connexion );
     Partage->com_admin.Clients = g_list_remove ( Partage->com_admin.Clients, client );
   }
 /**********************************************************************************************************/
