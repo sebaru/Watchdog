@@ -22,6 +22,7 @@
  struct CLIENT_ADMIN
   { gint connexion;
     gint mode;
+    gint last_use;
   };
 
  struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */

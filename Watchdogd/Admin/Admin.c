@@ -125,6 +125,7 @@
 
        client->connexion = id;
        client->mode = MODE_ADMIN_RUNNING;
+       client->last_use = Partage->top;
        fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
 
        Partage->com_admin.Clients = g_list_append( Partage->com_admin.Clients, client );
@@ -148,11 +149,18 @@
  static void Ecouter_admin ( struct CLIENT_ADMIN *client )
   { gchar ligne[128], commande[128], chaine[128];
     gint taille;
+
+    if ( Partage->top > client->last_use + 60 )
+     { Deconnecter_admin ( client ); 
+       return;
+     }
+
     taille = read( client->connexion, ligne, sizeof(ligne) );
 
     if (taille > 0)
      { ligne[taille] = 0;
 
+       client->last_use = Partage->top;
        Info_c( Config.log, DEBUG_ADMIN, "Admin : received command", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 

@@ -148,7 +148,8 @@
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (cpth_prochain_save_db < Partage->top)                        /* Update DB toutes les 5 minutes */
-        { for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
+        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPTH" );
+          for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
            { Updater_cpthDB( Config.log, Db_watchdog, &Partage->ch[cpt].cpthdb); }     
           cpth_prochain_save_db = Partage->top + 3000;                 /* Sauvegarde toutes les 5 minutes */
         }
