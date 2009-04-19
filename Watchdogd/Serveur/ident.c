@@ -105,9 +105,7 @@
        return(DECONNECTE);
      }
 
-#warning To be CleanedUp !
-
-    if ( id!=0 && memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
+    if (memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
      { Info_c( Config.log, DEBUG_CONNEXION, 
                _("Tester_autorisation: Password error"), client->util->nom );
        Info_c( Config.log, DEBUG_CONNEXION, 
