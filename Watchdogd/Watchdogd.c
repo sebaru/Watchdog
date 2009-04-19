@@ -125,15 +125,17 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
-  { struct DB *Db_watchdog;
-    gint cpt;
-    gint cpth_prochain_save_db;
+  { gint cpth_prochain_save_db;
     gint scenario_test_date;
+    struct DB *db;
+    gint cpt;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
     Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Debut boucle sans fin" );
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,       /* Connexion en tant que user normal */
-                               Config.db_username, Config.db_password );
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
 
     cpth_prochain_save_db = Partage->top + 3000;
     scenario_test_date = Partage->top + 100;
@@ -144,13 +146,13 @@
        Gerer_manque_process();                               /* Detection du manque de serveurs en ecoute */
 /*     Gerer_fifo_admin();                                       /* Gestion de l'interface d'admin locale */
 
-       Gerer_arrive_MSGxxx_dls( Db_watchdog );/* Redistrib des messages DLS vers les clients + Historique */ 
+       Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (cpth_prochain_save_db < Partage->top)                        /* Update DB toutes les 5 minutes */
         { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPTH" );
           for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
-           { Updater_cpthDB( Config.log, Db_watchdog, &Partage->ch[cpt].cpthdb); }     
+           { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
           cpth_prochain_save_db = Partage->top + 3000;                 /* Sauvegarde toutes les 5 minutes */
         }
 
@@ -166,7 +168,7 @@
 
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
     Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: fin boucle sans fin" );
-    DeconnexionDB( Config.log, &Db_watchdog );                                  /* Deconnexion de la base */
+    Libere_DB_SQL( Config.log, &db );
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/

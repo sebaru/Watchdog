@@ -219,7 +219,8 @@
 /* Sortie: TRUE si pas de souci                                                                           */
 /**********************************************************************************************************/
  gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete )
-  { if ( mysql_query ( db->mysql, requete ) )
+  { if (!db) return(FALSE);
+    if ( mysql_query ( db->mysql, requete ) )
      { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed",
                (char *)mysql_error(db->mysql) );
        return(FALSE);
@@ -247,7 +248,8 @@
 /* Sortie: La ligne ou NULL si il n'y en en plus                                                          */
 /**********************************************************************************************************/
  MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db )
-  { db->row = mysql_fetch_row(db->result);
+  { if (!db) return(NULL);
+    db->row = mysql_fetch_row(db->result);
     return( db->row );
   }
 /**********************************************************************************************************/
@@ -256,7 +258,8 @@
 /* Sortie: Le dernier ID                                                                                  */
 /**********************************************************************************************************/
  guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db )
-  { return ( mysql_insert_id(db->mysql) );
+  { if (!db) return(0);
+    return ( mysql_insert_id(db->mysql) );
   }
 /**********************************************************************************************************/
 /* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                       */
@@ -264,7 +267,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
-  { mysql_free_result( db->result );
+  { if (db) mysql_free_result( db->result );
   }
 /**********************************************************************************************************/
 /* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */
@@ -287,38 +290,6 @@
 /* sortie: un pointeur query, ou null si pb                                                               */
 /**********************************************************************************************************/
  SQLHSTMT NewQueryDB ( struct LOG *log, struct DB *db )
-  { SQLHSTMT hquery;
-    long retour;
-
-    /*Info_n( log, DEBUG_DB, "DB: NewqueryDB: db = ", db );*/
-    if ( db->nbr_query != 0 )
-     { Info_n( log, DEBUG_DB, "DB: NewqueryDB: nbr_query!=0 !!", db->nbr_query );
-     }
-
-    retour = SQLConnect( db->hdb, (SQLCHAR*) db->dsn, SQL_NTS,                       /* DSN -> DBWatchdog */
-                             (SQLCHAR*) db->db_username, SQL_NTS,                             /* Username */
-                             (SQLCHAR*) db->db_password, SQL_NTS);                            /* Password */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { PrintErrDB( log, db->hdb );
-       Info_n( log, DEBUG_DB, "DB: NewqueryDB: Erreur de connexion", retour );
-       return(NULL);
-     }
-
-    retour = SQLAllocHandle( SQL_HANDLE_STMT, db->hdb, &hquery );
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "DB: NewQueryDB: pb allocation pointeur" );
-       PrintErrQueryDB( log, db, hquery );
-       return(NULL);
-     }
-    db->nbr_query++;
-    return(hquery);
-  }
-/**********************************************************************************************************/
-/* NewQueryDB: renvoie un pointeur sur la nouvelle requete db                                             */
-/* entrée: un log et une db                                                                               */
-/* sortie: un pointeur query, ou null si pb                                                               */
-/**********************************************************************************************************/
- MYSQL *NewQueryDB_new ( struct LOG *log, struct DB *db )
   { SQLHSTMT hquery;
     long retour;
 
