@@ -74,7 +74,6 @@
 
     if (util->id < NBR_UTILISATEUR_RESERVE) 
      { Info_c( log, DEBUG_DB, "Retirer_utilisateurDB: elimination failed: id reserve", util->nom );
-       g_snprintf( db->last_err, sizeof(db->last_err), "Permission denied" );
        return(FALSE);
      }
 
@@ -148,6 +147,9 @@
   { gchar requete[1024], chaine[100];
     gchar *comment;
     gchar *crypt;
+
+    if (util->id < NBR_UTILISATEUR_RESERVE) 
+     { return(FALSE); }
 
     comment = Normaliser_chaine ( log, util->commentaire );
     if (!comment)

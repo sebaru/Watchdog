@@ -47,6 +47,9 @@
  gboolean Set_compte_actif( struct LOG *log, struct DB *db, guint id, gboolean enable )
   { gchar requete[200];
 
+    if (id < NBR_UTILISATEUR_RESERVE) 
+     { return(TRUE); }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET enable = '%d', login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, enable, id );

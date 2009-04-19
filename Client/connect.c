@@ -117,15 +117,7 @@ one_again:
              gtk_widget_destroy(erreur);
              goto one_again;
            }
-      /*    if ( !g_utf8_collate(code1, Client_en_cours.password) )
-           { GtkWidget *erreur;      A faire coté serveur !!!!
-             erreur = gtk_message_dialog_new( GTK_WINDOW(dialog), GTK_DIALOG_DESTROY_WITH_PARENT,
-                                              GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
-                                              _("Your REALLY have to\nchange your password") );
-             gtk_dialog_run( GTK_DIALOG(erreur) );
-             gtk_widget_destroy(erreur);
-             goto one_again;
-           }*/
+
           util.id = Client_en_cours.id;
           memcpy( util.code_en_clair, code1, sizeof(util.code_en_clair) );
           Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SETPASSWORD,

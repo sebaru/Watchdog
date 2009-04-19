@@ -86,9 +86,9 @@
              { Client_mode( client, ENVOI_UTIL );
              }
             break;
-/*       case SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL:
-             { 
-             }*/
+       case SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL:
+             { Client_mode( client, ENVOI_GROUPE_FOR_UTIL );
+             }
             break;
        case SSTAG_CLIENT_EDIT_UTIL:
              { struct CMD_ID_UTILISATEUR *util;

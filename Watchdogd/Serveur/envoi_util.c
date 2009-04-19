@@ -67,14 +67,9 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    retour = FALSE;
-    util   = NULL;
-    if (rezo_util->id >= NBR_UTILISATEUR_RESERVE)
-     { util = Rechercher_utilisateurDB( Config.log, Db_watchdog, rezo_util->id );
-       if (util) retour = TRUE;                                                            /* Autorisé !! */
-     } 
+    util = Rechercher_utilisateurDB( Config.log, Db_watchdog, rezo_util->id );
 
-    if (retour)
+    if (util)
      { edit_util.id            = util->id;                                  /* Recopie des info editables */
        memcpy( &edit_util.nom, util->nom, sizeof(edit_util.nom) );
        memcpy( &edit_util.commentaire, util->commentaire, sizeof(edit_util.commentaire) );
@@ -94,7 +89,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate user %s (%d)", rezo_util->nom, rezo_util->id );
+                   "Permission Denied for user %s (%d)", rezo_util->nom, rezo_util->id );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -138,7 +133,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate user %s:\n%s", rezo_util->nom, Db_watchdog->last_err);
+                          "Permission Denied for user %s (%d)", rezo_util->nom, rezo_util->id );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }

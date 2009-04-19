@@ -109,6 +109,9 @@
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_Root"), Menu_root),
     GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_ITEM_STOCK( N_("Change Password"), N_("Change the password"),
+                            Changer_password, GNOME_STOCK_PIXMAP_PROPERTIES ),
+    GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };

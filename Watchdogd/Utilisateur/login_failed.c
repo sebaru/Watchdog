@@ -48,7 +48,8 @@
   { gchar requete[200];
     gint nbr_login;
 
-    if (id == 0) return (0);                                             /* Si ROOT : pas de login failed */
+    if (id < NBR_UTILISATEUR_RESERVE) 
+     { return(0); }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT login_failed FROM %s WHERE id=%d",
@@ -76,7 +77,8 @@
  gboolean Ajouter_one_login_failed( struct LOG *log, struct DB *db, guint id, gint max_login_failed )
   { gchar requete[200];
 
-    if (id == 0) return (TRUE);                                          /* Si ROOT : pas de login failed */
+    if (id < NBR_UTILISATEUR_RESERVE) 
+     { return(FALSE); }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET login_failed = login_failed+1 WHERE id=%d",
