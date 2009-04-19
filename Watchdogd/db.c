@@ -257,7 +257,7 @@
 /**********************************************************************************************************/
  void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
   { if (db)
-     { while( Recuperer_ligne_SQL ( log, db ) );
+     { while( db->row ) Recuperer_ligne_SQL ( log, db );
        mysql_free_result( db->result );
        db->free = TRUE;
      }

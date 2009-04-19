@@ -88,6 +88,7 @@ Info( Config.log, DEBUG_DB, "Test 1" );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
+Info( Config.log, DEBUG_DB, "Test 1.5" );
     Liberer_resultat_SQL ( Config.log, client->Db_watchdog );
 
 Info( Config.log, DEBUG_DB, "Test 2" );
