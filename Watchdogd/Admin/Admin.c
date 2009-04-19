@@ -100,6 +100,7 @@
  static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
   { close ( client->connexion );
     g_free(client);
+    Info_n( Config.log, DEBUG_ADMIN, "Connexion terminée ID", id);
     Partage->com_admin.Clients = g_list_remove ( Partage->com_admin.Clients, client );
   }
 /**********************************************************************************************************/
@@ -149,11 +150,6 @@
  static void Ecouter_admin ( struct CLIENT_ADMIN *client )
   { gchar ligne[128], commande[128], chaine[128];
     gint taille;
-
-    if ( Partage->top > client->last_use + 60 )
-     { Deconnecter_admin ( client ); 
-       return;
-     }
 
     taille = read( client->connexion, ligne, sizeof(ligne) );
 
@@ -227,6 +223,11 @@
           liste = Partage->com_admin.Clients;
           while (liste)
            { client = (struct CLIENT_ADMIN *)liste->data;
+
+             if ( Partage->top > client->last_use + 60 )       /* Deconnexion = 60 secondes si inactivité */
+              { Deconnecter_admin ( client ); 
+                continue;
+              }
 
              Ecouter_admin( client );
              liste=liste->next;
