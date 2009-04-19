@@ -648,7 +648,7 @@
 
              if (Partage->top > client->pulse)                                    /* Gestion du KEEPALIVE */
               { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );
-                client->pulse = Partage->top + 30;
+                client->pulse = Partage->top + 20;
               }
 
              liste = liste->next;

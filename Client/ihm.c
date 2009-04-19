@@ -157,6 +157,7 @@
     if (nbr_enreg != nbr_enreg_max) nbr_enreg++;
     progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
     gtk_progress_bar_set_fraction( progress, (gdouble)nbr_enreg/nbr_enreg_max );
+    if (nbr_enreg == nbr_enreg_max) Set_progress_text( _("done"), nbr_enreg_max );
   }
 /**********************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                         */
@@ -165,6 +166,7 @@
 /**********************************************************************************************************/
  void Set_progress_pulse( void )
   { GtkProgressBar *progress;
+    if ( nbr_enreg != nbr_enreg_max ) return;
     progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
     gtk_progress_bar_pulse ( progress );
   }
