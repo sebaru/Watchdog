@@ -68,19 +68,19 @@
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_audio ( void )
-  { guint num;
-    struct MSGDB *msg;
+  { struct MSGDB *msg;
+    struct DB *db;
+    guint num;
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "Audio: demarrage" );
 
     sleep(5);                                                      /* A l'init, nous attendons 5 secondes */
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,       /* Connexion en tant que user normal */
-                               Config.db_username, Config.db_password );
-
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "AUDIO: Run_audio: Unable to open database (dsn)", Config.db_database );
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_DB, "AUDIO: Run_audio: Unable to open database", Config.db_database );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -107,7 +107,7 @@
 
        Info_n( Config.log, DEBUG_INFO, "AUDIO : Préparation du message id", num );
 
-       msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
+       msg = Rechercher_messageDB( Config.log, db, num );
        if (msg)
         { gchar nom_fichier[128], cible[128];
           gint fd_cible, pid;
@@ -171,7 +171,7 @@
           g_free(msg);
         }
      }
-    DeconnexionDB( Config.log, &Db_watchdog );                                  /* Deconnexion de la base */
+    Libere_DB_SQL( Config.log, &db );
     Info_n( Config.log, DEBUG_FORK, "AUDIO: Run_audio: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

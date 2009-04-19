@@ -85,7 +85,7 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_DB, "ARCH: Run_arch: Unable to open database (dsn)", Config.db_database );
+     { Info_c( Config.log, DEBUG_DB, "ARCH: Run_arch: Unable to open database", Config.db_database );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
