@@ -153,6 +153,7 @@
              printf("%s", reponse ); fflush(stdout);
            }
 	}
+       usleep(1);
      }
 
     close( Socket );
