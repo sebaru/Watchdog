@@ -261,6 +261,7 @@
        mysql_free_result( db->result );
        db->result = NULL;
        db->free = TRUE;
+       Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: free OK" );
      }
   }
 /**********************************************************************************************************/
