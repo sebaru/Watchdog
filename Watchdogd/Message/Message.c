@@ -105,12 +105,15 @@
  struct MSGDB *Recuperer_messageDB_suite( struct LOG *log, struct DB *db )
   { struct MSGDB *msg;
 
+Info( log, DEBUG_DB, "Recuperer_messageDB_suite 1" );
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+Info( log, DEBUG_DB, "Recuperer_messageDB_suite 2" );
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
      }
 
+Info( log, DEBUG_DB, "Recuperer_messageDB_suite 3" );
     msg = (struct MSGDB *)g_malloc0( sizeof(struct MSGDB) );
     if (!msg) Info( log, DEBUG_MEM, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
@@ -124,7 +127,9 @@
        msg->not_inhibe  = atoi(db->row[6]);
        msg->sms         = atoi(db->row[8]);
      }
+Info( log, DEBUG_DB, "Recuperer_messageDB_suite 4" );
     Liberer_resultat_SQL ( log, db );
+Info( log, DEBUG_DB, "Recuperer_messageDB_suite 5" );
     return(msg);
   }
 /**********************************************************************************************************/
