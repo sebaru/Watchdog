@@ -228,7 +228,9 @@
      { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete OK", requete ); }
 
     if ( ! strcmp ( "SELECT", requete ) )
-     { db->result = mysql_store_result ( db->mysql );
+     {
+       Info( Config.log, DEBUG_DB, "mysql_store" );
+       db->result = mysql_store_result ( db->mysql );
        if ( ! db->result )
         { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result failed",
                   (char *) mysql_error(db->mysql) );
@@ -239,6 +241,8 @@
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }
+    Info( Config.log, DEBUG_DB, "fin Lancer_requete_SQL" );
+          
     return(TRUE);
   }
 /**********************************************************************************************************/
