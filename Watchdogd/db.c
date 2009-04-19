@@ -227,14 +227,17 @@
     else 
      { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete OK", requete ); }
 
-    db->result = mysql_store_result ( db->mysql );
-    if ( ! db->result )
-     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result failed",
-               (char *) mysql_error(db->mysql) );
-     }
-    else 
-     { Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );
-       db->nbr_result = mysql_num_rows ( db->result );
+    if ( ! strcmp ( requete, "SELECT" ) )
+     { db->result = mysql_store_result ( db->mysql );
+       if ( ! db->result )
+        { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result failed",
+                  (char *) mysql_error(db->mysql) );
+          db->nbr_result = 0;
+        }
+       else 
+        { Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );
+          db->nbr_result = mysql_num_rows ( db->result );
+        }
      }
     return(TRUE);
   }

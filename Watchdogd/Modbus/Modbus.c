@@ -724,6 +724,7 @@
     liste = Partage->com_modbus.Modules_MODBUS;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
+       usleep(1);
        sched_yield();
 
        if (Partage->com_modbus.reload == TRUE)
