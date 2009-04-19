@@ -223,6 +223,7 @@
           liste = Partage->com_admin.Clients;
           while (liste)
            { client = (struct CLIENT_ADMIN *)liste->data;
+             liste=liste->next;
 
              if ( Partage->top > client->last_use + 600 )      /* Deconnexion = 60 secondes si inactivité */
               { Deconnecter_admin ( client ); 
@@ -230,7 +231,6 @@
               }
 
              Ecouter_admin( client );
-             liste=liste->next;
            }
         }
        sched_yield();
