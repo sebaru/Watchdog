@@ -40,13 +40,15 @@
  #include "proto_util.h"
 
 /**********************************************************************************************************/
-/* Get_login_failed: Recupere la valeur du login failed                                             */
+/* Get_login_failed: Recupere la valeur du login failed                                                   */
 /* Entrées: un log, une db et nom d'utilisateur                                                           */
 /* Sortie: le nombre de login failed, -1 si erreur                                                        */
 /**********************************************************************************************************/
  gint Get_login_failed( struct LOG *log, struct DB *db, guint id )
   { gchar requete[200];
     gint nbr_login;
+
+    if (id == 0) return (0);                                             /* Si ROOT : pas de login failed */
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT login_failed FROM %s WHERE id=%d",
@@ -73,6 +75,8 @@
 /**********************************************************************************************************/
  gboolean Ajouter_one_login_failed( struct LOG *log, struct DB *db, guint id, gint max_login_failed )
   { gchar requete[200];
+
+    if (id == 0) return (TRUE);                                          /* Si ROOT : pas de login failed */
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET login_failed = login_failed+1 WHERE id=%d",

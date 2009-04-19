@@ -108,6 +108,10 @@
     if (memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
      { Info_c( Config.log, DEBUG_CONNEXION, 
                _("Tester_autorisation: Password error"), client->util->nom );
+       Info_c( Config.log, DEBUG_CONNEXION, 
+               _("Tester_autorisation: Password error"), client->util->code );
+       Info_c( Config.log, DEBUG_CONNEXION, 
+               _("Tester_autorisation: Password error"), crypt );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        g_free(crypt);
        Ajouter_one_login_failed( Config.log, client->Db_watchdog,  /* Dommage ! */
