@@ -304,9 +304,7 @@
     else if ( ! strcmp ( commande, "addborne" ) )
      { gchar type[128], chaine[128];
        guint adresse, min, nbr, module;
-       sscanf ( ligne, "%s %s %d %d %d", commande, type, &adresse, &min, &nbr, &module );
-
-printf("Recu %s %d %d %d\n", type, adresse, min, nbr, module );
+       sscanf ( ligne, "%s %s %d %d %d %d", commande, type, &adresse, &min, &nbr, &module );
 
        if ( min >= NBR_BIT_DLS )
         { Write_admin ( client->connexion, " min should be < NBR_BIT_DLS\n" ); }
