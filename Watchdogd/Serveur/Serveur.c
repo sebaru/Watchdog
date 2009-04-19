@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
  #include <openssl/err.h>
  #include <openssl/rsa.h>
  #include <openssl/x509.h>
@@ -52,9 +51,6 @@
  #include "watchdogd.h"
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -154,7 +150,7 @@
     if (client->mode == VALIDE_NON_ROOT && mode == VALIDE)                    /* Nous prevenons le client */
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 ); }
     client->mode = mode;
-    g_snprintf( chaine, sizeof(chaine), _("SSRV: client mode %s"), Mode_vers_string(mode) );
+    g_snprintf( chaine, sizeof(chaine), "SSRV: client mode %s", Mode_vers_string(mode) );
     if (!client->util) Info_n( Config.log, DEBUG_CONNEXION, chaine, client->connexion->socket );
                   else Info_c( Config.log, DEBUG_CONNEXION, chaine, client->util->nom );
   }
@@ -165,6 +161,7 @@
 /**********************************************************************************************************/
  static void Deconnecter ( struct CLIENT *client )
   {
+    Libere_DB_SQL( Config.log, &client->Db_watchdog );
     client->mode = VALIDE;                            /* Envoi un dernier paquet "OFF" avant deconnexion" */
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
@@ -173,7 +170,7 @@
     Fermer_connexion( client->connexion );
     pthread_mutex_destroy( &client->mutex_write );
     pthread_mutex_destroy( &client->mutex_struct_used );
-    Info_n( Config.log, DEBUG_NETWORK, _("SSRV: Deconnecter: Connexion stopped"), client->connexion->socket );
+    Info_n( Config.log, DEBUG_NETWORK, "SSRV: Deconnecter: Connexion stopped", client->connexion->socket );
     if (client->util) { g_free( client->util ); }
     if (client->bit_syns)     { g_list_free(client->bit_syns); }
     if (client->bit_init_syn) { g_list_free(client->bit_init_syn); }
@@ -234,11 +231,11 @@
        pthread_mutex_init( &client->mutex_struct_used, NULL );
        client->struct_used = 0;                            /* Par défaut, personne n'utilise la structure */
 
-       client->Db_watchdog = ConnexionDB( Config.log, Config.db_database,
-                                          Config.db_username, Config.db_password );
+       client->Db_watchdog = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                                          Config.db_username, Config.db_password, Config.db_port );
        if (!client->Db_watchdog)
-        { Info_c( Config.log, DEBUG_DB,
-                  _("SSRV: Accueillir_nouveaux_client: Unable to open database (dsn)"), Config.db_database );
+        { Info( Config.log, DEBUG_DB,
+                  "SSRV: Accueillir_nouveaux_client: Unable to open database" );
           Deconnecter( client );
         }
        else
@@ -279,13 +276,13 @@
     Partage->Sous_serveur[id].nb_client = 0;
    /* Partage->Sous_serveur[id].pid = getpid(); /*pthread_self(); /* Le fils est pret et en informe le pere */
 
-    Info_n( Config.log, DEBUG_INFO, _("SSRV: Run_serveur: Enable"), id );
+    Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: Enable", id );
          
     while( Partage->Arret < FIN && Arret != FIN )  /* On tourne tant que le pere est en vie et arret!=fin */
      { if (Partage->jeton == id)                                                /* Avons nous le jeton ?? */
         { if (Accueillir_un_client( id ) == TRUE)                         /* Un client vient d'arriver ?? */
            { Partage->jeton = -1;                                /* On signale que l'on accepte le client */
-             Info_n( Config.log, DEBUG_INFO, _("SSRV: Run_serveur: jeton rendu"), id );
+             Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: jeton rendu", id );
            }
         }
 
@@ -650,7 +647,7 @@
              if (client->mode >= ATTENTE_IDENT) Ecouter_client( id, client );
 #ifdef bouh
              if (Top > client->timeout)                                           /* Gestion du KEEPALIVE */
-              { Info_n( Config.log, DEBUG_NETWORK, _("Keep alive failed"), client->connexion->socket );
+              { Info_n( Config.log, DEBUG_NETWORK, "Keep alive failed", client->connexion->socket );
                 Deconnecter( client );
               }
 #endif
