@@ -646,8 +646,10 @@
 
              if (client->mode >= ATTENTE_IDENT) Ecouter_client( id, client );
 
-             if (Partage->top > client->pulse + 20)                               /* Gestion du KEEPALIVE */
-              { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 ); }
+             if (Partage->top > client->pulse)                                    /* Gestion du KEEPALIVE */
+              { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );
+                client->pulse = Partage->top + 30;
+              }
 
              liste = liste->next;
            }
