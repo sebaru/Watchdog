@@ -209,7 +209,7 @@
 
     db = *adr_db;
     mysql_close( db->mysql );
-    Info( log, DEBUG_DB, "DeconnexionDB: Deconnexion effective" );
+    Info( log, DEBUG_DB, "Libere_DB_SQL: Deconnexion effective" );
     g_free( db );
     *adr_db = NULL;
   }

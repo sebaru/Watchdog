@@ -26,7 +26,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -61,23 +61,22 @@
   { struct CMD_APPEND_COURBE envoi_courbe;
     struct ARCHDB *arch;
     struct CMD_ID_COURBE rezo_courbe;
-    struct DB *Db_watchdog;
-    SQLHSTMT hquery;
+    struct DB *db;
     guint i, delta_x;
-/*    Db_watchdog = client->Db_watchdog;*/
+
+    prctl(PR_SET_NAME, "W-HISTOCourbe", 0, 0, 0 );
 
     memcpy ( &rezo_courbe, &client->courbe, sizeof( rezo_courbe ) );
     client->courbe.id=-1;
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
-                               Config.db_username, Config.db_password );
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB,
-               _("SSRV: Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)"), Config.db_database );
-       Unref_client( client );                                           /* Déréférence la structure cliente */
-       pthread_exit(NULL);
-     }
- 
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Info( Config.log, DEBUG_DB, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
 
 printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
 
@@ -93,9 +92,9 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
      { case MNEMO_ENTREE_ANA:
        case MNEMO_ENTREE:
 
-            hquery = Recuperer_archDB ( Config.log, Db_watchdog, rezo_courbe.type, rezo_courbe.id,
-                                        client->histo_courbe.date_first,
-                                        client->histo_courbe.date_last );
+            Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.id,
+                               client->histo_courbe.date_first,
+                               client->histo_courbe.date_last );
                
             envoi_courbe.slot_id = rezo_courbe.slot_id;     /* Valeurs par defaut si pas d'enregistrement */
             envoi_courbe.type    = rezo_courbe.type;
@@ -105,9 +104,8 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
             delta_x = (client->histo_courbe.date_last - client->histo_courbe.date_first) /
                       TAILLEBUF_HISTO_EANA;
 
-            if (!hquery) break;
             for( i=0; i<TAILLEBUF_HISTO_EANA; )
-             { arch = Recuperer_archDB_suite( Config.log, Db_watchdog, hquery );    /* On prend un enreg. */
+             { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend un enreg. */
 
                if (!arch) break;
 
@@ -149,7 +147,7 @@ encore:
              }
 
             if (i==TAILLEBUF_HISTO_EANA)     /* si tout a été envoyé, il faut verifier la base de données */
-             { EndQueryDB( Config.log, Db_watchdog, hquery ); }
+             { while (Recuperer_archDB_suite( Config.log, db )); }
 
             while (i<TAILLEBUF_HISTO_EANA)                          /* A-t'on envoyé le nombre souhaité ? */
              { envoi_courbe.date = envoi_courbe.date + delta_x;
@@ -162,7 +160,7 @@ encore:
        default : printf("Error\n");
      }
 
-    DeconnexionDB( Config.log, &Db_watchdog );                                          /* Deconnexion DB */
+    Libere_DB_SQL( Config.log, &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(NULL);
   }

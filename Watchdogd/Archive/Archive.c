@@ -36,11 +36,6 @@
  #include "proto_dls.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- static struct DB *Db_watchdog;                                                      /* Database Watchdog */
-
-
 /**********************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
@@ -79,17 +74,17 @@
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_arch ( void )
-  { guint top;
+  { struct DB *db;
+    guint top;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "ARCH: demarrage" );
 
     sleep(5);                                                      /* A l'init, nous attendons 5 secondes */
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,       /* Connexion en tant que user normal */
-                               Config.db_username, Config.db_password );
-
-    if (!Db_watchdog)
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Info_c( Config.log, DEBUG_DB, "ARCH: Run_arch: Unable to open database (dsn)", Config.db_database );
        pthread_exit(GINT_TO_POINTER(-1));
      }
@@ -118,11 +113,11 @@
 #endif
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
-       Ajouter_archDB ( Config.log, Db_watchdog, arch );
+       Ajouter_archDB ( Config.log, db, arch );
 
        g_free(arch);
      }
-    DeconnexionDB( Config.log, &Db_watchdog );                                  /* Deconnexion de la base */
+    Libere_DB_SQL( Config.log, &db );
     Info_n( Config.log, DEBUG_FORK, "ARCH: Run_arch: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

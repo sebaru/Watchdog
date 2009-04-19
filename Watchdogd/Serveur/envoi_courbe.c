@@ -3,8 +3,30 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 12 jun 2005 18:01:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * 
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -15,9 +37,6 @@
  #include "Config.h"
  #include "Client.h"
  #include "watchdogd.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -50,24 +69,12 @@
     struct ARCHDB *arch;
     struct CMD_ID_COURBE rezo_courbe;
     struct COURBE *courbe;
-    struct DB *Db_watchdog;
+    struct DB *db;
     GList *liste_courbe;
-    SQLHSTMT hquery;
     time_t date;
     guint i;
-   /* Db_watchdog = client->Db_watchdog;*/
 
-    memcpy ( &rezo_courbe, &client->courbe, sizeof( rezo_courbe ) );
-    client->courbe.id=-1;
-
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
-                               Config.db_username, Config.db_password );
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB,
-               _("SSRV: Proto_ajouter_courbe_thread: Unable to open database (dsn)"), Config.db_database );
-       Unref_client( client );                                           /* Déréférence la structure cliente */
-       pthread_exit(NULL);
-     }
+    prctl(PR_SET_NAME, "W-EnvoiCOURBE", 0, 0, 0 );
 
     if ( g_list_length( client->courbes ) > 18 )
      { struct CMD_GTK_MESSAGE erreur;
@@ -78,6 +85,9 @@
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit(NULL);
      }
+
+    memcpy ( &rezo_courbe, &client->courbe, sizeof( rezo_courbe ) );
+    client->courbe.id=-1;
 
     courbe = NULL;
     liste_courbe = client->courbes;                         /* Recherche d'une structure deja initialisée */
@@ -95,7 +105,7 @@
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit(NULL);
      }
-       
+
     courbe = (struct COURBE *)g_malloc0( sizeof( struct COURBE ) );
     if (!courbe)
      { struct CMD_GTK_MESSAGE erreur;
@@ -112,6 +122,15 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
     courbe->slot_id = rezo_courbe.slot_id;
     courbe->type    = rezo_courbe.type;
 
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Info( Config.log, DEBUG_DB, "Proto_ajouter_courbe_thread: Unable to open database (dsn)" );
+       g_free(courbe);
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+       
     Envoi_client ( client, TAG_COURBE, SSTAG_SERVEUR_ADD_COURBE_OK,        /* Envoi préparation au client */
                    (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
 
@@ -120,17 +139,16 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
        case MNEMO_ENTREE:
             date = time(NULL);                                            /* On recupere la date actuelle */
 
-            hquery = Recuperer_archDB ( Config.log, Db_watchdog, courbe->type, courbe->id,
-                                        (date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP), date );
+            Recuperer_archDB ( Config.log, db, courbe->type, courbe->id,
+                               (date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP), date );
                
             envoi_courbe.slot_id = courbe->slot_id;         /* Valeurs par defaut si pas d'enregistrement */
             envoi_courbe.type    = courbe->type;
             envoi_courbe.date    = (date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP);
             envoi_courbe.val     = (courbe->type == MNEMO_ENTREE ? E(courbe->id) : 0);
 
-            if (!hquery) break;
             for( i=0; i<TAILLEBUF_HISTO_EANA; )
-             { arch = Recuperer_archDB_suite( Config.log, Db_watchdog, hquery );    /* On prend un enreg. */
+             { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend un enreg. */
 
                if (!arch) break;
 
@@ -184,6 +202,7 @@ encore:
 
     client->courbes = g_list_append ( client->courbes, courbe );
 
+    Libere_DB_SQL( Config.log, &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(NULL);
   }
