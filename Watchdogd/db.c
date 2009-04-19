@@ -259,6 +259,7 @@
   { if (db)
      { while( db->row ) Recuperer_ligne_SQL ( log, db );
        mysql_free_result( db->result );
+       db->result = NULL;
        db->free = TRUE;
      }
   }

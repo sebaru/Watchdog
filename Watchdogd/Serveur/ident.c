@@ -78,8 +78,6 @@
     gchar *clef, *crypt;
     gint id;
 
-Info( Config.log, DEBUG_DB, "Test 1" );
-
     clef = Recuperer_clef( Config.log, client->Db_watchdog,
                            client->ident.nom, &id );
     if (!clef)
@@ -88,10 +86,6 @@ Info( Config.log, DEBUG_DB, "Test 1" );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
-Info( Config.log, DEBUG_DB, "Test 1.5" );
-    Liberer_resultat_SQL ( Config.log, client->Db_watchdog );
-
-Info( Config.log, DEBUG_DB, "Test 2" );
           
     client->util = Rechercher_utilisateurDB( Config.log, client->Db_watchdog, id );
     if (!client->util)
@@ -103,7 +97,6 @@ Info( Config.log, DEBUG_DB, "Test 2" );
     Liberer_resultat_SQL ( Config.log, client->Db_watchdog );
     memcpy( client->util->code, clef, sizeof( client->util->code ) );    
     g_free(clef);
-Info( Config.log, DEBUG_DB, "Test 3" );
 /***************************************** Identification du client ***************************************/
     crypt = Crypter( Config.log, Config.crypto_key, client->ident.password );
     if (!crypt)
@@ -113,7 +106,6 @@ Info( Config.log, DEBUG_DB, "Test 3" );
        return(DECONNECTE);
      }
 
-Info( Config.log, DEBUG_DB, "Test 4" );
     if (memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
      { Info_c( Config.log, DEBUG_CONNEXION, 
                _("Tester_autorisation: Password error"), client->util->nom );
