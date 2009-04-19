@@ -20,7 +20,7 @@
  gint Nbr_message_alrm=0;                                       /* Nombre_total de messages dans la liste */
  gint Nbr_message_inhib=0;                                      /* Nombre_total de messages dans la liste */
 
- static gint nbr_enreg = 0, nbr_enreg_max = 1;
+ static gint nbr_enreg = 0, nbr_enreg_max = 0;
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
@@ -166,7 +166,6 @@
 /**********************************************************************************************************/
  void Set_progress_pulse( void )
   { GtkProgressBar *progress;
-    if ( nbr_enreg != nbr_enreg_max ) return;
     progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
     gtk_progress_bar_pulse ( progress );
   }
@@ -178,6 +177,7 @@
  void Set_progress_plus( gint plus )
   { GtkProgressBar *progress;
     nbr_enreg += plus;
+    if (!nbr_enreg_max) nbr_enreg_max=1;
     if (nbr_enreg > nbr_enreg_max) nbr_enreg = nbr_enreg_max;
     progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
     gtk_progress_bar_set_fraction( progress, (gdouble)nbr_enreg/nbr_enreg_max );
