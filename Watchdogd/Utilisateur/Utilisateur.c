@@ -278,9 +278,9 @@
        util->date_expire   = atoi(db->row[6]);
        util->cansetpass    = atoi(db->row[7]);
        util->date_modif    = atoi(db->row[8]);
-       Groupe_get_groupe_utilDB ( log, db, util->id, (guint *)&util->gids );
      }
     Liberer_resultat_SQL ( log, db );
+    if (util) Groupe_get_groupe_utilDB ( log, db, util->id, (guint *)&util->gids );
     return( util );
   }
 /*--------------------------------------------------------------------------------------------------------*/
