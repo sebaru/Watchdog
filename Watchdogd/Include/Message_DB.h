@@ -28,13 +28,11 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern struct MSGDB *Rechercher_messageDB ( struct LOG *log, struct DB *db, guint num );
  extern struct MSGDB *Rechercher_messageDB_par_id ( struct LOG *log, struct DB *db, guint id );
- extern SQLHSTMT Recuperer_messageDB ( struct LOG *log, struct DB *db );
- extern struct MSGDB *Recuperer_messageDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_messageDB ( struct LOG *log, struct DB *db );
+ extern struct MSGDB *Recuperer_messageDB_suite( struct LOG *log, struct DB *db );
  extern gint Ajouter_messageDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MESSAGE *msg );
  extern gboolean Retirer_messageDB ( struct LOG *log, struct DB *db, struct CMD_ID_MESSAGE *msg );
  extern gboolean Modifier_messageDB( struct LOG *log, struct DB *db, struct CMD_EDIT_MESSAGE *msg );
-
- extern gboolean Creer_db_msg ( struct LOG *log, struct DB *db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

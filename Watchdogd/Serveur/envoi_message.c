@@ -4,7 +4,7 @@
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -17,8 +17,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -71,7 +69,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate message %s:\n%s"), rezo_msg->libelle, Db_watchdog->last_err);
+                   "Unable to locate message %s:\n%s", rezo_msg->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -91,7 +89,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit message %s:\n%s"), rezo_msg->libelle, Db_watchdog->last_err);
+                   "Unable to edit message %s:\n%s", rezo_msg->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -103,7 +101,7 @@
               if (!msg)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -115,7 +113,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate message %s:\n%s"), rezo_msg->libelle, Db_watchdog->last_err);
+                          "Unable to locate message %s:\n%s", rezo_msg->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -140,7 +138,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete message %s:\n%s"), rezo_msg->libelle, Db_watchdog->last_err);
+                   "Unable to delete message %s:\n%s", rezo_msg->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -160,7 +158,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add message %s:\n%s"), rezo_msg->libelle, Db_watchdog->last_err);
+                   "Unable to add message %s:\n%s", rezo_msg->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -168,7 +166,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate message %s:\n%s"), rezo_msg->libelle, Db_watchdog->last_err);
+                          "Unable to locate message %s:\n%s", rezo_msg->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -179,7 +177,7 @@
               if (!msg)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -199,26 +197,34 @@
   { struct CMD_SHOW_MESSAGE *rezo_msg;
     struct CMD_ENREG nbr;
     struct MSGDB *msg;
-    SQLHSTMT hquery;                                                   /* Requete SQL en cours d'emission */
+    struct DB *db;
     gint cpt;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    hquery = Recuperer_messageDB( Config.log, Db_watchdog );
-    if (!hquery)                                                                 /* Si pas de histos (??) */
+    prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_messageDB( Config.log, db ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Libere_DB_SQL( Config.log, &db );
        pthread_exit( NULL );
      }
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading messages") );
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d messages", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { msg = Recuperer_messageDB_suite( Config.log, Db_watchdog, hquery );
+     { msg = Recuperer_messageDB_suite( Config.log, db );
        if (!msg)
         { Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

@@ -140,6 +140,7 @@
 
     if ( ! Recuperer_histoDB( Config.log, db ) )
      { Client_mode( client, VALIDE );         /* Le client est maintenant valide aux yeux du sous-serveur */
+       Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */

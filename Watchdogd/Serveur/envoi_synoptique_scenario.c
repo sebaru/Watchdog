@@ -263,7 +263,8 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_scenarioDB_par_bitm( Config.log, db, &client->sce ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
 

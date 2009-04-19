@@ -151,6 +151,5 @@
            continue;                                                               /* Si offline, on swap */
        while(Partage->Arret!=FIN && Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
      }
-    Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: traitement fini", num );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -236,6 +236,7 @@
 
     if (!Recuperer_entreeANADB( Config.log, db ))
      { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Libere_DB_SQL( Config.log, &db );
        return;
      }                                                                           /* Si pas de histos (??) */
 

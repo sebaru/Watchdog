@@ -84,7 +84,8 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Rechercher_histo_hardDB( Config.log, db, &requete ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
 
