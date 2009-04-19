@@ -60,14 +60,13 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Proto_set_password ( gint Id_serveur, struct CLIENT *client, struct CMD_UTIL_SETPASSWORD *util )
-  { if (util->id != client->util->id) Client_mode ( client, DECONNECTE );
-    else { if (Set_password( Config.log, client->Db_watchdog,
-                             Config.crypto_key, util ))
-            { Autoriser_client( Id_serveur, client );
-              Client_mode( client, ENVOI_DONNEES );
-            }
-           else Client_mode ( client, DECONNECTE );
-         }
+  { if (util->id != client->util->id)
+     { Client_mode ( client, DECONNECTE );
+       return;
+     }
+
+    Set_password( Config.log, client->Db_watchdog, Config.crypto_key, util );
+    Client_mode ( client, DECONNECTE );                        /* On deconnecte le client tout de suite ! */
   }
 /**********************************************************************************************************/
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                          */
