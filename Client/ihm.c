@@ -25,7 +25,6 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
- extern time_t Pulse;                                                /* Dernier temps de pulse du serveur */
 /****************************** Inclusion des images XPM pour les menus ***********************************/
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
  extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
@@ -164,6 +163,16 @@
 /* Entrées: val, max                                                                                      */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
+ void Set_progress_pulse( void )
+  { GtkProgressBar *progress;
+    progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
+    gtk_progress_bar_pulse ( progress );
+  }
+/**********************************************************************************************************/
+/* Set_progress: Positionne la barre de progression de la fenetre                                         */
+/* Entrées: val, max                                                                                      */
+/* Sortie: Kedal                                                                                          */
+/**********************************************************************************************************/
  void Set_progress_plus( gint plus )
   { GtkProgressBar *progress;
     nbr_enreg += plus;
@@ -181,7 +190,6 @@
   { GtkProgressBar *progress;
     gchar chaine[50];
 
-    Pulse = -TEMPS_MAX_PULSE;                                /* Pulse de la barre de progression ou non ? */
     nbr_enreg_max = max;
     nbr_enreg     = 0;
     progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );

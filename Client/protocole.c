@@ -41,7 +41,6 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
- extern time_t Pulse;                                                /* Dernier temps de pulse du serveur */
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
@@ -93,12 +92,11 @@
           case TAG_COURBE      : Gerer_protocole_courbe       ( connexion ); break;
           case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
           case TAG_SCENARIO    : Gerer_protocole_scenario     ( connexion ); break;
+          case TAG_CONNEXION   : if ( Reseau_ss_tag( connexion ) == SSTAG_SERVEUR_PULSE ) 
+                                  { Set_progress_pulse(); }
+                                 break;
           default : printf("Gerer_protocole : protocole inconnu %d\n", Reseau_tag(connexion) );
         }
-#ifdef bouh
-       else if ( Verifier_tag ( connexion, TAG_SERVEUR_PULSE ) )
-        { time(&Pulse); }
-#endif
      }
     else if ( Client_en_cours.mode == CONNECTE )
      {

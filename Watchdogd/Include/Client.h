@@ -88,7 +88,7 @@
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */
     guchar defaut;                                                            /* Defaut d'envoi au client */
     time_t        seconde;                                                        /* Seconde de connexion */
-    time_t        timeout;                  /* échéance au bout de laquelle le client est consideré perdu */
+    guint  pulse;                                                                      /* pulse du client */
     struct
      { int fd;                                        /* descripteur du fichier actuellement en transfert */
        gchar *buffer;                                                        /* Buffer d'envoi de donnees */

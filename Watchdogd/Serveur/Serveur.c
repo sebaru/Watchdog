@@ -224,7 +224,7 @@
                                (gchar *)inet_ntoa(distant.sin_addr) );
                  }
        time( &client->seconde );                       /* Enregistrement de la date de debut de connexion */
-       client->timeout = client->seconde + Config.timeout_connexion;
+       client->pulse = Partage->top;
        client->Id_serveur = ss_id;
        client->courbe.id = -1;
        pthread_mutex_init( &client->mutex_write, NULL );
@@ -645,12 +645,9 @@
 
 
              if (client->mode >= ATTENTE_IDENT) Ecouter_client( id, client );
-#ifdef bouh
-             if (Top > client->timeout)                                           /* Gestion du KEEPALIVE */
-              { Info_n( Config.log, DEBUG_NETWORK, "Keep alive failed", client->connexion->socket );
-                Deconnecter( client );
-              }
-#endif
+
+             if (Partage->top > client->pulse + 20)                               /* Gestion du KEEPALIVE */
+              { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 ); }
 
              liste = liste->next;
            }

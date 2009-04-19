@@ -176,6 +176,7 @@
  extern void Set_progress_plusun( void );
  extern void Set_progress_plus( gint plus );
  extern void Set_progress_text( gchar *capteur, gint max );
+ extern void Set_progress_pulse( void );
  extern void Raz_progress( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
  extern gboolean Tester_page_notebook ( guint type );
