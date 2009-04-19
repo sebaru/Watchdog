@@ -195,6 +195,7 @@
        g_free(db);
        return (NULL);
      }
+    db->free = TRUE;
     Info_c( log, DEBUG_DB, "Init_DB_SQL: Connexion effective DB", database );
     Info_c( log, DEBUG_DB, "                          avec user", user );
     return(db);
@@ -208,6 +209,8 @@
     if (!(adr_db && *adr_db)) return;
 
     db = *adr_db;
+    if (db->free==FALSE)
+     { Info( log, DEBUG_DB, "Libere_DB_SQL: Reste un result a FREEer !" ); }
     mysql_close( db->mysql );
     Info( log, DEBUG_DB, "Libere_DB_SQL: Deconnexion effective" );
     g_free( db );
@@ -220,6 +223,10 @@
 /**********************************************************************************************************/
  gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete )
   { if (!db) return(FALSE);
+
+    if (db->free==FALSE)
+     { Info( log, DEBUG_DB, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
+
     if ( mysql_query ( db->mysql, requete ) )
      { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed",
                (char *)mysql_error(db->mysql) );
@@ -230,6 +237,7 @@
 
     if ( ! strncmp ( requete, "SELECT", 6 ) )
      { db->result = mysql_store_result ( db->mysql );
+       db->free = FALSE;
        if ( ! db->result )
         { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result failed",
                   (char *) mysql_error(db->mysql) );
@@ -241,6 +249,17 @@
         }
      }
     return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                       */
+/* Entrée: la DB                                                                                          */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
+  { if (db)
+     { mysql_free_result( db->result );
+       db->free = TRUE;
+     }
   }
 /**********************************************************************************************************/
 /* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                          */
@@ -260,14 +279,6 @@
  guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db )
   { if (!db) return(0);
     return ( mysql_insert_id(db->mysql) );
-  }
-/**********************************************************************************************************/
-/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                       */
-/* Entrée: la DB                                                                                          */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
-  { if (db) mysql_free_result( db->result );
   }
 /**********************************************************************************************************/
 /* DeconnexionDB: Deconnexion et libération mémoire de la structure DB en paramètres                      */

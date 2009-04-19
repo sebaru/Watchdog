@@ -26,7 +26,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <string.h>
 
  #include "Reseaux.h"
@@ -36,8 +36,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -88,7 +86,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate group %s:\n%s"), rezo_groupe->nom, Db_watchdog->last_err);
+                   "Unable to locate group %s", rezo_groupe->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -108,7 +106,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit group %s:\n%s"), rezo_groupe->nom, Db_watchdog->last_err);
+                   "Unable to edit group %s", rezo_groupe->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -120,7 +118,7 @@
               if (!groupe)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -132,7 +130,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate group %s:\n%s"), rezo_groupe->nom, Db_watchdog->last_err);
+                          "Unable to locate group %s", rezo_groupe->nom);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -157,7 +155,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete group %s:\n%s"), rezo_groupe->nom, Db_watchdog->last_err);
+                   "Unable to delete group %s", rezo_groupe->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -177,8 +175,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add group %s:\n%s"), rezo_groupe->nom, Db_watchdog->last_err);
-                   printf("errrrrreur  %s\n", erreur.message );
+                   "Unable to add group %s", rezo_groupe->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -186,7 +183,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to add group %s:\n%s"), rezo_groupe->nom, Db_watchdog->last_err);
+                          "Unable to add group %s", rezo_groupe->nom );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -197,7 +194,7 @@
               if (!groupe)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -217,27 +214,32 @@
   { struct CMD_SHOW_GROUPE *rezo_groupe;
     struct CMD_ENREG nbr;
     struct GROUPEDB *groupe;
-    struct DB *Db_watchdog;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
+    prctl(PR_SET_NAME, "W-EnvoiGrp", 0, 0, 0 );
 
-    hquery = Recuperer_groupesDB( Config.log, Db_watchdog );
-    if (!hquery)
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
+       return;
      }                                                                           /* Si pas de histos (??) */
+    if (! Recuperer_groupesDB( Config.log, db ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       return;
+    }                                                                           /* Si pas de histos (??) */
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading %d groups"), nbr.num );
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d groups", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for ( ; ; )
-     { groupe = Recuperer_groupesDB_suite( Config.log, Db_watchdog, hquery );
+     { groupe = Recuperer_groupesDB_suite( Config.log, db );
        if (!groupe)                                                               /* Fin de traitement ?? */
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
+          return;
         }
        rezo_groupe = Preparer_envoi_groupe( groupe );                     /* Sinon, on continue d'envoyer */
        g_free(groupe);
@@ -245,7 +247,6 @@
        if (rezo_groupe)
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-
           Envoi_client ( client, tag, sstag,
                          (gchar *)rezo_groupe, sizeof(struct CMD_SHOW_GROUPE) );
           g_free(rezo_groupe);

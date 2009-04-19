@@ -32,6 +32,7 @@
  #include <sqlext.h> 
  #include <sqltypes.h>
 
+ #include "watchdogd.h"
  #include "Erreur.h"
  #include "Utilisateur_DB.h"
 
@@ -45,49 +46,25 @@
 /**********************************************************************************************************/
  gint Get_login_failed( struct LOG *log, struct DB *db, guint id )
   { gchar requete[200];
-    SQLRETURN retour;
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
-    gchar login_from_sql[10];
-    SQLINTEGER nbr;
-
-    hquery = NewQueryDB( log, db );                            /* Création d'un nouveau handle de requete */
-    if (!hquery)
-     { Info_n( log, DEBUG_DB, "Get_login_failed: update failed: query=null", id );
-       return(-1);
-     }
-
-    retour = SQLBindCol( hquery, 1, SQL_C_CHAR, &login_from_sql, sizeof(login_from_sql), NULL );  /* Bind */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "Get_login_failed: erreur bind du login_failed" );
-       PrintErrDB( log, db );
-       EndQueryDB( log, db, hquery );
-       return(-1);
-     }
+    gint nbr_login;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT login_failed FROM %s WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );          /* Execution de la requete SQL */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info_n( log, DEBUG_DB, "Get_login_failed: recherche failed", id );
-       PrintErrQueryDB( log, db, hquery );
-       EndQueryDB( log, db, hquery );
-       return(-1);
-     }
-    else Info_n( log, DEBUG_DB, "Get_login_failed: recherche ok", id );
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(0); }
 
-    SQLRowCount( hquery, &nbr );
-    if (nbr==0)
-     { Info_n( log, DEBUG_DB, "Get_login_failed: Login_failed non trouvé dans la BDD", id );
-       EndQueryDB( log, db, hquery );
-       return(-1);
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_n( log, DEBUG_DB, "Get_login_failed: Login_failed non trouvé dans la BDD", id );
+       return(0);
      }
-    if (nbr>1) Info_n( log, DEBUG_DB, "Get_login_failed: Multiple solution", id );
 
-    SQLFetch(hquery);
-    EndQueryDB( log, db, hquery );
-    return( atoi( login_from_sql ) );
+    nbr_login = atoi(db->row[0]);
+    Liberer_resultat_SQL ( log, db );
+    return( nbr_login );
   }
 /**********************************************************************************************************/
 /* Ajouter_one_login_failed: Ajoute 1 au login failed de l'utilisateur                                    */
@@ -96,29 +73,12 @@
 /**********************************************************************************************************/
  gboolean Ajouter_one_login_failed( struct LOG *log, struct DB *db, guint id, gint max_login_failed )
   { gchar requete[200];
-    SQLRETURN retour;
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
-
-    hquery = NewQueryDB( log, db );                            /* Création d'un nouveau handle de requete */
-    if (!hquery)
-     { Info_n( log, DEBUG_DB, "Ajouter_one_login_failed: update failed: query=null", id );
-       return(FALSE);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET login_failed = login_failed+1 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );          /* Execution de la requete SQL */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info_n( log, DEBUG_DB, "Ajouter_one_login_failed: update failed", id );
-       PrintErrQueryDB( log, db, hquery );
-       EndQueryDB( log, db, hquery );
-       return(FALSE);
-     }
-    else Info_n( log, DEBUG_DB, "Ajouter_one_login_failed: update ok", id );
-
-    EndQueryDB( log, db, hquery );
+    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
     if (Get_login_failed( log, db, id )>=max_login_failed)                     /* Desactivation du compte */
      { Info_n( log, DEBUG_DB, "Desactivation compte sur trop login failed", id );
        Set_compte_actif( log, db, id, FALSE );
@@ -132,29 +92,11 @@
 /**********************************************************************************************************/
  gboolean Raz_login_failed( struct LOG *log, struct DB *db, guint id )
   { gchar requete[200];
-    SQLRETURN retour;
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
-
-    hquery = NewQueryDB( log, db );                            /* Création d'un nouveau handle de requete */
-    if (!hquery)
-     { Info_n( log, DEBUG_DB, "Raz_login_failed: recherche failed: query=null", id );
-       return(FALSE);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );          /* Execution de la requete SQL */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info_n( log, DEBUG_DB, "Raz_login_failed: update failed", id );
-       PrintErrQueryDB( log, db, hquery );
-       EndQueryDB( log, db, hquery );
-       return(FALSE);
-     }
-    else Info_n( log, DEBUG_DB, "Raz_login_failed: update ok", id );
-
-    EndQueryDB( log, db, hquery );
-    return(TRUE);
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -32,6 +32,7 @@
  #include <stdlib.h>
  #include <openssl/evp.h>                                                        /* Procedure de cryptage */
 
+ #include "watchdogd.h"
  #include "Erreur.h"
  #include "Utilisateur_DB.h"
 
@@ -45,20 +46,11 @@
 /**********************************************************************************************************/
  gboolean Set_password( struct LOG *log, struct DB *db, gchar *clef, struct CMD_UTIL_SETPASSWORD *util )
   { gchar requete[200];
-    SQLRETURN retour;
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
     gchar *crypt, *code_crypt;
-
-    hquery = NewQueryDB( log, db );                            /* Création d'un nouveau handle de requete */
-    if (!hquery)
-     { Info_n( log, DEBUG_DB, "Set_password: recherche failed: query=null", util->id );
-       return(FALSE);
-     }
 
     crypt = Crypter( log, clef, util->code_en_clair );
     if (!crypt)
      { Info( log, DEBUG_DB, "Set_password: cryptage password impossible" );
-       EndQueryDB( log, db, hquery );
        return(FALSE);
      }
 
@@ -66,7 +58,6 @@
     g_free(crypt);
     if (!code_crypt)
      { Info( log, DEBUG_DB, "Set_password: Normalisation code crypte impossible" );
-       EndQueryDB( log, db, hquery );
        return(FALSE);
      }
  
@@ -75,16 +66,12 @@
                 NOM_TABLE_UTIL, code_crypt, util->id );
     g_free(code_crypt);
 
-    retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );          /* Execution de la requete SQL */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
+    if ( ! Lancer_requete_SQL ( log, db, requete ))
      { Info_c( log, DEBUG_DB, "Set_password: update failed", requete );
-       PrintErrQueryDB( log, db, hquery );
-       EndQueryDB( log, db, hquery );
        g_free(crypt);
        return(FALSE);
      }
     else Info_n( log, DEBUG_DB, "Set_password: update ok", util->id );
-    EndQueryDB( log, db, hquery );
     g_free(crypt);
     return(TRUE);
   }
@@ -96,57 +83,25 @@
  gchar *Recuperer_clef ( struct LOG *log, struct DB *db, gchar *nom, gint *id )
   { guchar crypt_from_sql[NBR_CARAC_CODE_CRYPTE+1];
     gchar requete[200];
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
-    SQLRETURN retour;
-    SQLINTEGER nbr;                                                         /* Nombre de solution retenue */
     gchar id_from_sql[20];
     gchar *crypt;
-
-    hquery = NewQueryDB( log, db );
-    if ( !hquery )
-     { Info( log, DEBUG_DB, "Recuperer_clef: alloc hquery failed" );
-       return(NULL);
-     }
-
-    retour = SQLBindCol( hquery, 1, SQL_C_CHAR, &id_from_sql, sizeof(id_from_sql), NULL );     /* Bind ID */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "Recuperer_clef: erreur bind de l'id" );
-       PrintErrDB( log, db );
-       EndQueryDB( log, db, hquery );
-       return(NULL);
-     }
-
-    retour = SQLBindCol( hquery, 2, SQL_C_CHAR, &crypt_from_sql, NBR_CARAC_CODE_CRYPTE+1, NULL );
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info( log, DEBUG_DB, "Recuperer_clef: erreur bind du crypt" );
-       PrintErrDB( log, db );
-       EndQueryDB( log, db, hquery );
-       return(NULL);
-     }
 
     g_snprintf( requete, sizeof(requete),
                 "SELECT id, crypt"
                 " FROM %s WHERE name=\'%s\'",
                  NOM_TABLE_UTIL, nom );
-    retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info_c( log, DEBUG_DB, "Recuperer_clef: erreur execution requete SQL", requete );
-       PrintErrQueryDB( log, db, hquery );
-       EndQueryDB( log, db, hquery );
-       return(NULL);
-     } else Info_c( log, DEBUG_DB, "Recuperer_clef: execution requete SQL OK", requete );
 
-    SQLRowCount( hquery, &nbr );
-    if (nbr==0)
-     { Info_n( log, DEBUG_DB, "Recuperer_clef: Clef non trouvé dans la BDD", *id );
-       EndQueryDB( log, db, hquery );
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_c( log, DEBUG_DB, "Recuperer_clef: Clef non trouvé dans la BDD", nom );
        return(NULL);
      }
-    if (nbr>1) Info_c( log, DEBUG_DB, "Recuperer_clef: Multiple solution", nom );
 
-    SQLFetch( hquery );
-    EndQueryDB( log, db, hquery );
-    *id = atoi(id_from_sql);                                                      /* Conversion en entier */
+    *id = atoi(db->row[0]);                                                      /* Conversion en entier */
 
     crypt = (gchar *)g_malloc0( NBR_CARAC_CODE_CRYPTE );
     if (!crypt)

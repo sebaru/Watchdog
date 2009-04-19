@@ -32,6 +32,7 @@
  #include <sqlext.h> 
  #include <sqltypes.h>
 
+ #include "watchdogd.h"
  #include "Erreur.h"
  #include "Utilisateur_DB.h"
  
@@ -45,28 +46,11 @@
 /**********************************************************************************************************/
  gboolean Set_compte_actif( struct LOG *log, struct DB *db, guint id, gboolean enable )
   { gchar requete[200];
-    SQLRETURN retour;
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
-
-    hquery = NewQueryDB( log, db );                            /* Création d'un nouveau handle de requete */
-    if (!hquery)
-     { Info_n( log, DEBUG_DB, "Set_compte_actif: recherche failed: query=null", id );
-       return(FALSE);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET enable = '%d', login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, enable, id );
 
-    retour = SQLExecDirect( hquery, (guchar *)requete, SQL_NTS );          /* Execution de la requete SQL */
-    if ((retour != SQL_SUCCESS) && (retour != SQL_SUCCESS_WITH_INFO))
-     { Info_c( log, DEBUG_DB, "Set_compte_actif: update failed", requete );
-       PrintErrQueryDB( log, db, hquery );
-       EndQueryDB( log, db, hquery );
-       return(FALSE);
-     }
-    else Info_n( log, DEBUG_DB, "Set_compte_actif: update ok", id );
-    EndQueryDB( log, db, hquery );
-    return(TRUE);
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

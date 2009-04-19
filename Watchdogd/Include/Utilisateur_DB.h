@@ -59,9 +59,8 @@
   };
 
 /************************************** Prototypes de fonctions *******************************************/
- extern SQLHSTMT Recuperer_groupesDB( struct LOG *log, struct DB *db );                  /* Dans groupe.c */
- extern struct GROUPEDB *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
- extern gboolean Creer_db_groupe ( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_groupesDB( struct LOG *log, struct DB *db );                  /* Dans groupe.c */
+ extern struct GROUPEDB *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Tester_groupe_util( guint id_util, guint *groupes, guint id_groupe );
  extern gchar *Nom_groupe_reserve( gint id );
  extern gboolean Retirer_groupeDB( struct LOG *log, struct DB *db, struct CMD_ID_GROUPE *groupe );
@@ -71,10 +70,8 @@
  extern gboolean Groupe_set_groupe_utilDB( struct LOG *log, struct DB *db, guint id_util, guint *gids );
  extern gboolean Groupe_get_groupe_utilDB( struct LOG *log, struct DB *db, guint id, guint *gids );
 
- extern gboolean Creer_db_util ( struct LOG *log, gchar *clef, struct DB *db );     /* Dans Utilisateur.c */
- extern gboolean Creer_db_gids ( struct LOG *log, struct DB *db );
- extern SQLHSTMT Recuperer_utilsDB( struct LOG *log, struct DB *db );
- extern struct UTILISATEURDB *Recuperer_utilsDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_utilsDB( struct LOG *log, struct DB *db );
+ extern struct UTILISATEURDB *Recuperer_utilsDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Retirer_utilisateurDB( struct LOG *log, struct DB *db,
                                         struct CMD_ID_UTILISATEUR *util );
  extern gint Ajouter_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,

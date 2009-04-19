@@ -32,6 +32,7 @@
     MYSQL *mysql;
     MYSQL_RES *result;
     gint nbr_result;
+    gboolean free;                                                    /* Le resultat est-il free ou non ? */
     MYSQL_ROW row;
   };
 /************************************* Prototypes de fonctions ********************************************/

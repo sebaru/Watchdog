@@ -250,7 +250,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-
        rezo_msg = Preparer_envoi_msg( msg );
        g_free(msg);
        if (rezo_msg)
