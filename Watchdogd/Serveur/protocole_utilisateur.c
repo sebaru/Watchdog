@@ -94,7 +94,6 @@
              { struct CMD_ID_UTILISATEUR *util;
                util = (struct CMD_ID_UTILISATEUR *)connexion->donnees;
                Proto_editer_utilisateur( client, util );
-               Client_mode( client, ENVOI_GROUPE_FOR_UTIL );
              }
             break;
        case SSTAG_CLIENT_ADD_UTIL:

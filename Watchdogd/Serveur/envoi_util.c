@@ -85,6 +85,7 @@
        Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_EDIT_UTIL_OK,
                      (gchar *)&edit_util, sizeof(struct CMD_EDIT_UTILISATEUR) );
        g_free(util);                                                                /* liberation mémoire */
+       Client_mode( client, ENVOI_GROUPE_FOR_UTIL );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;

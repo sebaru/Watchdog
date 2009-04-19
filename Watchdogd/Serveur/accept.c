@@ -42,8 +42,9 @@
        SSL_set_accept_state( connexion->ssl );
        Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: set_accept_state", client->connexion->socket );
      }
-    Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: accept en cours", client->connexion->socket );
+    Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: accept en cours 1", client->connexion->socket );
     retour = SSL_accept( connexion->ssl );
+    Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: accept en cours 2", retour );
     if (retour<=0)
      { retour = SSL_get_error( connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
