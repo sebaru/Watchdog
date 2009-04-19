@@ -3,8 +3,30 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 08 mar 2009 14:28:35 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * envoi_dls.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <string.h>
  #include <sys/stat.h>
  #include <sys/types.h>
@@ -24,8 +46,6 @@
  #endif
 
  #include "watchdogd.h"
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -79,7 +99,7 @@
      { struct CMD_GTK_MESSAGE erreur;
        Proto_effacer_fichier_plugin_dls( client, rezo_dls->id );     /* Destruction du fichier sur disque */
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete plugin %s:\n%s"), rezo_dls->nom, Db_watchdog->last_err);
+                   "Unable to delete plugin %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -109,7 +129,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate plugin DLS %s:\n%s"), rezo_dls->nom, Db_watchdog->last_err);
+                   "Unable to locate plugin DLS %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -129,7 +149,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit plugin DLS %s:\n%s"), rezo_dls->nom,
+                   "Unable to edit plugin DLS %s:\n%s", rezo_dls->nom,
                    Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -142,7 +162,7 @@
               if (!dls)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -169,7 +189,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate plugin DLS %s:\n%s"), rezo_dls->nom, Db_watchdog->last_err);
+                          "Unable to locate plugin DLS %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -186,7 +206,7 @@
     client->transfert.buffer = g_malloc0( Config.taille_bloc_reseau );
     if (!client->transfert.buffer)
      { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message), _("Not enough memory") );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Not enough memory" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        return;
@@ -196,7 +216,7 @@
     client->transfert.fd = open( chaine, O_RDONLY );
     if (client->transfert.fd < 0)
      { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message), _("Unable to open %s"), chaine );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open %s", chaine );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        g_free(client->transfert.buffer);
@@ -246,7 +266,7 @@
 
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Proto_compiler_source_dls: Compilation module DLS", dls.id );
     retour = Traduire_DLS( Config.log, dls.id );
-    Info_n( Config.log, DEBUG_FORK, _("THRCompil: Proto_compiler_source_dls (fils1): fin traduction"), retour );
+    Info_n( Config.log, DEBUG_FORK, "THRCompil: Proto_compiler_source_dls (fils1): fin traduction", retour );
     if (retour == FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        gint id_fichier;
@@ -264,7 +284,7 @@
           close(id_fichier);
         }
        Info_n( Config.log, DEBUG_FORK,
-               _("THRCompil: Proto_compiler_source_dls (fils1): envoi erreur client"), dls.id );
+               "THRCompil: Proto_compiler_source_dls (fils1): envoi erreur client", dls.id );
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
      }
     else
@@ -303,11 +323,11 @@
        pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
 
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Compilation OK, Reset plugin OK") );
+                   "Compilation OK, Reset plugin OK" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    Info_n( Config.log, DEBUG_FORK, _("THRCompil: Proto_compiler_source_dls (pere): terminé"), dls.id );
+    Info_n( Config.log, DEBUG_FORK, "THRCompil: Proto_compiler_source_dls (pere): terminé", dls.id );
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/
@@ -325,7 +345,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add plugin %s:\n%s"), rezo_dls->nom, Db_watchdog->last_err);
+                   "Unable to add plugin %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
                    printf("errrrrreur  %s\n", erreur.message );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -334,7 +354,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to add plugin %s:\n%s"), rezo_dls->nom, Db_watchdog->last_err);
+                          "Unable to add plugin %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -348,7 +368,7 @@
               if (id_fichier == -1)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Unable to create file %s:\n"), chaine );
+                             "Unable to create file %s:\n", chaine );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -361,7 +381,7 @@
                      if (!dls)
                       { struct CMD_GTK_MESSAGE erreur;
                         g_snprintf( erreur.message, sizeof(erreur.message),
-                                    _("Not enough memory") );
+                                    "Not enough memory" );
                         Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                       (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                       }
@@ -382,28 +402,33 @@
   { struct CMD_SHOW_PLUGIN_DLS *rezo_dls;
     struct CMD_ENREG nbr;
     struct PLUGIN_DLS *dls;
-    SQLHSTMT hquery;                                                   /* Requete SQL en cours d'emission */
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
     
-    hquery = Recuperer_plugins_dlsDB( Config.log, Db_watchdog );
-    if (!hquery)
+    prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading plugins") );
+    if ( ! Recuperer_plugins_dlsDB( Config.log, db ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Libere_DB_SQL( Config.log, &db );
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d plugins", nbr.num );
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
-    if (Attendre_envoi_disponible( Config.log, client->connexion ))
-     return(FALSE);                                  /* Attente de la possibilité d'envoyer sur le reseau */
-
     for( ; ; )
-     { dls = Recuperer_plugins_dlsDB_suite( Config.log, Db_watchdog, hquery );
+     { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
        if (!dls)
         { Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

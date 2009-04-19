@@ -23,8 +23,8 @@
  extern gboolean Retirer_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_ID_PLUGIN_DLS *dls );
  extern gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_ADD_PLUGIN_DLS *dls );
  extern gboolean Creer_db_dls ( struct LOG *log, struct DB *db );
- extern SQLHSTMT Recuperer_plugins_dlsDB( struct LOG *log, struct DB *db );
- extern struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_plugins_dlsDB( struct LOG *log, struct DB *db );
+ extern struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db );
  extern struct PLUGIN_DLS *Rechercher_plugin_dlsDB( struct LOG *log, struct DB *db, gint id );
  extern gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PLUGIN_DLS *dls );
  #endif

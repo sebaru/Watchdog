@@ -31,12 +31,11 @@
  #include <stdio.h>
  #include <dlfcn.h>
 
+ #include "watchdogd.h"
  #include "Erreur.h"
- #include "Config.h"
  #include "Dls_DB.h"
 
  extern GList *Plugins;
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_dls.h"
 
@@ -185,28 +184,23 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Charger_plugins ( void )
-  { struct DB *Db_watchdog;                                                          /* Database Watchdog */
-    SQLHSTMT hquery;
-    struct PLUGIN_DLS *dls;
+  { struct PLUGIN_DLS *dls;
+    struct DB *db;                                                          /* Database Watchdog */
     gint cpt;
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
-                               Config.db_username, Config.db_password );
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "DLS: Charger_plugins: Unable to open database (dsn)", Config.db_database );
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info( Config.log, DEBUG_DB, "DLS: Charger_plugins: Unable to open database" );
        return;
      }
 
-    hquery = Recuperer_plugins_dlsDB( Config.log, Db_watchdog );
-    if (!hquery)                                                                      /* Si pas de hquery */
-     { DeconnexionDB( Config.log, &Db_watchdog );
-       return;
-     }
+    Recuperer_plugins_dlsDB( Config.log, db );
     cpt = 0;
     do
-     { dls = Recuperer_plugins_dlsDB_suite( Config.log, Db_watchdog, hquery );
+     { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
        if (!dls)
-        { DeconnexionDB( Config.log, &Db_watchdog );
+        { Libere_DB_SQL( Config.log, &db );
           Info_n( Config.log, DEBUG_DLS, "DLS: active plugins", cpt );
           return;
         }
