@@ -26,7 +26,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -38,8 +38,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -90,7 +88,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to locate mnemo %s:\n%s"), rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to locate mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -110,7 +108,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to edit mnemo %s:\n%s"), rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to edit mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -122,7 +120,7 @@
               if (!mnemo)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -134,7 +132,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate mnemo %s:\n%s"), rezo_mnemonique->libelle, Db_watchdog->last_err);
+                          "Unable to locate mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -159,7 +157,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete mnemo %s:\n%s"), rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to delete mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -179,7 +177,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add mnemo %s:\n%s"), rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to add mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -187,7 +185,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate mnemo %s:\n%s"), rezo_mnemonique->libelle, Db_watchdog->last_err);
+                          "Unable to locate mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -199,7 +197,7 @@
                { struct CMD_GTK_MESSAGE erreur;
                
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -237,8 +235,8 @@
        unconnu.id = 0;
        unconnu.type = critere->type;
        unconnu.num = critere->num;
-       g_snprintf( unconnu.objet, sizeof(unconnu.objet), _("Unknown") );
-       g_snprintf( unconnu.libelle, sizeof(unconnu.libelle), _("Unknown") );
+       g_snprintf( unconnu.objet, sizeof(unconnu.objet), "Unknown" );
+       g_snprintf( unconnu.libelle, sizeof(unconnu.libelle), "Unknown" );
        Envoi_client ( client, tag, ss_tag,
                       (gchar *)&unconnu, sizeof(struct CMD_SHOW_MNEMONIQUE) );
      }
@@ -252,35 +250,34 @@
   { struct CMD_SHOW_MNEMONIQUE *rezo_mnemonique;
     struct CMD_ENREG nbr;
     struct MNEMONIQUEDB *mnemo;
-    SQLHSTMT hquery;
-    struct DB *Db_watchdog;
+    struct DB *db;
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
-                               Config.db_username, Config.db_password );
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB,
-               _("SSRV: Envoyer_mnemoniques_tag: Unable to open database (dsn)"), Config.db_database );
-       Unref_client( client );                                           /* Déréférence la structure cliente */
-       pthread_exit(NULL);
-     }
+    prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
 
-    hquery = Recuperer_mnemoDB( Config.log, Db_watchdog );
-    if (!hquery)
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
+       return;
      }                                                                           /* Si pas de histos (??) */
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading mnemos") );
+    if ( ! Recuperer_mnemoDB( Config.log, db ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d mnemos", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { mnemo = Recuperer_mnemoDB_suite( Config.log, Db_watchdog, hquery );
+     { mnemo = Recuperer_mnemoDB_suite( Config.log, db );
        if (!mnemo)
-        { DeconnexionDB( Config.log, &Db_watchdog );                                    /* Deconnexion DB */
+        { Libere_DB_SQL( Config.log, &db );
           Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
+          return;
         }
 
        rezo_mnemonique = Preparer_envoi_mnemonique( mnemo );
@@ -304,26 +301,34 @@
   { struct CMD_SHOW_MNEMONIQUE *rezo_mnemonique;
     struct CMD_ENREG nbr;
     struct MNEMONIQUEDB *mnemo;
-    SQLHSTMT hquery;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_mnemoDB_for_courbe( Config.log, Db_watchdog );
-    if (!hquery)
+    prctl(PR_SET_NAME, "W-MnemoCourbe", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
+       return;
      }                                                                           /* Si pas de histos (??) */
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading mnemos") );
+    if ( ! Recuperer_mnemoDB_for_courbe( Config.log, db ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Libere_DB_SQL( Config.log, &db );
+       return;
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d mnemos", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { mnemo = Recuperer_mnemoDB_for_courbe_suite( Config.log, Db_watchdog, hquery );
+     { mnemo = Recuperer_mnemoDB_for_courbe_suite( Config.log, db );
        if (!mnemo)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
+          return;
         }
 
        rezo_mnemonique = Preparer_envoi_mnemonique( mnemo );

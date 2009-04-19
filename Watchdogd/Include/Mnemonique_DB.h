@@ -24,17 +24,15 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct MNEMONIQUEDB *Rechercher_mnemoDB ( struct LOG *log, struct DB *db, guint id );
- extern SQLHSTMT Recuperer_mnemoDB ( struct LOG *log, struct DB *db );
- extern struct MNEMONIQUEDB *Recuperer_mnemoDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
- extern SQLHSTMT Recuperer_mnemoDB_for_courbe ( struct LOG *log, struct DB *db );
- extern struct MNEMONIQUEDB *Recuperer_mnemoDB_for_courbe_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_mnemoDB ( struct LOG *log, struct DB *db );
+ extern struct MNEMONIQUEDB *Recuperer_mnemoDB_suite( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_mnemoDB_for_courbe ( struct LOG *log, struct DB *db );
+ extern struct MNEMONIQUEDB *Recuperer_mnemoDB_for_courbe_suite( struct LOG *log, struct DB *db );
  extern gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MNEMONIQUE *mnemo );
  extern gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ID_MNEMONIQUE *mnemo );
  extern gboolean Modifier_mnemoDB( struct LOG *log, struct DB *db, struct CMD_EDIT_MNEMONIQUE *mnemo );
  extern struct MNEMONIQUEDB *Rechercher_mnemoDB_type_num ( struct LOG *log, struct DB *db,
                                                          struct CMD_TYPE_NUM_MNEMONIQUE *critere );
-
- extern gboolean Creer_db_mnemo ( struct LOG *log, struct DB *db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
