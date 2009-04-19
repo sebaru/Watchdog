@@ -103,6 +103,7 @@
 
     *id = atoi(db->row[0]);                                                      /* Conversion en entier */
 
+    Liberer_resultat_SQL ( log, db );
     crypt = (gchar *)g_malloc0( NBR_CARAC_CODE_CRYPTE );
     if (!crypt)
      { Info( log, DEBUG_DB, "Recuperer_clef: out of memory" );

@@ -335,7 +335,6 @@
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
                 Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
-                unlink ( FICHIER_EXPORT );
                 close (fd);
                 return(1);
               }
