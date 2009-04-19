@@ -81,9 +81,7 @@
 /* Sortie: la clef freeable ou null si pb                                                                 */
 /**********************************************************************************************************/
  gchar *Recuperer_clef ( struct LOG *log, struct DB *db, gchar *nom, gint *id )
-  { guchar crypt_from_sql[NBR_CARAC_CODE_CRYPTE+1];
-    gchar requete[200];
-    gchar id_from_sql[20];
+  { gchar requete[200];
     gchar *crypt;
 
     g_snprintf( requete, sizeof(requete),
@@ -101,15 +99,16 @@
        return(NULL);
      }
 
-    *id = atoi(db->row[0]);                                                      /* Conversion en entier */
-
-    Liberer_resultat_SQL ( log, db );
     crypt = (gchar *)g_malloc0( NBR_CARAC_CODE_CRYPTE );
     if (!crypt)
      { Info( log, DEBUG_DB, "Recuperer_clef: out of memory" );
+       Liberer_resultat_SQL ( log, db );
        return(NULL);
      }
-    memcpy( crypt, crypt_from_sql, NBR_CARAC_CODE_CRYPTE );
+   *id = atoi(db->row[0]);                                                      /* Conversion en entier */
+    memcpy( crypt, db->row[1], NBR_CARAC_CODE_CRYPTE );
+
+    Liberer_resultat_SQL ( log, db );
     return(crypt);
   }
 /**********************************************************************************************************/
