@@ -246,7 +246,7 @@
           db->nbr_result = 0;
         }
        else 
-        { Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );
+        { /*Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );*/
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }

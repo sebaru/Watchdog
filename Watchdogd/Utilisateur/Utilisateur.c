@@ -238,7 +238,6 @@
        util->cansetpass    = atoi(db->row[8]);
        util->date_modif    = atoi(db->row[9]);
      }
-    Liberer_resultat_SQL ( log, db );
     return( util );
   }
 /**********************************************************************************************************/

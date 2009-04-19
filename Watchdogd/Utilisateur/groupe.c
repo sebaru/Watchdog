@@ -202,7 +202,6 @@
        memcpy( groupe->nom, db->row[1], sizeof(groupe->nom) );               /* Recopie dans la structure */
        memcpy( groupe->commentaire, db->row[2], sizeof(groupe->commentaire) );
      }
-    Liberer_resultat_SQL ( log, db );
     return(groupe);
   } 
 /**********************************************************************************************************/
