@@ -93,6 +93,7 @@
        case SSTAG_CLIENT_EDIT_UTIL:
              { struct CMD_ID_UTILISATEUR *util;
                util = (struct CMD_ID_UTILISATEUR *)connexion->donnees;
+               printf("SSTAG_CLIENT_EDIT_UTIL:\n");
                Proto_editer_utilisateur( client, util );
              }
             break;
