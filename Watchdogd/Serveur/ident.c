@@ -86,6 +86,8 @@
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
+    Liberer_resultat_SQL ( Config.log, client->Db_watchdog );
+
     client->util = Rechercher_utilisateurDB( Config.log, client->Db_watchdog, id );
     if (!client->util)
      { Info_c( Config.log, DEBUG_CONNEXION,
@@ -93,6 +95,7 @@
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
+    Liberer_resultat_SQL ( Config.log, client->Db_watchdog );
     memcpy( client->util->code, clef, sizeof( client->util->code ) );    
     g_free(clef);
 /***************************************** Identification du client ***************************************/
