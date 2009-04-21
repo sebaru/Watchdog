@@ -110,8 +110,8 @@
 
  extern gboolean Retirer_commentDB ( struct LOG *log, struct DB *db, struct CMD_ID_COMMENT *comment );
  extern gint Ajouter_commentDB ( struct LOG *log, struct DB *db, struct CMD_ADD_COMMENT *comment );
- extern SQLHSTMT Recuperer_commentDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct COMMENTDB *Recuperer_commentDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_commentDB ( struct LOG *log, struct DB *db, gint id_syn );
+ extern struct COMMENTDB *Recuperer_commentDB_suite( struct LOG *log, struct DB *db );
  extern struct COMMENTDB *Rechercher_commentDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_commentDB( struct LOG *log, struct DB *db, struct CMD_EDIT_COMMENT *comment );
 

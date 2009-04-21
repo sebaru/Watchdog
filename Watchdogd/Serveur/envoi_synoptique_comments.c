@@ -26,7 +26,7 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -38,8 +38,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -85,7 +83,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete comment %s:\n%s"), rezo_comment->libelle, Db_watchdog->last_err);
+                   "Unable to delete comment %s", rezo_comment->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        Info( Config.log, DEBUG_INFO, "MSRV: effacement comment NOK" );
@@ -107,7 +105,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add comment %s:\n%s"), rezo_comment->libelle, Db_watchdog->last_err);
+                   "Unable to add comment %s", rezo_comment->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK" );
@@ -117,7 +115,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate comment %s:\n%s"), rezo_comment->libelle, Db_watchdog->last_err);
+                          "Unable to locate comment %s", rezo_comment->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
               Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK (2)" );
@@ -129,7 +127,7 @@
               if (!comment)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                  Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK (3)" );
@@ -157,7 +155,7 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_comment_atelier" );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to save comment %s:\n%s"), rezo_comment->libelle, Db_watchdog->last_err);
+                   "Unable to save comment %s", rezo_comment->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -172,24 +170,33 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
   { struct CMD_SHOW_COMMENT *rezo_comment;
     struct CMD_ENREG nbr;
     struct COMMENTDB *comment;
-    struct DB *Db_watchdog;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_commentDB( Config.log, Db_watchdog, client->syn.id );
-    if (!hquery) { Client_mode( client, ENVOI_PASSERELLE_ATELIER );
-                   Unref_client( client );                            /* Déréférence la structure cliente */
-                   pthread_exit ( NULL );                                        /* Si pas de histos (??) */
-                 }
+    prctl(PR_SET_NAME, "W-EnvoiComment", 0, 0, 0 );
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading comments") );
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_commentDB( Config.log, db, client->syn.id ) )
+     { Client_mode( client, ENVOI_PASSERELLE_ATELIER );
+       Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit ( NULL );                                                    /* Si pas de histos (??) */
+     }
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d comments", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { comment = Recuperer_commentDB_suite( Config.log, Db_watchdog, hquery );
+     { comment = Recuperer_commentDB_suite( Config.log, db );
        if (!comment)
-        { Client_mode( client, ENVOI_PASSERELLE_ATELIER );
+        { Libere_DB_SQL( Config.log, &db );
+          Client_mode( client, ENVOI_PASSERELLE_ATELIER );
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
@@ -218,24 +225,34 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
     struct CMD_ENREG nbr;
     struct COMMENTDB *comment;
     struct DB *Db_watchdog;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_commentDB( Config.log, Db_watchdog, client->num_supervision );
-    if (!hquery) { Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );         /* Si pas de comments ... */
-                   Unref_client( client );                            /* Déréférence la structure cliente */
-                   pthread_exit ( NULL );
-                 }
+    prctl(PR_SET_NAME, "W-EnvoiComment", 0, 0, 0 );
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading comments") );
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_commentDB( Config.log, db, client->num_supervision ) )
+     { Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );                     /* Si pas de comments ... */
+       Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit ( NULL );
+     }
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d comments", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { comment = Recuperer_commentDB_suite( Config.log, Db_watchdog, hquery );
+     { comment = Recuperer_commentDB_suite( Config.log, db );
        if (!comment)                                                                        /* Terminé ?? */
-        { Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );
+        { Libere_DB_SQL( Config.log, &db );
+          Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
