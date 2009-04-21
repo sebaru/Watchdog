@@ -31,9 +31,9 @@
  #include "Client.h"
  #include "Synoptiques_DB.h"
 
-/********************************* Définitions des prototypes programme ***********************************/
+ #include "watchdogd.h"
+/******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
@@ -68,14 +68,22 @@
                else { struct CMD_SHOW_SYNOPTIQUE *cmd;
                       struct SYNOPTIQUEDB *syndb;
                       syndb = Rechercher_synoptiqueDB ( Config.log, client->Db_watchdog, syn->id );
-                      cmd = Preparer_envoi_synoptique ( syndb );
-                      g_free(syndb);
-                      if (cmd)
-                       { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
-                                        (gchar *)cmd, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
-                         g_free(cmd);
-                         client->num_supervision = syn->id;   /* Sauvegarde du syn voulu pour envoi motif */
-                         Client_mode( client, ENVOI_MOTIF_SUPERVISION );
+                      if ( ! syndb )
+                       { struct CMD_GTK_MESSAGE gtkmessage;
+                         g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Synoptique inconnu..." );
+                         Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                       (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                       }
+                      else
+                       { cmd = Preparer_envoi_synoptique ( syndb );
+                         g_free(syndb);
+                         if (cmd)
+                          { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
+                                           (gchar *)cmd, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
+                            g_free(cmd);
+                            client->num_supervision = syn->id;/* Sauvegarde du syn voulu pour envoi motif */
+                            Client_mode( client, ENVOI_MOTIF_SUPERVISION );
+                          }
                        }
                     }
              }
