@@ -167,7 +167,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
   { struct CMD_SHOW_CAPTEUR *rezo_capteur;
     struct CMD_ENREG nbr;
     struct CAPTEURDB *capteur;
-    struct DB *Db_watchdog;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );
@@ -221,7 +220,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
   { struct CMD_SHOW_CAPTEUR *rezo_capteur;
     struct CMD_ENREG nbr;
     struct CAPTEURDB *capteur;
-    struct DB *Db_watchdog;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );

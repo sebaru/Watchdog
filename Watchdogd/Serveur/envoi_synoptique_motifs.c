@@ -3,8 +3,30 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 22 mai 2005 17:25:01 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * envoi_synoptique_motifs.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
+ #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -16,8 +38,6 @@
  #include "Client.h"
 
  #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 
@@ -71,7 +91,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to delete motif %s:\n%s"), rezo_motif->libelle, Db_watchdog->last_err);
+                   "Unable to delete motif %s", rezo_motif->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -92,7 +112,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to add motif %s:\n%s"), rezo_motif->libelle, Db_watchdog->last_err);
+                   "Unable to add motif %s", rezo_motif->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -100,7 +120,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          _("Unable to locate motif %s:\n%s"), rezo_motif->libelle, Db_watchdog->last_err);
+                          "Unable to locate motif %s", rezo_motif->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -111,7 +131,7 @@
               if (!motif)
                { struct CMD_GTK_MESSAGE erreur;
                  g_snprintf( erreur.message, sizeof(erreur.message),
-                             _("Not enough memory") );
+                             "Not enough memory" );
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
@@ -137,7 +157,7 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_motif_atelier" );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   _("Unable to save motif %s:\n%s"), rezo_motif->libelle, Db_watchdog->last_err);
+                   "Unable to save motif %s", rezo_motif->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -153,24 +173,34 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
   { struct CMD_SHOW_MOTIF *rezo_motif;
     struct CMD_ENREG nbr;
     struct MOTIFDB *motif;
-    struct DB *Db_watchdog;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
 
-    hquery = Recuperer_motifDB( Config.log, Db_watchdog, client->syn.id );
-    if (!hquery) { Client_mode( client, ENVOI_COMMENT_ATELIER );
-                   Unref_client( client );                            /* Déréférence la structure cliente */
-                   pthread_exit ( NULL ); }                                      /* Si pas de histos (??) */
+    prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading synoptique") );
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_motifDB( Config.log, db, client->syn.id ) )
+     { Client_mode( client, ENVOI_COMMENT_ATELIER );
+       Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit ( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d motifs", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { motif = Recuperer_motifDB_suite( Config.log, Db_watchdog, hquery );
+     { motif = Recuperer_motifDB_suite( Config.log, db );
        if (!motif)
-        { Client_mode( client, ENVOI_COMMENT_ATELIER );
+        { Libere_DB_SQL( Config.log, &db );
+          Client_mode( client, ENVOI_COMMENT_ATELIER );
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL ); 
@@ -202,9 +232,9 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
   { struct CMD_SHOW_MOTIF *rezo_motif;
     struct CMD_ENREG nbr;
     struct MOTIFDB *motif;
-    struct DB *Db_watchdog;
-    SQLHSTMT hquery;
-    Db_watchdog = client->Db_watchdog;
+    struct DB *db;
+
+    prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
 
     printf("1 - Recherche supervision %d\n", client->num_supervision);
     if (client->bit_init_syn)
@@ -213,21 +243,30 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
      }
     printf("2 - Recherche supervision %d\n", client->num_supervision);
 
-    hquery = Recuperer_motifDB( Config.log, Db_watchdog, client->num_supervision );
-    if (!hquery) { Client_mode( client, ENVOI_COMMENT_SUPERVISION );              /* Si pas de motifs ... */
-                   Unref_client( client );                            /* Déréférence la structure cliente */
-                   pthread_exit ( NULL );
-                 }
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
 
-    SQLRowCount( hquery, (SQLINTEGER *)&nbr.num );
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Loading synoptique") );
+    if ( ! Recuperer_motifDB( Config.log, db, client->num_supervision ) )
+     { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
+       Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit ( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d motifs", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { motif = Recuperer_motifDB_suite( Config.log, Db_watchdog, hquery );
+     { motif = Recuperer_motifDB_suite( Config.log, db );
        if (!motif)                                                                          /* Terminé ?? */
-        { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
+        { Libere_DB_SQL( Config.log, &db );
+          Client_mode( client, ENVOI_COMMENT_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

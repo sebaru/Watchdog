@@ -103,8 +103,8 @@
 
  extern gboolean Retirer_motifDB ( struct LOG *log, struct DB *db, struct CMD_ID_MOTIF *motif );
  extern gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MOTIF *motif );
- extern SQLHSTMT Recuperer_motifDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct MOTIFDB *Recuperer_motifDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_motifDB ( struct LOG *log, struct DB *db, gint id_syn );
+ extern struct MOTIFDB *Recuperer_motifDB_suite( struct LOG *log, struct DB *db );
  extern struct MOTIFDB *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_motifDB( struct LOG *log, struct DB *db, struct CMD_EDIT_MOTIF *motif );
 
@@ -117,15 +117,15 @@
 
  extern gboolean Retirer_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_ID_PASSERELLE *pass );
  extern gint Ajouter_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_ADD_PASSERELLE *pass );
- extern SQLHSTMT Recuperer_passerelleDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct PASSERELLEDB *Recuperer_passerelleDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_passerelleDB ( struct LOG *log, struct DB *db, gint id_syn );
+ extern struct PASSERELLEDB *Recuperer_passerelleDB_suite( struct LOG *log, struct DB *db );
  extern struct PASSERELLEDB *Rechercher_passerelleDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_passerelleDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PASSERELLE *pass );
 
  extern gboolean Retirer_paletteDB ( struct LOG *log, struct DB *db, struct CMD_ID_PALETTE *pass );
  extern gint Ajouter_paletteDB ( struct LOG *log, struct DB *db, struct CMD_ADD_PALETTE *pass );
- extern SQLHSTMT Recuperer_paletteDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct PALETTEDB *Recuperer_paletteDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_paletteDB ( struct LOG *log, struct DB *db, gint id_syn );
+ extern struct PALETTEDB *Recuperer_paletteDB_suite( struct LOG *log, struct DB *db );
  extern struct PALETTEDB *Rechercher_paletteDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_paletteDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PALETTE *pass );
 
