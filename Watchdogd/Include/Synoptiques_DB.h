@@ -101,14 +101,8 @@
  extern gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_ID_SYNOPTIQUE *syn );
  extern gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_EDIT_SYNOPTIQUE *syn );
 
- extern gboolean Creer_db_synoptique ( struct LOG *log, struct DB *db );
- extern gboolean Creer_db_motif ( struct LOG *log, struct DB *db );
- extern gboolean Creer_db_comment ( struct LOG *log, struct DB *db );
- extern gboolean Creer_db_passerelle ( struct LOG *log, struct DB *db );
-
  extern gboolean Retirer_motifDB ( struct LOG *log, struct DB *db, struct CMD_ID_MOTIF *motif );
  extern gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MOTIF *motif );
- extern gboolean Creer_db_motif ( struct LOG *log, struct DB *db );
  extern SQLHSTMT Recuperer_motifDB ( struct LOG *log, struct DB *db, gint id_syn );
  extern struct MOTIFDB *Recuperer_motifDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
  extern struct MOTIFDB *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id );
@@ -137,8 +131,8 @@
 
  extern gboolean Retirer_capteurDB ( struct LOG *log, struct DB *db, struct CMD_ID_CAPTEUR *capteur );
  extern gint Ajouter_capteurDB ( struct LOG *log, struct DB *db, struct CMD_ADD_CAPTEUR *capteur );
- extern SQLHSTMT Recuperer_capteurDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CAPTEURDB *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_capteurDB ( struct LOG *log, struct DB *db, gint id_syn );
+ extern struct CAPTEURDB *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db );
  extern struct CAPTEURDB *Rechercher_capteurDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_capteurDB( struct LOG *log, struct DB *db, struct CMD_EDIT_CAPTEUR *capteur );
 #endif

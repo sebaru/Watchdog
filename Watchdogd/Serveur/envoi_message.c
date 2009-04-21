@@ -220,7 +220,6 @@
     struct CMD_ENREG nbr;
     struct MSGDB *msg;
     struct DB *db;
-    gint cpt;
 
     prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
 
