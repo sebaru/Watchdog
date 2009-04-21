@@ -127,10 +127,8 @@
     while ( Recuperer_ligne_SQL (log, db) != NULL && cpt<NBR_MAX_GROUPE_PAR_UTIL)
      { gint gid;
        gid = atoi(db->row[0]);
-       if (gid != 0)
-        { *(gids + cpt) = gid;
-          cpt++;
-        }
+       *(gids + cpt) = gid;
+       cpt++;
      }
     *(gids + cpt) = 0;                                         /* Fin de tableau = groupe "tout le monde" */
 
