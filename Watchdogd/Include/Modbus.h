@@ -27,6 +27,7 @@
     guint admin_stop;                                                           /* Demande de deconnexion */
     guint admin_add;                                                            /* Demande de deconnexion */
     guint admin_add_borne;                                                      /* Demande de deconnexion */
+    guint admin_del_borne;                                                      /* Demande de deconnexion */
   };
 
  enum

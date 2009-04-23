@@ -286,6 +286,31 @@
     Partage->com_modbus.Modules_MODBUS = g_list_remove ( Partage->com_modbus.Modules_MODBUS, module );
   }
 /**********************************************************************************************************/
+/* Decharcher_une_borne_MODBUS: Décharge une borne de la liste des bornes actives                         */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_une_borne_MODBUS ( gint id )
+  { GList *liste, *liste_borne;
+    liste = Partage->com_modbus.Modules_MODBUS;
+    while ( liste )
+     { struct MODULE_MODBUS *module;
+       module = ((struct MODULE_MODBUS *)liste->data);
+
+       liste_borne = module->Bornes;
+       while ( liste_borne )
+        { struct BORNE_MODBUS *borne;
+          borne = ((struct BORNE_MODBUS *)liste->data);
+          if (borne->id == id)
+           { module->Bornes = g_list_remove ( module->Bornes, borne );
+             return;
+           }
+          liste_borne = liste_borne->next;
+        }
+       liste = liste->next;
+     }
+  }
+/**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
@@ -741,6 +766,12 @@
           Deconnecter_module  ( module );
           Decharger_un_MODBUS ( module );
           Partage->com_modbus.admin_del = 0;
+        }
+
+       if (Partage->com_modbus.admin_del_borne)
+        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting une borne" );
+          Decharger_une_borne_MODBUS ( Partage->com_modbus.admin_del_borne );
+          Partage->com_modbus.admin_del_borne = 0;
         }
 
        if (Partage->com_modbus.admin_add)

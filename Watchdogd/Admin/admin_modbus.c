@@ -269,6 +269,39 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
+ static void Admin_modbus_del_borne ( struct CLIENT_ADMIN *client, gint id )
+  { gchar requete[128], chaine[128];
+    struct DB *db;
+
+    while (Partage->com_modbus.admin_del) sched_yield();
+    Partage->com_modbus.admin_del_borne = id;
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE id = %d",
+                NOM_TABLE_BORNE_MODBUS, id
+              );
+
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
+       return;
+     }
+
+    Libere_DB_SQL( Config.log, &db );
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted", id );
+    Write_admin ( client->connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
  void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
@@ -320,6 +353,12 @@
           Write_admin ( client->connexion, chaine );
         }
      }
+    else if ( ! strcmp ( commande, "deleteborne" ) )
+     { gchar chaine[128];
+       guint num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_modbus_del_borne ( client, num );
+     }
     else if ( ! strcmp ( commande, "delete" ) )
      { gchar chaine[128];
        guint num;
@@ -331,6 +370,8 @@
                      "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
        Write_admin ( client->connexion,
                      "  addborne type adresse min nbr moduleID - Ajoute une borne a un module\n" );
+       Write_admin ( client->connexion,
+                     "  deleteborne id                         - Supprime la borne id\n" );
        Write_admin ( client->connexion,
                      "  add ip bit watchdog                    - Ajoute un module MODBUS\n" );
        Write_admin ( client->connexion,
