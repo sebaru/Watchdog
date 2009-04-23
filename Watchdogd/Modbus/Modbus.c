@@ -744,7 +744,6 @@
      { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
-printf("Fin charger MODBUS\n");
 
     liste = Partage->com_modbus.Modules_MODBUS;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
@@ -752,7 +751,6 @@ printf("Fin charger MODBUS\n");
        usleep(1);
        sched_yield();
 
-printf("Boucle MODBUS\n");
        if (Partage->com_modbus.reload == TRUE)
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_tous_MODBUS();
