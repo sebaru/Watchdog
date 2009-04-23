@@ -139,11 +139,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static gint Admin_rs485_add ( struct CLIENT_ADMIN *client, gint ea_min, gint ea_max, gint e_min, gint e_max,
-                               gint ec_min, gint ec_max,gint s_min, gint s_max, gint sa_min,gint sa_max )
+ static gint Admin_rs485_add ( struct CLIENT_ADMIN *client, gint id, gint ea_min, gint ea_max,
+                               gint e_min, gint e_max, gint ec_min, gint ec_max,gint s_min, gint s_max,
+                               gint sa_min,gint sa_max )
   { gchar requete[128];
     struct DB *db;
-    gint id;
+    gint retour;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -154,21 +155,21 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,s_min,s_max,sa_min,sa_max) "
-                " VALUES (FALSE,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
-                NOM_TABLE_MODULE_RS485, ea_min,ea_max,e_min,e_max,ec_min,ec_max,s_min,s_max,sa_min,sa_max
+                "INSERT INTO %s(id,actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,s_min,s_max,sa_min,sa_max) "
+                " VALUES (%d,FALSE,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
+                NOM_TABLE_MODULE_RS485,id,ea_min,ea_max,e_min,e_max,ec_min,ec_max,s_min,s_max,sa_min,sa_max
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
      { Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
-    id = Recuperer_last_ID_SQL ( Config.log, db );
+    retour = Recuperer_last_ID_SQL ( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
 
     while (Partage->com_rs485.admin_add) sched_yield();
     Partage->com_rs485.admin_add = id;
-    return(id);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
@@ -227,9 +228,9 @@
      { Admin_rs485_reload(client);
      }
     else if ( ! strcmp ( commande, "add" ) )
-     { gint ea_min, ea_max, e_min, e_max, ec_min, ec_max, s_min, s_max, sa_min, sa_max;
+     { gint id, ea_min, ea_max, e_min, e_max, ec_min, ec_max, s_min, s_max, sa_min, sa_max;
        gchar chaine[128];
-       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d", commande,
+       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d", commande, &id,
                 &ea_min, &ea_max, &e_min, &e_max, &ec_min, &ec_max, &s_min, &s_max, &sa_min, &sa_max
               );                                                     /* Découpage de la ligne de commande */
        if ( ea_min < -1 || ea_min> NBR_BIT_DLS )
@@ -253,10 +254,10 @@
        else if ( sa_max < -1 || sa_max> NBR_BIT_DLS )
         { Write_admin ( client->connexion, " sa_max should be < NBR_BIT_DLS\n" ); }
        else
-        { int id;
-          id = Admin_rs485_add ( client, ea_min, ea_max, e_min, e_max, ec_min, ec_max,
-                                 s_min, s_max, sa_min, sa_max );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module RS485 %d added", id ); }
+        { int retour;
+          retour = Admin_rs485_add ( client, id, ea_min, ea_max, e_min, e_max, ec_min, ec_max,
+                                     s_min, s_max, sa_min, sa_max );
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module RS485 %d added", retour ); }
           else          { g_snprintf( chaine, sizeof(chaine), "Module RS485 NOT added" ); }
           Write_admin ( client->connexion, chaine );
         }
@@ -270,7 +271,7 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
        Write_admin ( client->connexion,
-                     "  add ea_min ea_max e_min e_max ec_min ec_max s_min s_max sa_min sa_max - Ajoute un module RS485\n" );
+                     "  add id ea_min ea_max e_min e_max ec_min ec_max s_min s_max sa_min sa_max - Ajoute un module RS485\n" );
        Write_admin ( client->connexion,
                      "  delete id                              - Supprime le module id\n" );
        Write_admin ( client->connexion,
