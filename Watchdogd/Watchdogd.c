@@ -411,7 +411,9 @@
        pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        gint i;
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
+printf("wat 0 %d\n", Partage->com_admin.sigusr1);
        import = Importer();                         /* Tente d'importer les données juste après un reload */
+printf("wat 1 %d\n", Partage->com_admin.sigusr1);
 
        memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
@@ -449,12 +451,10 @@
        sigaction( SIGTERM, &sig, NULL );
 encore:   
 
-printf("wat 0 %d\n", Partage->com_admin.sigusr1);
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
        Charger_eana();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
 
-printf("wat 1 %d\n", Partage->com_admin.sigusr1);
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
        Charger_scenario();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
@@ -465,7 +465,6 @@ printf("wat 1 %d\n", Partage->com_admin.sigusr1);
           Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
         } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 
-printf("wat 3 %d\n", Partage->com_admin.sigusr1);
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
        Charger_cpth();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );

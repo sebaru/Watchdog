@@ -198,11 +198,9 @@
     prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
-printf("Admin 0 %d\n", Partage->com_admin.sigusr1);
 
     Partage->com_admin.ecoute = Activer_ecoute_admin ();
 
-printf("Admin 1 %d\n", Partage->com_admin.sigusr1);
     if ( Partage->com_admin.ecoute < 0 )
      { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
