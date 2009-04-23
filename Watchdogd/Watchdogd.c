@@ -411,9 +411,7 @@
        pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        gint i;
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
-printf("wat 0 %d\n", Partage->com_admin.sigusr1);
        import = Importer();                         /* Tente d'importer les données juste après un reload */
-printf("wat 1 %d\n", Partage->com_admin.sigusr1);
 
        memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
@@ -473,7 +471,6 @@ encore:
        if (!Ssl_ctx)
         { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
        else
-#ifdef bouh
        if (!Demarrer_arch())                                               /* Demarrage gestion Archivage */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
        else
@@ -489,7 +486,6 @@ encore:
        if (!Demarrer_audio())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
        else
-#endif
        if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
        else

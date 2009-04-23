@@ -207,8 +207,7 @@
      } else Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: En ecoute !" );
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { printf("Admin 2 %d\n", Partage->com_admin.sigusr1);
-       if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
+     { if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
         { Partage->com_admin.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
         }
