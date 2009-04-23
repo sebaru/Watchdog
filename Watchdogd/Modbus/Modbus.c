@@ -188,8 +188,9 @@
                 "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           continue;
         }
-
+printf("Charger_un_MODBUS_DB\n");
        Charger_un_MODBUS_DB( module, atoi (db->row[0]) );
+printf("Fin Charger_un_MODBUS_DB\n");
                                                                         /* Ajout dans la liste de travail */
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
