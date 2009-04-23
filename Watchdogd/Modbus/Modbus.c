@@ -188,9 +188,7 @@
                 "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           continue;
         }
-printf("Charger_un_MODBUS_DB\n");
        Charger_un_MODBUS_DB( module, atoi (db->row[0]) );
-printf("Fin Charger_un_MODBUS_DB\n");
                                                                         /* Ajout dans la liste de travail */
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
@@ -753,6 +751,7 @@ printf("Fin Charger_un_MODBUS_DB\n");
        usleep(1);
        sched_yield();
 
+printf("Boucle MODBUS\n");
        if (Partage->com_modbus.reload == TRUE)
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_tous_MODBUS();
@@ -817,6 +816,7 @@ printf("Fin Charger_un_MODBUS_DB\n");
 
        module = (struct MODULE_MODBUS *)liste->data;
        if (module->actif != TRUE) { continue; }
+printf("Boucle module MODBUS\n");
 
 /*********************************** Début de l'interrogation du module ***********************************/
        date = time(NULL);                                                 /* On recupere l'heure actuelle */

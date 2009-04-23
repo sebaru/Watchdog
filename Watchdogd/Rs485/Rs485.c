@@ -421,6 +421,7 @@
 
     if ( Charger_tous_RS485() == FALSE )                                    /* Chargement des modules rs485 */
      { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: No module RS485 found -> stop" );
+       close(fd_rs485);
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
