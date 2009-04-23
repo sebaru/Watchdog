@@ -744,6 +744,7 @@
      { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
+printf("Fin charger MODBUS\n");
 
     liste = Partage->com_modbus.Modules_MODBUS;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */

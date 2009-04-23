@@ -471,6 +471,7 @@ encore:
        if (!Ssl_ctx)
         { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
        else
+#ifdef bouh
        if (!Demarrer_arch())                                               /* Demarrage gestion Archivage */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
        else
@@ -486,6 +487,7 @@ encore:
        if (!Demarrer_audio())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
        else
+#endif
        if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
        else
