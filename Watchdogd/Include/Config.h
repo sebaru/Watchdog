@@ -20,19 +20,9 @@
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
- struct MODULE_RS485
-  { gint id;
-    gint ea_min, ea_max;
-    gint e_min, e_max;
-    gint ec_min, ec_max;
-    gint s_min, s_max;
-    gint sa_min, sa_max;
-  };
-
   struct CONFIG
   { gint  port;                                                    /* Port d'ecoute des requetes clientes */
     gchar port_RS485[ TAILLE_PORT_RS485+1 ];                                         /* Nom du port RS485 */
-    struct MODULE_RS485 module_rs485[NBR_ID_RS485];
     gint  max_client;                  /* Nombre maximum de client qui peuvent se connecter en meme temps */
     gint  min_serveur;                                     /* Nombre de server min à lancer en même temps */
     gint  max_serveur;                                     /* Nombre de server max à lancer en même temps */

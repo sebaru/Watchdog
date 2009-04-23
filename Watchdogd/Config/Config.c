@@ -43,7 +43,6 @@
  void Lire_config ( char *fichier_config )
   { char *fichier;
     FILE *rc;
-    int cpt;
 
     Config.port                  = DEFAUT_PORT;
     Config.max_client            = DEFAUT_MAX_CLIENT;
@@ -66,9 +65,6 @@
     snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME );
     Config.db_port               = DEFAUT_DB_PORT;
 
-    for ( cpt=0; cpt < NBR_ID_RS485; cpt++)
-     { Config.module_rs485[cpt].id = -1; }
-
     if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;
                     else fichier = fichier_config;
     rc = fopen( fichier, "r");
@@ -82,8 +78,7 @@
 /* Entrée: une config !! -> le champ log doit etre initialisé via la librairie Erreur                     */
 /**********************************************************************************************************/
  void Print_config ( void )
-  { int cpt;
-
+  { 
     if (!Config.log) return;
     Info_n( Config.log, DEBUG_CONFIG, "Config port                 ", Config.port );
     Info_c( Config.log, DEBUG_CONFIG, "Config port rs485           ", Config.port_RS485  );
@@ -105,30 +100,5 @@
     Info_c( Config.log, DEBUG_CONFIG, "Config db password          ", Config.db_password );
     Info_n( Config.log, DEBUG_CONFIG, "Config db port              ", Config.db_port );
     Info_c( Config.log, DEBUG_CONFIG, "Config crypto key           ", Config.crypto_key );
-    for ( cpt=0; cpt < NBR_ID_RS485; cpt++)
-     { if (Config.module_rs485[cpt].id != -1)
-        { Info_n( Config.log, DEBUG_CONFIG, "Config Module RS485    id = ", Config.module_rs485[cpt].id );
-          if (Config.module_rs485[cpt].ea_min != -1)
-           { Info_n( Config.log, DEBUG_CONFIG, "                   ea_min = ", Config.module_rs485[cpt].ea_min );
-             Info_n( Config.log, DEBUG_CONFIG, "                   ea_max = ", Config.module_rs485[cpt].ea_max );
-           }
-          if (Config.module_rs485[cpt].e_min != -1)
-           { Info_n( Config.log, DEBUG_CONFIG, "                    e_min = ", Config.module_rs485[cpt].e_min );
-             Info_n( Config.log, DEBUG_CONFIG, "                    e_max = ", Config.module_rs485[cpt].e_max );
-           }
-          if (Config.module_rs485[cpt].ec_min != -1)
-           { Info_n( Config.log, DEBUG_CONFIG, "                   ec_min = ", Config.module_rs485[cpt].ec_min );
-             Info_n( Config.log, DEBUG_CONFIG, "                   ec_max = ", Config.module_rs485[cpt].ec_max );
-           }
-          if (Config.module_rs485[cpt].s_min != -1)
-           { Info_n( Config.log, DEBUG_CONFIG, "                    s_min = ", Config.module_rs485[cpt].s_min );
-             Info_n( Config.log, DEBUG_CONFIG, "                    s_max = ", Config.module_rs485[cpt].s_max );
-           }
-          if (Config.module_rs485[cpt].sa_min != -1)
-           { Info_n( Config.log, DEBUG_CONFIG, "                   sa_min = ", Config.module_rs485[cpt].sa_min );
-             Info_n( Config.log, DEBUG_CONFIG, "                   sa_max = ", Config.module_rs485[cpt].sa_max );
-           }
-        }
-     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

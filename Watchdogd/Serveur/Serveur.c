@@ -184,7 +184,7 @@
     if (client->courbes)      { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
                                 g_list_free(client->courbes);
                               }
-    if (client->Db_watchdog)  { DeconnexionDB( Config.log, &client->Db_watchdog ); }    /* Deconnexion DB */
+    if (client->Db_watchdog)  { Libere_DB_SQL( Config.log, &client->Db_watchdog ); }    /* Deconnexion DB */
     g_free( client );
   }
 /**********************************************************************************************************/

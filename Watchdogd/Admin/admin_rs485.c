@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/Admin/admin_modbus.c        Gestion des connexions Admin MODBUS au serveur watchdog          */
+/* Watchdogd/Admin/admin_rs485.c        Gestion des connexions Admin RS485 au serveur watchdog           */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 18 jan 2009 14:43:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * admin_modbus.c
+ * admin_rs485.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2008 - sebastien
@@ -28,54 +28,43 @@
  #include <glib.h>
 
  #include "Admin.h"
- #include "Modbus.h"
+ #include "Rs485.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Admin_modbus_reload: Demande le rechargement des conf MODBUS                                           */
+/* Admin_rs485_reload: Demande le rechargement des conf RS485                                             */
 /* Entrée: le client                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_modbus_reload ( struct CLIENT_ADMIN *client )
-  { Partage->com_modbus.reload = TRUE;
-    Write_admin ( client->connexion, " MODBUS Reloading in progress\n" );
-    while (Partage->com_modbus.reload) sched_yield();
-    Write_admin ( client->connexion, " MODBUS Reloading done\n" );
+ static void Admin_rs485_reload ( struct CLIENT_ADMIN *client )
+  { Partage->com_rs485.reload = TRUE;
+    Write_admin ( client->connexion, " RS485 Reloading in progress\n" );
+    while (Partage->com_rs485.reload) sched_yield();
+    Write_admin ( client->connexion, " RS485 Reloading done\n" );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_modbus_list ( struct CLIENT_ADMIN *client )
-  { GList *liste_modules, *liste_bornes;
+ void Admin_rs485_list ( struct CLIENT_ADMIN *client )
+  { GList *liste_modules;
     gchar chaine[128];
 
-    liste_modules = Partage->com_modbus.Modules_MODBUS;
+    liste_modules = Partage->com_rs485.Modules_RS485;
     while ( liste_modules )
-     { struct MODULE_MODBUS *module;
-       module = (struct MODULE_MODBUS *)liste_modules->data;
+     { struct MODULE_RS485 *module;
+       module = (struct MODULE_RS485 *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, trans.=%d, "
-                   "deco.=%d, request=%d, retente=%d \n",
-                   module->id, module->ip, module->bit, module->actif, module->started,
-                   module->transaction_id, module->nbr_deconnect, module->request,
-                   (int)module->date_retente
+                   "\n RS485[%02d] -> actif=%d, ea=%d-%d, e=%d-%d, ec=%d-%d, s=%d-%d, sa=%d-%d requete=%d"
+                   " retente=%d ana=%d\n",
+                   module->id, module->actif, module->ea_min, module->ea_max,
+                   module->e_min, module->e_max, module->ec_min, module->ec_max,
+                   module->s_min, module->s_max, module->sa_min, module->sa_max,
+                   (gint)module->date_requete, (gint)module->date_retente, (gint)module->date_ana
                  );
        Write_admin ( client->connexion, chaine );
-
-       liste_bornes = module->Bornes;
-       while ( liste_bornes )
-        { struct BORNE_MODBUS *borne;
-          borne = (struct BORNE_MODBUS *)liste_bornes->data;
-          g_snprintf( chaine, sizeof(chaine),
-                      " - Borne %02d -> type='%s', adresse=%d, min=%d, nbr=%d\n",
-                      borne->id, Mode_borne[borne->type], borne->adresse, borne->min, borne->nbr
-                    );
-          Write_admin ( client->connexion, chaine );
-          liste_bornes = liste_bornes->next;
-        }
        liste_modules = liste_modules->next;
      }
   }
@@ -84,23 +73,23 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_start ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_rs485_start ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
 
-    while (Partage->com_modbus.admin_start) sched_yield();
-    Partage->com_modbus.admin_start = id;
+    while (Partage->com_rs485.admin_start) sched_yield();
+    Partage->com_rs485.admin_start = id;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_start: impossible d'ouvrir la Base de données",
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_start: impossible d'ouvrir la Base de données",
                Config.db_database );
        return;
      }
 
     g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=1 WHERE id=%d",
-                NOM_TABLE_MODULE_MODBUS, id
+                NOM_TABLE_MODULE_RS485, id
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -109,7 +98,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started", id );
+    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d started", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -117,23 +106,23 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_stop ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_rs485_stop ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
 
-    while (Partage->com_modbus.admin_stop) sched_yield();
-    Partage->com_modbus.admin_stop = id;
+    while (Partage->com_rs485.admin_stop) sched_yield();
+    Partage->com_rs485.admin_stop = id;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_stop: impossible d'ouvrir la Base de données",
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_stop: impossible d'ouvrir la Base de données",
                Config.db_database );
        return;
      }
 
     g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=0 WHERE id=%d",
-                NOM_TABLE_MODULE_MODBUS, id
+                NOM_TABLE_MODULE_RS485, id
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -142,7 +131,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d stopped", id );
+    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d stopped", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -150,50 +139,8 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static gint Admin_modbus_add ( struct CLIENT_ADMIN *client, gchar *ip_orig, guint bit, guint watchdog )
-  { gchar requete[128], *ip;
-    struct DB *db;
-    gint id;
-
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_add: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return(-1);
-     }
-
-    ip = Normaliser_chaine ( Config.log, ip_orig );                      /* Formatage correct des chaines */
-    if (!ip)
-     { Info( Config.log, DEBUG_ADMIN, "Admin_modbus_add: Normalisation impossible" );
-       Libere_DB_SQL( Config.log, &db );
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(actif,ip,bit,watchdog) VALUES (FALSE,'%s',%d,%d)",
-                NOM_TABLE_MODULE_MODBUS, ip, bit, watchdog
-              );
-    g_free(ip);
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return(-1);
-     }
-    id = Recuperer_last_ID_SQL ( Config.log, db );
-    Libere_DB_SQL( Config.log, &db );
-
-    while (Partage->com_modbus.admin_add) sched_yield();
-    Partage->com_modbus.admin_add = id;
-    return(id);
-  }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- static gint Admin_modbus_add_borne ( struct CLIENT_ADMIN *client, gchar *type,
-                                      guint adresse, guint min, guint nbr, guint module )
+ static gint Admin_rs485_add ( struct CLIENT_ADMIN *client, gint ea_min, gint ea_max, gint e_min, gint e_max,
+                               gint ec_min, gint ec_max,gint s_min, gint s_max, gint sa_min,gint sa_max )
   { gchar requete[128];
     struct DB *db;
     gint id;
@@ -201,14 +148,15 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_add: impossible d'ouvrir la Base de données",
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_add: impossible d'ouvrir la Base de données",
                Config.db_database );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(type,adresse,min,nbr,module) VALUES (%d,%d,%d,%d,%d)",
-                NOM_TABLE_BORNE_MODBUS, Mode_borne_vers_id(type), adresse, min, nbr, module
+                "INSERT INTO %s(actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,s_min,s_max,sa_min,sa_max) "
+                " VALUES (FALSE,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
+                NOM_TABLE_MODULE_RS485, ea_min,ea_max,e_min,e_max,ec_min,ec_max,s_min,s_max,sa_min,sa_max
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -218,8 +166,8 @@
     id = Recuperer_last_ID_SQL ( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
 
-    while (Partage->com_modbus.admin_add_borne) sched_yield();
-    Partage->com_modbus.admin_add_borne = id;
+    while (Partage->com_rs485.admin_add) sched_yield();
+    Partage->com_rs485.admin_add = id;
     return(id);
   }
 /**********************************************************************************************************/
@@ -227,32 +175,23 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_del ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_rs485_del ( struct CLIENT_ADMIN *client, gint id )
   { gchar requete[128], chaine[128];
     struct DB *db;
 
-    while (Partage->com_modbus.admin_del) sched_yield();
-    Partage->com_modbus.admin_del = id;
+    while (Partage->com_rs485.admin_del) sched_yield();
+    Partage->com_rs485.admin_del = id;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_modbus_del: impossible d'ouvrir la Base de données",
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_del: impossible d'ouvrir la Base de données",
                Config.db_database );
        return;
      }
 
     g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE id = %d",
-                NOM_TABLE_MODULE_MODBUS, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE module = %d",
-                NOM_TABLE_BORNE_MODBUS, id
+                NOM_TABLE_MODULE_RS485, id
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -261,7 +200,7 @@
      }
 
     Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted", id );
+    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d deleted", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -269,7 +208,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_rs485 ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -277,62 +216,61 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_start ( client, num );
+       Admin_rs485_start ( client, num );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_stop ( client, num );
+       Admin_rs485_stop ( client, num );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_modbus_reload(client);
+     { Admin_rs485_reload(client);
      }
     else if ( ! strcmp ( commande, "add" ) )
-     { gchar ip[128], chaine[128];
-       guint bit, watchdog;
-       sscanf ( ligne, "%s %s %d %d", commande, ip, &bit, &watchdog );/* Découpage de la ligne de commande */
-       if ( bit >= NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " bit should be < NBR_BIT_DLS\n" ); }
+     { gint ea_min, ea_max, e_min, e_max, ec_min, ec_max, s_min, s_max, sa_min, sa_max;
+       gchar chaine[128];
+       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d", commande,
+                &ea_min, &ea_max, &e_min, &e_max, &ec_min, &ec_max, &s_min, &s_max, &sa_min, &sa_max
+              );                                                     /* Découpage de la ligne de commande */
+       if ( ea_min < -1 || ea_min> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " ea_min should be < NBR_BIT_DLS\n" ); }
+       else if ( ea_max < -1 || ea_max> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " ea_min should be < NBR_BIT_DLS\n" ); }
+       else if ( e_min < -1 || e_min> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " e_min should be < NBR_BIT_DLS\n" ); }
+       else if ( e_max < -1 || e_max> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " e_max should be < NBR_BIT_DLS\n" ); }
+       else if ( ec_min < -1 || ec_min> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " ec_min should be < NBR_BIT_DLS\n" ); }
+       else if ( ea_max < -1 || ec_max> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " ec_max should be < NBR_BIT_DLS\n" ); }
+       else if ( s_min < -1 || s_min> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " s_min should be < NBR_BIT_DLS\n" ); }
+       else if ( s_max < -1 || s_max> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " s_max should be < NBR_BIT_DLS\n" ); }
+       else if ( sa_min < -1 || sa_min> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " sa_min should be < NBR_BIT_DLS\n" ); }
+       else if ( sa_max < -1 || sa_max> NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " sa_max should be < NBR_BIT_DLS\n" ); }
        else
         { int id;
-          id = Admin_modbus_add ( client, ip, bit, watchdog );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
-          Write_admin ( client->connexion, chaine );
-        }
-     }
-    else if ( ! strcmp ( commande, "addborne" ) )
-     { gchar type[128], chaine[128];
-       guint adresse, min, nbr, module;
-       sscanf ( ligne, "%s %s %d %d %d %d", commande, type, &adresse, &min, &nbr, &module );
-
-       if ( min >= NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " min should be < NBR_BIT_DLS\n" ); }
-       else if ( module > 255 )
-        { Write_admin ( client->connexion, " module should be < 255\n" ); }
-       else if ( nbr > 8 )
-        { Write_admin ( client->connexion, " nbr should be <= 8\n" ); }
-       else
-        { int id;
-          id = Admin_modbus_add_borne ( client, type, adresse, min, nbr, module );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
+          id = Admin_rs485_add ( client, ea_min, ea_max, e_min, e_max, ec_min, ec_max,
+                                 s_min, s_max, sa_min, sa_max );
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module RS485 %d added", id ); }
+          else          { g_snprintf( chaine, sizeof(chaine), "Module RS485 NOT added" ); }
           Write_admin ( client->connexion, chaine );
         }
      }
     else if ( ! strcmp ( commande, "delete" ) )
-     { gchar chaine[128];
-       guint num;
+     { guint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_del ( client, num );
+       Admin_rs485_del ( client, num );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
+                     "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
        Write_admin ( client->connexion,
-                     "  addborne type adresse min nbr moduleID - Ajoute une borne a un module\n" );
-       Write_admin ( client->connexion,
-                     "  add ip bit watchdog                    - Ajoute un module MODBUS\n" );
+                     "  add ea_min ea_max e_min e_max ec_min ec_max s_min s_max sa_min sa_max - Ajoute un module RS485\n" );
        Write_admin ( client->connexion,
                      "  delete id                              - Supprime le module id\n" );
        Write_admin ( client->connexion,

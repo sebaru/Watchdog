@@ -15,6 +15,7 @@
   { MODE_ADMIN_RUNNING,
     MODE_ADMIN_MODBUS,
     MODE_ADMIN_PROCESS,
+    MODE_ADMIN_RS485,
     NBR_MODE_ADMIN
   };
  extern gchar *Mode_admin[NBR_MODE_ADMIN];

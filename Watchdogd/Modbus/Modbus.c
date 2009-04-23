@@ -185,7 +185,7 @@
        module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info( Config.log, DEBUG_MEM,
-                "Charger_modules_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
+                "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           continue;
         }
 
@@ -193,14 +193,14 @@
                                                                         /* Ajout dans la liste de travail */
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-       Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->id       );
-       Info_n( Config.log, DEBUG_MODBUS, "                      -  actif    = ", module->actif    );
-       Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->ip       );
-       Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
-       Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
+       Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS:  id       = ", module->id       );
+       Info_n( Config.log, DEBUG_MODBUS, "                   -  actif    = ", module->actif    );
+       Info_c( Config.log, DEBUG_MODBUS, "                   -  ip       = ", module->ip       );
+       Info_n( Config.log, DEBUG_MODBUS, "                   -  bit      = ", module->bit      );
+       Info_n( Config.log, DEBUG_MODBUS, "                   -  watchdog = ", module->watchdog );
      }
     Liberer_resultat_SQL ( Config.log, db );
-    Info_n( Config.log, DEBUG_INFO, "MODBUS: Run_modbus: module MODBUS found  !", cpt );
+    Info_n( Config.log, DEBUG_INFO, "Charger_tous_MODBUS: module MODBUS found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);

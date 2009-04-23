@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- 
  #include <glib.h>
  #include <fcntl.h>
  #include <string.h>
@@ -456,9 +455,9 @@ Info( Config.log, DEBUG_DLS, "dls: plugin reset fin" );
           if (plugin_actuel->actif && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
-             pthread_mutex_lock( &Partage->com_dls_rs.synchro );
+             pthread_mutex_lock( &Partage->com_rs485.synchro );
              plugin_actuel->go( plugin_actuel->start );                             /* On appel le plugin */
-             pthread_mutex_unlock( &Partage->com_dls_rs.synchro );
+             pthread_mutex_unlock( &Partage->com_rs485.synchro );
              gettimeofday( &tv_apres, NULL );
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->start = 0;

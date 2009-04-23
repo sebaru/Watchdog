@@ -229,7 +229,6 @@
 
     if (groupe->id < NBR_GROUPE_RESERVE)
      { Info_c( log, DEBUG_DB, "Retirer_groupe: elimination failed: id reserve", groupe->nom );
-       g_snprintf( db->last_err, sizeof(db->last_err), _("Permission denied") );
        return(FALSE);
      }
        

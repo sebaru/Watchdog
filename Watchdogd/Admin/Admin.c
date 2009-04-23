@@ -37,7 +37,7 @@
  #include "watchdogd.h"
 
  gchar *Mode_admin[NBR_MODE_ADMIN] =
-  { "running", "modbus", "process" };
+  { "running", "modbus", "process", "rs485" };
  
  extern struct CONFIG Config;
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */

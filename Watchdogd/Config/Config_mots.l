@@ -35,9 +35,6 @@ blanc         [\t ]+
 "port_rs485"               { Config_lval.val = PORT_RS485;
                              return PORT_RS485;
                            }
-"module_rs485"             { Config_lval.val = DEF_MODULE_RS485;
-                             return DEF_MODULE_RS485;
-                           }
 "home_dir"                 { Config_lval.val = HOME;
                              return HOME;
                            }
@@ -136,6 +133,9 @@ blanc         [\t ]+
                            }
 "ADMIN"                    { Config_lval.val = D_ADMIN;
                              return(D_ADMIN);
+                           }
+"RS485"                    { Config_lval.val = D_RS485;
+                             return(D_RS485);
                            }
 "CONNEXION"                { Config_lval.val = D_CONNEXION;
                              return(D_CONNEXION);

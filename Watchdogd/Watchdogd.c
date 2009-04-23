@@ -105,7 +105,7 @@
                           if (Partage->Sous_serveur[i].pid) Partage->Sous_serveur[i].sigusr1 = TRUE;
                         }
                        Partage->com_ssrv_dls.sigusr1 = TRUE;
-                       Partage->com_dls_rs.sigusr1   = TRUE;
+                       Partage->com_rs485.reload   = TRUE;
                        Partage->com_msrv_sms.sigusr1 = TRUE;
                        Partage->com_modbus.reload = TRUE;
                        Partage->com_arch.sigusr1 = TRUE;          
@@ -429,7 +429,7 @@
 
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
-       pthread_mutex_init( &Partage->com_dls_rs.synchro, &attr );
+       pthread_mutex_init( &Partage->com_rs485.synchro, &attr );
        pthread_mutex_init( &Partage->com_msrv_sms.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_ssrv_dls.synchro, &attr );
@@ -508,7 +508,7 @@ encore:
        goto encore;
      }
 
-    pthread_mutex_destroy( &Partage->com_dls_rs.synchro );
+    pthread_mutex_destroy( &Partage->com_rs485.synchro );
     pthread_mutex_destroy( &Partage->com_msrv_sms.synchro );
     pthread_mutex_destroy( &Partage->com_dls_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_ssrv_dls.synchro );

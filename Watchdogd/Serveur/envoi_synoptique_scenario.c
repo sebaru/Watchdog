@@ -136,7 +136,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
+                   "Unable to locate scenario %s", rezo_sc->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -156,7 +156,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
+                   "Unable to edit scenario %s", rezo_sc->libelle );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -181,7 +181,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
+                          "Unable to locate scenario %s", rezo_sc->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -202,7 +202,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
+                   "Unable to add scenario %s", rezo_sc->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -210,7 +210,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate scenario %s:\n%s", rezo_sc->libelle, Db_watchdog->last_err);
+                          "Unable to locate scenario %s", rezo_sc->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -250,7 +250,6 @@
   { struct CMD_SHOW_SCENARIO *rezo_sc;
     struct CMD_ENREG nbr;
     struct SCENARIO_DB *sc;
-    SQLHSTMT hquery;                                                   /* Requete SQL en cours d'emission */
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiSUPSCE", 0, 0, 0 );

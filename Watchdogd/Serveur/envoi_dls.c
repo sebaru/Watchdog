@@ -99,7 +99,7 @@
      { struct CMD_GTK_MESSAGE erreur;
        Proto_effacer_fichier_plugin_dls( client, rezo_dls->id );     /* Destruction du fichier sur disque */
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete plugin %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
+                   "Unable to delete plugin %s", rezo_dls->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -129,7 +129,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate plugin DLS %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
+                   "Unable to locate plugin DLS %s", rezo_dls->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -149,8 +149,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit plugin DLS %s:\n%s", rezo_dls->nom,
-                   Db_watchdog->last_err);
+                   "Unable to edit plugin DLS %s", rezo_dls->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -189,7 +188,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate plugin DLS %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
+                          "Unable to locate plugin DLS %s", rezo_dls->nom);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -345,7 +344,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add plugin %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
+                   "Unable to add plugin %s", rezo_dls->nom);
                    printf("errrrrreur  %s\n", erreur.message );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -354,7 +353,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to add plugin %s:\n%s", rezo_dls->nom, Db_watchdog->last_err);
+                          "Unable to add plugin %s", rezo_dls->nom);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }

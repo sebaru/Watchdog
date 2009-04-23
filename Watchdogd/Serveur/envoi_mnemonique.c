@@ -88,7 +88,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to locate mnemo %s", rezo_mnemonique->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -108,7 +108,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to edit mnemo %s", rezo_mnemonique->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -132,7 +132,7 @@
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
+                          "Unable to locate mnemo %s", rezo_mnemonique->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -157,7 +157,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to delete mnemo %s", rezo_mnemonique->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -177,7 +177,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
+                   "Unable to add mnemo %s", rezo_mnemonique->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -185,7 +185,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s:\n%s", rezo_mnemonique->libelle, Db_watchdog->last_err);
+                          "Unable to locate mnemo %s", rezo_mnemonique->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }

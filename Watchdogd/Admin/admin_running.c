@@ -174,12 +174,7 @@
      { Admin_modbus_list ( client );
      } else
     if ( ! strcmp ( commande, "rs" ) )
-     { int i;
-       for (i=0; i<NBR_ID_RS485; i++)
-        { gchar chaine[256];
-          Rs485_state( i, chaine, sizeof(chaine) );
-          Write_admin ( client->connexion, chaine );
-        }
+     { Admin_rs485_list ( client );
      } else
     if ( ! strcmp ( commande, "dlson" ) )
      { int num;

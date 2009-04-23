@@ -14,7 +14,6 @@
 
 extern int ligne;
 int erreur;                                                             /* Compteur d'erreur du programme */
-static struct MODULE_RS485 Config_rs485;
 
 %}
 
@@ -32,11 +31,10 @@ static struct MODULE_RS485 Config_rs485;
 %token   MIN_SERVEUR MAX_SERVEUR MAX_INACTIVITE
 %token   HOME TIMEOUT_CONNEXION MAX_LOGIN_FAILED TAILLE_BLOC_RESEAU
 %token   DB_HOST DB_DATABASE DB_PASSWORD DB_USERNAME DB_PORT
-%token   PORT_RS485 DEF_MODULE_RS485 ID INPUT_ANA INPUT_TOR INPUT_CHOC OUTPUT_TOR OUTPUT_ANA
+%token   PORT_RS485
 %token   CRYPTO_KEY TAILLE_CLEF_DH TAILLE_CLEF_RSA
 %token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_FORK D_MODBUS
-%token   D_ADMIN
-%token   D_CONNEXION D_DLS
+%token   D_ADMIN D_CONNEXION D_DLS D_RS485
 
 
 %%
@@ -106,28 +104,8 @@ une_ligne:      PORT EGAL ENTIER
                 | DEBUG EGAL liste_debug
                 { Config.debug_level = $3;
                 }
-                | DEF_MODULE_RS485 DPOINT liste_rs485
-                { if ( (0 <= Config_rs485.id) &&
-                            (Config_rs485.id < NBR_ID_RS485) )
-                   { Config.module_rs485[ Config_rs485.id ].id     = Config_rs485.id;
-                     Config.module_rs485[ Config_rs485.id ].ea_min = Config_rs485.ea_min;
-                     Config.module_rs485[ Config_rs485.id ].ea_max = Config_rs485.ea_max;
-                     Config.module_rs485[ Config_rs485.id ].e_min  = Config_rs485.e_min;
-                     Config.module_rs485[ Config_rs485.id ].e_max  = Config_rs485.e_max;
-                     Config.module_rs485[ Config_rs485.id ].ec_min = Config_rs485.ec_min;
-                     Config.module_rs485[ Config_rs485.id ].ec_max = Config_rs485.ec_max;
-                     Config.module_rs485[ Config_rs485.id ].s_min  = Config_rs485.s_min;
-                     Config.module_rs485[ Config_rs485.id ].s_max  = Config_rs485.s_max;
-                     Config.module_rs485[ Config_rs485.id ].sa_min = Config_rs485.sa_min;
-                     Config.module_rs485[ Config_rs485.id ].sa_max = Config_rs485.sa_max;
-                   }
-                  Config_rs485.id = -1;
-                  Config_rs485.ea_min = -1;
-                  Config_rs485.e_min  = -1;
-                  Config_rs485.ec_min = -1;
-                  Config_rs485.s_min  = -1;
-                  Config_rs485.sa_min = -1;
-                }
+                ;
+
 
 liste_debug:    one_debug VIRGULE liste_debug
                 { $$ = $1 + $3; }
@@ -150,20 +128,9 @@ one_debug:
                 | D_DLS       { $$ = DEBUG_DLS;       }
                 | D_MODBUS    { $$ = DEBUG_MODBUS;    }
                 | D_ADMIN     { $$ = DEBUG_ADMIN;     }
+                | D_ADMIN     { $$ = DEBUG_RS485;     }
                 | D_ALL       { $$ = ~0; }
 		;
-liste_rs485:	one_rs485 VIRGULE liste_rs485
-		| one_rs485
-                ;
-
-one_rs485:
-		  ID EGAL ENTIER { Config_rs485.id = $3; }
-		| INPUT_ANA EGAL ENTIER TIRET ENTIER  { Config_rs485.ea_min = $3; Config_rs485.ea_max = $5; }
-		| INPUT_TOR EGAL ENTIER TIRET ENTIER  { Config_rs485.e_min = $3; Config_rs485.e_max = $5;   }
-		| INPUT_CHOC EGAL ENTIER TIRET ENTIER { Config_rs485.ec_min = $3; Config_rs485.ec_max = $5; }
-		| OUTPUT_TOR EGAL ENTIER TIRET ENTIER { Config_rs485.s_min = $3; Config_rs485.s_max = $5;   }
-		| OUTPUT_ANA EGAL ENTIER TIRET ENTIER { Config_rs485.sa_min = $3; Config_rs485.sa_max = $5; }
-                ;
 %%
 /**********************************************************************************************************/
 /* yyerror: Gestion des erreurs de syntaxe                                                                */

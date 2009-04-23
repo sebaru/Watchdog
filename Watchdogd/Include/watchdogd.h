@@ -78,11 +78,6 @@
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
   };
 
- struct COM_DLS_RS                                                 /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    gboolean sigusr1;
-  };
-
  struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_audio;                                                   /* liste de message a prononcer */
@@ -147,7 +142,7 @@
 
                                                                                 /* Interfacage avec D.L.S */
     struct COM_DLS_MSRV com_dls_msrv;                                            /* Changement du à D.L.S */
-    struct COM_DLS_RS com_dls_rs;                                                          /* Comm rs/dls */
+    struct COM_RS485 com_rs485;                                                                   /* Comm rs485 */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
     struct COM_MSRV_SMS com_msrv_sms;                                                    /* Comm msrv/sms */
     struct COM_SSRV_DLS com_ssrv_dls;                                         /* Changement du au serveur */

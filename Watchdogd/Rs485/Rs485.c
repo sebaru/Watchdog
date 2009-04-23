@@ -49,17 +49,156 @@
 
  #define TEMPS_RETENTE   5                /* Tente de se raccrocher au module banni toutes les 5 secondes */
 
- static struct COMM_RS485                                     /* Etat de la connexion avec les modules RS */
-  { time_t date_requete;
-    time_t date_retente;
-    time_t date_ana;
-  } Comm_RS485 [ NBR_ID_RS485 ];
  static gint fd_rs485;
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- static struct DB *Db_watchdog;                                                      /* Database Watchdog */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
+/**********************************************************************************************************/
+/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                       */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static struct MODULE_RS485 *Chercher_module_by_id ( gint id )
+  { GList *liste;
+    liste = Partage->com_rs485.Modules_RS485;
+    while ( liste )
+     { struct MODULE_RS485 *module;
+       module = ((struct MODULE_RS485 *)liste->data);
+       if (module->id == id) return(module);
+       liste = liste->next;
+     }
+    return(NULL);
+  }
+/**********************************************************************************************************/
+/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                       */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static gboolean Charger_un_RS485_DB ( struct MODULE_RS485 *module, gint id  )
+  { gchar requete[128];
+    struct DB *db;
 
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db) return(FALSE);
+
+/********************************************** Chargement des modules ************************************/
+    g_snprintf( requete, sizeof(requete), "SELECT ea_min,ea_max,e_min,e_max,ec_min,ec_max,"
+                                          "s_min,s_max,sa_min,sa_max,actif FROM %s WHERE id=%d",
+                NOM_TABLE_MODULE_RS485, id
+              );
+
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
+       return(FALSE);
+     }
+
+    while ( Recuperer_ligne_SQL (Config.log, db) )
+     { module->id       = id;
+       module->ea_min   = atoi(db->row[0]);
+       module->ea_max   = atoi(db->row[1]);
+       module->e_min    = atoi(db->row[2]);
+       module->e_max    = atoi(db->row[3]);
+       module->ec_min   = atoi(db->row[4]);
+       module->ec_max   = atoi(db->row[5]);
+       module->s_min    = atoi(db->row[6]);
+       module->s_max    = atoi(db->row[7]);
+       module->sa_min   = atoi(db->row[8]);
+       module->sa_max   = atoi(db->row[9]);
+       module->actif    = atoi (db->row[10]);
+                                                                        /* Ajout dans la liste de travail */
+       Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id       = ", module->id    );
+       Info_n( Config.log, DEBUG_RS485, "                   -  actif   = ", module->actif );
+     }
+    Liberer_resultat_SQL ( Config.log, db );
+    Libere_DB_SQL( Config.log, &db );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                            */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static gboolean Charger_tous_RS485 ( void  )
+  { gchar requete[128];
+    struct DB *db;
+    gint cpt;
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db) return(FALSE);
+
+/********************************************** Chargement des modules ************************************/
+    g_snprintf( requete, sizeof(requete), "SELECT id FROM %s",
+                NOM_TABLE_MODULE_RS485
+              );
+
+    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+     { Libere_DB_SQL( Config.log, &db );
+       return(FALSE);
+     }
+
+    Partage->com_rs485.Modules_RS485 = NULL;
+    cpt = 0;
+    while ( Recuperer_ligne_SQL (Config.log, db) )
+     { struct MODULE_RS485 *module;
+
+       module = (struct MODULE_RS485 *)g_malloc0( sizeof(struct MODULE_RS485) );
+       if (!module)                                                   /* Si probleme d'allocation mémoire */
+        { Info( Config.log, DEBUG_MEM,
+                "Charger_modules_RS485: Erreur allocation mémoire struct MODULE_RS485" );
+          continue;
+        }
+
+       Charger_un_RS485_DB( module, atoi (db->row[0]) );
+                                                                        /* Ajout dans la liste de travail */
+       Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
+       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+       Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id      = ", module->id    );
+       Info_n( Config.log, DEBUG_RS485, "                  -  actif   = ", module->actif );
+     }
+    Liberer_resultat_SQL ( Config.log, db );
+    Info_n( Config.log, DEBUG_INFO, "Charger_tous_RS485: module RS485 found  !", cpt );
+
+    Libere_DB_SQL( Config.log, &db );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Charger_un_RS485 ( gint id )
+  { struct MODULE_RS485 *module;
+    
+    module = (struct MODULE_RS485 *)g_malloc0( sizeof(struct MODULE_RS485) );
+    if (!module)                                                   /* Si probleme d'allocation mémoire */
+     { Info( Config.log, DEBUG_MEM,
+            "Charger_un_RS485: Erreur allocation mémoire struct MODULE_RS485" );
+       return;
+     }
+    Charger_un_RS485_DB ( module, id );
+    Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_un_RS485 ( struct MODULE_RS485 *module )
+  { if (!module) return;
+    Partage->com_rs485.Modules_RS485 = g_list_remove ( Partage->com_rs485.Modules_RS485, module );
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_tous_RS485 ( void  )
+  { struct MODULE_RS485 *module;
+    while ( Partage->com_rs485.Modules_RS485 )
+     { module = (struct MODULE_RS485 *)Partage->com_rs485.Modules_RS485->data;
+       Decharger_un_RS485 ( module );
+     }
+  }
 /**********************************************************************************************************/
 /* Calcul_crc16: renvoie le CRC16 de la trame en parametre                                                */
 /* Entrée: la trame a tester                                                                              */
@@ -107,34 +246,34 @@
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                             */
 /**********************************************************************************************************/
- static void Envoyer_trame_want_inputANA( int id_esclave, int fd )
+ static void Envoyer_trame_want_inputANA( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_ana=
      { 0x00, 0xFF, FCT_ENTRE_ANA, 0x00,
    	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
        0xFF, 0xFF
      };
-    Trame_want_entre_ana.dest = id_esclave;
+    Trame_want_entre_ana.dest = module->id;
     Envoyer_trame( fd, &Trame_want_entre_ana );
   }
 /**********************************************************************************************************/
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                             */
 /**********************************************************************************************************/
- static void Envoyer_trame_want_inputTOR( int id_esclave, int fd )
+ static void Envoyer_trame_want_inputTOR( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_tor=
      { 0x00, 0xFF, FCT_ENTRE_TOR, 0x00,
    	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
        0xFF, 0xFF
      };
-    Trame_want_entre_tor.dest = id_esclave;
-    if (Config.module_rs485[id_esclave].s_min != -1 )
+    Trame_want_entre_tor.dest = module->id;
+    if (module->s_min != -1 )
      { guchar poids, a, octet, taille;
        gint num_a;
        poids = 0x80;
        taille = 1;
        octet = 0;
-       for ( num_a =  Config.module_rs485[id_esclave].s_min;
-             num_a <= Config.module_rs485[id_esclave].s_max;
+       for ( num_a =  module->s_min;
+             num_a <= module->s_max;
              num_a ++ )
         { a = A(num_a);
           if (a) octet |= poids;
@@ -189,14 +328,11 @@
 /* Entrée: la trame a recue                                                                               */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static int Processer_trame( struct TRAME_RS485 *trame )
+ static int Processer_trame( struct MODULE_RS485 *module, struct TRAME_RS485 *trame )
   { struct TRAME_RS485_IDENT *trame_ident;
     if (trame->dest != 0xFF) return(FALSE);                        /* Si c'est pas pour nous, on se casse */
-    if ( trame->source >= NBR_ID_RS485 )
-     { Info_n( Config.log, DEBUG_INFO, "Processer_trame: module id not in range", trame->source );
-       return(TRUE);
-     }
-    if (Config.module_rs485[trame->source].id != trame->source)
+
+    if (module->id != trame->source)
      { Info_n( Config.log, DEBUG_INFO, "Processer_trame: Module RS485 unknown", trame->source);
        return(TRUE);
      }
@@ -211,18 +347,17 @@
                        break;
        case FCT_ENTRE_TOR:
              { int e, cpt, nbr_e;
-               nbr_e = Config.module_rs485[trame->source].e_max - Config.module_rs485[trame->source].e_min + 1;
+               nbr_e = module->e_max - module->e_min + 1;
                for( cpt = 0; cpt<nbr_e; cpt++)
                 { e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
-                  SE( Config.module_rs485[trame->source].e_min + cpt, e );
+                  SE( module->e_min + cpt, e );
                 }
              }
 	    break;
        case FCT_ENTRE_ANA:
              { int cpt, nbr_ea;
-               if (Config.module_rs485[trame->source].ea_min == -1) nbr_ea = 0;
-               else nbr_ea = Config.module_rs485[trame->source].ea_max -
-                             Config.module_rs485[trame->source].ea_min + 1;
+               if (module->ea_min == -1) nbr_ea = 0;
+               else nbr_ea = module->ea_max - module->ea_min + 1;
                for( cpt = 0; cpt<nbr_ea; cpt++)
                 { gint num_ea, val_int, ajout1, ajout2, ajout3, ajout4, ajout5;
 
@@ -233,7 +368,7 @@
                   ajout4 = ajout1  & ajout2;
                   ajout5 = ajout4 >> ajout3;
                   val_int += ajout5;
-                  num_ea = Config.module_rs485[trame->source].ea_min + cpt;
+                  num_ea = module->ea_min + cpt;
 
                   if (val_int<=10)
                    { SEA( num_ea, 0, 0 ); }
@@ -264,33 +399,19 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Modbus_state : Renvoie l'etat du modbus num id en tant que chaine de caractere                         */
-/* Entrée : Le numéro du module et la chaine a remplir                                                    */
-/**********************************************************************************************************/
- void Rs485_state ( int id, gchar *chaine, int size )
-  { g_snprintf( chaine, size,
-                " RS485[%02d] - Requete %d, Retente %d, Ana %d\n", id,
-                Comm_RS485[id].date_requete, Comm_RS485[id].date_retente,
-                Comm_RS485[id].date_ana );
-  }
-/**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_rs485 ( void )
   { gint retval, nbr_oct_lu, id_en_cours, attente_reponse, cpt;
+    struct MODULE_RS485 *module;
     struct TRAME_RS485 Trame;
     struct timeval tv;
     fd_set fdselect;
+    GList *liste;
 
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "RS485: demarrage" );
 
-    for (cpt=0; cpt<NBR_ID_RS485; cpt++)
-     { if( Config.module_rs485[cpt].id == cpt ) break; }                         /* Au moins un module ?? */
-    if (cpt==NBR_ID_RS485)
-     { Info( Config.log, DEBUG_INFO, "RS485: Run_rs485: No module RS485 found in config -> stop" );
-       pthread_exit(GINT_TO_POINTER(-1));
-     }
 
     fd_rs485 = Init_rs485();
     if (fd_rs485<0)                                                        /* On valide l'acces aux ports */
@@ -298,66 +419,90 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    Db_watchdog = ConnexionDB( Config.log, Config.db_database,
-                               Config.db_username, Config.db_password );
-
-    if (!Db_watchdog)
-     { Info_c( Config.log, DEBUG_DB, "RS485: Run_rs485: Unable to open database (dsn)", Config.db_database );
-       close(fd_rs485);
+    if ( Charger_tous_RS485() == FALSE )                                    /* Chargement des modules rs485 */
+     { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: No module RS485 found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
     nbr_oct_lu = 0;
     id_en_cours = 0;
     attente_reponse = FALSE;
-    memset (&Comm_RS485, 0, sizeof(Comm_RS485) );
 
+    liste = Partage->com_rs485.Modules_RS485;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                            /* On veut parler au prochain module RS485 */
-       date = time(NULL);                                                 /* On recupere l'heure actuelle */
+       usleep(1);
+       sched_yield();
 
-       if (Partage->com_dls_rs.sigusr1)
-        { Partage->com_dls_rs.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_INFO, "RS485: Run_rs485: SIGUSR1" );
+       if (Partage->com_rs485.reload == TRUE)
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Reloading conf" );
+          Decharger_tous_RS485();
+          Charger_tous_RS485();
+          liste = Partage->com_rs485.Modules_RS485;
+          Partage->com_rs485.reload = FALSE;
         }
 
-       if ( attente_reponse == FALSE )
-        { do
-           { id_en_cours++;
-             if (id_en_cours>=NBR_ID_RS485)              /* On vient de faire un tour de tous les modules */
-              { /*static struct timeval before = { 0, 0 };
-                struct timeval now;*/
-                id_en_cours = 0;
-                /*gettimeofday( &now, NULL );*/               /* On impose 1 tour module = 100 ms minimum */
-                /*while( before.tv_sec == now.tv_sec && 
-                       now.tv_usec - before.tv_usec < 100000 ) sched_yield();
-                before.tv_sec = now.tv_sec;
-                before.tv_usec = now.tv_usec;*/
-              }
-           } while( Config.module_rs485[id_en_cours].id != id_en_cours );
+       if (Partage->com_rs485.admin_del)
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Deleting module" );
+          module = Chercher_module_by_id ( Partage->com_rs485.admin_del );
+          Decharger_un_RS485 ( module );
+          Partage->com_rs485.admin_del = 0;
+        }
 
-          if ( Comm_RS485[ id_en_cours ].date_retente <= date )                  /* module banni ou non ? */
-           { if (Comm_RS485[ id_en_cours ].date_ana > date)                 /* Ana toutes les 10 secondes */
-              { Envoyer_trame_want_inputTOR( id_en_cours, fd_rs485 );
+       if (Partage->com_rs485.admin_add)
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Adding module" );
+          Charger_un_RS485 ( Partage->com_rs485.admin_add );
+          Partage->com_rs485.admin_add = 0;
+        }
+
+       if (Partage->com_rs485.admin_start)
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
+          module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
+          module->actif = 1;
+          Partage->com_rs485.admin_start = 0;
+        }
+
+       if (Partage->com_rs485.admin_stop)
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stoping module" );
+          module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
+          module->actif = 0;
+          Partage->com_rs485.admin_stop = 0;
+        }
+
+       if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
+        { sleep(1); continue; }                        /* Si pas de module, on ne sollicite pas le proc ! */
+
+       liste = liste->next;
+       if (!liste)                                       /* On vient de faire un tour de tous les modules */
+        { liste = Partage->com_rs485.Modules_RS485; }
+
+       module = (struct MODULE_RS485 *)liste->data;
+       if (module->actif != TRUE) { continue; }
+
+       if ( attente_reponse == FALSE )
+        { date = time(NULL);                                              /* On recupere l'heure actuelle */
+
+          if ( module->date_retente <= date )                                    /* module banni ou non ? */
+           { if (module->date_ana > date)                                   /* Ana toutes les 10 secondes */
+              { Envoyer_trame_want_inputTOR( module, fd_rs485 );
               }
              else
-              { Envoyer_trame_want_inputANA( id_en_cours, fd_rs485 );
-                Comm_RS485[ id_en_cours ].date_ana = date + 2;     /* Prochain update ana dans 2 secondes */
+              { Envoyer_trame_want_inputANA( module, fd_rs485 );
+                module->date_ana = date + 2;                       /* Prochain update ana dans 2 secondes */
               }
 
              sched_yield();
-             Comm_RS485[ id_en_cours ].date_requete = date;
+             module->date_requete = date;
              attente_reponse = TRUE;
            }
-           /*} else Info_n(Config.log, DEBUG_INFO, "Module banni pour le moment", id_en_cours );*/
         }
        else
-        { if ( date - Comm_RS485[ id_en_cours ].date_requete > 2 )                 /* Si la comm est niet */
-           { Comm_RS485[ id_en_cours ].date_retente = date + TEMPS_RETENTE;
+        { if ( date - module->date_requete > 2 )                                   /* Si la comm est niet */
+           { module->date_retente = date + TEMPS_RETENTE;
              attente_reponse = FALSE;
              memset (&Trame, 0, sizeof(struct TRAME_RS485) );
              nbr_oct_lu = 0;
-             Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", id_en_cours );
+             Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->id );
            }
         }
 
@@ -385,10 +530,10 @@
                 if (crc_recu != Calcul_crc16(&Trame))
                  { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
                 else
-                 { pthread_mutex_lock( &Partage->com_dls_rs.synchro );
-                   if (Processer_trame( &Trame ))          /* Si la trame est processée, on passe suivant */
+                 { pthread_mutex_lock( &Partage->com_rs485.synchro );
+                   if (Processer_trame( module, &Trame ))  /* Si la trame est processée, on passe suivant */
                     { attente_reponse = FALSE; }
-                   pthread_mutex_unlock( &Partage->com_dls_rs.synchro );
+                   pthread_mutex_unlock( &Partage->com_rs485.synchro );
                  }
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
               }
@@ -397,6 +542,7 @@
       /*usleep(1);*/
      }
     close(fd_rs485);
+    Decharger_tous_RS485();
     Info_n( Config.log, DEBUG_FORK, "RS485: Run_rs485: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }

@@ -63,7 +63,6 @@
  void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_ID_UTILISATEUR *rezo_util )
   { struct CMD_EDIT_UTILISATEUR edit_util;
     struct UTILISATEURDB *util;
-    gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -110,7 +109,7 @@
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit user %s:\n%s", rezo_util->nom, Db_watchdog->last_err);
+                   "Unable to edit user %s", rezo_util->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -159,7 +158,7 @@
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete user %s:\n%s", rezo_util->nom, Db_watchdog->last_err);
+                   "Unable to delete user %s", rezo_util->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -179,7 +178,7 @@
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add group %s:\n%s", rezo_util->nom, Db_watchdog->last_err);
+                   "Unable to add group %s", rezo_util->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -187,7 +186,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to add group %s:\n%s", rezo_util->nom, Db_watchdog->last_err);
+                          "Unable to add group %s", rezo_util->nom);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }

@@ -27,22 +27,17 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct ICONEDB *Rechercher_iconeDB ( struct LOG *log, struct DB *db, guint id );
- extern SQLHSTMT Recuperer_iconeDB ( struct LOG *log, struct DB *db, guint classe );
- extern struct ICONEDB *Recuperer_iconeDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_iconeDB ( struct LOG *log, struct DB *db, guint classe );
+ extern struct ICONEDB *Recuperer_iconeDB_suite( struct LOG *log, struct DB *db );
  extern gint Ajouter_iconeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_ICONE *icone );
  extern gboolean Retirer_iconeDB ( struct LOG *log, struct DB *db, struct CMD_ID_ICONE *icone );
  extern gboolean Modifier_iconeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_ICONE *icone );
 
- extern gboolean Creer_db_icone ( struct LOG *log, struct DB *db );
-
-
  extern struct CLASSEDB *Rechercher_classeDB ( struct LOG *log, struct DB *db, guint id );
- extern SQLHSTMT Recuperer_classeDB ( struct LOG *log, struct DB *db );
- extern struct CLASSEDB *Recuperer_classeDB_suite( struct LOG *log, struct DB *db, SQLHSTMT hquery );
+ extern gboolean Recuperer_classeDB ( struct LOG *log, struct DB *db );
+ extern struct CLASSEDB *Recuperer_classeDB_suite( struct LOG *log, struct DB *db );
  extern gint Ajouter_classeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_CLASSE *classe );
  extern gboolean Retirer_classeDB ( struct LOG *log, struct DB *db, struct CMD_ID_CLASSE *classe );
  extern gboolean Modifier_classeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_CLASSE *classe );
-
- extern gboolean Creer_db_classe ( struct LOG *log, struct DB *db );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
