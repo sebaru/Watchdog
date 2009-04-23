@@ -198,15 +198,18 @@
     prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
+printf("Admin 0 %d\n", Partage->com_admin.sigusr1);
 
     Partage->com_admin.ecoute = Activer_ecoute_admin ();
+
+printf("Admin 1 %d\n", Partage->com_admin.sigusr1);
     if ( Partage->com_admin.ecoute < 0 )
      { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
      } else Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: En ecoute !" );
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { printf("Admin\n");
+     { printf("Admin 2 %d\n", Partage->com_admin.sigusr1);
        if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
         { Partage->com_admin.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
