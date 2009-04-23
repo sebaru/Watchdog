@@ -128,7 +128,7 @@ one_debug:
                 | D_DLS       { $$ = DEBUG_DLS;       }
                 | D_MODBUS    { $$ = DEBUG_MODBUS;    }
                 | D_ADMIN     { $$ = DEBUG_ADMIN;     }
-                | D_ADMIN     { $$ = DEBUG_RS485;     }
+                | D_RS485     { $$ = DEBUG_RS485;     }
                 | D_ALL       { $$ = ~0; }
 		;
 %%
