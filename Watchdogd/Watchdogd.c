@@ -449,10 +449,12 @@
        sigaction( SIGTERM, &sig, NULL );
 encore:   
 
+printf("wat 0 %d\n", Partage->com_admin.sigusr1);
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
        Charger_eana();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
 
+printf("wat 1 %d\n", Partage->com_admin.sigusr1);
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
        Charger_scenario();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
@@ -463,6 +465,7 @@ encore:
           Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
         } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 
+printf("wat 2 %d\n", Partage->com_admin.sigusr1);
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
        Charger_cpth();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
