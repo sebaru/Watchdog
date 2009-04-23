@@ -761,7 +761,8 @@
         }
 
        if (Partage->com_modbus.admin_del)
-        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting module" );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting module",
+                  Partage->com_modbus.admin_del );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_del );
           Deconnecter_module  ( module );
           Decharger_un_MODBUS ( module );
@@ -769,32 +770,37 @@
         }
 
        if (Partage->com_modbus.admin_del_borne)
-        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting une borne" );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting une borne",
+                  Partage->com_modbus.admin_del_borne );
           Decharger_une_borne_MODBUS ( Partage->com_modbus.admin_del_borne );
           Partage->com_modbus.admin_del_borne = 0;
         }
 
        if (Partage->com_modbus.admin_add)
-        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module" );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module",
+                  Partage->com_modbus.admin_add );
           Charger_un_MODBUS ( Partage->com_modbus.admin_add );
           Partage->com_modbus.admin_add = 0;
         }
 
        if (Partage->com_modbus.admin_add_borne)
-        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module une borne" );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module une borne",
+                  Partage->com_modbus.admin_add_borne );
           Charger_une_borne_MODBUS ( Partage->com_modbus.admin_add_borne );
           Partage->com_modbus.admin_add_borne = 0;
         }
 
        if (Partage->com_modbus.admin_start)
-        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Starting module" );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Starting module",
+                  Partage->com_modbus.admin_start );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_start );
           module->actif = 1;
           Partage->com_modbus.admin_start = 0;
         }
 
        if (Partage->com_modbus.admin_stop)
-        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Stoping module" );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Stoping module",
+                  Partage->com_modbus.admin_stop );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_stop );
           Deconnecter_module  ( module );
           module->actif = 0;
