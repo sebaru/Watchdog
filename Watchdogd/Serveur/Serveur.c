@@ -703,7 +703,6 @@
     g_list_free(Partage->Sous_serveur[id].Clients);
 
     Partage->Sous_serveur[id].nb_client = -1;
-    Partage->Sous_serveur[id].pid = -1;
     Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                          /* Information traitée */
     Partage->Sous_serveur[id].Clients = NULL;
     if (Partage->jeton == id)
