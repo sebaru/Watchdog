@@ -476,8 +476,7 @@
           continue;
         }
        module = (struct MODULE_RS485 *)liste->data;
-       liste = liste->next;
-       if (module->actif != TRUE) { continue; }
+       if (module->actif != TRUE) { liste = liste->next; continue; }
 
        if ( attente_reponse == FALSE )
         { date = time(NULL);                                              /* On recupere l'heure actuelle */
@@ -503,7 +502,10 @@
              memset (&Trame, 0, sizeof(struct TRAME_RS485) );
              nbr_oct_lu = 0;
              Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->id );
+             liste = liste->next;
+             continue;
            }
+          else { module->date_retente = 0; }
         }
 
        FD_ZERO(&fdselect);                                          /* Reception sur la ligne serie RS485 */
@@ -532,7 +534,9 @@
                 else
                  { pthread_mutex_lock( &Partage->com_rs485.synchro );
                    if (Processer_trame( module, &Trame ))  /* Si la trame est processée, on passe suivant */
-                    { attente_reponse = FALSE; }
+                    { attente_reponse = FALSE;
+                      liste = liste->next;
+                    }
                    pthread_mutex_unlock( &Partage->com_rs485.synchro );
                  }
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
