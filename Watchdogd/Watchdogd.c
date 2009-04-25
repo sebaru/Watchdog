@@ -412,8 +412,17 @@
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 
-       memset( &Partage->new_histo, 0, sizeof(Partage->new_histo) );
-       memset( &Partage->del_histo, 0, sizeof(Partage->del_histo) );
+       memset( &Partage->new_histo,    0, sizeof(Partage->new_histo) );
+       memset( &Partage->del_histo,    0, sizeof(Partage->del_histo) );
+       memset( &Partage->com_dls_msrv, 0, sizeof(Partage->com_dls_msrv) );
+       memset( &Partage->com_rs485,    0, sizeof(Partage->com_rs485) );
+       memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
+       memset( &Partage->com_msrv_sms, 0, sizeof(Partage->com_msrv_sms) );
+       memset( &Partage->com_ssrv_dls, 0, sizeof(Partage->com_ssrv_dls) );
+       memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
+       memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
+       memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
+
        Partage->Arret            = 0;                     /* On n'arrete pas tout de suite le serveur ;-) */
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        Partage->top              = 0;

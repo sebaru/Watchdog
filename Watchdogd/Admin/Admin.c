@@ -38,6 +38,10 @@
 
  gchar *Mode_admin[NBR_MODE_ADMIN] =
   { "running", "modbus", "process", "rs485" };
+
+ static GList *Clients = NULL;                                     /* Leste des clients d'admin connectés */
+ static gint Fd_ecoute = 0;                                          /* File descriptor de l'ecoute admin */
+
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -85,8 +89,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Desactiver_ecoute_admin ( void )
-  { close (Partage->com_admin.ecoute);
-    Partage->com_admin.ecoute = 0;
+  { close (Fd_ecoute);
+    Fd_ecoute = 0;
     Info( Config.log, DEBUG_ADMIN, "Desactivation socket" );
   }
 /**********************************************************************************************************/
@@ -98,7 +102,7 @@
   { close ( client->connexion );
     Info_n( Config.log, DEBUG_ADMIN, "Connexion terminée ID", client->connexion );
     g_free(client);
-    Partage->com_admin.Clients = g_list_remove ( Partage->com_admin.Clients, client );
+    Clients = g_list_remove ( Clients, client );
   }
 /**********************************************************************************************************/
 /* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
@@ -126,7 +130,7 @@
        client->last_use = Partage->top;
        fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
 
-       Partage->com_admin.Clients = g_list_append( Partage->com_admin.Clients, client );
+       Clients = g_list_append( Clients, client );
        Info_n( Config.log, DEBUG_ADMIN, "Connexion acceptée ID", id);
        return(TRUE);
      }
@@ -199,13 +203,13 @@
 
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
 
-    Partage->com_admin.ecoute = Activer_ecoute_admin ();
-    if ( Partage->com_admin.ecoute < 0 )
+    Fd_ecoute = Activer_ecoute_admin ();
+    if ( Fd_ecoute < 0 )
      { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
      } else Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: En ecoute !" );
 
-    Partage->com_admin.Clients = NULL;                          /* Initialisation des variables du thread */
+    Clients = NULL;                                             /* Initialisation des variables du thread */
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
@@ -213,19 +217,19 @@
           Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
         }
 
-       Accueillir_un_admin( Partage->com_admin.ecoute );                  /* Accueille les nouveaux admin */
+       Accueillir_un_admin( Fd_ecoute );                  /* Accueille les nouveaux admin */
 
-       if ( Partage->com_admin.Clients )                                          /* Ecoutons nos clients */
+       if ( Clients )                                          /* Ecoutons nos clients */
         { struct CLIENT_ADMIN *client;
           GList *liste;
 
-          liste = Partage->com_admin.Clients;
+          liste = Clients;
           while (liste)
            { client = (struct CLIENT_ADMIN *)liste->data;
 
              if ( Partage->top > client->last_use + 600 )      /* Deconnexion = 60 secondes si inactivité */
               { Deconnecter_admin ( client ); 
-                liste = Partage->com_admin.Clients;
+                liste = Clients;
                 continue;
               }
 
@@ -237,9 +241,9 @@
        usleep(10000);
      }
 
-    while(Partage->com_admin.Clients)                                 /* Parcours de la liste des clients */
+    while(Clients)                                 /* Parcours de la liste des clients */
      { struct CLIENT_ADMIN *client;                                   /* Deconnection de tous les clients */
-       client = (struct CLIENT_ADMIN *)Partage->com_admin.Clients->data;
+       client = (struct CLIENT_ADMIN *)Clients->data;
        Deconnecter_admin ( client );
      }
 
