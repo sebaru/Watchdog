@@ -810,6 +810,7 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Stoping module",
                   Partage->com_modbus.admin_stop );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_stop );
+          if (module) module->actif = 0;
           Deconnecter_module  ( module );
           Partage->com_modbus.admin_stop = 0;
         }
