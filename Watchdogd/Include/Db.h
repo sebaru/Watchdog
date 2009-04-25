@@ -7,9 +7,6 @@
  #ifndef _DB_H_
   #define _DB_H_
 
- #include <sql.h>                                             /* Entetes de gestion de la base de données */
- #include <sqlext.h> 
- #include <sqltypes.h>
  #include <mysql.h>
 
  #include "Erreur.h"

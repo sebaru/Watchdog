@@ -43,7 +43,6 @@
  #include "Config.h"
  #include "Rs485.h"
  #include "EntreeANA_DB.h"
- #include "ValANA_DB.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
  #include "proto_dls.h"                                                             /* Acces a A(x), E(x) */
 

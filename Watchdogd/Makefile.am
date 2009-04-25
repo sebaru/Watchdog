@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
-          CptHoraire EntreeANA Message Mnemonique Scenario Icones Histo ValANA Utilisateur \
+          CptHoraire EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
 	  Synoptiques
 
 bin_PROGRAMS = Watchdogd
@@ -31,7 +31,6 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Scenario/libscenario.la \
 		    Icones/libico.la \
 		    Histo/libhisto.la \
-		    ValANA/libvalana.la \
 		    Utilisateur/libutil.la \
 		    Synoptiques/libsyn.la \
 		    $(top_srcdir)/Commun/libwatchdog.la

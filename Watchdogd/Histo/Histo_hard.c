@@ -86,9 +86,7 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  gboolean Rechercher_histo_hardDB ( struct LOG *log, struct DB *db, struct CMD_REQUETE_HISTO_HARD *critere )
-  { SQLRETURN retour;
-    SQLHSTMT hquery;                                                          /* Handle SQL de la requete */
-    gchar requete[1024];
+  { gchar requete[1024];
     gchar critereSQL[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

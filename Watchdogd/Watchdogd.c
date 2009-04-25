@@ -48,7 +48,6 @@
  #include "Histo_DB.h"
  #include "EntreeANA_DB.h"
  #include "Cpth_DB.h"
- #include "ValANA_DB.h"
 
  gint Socket_ecoute;                                         /* Socket de connexion (d'écoute) du serveur */
 

@@ -107,7 +107,6 @@ Watchdogd/Mnemonique/Makefile \
 Watchdogd/Scenario/Makefile \
 Watchdogd/Icones/Makefile \
 Watchdogd/Histo/Makefile \
-Watchdogd/ValANA/Makefile \
 Watchdogd/Utilisateur/Makefile \
 Watchdogd/Synoptiques/Makefile \
 Watchdogd/CptHoraire/Makefile \
