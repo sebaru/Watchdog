@@ -460,14 +460,14 @@
        if (Partage->com_rs485.admin_start)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
-          module->actif = 1;
+          if (module) { module->actif = 1; }
           Partage->com_rs485.admin_start = 0;
         }
 
        if (Partage->com_rs485.admin_stop)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stoping module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
-          module->actif = 0;
+          if (module) module->actif = 0;
           Partage->com_rs485.admin_stop = 0;
         }
 

@@ -57,8 +57,8 @@
        module = (struct MODULE_RS485 *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n RS485[%02d] -> actif=%d, ea=%d-%d, e=%d-%d, ec=%d-%d, s=%d-%d, sa=%d-%d requete=%d"
-                   " retente=%d ana=%d\n",
+                   "\n RS485[%02d] -> actif=%d, ea=%03d-%03d, e=%03d-%03d, ec=%03d-%03d, s=%03d-%03d,"
+                   " sa=%03d-%03d req=%d ret=%d ana=%d\n",
                    module->id, module->actif, module->ea_min, module->ea_max,
                    module->e_min, module->e_max, module->ec_min, module->ec_max,
                    module->s_min, module->s_max, module->sa_min, module->sa_max,
@@ -98,7 +98,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d started", id );
+    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d started\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -131,7 +131,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d stopped", id );
+    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -201,7 +201,7 @@
      }
 
     Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d deleted", id );
+    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d deleted\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -260,8 +260,8 @@
         { int retour;
           retour = Admin_rs485_add ( client, id, ea_min, ea_max, e_min, e_max, ec_min, ec_max,
                                      s_min, s_max, sa_min, sa_max );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module RS485 %d added", retour ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module RS485 NOT added" ); }
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module RS485 %d added\n", retour ); }
+          else          { g_snprintf( chaine, sizeof(chaine), "Module RS485 NOT added\n" ); }
           Write_admin ( client->connexion, chaine );
         }
      }

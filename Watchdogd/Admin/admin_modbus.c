@@ -109,7 +109,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started", id );
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -142,7 +142,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d stopped", id );
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -261,7 +261,7 @@
      }
 
     Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted", id );
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -294,7 +294,7 @@
      }
 
     Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted", id );
+    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -332,8 +332,8 @@
        else
         { int id;
           id = Admin_modbus_add ( client, ip, bit, watchdog );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added\n", id ); }
+          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added\n" ); }
           Write_admin ( client->connexion, chaine );
         }
      }
@@ -351,8 +351,8 @@
        else
         { int id;
           id = Admin_modbus_add_borne ( client, type, adresse, min, nbr, module );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added" ); }
+          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added\n", id ); }
+          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added\n" ); }
           Write_admin ( client->connexion, chaine );
         }
      }

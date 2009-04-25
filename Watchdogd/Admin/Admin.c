@@ -228,7 +228,7 @@
           while (liste)
            { client = (struct CLIENT_ADMIN *)liste->data;
 
-             if ( Partage->top > client->last_use + 600 )      /* Deconnexion = 60 secondes si inactivité */
+             if ( Partage->top > client->last_use + 3000 )    /* Deconnexion = 300 secondes si inactivité */
               { Deconnecter_admin ( client ); 
                 liste = Clients;
                 continue;

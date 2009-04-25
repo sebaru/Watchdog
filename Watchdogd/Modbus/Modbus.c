@@ -795,7 +795,7 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Starting module",
                   Partage->com_modbus.admin_start );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_start );
-          module->actif = 1;
+          if (module) module->actif = 1;
           Partage->com_modbus.admin_start = 0;
         }
 
@@ -804,7 +804,6 @@
                   Partage->com_modbus.admin_stop );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_stop );
           Deconnecter_module  ( module );
-          module->actif = 0;
           Partage->com_modbus.admin_stop = 0;
         }
 
