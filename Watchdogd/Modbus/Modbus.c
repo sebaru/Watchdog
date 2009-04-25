@@ -833,6 +833,7 @@
         { if ( Connecter_module( module ) )
            { if ( module->watchdog )
               { Init_watchdog_modbus(module); }
+             module->date_retente = 0;;
              module->started = TRUE;
            }
           else
