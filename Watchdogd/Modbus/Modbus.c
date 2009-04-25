@@ -834,14 +834,13 @@
              continue;
            }
         }
-printf("Modbus1\n");
+
        if ( module->request )                                        /* Requete en cours pour ce module ? */
         { Recuperer_borne ( module );
           continue;
         }
 
                                                        /* Si pas de requete, on passe a la borne suivante */
-printf("Modbus1\n");
        module->borne_en_cours = module->borne_en_cours->next;
        if ( ! module->borne_en_cours)                                                /* Tour des bornes ? */
         { module->borne_en_cours = module->Bornes; }
