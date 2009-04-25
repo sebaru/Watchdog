@@ -25,9 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <sql.h>                                             /* Entetes de gestion de la base de données */
- #include <sqlext.h> 
- #include <sqltypes.h>
  #include <glib.h>
  #include <unistd.h>
  #include <stdio.h>
