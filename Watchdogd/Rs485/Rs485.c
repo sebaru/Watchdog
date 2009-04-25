@@ -472,13 +472,11 @@
         }
 
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { sleep(1); continue; }                        /* Si pas de module, on ne sollicite pas le proc ! */
-
-       liste = liste->next;
-       if (!liste)                                       /* On vient de faire un tour de tous les modules */
-        { liste = Partage->com_rs485.Modules_RS485; }
-
+        { liste = Partage->com_rs485.Modules_RS485;
+          continue;
+        }
        module = (struct MODULE_RS485 *)liste->data;
+       liste = liste->next;
        if (module->actif != TRUE) { continue; }
 
        if ( attente_reponse == FALSE )
