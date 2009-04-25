@@ -78,6 +78,7 @@
  struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
                           gchar *user, gchar *password, guint port )
   { struct DB *db;
+    my_bool reconnect;
     db = (struct DB *)g_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
      { Info( log, DEBUG_DB, "Init_DB_SQL: Erreur allocation mémoire struct DB" );
@@ -91,6 +92,9 @@
        g_free(db);
        return (NULL);
      }
+
+    reconnect = 1;
+    mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
     if ( ! mysql_real_connect( db->mysql, host, user, password, database, port, NULL, 0 ) )
      { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base",
                               (char *) mysql_error(db->mysql)  );
