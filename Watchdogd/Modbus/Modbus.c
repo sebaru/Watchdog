@@ -740,7 +740,9 @@
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     Info( Config.log, DEBUG_MODBUS, "MODBUS: demarrage" );
 
-    if ( Charger_tous_MODBUS() == FALSE )                                    /* Chargement des modules modbus */
+    Partage->com_modbus.Modules_MODBUS = NULL;                            /* Init des variables du thread */
+
+    if ( Charger_tous_MODBUS() == FALSE )                                /* Chargement des modules modbus */
      { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
        pthread_exit(GINT_TO_POINTER(-1));
      }

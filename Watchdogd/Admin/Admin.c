@@ -200,11 +200,12 @@
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
 
     Partage->com_admin.ecoute = Activer_ecoute_admin ();
-
     if ( Partage->com_admin.ecoute < 0 )
      { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
      } else Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: En ecoute !" );
+
+    Partage->com_admin.Clients = NULL;                          /* Initialisation des variables du thread */
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
@@ -213,19 +214,15 @@
         }
 
        Accueillir_un_admin( Partage->com_admin.ecoute );                  /* Accueille les nouveaux admin */
-sleep(5);
-printf("boucle admin\n");
 
        if ( Partage->com_admin.Clients )                                          /* Ecoutons nos clients */
         { struct CLIENT_ADMIN *client;
           GList *liste;
 
-printf("boucle admin2\n");
           liste = Partage->com_admin.Clients;
           while (liste)
            { client = (struct CLIENT_ADMIN *)liste->data;
 
-printf("boucle admin3\n");
              if ( Partage->top > client->last_use + 600 )      /* Deconnexion = 60 secondes si inactivité */
               { Deconnecter_admin ( client ); 
                 liste = Partage->com_admin.Clients;

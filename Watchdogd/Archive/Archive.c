@@ -80,8 +80,6 @@
 
     Info( Config.log, DEBUG_FORK, "ARCH: demarrage" );
 
-    sleep(5);                                                      /* A l'init, nous attendons 5 secondes */
-
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
@@ -89,6 +87,7 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
+    Partage->com_arch.liste_arch = NULL;                                  /* Initialisation des variables */
     top = Partage->top;                                        /* Initialisation des archivages temporels */
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { struct ARCHDB *arch;

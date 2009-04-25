@@ -75,8 +75,6 @@
 
     Info( Config.log, DEBUG_FORK, "Audio: demarrage" );
 
-    sleep(5);                                                      /* A l'init, nous attendons 5 secondes */
-
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
@@ -84,8 +82,9 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
+    Partage->com_audio.liste_audio = NULL;                      /* Initialisation des variables du thread */
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { if (Partage->com_audio.sigusr1)                                             /* On a recu sigusr1 ?? */
+     { if (Partage->com_audio.sigusr1)                                            /* On a recu sigusr1 ?? */
         { Partage->com_audio.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "AUDIO: Run_audio: SIGUSR1" );
         }

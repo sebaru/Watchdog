@@ -412,14 +412,15 @@
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );
     Info( Config.log, DEBUG_FORK, "RS485: demarrage" );
 
-
     fd_rs485 = Init_rs485();
     if (fd_rs485<0)                                                        /* On valide l'acces aux ports */
      { Info( Config.log, DEBUG_INFO, "RS485: Acces RS485 impossible, terminé");
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    if ( Charger_tous_RS485() == FALSE )                                    /* Chargement des modules rs485 */
+    Partage->com_rs485.Modules_RS485 = NULL;                    /* Initialisation des variables du thread */
+
+    if ( Charger_tous_RS485() == FALSE )                                  /* Chargement des modules rs485 */
      { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: No module RS485 found -> stop" );
        close(fd_rs485);
        pthread_exit(GINT_TO_POINTER(-1));

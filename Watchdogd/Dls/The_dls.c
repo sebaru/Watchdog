@@ -380,6 +380,10 @@ if (num<8) printf("Update EA%d = %d, inrange=%d\n", num, val_int, inrange );
 
     Info( Config.log, DEBUG_FORK, "DLS: demarrage" );                                        /* Log Start */
              
+    Partage->com_ssrv_dls.liste_m            = NULL;            /* Initialisation des variables du thread */
+    Partage->com_ssrv_dls.liste_plugin_off   = NULL;
+    Partage->com_ssrv_dls.liste_plugin_on    = NULL;
+    Partage->com_ssrv_dls.liste_plugin_reset = NULL;
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
