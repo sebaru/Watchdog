@@ -470,12 +470,12 @@ encore:
        if (!Ssl_ctx)
         { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
        else
-#ifdef bouh
        if (!Demarrer_arch())                                               /* Demarrage gestion Archivage */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
        else
        if (!Demarrer_rs485())                                           /* Demarrage gestion module RS485 */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
+#ifdef bouh
        else
        if (!Demarrer_modbus())                                         /* Demarrage gestion module MODBUS */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
@@ -488,11 +488,11 @@ encore:
        else
        if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+#endif
        else
        if (!Demarrer_dls())                                                           /* Démarrage D.L.S. */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
        else
-#endif
         { pthread_t TID;
 printf("attente maitre\n");
 sleep(5);
