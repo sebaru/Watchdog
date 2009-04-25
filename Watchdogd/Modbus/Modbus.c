@@ -817,7 +817,6 @@
 
        module = (struct MODULE_MODBUS *)liste->data;
        if (module->actif != TRUE) { continue; }
-printf("Boucle module MODBUS\n");
 
 /*********************************** Début de l'interrogation du module ***********************************/
        date = time(NULL);                                                 /* On recupere l'heure actuelle */
