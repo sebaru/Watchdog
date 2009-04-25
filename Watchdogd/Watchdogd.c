@@ -511,6 +511,7 @@ encore:
 
     if (Partage->Arret == RELOAD)
      { Lire_config( NULL );                                 /* Lecture sur le fichier /etc/watchdogd.conf */
+       Print_config();
        Partage->Arret = TOURNE;
        goto encore;
      }

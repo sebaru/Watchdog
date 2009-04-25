@@ -181,8 +181,6 @@
  void SEA( int num, int val_int, int inrange )
   { if (num>=NBR_ENTRE_ANA) return;
 
-if (num<8) printf("Update EA%d = %d, inrange=%d\n", num, val_int, inrange );
-
     if (Partage->ea[ num ].val != val_int)
      { Partage->ea[ num ].val     = val_int;
        Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
