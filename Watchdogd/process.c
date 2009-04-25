@@ -39,13 +39,13 @@
  #include "watchdogd.h"
  #include "proto_srv.h"
 
- static pthread_t TID_sms;                                          /* Le tid du SMS en cours d'execution */
- static pthread_t TID_dls;                                          /* Le tid du DLS en cours d'execution */
- static pthread_t TID_rs485;                                      /* Le tid du rs485 en cours d'execution */
- static pthread_t TID_arch;                                        /* Le tid du ARCH en cours d'execution */
- static pthread_t TID_modbus;                                    /* Le tid du MODBUS en cours d'execution */
- static pthread_t TID_audio;                                     /* Le tid du AUDIO  en cours d'execution */
- static pthread_t TID_admin;                                     /* Le tid du ADMIN  en cours d'execution */
+ static pthread_t TID_sms    = NULL;                                /* Le tid du SMS en cours d'execution */
+ static pthread_t TID_dls    = NULL;                                /* Le tid du DLS en cours d'execution */
+ static pthread_t TID_rs485  = NULL;                              /* Le tid du rs485 en cours d'execution */
+ static pthread_t TID_arch   = NULL;                               /* Le tid du ARCH en cours d'execution */
+ static pthread_t TID_modbus = NULL;                             /* Le tid du MODBUS en cours d'execution */
+ static pthread_t TID_audio  = NULL;                             /* Le tid du AUDIO  en cours d'execution */
+ static pthread_t TID_admin  = NULL;                             /* Le tid du ADMIN  en cours d'execution */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
@@ -301,30 +301,6 @@
   { gint i;
     Info( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Debut stopper_fils") );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for DLS to finish"), TID_dls );
-    pthread_join( TID_dls, NULL );                                                     /* Attente fin DLS */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, DLS is down"), TID_dls );
-
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
-    pthread_join( TID_rs485, NULL );                                                 /* Attente fin RS485 */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
-
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
-    pthread_join( TID_modbus, NULL );                                               /* Attente fin MODBUS */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_rs485 );
-
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for SMS to finish"), TID_sms );
-    pthread_join( TID_sms, NULL );                                                     /* Attente fin SMS */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, SMS is down"), TID_sms );
-
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), TID_arch );
-    pthread_join( TID_arch, NULL );                                                   /* Attente fin ARCH */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ARCH is down"), TID_arch );
-
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
-    pthread_join( TID_audio, NULL );                                                   /* Attente fin ARCH */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
-
     for (i=0; i<Config.max_serveur; i++)                   /* Arret de tous les fils en cours d'execution */
      { if (Partage->Sous_serveur[i].pid != -1)                             /* Attente de la fin du fils i */
         { Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for SSRV pid to finish"),
@@ -334,6 +310,35 @@
                                           Partage->Sous_serveur[i].pid );
         }
      }
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for DLS to finish"), TID_dls );
+    if (TID_dls) { pthread_join( TID_dls, NULL ); }                                    /* Attente fin DLS */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, DLS is down"), TID_dls );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
+    if (TID_rs485) { pthread_join( TID_rs485, NULL ); }                              /* Attente fin RS485 */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
+    if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_rs485 );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for SMS to finish"), TID_sms );
+    if (TID_sms) { pthread_join( TID_sms, NULL ); }                                    /* Attente fin SMS */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, SMS is down"), TID_sms );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), TID_arch );
+    if (TID_arch) { pthread_join( TID_arch, NULL ); }                                 /* Attente fin ARCH */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ARCH is down"), TID_arch );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
+    if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
+    if (TID_admin) { pthread_join( TID_admin, NULL ); }                              /* Attente fin ADMIN */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ADMIN is down"), TID_admin );
+
     Info( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Fin stopper_fils") );
   }
 /*--------------------------------------------------------------------------------------------------------*/
