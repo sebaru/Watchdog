@@ -484,7 +484,6 @@ encore:
        else
        if (!Demarrer_rs485())                                           /* Demarrage gestion module RS485 */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
-#ifdef bouh
        else
        if (!Demarrer_modbus())                                         /* Demarrage gestion module MODBUS */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
@@ -494,7 +493,6 @@ encore:
        else
        if (!Demarrer_audio())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
-#endif
        else
        if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
