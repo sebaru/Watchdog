@@ -808,20 +808,18 @@
         }
 
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { sleep(1); continue; }                        /* Si pas de module, on ne sollicite pas le proc ! */
-
-       liste = liste->next;
-       if (!liste)                                       /* On vient de faire un tour de tous les modules */
-        { liste = Partage->com_modbus.Modules_MODBUS; }
+        { liste = Partage->com_modbus.Modules_MODBUS;
+          continue;
+        }
 
        module = (struct MODULE_MODBUS *)liste->data;
        if (module->actif != TRUE) { continue; }
+       liste = liste->next;
 
 /*********************************** Début de l'interrogation du module ***********************************/
        date = time(NULL);                                                 /* On recupere l'heure actuelle */
        if ( date < module->date_retente )                      /* Si attente retente, on change de module */
-        { continue;
-        }
+        { continue; }
 
        if ( ! module->started )                                              /* Communication OK ou non ? */
         { if ( Connecter_module( module ) )
