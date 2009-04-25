@@ -28,9 +28,6 @@
  
  #include <glib.h>
  #include <stdlib.h>
- #include <sql.h>                                             /* Entetes de gestion de la base de données */
- #include <sqlext.h> 
- #include <sqltypes.h>
 
  #include "watchdogd.h"
  #include "Erreur.h"

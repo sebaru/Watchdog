@@ -259,7 +259,7 @@ Watchdogd_LDADD = Config/libconfig.la \
 		    Synoptiques/libsyn.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -lodbc -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)
+Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)
 INCLUDES = -I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 $(GLIB_CFLAGS) \

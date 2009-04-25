@@ -26,10 +26,6 @@
  */
  
  #include <glib.h>
-
- #include <sql.h>                                             /* Entetes de gestion de la base de données */
- #include <sqlext.h> 
- #include <sqltypes.h>
  #include <string.h>
 
 /******************************************** Chargement des prototypes ***********************************/
