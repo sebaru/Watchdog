@@ -150,7 +150,9 @@
 
        Charger_un_RS485_DB( module, atoi (db->row[0]) );
                                                                         /* Ajout dans la liste de travail */
+       pthread_mutex_lock( &Partage->com_rs485.synchro );
        Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
+       pthread_mutex_unlock( &Partage->com_rs485.synchro );
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
        Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id      = ", module->id    );
        Info_n( Config.log, DEBUG_RS485, "                  -  actif   = ", module->actif );
@@ -176,7 +178,9 @@
        return;
      }
     Charger_un_RS485_DB ( module, id );
+    pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
+    pthread_mutex_unlock( &Partage->com_rs485.synchro );
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -185,7 +189,9 @@
 /**********************************************************************************************************/
  static void Decharger_un_RS485 ( struct MODULE_RS485 *module )
   { if (!module) return;
+    pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_remove ( Partage->com_rs485.Modules_RS485, module );
+    pthread_mutex_unlock( &Partage->com_rs485.synchro );
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */

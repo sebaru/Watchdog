@@ -51,6 +51,7 @@
   { GList *liste_modules, *liste_bornes;
     gchar chaine[128];
 
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
     liste_modules = Partage->com_modbus.Modules_MODBUS;
     while ( liste_modules )
      { struct MODULE_MODBUS *module;
@@ -78,6 +79,7 @@
         }
        liste_modules = liste_modules->next;
      }
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */

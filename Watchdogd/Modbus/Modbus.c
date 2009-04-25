@@ -247,10 +247,12 @@
     borne->min      = atoi (db->row[3]);
     borne->nbr      = atoi (db->row[4]);
 
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
     module = Chercher_module_by_id ( atoi(db->row[5]) );
     if (module)
      { module->Bornes = g_list_append ( module->Bornes, borne ); }      /* Ajout dans la liste de travail */
     else g_free(borne);                                                   /* Sinon, on oublie, tant pis ! */
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
     Liberer_resultat_SQL ( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
   }
@@ -268,8 +270,10 @@
             "Charger_un_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
        return;
      }
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
     Charger_un_MODBUS_DB ( module, id );
     Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -278,11 +282,13 @@
 /**********************************************************************************************************/
  static void Decharger_un_MODBUS ( struct MODULE_MODBUS *module )
   { if (!module) return;
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
     if (module->Bornes)
      { g_list_foreach( module->Bornes, (GFunc) g_free, NULL );
        g_list_free( module->Bornes );
      }
     Partage->com_modbus.Modules_MODBUS = g_list_remove ( Partage->com_modbus.Modules_MODBUS, module );
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 /**********************************************************************************************************/
 /* Decharcher_une_borne_MODBUS: Décharge une borne de la liste des bornes actives                         */
@@ -291,6 +297,7 @@
 /**********************************************************************************************************/
  static void Decharger_une_borne_MODBUS ( gint id )
   { GList *liste, *liste_borne;
+    pthread_mutex_lock( &Partage->com_modbus.synchro );
     liste = Partage->com_modbus.Modules_MODBUS;
     while ( liste )
      { struct MODULE_MODBUS *module;
@@ -301,13 +308,12 @@
         { struct BORNE_MODBUS *borne;
           borne = ((struct BORNE_MODBUS *)liste->data);
           if (borne->id == id)
-           { module->Bornes = g_list_remove ( module->Bornes, borne );
-             return;
-           }
+           { module->Bornes = g_list_remove ( module->Bornes, borne ); }
           liste_borne = liste_borne->next;
         }
        liste = liste->next;
      }
+    pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
