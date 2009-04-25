@@ -376,6 +376,8 @@ if (num<8) printf("Update EA%d = %d, inrange=%d\n", num, val_int, inrange );
     timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                /* = 10 fois par secondes */
     setitimer( ITIMER_REAL, &timer, NULL );                                            /* Active le timer */
 
+    sleep(10);/* attente 10 secondes pour initialisation des bit internes et collection des infos modules */
+
     Info( Config.log, DEBUG_FORK, "DLS: demarrage" );                                        /* Log Start */
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */

@@ -76,9 +76,7 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_dls: Attente 10 secondes"), getpid() );
-    sleep(10);
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
     if ( pthread_create( &TID_dls, NULL, (void *)Run_dls, NULL ) )
      { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_dls: pthread_create failed") );
        return(FALSE);
