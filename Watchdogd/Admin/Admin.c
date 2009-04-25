@@ -178,11 +178,11 @@
         {
           case MODE_ADMIN_MODBUS : Admin_modbus  ( client, ligne ); break;
           case MODE_ADMIN_PROCESS: Admin_process ( client, ligne ); break;
+          case MODE_ADMIN_RS485  : Admin_rs485   ( client, ligne ); break;
 
-          case MODE_ADMIN_RUNNING:
+          case MODE_ADMIN_RUNNING: Admin_running( client, ligne );
           default:                 break;
         }
-       Admin_running( client, ligne );
 
        if (client->mode == MODE_ADMIN_RUNNING)
         { g_snprintf( chaine, sizeof(chaine), " #%s> ", Mode_admin[client->mode] ); }
