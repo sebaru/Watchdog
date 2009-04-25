@@ -485,10 +485,10 @@ encore:
        else
        if (!Demarrer_audio())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
+#endif
        else
        if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
-#endif
        else
        if (!Demarrer_dls())                                                           /* Démarrage D.L.S. */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }

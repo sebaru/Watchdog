@@ -39,13 +39,13 @@
  #include "watchdogd.h"
  #include "proto_srv.h"
 
- static pthread_t TID_sms    = NULL;                                /* Le tid du SMS en cours d'execution */
- static pthread_t TID_dls    = NULL;                                /* Le tid du DLS en cours d'execution */
- static pthread_t TID_rs485  = NULL;                              /* Le tid du rs485 en cours d'execution */
- static pthread_t TID_arch   = NULL;                               /* Le tid du ARCH en cours d'execution */
- static pthread_t TID_modbus = NULL;                             /* Le tid du MODBUS en cours d'execution */
- static pthread_t TID_audio  = NULL;                             /* Le tid du AUDIO  en cours d'execution */
- static pthread_t TID_admin  = NULL;                             /* Le tid du ADMIN  en cours d'execution */
+ static pthread_t TID_sms    = 0;                                   /* Le tid du SMS en cours d'execution */
+ static pthread_t TID_dls    = 0;                                   /* Le tid du DLS en cours d'execution */
+ static pthread_t TID_rs485  = 0;                                 /* Le tid du rs485 en cours d'execution */
+ static pthread_t TID_arch   = 0;                                  /* Le tid du ARCH en cours d'execution */
+ static pthread_t TID_modbus = 0;                                /* Le tid du MODBUS en cours d'execution */
+ static pthread_t TID_audio  = 0;                                /* Le tid du AUDIO  en cours d'execution */
+ static pthread_t TID_admin  = 0;                                /* Le tid du ADMIN  en cours d'execution */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
