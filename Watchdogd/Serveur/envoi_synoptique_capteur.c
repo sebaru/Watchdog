@@ -231,7 +231,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
-    if ( ! Recuperer_capteurDB( Config.log, db, client->syn.id ) )
+    if ( ! Recuperer_capteurDB( Config.log, db, client->num_supervision ) )
      { Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
