@@ -213,6 +213,8 @@
         }
 
        Accueillir_un_admin( Partage->com_admin.ecoute );                  /* Accueille les nouveaux admin */
+sleep(5);
+printf("boucle admin\n");
 
        if ( Partage->com_admin.Clients )                                          /* Ecoutons nos clients */
         { struct CLIENT_ADMIN *client;
