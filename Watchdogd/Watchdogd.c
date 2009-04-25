@@ -348,7 +348,6 @@
  int main ( int argc, char *argv[], char *envp[] )
   { struct sigaction sig;
     gchar strpid[12];
-    struct DB *db;
     gint fd_lock;
     gboolean fg;
 
@@ -481,7 +480,6 @@ encore:
        if (!Demarrer_modbus())                                         /* Demarrage gestion module MODBUS */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
        else
-#endif
        if (!Demarrer_sms())                                                           /* Démarrage S.M.S. */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
        else
@@ -494,8 +492,11 @@ encore:
        if (!Demarrer_dls())                                                           /* Démarrage D.L.S. */
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
        else
+#endif
         { pthread_t TID;
+printf("attente maitre\n");
 sleep(5);
+printf("fin attente maitre\n");
           /*sigaction( SIGCHLD, &sig, NULL );*/
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
