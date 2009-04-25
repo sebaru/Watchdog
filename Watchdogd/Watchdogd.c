@@ -494,9 +494,6 @@ encore:
         { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
        else
         { pthread_t TID;
-printf("attente maitre\n");
-sleep(5);
-printf("fin attente maitre\n");
           /*sigaction( SIGCHLD, &sig, NULL );*/
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );

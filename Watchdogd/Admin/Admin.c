@@ -220,17 +220,20 @@ printf("boucle admin\n");
         { struct CLIENT_ADMIN *client;
           GList *liste;
 
+printf("boucle admin2\n");
           liste = Partage->com_admin.Clients;
           while (liste)
            { client = (struct CLIENT_ADMIN *)liste->data;
-             liste=liste->next;
 
+printf("boucle admin3\n");
              if ( Partage->top > client->last_use + 600 )      /* Deconnexion = 60 secondes si inactivité */
               { Deconnecter_admin ( client ); 
+                liste = Partage->com_admin.Clients;
                 continue;
               }
 
              Ecouter_admin( client );
+             liste=liste->next;
            }
         }
        sched_yield();
