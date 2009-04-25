@@ -312,6 +312,9 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_modbus_start ( client, num );
      }
+    else if ( ! strcmp ( commande, "mbus" ) )
+     { Admin_modbus_list ( client );
+     }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
@@ -380,6 +383,8 @@
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
                      "  stop id                                - Demarre le module id\n" );
+       Write_admin ( client->connexion,
+                     "  mbus                                   - Liste les modules MODBUS+Borne\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }

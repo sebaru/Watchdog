@@ -38,6 +38,7 @@
  extern void Admin_modbus_list ( struct CLIENT_ADMIN *client );
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_rs485 ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Write_admin ( gint fd, gchar *chaine );
 
 #endif

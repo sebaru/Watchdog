@@ -224,6 +224,9 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_rs485_stop ( client, num );
      }
+    else if ( ! strcmp ( commande, "rs" ) )
+     { Admin_rs485_list ( client );
+     }
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_rs485_reload(client);
      }
@@ -278,6 +281,8 @@
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
                      "  stop id                                - Demarre le module id\n" );
+       Write_admin ( client->connexion,
+                     "  rs                                     - Affiche les status des equipements RS485\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }

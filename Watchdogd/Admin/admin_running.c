@@ -242,38 +242,33 @@
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
        Write_admin ( client->connexion, chaine );
      } else
-#ifdef bouh
-       if ( ! strcmp ( commande, "msgs" ) )
-        { char chaine[128], msg[128];
-          GList *liste;
-          gint i;
+    if ( ! strcmp ( commande, "msgs" ) )
+     { char chaine[128], msg[128];
+       GList *liste;
+       gint i;
 
-          memset( msg, 0, sizeof(msg) );
-          sscanf ( ligne, "%s %s", commande, msg );                  /* Découpage de la ligne de commande */
+       memset( msg, 0, sizeof(msg) );
+       sscanf ( ligne, "%s %s", commande, msg );                  /* Découpage de la ligne de commande */
 
-          for (i=0; i<Config.max_serveur; i++)
-            { if (Partage->Sous_serveur[i].pid == -1) continue;
+       for (i=0; i<Config.max_serveur; i++)
+         { if (Partage->Sous_serveur[i].pid == -1) continue;
+           liste = Partage->Sous_serveur[i].Clients;
+           while(liste)                                            /* Parcours de la liste des clients */
+            { struct CMD_GTK_MESSAGE erreur;
+              struct CLIENT *client_wat;
+              client = (struct CLIENT *)liste->data;
 
-              liste = Partage->Sous_serveur[i].Clients;
-              while(liste)                                            /* Parcours de la liste des clients */
-               { struct CMD_GTK_MESSAGE erreur;
-                 struct CLIENT *client;
-                 client = (struct CLIENT *)liste->data;
+              g_snprintf( erreur.message, sizeof(erreur.message), msg );
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
 
-
-                 g_snprintf( erreur.message, sizeof(erreur.message), msg );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-
-                 g_snprintf( chaine, sizeof(chaine), " Envoi du message a %s@%s\n",
-                             client->util->nom, client->machine );
-                 Write_admin ( client->connexion, chaine );
-
-                 liste = liste->next;
-               }
+              g_snprintf( chaine, sizeof(chaine), " Envoi du message a %s@%s\n",
+                          client_wat->util->nom, client_wat->machine );
+              Write_admin ( client->connexion, chaine );
+              liste = liste->next;
             }
-        } else
-#endif
+         }
+     } else
     if ( ! strcmp ( commande, "audit" ) )
      { g_snprintf( chaine, sizeof(chaine), " Bit/s : %d\n", Partage->audit_bit_interne_per_sec_hold );
        Write_admin ( client->connexion, chaine );

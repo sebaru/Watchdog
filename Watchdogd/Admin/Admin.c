@@ -99,7 +99,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
-  { close ( client->connexion );
+  { Write_admin( client->connexion, "\n - Deconnected - \n" );
+    close ( client->connexion );
     Info_n( Config.log, DEBUG_ADMIN, "Connexion terminée ID", client->connexion );
     g_free(client);
     Clients = g_list_remove ( Clients, client );
