@@ -359,14 +359,12 @@
         }
      }
     else if ( ! strcmp ( commande, "deleteborne" ) )
-     { gchar chaine[128];
-       guint num;
+     { guint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_modbus_del_borne ( client, num );
      }
     else if ( ! strcmp ( commande, "delete" ) )
-     { gchar chaine[128];
-       guint num;
+     { guint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_modbus_del ( client, num );
      }

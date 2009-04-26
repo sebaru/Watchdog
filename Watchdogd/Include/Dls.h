@@ -30,19 +30,23 @@
     GList *Plugins;                                                   /* Liste des plugins chargés de DLS */
     GList *liste_m;                                                           /* liste des Mxxx a activer */
     GList *liste_plugin_reset;                                            /* liste des plugins a resetter */
-    GList *liste_plugin_on;                                                /* liste des plugins a allumer */
-    GList *liste_plugin_off;                                              /* liste des plugins a eteindre */
-    gboolean sigusr1;
+    gboolean reload;
+    guint admin_start;                                                          /* Demande de deconnexion */
+    guint admin_stop;                                                           /* Demande de deconnexion */
   };
 
 /*************************************** Prototypes de fonctions ******************************************/
  extern gboolean Retirer_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_ID_PLUGIN_DLS *dls );
  extern gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_ADD_PLUGIN_DLS *dls );
- extern gboolean Creer_db_dls ( struct LOG *log, struct DB *db );
  extern gboolean Recuperer_plugins_dlsDB( struct LOG *log, struct DB *db );
  extern struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db );
  extern struct PLUGIN_DLS *Rechercher_plugin_dlsDB( struct LOG *log, struct DB *db, gint id );
  extern gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PLUGIN_DLS *dls );
+
+ extern void Reseter_un_plugin ( gint id );
+ extern void Decharger_un_plugin_by_id ( gint id );
+ extern void Decharger_plugins ( void );
+ extern void Charger_plugins ( void );
 
  extern void Run_dls ( void );                                                          /* Dans The_dls.c */
  extern int E( int num );
@@ -68,11 +72,6 @@
  extern void SA( int num, int etat );
  extern void SCH( int num, int etat );
  extern void MSG( int num, int etat );
- extern void Reseter_un_plugin ( gint id );
- extern void Retirer_plugins ( void );
- extern void Charger_plugins ( void );
- extern void Lister_plugins ( void );
- extern void Activer_plugins ( gint num, gboolean actif );
  
  extern void Prendre_heure ( void );                                                      /* Dans heure.c */ 
  #endif

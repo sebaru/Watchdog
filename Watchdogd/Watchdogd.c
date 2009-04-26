@@ -94,7 +94,7 @@
                           Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: SSRV nbr_client", Partage->Sous_serveur[i].nb_client );
                           if (Partage->Sous_serveur[i].pid) Partage->Sous_serveur[i].sigusr1 = TRUE;
                         }
-                       Partage->com_dls.sigusr1 = TRUE;
+                       Partage->com_dls.reload = TRUE;
                        Partage->com_rs485.reload   = TRUE;
                        Partage->com_sms.sigusr1 = TRUE;
                        Partage->com_modbus.reload = TRUE;

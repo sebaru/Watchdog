@@ -37,7 +37,7 @@
  #include "watchdogd.h"
 
  gchar *Mode_admin[NBR_MODE_ADMIN] =
-  { "running", "modbus", "process", "rs485" };
+  { "running", "modbus", "process", "rs485", "dls" };
 
  static GList *Clients = NULL;                                     /* Leste des clients d'admin connectés */
  static gint Fd_ecoute = 0;                                          /* File descriptor de l'ecoute admin */
@@ -180,6 +180,7 @@
           case MODE_ADMIN_MODBUS : Admin_modbus  ( client, ligne ); break;
           case MODE_ADMIN_PROCESS: Admin_process ( client, ligne ); break;
           case MODE_ADMIN_RS485  : Admin_rs485   ( client, ligne ); break;
+          case MODE_ADMIN_DLS    : Admin_dls     ( client, ligne ); break;
 
           case MODE_ADMIN_RUNNING: Admin_running( client, ligne );
           default:                 break;

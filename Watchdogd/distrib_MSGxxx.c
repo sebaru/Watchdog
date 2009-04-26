@@ -26,6 +26,7 @@
  */
 
  #include <glib.h>
+ #include <sys/time.h>
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  #include <unistd.h>

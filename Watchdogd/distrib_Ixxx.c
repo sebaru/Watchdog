@@ -39,8 +39,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
-  { struct MSGDB *msg;
-    gint i, num;
+  { gint i, num;
 
     if (!Partage->com_msrv.liste_i) return;                               /* Si pas de i, on se barre */
 

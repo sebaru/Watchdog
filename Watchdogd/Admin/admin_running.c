@@ -50,8 +50,6 @@
        Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
        Write_admin ( client->connexion, "  dls                  - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  dlson xx             - D.L.S. Start plugin xx\n" );
-       Write_admin ( client->connexion, "  dlsoff xx            - D.L.S. Stop plugin xx\n" );
        Write_admin ( client->connexion, "  ssrv                 - SousServers Status\n" );
        Write_admin ( client->connexion, "  client               - Client Status\n" );
        Write_admin ( client->connexion, "  kick nom machine     - Kick client nom@machine\n" );
@@ -90,15 +88,6 @@
           char chaine[128];
           GList *plugins;
 
-          plugins = Plugins;
-          while(plugins)                                         /* On execute tous les modules un par un */
-           { plugin_actuel = (struct PLUGIN_DLS_DL *)plugins->data;
-
-             g_snprintf( chaine, sizeof(chaine), " DLS %03d actif=%d conso=%f\n",
-                         plugin_actuel->id, plugin_actuel->actif, plugin_actuel->conso );
-             Write_admin ( client->connexion, chaine );
-             plugins = plugins->next;
-           }
         } else
 #endif
     if ( ! strcmp ( commande, "ssrv" ) )
@@ -175,20 +164,6 @@
      } else
     if ( ! strcmp ( commande, "rs" ) )
      { Admin_rs485_list ( client );
-     } else
-    if ( ! strcmp ( commande, "dlson" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
-       Activer_plugins ( num, TRUE );
-       g_snprintf( chaine, sizeof(chaine), " Plugin %d started\n", num );
-       Write_admin ( client->connexion, chaine );
-     } else
-    if ( ! strcmp ( commande, "dlsoff" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
-       Activer_plugins ( num, FALSE );
-       g_snprintf( chaine, sizeof(chaine), " Plugin %d stopped\n", num );
-       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getm" ) )
      { int num;

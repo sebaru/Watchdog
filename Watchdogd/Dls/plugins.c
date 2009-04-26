@@ -45,6 +45,7 @@
     gchar nom_fichier_absolu[60];
     void (*Go)(int);
     void *handle;
+
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
@@ -69,43 +70,73 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Retirer_un_plugin: Decharge le plugin dont le numero est en parametre                                  */
-/* Entrée: L'identifiant du plugin                                                                        */
+/* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                          */
+/* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- void Reseter_un_plugin ( gint id )
-  { struct PLUGIN_DLS *plugin;
-    GList *plugins;
-    gboolean on;
-    gint retour;
+ static gboolean Charger_un_plugin_by_id ( gint id )
+  { struct PLUGIN_DLS *dls;
+    struct DB *db;                                                                   /* Database Watchdog */
 
-    Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Demande de reset plugin", id );
-
-    plugins = Partage->com_dls.Plugins;
-    while(plugins)                                                      /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
-       if( plugin->id == id )
-        { retour = dlclose( plugin->handle );
-          if (retour) Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: dlclose failed", retour );
-          Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: plugin dechargé", plugin->id );
-          break;
-        }
-       plugins = plugins->next;
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Unable to open database" );
+       return(FALSE);
      }
-    if (!plugin) return;                        /* Si le plugin n'a pas été trouvé, on ne le charge pas ! */
 
-    Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: tentative de redemarrage plugin", id );
-    if (Charger_un_plugin( plugin ))                                 /* Chargement en actif ou inactif */
-     { Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Reset OK", id ); }
-    else
-     { Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Reset failed", id ); }
+    dls = Rechercher_plugin_dlsDB( Config.log, db, id );
+    Libere_DB_SQL( Config.log, &db );
+
+    if (!dls)
+     { Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Plugin non trouvé", id );
+       return(FALSE);
+     }
+
+    return ( Charger_un_plugin ( dls ) );
   }
 /**********************************************************************************************************/
 /* Retirer_plugins: Decharge toutes les librairies                                                        */
 /* Entrée: Rien                                                                                           */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- void Retirer_plugins ( void )
+ void Decharger_un_plugin_by_id ( gint id )
+  { struct PLUGIN_DLS *plugin;
+    GList *plugins;
+
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    plugins = Partage->com_dls.Plugins;
+    while(plugins)                                                       /* Liberation mémoire des modules */
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
+
+       if ( plugin->id == id )
+        { dlclose( plugin->handle );
+          Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
+          g_free( plugin );
+          Info_n( Config.log, DEBUG_DLS, "DLS: Retirer_plugin: Dechargé", plugin->id );
+          break;
+        }
+       plugins = plugins->next;
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/**********************************************************************************************************/
+/* Retirer_un_plugin: Decharge le plugin dont le numero est en parametre                                  */
+/* Entrée: L'identifiant du plugin                                                                        */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Reseter_un_plugin ( gint id )
+  { Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Demande de reset plugin", id );
+
+    Decharger_un_plugin_by_id ( id );
+    Charger_un_plugin_by_id ( id );
+  }
+/**********************************************************************************************************/
+/* Retirer_plugins: Decharge toutes les librairies                                                        */
+/* Entrée: Rien                                                                                           */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Decharger_plugins ( void )
   { struct PLUGIN_DLS *plugin;
     GList *plugins;
 
@@ -126,49 +157,6 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
-/* Retirer_plugins: Decharge toutes les librairies                                                        */
-/* Entrée: Rien                                                                                           */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
- void Activer_plugins ( gint num, gboolean actif )
-  { struct PLUGIN_DLS *plugin;
-    GList *plugins;
-
-    plugins = Partage->com_dls.Plugins;
-    while(plugins)                                               /* On cherche tous les modules un par un */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
-
-       if ( plugin->id == num )
-        { Info_n( Config.log, DEBUG_INFO, "DLS: Activer_plugins: plugin", plugin->id );
-          Info_c( Config.log, DEBUG_INFO, "                            " ,(actif ? "enable" : "disable") );
-          plugin->on = actif;
-          plugin->starting = 1;
-          break;
-        }
-       plugins = plugins->next;
-     }
-  }
-/**********************************************************************************************************/
-/* Retirer_plugins: Decharge toutes les librairies                                                        */
-/* Entrée: Rien                                                                                           */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
- void Lister_plugins ( void )
-  { struct PLUGIN_DLS *plugin;
-    GList *plugins;
-
-    plugins = Partage->com_dls.Plugins;
-    while(plugins)                                               /* On cherche tous les modules un par un */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
-
-       if ( plugin->on )
-        { Info_n( Config.log, DEBUG_INFO, "DLS: Lister_plugins: plugin", plugin->id );
-          Info_c( Config.log, DEBUG_INFO, "                           ", plugin->nom_fichier );
-        }
-       plugins = plugins->next;
-     }
-  }
-/**********************************************************************************************************/
 /* Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                              */
 /* Entrée: Rien                                                                                           */
 /* Sortie: Rien                                                                                           */
@@ -180,7 +168,7 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info( Config.log, DEBUG_DB, "DLS: Charger_plugins: Unable to open database" );
+     { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: Unable to open database" );
        return;
      }
 

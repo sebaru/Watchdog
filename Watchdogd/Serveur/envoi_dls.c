@@ -82,7 +82,11 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    Activer_plugins ( rezo_dls->id, FALSE );                               /* Arret systeme DLS du plugin */
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                                          GINT_TO_POINTER(rezo_dls->id) );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+
     retour = Retirer_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls );
     if (retour)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
@@ -159,19 +163,10 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { pthread_mutex_lock( &Partage->com_dls.synchro );
-                     if (dls->on)
-                      { Partage->com_dls.liste_plugin_on =
-                                 g_list_append ( Partage->com_dls.liste_plugin_on,
-                                                 GINT_TO_POINTER(dls->id) );
-                      }
-                     else
-                      { Partage->com_dls.liste_plugin_off =
-                                 g_list_append ( Partage->com_dls.liste_plugin_off,
-                                                 GINT_TO_POINTER(dls->id) );
-                      }
+                     Partage->com_dls.liste_plugin_reset =
+                              g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                              GINT_TO_POINTER(dls->id) );
                      pthread_mutex_unlock( &Partage->com_dls.synchro );
-
-                     printf("Envoi plugin %d %s à DLS\n", dls->id, (dls->on ? "on" : "off") );
                       
                      Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
                                    (gchar *)dls, sizeof(struct CMD_SHOW_MESSAGE) );

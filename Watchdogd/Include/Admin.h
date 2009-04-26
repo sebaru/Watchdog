@@ -16,6 +16,7 @@
     MODE_ADMIN_MODBUS,
     MODE_ADMIN_PROCESS,
     MODE_ADMIN_RS485,
+    MODE_ADMIN_DLS,
     NBR_MODE_ADMIN
   };
  extern gchar *Mode_admin[NBR_MODE_ADMIN];
@@ -31,7 +32,6 @@
     gboolean sigusr1; 
   };
 
-
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Audio.c */
  extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
@@ -39,6 +39,9 @@
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_rs485 ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_rs485_list ( struct CLIENT_ADMIN *client );
+ extern void Admin_dls ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_dls_list ( struct CLIENT_ADMIN *client );
  extern void Write_admin ( gint fd, gchar *chaine );
 
 #endif

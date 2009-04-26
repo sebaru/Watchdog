@@ -368,8 +368,6 @@
              
     Partage->com_dls.Plugins            = NULL;            /* Initialisation des variables du thread */
     Partage->com_dls.liste_m            = NULL;            /* Initialisation des variables du thread */
-    Partage->com_dls.liste_plugin_off   = NULL;
-    Partage->com_dls.liste_plugin_on    = NULL;
     Partage->com_dls.liste_plugin_reset = NULL;
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
@@ -377,10 +375,11 @@
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { struct timeval tv_avant, tv_apres;
 
-       if (Partage->com_dls.sigusr1)
-        { Partage->com_dls.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_INFO, "DLS: Run_dls: SIGUSR1" );
-          Lister_plugins();
+       if (Partage->com_dls.reload)
+        { Partage->com_dls.reload = FALSE;
+          Info( Config.log, DEBUG_INFO, "DLS: Run_dls: RELOADING" );
+          Decharger_plugins();
+          Charger_plugins();
         }
 
        if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
@@ -390,7 +389,6 @@
 
        if (Partage->com_dls.liste_m)                            /* A-t-on un monostable a allumer ?? */
         { gint num;
-Info( Config.log, DEBUG_DLS, "dls: monostable a allumer debut" );
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
           Partage->com_dls.liste_m = g_list_remove ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
@@ -398,43 +396,16 @@ Info( Config.log, DEBUG_DLS, "dls: monostable a allumer debut" );
           Info_n( Config.log, DEBUG_INFO, "DLS: Run_dls: mise a un du bit M", num );
           SM( num, 1 );
           Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) );
-Info( Config.log, DEBUG_DLS, "dls: monostable a allumer fin" );
-        }
-
-       if (Partage->com_dls.liste_plugin_off)                      /* A-t-on un plugin a eteindre ?? */
-        { gint num;
-Info( Config.log, DEBUG_DLS, "dls: plugin off debut" );
-          pthread_mutex_lock( &Partage->com_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_off->data );
-          Partage->com_dls.liste_plugin_off = g_list_remove ( Partage->com_dls.liste_plugin_off,
-                                                                   GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-          Activer_plugins( num, FALSE );
-Info( Config.log, DEBUG_DLS, "dls: plugin off fin" );
-        }
-
-       if (Partage->com_dls.liste_plugin_on)                        /* A-t-on un plugin a allumer ?? */
-        { gint num;
-Info( Config.log, DEBUG_DLS, "dls: plugin on debut" );
-          pthread_mutex_lock( &Partage->com_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_on->data );
-          Partage->com_dls.liste_plugin_on = g_list_remove ( Partage->com_dls.liste_plugin_on,
-                                                                  GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-          Activer_plugins( num, TRUE );
-Info( Config.log, DEBUG_DLS, "dls: plugin off fin" );
         }
 
        if (Partage->com_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
         { gint num;
-Info( Config.log, DEBUG_DLS, "dls: plugin reset debut" );
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
           Partage->com_dls.liste_plugin_reset = g_list_remove ( Partage->com_dls.liste_plugin_reset,
                                                                      GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           Reseter_un_plugin( num );
-Info( Config.log, DEBUG_DLS, "dls: plugin reset fin" );
         }
 
        SB(0, !B(0));                                            /* Change d'etat tous les tours programme */
@@ -465,7 +436,7 @@ Info( Config.log, DEBUG_DLS, "dls: plugin reset fin" );
        usleep(1000);
        sched_yield();
      }
-    Retirer_plugins();                                                    /* Dechargement des modules DLS */
+    Decharger_plugins();                                                  /* Dechargement des modules DLS */
     Info_n( Config.log, DEBUG_FORK, "Run_dls: DLS Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
