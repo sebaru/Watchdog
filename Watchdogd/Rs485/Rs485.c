@@ -190,6 +190,7 @@
   { if (!module) return;
     pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_remove ( Partage->com_rs485.Modules_RS485, module );
+    g_free(module);
     pthread_mutex_unlock( &Partage->com_rs485.synchro );
   }
 /**********************************************************************************************************/
@@ -470,12 +471,14 @@
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Deleting module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_del );
           Decharger_un_RS485 ( module );
+          liste = Partage->com_rs485.Modules_RS485;
           Partage->com_rs485.admin_del = 0;
         }
 
        if (Partage->com_rs485.admin_add)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Adding module" );
           Charger_un_RS485 ( Partage->com_rs485.admin_add );
+          liste = Partage->com_rs485.Modules_RS485;
           Partage->com_rs485.admin_add = 0;
         }
 
@@ -503,10 +506,9 @@
        module = (struct MODULE_RS485 *)liste->data;
        if (module->actif != TRUE) { liste = liste->next; continue; }
 
+       date = time(NULL);                                                 /* On recupere l'heure actuelle */
        if ( attente_reponse == FALSE )
-        { date = time(NULL);                                              /* On recupere l'heure actuelle */
-
-          if ( module->date_retente <= date )                                    /* module banni ou non ? */
+        { if ( module->date_retente <= date )                                    /* module banni ou non ? */
            { if (module->date_ana > date)                                   /* Ana toutes les 10 secondes */
               { Envoyer_trame_want_inputTOR( module, fd_rs485 );
               }
