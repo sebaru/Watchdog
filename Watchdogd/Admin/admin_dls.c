@@ -55,8 +55,8 @@
      { struct PLUGIN_DLS *dls;
        dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-       g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, nom=%s, conso=%f\n",
-                           dls->id, dls->on, dls->nom, dls->conso );
+       g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, conso=%f, nom=%s\n",
+                           dls->id, dls->on, dls->conso, dls->nom );
        Write_admin ( client->connexion, chaine );
        liste_dls = liste_dls->next;
      }

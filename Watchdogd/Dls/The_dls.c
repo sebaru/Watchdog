@@ -371,7 +371,6 @@
     Partage->com_dls.liste_plugin_reset = NULL;
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
-printf("DLS 1\n");
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { struct timeval tv_avant, tv_apres;
 
@@ -382,7 +381,6 @@ printf("DLS 1\n");
           Charger_plugins();
         }
 
-printf("DLS 2\n");
        if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
         { Prendre_heure ();                            /* Mise à jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
@@ -399,7 +397,6 @@ printf("DLS 2\n");
           Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) );
         }
 
-printf("DLS 3\n");
        if (Partage->com_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
@@ -415,7 +412,6 @@ printf("DLS 3\n");
        SB(2, 1);                                                                   /* B2 est toujours à 1 */
        SI(1, 1, 255, 0, 0, 0 );                                               /* Icone toujours à 1:rouge */
 
-printf("DLS 4\n"); sleep(1);
        plugins = Partage->com_dls.Plugins;
        while(plugins)                                            /* On execute tous les modules un par un */
         { struct PLUGIN_DLS *plugin_actuel;
