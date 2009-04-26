@@ -165,6 +165,9 @@
     if ( ! strcmp ( commande, "rs" ) )
      { Admin_rs485_list ( client );
      } else
+    if ( ! strcmp ( commande, "dls" ) )
+     { Admin_dls_list ( client );
+     } else
     if ( ! strcmp ( commande, "getm" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */

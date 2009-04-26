@@ -41,8 +41,7 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
-  { struct PLUGIN_DLS *plugin;
-    gchar nom_fichier_absolu[60];
+  { gchar nom_fichier_absolu[60];
     void (*Go)(int);
     void *handle;
 
@@ -60,12 +59,12 @@
              }
 
     Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: handle", GPOINTER_TO_INT(handle) );
-    strncpy( plugin->nom_fichier, nom_fichier_absolu, sizeof(plugin->nom_fichier) );
-    plugin->handle  = handle;
-    plugin->go      = Go;
-    plugin->starting= 1;
+    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
+    dls->handle  = handle;
+    dls->go      = Go;
+    dls->starting= 1;
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, plugin );
+    Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(TRUE);
   }
@@ -113,7 +112,7 @@
         { dlclose( plugin->handle );
           Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
-          Info_n( Config.log, DEBUG_DLS, "DLS: Retirer_plugin: Dechargé", plugin->id );
+          Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_un_plugin_by_id: Dechargé", plugin->id );
           break;
         }
        plugins = plugins->next;
@@ -144,12 +143,12 @@
     plugins = Partage->com_dls.Plugins;
     while(plugins)                                                       /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
-       Info_n( Config.log, DEBUG_DLS, "DLS: Retirer_plugin: tentative dechargement:", plugin->id );
+       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: tentative dechargement:", plugin->id );
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
        g_free( plugin );
-       Info_n( Config.log, DEBUG_DLS, "DLS: Retirer_plugin: Dechargé", plugin->id );
+       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: Dechargé", plugin->id );
        plugins = plugins->next;
      }
     g_list_free( Partage->com_dls.Plugins );
