@@ -32,13 +32,7 @@
  #include <time.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Erreur.h"
- #include "Config.h"
  #include "watchdogd.h"
- #include "Histo_DB.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */

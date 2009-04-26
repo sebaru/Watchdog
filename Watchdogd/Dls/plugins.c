@@ -45,7 +45,7 @@
     gchar nom_fichier_absolu[80];
     void (*Go)(int);
     void *handle;
-
+printf("Charger_un_plugin 1\n");
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
@@ -58,6 +58,7 @@
                dlclose( handle );
                return(FALSE);
              }
+printf("Charger_un_plugin 2\n");
 
     Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: handle", GPOINTER_TO_INT(handle) );
     strncpy( plugin->nom_fichier, nom_fichier_absolu, sizeof(plugin->nom_fichier) );
@@ -67,6 +68,7 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, plugin );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+printf("Charger_un_plugin 3\n");
     return(TRUE);
   }
 /**********************************************************************************************************/

@@ -3,19 +3,34 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      lun 10 mai 2004 11:31:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * distrib_Ixxx.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  #include <unistd.h>
  #include <time.h>
 
- #include "Erreur.h"
- #include "Config.h"
- #include "watchdogd.h"
-
-/* extern struct DB *Db_watchdog;                                                      /* Database Watchdog */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
 
