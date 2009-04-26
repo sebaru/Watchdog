@@ -60,9 +60,10 @@
 
     Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: handle", GPOINTER_TO_INT(handle) );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
-    dls->handle  = handle;
-    dls->go      = Go;
-    dls->starting= 1;
+    dls->handle   = handle;
+    dls->go       = Go;
+    dls->starting = 1;
+    dls->conso    = 0.0;
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -199,6 +200,8 @@
 
        if ( plugin->id == id )
         { plugin->on = actif;
+          plugin->conso = 0.0;
+          plugin->starting = 1;
           Info_n( Config.log, DEBUG_DLS, "DLS: Activer_plugin_by_id done", plugin->id );
           break;
         }
