@@ -288,6 +288,7 @@
        g_list_free( module->Bornes );
      }
     Partage->com_modbus.Modules_MODBUS = g_list_remove ( Partage->com_modbus.Modules_MODBUS, module );
+    g_free(module);
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 /**********************************************************************************************************/
@@ -314,6 +315,23 @@
        liste = liste->next;
      }
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
+  }
+/**********************************************************************************************************/
+/* Decharcher_une_borne_MODBUS: Décharge une borne de la liste des bornes actives                         */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static gboolean Modbus_is_actif ( void )
+  { GList *liste;
+    liste = Partage->com_modbus.Modules_MODBUS;
+    while ( liste )
+     { struct MODULE_MODBUS *module;
+       module = ((struct MODULE_MODBUS *)liste->data);
+
+       if (module->actif) return(TRUE);
+       liste = liste->next;
+     }
+    return(FALSE);
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -757,7 +775,7 @@
     liste = Partage->com_modbus.Modules_MODBUS;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
-       usleep(1);
+       usleep(1000);
        sched_yield();
 
        if (Partage->com_modbus.reload == TRUE)
@@ -774,6 +792,7 @@
           module = Chercher_module_by_id ( Partage->com_modbus.admin_del );
           Deconnecter_module  ( module );
           Decharger_un_MODBUS ( module );
+          liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.admin_del = 0;
         }
 
@@ -788,6 +807,7 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module",
                   Partage->com_modbus.admin_add );
           Charger_un_MODBUS ( Partage->com_modbus.admin_add );
+          liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.admin_add = 0;
         }
 
@@ -815,14 +835,16 @@
           Partage->com_modbus.admin_stop = 0;
         }
 
-       if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { liste = Partage->com_modbus.Modules_MODBUS;
-          continue;
-        }
+       if (Partage->com_modbus.Modules_MODBUS == NULL ||        /* Si pas de module référencés, on attend */
+           Modbus_is_actif() == FALSE)
+        { sleep(2); continue; }
 
+       if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
+        { liste = Partage->com_modbus.Modules_MODBUS; }
        module = (struct MODULE_MODBUS *)liste->data;
+       liste = liste->next;                            /* On prépare le prochain accès au prochain module */
+
        if (module->actif != TRUE) { continue; }
-       liste = liste->next;
 
 /*********************************** Début de l'interrogation du module ***********************************/
        date = time(NULL);                                                 /* On recupere l'heure actuelle */
