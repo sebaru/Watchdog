@@ -30,12 +30,7 @@
  #include <sys/prctl.h>
  #include <unistd.h>
 
- #include "Erreur.h"
- #include "Config.h"
- #include "Archive_DB.h"
- #include "proto_dls.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
-
 /**********************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */

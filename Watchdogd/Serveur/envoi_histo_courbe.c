@@ -32,14 +32,9 @@
  #include <unistd.h>
 
  #include "Reseaux.h"
- #include "Archive_DB.h"
- #include "Erreur.h"
- #include "Config.h"
  #include "Client.h"
  #include "watchdogd.h"
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
 

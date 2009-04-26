@@ -9,10 +9,8 @@
 
  #include <pthread.h>
  #include "Reseaux.h"
-/* #include "Cst_entreeana.h"
- #include "Cst_dls.h"*/
 
- #include "Archive_DB.h"
+ #include "Archive.h"
  #include "Audio.h"
  #include "Admin.h"
  #include "Client.h"
@@ -20,8 +18,11 @@
  #include "Modbus.h"
  #include "Rs485.h"
  #include "Scenario_DB.h"
+ #include "Message_DB.h"
  #include "Sms.h"
- #include "proto_dls.h"
+ #include "Dls.h"
+ #include "Histo_DB.h"
+ #include "EntreeANA_DB.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
@@ -52,15 +53,6 @@
     TYPE_INFO_NEW_HISTO,                                   /* Le fils doit traiter un nouveau message DLS */
     TYPE_INFO_DEL_HISTO,                                       /* Le fils doit traiter un message DLS OFF */
     TYPE_INFO_NEW_MOTIF                                         /* Le fils doit traiter un evenement Ixxx */
-  };
-
- struct COM_SSRV_DLS                                             /* Communication entre le serveur et DLS */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_m;                                                           /* liste des Mxxx a activer */
-    GList *liste_plugin_reset;                                            /* liste des plugins a resetter */
-    GList *liste_plugin_on;                                                /* liste des plugins a allumer */
-    GList *liste_plugin_off;                                              /* liste des plugins a eteindre */
-    gboolean sigusr1;
   };
 
  struct SOUS_SERVEUR
@@ -145,7 +137,7 @@
     struct COM_RS485 com_rs485;                                                                   /* Comm rs485 */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
     struct COM_MSRV_SMS com_msrv_sms;                                                    /* Comm msrv/sms */
-    struct COM_SSRV_DLS com_ssrv_dls;                                         /* Changement du au serveur */
+    struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */

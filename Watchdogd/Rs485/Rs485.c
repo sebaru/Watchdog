@@ -44,7 +44,6 @@
  #include "Rs485.h"
  #include "EntreeANA_DB.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
- #include "proto_dls.h"                                                             /* Acces a A(x), E(x) */
 
  #define TEMPS_RETENTE   5                /* Tente de se raccrocher au module banni toutes les 5 secondes */
 
@@ -560,12 +559,12 @@
                 if (crc_recu != Calcul_crc16(&Trame))
                  { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
                 else
-                 { pthread_mutex_lock( &Partage->com_rs485.synchro );
+                 { pthread_mutex_lock( &Partage->com_dls.synchro );
                    if (Processer_trame( module, &Trame ))  /* Si la trame est processée, on passe suivant */
                     { attente_reponse = FALSE;
                       liste = liste->next;
                     }
-                   pthread_mutex_unlock( &Partage->com_rs485.synchro );
+                   pthread_mutex_unlock( &Partage->com_dls.synchro );
                  }
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
               }

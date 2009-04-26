@@ -36,24 +36,13 @@
  #include <sys/prctl.h>
  #include <semaphore.h>
 
- #include "Erreur.h"
- #include "Config.h"
  #include "Cst_mnemoniques.h"
  #include "watchdogd.h"
  #include "Cst_dls.h"
  #include "Module_dls.h"
- #include "Archive_DB.h"
+ #include "Dls.h"
 
- GList *Plugins;                                                      /* Liste des plugins chargés de DLS */
- static struct PLUGIN_DLS_DL *plugin_actuel;
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-/******************************************** Prototypes de fonctions *************************************/
- #include "proto_dls.h"
- #include "proto_arch.h"
-
 /**********************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
 /* Entrée: le temps avant, et le temps apres l'action                                                     */
@@ -378,17 +367,18 @@
 
     Info( Config.log, DEBUG_FORK, "DLS: demarrage" );                                        /* Log Start */
              
-    Partage->com_ssrv_dls.liste_m            = NULL;            /* Initialisation des variables du thread */
-    Partage->com_ssrv_dls.liste_plugin_off   = NULL;
-    Partage->com_ssrv_dls.liste_plugin_on    = NULL;
-    Partage->com_ssrv_dls.liste_plugin_reset = NULL;
+    Partage->com_dls.Plugins            = NULL;            /* Initialisation des variables du thread */
+    Partage->com_dls.liste_m            = NULL;            /* Initialisation des variables du thread */
+    Partage->com_dls.liste_plugin_off   = NULL;
+    Partage->com_dls.liste_plugin_on    = NULL;
+    Partage->com_dls.liste_plugin_reset = NULL;
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { struct timeval tv_avant, tv_apres;
 
-       if (Partage->com_ssrv_dls.sigusr1)
-        { Partage->com_ssrv_dls.sigusr1 = FALSE;
+       if (Partage->com_dls.sigusr1)
+        { Partage->com_dls.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "DLS: Run_dls: SIGUSR1" );
           Lister_plugins();
         }
@@ -398,51 +388,51 @@
           Update_heure=Partage->top;
         }
 
-       if (Partage->com_ssrv_dls.liste_m)                            /* A-t-on un monostable a allumer ?? */
+       if (Partage->com_dls.liste_m)                            /* A-t-on un monostable a allumer ?? */
         { gint num;
 Info( Config.log, DEBUG_DLS, "dls: monostable a allumer debut" );
-          pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_ssrv_dls.liste_m->data );
-          Partage->com_ssrv_dls.liste_m = g_list_remove ( Partage->com_ssrv_dls.liste_m, GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+          pthread_mutex_lock( &Partage->com_dls.synchro );
+          num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
+          Partage->com_dls.liste_m = g_list_remove ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
           Info_n( Config.log, DEBUG_INFO, "DLS: Run_dls: mise a un du bit M", num );
           SM( num, 1 );
           Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) );
 Info( Config.log, DEBUG_DLS, "dls: monostable a allumer fin" );
         }
 
-       if (Partage->com_ssrv_dls.liste_plugin_off)                      /* A-t-on un plugin a eteindre ?? */
+       if (Partage->com_dls.liste_plugin_off)                      /* A-t-on un plugin a eteindre ?? */
         { gint num;
 Info( Config.log, DEBUG_DLS, "dls: plugin off debut" );
-          pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_ssrv_dls.liste_plugin_off->data );
-          Partage->com_ssrv_dls.liste_plugin_off = g_list_remove ( Partage->com_ssrv_dls.liste_plugin_off,
+          pthread_mutex_lock( &Partage->com_dls.synchro );
+          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_off->data );
+          Partage->com_dls.liste_plugin_off = g_list_remove ( Partage->com_dls.liste_plugin_off,
                                                                    GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
           Activer_plugins( num, FALSE );
 Info( Config.log, DEBUG_DLS, "dls: plugin off fin" );
         }
 
-       if (Partage->com_ssrv_dls.liste_plugin_on)                        /* A-t-on un plugin a allumer ?? */
+       if (Partage->com_dls.liste_plugin_on)                        /* A-t-on un plugin a allumer ?? */
         { gint num;
 Info( Config.log, DEBUG_DLS, "dls: plugin on debut" );
-          pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_ssrv_dls.liste_plugin_on->data );
-          Partage->com_ssrv_dls.liste_plugin_on = g_list_remove ( Partage->com_ssrv_dls.liste_plugin_on,
+          pthread_mutex_lock( &Partage->com_dls.synchro );
+          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_on->data );
+          Partage->com_dls.liste_plugin_on = g_list_remove ( Partage->com_dls.liste_plugin_on,
                                                                   GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
           Activer_plugins( num, TRUE );
 Info( Config.log, DEBUG_DLS, "dls: plugin off fin" );
         }
 
-       if (Partage->com_ssrv_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
+       if (Partage->com_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
         { gint num;
 Info( Config.log, DEBUG_DLS, "dls: plugin reset debut" );
-          pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_ssrv_dls.liste_plugin_reset->data );
-          Partage->com_ssrv_dls.liste_plugin_reset = g_list_remove ( Partage->com_ssrv_dls.liste_plugin_reset,
+          pthread_mutex_lock( &Partage->com_dls.synchro );
+          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
+          Partage->com_dls.liste_plugin_reset = g_list_remove ( Partage->com_dls.liste_plugin_reset,
                                                                      GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
           Reseter_un_plugin( num );
 Info( Config.log, DEBUG_DLS, "dls: plugin reset fin" );
         }
@@ -452,19 +442,20 @@ Info( Config.log, DEBUG_DLS, "dls: plugin reset fin" );
        SB(2, 1);                                                                   /* B2 est toujours à 1 */
        SI(1, 1, 255, 0, 0, 0 );                                               /* Icone toujours à 1:rouge */
 
-       plugins = Plugins;
+       plugins = Partage->com_dls.Plugins;
        while(plugins)                                            /* On execute tous les modules un par un */
-        { plugin_actuel = (struct PLUGIN_DLS_DL *)plugins->data;
+        { struct PLUGIN_DLS *plugin_actuel;
+          plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
 
-          if (plugin_actuel->actif && plugin_actuel->go)
+          if (plugin_actuel->on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
-             pthread_mutex_lock( &Partage->com_rs485.synchro );
-             plugin_actuel->go( plugin_actuel->start );                             /* On appel le plugin */
-             pthread_mutex_unlock( &Partage->com_rs485.synchro );
+             pthread_mutex_lock( &Partage->com_dls.synchro );
+             plugin_actuel->go( plugin_actuel->starting );                          /* On appel le plugin */
+             pthread_mutex_unlock( &Partage->com_dls.synchro );
              gettimeofday( &tv_apres, NULL );
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-             plugin_actuel->start = 0;
+             plugin_actuel->starting = 0;
            }
           plugins = plugins->next;
         }

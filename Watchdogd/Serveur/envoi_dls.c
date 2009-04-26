@@ -36,9 +36,6 @@
  #include <sys/wait.h>
 
  #include "Reseaux.h"
- #include "Dls_DB.h"
- #include "Erreur.h"
- #include "Config.h"
  #include "Client.h"
 
  #ifndef REP_INCLUDE_GLIB
@@ -165,18 +162,18 @@
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
-              else { pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
+              else { pthread_mutex_lock( &Partage->com_dls.synchro );
                      if (dls->on)
-                      { Partage->com_ssrv_dls.liste_plugin_on =
-                                 g_list_append ( Partage->com_ssrv_dls.liste_plugin_on,
+                      { Partage->com_dls.liste_plugin_on =
+                                 g_list_append ( Partage->com_dls.liste_plugin_on,
                                                  GINT_TO_POINTER(dls->id) );
                       }
                      else
-                      { Partage->com_ssrv_dls.liste_plugin_off =
-                                 g_list_append ( Partage->com_ssrv_dls.liste_plugin_off,
+                      { Partage->com_dls.liste_plugin_off =
+                                 g_list_append ( Partage->com_dls.liste_plugin_off,
                                                  GINT_TO_POINTER(dls->id) );
                       }
-                     pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+                     pthread_mutex_unlock( &Partage->com_dls.synchro );
 
                      printf("Envoi plugin %d %s à DLS\n", dls->id, (dls->on ? "on" : "off") );
                       
@@ -316,10 +313,10 @@
                "THRCompil: Proto_compiler_source_dls: gcc is down, OK", pidgcc );
 
 
-       pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
-       Partage->com_ssrv_dls.liste_plugin_reset = g_list_append ( Partage->com_ssrv_dls.liste_plugin_reset,
+       pthread_mutex_lock( &Partage->com_dls.synchro );
+       Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
                                                                   GINT_TO_POINTER(dls.id) );
-       pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
 
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Compilation OK, Reset plugin OK" );

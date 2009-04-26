@@ -9,12 +9,7 @@
  #include <unistd.h>
  #include <time.h>
 
- #include "Erreur.h"
- #include "Config.h"
  #include "watchdogd.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
 
 /**********************************************************************************************************/
@@ -22,8 +17,8 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Envoyer_commande_dls ( int num )
-  { pthread_mutex_lock( &Partage->com_ssrv_dls.synchro );
-    Partage->com_ssrv_dls.liste_m = g_list_append ( Partage->com_ssrv_dls.liste_m, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Partage->com_ssrv_dls.synchro );
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.liste_m = g_list_append ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /*--------------------------------------------------------------------------------------------------------*/

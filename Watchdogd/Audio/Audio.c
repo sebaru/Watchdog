@@ -34,16 +34,7 @@
  #include <sys/wait.h>
  #include <fcntl.h>
 
- #include "Message_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "proto_dls.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- static struct DB *Db_watchdog;                                                      /* Database Watchdog */
-
 /**********************************************************************************************************/
 /* Ajouter_audio: Ajoute un message audio a prononcer                                                     */
 /* Entrées: le numéro du message a prononcer                                                              */

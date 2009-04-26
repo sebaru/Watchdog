@@ -32,9 +32,6 @@
  #include <unistd.h>
 
  #include "Reseaux.h"
- #include "Archive_DB.h"
- #include "Erreur.h"
- #include "Config.h"
  #include "Client.h"
  #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/

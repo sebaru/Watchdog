@@ -41,11 +41,7 @@
  #include <netinet/in.h>
  #include <netdb.h>
 
- #include "Erreur.h"
- #include "Config.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
- #include "proto_dls.h"                                                             /* Acces a A(x), E(x) */   
- #include "Modbus.h"
 
  gchar *Mode_borne[NBR_MODE_BORNE+1] =
   { "input_TOR", "output_TOR", "input_ANA", "output_ANA", "unknown" };
@@ -745,7 +741,9 @@
           if (module->nbr_oct_lu >= 
               TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
            { 
+             pthread_mutex_lock( &Partage->com_dls.synchro );
              Processer_trame( module );                         /* Si l'on a trouvé une trame complète !! */
+             pthread_mutex_unlock( &Partage->com_dls.synchro );
              module->nbr_oct_lu = 0;
            }
          } 

@@ -26,13 +26,10 @@
  */
 
  #include <glib.h>
- #include "Erreur.h"
+ #include "watchdogd.h"
  #include "Reseaux.h"
  #include "Client.h"
- #include "Dls_DB.h"
- #include "Config.h"
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "proto_srv.h"
 

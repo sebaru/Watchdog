@@ -31,52 +31,42 @@
  #include <stdio.h>
  #include <dlfcn.h>
 
- #include "watchdogd.h"
- #include "Erreur.h"
- #include "Dls_DB.h"
-
- extern GList *Plugins;
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_dls.h"
+ #include "watchdogd.h"
+ #include "Dls.h"
 
 /**********************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                          */
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- static gboolean Charger_un_plugin ( gint id, gint on )
-  { struct PLUGIN_DLS_DL *plugin;
+ static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
+  { struct PLUGIN_DLS *plugin;
     gchar nom_fichier_absolu[80];
     void (*Go)(int);
     void *handle;
 
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, id );
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
-    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Candidat rejeté ", id );
+    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Candidat rejeté ", dls->id );
                    Info_c( Config.log, DEBUG_DLS, "DLS: -- sur ouverture", dlerror() );
                    return(FALSE);
                  }
     Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Candidat rejeté sur absence GO", id ); 
+    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Candidat rejeté sur absence GO", dls->id ); 
                dlclose( handle );
                return(FALSE);
              }
 
-    plugin = g_malloc0( sizeof( struct PLUGIN_DLS_DL ) );
-    if (!plugin)
-     { Info_n( Config.log, DEBUG_DLS, "DLS: Plus de mémoire chargement plugin", id );
-       dlclose(handle);
-       return(FALSE);
-     }
     Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: handle", GPOINTER_TO_INT(handle) );
     strncpy( plugin->nom_fichier, nom_fichier_absolu, sizeof(plugin->nom_fichier) );
     plugin->handle  = handle;
     plugin->go      = Go;
-    plugin->actif   = on;
-    plugin->id      = id;
-    plugin->start   = 1;
-    Plugins = g_list_append( Plugins, plugin );
+    plugin->starting= 1;
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, plugin );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -85,22 +75,25 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Reseter_un_plugin ( gint id )
-  { struct PLUGIN_DLS_DL *plugin;
+  { struct PLUGIN_DLS *plugin;
     GList *plugins;
-    gboolean actif;
+    gboolean on;
     gint retour;
 
     Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Demande de reset plugin", id );
 
-    plugins = Plugins;
+    plugins = Partage->com_dls.Plugins;
     while(plugins)                                                      /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS_DL *)plugins->data;
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
        if( plugin->id == id )
         { retour = dlclose( plugin->handle );
           if (retour) Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: dlclose failed", retour );
           Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: plugin dechargé", plugin->id );
-          actif = plugin->actif;                                         /* Sauvegarde etat actif/inactif */
-          Plugins = g_list_remove( Plugins, plugin );    /* Destruction de l'entete associé dans la GList */
+          on = plugin->on;                                               /* Sauvegarde etat actif/inactif */
+          pthread_mutex_lock( &Partage->com_dls.synchro );
+          Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
+                                                         /* Destruction de l'entete associé dans la GList */
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
           g_free(plugin);                                                    /* Libération mémoire plugin */
           break;
         }
@@ -109,7 +102,7 @@
     if (!plugin) return;                        /* Si le plugin n'a pas été trouvé, on ne le charge pas ! */
 
     Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: tentative de redemarrage plugin", id );
-    if (Charger_un_plugin( id, actif ))                                 /* Chargement en actif ou inactif */
+    if (Charger_un_plugin( plugin ))                                 /* Chargement en actif ou inactif */
      { Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Reset OK", id ); }
     else
      { Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Reset failed", id ); }
@@ -120,20 +113,24 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Retirer_plugins ( void )
-  { struct PLUGIN_DLS_DL *plugin;
+  { struct PLUGIN_DLS *plugin;
     GList *plugins;
 
-    plugins = Plugins;
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    plugins = Partage->com_dls.Plugins;
     while(plugins)                                                       /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS_DL *)plugins->data;
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
        Info_n( Config.log, DEBUG_DLS, "DLS: Retirer_plugin: tentative dechargement:", plugin->id );
        dlclose( plugin->handle );
+       Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
+                                                         /* Destruction de l'entete associé dans la GList */
        g_free( plugin );
        Info_n( Config.log, DEBUG_DLS, "DLS: Retirer_plugin: Dechargé", plugin->id );
        plugins = plugins->next;
      }
-    g_list_free( Plugins );
-    Plugins = NULL;
+    g_list_free( Partage->com_dls.Plugins );
+    Partage->com_dls.Plugins = NULL;
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
 /* Retirer_plugins: Decharge toutes les librairies                                                        */
@@ -141,18 +138,18 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Activer_plugins ( gint num, gboolean actif )
-  { struct PLUGIN_DLS_DL *plugin;
+  { struct PLUGIN_DLS *plugin;
     GList *plugins;
 
-    plugins = Plugins;
+    plugins = Partage->com_dls.Plugins;
     while(plugins)                                               /* On cherche tous les modules un par un */
-     { plugin = (struct PLUGIN_DLS_DL *)plugins->data;
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
 
        if ( plugin->id == num )
         { Info_n( Config.log, DEBUG_INFO, "DLS: Activer_plugins: plugin", plugin->id );
           Info_c( Config.log, DEBUG_INFO, "                            " ,(actif ? "enable" : "disable") );
-          plugin->actif = actif;
-          plugin->start = 1;
+          plugin->on = actif;
+          plugin->starting = 1;
           break;
         }
        plugins = plugins->next;
@@ -164,14 +161,14 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Lister_plugins ( void )
-  { struct PLUGIN_DLS_DL *plugin;
+  { struct PLUGIN_DLS *plugin;
     GList *plugins;
 
-    plugins = Plugins;
+    plugins = Partage->com_dls.Plugins;
     while(plugins)                                               /* On cherche tous les modules un par un */
-     { plugin = (struct PLUGIN_DLS_DL *)plugins->data;
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
 
-       if ( plugin->actif )
+       if ( plugin->on )
         { Info_n( Config.log, DEBUG_INFO, "DLS: Lister_plugins: plugin", plugin->id );
           Info_c( Config.log, DEBUG_INFO, "                           ", plugin->nom_fichier );
         }
@@ -185,8 +182,7 @@
 /**********************************************************************************************************/
  void Charger_plugins ( void )
   { struct PLUGIN_DLS *dls;
-    struct DB *db;                                                          /* Database Watchdog */
-    gint cpt;
+    struct DB *db;                                                                   /* Database Watchdog */
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -196,18 +192,15 @@
      }
 
     Recuperer_plugins_dlsDB( Config.log, db );
-    cpt = 0;
     do
      { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
        if (!dls)
         { Libere_DB_SQL( Config.log, &db );
-          Info_n( Config.log, DEBUG_DLS, "DLS: active plugins", cpt );
           return;
         }
 
-       if (Charger_un_plugin( dls->id, dls->on )==TRUE)
+       if (Charger_un_plugin( dls )==TRUE)
         { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->nom ); }
-       if (dls->on) cpt++;
        g_free(dls);
      } while ( TRUE );
  }

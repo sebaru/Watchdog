@@ -7,12 +7,9 @@
  #include <glib.h>
  #include "Module_dls.h"                                                                /* Acces à E et B */
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-
+ #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
  #include "proto_srv.h"
- #include "proto_dls.h"
 
 /**********************************************************************************************************/
 /* Tester_update_capteur renvoie TRUE si le capteur doit etre updaté sur le client                        */

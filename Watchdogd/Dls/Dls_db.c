@@ -33,9 +33,6 @@
  #include <time.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Dls_DB.h"
-
 /**********************************************************************************************************/
 /* Retirer_dlsDB: Elimine un prg DLS dans la base de données                                              */
 /* Entrées: un log, une db, un nom                                                                        */

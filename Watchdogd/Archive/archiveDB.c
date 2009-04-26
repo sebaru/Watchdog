@@ -28,9 +28,6 @@
  #include <glib.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Archive_DB.h"
-
 /**********************************************************************************************************/
 /* Ajouter_archDB: Ajout ou edition d'un entreeANA                                                        */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                          */

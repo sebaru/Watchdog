@@ -40,14 +40,9 @@
  #include <popt.h>
  #include <pthread.h>
 
- #include "Erreur.h"
- #include "Config.h"
  #include "watchdogd.h"
  #include "proto_srv.h"
  #include "Module_dls.h"
- #include "Histo_DB.h"
- #include "EntreeANA_DB.h"
- #include "Cpth_DB.h"
 
  gint Socket_ecoute;                                         /* Socket de connexion (d'écoute) du serveur */
 
@@ -103,7 +98,7 @@
                           Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: SSRV nbr_client", Partage->Sous_serveur[i].nb_client );
                           if (Partage->Sous_serveur[i].pid) Partage->Sous_serveur[i].sigusr1 = TRUE;
                         }
-                       Partage->com_ssrv_dls.sigusr1 = TRUE;
+                       Partage->com_dls.sigusr1 = TRUE;
                        Partage->com_rs485.reload   = TRUE;
                        Partage->com_msrv_sms.sigusr1 = TRUE;
                        Partage->com_modbus.reload = TRUE;
@@ -417,7 +412,7 @@
        memset( &Partage->com_rs485,    0, sizeof(Partage->com_rs485) );
        memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
        memset( &Partage->com_msrv_sms, 0, sizeof(Partage->com_msrv_sms) );
-       memset( &Partage->com_ssrv_dls, 0, sizeof(Partage->com_ssrv_dls) );
+       memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
@@ -439,7 +434,7 @@
        pthread_mutex_init( &Partage->com_rs485.synchro, &attr );
        pthread_mutex_init( &Partage->com_msrv_sms.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls_msrv.synchro, &attr );
-       pthread_mutex_init( &Partage->com_ssrv_dls.synchro, &attr );
+       pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
@@ -518,7 +513,7 @@ encore:
     pthread_mutex_destroy( &Partage->com_rs485.synchro );
     pthread_mutex_destroy( &Partage->com_msrv_sms.synchro );
     pthread_mutex_destroy( &Partage->com_dls_msrv.synchro );
-    pthread_mutex_destroy( &Partage->com_ssrv_dls.synchro );
+    pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_audio.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
