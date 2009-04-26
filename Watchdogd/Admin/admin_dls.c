@@ -82,7 +82,7 @@
        return;
      }
 
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET on=1 WHERE id=%d",
+    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=1 WHERE id=%d",
                 NOM_TABLE_DLS, id
               );
 
@@ -115,7 +115,7 @@
        return;
      }
 
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET on=0 WHERE id=%d",
+    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=0 WHERE id=%d",
                 NOM_TABLE_DLS, id
               );
 
