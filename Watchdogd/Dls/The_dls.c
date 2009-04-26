@@ -415,21 +415,19 @@ printf("DLS 3\n");
        SB(2, 1);                                                                   /* B2 est toujours à 1 */
        SI(1, 1, 255, 0, 0, 0 );                                               /* Icone toujours à 1:rouge */
 
+printf("DLS 4\n"); sleep(1);
        plugins = Partage->com_dls.Plugins;
        while(plugins)                                            /* On execute tous les modules un par un */
         { struct PLUGIN_DLS *plugin_actuel;
           plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
 
-printf("DLS 4\n");
           if (plugin_actuel->on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
-printf("DLS 5\n");
              pthread_mutex_lock( &Partage->com_dls.synchro );
              plugin_actuel->go( plugin_actuel->starting );                          /* On appel le plugin */
              pthread_mutex_unlock( &Partage->com_dls.synchro );
              gettimeofday( &tv_apres, NULL );
-printf("DLS 6\n");
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->starting = 0;
            }
