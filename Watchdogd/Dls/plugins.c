@@ -42,10 +42,9 @@
 /**********************************************************************************************************/
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { struct PLUGIN_DLS *plugin;
-    gchar nom_fichier_absolu[80];
+    gchar nom_fichier_absolu[60];
     void (*Go)(int);
     void *handle;
-printf("Charger_un_plugin 1\n");
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
@@ -58,7 +57,6 @@ printf("Charger_un_plugin 1\n");
                dlclose( handle );
                return(FALSE);
              }
-printf("Charger_un_plugin 2\n");
 
     Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: handle", GPOINTER_TO_INT(handle) );
     strncpy( plugin->nom_fichier, nom_fichier_absolu, sizeof(plugin->nom_fichier) );
@@ -68,7 +66,6 @@ printf("Charger_un_plugin 2\n");
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, plugin );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-printf("Charger_un_plugin 3\n");
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -91,12 +88,6 @@ printf("Charger_un_plugin 3\n");
         { retour = dlclose( plugin->handle );
           if (retour) Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: dlclose failed", retour );
           Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: plugin dechargé", plugin->id );
-          on = plugin->on;                                               /* Sauvegarde etat actif/inactif */
-          pthread_mutex_lock( &Partage->com_dls.synchro );
-          Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
-                                                         /* Destruction de l'entete associé dans la GList */
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-          g_free(plugin);                                                    /* Libération mémoire plugin */
           break;
         }
        plugins = plugins->next;
@@ -203,7 +194,6 @@ printf("Charger_un_plugin 3\n");
 
        if (Charger_un_plugin( dls )==TRUE)
         { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->nom ); }
-       g_free(dls);
      } while ( TRUE );
  }
 /*--------------------------------------------------------------------------------------------------------*/
