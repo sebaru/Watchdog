@@ -29,16 +29,9 @@
  #include <sys/prctl.h>
  #include <string.h>
 
- #include "Reseaux.h"
- #include "Utilisateur_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_util: convertit une structure UTILISATEUR en structure CMD_SHOW_UTILISATEUR             */
 /* Entrée: un client et un utilisateur                                                                    */

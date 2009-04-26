@@ -10,6 +10,7 @@
  #include <pthread.h>
  #include "Reseaux.h"
 
+ #include "Db.h"
  #include "Archive.h"
  #include "Audio.h"
  #include "Admin.h"
@@ -22,7 +23,11 @@
  #include "Sms.h"
  #include "Dls.h"
  #include "Histo_DB.h"
+ #include "Synoptiques_DB.h"
+ #include "Mnemonique_DB.h"
+ #include "Icones_DB.h"
  #include "EntreeANA_DB.h"
+ #include "Sous_serveur.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
@@ -55,37 +60,11 @@
     TYPE_INFO_NEW_MOTIF                                         /* Le fils doit traiter un evenement Ixxx */
   };
 
- struct SOUS_SERVEUR
-  { pthread_t pid;
-    gint nb_client;
-    gboolean sigusr1;
-    gboolean type_info;                                          /* Acquisition de l'information actuelle */
-    GList *Clients;                                         /* La liste des clients qui se sont connectés */
-  };
-
  struct COM_DLS_MSRV                                    /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
-  };
-
- struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_audio;                                                   /* liste de message a prononcer */
-    gboolean sigusr1;
-  };
-
- struct COM_MSRV_SMS                                                   /* Communication entre MSRV et SMS */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_sms;                                              /* liste de struct MSGDB msg a envoyer */
-    gboolean sigusr1;
-  };
-
- struct COM_ARCH                                                               /* Communication vers ARCH */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_arch;                                             /* liste de struct MSGDB msg a envoyer */
-    gboolean sigusr1;
   };
 
  struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
@@ -103,12 +82,6 @@
     guint slot_id;
     guint type;
 /*    time_t  date;*/
-  };
-
- struct CAPTEUR
-  { gint    type;                                                              /* type du bit de controle */
-    guint bit_controle;
-    gdouble val_ech;
   };
 
  struct I_MOTIF

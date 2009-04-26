@@ -31,16 +31,9 @@
  #include <string.h>
  #include <unistd.h>
 
- #include "Reseaux.h"
- #include "Mnemonique_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_mnemonique: convertit une structure MNEMONIQUE en structure CMD_SHOW_MNEMONIQUE         */
 /* Entrée: un client et un utilisateur                                                                    */

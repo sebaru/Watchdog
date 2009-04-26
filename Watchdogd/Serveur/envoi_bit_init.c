@@ -3,23 +3,37 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mer 01 fév 2006 18:30:05 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * envoi_bit_init.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
 
- #include "Reseaux.h"
- #include "Synoptiques_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                            */
 /* Entrée: L'element                                                                                      */

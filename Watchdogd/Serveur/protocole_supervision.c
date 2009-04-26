@@ -26,15 +26,9 @@
  */
  
  #include <glib.h>
- #include "Erreur.h"
- #include "Reseaux.h"
- #include "Client.h"
- #include "Synoptiques_DB.h"
-
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */

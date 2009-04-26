@@ -26,13 +26,9 @@
  */
 
  #include <glib.h>
- #include "watchdogd.h"
+/******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
- #include "Client.h"
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "proto_srv.h"
-
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */

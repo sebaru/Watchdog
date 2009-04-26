@@ -7,9 +7,21 @@
  #ifndef _PROTO_SRV_H_
  #define _PROTO_SRV_H_
  #include <glib.h>
- #include "Client.h"
- #include "watchdogd.h"
- #include "Synoptiques_DB.h"
+
+ struct SOUS_SERVEUR
+  { pthread_t pid;
+    gint nb_client;
+    gboolean sigusr1;
+    gboolean type_info;                                          /* Acquisition de l'information actuelle */
+    GList *Clients;                                         /* La liste des clients qui se sont connectés */
+  };
+
+ struct CAPTEUR
+  { gint    type;                                                              /* type du bit de controle */
+    guint bit_controle;
+    gdouble val_ech;
+  };
+
 /*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/
 
                                                                                         /* Dans serveur.c */

@@ -7,10 +7,9 @@
  #include <glib.h>
  #include "Module_dls.h"                                                                /* Acces à E et B */
 
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Tester_update_capteur renvoie TRUE si le capteur doit etre updaté sur le client                        */
 /* Entrée: un capteur                                                                                     */

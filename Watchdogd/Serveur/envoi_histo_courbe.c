@@ -31,13 +31,9 @@
  #include <string.h>
  #include <unistd.h>
 
- #include "Reseaux.h"
- #include "Client.h"
- #include "watchdogd.h"
-
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Proto_effacer_entree: Retrait du entree en parametre                                                   */
 /* Entrée: le client demandeur et le entree en question                                                   */

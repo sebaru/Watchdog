@@ -35,17 +35,13 @@
  #include <sys/file.h>                                            /* Gestion des verrous sur les fichiers */
  #include <sys/wait.h>
 
+/******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
- #include "Client.h"
+ #include "watchdogd.h"
 
  #ifndef REP_INCLUDE_GLIB
  #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
  #endif
-
- #include "watchdogd.h"
-/******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
 /**********************************************************************************************************/
 /* Preparer_envoi_groupe: convertit une structure PLUGIN_DLS en structure CMD_SHOW_PLUGIN_DLS             */
 /* Entrée: un client et un utilisateur                                                                    */

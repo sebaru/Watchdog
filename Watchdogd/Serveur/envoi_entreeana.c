@@ -31,17 +31,10 @@
  #include <string.h>
  #include <unistd.h>
 
+/******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
- #include "EntreeANA_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
  #include "watchdogd.h"
  #include "Cst_entreeana.h"
-
-/******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
 /**********************************************************************************************************/
 /* Preparer_envoi_entree: convertit une structure ENTREEANA_DB en structure CMD_SHOW_ENTREEANA            */
 /* Entrée: un client et un utilisateur                                                                    */

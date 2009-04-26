@@ -31,16 +31,9 @@
  #include <string.h>
  #include <unistd.h>
 
- #include "Reseaux.h"
- #include "Synoptiques_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_synoptique: convertit une structure MSG en structure CMD_SHOW_SYNOPTIQUE                */
 /* Entrée: un client et un utilisateur                                                                    */

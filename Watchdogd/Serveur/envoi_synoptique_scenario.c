@@ -35,18 +35,9 @@
  #include <unistd.h>
  #include <pthread.h>
 
- #include "Reseaux.h"
- #include "Scenario_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_scenario: convertit une structure MSG en structure CMD_SHOW_SCENARIO                      */
 /* Entrée: un client et un utilisateur                                                                    */

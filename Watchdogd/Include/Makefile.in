@@ -203,7 +203,7 @@ noinst_HEADERS = Db.h Message_DB.h Histo_DB.h \
 		    Synoptiques_DB.h \
 		    Mnemonique_DB.h \
                     Client.h \
-		    proto_srv.h \
+		    Sous_serveur.h \
 		    Proto_traductionDLS.h \
                     watchdogd.h Dls.h Admin.h \
 		    Rs485.h Sms.h Audio.h Cpth_DB.h \

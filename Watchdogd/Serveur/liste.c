@@ -14,15 +14,9 @@
  #include <stdio.h>
  #include <time.h>
 
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
-/* #define DEBUG*/               /* Activer pour debugger les fonctions de gestion des listes de fichiers */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Liberer_liste: Liberation de la liste de fichiers                                                      */
 /* Entrée: la liste en cours                                                                              */

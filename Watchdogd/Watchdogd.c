@@ -41,16 +41,12 @@
  #include <pthread.h>
 
  #include "watchdogd.h"
- #include "proto_srv.h"
- #include "Module_dls.h"
 
  gint Socket_ecoute;                                         /* Socket de connexion (d'écoute) du serveur */
 
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
  struct CONFIG Config;                   /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  struct PARTAGE *Partage;                                    /* Accès aux données partagées des processes */
-/******************************************** Prototypes de fonctions *************************************/
- #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */

@@ -7,8 +7,6 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #include "Db.h"
-
  #define NOM_TABLE_ARCH    "histo_bit"
 
  struct ARCHDB
@@ -17,6 +15,12 @@
     guint  type;                                                             /* Type de bit: E ? B ? EA ? */
     guint  num;                                            /* Numero de l'entrée analogique photographiée */
     guint  valeur;                                                       /* Valeur de l'entrée analogique */
+  };
+
+ struct COM_ARCH                                                               /* Communication vers ARCH */
+  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *liste_arch;                                             /* liste de struct MSGDB msg a envoyer */
+    gboolean sigusr1;
   };
 
 /*************************************** Définitions des prototypes ***************************************/

@@ -30,19 +30,9 @@
  #include <string.h>
  
  #include "sysconfig.h"
+/******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
- #include "Db.h"
- #include "Config.h"
- #include "Client.h"
- #include "Utilisateur_DB.h"
  #include "watchdogd.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- 
-/********************************* Définitions des prototypes programme ***********************************/
- #include "proto_srv.h"
-
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /**********************************************************************************************************/
 /* Autoriser_client: Autorise le client à se connecter                                                    */
 /* Entrée/Sortie: rien                                                                                    */

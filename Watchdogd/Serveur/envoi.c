@@ -34,18 +34,10 @@
  #include <sys/unistd.h>
  #include <bonobo/bonobo-i18n.h>
 
- #include "Reseaux.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
- #include "watchdogd.h"
-
  #define DEFAUT_MAX 3
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Envoi_client: Envoi le buffer au client id                                                             */

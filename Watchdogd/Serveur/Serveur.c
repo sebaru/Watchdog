@@ -44,15 +44,11 @@
  #include <string.h>
  #include <pthread.h>
 
+/******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
- #include "Config.h"
- #include "Client.h"
- #include "Utilisateur_DB.h"
  #include "watchdogd.h"
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
-/******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
 
 /**********************************************************************************************************/
 /* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                 */

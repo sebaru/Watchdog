@@ -33,16 +33,9 @@
  #include <unistd.h>
  #include <gnokii.h>
 
- #include "Reseaux.h"
- #include "Message_DB.h"
- #include "Erreur.h"
- #include "Config.h"
-
- #include "watchdogd.h"
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
+ #include "Reseaux.h"
+ #include "watchdogd.h"
  #define PRESMS   "CDE:"
 /**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */

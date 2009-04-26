@@ -30,15 +30,9 @@
  #include <string.h>
  #include <pthread.h>
 
- #include "Reseaux.h"
- #include "Histo_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Preparer_envoi_histo: convertit une structure HISTO en structure CMD_SHOW_HISTO                        */

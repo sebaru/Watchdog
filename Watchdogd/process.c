@@ -34,10 +34,9 @@
  #include <openssl/ssl.h>
  #include <string.h>
 
- #include "Erreur.h"
- #include "Config.h"
+/******************************************** Prototypes de fonctions *************************************/
+ #include "Reseaux.h"
  #include "watchdogd.h"
- #include "proto_srv.h"
 
  static pthread_t TID_sms    = 0;                                   /* Le tid du SMS en cours d'execution */
  static pthread_t TID_dls    = 0;                                   /* Le tid du DLS en cours d'execution */
@@ -49,10 +48,6 @@
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
-/******************************************** Prototypes de fonctions *************************************/
- #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Demarrer_sous_serveur: Fork un sous_serveur                                                            */

@@ -9,8 +9,9 @@
  #include <unistd.h>
  #include <time.h>
 
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Envoyer_commande_dls: Gestion des envois de commande DLS                                               */

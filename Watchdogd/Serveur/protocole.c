@@ -35,13 +35,9 @@
  #include <libgen.h>                                                                      /* Pour dirname */
  #include <pthread.h>
 
- #include "Reseaux.h"
- #include "Config.h"
- #include "Client.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */

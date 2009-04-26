@@ -3,22 +3,38 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      mar 24 jun 2003 12:58:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * accept.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <stdio.h>
  #include <openssl/ssl.h>
  #include <openssl/err.h>
  #include <openssl/rand.h>
 
- #include "Erreur.h"
- #include "Reseaux.h"
- #include "Config.h"
- /*#include "watchdogd.h"*/
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 
+ extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
 /**********************************************************************************************************/
 /* Connecter_ssl: Tentative de connexion sécurisée                                                        */
 /* Entrée: le pointeur du client                                                                          */

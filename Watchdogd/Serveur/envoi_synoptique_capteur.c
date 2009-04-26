@@ -31,16 +31,9 @@
  #include <string.h>
  #include <unistd.h>
 
- #include "Reseaux.h"
- #include "Synoptiques_DB.h"
- #include "Erreur.h"
- #include "Config.h"
- #include "Client.h"
-
- #include "watchdogd.h"
 /******************************************** Prototypes de fonctions *************************************/
- #include "proto_srv.h"
-
+ #include "Reseaux.h"
+ #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_capteur: convertit une structure CAPTEURDB en structure CMD_SHOW_CAPTEUR                */
 /* Entrée: un client et un utilisateur                                                                    */

@@ -7,6 +7,11 @@
 #ifndef _SMS_H_
  #define _SMS_H_
 
+ struct COM_MSRV_SMS                                                   /* Communication entre MSRV et SMS */
+  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *liste_sms;                                              /* liste de struct MSGDB msg a envoyer */
+    gboolean sigusr1;
+  };
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_sms ( void );                                                              /* Dans Sms.c */

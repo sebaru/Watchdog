@@ -7,6 +7,12 @@
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
+ struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
+  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *liste_audio;                                                   /* liste de message a prononcer */
+    gboolean sigusr1;
+  };
+
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_audio ( void );                                                          /* Dans Audio.c */
  extern void Ajouter_audio( gint num );
