@@ -62,6 +62,8 @@ int erreur;                                                             /* Compt
 %token <valf>        VALF
 %token <couleur>     ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
 %token <chaine>      ID
+%token HEURE APRES AVANT
+%token OU ET BARRE
 
 %type  <val>     barre alias_bit modulateur ordre
 %type  <couleur> couleur
@@ -70,10 +72,6 @@ int erreur;                                                             /* Compt
 %type  <chaine>  unite facteur expr suite_id
 %type  <action>  action une_action
 
-%token   CONTACTEUR FENETRE
-%token   HEURE APRES AVANT
-
-%token   OU ET BARRE
 %%
 fichier: ligne_source_dls;
 
@@ -176,60 +174,6 @@ une_instr:      MOINS START DONNE action PVIRGULE
                    g_free($4->alors); g_free($4);
                    g_free($2);
                 }}
-
-/******************************************* Gestion des contacteurs **************************************/
-                | MOINS CONTACTEUR POUV  ENTREE ENTIER VIRGULE ENTREE ENTIER VIRGULE ENTREE ENTIER
-                  VIRGULE SORTIE ENTIER VIRGULE SORTIE ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MONO ENTIER VIRGULE MONO ENTIER VIRGULE MONO ENTIER
-                  VIRGULE MONO ENTIER VIRGULE MONO ENTIER VIRGULE MONO ENTIER VIRGULE BI ENTIER 
-                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER 
-                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE TEMPO ENTIER VIRGULE TEMPO ENTIER
-                  VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER
-                  VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER VIRGULE ICONE ENTIER
-                  VIRGULE ICONE ENTIER
-                  PFERM PVIRGULE
-                {{ int taille;
-                   char *instr;
-                   taille = 300;
-                   instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "Gerer_contacteur("
-                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,"
-                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d);",
-                                            $5, $8, $11, $14, $17, $20, $23, $26, $29, $32, $35, $38, $41,
-                                            $44, $47, $50, $53, $56, $59, $62, $65, $68, $71, $74, $77,
-                                            $80, $83, $86, $89, $92, $95, $98, $101, $104, $107, $110, $113,
-                                            $116, $119, $122 );
-                   Emettre( instr ); g_free(instr);
-                }}
-/*************************************** Module de gestion des fenetres ***********************************/
-                | MOINS FENETRE POUV
-                  ENTREE ENTIER VIRGULE ENTREE ENTIER VIRGULE ENTREE ENTIER VIRGULE ENTREE ENTIER
-                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER 
-                  VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER VIRGULE BI ENTIER 
-                  VIRGULE BI ENTIER
-                  VIRGULE MONO ENTIER VIRGULE MONO ENTIER
-                  VIRGULE TEMPO ENTIER
-                  VIRGULE SORTIE ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  VIRGULE MSG ENTIER VIRGULE MSG ENTIER
-                  PFERM PVIRGULE
-                {{ int taille;
-                   char *instr;
-                   taille = 300;
-                   instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "Gerer_fenetre("
-                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,"
-                                           "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d);",
-                                            $5, $8, $11, $14, $17, $20, $23, $26, $29, $32, $35, $38, $41,
-                                            $44, $47, $50, $53, $56, $59, $62, $65, $68, $71, $74, $77,
-                                            $80, $83, $86, $89, $92, $95 );
-                   Emettre( instr ); g_free(instr);
-                }}
-                ;
 
 expr:           expr OU facteur
                 {{ int taille;

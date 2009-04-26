@@ -84,8 +84,6 @@ blanc         [\t ]+
                            }
 
  /***************************************** Methodes speciales ********************************************/
-"Contacteur"               { return CONTACTEUR; }
-"Fenetre"                  { return FENETRE;    }
 "HEURE"                    { return HEURE;      }
 "APRES"                    { return APRES;      }
 "AVANT"                    { return AVANT;      }

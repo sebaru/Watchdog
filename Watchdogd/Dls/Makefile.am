@@ -7,7 +7,7 @@ SUBDIRS=
 
 lib_LTLIBRARIES      = libdls.la
 libdls_la_SOURCES    = plugins.c \
-                       fenetre.c heure.c \
+                       heure.c \
 		       Dls_db.c \
                        The_dls.c
 libdls_la_LDFLAGS    = -rdynamic \

@@ -52,8 +52,7 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libdls_la_LIBADD =
-am_libdls_la_OBJECTS = plugins.lo fenetre.lo heure.lo Dls_db.lo \
-	The_dls.lo
+am_libdls_la_OBJECTS = plugins.lo heure.lo Dls_db.lo The_dls.lo
 libdls_la_OBJECTS = $(am_libdls_la_OBJECTS)
 libdls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -228,7 +227,7 @@ top_srcdir = @top_srcdir@
 SUBDIRS = 
 lib_LTLIBRARIES = libdls.la
 libdls_la_SOURCES = plugins.c \
-                       fenetre.c heure.c \
+                       heure.c \
 		       Dls_db.c \
                        The_dls.c
 
@@ -313,7 +312,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Dls_db.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/The_dls.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fenetre.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugins.Plo@am__quote@
 
