@@ -205,6 +205,23 @@
      }
   }
 /**********************************************************************************************************/
+/* RS485_is_actif: Renvoi TRUE si au moins un des modules rs est actif                                    */
+/* Entrée: rien                                                                                           */
+/* Sortie: TRUE/FALSE                                                                                     */
+/**********************************************************************************************************/
+ static gboolean Rs485_is_actif ( void )
+  { GList *liste;
+    liste = Partage->com_rs485.Modules_RS485;
+    while ( liste )
+     { struct MODULE_RS485 *module;
+       module = ((struct MODULE_RS485 *)liste->data);
+
+       if (module->actif) return(TRUE);
+       liste = liste->next;
+     }
+    return(FALSE);
+  }
+/**********************************************************************************************************/
 /* Calcul_crc16: renvoie le CRC16 de la trame en parametre                                                */
 /* Entrée: la trame a tester                                                                              */
 /* Sortie: le crc 16 bits                                                                                 */
@@ -476,10 +493,13 @@
           Partage->com_rs485.admin_stop = 0;
         }
 
+       if (Partage->com_rs485.Modules_RS485 == NULL ||          /* Si pas de module référencés, on attend */
+           Rs485_is_actif() == FALSE)
+        { sleep(2); continue; }
+
        if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { liste = Partage->com_rs485.Modules_RS485;
-          continue;
-        }
+        { liste = Partage->com_rs485.Modules_RS485; }
+
        module = (struct MODULE_RS485 *)liste->data;
        if (module->actif != TRUE) { liste = liste->next; continue; }
 
@@ -497,6 +517,7 @@
 
              sched_yield();
              module->date_requete = date;
+             module->date_retente = 0;
              attente_reponse = TRUE;
            }
         }

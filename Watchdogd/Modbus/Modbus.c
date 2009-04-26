@@ -317,9 +317,9 @@
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
 /**********************************************************************************************************/
-/* Decharcher_une_borne_MODBUS: Décharge une borne de la liste des bornes actives                         */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Modbus_is_actif: Renvoi TRUE si au moins un des modules modbus est actif                               */
+/* Entrée: rien                                                                                           */
+/* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
  static gboolean Modbus_is_actif ( void )
   { GList *liste;
@@ -334,9 +334,9 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Decharger_tous_MODBUS: Decharge l'ensemble des modules MODBUS                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Decharger_tous_MODBUS ( void  )
   { struct MODULE_MODBUS *module;
