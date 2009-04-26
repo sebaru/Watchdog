@@ -27,14 +27,14 @@
   { struct MSGDB *msg;
     gint i, num;
 
-    if (!Partage->com_dls_msrv.liste_i) return;                               /* Si pas de i, on se barre */
+    if (!Partage->com_msrv.liste_i) return;                               /* Si pas de i, on se barre */
 
-    pthread_mutex_lock( &Partage->com_dls_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
-    num = GPOINTER_TO_INT(Partage->com_dls_msrv.liste_i->data);            /* Recuperation du numero de i */
+    pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
+    num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);            /* Recuperation du numero de i */
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls: Reste a traiter",
-                                   g_list_length(Partage->com_dls_msrv.liste_i) );
-    Partage->com_dls_msrv.liste_i = g_list_remove ( Partage->com_dls_msrv.liste_i, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Partage->com_dls_msrv.synchro );
+                                   g_list_length(Partage->com_msrv.liste_i) );
+    Partage->com_msrv.liste_i = g_list_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls: Recu I DLS", num );
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls:       mode", Partage->i[num].etat );

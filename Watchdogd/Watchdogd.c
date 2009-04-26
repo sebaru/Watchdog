@@ -96,7 +96,7 @@
                         }
                        Partage->com_dls.sigusr1 = TRUE;
                        Partage->com_rs485.reload   = TRUE;
-                       Partage->com_msrv_sms.sigusr1 = TRUE;
+                       Partage->com_sms.sigusr1 = TRUE;
                        Partage->com_modbus.reload = TRUE;
                        Partage->com_arch.sigusr1 = TRUE;          
                        Partage->com_audio.sigusr1 = TRUE;          
@@ -404,10 +404,10 @@
 
        memset( &Partage->new_histo,    0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo,    0, sizeof(Partage->del_histo) );
-       memset( &Partage->com_dls_msrv, 0, sizeof(Partage->com_dls_msrv) );
+       memset( &Partage->com_msrv, 0, sizeof(Partage->com_msrv) );
        memset( &Partage->com_rs485,    0, sizeof(Partage->com_rs485) );
        memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
-       memset( &Partage->com_msrv_sms, 0, sizeof(Partage->com_msrv_sms) );
+       memset( &Partage->com_sms, 0, sizeof(Partage->com_sms) );
        memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
@@ -428,8 +428,8 @@
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_rs485.synchro, &attr );
-       pthread_mutex_init( &Partage->com_msrv_sms.synchro, &attr );
-       pthread_mutex_init( &Partage->com_dls_msrv.synchro, &attr );
+       pthread_mutex_init( &Partage->com_sms.synchro, &attr );
+       pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
@@ -507,8 +507,8 @@ encore:
      }
 
     pthread_mutex_destroy( &Partage->com_rs485.synchro );
-    pthread_mutex_destroy( &Partage->com_msrv_sms.synchro );
-    pthread_mutex_destroy( &Partage->com_dls_msrv.synchro );
+    pthread_mutex_destroy( &Partage->com_sms.synchro );
+    pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_audio.synchro );

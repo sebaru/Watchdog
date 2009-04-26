@@ -230,12 +230,12 @@
        Partage->i[num].bleu   = bleu;
        Partage->i[num].cligno = cligno;
 
-       pthread_mutex_lock( &Partage->com_dls_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       if ( ! g_list_find( Partage->com_dls_msrv.liste_i, GINT_TO_POINTER(num) ) )
-        { Partage->com_dls_msrv.liste_i = g_list_append( Partage->com_dls_msrv.liste_i,
+       pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
+       if ( ! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) ) )
+        { Partage->com_msrv.liste_i = g_list_append( Partage->com_msrv.liste_i,
                                                          GINT_TO_POINTER(num) );
         }
-       pthread_mutex_unlock( &Partage->com_dls_msrv.synchro );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Partage->audit_bit_interne_per_sec++;
      }
   }
@@ -309,25 +309,25 @@
      { if (Partage->g[numero] & bit) return;
        Partage->g[numero] |= bit;
 
-       pthread_mutex_lock( &Partage->com_dls_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       nbr = g_list_length(Partage->com_dls_msrv.liste_msg_on);
-       if ( nbr < 200 && ! g_list_find( Partage->com_dls_msrv.liste_msg_on, GINT_TO_POINTER(num) ) )
-        { Partage->com_dls_msrv.liste_msg_on = g_list_append( Partage->com_dls_msrv.liste_msg_on,
+       pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
+       nbr = g_list_length(Partage->com_msrv.liste_msg_on);
+       if ( nbr < 200 && ! g_list_find( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) ) )
+        { Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
                                                               GINT_TO_POINTER(num) );
         }
-       pthread_mutex_unlock( &Partage->com_dls_msrv.synchro );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
     else
      { if (! (Partage->g[numero] & bit)) return;
        Partage->g[numero] &= ~bit;
 
-       pthread_mutex_lock( &Partage->com_dls_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       nbr = g_list_length(Partage->com_dls_msrv.liste_msg_off);
-       if ( nbr < 200 && ! g_list_find( Partage->com_dls_msrv.liste_msg_off, GINT_TO_POINTER(num) ) )
-        { Partage->com_dls_msrv.liste_msg_off = g_list_append( Partage->com_dls_msrv.liste_msg_off,
+       pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
+       nbr = g_list_length(Partage->com_msrv.liste_msg_off);
+       if ( nbr < 200 && ! g_list_find( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) ) )
+        { Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
                                                                GINT_TO_POINTER(num) );
         }
-       pthread_mutex_unlock( &Partage->com_dls_msrv.synchro );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
     Partage->audit_bit_interne_per_sec++;
   }

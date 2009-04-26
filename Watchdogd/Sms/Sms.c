@@ -46,9 +46,9 @@
   { gchar *copie;
     gint nbr;
 
-    pthread_mutex_lock( &Partage->com_msrv_sms.synchro );      /* On recupere le nombre de sms en attente */
-    nbr = g_list_length(Partage->com_msrv_sms.liste_sms);
-    pthread_mutex_unlock( &Partage->com_msrv_sms.synchro );
+    pthread_mutex_lock( &Partage->com_sms.synchro );      /* On recupere le nombre de sms en attente */
+    nbr = g_list_length(Partage->com_sms.liste_sms);
+    pthread_mutex_unlock( &Partage->com_sms.synchro );
 
     if (nbr > 50)
      { Info( Config.log, DEBUG_INFO, "Envoyer_sms: liste d'attente pleine" ); return; }
@@ -56,9 +56,9 @@
     copie = g_strdup ( libelle );
     if (!copie) { Info( Config.log, DEBUG_MEM, "Envoyer_sms: pas assez de mémoire" ); return; }
 
-    pthread_mutex_lock( &Partage->com_msrv_sms.synchro );
-    Partage->com_msrv_sms.liste_sms = g_list_append ( Partage->com_msrv_sms.liste_sms, copie );
-    pthread_mutex_unlock( &Partage->com_msrv_sms.synchro );
+    pthread_mutex_lock( &Partage->com_sms.synchro );
+    Partage->com_sms.liste_sms = g_list_append ( Partage->com_sms.liste_sms, copie );
+    pthread_mutex_unlock( &Partage->com_sms.synchro );
   }
 /**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */
@@ -104,14 +104,14 @@
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      {
 
-       if (Partage->com_msrv_sms.sigusr1)                                 /* A-t'on recu un signal USR1 ? */
+       if (Partage->com_sms.sigusr1)                                 /* A-t'on recu un signal USR1 ? */
         { int nbr;
 
-          Partage->com_msrv_sms.sigusr1 = FALSE;
+          Partage->com_sms.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "SMS: Run_sms: SIGUSR1" );
-          pthread_mutex_lock( &Partage->com_msrv_sms.synchro );/* On recupere le nombre de sms en attente */
-          nbr = g_list_length(Partage->com_msrv_sms.liste_sms);
-          pthread_mutex_unlock( &Partage->com_msrv_sms.synchro );
+          pthread_mutex_lock( &Partage->com_sms.synchro );/* On recupere le nombre de sms en attente */
+          nbr = g_list_length(Partage->com_sms.liste_sms);
+          pthread_mutex_unlock( &Partage->com_sms.synchro );
           Info_n( Config.log, DEBUG_INFO, "SMS: Nbr SMS a envoyer", nbr );
         }
 
@@ -140,15 +140,15 @@
        if (error == GN_ERR_INVALIDLOCATION) sms_index=1;      /* On regarde toutes les places de stockage */
 
 /************************************************ Envoi de SMS ********************************************/
-       if ( !Partage->com_msrv_sms.liste_sms )                          /* Attente de demande d'envoi SMS */
+       if ( !Partage->com_sms.liste_sms )                          /* Attente de demande d'envoi SMS */
         { sched_yield();
           continue;
         }
 
        Info( Config.log, DEBUG_DLS, "SMS: Run_sms send: debut" );
-       pthread_mutex_lock( &Partage->com_msrv_sms.synchro );
-       liste_sms = Partage->com_msrv_sms.liste_sms;                    /* Sauvegarde du ptr sms a envoyer */
-       pthread_mutex_unlock( &Partage->com_msrv_sms.synchro );
+       pthread_mutex_lock( &Partage->com_sms.synchro );
+       liste_sms = Partage->com_sms.liste_sms;                    /* Sauvegarde du ptr sms a envoyer */
+       pthread_mutex_unlock( &Partage->com_sms.synchro );
 
        gn_sms_default_submit(&sms);                                          /* The memory is zeroed here */
 
@@ -189,12 +189,12 @@
        else
         { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Envoi SMS Nok", gn_error_print(error)); }
 
-       pthread_mutex_lock( &Partage->com_msrv_sms.synchro );
+       pthread_mutex_lock( &Partage->com_sms.synchro );
        g_free( liste_sms->data );
-       Partage->com_msrv_sms.liste_sms = g_list_remove ( Partage->com_msrv_sms.liste_sms, liste_sms->data );
+       Partage->com_sms.liste_sms = g_list_remove ( Partage->com_sms.liste_sms, liste_sms->data );
        Info_n ( Config.log, DEBUG_INFO, "SMS: Run_sms: Reste a envoyer",
-                g_list_length(Partage->com_msrv_sms.liste_sms) );
-       pthread_mutex_unlock( &Partage->com_msrv_sms.synchro );
+                g_list_length(Partage->com_sms.liste_sms) );
+       pthread_mutex_unlock( &Partage->com_sms.synchro );
 
        Info( Config.log, DEBUG_DLS, "SMS: Run_sms send: fin" );
      }

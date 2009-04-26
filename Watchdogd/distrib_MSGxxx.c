@@ -107,28 +107,28 @@
  void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog )
   { gint i, num, etat;
 
-    if (! (Partage->com_dls_msrv.liste_msg_on  ||
-           Partage->com_dls_msrv.liste_msg_off)
+    if (! (Partage->com_msrv.liste_msg_on  ||
+           Partage->com_msrv.liste_msg_off)
        ) return;                                                        /* Si pas de message, on se barre */
 
-    pthread_mutex_lock( &Partage->com_dls_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
-    if (Partage->com_dls_msrv.liste_msg_off)
-     { num = GPOINTER_TO_INT(Partage->com_dls_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
+    pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
+    if (Partage->com_msrv.liste_msg_off)
+     { num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
        etat  = FALSE;
-       Partage->com_dls_msrv.liste_msg_off = g_list_remove ( Partage->com_dls_msrv.liste_msg_off,
+       Partage->com_msrv.liste_msg_off = g_list_remove ( Partage->com_msrv.liste_msg_off,
                                                              GINT_TO_POINTER(num) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter OFF",
-                                      g_list_length(Partage->com_dls_msrv.liste_msg_off) );
+                                      g_list_length(Partage->com_msrv.liste_msg_off) );
      }
     else
-     { num = GPOINTER_TO_INT(Partage->com_dls_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
+     { num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
        etat  = TRUE;
-       Partage->com_dls_msrv.liste_msg_on = g_list_remove ( Partage->com_dls_msrv.liste_msg_on,
+       Partage->com_msrv.liste_msg_on = g_list_remove ( Partage->com_msrv.liste_msg_on,
                                                             GINT_TO_POINTER(num) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter ON",
-                                      g_list_length(Partage->com_dls_msrv.liste_msg_on) );
+                                      g_list_length(Partage->com_msrv.liste_msg_on) );
      }
-    pthread_mutex_unlock( &Partage->com_dls_msrv.synchro );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Recu message DLS", num );
 

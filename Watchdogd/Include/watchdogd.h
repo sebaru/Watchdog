@@ -60,7 +60,7 @@
     TYPE_INFO_NEW_MOTIF                                         /* Le fils doit traiter un evenement Ixxx */
   };
 
- struct COM_DLS_MSRV                                    /* Communication entre DLS et le serveur Watchdog */
+ struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
@@ -106,10 +106,10 @@
     guchar Arret;                                                  /* != 0 si l'arret systeme est demandé */
 
                                                                                 /* Interfacage avec D.L.S */
-    struct COM_DLS_MSRV com_dls_msrv;                                            /* Changement du à D.L.S */
-    struct COM_RS485 com_rs485;                                                                   /* Comm rs485 */
+    struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
+    struct COM_RS485 com_rs485;                                                             /* Comm rs485 */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
-    struct COM_MSRV_SMS com_msrv_sms;                                                    /* Comm msrv/sms */
+    struct COM_SMS com_sms;                                                              /* Comm msrv/sms */
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
