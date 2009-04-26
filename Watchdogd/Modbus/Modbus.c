@@ -770,7 +770,6 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    liste = Partage->com_modbus.Modules_MODBUS;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                           /* On veut parler au prochain module MODBUS */
        usleep(1000);
@@ -780,7 +779,6 @@
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_tous_MODBUS();
           Charger_tous_MODBUS();
-          liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.reload = FALSE;
         }
 
@@ -790,7 +788,6 @@
           module = Chercher_module_by_id ( Partage->com_modbus.admin_del );
           Deconnecter_module  ( module );
           Decharger_un_MODBUS ( module );
-          liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.admin_del = 0;
         }
 
@@ -805,7 +802,6 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module",
                   Partage->com_modbus.admin_add );
           Charger_un_MODBUS ( Partage->com_modbus.admin_add );
-          liste = Partage->com_modbus.Modules_MODBUS;
           Partage->com_modbus.admin_add = 0;
         }
 
@@ -837,44 +833,44 @@
            Modbus_is_actif() == FALSE)
         { sleep(2); continue; }
 
-       if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { liste = Partage->com_modbus.Modules_MODBUS; }
-       module = (struct MODULE_MODBUS *)liste->data;
-       liste = liste->next;                            /* On prépare le prochain accès au prochain module */
-
-       if (module->actif != TRUE) { continue; }
-
-/*********************************** Début de l'interrogation du module ***********************************/
        date = time(NULL);                                                 /* On recupere l'heure actuelle */
-       if ( date < module->date_retente )                      /* Si attente retente, on change de module */
-        { continue; }
-
-       if ( ! module->started )                                              /* Communication OK ou non ? */
-        { if ( Connecter_module( module ) )
-           { if ( module->watchdog )
-              { Init_watchdog_modbus(module); }
-             module->date_retente = 0;;
-             module->started = TRUE;
-           }
-          else
-           { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->id );
-             module->date_retente = date + MODBUS_RETRY;
+       liste = Partage->com_modbus.Modules_MODBUS;
+       while (liste)
+        { module = (struct MODULE_MODBUS *)liste->data;
+          if ( module->actif != TRUE || 
+               date < module->date_retente )                   /* Si attente retente, on change de module */
+           { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
            }
+
+/*********************************** Début de l'interrogation du module ***********************************/
+          if ( ! module->started )                                           /* Communication OK ou non ? */
+           { if ( Connecter_module( module ) )
+              { if ( module->watchdog )
+                 { Init_watchdog_modbus(module); }
+                module->date_retente = 0;;
+                module->started = TRUE;
+              }
+             else
+              { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->id );
+                module->date_retente = date + MODBUS_RETRY;
+              }
+           }
+          else
+           { if ( module->request )                                  /* Requete en cours pour ce module ? */
+              { Recuperer_borne ( module ); }
+             else
+              {                                        /* Si pas de requete, on passe a la borne suivante */
+                module->borne_en_cours = module->borne_en_cours->next;
+                if ( ! module->borne_en_cours )                                      /* Tour des bornes ? */
+                 { module->borne_en_cours = module->Bornes; }
+
+/***************************** Début de l'interrogation de la borne du module *****************************/
+                Interroger_borne ( module );
+             }
+           }
+          liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
-
-       if ( module->request )                                        /* Requete en cours pour ce module ? */
-        { Recuperer_borne ( module );
-          continue;
-        }
-
-                                                       /* Si pas de requete, on passe a la borne suivante */
-       module->borne_en_cours = module->borne_en_cours->next;
-       if ( ! module->borne_en_cours)                                                /* Tour des bornes ? */
-        { module->borne_en_cours = module->Bornes; }
-
-/***************************** Début de l'interrogation de la borne du module ******************************/
-       Interroger_borne ( module );
      }
 
     Decharger_tous_MODBUS();

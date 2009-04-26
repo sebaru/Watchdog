@@ -39,10 +39,6 @@
  #include <signal.h>
  #include <semaphore.h>
 
- #include "Erreur.h"
- #include "Config.h"
- #include "Rs485.h"
- #include "EntreeANA_DB.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
  #define TEMPS_RETENTE   5                /* Tente de se raccrocher au module banni toutes les 5 secondes */
@@ -452,7 +448,6 @@
     id_en_cours = 0;
     attente_reponse = FALSE;
 
-    liste = Partage->com_rs485.Modules_RS485;
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { time_t date;                                            /* On veut parler au prochain module RS485 */
        usleep(1);
@@ -462,7 +457,6 @@
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Reloading conf" );
           Decharger_tous_RS485();
           Charger_tous_RS485();
-          liste = Partage->com_rs485.Modules_RS485;
           Partage->com_rs485.reload = FALSE;
         }
 
@@ -470,14 +464,12 @@
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Deleting module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_del );
           Decharger_un_RS485 ( module );
-          liste = Partage->com_rs485.Modules_RS485;
           Partage->com_rs485.admin_del = 0;
         }
 
        if (Partage->com_rs485.admin_add)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Adding module" );
           Charger_un_RS485 ( Partage->com_rs485.admin_add );
-          liste = Partage->com_rs485.Modules_RS485;
           Partage->com_rs485.admin_add = 0;
         }
 
@@ -499,79 +491,78 @@
            Rs485_is_actif() == FALSE)
         { sleep(2); continue; }
 
-       if (liste == NULL)                                 /* L'admin peut deleter les modules un par un ! */
-        { liste = Partage->com_rs485.Modules_RS485; }
-
-       module = (struct MODULE_RS485 *)liste->data;
-       if (module->actif != TRUE) { liste = liste->next; continue; }
-
        date = time(NULL);                                                 /* On recupere l'heure actuelle */
-       if ( attente_reponse == FALSE )
-        { if ( module->date_retente <= date )                                    /* module banni ou non ? */
-           { if (module->date_ana > date)                                   /* Ana toutes les 10 secondes */
-              { Envoyer_trame_want_inputTOR( module, fd_rs485 );
-              }
-             else
-              { Envoyer_trame_want_inputANA( module, fd_rs485 );
-                module->date_ana = date + 2;                       /* Prochain update ana dans 2 secondes */
-              }
+       liste = Partage->com_rs485.Modules_RS485;
+       while (liste)
+        { module = (struct MODULE_RS485 *)liste->data;
+          if (module->actif != TRUE) { liste = liste->next; continue; }
 
-             sched_yield();
-             module->date_requete = date;
-             module->date_retente = 0;
-             attente_reponse = TRUE;
-           }
-        }
-       else
-        { if ( date - module->date_requete > 2 )                                   /* Si la comm est niet */
-           { module->date_retente = date + TEMPS_RETENTE;
-             attente_reponse = FALSE;
-             memset (&Trame, 0, sizeof(struct TRAME_RS485) );
-             nbr_oct_lu = 0;
-             Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->id );
-             liste = liste->next;
-             continue;
-           }
-          else { module->date_retente = 0; }
-        }
-
-       FD_ZERO(&fdselect);                                          /* Reception sur la ligne serie RS485 */
-       FD_SET(fd_rs485, &fdselect );
-       tv.tv_sec = 0;
-       tv.tv_usec= 100000;
-       retval = select(fd_rs485+1, &fdselect, NULL, NULL, &tv );                /* Attente d'un caractere */
-       if (retval>=0 && FD_ISSET(fd_rs485, &fdselect) )
-	{ int bute, cpt;
-          if (nbr_oct_lu<TAILLE_ENTETE)
-	   { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
-
-          cpt = read( fd_rs485, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
-          if (cpt>0)
-           { nbr_oct_lu = nbr_oct_lu + cpt;
-	     if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                          /* traitement trame */
-              { int crc_recu;
-                nbr_oct_lu = 0;
-                /*for (cpt=0; cpt<sizeof(Trame); cpt++)
-                 { printf("%02X ", (unsigned char)*((unsigned char *)&Trame +cpt) ); }
-                printf("\n");*/
-                crc_recu =  (*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 1)) & 0xFF;
-                crc_recu +=  ((*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 2)) & 0xFF)<<8;
-                if (crc_recu != Calcul_crc16(&Trame))
-                 { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
-                else
-                 { pthread_mutex_lock( &Partage->com_dls.synchro );
-                   if (Processer_trame( module, &Trame ))  /* Si la trame est processée, on passe suivant */
-                    { attente_reponse = FALSE;
-                      liste = liste->next;
-                    }
-                   pthread_mutex_unlock( &Partage->com_dls.synchro );
+          if ( attente_reponse == FALSE )
+           { if ( module->date_retente <= date )                                 /* module banni ou non ? */
+              { if (module->date_ana > date)                                /* Ana toutes les 10 secondes */
+                 { Envoyer_trame_want_inputTOR( module, fd_rs485 );
                  }
-                memset (&Trame, 0, sizeof(struct TRAME_RS485) );
+                else
+                 { Envoyer_trame_want_inputANA( module, fd_rs485 );
+                   module->date_ana = date + 2;                       /* Prochain update ana dans 2 secondes */
+                 }
+
+                sched_yield();
+                module->date_requete = date;
+                module->date_retente = 0;
+                attente_reponse = TRUE;
               }
            }
-	}
-      /*usleep(1);*/
-     }
+          else
+           { if ( date - module->date_requete > 2 )                                /* Si la comm est niet */
+              { module->date_retente = date + TEMPS_RETENTE;
+                attente_reponse = FALSE;
+                memset (&Trame, 0, sizeof(struct TRAME_RS485) );
+                nbr_oct_lu = 0;
+                Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->id );
+                liste = liste->next;
+                continue;
+              }
+             else { module->date_retente = 0; }
+           }
+
+          FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RS485 */
+          FD_SET(fd_rs485, &fdselect );
+          tv.tv_sec = 0;
+          tv.tv_usec= 100000;
+          retval = select(fd_rs485+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
+          if (retval>=0 && FD_ISSET(fd_rs485, &fdselect) )
+	   { int bute, cpt;
+             if (nbr_oct_lu<TAILLE_ENTETE)
+	      { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
+ 
+             cpt = read( fd_rs485, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
+             if (cpt>0)
+              { nbr_oct_lu = nbr_oct_lu + cpt;
+   	        if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
+                 { int crc_recu;
+                   nbr_oct_lu = 0;
+                   /*for (cpt=0; cpt<sizeof(Trame); cpt++)
+                     { printf("%02X ", (unsigned char)*((unsigned char *)&Trame +cpt) ); }
+                   printf("\n");*/
+                   crc_recu =   (*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 1)) & 0xFF;
+                   crc_recu += ((*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 2)) & 0xFF)<<8;
+                   if (crc_recu != Calcul_crc16(&Trame))
+                    { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
+                   else
+                    { pthread_mutex_lock( &Partage->com_dls.synchro );
+                      if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
+                       { attente_reponse = FALSE;
+                         liste = liste->next;
+                       }
+                      pthread_mutex_unlock( &Partage->com_dls.synchro );
+                    }
+                   memset (&Trame, 0, sizeof(struct TRAME_RS485) );
+                 }
+              }
+	   }
+        }                                                                           /* Fin du While liste */
+      }                                                                    /* Fin du while partage->arret */
     close(fd_rs485);
     Decharger_tous_RS485();
     Info_n( Config.log, DEBUG_FORK, "RS485: Run_rs485: Down", pthread_self() );
