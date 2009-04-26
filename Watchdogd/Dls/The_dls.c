@@ -371,7 +371,7 @@
     Partage->com_dls.liste_plugin_reset = NULL;
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
-
+printf("DLS 1\n");
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { struct timeval tv_avant, tv_apres;
 
@@ -382,6 +382,7 @@
           Charger_plugins();
         }
 
+printf("DLS 2\n");
        if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
         { Prendre_heure ();                            /* Mise à jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
@@ -398,6 +399,7 @@
           Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) );
         }
 
+printf("DLS 3\n");
        if (Partage->com_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
@@ -418,13 +420,16 @@
         { struct PLUGIN_DLS *plugin_actuel;
           plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
 
+printf("DLS 4\n");
           if (plugin_actuel->on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
+printf("DLS 5\n");
              pthread_mutex_lock( &Partage->com_dls.synchro );
              plugin_actuel->go( plugin_actuel->starting );                          /* On appel le plugin */
              pthread_mutex_unlock( &Partage->com_dls.synchro );
              gettimeofday( &tv_apres, NULL );
+printf("DLS 6\n");
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->starting = 0;
            }
