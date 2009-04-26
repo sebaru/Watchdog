@@ -88,7 +88,7 @@
     Libere_DB_SQL( Config.log, &db );
 
     if (!dls)
-     { Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Plugin non trouvé", id );
+     { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Plugin non trouvé", id );
        return(FALSE);
      }
 
@@ -183,4 +183,27 @@
         { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->nom ); }
      } while ( TRUE );
  }
+/**********************************************************************************************************/
+/* Activer_plugin_by_id: Active ou non un plugin by id                                                    */
+/* Entrée: l'ID du plugin                                                                                 */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Activer_plugin_by_id ( gint id, gboolean actif )
+  { struct PLUGIN_DLS *plugin;
+    GList *plugins;
+
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    plugins = Partage->com_dls.Plugins;
+    while(plugins)                                                       /* Liberation mémoire des modules */
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
+
+       if ( plugin->id == id )
+        { plugin->on = actif;
+          Info_n( Config.log, DEBUG_DLS, "DLS: Activer_plugin_by_id done", plugin->id );
+          break;
+        }
+       plugins = plugins->next;
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
 /*--------------------------------------------------------------------------------------------------------*/

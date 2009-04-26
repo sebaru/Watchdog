@@ -47,6 +47,7 @@
  extern void Decharger_un_plugin_by_id ( gint id );
  extern void Decharger_plugins ( void );
  extern void Charger_plugins ( void );
+ extern void Activer_plugin_by_id ( gint id, gboolean actif );
 
  extern void Run_dls ( void );                                                          /* Dans The_dls.c */
  extern int E( int num );

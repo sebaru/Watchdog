@@ -397,6 +397,16 @@
           Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) );
         }
 
+       if (Partage->com_dls.admin_start)                                  /* A-t-on un plugin a allumer ? */
+        { Activer_plugin_by_id ( Partage->com_dls.admin_start, TRUE );
+          Partage->com_dls.admin_start = 0;
+        }
+
+       if (Partage->com_dls.admin_stop)                                  /* A-t-on un plugin a eteindre ? */
+        { Activer_plugin_by_id ( Partage->com_dls.admin_stop, FALSE );
+          Partage->com_dls.admin_stop = 0;
+        }
+
        if (Partage->com_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
