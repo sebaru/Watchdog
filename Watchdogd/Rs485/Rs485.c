@@ -41,12 +41,12 @@
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
- #define TEMPS_RETENTE   5                /* Tente de se raccrocher au module banni toutes les 5 secondes */
+ #define TEMPS_RETENTE   50               /* Tente de se raccrocher au module banni toutes les 5 secondes */
 
  static gint fd_rs485;
 
 /**********************************************************************************************************/
-/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                       */
+/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -97,7 +97,7 @@
        module->s_max    = atoi(db->row[7]);
        module->sa_min   = atoi(db->row[8]);
        module->sa_max   = atoi(db->row[9]);
-       module->actif    = atoi (db->row[10]);
+       module->actif    = atoi(db->row[10]);
                                                                         /* Ajout dans la liste de travail */
        Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id       = ", module->id    );
        Info_n( Config.log, DEBUG_RS485, "                   -  actif   = ", module->actif );
@@ -420,7 +420,7 @@
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_rs485 ( void )
-  { gint retval, nbr_oct_lu, id_en_cours, attente_reponse, cpt;
+  { gint retval, nbr_oct_lu, id_en_cours, attente_reponse;
     struct MODULE_RS485 *module;
     struct TRAME_RS485 Trame;
     struct timeval tv;
@@ -449,8 +449,7 @@
     attente_reponse = FALSE;
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { time_t date;                                            /* On veut parler au prochain module RS485 */
-       usleep(1);
+     { usleep(1);
        sched_yield();
 
        if (Partage->com_rs485.reload == TRUE)
@@ -491,31 +490,30 @@
            Rs485_is_actif() == FALSE)
         { sleep(2); continue; }
 
-       date = time(NULL);                                                 /* On recupere l'heure actuelle */
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->actif != TRUE) { liste = liste->next; continue; }
 
           if ( attente_reponse == FALSE )
-           { if ( module->date_retente <= date )                                 /* module banni ou non ? */
-              { if (module->date_ana > date)                                /* Ana toutes les 10 secondes */
+           { if ( module->date_retente <= Partage->top )                         /* module banni ou non ? */
+              { if (module->date_ana > Partage->top)                        /* Ana toutes les 10 secondes */
                  { Envoyer_trame_want_inputTOR( module, fd_rs485 );
                  }
                 else
                  { Envoyer_trame_want_inputANA( module, fd_rs485 );
-                   module->date_ana = date + 2;                       /* Prochain update ana dans 2 secondes */
+                   module->date_ana = Partage->top + 50;           /* Prochain update ana dans 2 secondes */
                  }
 
                 sched_yield();
-                module->date_requete = date;
+                module->date_requete = Partage->top;
                 module->date_retente = 0;
                 attente_reponse = TRUE;
               }
            }
           else
-           { if ( date - module->date_requete > 2 )                                /* Si la comm est niet */
-              { module->date_retente = date + TEMPS_RETENTE;
+           { if ( Partage->top - module->date_requete > 20 )                       /* Si la comm est niet */
+              { module->date_retente = Partage->top + TEMPS_RETENTE;
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
@@ -528,8 +526,8 @@
 
           FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RS485 */
           FD_SET(fd_rs485, &fdselect );
-          tv.tv_sec = 0;
-          tv.tv_usec= 100000;
+          tv.tv_sec = 1;
+          tv.tv_usec= 0;
           retval = select(fd_rs485+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
           if (retval>=0 && FD_ISSET(fd_rs485, &fdselect) )
 	   { int bute, cpt;

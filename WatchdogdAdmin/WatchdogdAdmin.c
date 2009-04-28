@@ -130,8 +130,8 @@
      { FD_ZERO(&fdselect);
        FD_SET(0, &fdselect);
        FD_SET(Socket, &fdselect );
-       tv.tv_sec = 0;
-       tv.tv_usec= 100;
+       tv.tv_sec = 1;
+       tv.tv_usec= 0;
        retval = select(Socket+1, &fdselect, NULL, NULL, &tv );            /* Attente d'un caractere */
 
        if (retval>=0)
@@ -152,8 +152,8 @@
              reponse[taille] = 0;
              printf("%s", reponse ); fflush(stdout);
            }
-	}
-       usleep(1);
+	} else break;
+       usleep(100);
      }
 
     close( Socket );

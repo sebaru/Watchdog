@@ -49,6 +49,36 @@
  struct PARTAGE *Partage;                                    /* Accès aux données partagées des processes */
 
 /**********************************************************************************************************/
+/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Exporter ( void )
+  { int fd;
+    unlink ( FICHIER_EXPORT );
+    fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
+                Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
+              }
+    else      { Info_c( Config.log, DEBUG_FORK, "Could not export", FICHIER_EXPORT ); }
+    close (fd);
+  }
+/**********************************************************************************************************/
+/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                         */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static gint Importer ( void )
+  { int fd;
+    fd = open( FICHIER_EXPORT, O_RDONLY );
+    if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
+                Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
+                close (fd);
+                return(1);
+              }
+    return(0);
+  }
+/**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
@@ -115,7 +145,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
-  { gint cpth_prochain_save_db;
+  { gint cpt_5_minutes;
     gint scenario_test_date;
     struct DB *db;
     gint cpt;
@@ -127,7 +157,7 @@
     if (!db)
      { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
 
-    cpth_prochain_save_db = Partage->top + 3000;
+    cpt_5_minutes = Partage->top + 3000;
     scenario_test_date = Partage->top + 100;
 
     sleep(1);
@@ -139,11 +169,12 @@
        Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
 
-       if (cpth_prochain_save_db < Partage->top)                        /* Update DB toutes les 5 minutes */
+       if (cpt_5_minutes < Partage->top)                        /* Update DB toutes les 5 minutes */
         { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPTH" );
           for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
            { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
-          cpth_prochain_save_db = Partage->top + 3000;                 /* Sauvegarde toutes les 5 minutes */
+          Exporter();
+          cpt_5_minutes = Partage->top + 3000;                 /* Sauvegarde toutes les 5 minutes */
         }
 
        if (scenario_test_date < Partage->top)                             /* Update DB toutes les minutes */
@@ -299,36 +330,6 @@
     fclose(fd); 
 
     return(fg);
-  }
-/**********************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Exporter ( void )
-  { int fd;
-    unlink ( FICHIER_EXPORT );
-    fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
-              }
-    else      { Info_c( Config.log, DEBUG_FORK, "Could not export", FICHIER_EXPORT ); }
-    close (fd);
-  }
-/**********************************************************************************************************/
-/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static gint Importer ( void )
-  { int fd;
-    fd = open( FICHIER_EXPORT, O_RDONLY );
-    if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_FORK, "Donnees importées", FICHIER_EXPORT );
-                close (fd);
-                return(1);
-              }
-    return(0);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                          */
