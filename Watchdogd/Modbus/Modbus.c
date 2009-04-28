@@ -771,8 +771,7 @@
      }
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { time_t date;                                           /* On veut parler au prochain module MODBUS */
-       usleep(1000);
+     { usleep(1000);
        sched_yield();
 
        if (Partage->com_modbus.reload == TRUE)
@@ -833,12 +832,11 @@
            Modbus_is_actif() == FALSE)
         { sleep(2); continue; }
 
-       date = time(NULL);                                                 /* On recupere l'heure actuelle */
        liste = Partage->com_modbus.Modules_MODBUS;
        while (liste)
         { module = (struct MODULE_MODBUS *)liste->data;
           if ( module->actif != TRUE || 
-               date < module->date_retente )                   /* Si attente retente, on change de module */
+               Partage->top < module->date_retente )           /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
            }
@@ -853,7 +851,7 @@
               }
              else
               { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->id );
-                module->date_retente = date + MODBUS_RETRY;
+                module->date_retente = Partage->top + MODBUS_RETRY;
               }
            }
           else
