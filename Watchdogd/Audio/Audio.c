@@ -88,7 +88,8 @@
 
        pthread_mutex_lock( &Partage->com_audio.synchro );                                /* lockage futex */
        num = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
-       Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio, GINT_TO_POINTER(num) );
+       Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio,
+                                                        GINT_TO_POINTER(num) );
 #ifdef DEBUG
        Info_n( Config.log, DEBUG_INFO, "AUDIO: Run_audio: Reste a traiter",
                                        g_list_length(Partage->com_audio.liste_audio) );
@@ -101,6 +102,8 @@
        if (msg)
         { gchar nom_fichier[128], cible[128];
           gint fd_cible, pid;
+
+          SM ( msg->num_voc, 1 );          /* Positionnement du profil audio en passant par le monostable */
 
           g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
           g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
