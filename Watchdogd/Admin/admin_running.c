@@ -237,7 +237,7 @@
               client = (struct CLIENT *)liste->data;
 
               g_snprintf( erreur.message, sizeof(erreur.message), msg );
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+              Envoi_client( client_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
 
               g_snprintf( chaine, sizeof(chaine), " Envoi du message a %s@%s\n",

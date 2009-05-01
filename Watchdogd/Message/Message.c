@@ -231,7 +231,7 @@
                 "UPDATE %s SET "             
                 "num=%d,libelle='%s',type=%d,num_syn=%d,num_voc=%d,not_inhibe=%s,objet='%s',sms=%s "
                 "WHERE id=%d",
-                NOM_TABLE_MSG, msg->num, libelle, msg->type, 0, 0,
+                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->num_voc,
                                (msg->not_inhibe ? "true" : "false"),
                                objet, (msg->sms ? "true" : "false"), msg->id );
     g_free(libelle);
