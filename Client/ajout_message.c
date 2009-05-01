@@ -68,7 +68,7 @@
                   index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
                   Edit_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
 printf("num_syn=%d\n", Edit_msg.num_syn );
-                  Edit_msg.num_voc    = 0; /* A voir !!! */
+                  Edit_msg.num_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
                                 (gchar *)&Edit_msg, sizeof( struct CMD_EDIT_MESSAGE ) );
                 }
@@ -84,7 +84,7 @@ printf("num_syn=%d\n", Edit_msg.num_syn );
                   new_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   index              = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
                   new_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-                  new_msg.num_voc    = 0; /* A voir !!! */
+                  new_msg.num_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
 
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
                                 (gchar *)&new_msg, sizeof( struct CMD_EDIT_MESSAGE ) );
@@ -201,7 +201,7 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
     Entry_objet = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, 2, 3 );
-
+printf("Message voc = %d\n", edit_msg->num_voc );
     texte = gtk_label_new( _("Monostable") );                            /* Numéro du bit M a positionner */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
     Spin_bit_voc = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
@@ -230,6 +230,7 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
      { /*syn = Rechercher_syn_par_num( Nom_syn, msg->num_synoptique );*/
        Edit_msg.id = edit_msg->id;
        Edit_msg.num_syn = edit_msg->num_syn;
+       Edit_msg.num_voc = edit_msg->num_voc;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_msg->objet );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_msg->type );
@@ -238,6 +239,7 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
 
        /*gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(Combo_syn)->entry), syn->libelle );*/
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_msg->num );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_voc), edit_msg->num_voc );
        gtk_widget_grab_focus( Entry_lib );
        /*for (cpt=0; cpt<MAX_HP; cpt++)
         { gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(Check_hp[cpt]), (msg.hps & (1<<cpt)) ); }*/
