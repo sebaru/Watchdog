@@ -264,7 +264,7 @@
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGINT, &sig, NULL );                                               /* On ignore le SIGINT */
 
-    Top = time(NULL);                                                        /* On prend l'heure actuelle */
+    Top = Partage->top;                                                      /* On prend l'heure actuelle */
     Arret = 0;
     Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
 
@@ -651,7 +651,7 @@
            }
         }
        else
-       if ( time(NULL) - Top > Config.max_inactivite )                          /* Detection d'inactivite */
+       if (  Top + Config.max_inactivite < Partage->top )                       /* Detection d'inactivite */
         { Info( Config.log, DEBUG_INFO, "Inactivity time reached" );
           Arret = FIN;                      /* Arret "Local" du process: n'impacte pas les autres process */
         }
@@ -700,12 +700,12 @@
 
     Partage->Sous_serveur[id].nb_client = -1;
     Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                          /* Information traitée */
-    Partage->Sous_serveur[id].Clients = NULL;
+    Partage->Sous_serveur[id].Clients   = NULL;
+    Partage->Sous_serveur[id].pid       = -1;
     if (Partage->jeton == id)
      { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
        Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: jeton rendu", id );
      }
-
     Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: Down", id );
     pthread_exit( NULL );
   }

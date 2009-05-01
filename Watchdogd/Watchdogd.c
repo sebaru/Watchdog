@@ -158,7 +158,7 @@
      { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
 
     cpt_5_minutes = Partage->top + 3000;
-    scenario_test_date = Partage->top + 100;
+    scenario_test_date = Partage->top + 600;
 
     sleep(1);
     while( Partage->Arret < FIN )
@@ -169,12 +169,12 @@
        Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
 
-       if (cpt_5_minutes < Partage->top)                        /* Update DB toutes les 5 minutes */
+       if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
         { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPTH" );
           for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
            { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
           Exporter();
-          cpt_5_minutes = Partage->top + 3000;                 /* Sauvegarde toutes les 5 minutes */
+          cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
         }
 
        if (scenario_test_date < Partage->top)                             /* Update DB toutes les minutes */
