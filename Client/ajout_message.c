@@ -3,6 +3,27 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       sam 20 nov 2004 13:47:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * ajout_message.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
 
  #include <gnome.h>
  
@@ -17,10 +38,12 @@
  static GtkWidget *Spin_num;                                /* Numéro du message en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                       /* Libelle du message */
  static GtkWidget *Entry_objet;                                                       /* Objet du message */
- static GtkWidget *Combo_type;                                                 /* Type actuel du message */
- static GtkWidget *Combo_syn;                                                  /* Type actuel du message */
+ static GtkWidget *Combo_type;                                                  /* Type actuel du message */
+ static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
  static GtkWidget *Check_not_inhibe;                              /* Le message est-il actif ou inhibe ?? */
- static GtkWidget *Check_sms;                                     /* Le message est-il actif ou inhibe ?? */
+ static GtkWidget *Check_sms;                                 /* Le message doit-il etre envoyé par sms ? */
+ static GtkWidget *Spin_bit_voc;                                                   /* Numéro du bit vocal */
+ static GtkWidget *Entry_bit_voc;                                /* Mnémonique correspondant au bit vocal */
  static GList *Liste_index_syn;
  static struct CMD_EDIT_MESSAGE Edit_msg;                                   /* Message en cours d'édition */
 
@@ -93,6 +116,30 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
      }
   }
 /**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ void Proto_afficher_mnemo_voc_message ( struct CMD_SHOW_MNEMONIQUE *mnemo )
+  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
+    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
+              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
+    gtk_entry_set_text( GTK_ENTRY(Entry_bit_voc), chaine );
+  }
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Afficher_mnemo_voc ( void )
+  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
+    mnemo.type = MNEMO_MONOSTABLE;
+    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_voc) );
+    
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
+                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
+  }
+/**********************************************************************************************************/
 /* Ajouter_message: Ajoute un message au systeme                                                          */
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
@@ -154,6 +201,17 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
     Entry_objet = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, 2, 3 );
+
+    texte = gtk_label_new( _("Monostable") );                            /* Numéro du bit M a positionner */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
+    Spin_bit_voc = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    g_signal_connect( G_OBJECT(Spin_bit_voc), "changed",
+                      G_CALLBACK(Afficher_mnemo_voc), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_voc, 1, 2, 3, 4 );
+
+    Entry_bit_voc = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_voc), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_voc, 2, 4, 3, 4 );
 
     texte = gtk_label_new( _("Synopt.") );                       /* Choix du synoptique cible du messages */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );

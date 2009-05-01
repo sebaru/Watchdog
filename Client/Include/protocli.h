@@ -255,6 +255,7 @@
  extern void Creer_page_message( void );
 
  extern void Menu_ajouter_editer_message ( struct CMD_EDIT_MESSAGE *edit_msg );   /* Dans ajout_message.c */
+ extern void Proto_afficher_mnemo_voc_message ( struct CMD_SHOW_MNEMONIQUE *mnemo );
 
  extern void Proto_cacher_un_synoptique( struct CMD_ID_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
