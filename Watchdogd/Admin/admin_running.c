@@ -59,6 +59,7 @@
        Write_admin ( client->connexion, "  setm xxx i           - Set Mxxx = i\n" );
        Write_admin ( client->connexion, "  getb xxx             - Get Bxxx\n" );
        Write_admin ( client->connexion, "  setb xxx i           - Set Bxxx = i\n" );
+       Write_admin ( client->connexion, "  geta xxx i           - Get Axxx\n" );
        Write_admin ( client->connexion, "  seta xxx i           - Set Axxx = i\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
@@ -197,6 +198,12 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, B(num) );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "geta" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, A(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setb" ) )
