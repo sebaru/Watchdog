@@ -161,6 +161,10 @@
      { gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, event, NULL, F_client );
        return(TRUE);
      }
+    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
+     { Menu_go_to_syn();
+       return(TRUE);
+     }
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -198,7 +202,6 @@
     else
      { g_snprintf( ack, sizeof(ack), _("no") ); }
 
-printf("New histo: type=%d %d %s %s %s\n", histo->type, histo->id, histo->objet, histo->libelle, date );
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NUM, histo->id,
