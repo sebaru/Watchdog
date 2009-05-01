@@ -234,7 +234,7 @@
            while(liste)                                            /* Parcours de la liste des clients */
             { struct CMD_GTK_MESSAGE erreur;
               struct CLIENT *client_wat;
-              client = (struct CLIENT *)liste->data;
+              client_wat = (struct CLIENT *)liste->data;
 
               g_snprintf( erreur.message, sizeof(erreur.message), msg );
               Envoi_client( client_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

@@ -43,7 +43,7 @@
                   Edit_msg.sms        = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_sms) );
                   Edit_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-                  Edit_msg.num_syn    = GPOINTER_TO_INT((g_list_nth( Liste_index_syn, index ))->data);
+                  Edit_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
 printf("num_syn=%d\n", Edit_msg.num_syn );
                   Edit_msg.num_voc    = 0; /* A voir !!! */
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
@@ -60,7 +60,7 @@ printf("num_syn=%d\n", Edit_msg.num_syn );
                   new_msg.sms        = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_sms) );
                   new_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   index              = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-                  new_msg.num_syn    = GPOINTER_TO_INT((g_list_nth( Liste_index_syn, index ))->data);
+                  new_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
                   new_msg.num_voc    = 0; /* A voir !!! */
 
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
@@ -85,9 +85,12 @@ printf("num_syn=%d\n", Edit_msg.num_syn );
     g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->mnemo, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-
+printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
     if (Edit_msg.num_syn == syn->id)
-     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_syn), g_list_length(Liste_index_syn) ); }
+     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_syn),
+                                 g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
+                                );
+     }
   }
 /**********************************************************************************************************/
 /* Ajouter_message: Ajoute un message au systeme                                                          */
