@@ -92,7 +92,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE:
              { struct CMD_SHOW_SYNOPTIQUE *syn;
                Set_progress_plusun();
-
+printf("bouh\n");
                syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
                if (!syn) return; 
 
@@ -102,6 +102,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN:
              { 
+printf("bouh fin\n");
                g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_syn_for_message, NULL );
                g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
                g_list_free( Arrivee_syn );

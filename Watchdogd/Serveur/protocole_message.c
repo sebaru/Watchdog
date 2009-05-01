@@ -77,8 +77,7 @@
              }
             break;
        case SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE:
-             { Info_n( Config.log, DEBUG_FORK, "SSRV: Protole: Creation pthread envoi_syn_for_masg",
-                                               client->dls.id );
+             { Info( Config.log, DEBUG_FORK, "SSRV: Protole: Creation pthread envoi_syn_for_msg" );
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_message_thread, client );
                pthread_detach( tid );
              }

@@ -169,7 +169,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,mnemo,groupe"
-                " FROM %s ORDER BY id", NOM_TABLE_SYNOPTIQUE );
+                " FROM %s ORDER BY mnemo,libelle", NOM_TABLE_SYNOPTIQUE );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
