@@ -291,7 +291,6 @@
   { Envoyer_synoptiques_tag( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE,
                                                   SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
-    Client_mode ( client, ENVOI_PALETTE_FOR_ATELIER_PALETTE );
     pthread_exit( NULL );
     return(NULL);
   }
