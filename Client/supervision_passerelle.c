@@ -41,6 +41,20 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+
+/**********************************************************************************************************/
+/* Changer_vue_directe: Demande au serveur une nouvelle vue                                               */
+/* Entrée: une reference sur le message                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Changer_vue_directe ( guint num_syn )
+  { struct CMD_ID_SYNOPTIQUE cmd;
+    if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
+
+    cmd.id = num_syn;
+    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
+                   (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
+  }
 /**********************************************************************************************************/
 /* Changer_vue: Demande au serveur une nouvelle vue                                                       */
 /* Entrée: une reference sur le message                                                                   */
@@ -54,11 +68,7 @@
        )
     return(FALSE);
 
-    if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, pass->syn_cible_id, TRUE )) return(TRUE);
-
-    cmd.id = pass->syn_cible_id;
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
-                   (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
+    Changer_vue_directe ( pass->syn_cible_id );
     return(TRUE);
   }
 /**********************************************************************************************************/

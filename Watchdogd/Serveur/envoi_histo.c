@@ -47,6 +47,7 @@
 
     rezo_histo->id               = histo->msg.num;
     rezo_histo->type             = histo->msg.type;
+    rezo_histo->num_syn          = histo->msg.num_syn;
     rezo_histo->date_create_sec  = histo->date_create_sec;
     rezo_histo->date_create_usec = histo->date_create_usec;
     rezo_histo->date_fixe        = histo->date_fixe;

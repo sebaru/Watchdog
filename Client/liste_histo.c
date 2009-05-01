@@ -23,6 +23,7 @@
   { COLONNE_NUM,
     COLONNE_OBJET,
     COLONNE_TYPE,
+    COLONNE_NUM_SYN,
     COLONNE_DATE_CREATE,
     COLONNE_ACK,
     COLONNE_LIBELLE,
@@ -51,9 +52,11 @@
  extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
 
  static void Menu_acquitter_histo ( void );
+ static void Menu_go_to_syn ( void );
 
  static GnomeUIInfo Menu_popup[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Acknowledge"), NULL, Menu_acquitter_histo, GNOME_STOCK_PIXMAP_CLEAR ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
     GNOMEUIINFO_END
   };
 /**********************************************************************************************************/
@@ -72,7 +75,7 @@
     return( _("Unknown") );
   }
 /**********************************************************************************************************/
-/* Effacer_message: Retrait des messages selectionnés                                                     */
+/* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
@@ -98,7 +101,35 @@
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
+/**********************************************************************************************************/
+/* Menu_go_to_syn: Affiche les synoptiques associés aux messages histo                                    */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_go_to_syn ( void )
+  { GtkTreeSelection *selection;
+    struct CMD_ID_HISTO histo;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
 
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_histo) );
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    while ( lignes )
+     { guint num_syn;
+       gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
+       gtk_tree_model_get( store, &iter, COLONNE_NUM_SYN, &num_syn, -1 );                  /* Recup du id */
+
+       Changer_vue_directe ( num_syn );
+
+       gtk_tree_selection_unselect_iter( selection, &iter );
+       lignes = lignes->next;
+     }
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
 /**********************************************************************************************************/
 /* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages            */
 /* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
@@ -171,6 +202,7 @@ printf("New histo: type=%d %d %s %s %s\n", histo->type, histo->id, histo->objet,
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NUM, histo->id,
+                         COLONNE_NUM_SYN, histo->num_syn,
                          COLONNE_OBJET, histo->objet,
                          COLONNE_TYPE, Type_vers_string(histo->type),
                          COLONNE_DATE_CREATE, date,
@@ -279,13 +311,12 @@ printf("New histo: type=%d %d %s %s %s\n", histo->type, histo->id, histo->objet,
     
     page->type  = TYPE_PAGE_HISTO;
     Liste_pages = g_list_append( Liste_pages, page );
-printf("1\n");
+
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     
 /***************************************** La liste des groupes *******************************************/
-printf("2\n");
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
@@ -293,19 +324,18 @@ printf("2\n");
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
+                                              G_TYPE_UINT,                                     /* Num_syn */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
                                               GDK_TYPE_COLOR,      /* Couleur de fond de l'enregistrement */
                                               GDK_TYPE_COLOR      /* Couleur du texte de l'enregistrement */
                                );
-printf("3\n");
     Liste_histo = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );           /* Creation de la vue */
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), Liste_histo );
 
-printf("4\n");
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne de l'id du msg */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Num"), renderer,

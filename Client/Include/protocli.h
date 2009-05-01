@@ -394,6 +394,7 @@
  
                                                                          /* Dans supervision_passerelle.c */
  extern void Proto_afficher_une_passerelle_supervision( struct CMD_SHOW_PASSERELLE *rezo_pass );
+ extern void Changer_vue_directe ( guint num_syn );
 
                                                                             /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_SHOW_PALETTE *rezo_palette );

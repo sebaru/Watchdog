@@ -59,7 +59,8 @@
        gettimeofday( &tv, NULL );
        Partage->new_histo.date_create_sec  = tv.tv_sec;
        Partage->new_histo.date_create_usec = tv.tv_usec;
-       Partage->new_histo.type = msg->type;
+       Partage->new_histo.type    = msg->type;
+       Partage->new_histo.num_syn = msg->num_syn;
 
        memcpy( &histo.msg, msg, sizeof(struct MSGDB) );
        memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );

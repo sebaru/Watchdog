@@ -12,7 +12,7 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
     guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    /*gchar  nom_syn;  */               /* Numéro du fichier syn correspondant(pas l'index dans la table) */
+    guint  num_syn;                                                /* Numéro du fichier syn correspondant */
     guint date_create_sec;
     guint date_create_usec;
     guint date_fixe;
