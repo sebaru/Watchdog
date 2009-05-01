@@ -42,6 +42,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_message ( struct CONNEXION *connexion )
   { static GList *Arrivee_message = NULL;
+    static GList *Arrivee_syn     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_MESSAGE_OK:
@@ -86,6 +87,25 @@
                g_list_free( Arrivee_message );
                Arrivee_message = NULL;
                Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE:
+             { struct CMD_SHOW_SYNOPTIQUE *syn;
+               Set_progress_plusun();
+
+               syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
+               if (!syn) return; 
+
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_SHOW_SYNOPTIQUE ) );
+               Arrivee_syn = g_list_append( Arrivee_syn, syn );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN:
+             { 
+               g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_syn_for_message, NULL );
+               g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_syn );
+               Arrivee_syn = NULL;
              }
             break;
      }

@@ -251,6 +251,7 @@
  extern void Proto_afficher_un_message( struct CMD_SHOW_MESSAGE *message );       /* Dans liste_message.c */
  extern void Proto_cacher_un_message( struct CMD_ID_MESSAGE *message );
  extern void Proto_rafraichir_un_message( struct CMD_SHOW_MESSAGE *message );
+ extern void Proto_afficher_un_syn_for_message ( struct CMD_SHOW_SYNOPTIQUE *syn );
  extern void Creer_page_message( void );
 
  extern void Menu_ajouter_editer_message ( struct CMD_EDIT_MESSAGE *edit_msg );   /* Dans ajout_message.c */
@@ -260,7 +261,7 @@
  extern void Proto_rafraichir_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
 
  extern void Menu_ajouter_editer_synoptique ( struct CMD_EDIT_SYNOPTIQUE *edit_syn );/* ajout_synoptique.c*/
- extern void Proto_afficher_les_groupes_pour_synoptique ( GList *Liste );
+ extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_SHOW_GROUPE *groupe );
  extern void Proto_fin_affichage_groupes_pour_synoptique ( void );
 
  extern void Proto_cacher_un_mnemonique( struct CMD_ID_MNEMONIQUE *mnemonique );/* Dans liste_mnemonique.c*/

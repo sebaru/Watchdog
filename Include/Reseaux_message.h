@@ -46,9 +46,10 @@
   };
 
  enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,                         /* Ajout d'un groupe dans la liste cliente */
+  { SSTAG_CLIENT_WANT_PAGE_MESSAGE,
+    SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,                         /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN,                     /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_CLIENT_WANT_PAGE_MESSAGE,
+
     SSTAG_CLIENT_ADD_MESSAGE,                              /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_MESSAGE_OK,                                      /* L'ajout du groupe est un succes */
 
@@ -59,6 +60,10 @@
     SSTAG_SERVEUR_EDIT_MESSAGE_OK,             /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,                            /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,                      /* Le serveur valide les nouvelles données */
+
+    SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE,                         /* Envoi des synoptiques pour les messages */
+    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE,
+    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN,
   };
 
 #endif

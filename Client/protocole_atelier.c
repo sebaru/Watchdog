@@ -126,7 +126,7 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN:
-             { Proto_afficher_les_groupes_pour_propriete_synoptique( Arrivee_groupe_propriete_syn );
+             { g_list_foreach( Arrivee_groupe, (GFunc)Proto_afficher_un_groupe_pour_propriete_synoptique, NULL );
                g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
                g_list_free( Arrivee_groupe_propriete_syn );
                Arrivee_groupe_propriete_syn = NULL;

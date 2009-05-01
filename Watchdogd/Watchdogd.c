@@ -520,6 +520,7 @@ encore:
     if (Config.rsa) RSA_free( Config.rsa );
 
     if (Partage->Arret != CLEARREBOOT) Exporter();           /* Tente d'exporter les données avant reload */
+    else { unlink ( FICHIER_EXPORT ); }
     if (Partage->Arret == REBOOT)
      { gint pid;
        Info( Config.log, DEBUG_INFO, "Rebooting ..." );

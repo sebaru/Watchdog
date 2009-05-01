@@ -455,16 +455,12 @@ printf("Changer_couleur %p\n", data);
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_les_groupes_pour_propriete_synoptique ( GList *liste )
-  { struct CMD_SHOW_GROUPE *groupe;
+ void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_SHOW_GROUPE *groupe )
+  {
 printf("Print groupe pour propriete synoptique \n");
-    while( liste )
-     { groupe = (struct CMD_SHOW_GROUPE *)liste->data;
-       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
-       Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
+    Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
 printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id);
-       liste = liste->next;
-     }
   }
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
@@ -572,6 +568,7 @@ printf("Detruire_fenetre_propriete_TOR: 2\n");
 printf("Detruire_fenetre_propriete_TOR: 3\n");
     gtk_widget_destroy( F_propriete );
 printf("Detruire_fenetre_propriete_TOR: 4\n");
+    g_list_free( Liste_index_groupe );
     Trame_motif_p0 = NULL;
     Trame_motif_p1 = NULL;
     F_propriete = NULL;
@@ -721,6 +718,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     g_signal_connect( G_OBJECT(Combo_groupe), "changed",
                       G_CALLBACK(Changer_groupe), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 2, 4, 8, 9 );
+    Liste_index_groupe = NULL;
 
     ok_timer = TIMER_OFF;                                                       /* Timer = OFF par défaut */
     Tag_timer = gtk_timeout_add( RESOLUTION_TIMER, Timer_preview, NULL );      /* Enregistrement du timer */
