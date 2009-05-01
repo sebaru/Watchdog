@@ -93,13 +93,11 @@
           if ( !g_list_find_custom(client->bit_capteurs, liste->data,
                                    (GCompareFunc) Chercher_bit_capteurs) )
            { capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
-             if (!capteur) 
-              { Unref_client( client );                               /* Déréférence la structure cliente */
-                pthread_exit(NULL);
+             if (capteur) 
+              { memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
+                client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
               }
-             memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
-             client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
-           }
+           } else capteur = (struct CAPTEUR *)liste->data;
 
           while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
 

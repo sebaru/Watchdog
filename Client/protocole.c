@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- 
  #include <gnome.h>
  #include <openssl/err.h>
  #include <stdio.h>
@@ -57,7 +56,7 @@
 
     switch ( Reseau_tag(connexion) )
      { case TAG_GTK_MESSAGE : Gerer_protocole_gtk_message ( connexion ); return;
-       case TAG_CONNEXION: printf("Recu TAG_CONNEXION\n");
+       case TAG_CONNEXION: 
             switch ( Reseau_ss_tag ( connexion ) )
              { case SSTAG_SERVEUR_OFF:
                     { printf("Recu SSTAG_SERVEUR_OFF\n");
@@ -71,7 +70,7 @@
                       Log ( _("Disconnected by server shutdown") );
                       break;
                     }
-               default : printf("recu SSTAG %d\n", Reseau_ss_tag ( connexion ) );
+               default : /*printf("recu SSTAG %d\n", Reseau_ss_tag ( connexion ) );*/
                          break;
              }
             break;

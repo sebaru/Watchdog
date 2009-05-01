@@ -122,6 +122,7 @@
  void *Envoyer_histo_thread ( struct CLIENT *client )
   { struct CMD_SHOW_HISTO *rezo_histo;
     struct HISTODB *histo;
+    struct CMD_ENREG nbr;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiHISTO", 0, 0, 0 );
@@ -139,6 +140,11 @@
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d histo", nbr.num );
+    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                   (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
      { histo = Recuperer_histoDB_suite( Config.log, db );

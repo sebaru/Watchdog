@@ -334,7 +334,6 @@ printf("Recu changement etat motif: %d = r%d v%d b%d\n", etat_motif->num, etat_m
                                     break;
              case TYPE_COMMENTAIRE: break;
              case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
-   printf("Test change etat pass, num= %d %d\n", trame_pass->pass->bit_controle_1, etat_motif->num );
                                     if (trame_pass->pass->bit_controle_1 == etat_motif->num)
                                      { Changer_etat_pass_1( trame_pass, etat_motif );
                                        cpt++;                         /* Nous updatons un motif de plus ! */ 
@@ -344,7 +343,7 @@ printf("Recu changement etat motif: %d = r%d v%d b%d\n", etat_motif->num, etat_m
                                        cpt++;                         /* Nous updatons un motif de plus ! */ 
                                      }
                                     break;
-             default: printf("Proto_changer_etat_motif: type inconnu %d\n", *((gint *)liste_motifs->data) );
+             default: break;
            }
           liste_motifs=liste_motifs->next;
         }

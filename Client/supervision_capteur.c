@@ -90,7 +90,7 @@ printf("recu %d/%d, capteur=%d/%d\n", etat_capteur->type, etat_capteur->bit_cont
              case TYPE_COMMENTAIRE:
              case TYPE_PASSERELLE:
                                     break;
-             default: printf("Proto_changer_etat_capteur: type inconnu\n" );
+             default: break;
            }
           liste_capteurs=liste_capteurs->next;
         }
