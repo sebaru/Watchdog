@@ -82,7 +82,7 @@
                pthread_detach( tid );
              }
             break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_CTRL:
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
                Proto_envoyer_type_num_mnemo_tag( TAG_MESSAGE, SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC,

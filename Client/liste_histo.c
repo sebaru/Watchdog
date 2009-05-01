@@ -130,7 +130,6 @@
 /**********************************************************************************************************/
  static void Menu_go_to_syn ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_HISTO histo;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
