@@ -44,8 +44,8 @@
                   Edit_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
                   Edit_msg.num_syn    = GPOINTER_TO_INT((g_list_nth( Liste_index_syn, index ))->data);
+printf("num_syn=%d\n", Edit_msg.num_syn );
                   Edit_msg.num_voc    = 0; /* A voir !!! */
-printf("sms=%d\n", Edit_msg.sms );
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
                                 (gchar *)&Edit_msg, sizeof( struct CMD_EDIT_MESSAGE ) );
                 }
@@ -85,6 +85,9 @@ printf("sms=%d\n", Edit_msg.sms );
     g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->mnemo, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
+
+    if (Edit_msg.num_syn == syn->id)
+     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_syn), g_list_length(Liste_index_syn) ); }
   }
 /**********************************************************************************************************/
 /* Ajouter_message: Ajoute un message au systeme                                                          */
@@ -92,7 +95,7 @@ printf("sms=%d\n", Edit_msg.sms );
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Menu_ajouter_editer_message ( struct CMD_EDIT_MESSAGE *edit_msg )
-  { GtkWidget *frame, *table, *texte, *hboite, *bouton, *menu;
+  { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt;
 
     if (edit_msg)
@@ -165,6 +168,7 @@ printf("sms=%d\n", Edit_msg.sms );
     if (edit_msg)                                                              /* Si edition d'un message */
      { /*syn = Rechercher_syn_par_num( Nom_syn, msg->num_synoptique );*/
        Edit_msg.id = edit_msg->id;
+       Edit_msg.num_syn = edit_msg->num_syn;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_msg->objet );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_msg->type );

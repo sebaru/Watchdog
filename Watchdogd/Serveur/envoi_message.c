@@ -74,6 +74,8 @@
        edit_msg.type       = msg->type;
        edit_msg.not_inhibe = msg->not_inhibe;
        edit_msg.sms        = msg->sms;
+       edit_msg.num_syn    = msg->num_syn;
+       edit_msg.num_voc    = msg->num_voc;
        memcpy( &edit_msg.libelle, msg->libelle, sizeof(edit_msg.libelle) );
        memcpy( &edit_msg.objet, msg->objet, sizeof(edit_msg.objet) );
 
