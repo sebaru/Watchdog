@@ -37,6 +37,7 @@
  extern void Info( struct LOG *log, guint niveau, gchar *texte );
  extern void Info_n( struct LOG *log, guint niveau, gchar *texte, gint valeur );
  extern void Info_c( struct LOG *log, guint niveau, gchar *texte, gchar *texte2 );
+ extern void Info_change_debug( struct LOG *log, guint debug );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

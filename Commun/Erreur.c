@@ -63,7 +63,13 @@
     openlog( log->entete, LOG_CONS | LOG_PID | LOG_PERROR, LOG_LOCAL3 );
     return(log);
   }
-
+/**********************************************************************************************************/
+/* Info_init: Initialisation du traitement d'erreur                                                       */
+/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                            */
+/**********************************************************************************************************/
+ void Info_change_debug( struct LOG *log, guint debug )
+  { if (log) log->debug_level = debug;
+  }
 /**********************************************************************************************************/
 /* Info: Log dans un fichier ou sur le terminal l'évolution du systeme                                    */
 /* Entrée: Le niveau de debuggage, et le texte a afficher                                                 */
