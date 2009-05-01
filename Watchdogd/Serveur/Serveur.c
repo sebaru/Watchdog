@@ -264,7 +264,7 @@
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGINT, &sig, NULL );                                               /* On ignore le SIGINT */
 
-    Top = Partage->top;                                                      /* On prend l'heure actuelle */
+    Partage->Sous_serveur[id].inactivite = Partage->top;                     /* On prend l'heure actuelle */
     Arret = 0;
     Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
 
@@ -291,7 +291,7 @@
         { gint new_mode;
           GList *liste;
 
-          Top = time(NULL);
+          Partage->Sous_serveur[id].inactivite = Partage->top;
           liste = Partage->Sous_serveur[id].Clients;
           while(liste)                                                /* Parcours de la liste des clients */
            { struct CLIENT *client;
@@ -651,7 +651,7 @@
            }
         }
        else
-       if (  Top + Config.max_inactivite < Partage->top )                       /* Detection d'inactivite */
+       if ( Partage->Sous_serveur[id].inactivite + Config.max_inactivite < Partage->top ) /* Inactivite ? */
         { Info( Config.log, DEBUG_INFO, "Inactivity time reached" );
           Arret = FIN;                      /* Arret "Local" du process: n'impacte pas les autres process */
         }

@@ -14,6 +14,7 @@
     gboolean sigusr1;
     gboolean type_info;                                          /* Acquisition de l'information actuelle */
     GList *Clients;                                         /* La liste des clients qui se sont connectés */
+    guint inactivite;
   };
 
  struct CAPTEUR

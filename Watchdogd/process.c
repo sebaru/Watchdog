@@ -186,8 +186,7 @@
  static gint Rechercher_serveur_inactif ( void )
   { gint i;
     for (i=0; i<Config.max_serveur; i++)                                /* Recherche d'un serveur inactif */
-     { printf("inactif: pid %d nb %d\n", (gint)Partage->Sous_serveur[i].pid, Partage->Sous_serveur[i].nb_client );
-       if (Partage->Sous_serveur[i].pid != -1 &&
+     { if (Partage->Sous_serveur[i].pid != -1 &&
            Partage->Sous_serveur[i].nb_client == 0) return(i);
      }
     return(-1);
