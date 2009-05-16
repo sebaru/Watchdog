@@ -59,8 +59,10 @@
                   g_snprintf( Edit_syn.mnemo, sizeof(Edit_syn.mnemo),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_mnemo) ) );
                   index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_groupe) );
-                  Edit_syn.groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data);
-
+                  if (index_groupe == -1)
+                   { Edit_syn.groupe = 1; }
+                  else
+                   { Edit_syn.groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data); }
                   Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE,
                                 (gchar *)&Edit_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
                 }
@@ -72,7 +74,10 @@
                   g_snprintf( new_syn.mnemo, sizeof(new_syn.mnemo),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_mnemo) ) );
                   index_groupe = gtk_option_menu_get_history( GTK_OPTION_MENU(Combo_groupe) );
-                  new_syn.groupe = GPOINTER_TO_INT ( g_list_nth_data( Liste_index_groupe, index_groupe ) );
+                  if (index_groupe == -1)
+                   { new_syn.groupe = 1; }
+                  else
+                   { new_syn.groupe = GPOINTER_TO_INT ( g_list_nth_data( Liste_index_groupe, index_groupe ) ); }
 
                   Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ADD_SYNOPTIQUE,
                                 (gchar *)&new_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
