@@ -94,6 +94,7 @@
                         struct TYPE_INFO_SUPERVISION *infos)
   { cairo_t *cr;
     cr = gtk_print_context_get_cairo_context (context);
+    cairo_scale ( cr, 0.85, 0.85 );
     goo_canvas_render ( GOO_CANVAS( infos->Trame->trame_widget ), cr, NULL, 1.0 );
   }
 /**********************************************************************************************************/
