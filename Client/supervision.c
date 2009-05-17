@@ -84,6 +84,37 @@
     goo_canvas_set_scale ( GOO_CANVAS(infos->Trame->trame_widget), gtk_adjustment_get_value(adj) );
   }
 /**********************************************************************************************************/
+/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                            */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void draw_page (GtkPrintOperation *operation,
+                        GtkPrintContext   *context,
+                        gint               page_nr,
+                        struct TYPE_INFO_SUPERVISION *infos)
+  { cairo_t *cr;
+    cr = gtk_print_context_get_cairo_context (context);
+    goo_canvas_render ( GOO_CANVAS( infos->Trame->trame_widget ), cr, NULL, 1.0 );
+  }
+/**********************************************************************************************************/
+/* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Menu_exporter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+  { GtkPrintOperation *print;
+    GtkPrintOperationResult res;
+    GError *error;
+
+    print = New_print_job ( "Print Synoptique" );
+
+    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), infos );
+    gtk_print_operation_set_n_pages ( print, 1 );
+
+    res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+                                   GTK_WINDOW(F_client), &error);
+  }
+/**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -128,6 +159,11 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Detruire_page), page );
+
+    bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_exporter_synoptique), infos );
 
 /*********************************************** Zoom *****************************************************/
     frame = gtk_frame_new ( _("Zoom") );
