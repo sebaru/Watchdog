@@ -369,10 +369,10 @@ printf("Changer_couleur %p\n", data);
     Trame_motif_p0 = Trame_ajout_motif( TRUE, Trame_preview0, &Motif_preview0 );   /* Affichage à l'ecran */
     Trame_motif_p1 = Trame_ajout_motif( TRUE, Trame_preview1, &Motif_preview1 );
 
-    g_signal_handlers_block_by_func( G_OBJECT( GTK_OPTION_MENU(Entry_libelle) ),
+    g_signal_handlers_block_by_func( G_OBJECT( GTK_ENTRY(Entry_libelle) ),
                                      G_CALLBACK( Changer_libelle_motif ), NULL );
     gtk_entry_set_text( GTK_ENTRY(Entry_libelle), motif->libelle );
-    g_signal_handlers_unblock_by_func( G_OBJECT( GTK_OPTION_MENU(Entry_libelle) ),
+    g_signal_handlers_unblock_by_func( G_OBJECT( GTK_ENTRY(Entry_libelle) ),
                                        G_CALLBACK( Changer_libelle_motif ), NULL );
 
     printf("Rafraichir_proprietes1:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
@@ -591,6 +591,8 @@ printf("Detruire_fenetre_propriete_TOR: fin\n");
                                                GTK_STOCK_OK, GTK_RESPONSE_OK,
                                                NULL);
     g_signal_connect( F_propriete, "response",
+                      G_CALLBACK(CB_editer_propriete_TOR), FALSE );
+    g_signal_connect( F_propriete, "delete-event",
                       G_CALLBACK(CB_editer_propriete_TOR), FALSE );
 
 /*********************************** Frame de representation du motif actif *******************************/
