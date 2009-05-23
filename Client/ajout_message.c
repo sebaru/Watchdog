@@ -201,7 +201,7 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
     Entry_objet = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, 2, 3 );
-printf("Message voc = %d\n", edit_msg->num_voc );
+
     texte = gtk_label_new( _("Monostable") );                            /* Numéro du bit M a positionner */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
     Spin_bit_voc = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
