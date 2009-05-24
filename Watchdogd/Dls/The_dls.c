@@ -219,7 +219,8 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
-  { if ( num>=NBR_BIT_CONTROLE ) return;
+  { gint nbr;
+    if ( num>=NBR_BIT_CONTROLE ) return;
     if (Partage->i[num].etat   != etat || Partage->i[num].rouge!=rouge || 
         Partage->i[num].vert   != vert || Partage->i[num].bleu!=bleu ||
         Partage->i[num].cligno != cligno
@@ -231,9 +232,10 @@
        Partage->i[num].cligno = cligno;
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       if ( ! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) ) )
+       nbr = g_list_length( Partage->com_msrv.liste_i );
+       if ( nbr < 200 && (! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) )) )
         { Partage->com_msrv.liste_i = g_list_append( Partage->com_msrv.liste_i,
-                                                         GINT_TO_POINTER(num) );
+                                                     GINT_TO_POINTER(num) );
         }
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Partage->audit_bit_interne_per_sec++;
