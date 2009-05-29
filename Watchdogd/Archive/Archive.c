@@ -31,6 +31,7 @@
  #include <unistd.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #define DEBUG
 /**********************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
@@ -38,16 +39,10 @@
  void Ajouter_arch( gint type, gint num, gint valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
-    gint taille;
 
-    pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
-    taille = g_list_length( Partage->com_arch.liste_arch );
-    pthread_mutex_unlock( &Partage->com_arch.synchro );
-
-    if (taille > 150)
-     { Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)", type);
-       Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)", num);
-       Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)", valeur);
+    if (Partage->com_arch.taille_arch > 150)
+     { Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150) taille",
+               Partage->com_arch.taille_arch);
        return;
      }
 
@@ -63,6 +58,7 @@
 
     pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
     Partage->com_arch.liste_arch = g_list_append( Partage->com_arch.liste_arch, arch );
+    Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
 /**********************************************************************************************************/
@@ -105,6 +101,7 @@
        Info_n( Config.log, DEBUG_INFO, "ARCH: Run_arch: Reste a traiter",
                                        g_list_length(Partage->com_arch.liste_arch) );
 #endif
+       Partage->com_arch.taille_arch--;
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
        Ajouter_archDB ( Config.log, db, arch );

@@ -97,7 +97,8 @@
   };
 
  struct PARTAGE                                                        /* Structure des données partagées */
-  { gint shmid;
+  { gint taille_partage;
+    gint shmid;
     gint jeton;
     guint top;                                                     /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                    /* Top de chien de garde des plugins DLS */

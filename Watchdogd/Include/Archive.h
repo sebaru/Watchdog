@@ -20,6 +20,7 @@
  struct COM_ARCH                                                               /* Communication vers ARCH */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_arch;                                             /* liste de struct MSGDB msg a envoyer */
+    gint taille_arch;
     gboolean sigusr1;
   };
 
