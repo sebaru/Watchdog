@@ -29,6 +29,10 @@
   { gint type;
     GooCanvasItem *item;
     cairo_matrix_t transform;
+    cairo_matrix_t transform_hg;
+    cairo_matrix_t transform_hd;
+    cairo_matrix_t transform_bg;
+    cairo_matrix_t transform_bd;
     GooCanvasItem *item_groupe;
     GooCanvasItem *select_hg;
     GooCanvasItem *select_hd;
