@@ -90,6 +90,10 @@
 /**********************************************************************************************************/
  void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif )
   { if (trame_motif->item_groupe) goo_canvas_item_remove( trame_motif->item_groupe );
+    if (trame_motif->select_hd) goo_canvas_item_remove( trame_motif->select_hd );
+    if (trame_motif->select_hg) goo_canvas_item_remove( trame_motif->select_hg );
+    if (trame_motif->select_bd) goo_canvas_item_remove( trame_motif->select_bd );
+    if (trame_motif->select_bg) goo_canvas_item_remove( trame_motif->select_bg );
     g_list_foreach( trame_motif->images, (GFunc) gdk_pixbuf_unref /*g_free*/, NULL );
     g_list_free( trame_motif->images );
     if (trame_motif->pixbuf) gdk_pixbuf_unref(trame_motif->pixbuf);
