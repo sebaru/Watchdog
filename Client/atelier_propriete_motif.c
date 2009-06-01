@@ -588,7 +588,6 @@ printf("Detruire_fenetre_propriete_TOR: fin\n");
     F_propriete = gtk_dialog_new_with_buttons( _("Edit a item"),
                                                GTK_WINDOW(F_client),
                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                                GTK_STOCK_OK, GTK_RESPONSE_OK,
                                                NULL);
     g_signal_connect( F_propriete, "response",
