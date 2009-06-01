@@ -140,53 +140,56 @@
 
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
-    cairo_matrix_init_identity ( &trame_motif->transform_hd );
-    cairo_matrix_translate ( &trame_motif->transform_hd,
-                             (gdouble)trame_motif->motif->position_x,
-                             (gdouble)trame_motif->motif->position_y
-                           );
-    cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-    cairo_matrix_translate ( &trame_motif->transform_hd,
-                             ((gdouble)trame_motif->motif->largeur/2),
-                             -((gdouble)trame_motif->motif->hauteur/2) - 9
-                           );
-    goo_canvas_item_set_transform ( trame_motif->select_hd, &trame_motif->transform_hd );
+    if ( trame_motif->select_hd)
+     {
+       cairo_matrix_init_identity ( &trame_motif->transform_hd );
+       cairo_matrix_translate ( &trame_motif->transform_hd,
+                                (gdouble)trame_motif->motif->position_x,
+                                (gdouble)trame_motif->motif->position_y
+                              );
+       cairo_matrix_rotate ( &trame_motif->transform_hd, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+       cairo_matrix_translate ( &trame_motif->transform_hd,
+                                ((gdouble)trame_motif->motif->largeur/2),
+                                -((gdouble)trame_motif->motif->hauteur/2) - 9
+                              );
+       goo_canvas_item_set_transform ( trame_motif->select_hd, &trame_motif->transform_hd );
 
-    cairo_matrix_init_identity ( &trame_motif->transform_bd );
-    cairo_matrix_translate ( &trame_motif->transform_bd,
-                             (gdouble)trame_motif->motif->position_x,
-                             (gdouble)trame_motif->motif->position_y
-                           );
-    cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-    cairo_matrix_translate ( &trame_motif->transform_bd,
-                             ((gdouble)trame_motif->motif->largeur/2),
-                             ((gdouble)trame_motif->motif->hauteur/2)
-                           );
-    goo_canvas_item_set_transform ( trame_motif->select_bd, &trame_motif->transform_bd );
+       cairo_matrix_init_identity ( &trame_motif->transform_bd );
+       cairo_matrix_translate ( &trame_motif->transform_bd,
+                                (gdouble)trame_motif->motif->position_x,
+                                (gdouble)trame_motif->motif->position_y
+                              );
+       cairo_matrix_rotate ( &trame_motif->transform_bd, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+       cairo_matrix_translate ( &trame_motif->transform_bd,
+                                ((gdouble)trame_motif->motif->largeur/2),
+                                ((gdouble)trame_motif->motif->hauteur/2)
+                              );
+       goo_canvas_item_set_transform ( trame_motif->select_bd, &trame_motif->transform_bd );
 
-    cairo_matrix_init_identity ( &trame_motif->transform_hg );
-    cairo_matrix_translate ( &trame_motif->transform_hg,
-                             (gdouble)trame_motif->motif->position_x,
-                             (gdouble)trame_motif->motif->position_y
-                           );
-    cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-    cairo_matrix_translate ( &trame_motif->transform_hg,
-                             -((gdouble)trame_motif->motif->largeur/2) - 9,
-                             -((gdouble)trame_motif->motif->hauteur/2) - 9
-                           );
-    goo_canvas_item_set_transform ( trame_motif->select_hg, &trame_motif->transform_hg );
+       cairo_matrix_init_identity ( &trame_motif->transform_hg );
+       cairo_matrix_translate ( &trame_motif->transform_hg,
+                                (gdouble)trame_motif->motif->position_x,
+                                (gdouble)trame_motif->motif->position_y
+                              );
+       cairo_matrix_rotate ( &trame_motif->transform_hg, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+       cairo_matrix_translate ( &trame_motif->transform_hg,
+                                -((gdouble)trame_motif->motif->largeur/2) - 9,
+                                -((gdouble)trame_motif->motif->hauteur/2) - 9
+                              );
+       goo_canvas_item_set_transform ( trame_motif->select_hg, &trame_motif->transform_hg );
 
-    cairo_matrix_init_identity ( &trame_motif->transform_bg );
-    cairo_matrix_translate ( &trame_motif->transform_bg,
-                             (gdouble)trame_motif->motif->position_x,
-                             (gdouble)trame_motif->motif->position_y
-                           );
-    cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-    cairo_matrix_translate ( &trame_motif->transform_bg,
-                             -((gdouble)trame_motif->motif->largeur/2) - 9,
-                             ((gdouble)trame_motif->motif->hauteur/2)
-                           );
-    goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
+       cairo_matrix_init_identity ( &trame_motif->transform_bg );
+       cairo_matrix_translate ( &trame_motif->transform_bg,
+                                (gdouble)trame_motif->motif->position_x,
+                                (gdouble)trame_motif->motif->position_y
+                              );
+       cairo_matrix_rotate ( &trame_motif->transform_bg, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+       cairo_matrix_translate ( &trame_motif->transform_bg,
+                                -((gdouble)trame_motif->motif->largeur/2) - 9,
+                                ((gdouble)trame_motif->motif->hauteur/2)
+                              );
+       goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
+     }
   }
 /**********************************************************************************************************/
 /* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
