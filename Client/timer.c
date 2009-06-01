@@ -82,6 +82,28 @@
                                                   trame_motif->bleu );
              }
             break;
+       case TYPE_CYCLIQUE:
+printf("timer. Etat =%d, num_image =%d, nbr_image=%d\n",
+        trame_motif->etat, trame_motif->num_image, trame_motif->nbr_images );
+            if (trame_motif->etat)
+             {  if (trame_motif->num_image != trame_motif->nbr_images-1)
+                 { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
+                                                      trame_motif->rouge,
+                                                      trame_motif->vert,
+                                                      trame_motif->bleu );
+                 }
+                else
+                 { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
+                                                         trame_motif->vert,
+                                                         trame_motif->bleu );
+                 }
+             }
+            else
+             { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
+                                                     trame_motif->vert,
+                                                     trame_motif->bleu );
+             }
+            break;
      }
 
     if (trame_motif->cligno == 1 && !cligno &&                                    /* Gestion clignotement */
