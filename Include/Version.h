@@ -9,7 +9,7 @@
  #include <glib.h>
 
  #define FICHIER_VERSION "version.wdg"
- #define TAILLE_VERSION  10
+ #define TAILLE_VERSION  20
 
  extern time_t Lire_version_donnees( struct LOG *log );
  extern time_t Changer_version_donnees( struct LOG *log, time_t new_version );

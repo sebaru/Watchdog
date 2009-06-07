@@ -51,7 +51,7 @@
 
     memcpy( &ident.nom, &Client_en_cours.user, sizeof(ident.nom) );
     memcpy( &ident.password, &Client_en_cours.password, sizeof(ident.password) );
-    memcpy( &ident.version, VERSION, sizeof(ident.version) );
+    snprintf( ident.version, sizeof(ident.version), "%s", VERSION );
     
     ident.version_d = Lire_version_donnees( Config_cli.log );
 
