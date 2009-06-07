@@ -13,6 +13,7 @@
     gint nb_client;
     gboolean sigusr1;
     gboolean type_info;                                          /* Acquisition de l'information actuelle */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Clients;                                         /* La liste des clients qui se sont connectés */
     guint inactivite;
   };

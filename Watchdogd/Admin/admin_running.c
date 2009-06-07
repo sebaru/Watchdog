@@ -83,14 +83,6 @@
        g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
        Write_admin ( client->connexion, chaine );
      } else
-#ifdef bouh
-       if ( ! strcmp ( commande, "dls" ) )
-        { struct PLUGIN_DLS_DL *plugin_actuel;
-          char chaine[128];
-          GList *plugins;
-
-        } else
-#endif
     if ( ! strcmp ( commande, "ssrv" ) )
      { int i;
 
@@ -103,63 +95,30 @@
           Write_admin ( client->connexion, chaine );
         }
      } else
-#ifdef bouh
-    if ( ! strcmp ( commande, "kick" ) )
-     { char nom[128], machine[128];
+    if ( ! strcmp ( commande, "client" ) )
+     { char chaine[128];
        GList *liste;
        gint i;
+        
+       for (i=0; i<Config.max_serveur; i++)
+         { if (Partage->Sous_serveur[i].pid == -1) continue;
 
-       memset( nom, 0, sizeof(nom) );
-       memset( machine, 0, sizeof(machine) );
-       sscanf ( ligne, "%s %s %s", commande, nom, machine );      /* Découpage de la ligne de commande */
+           liste = Partage->Sous_serveur[i].Clients;
+           pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+           while(liste)                                            /* Parcours de la liste des clients */
+            { struct CLIENT *client;
+              client = (struct CLIENT *)liste->data;
 
-          g_snprintf( chaine, sizeof(chaine), " Searching for client %s@%s ... \n",
-                      nom, machine );
-          Write_admin ( client->connexion, chaine );
+              g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s\n",
+                          i, client->ident.version, client->util->nom, client->machine,
+                          client->mode, client->defaut, ctime(&client->seconde) );
+              Write_admin ( client->connexion, chaine );
 
-          for (i=0; i<Config.max_serveur; i++)
-            { liste = Partage->Sous_serveur[i].Clients;
-              while(liste)                                            /* Parcours de la liste des clients */
-               { struct CLIENT *client;
-                 client = (struct CLIENT *)liste->data;
-
-                 if ( (! strncmp( client->util->nom, nom, sizeof(client->util->nom))) &&
-                      (! strncmp( client->machine, machine, sizeof(client->machine)))
-                    )
-                  { Client_mode ( client, DECONNECTE );
-                    g_snprintf( chaine, sizeof(chaine),
-                                " Found ... Kicking ... SSRV%02d - v%s %s@%s - mode %d defaut %d\n",
-                                i, client->ident.version, client->util->nom, client->machine,
-                               client->mode, client->defaut );
-                    Write_admin ( client->connexion, chaine );
-                  }
-                 liste = liste->next;
-               }
-           }
-        } else
-       if ( ! strcmp ( commande, "client" ) )
-        { char chaine[128];
-          GList *liste;
-          gint i;
-
-          for (i=0; i<Config.max_serveur; i++)
-            { if (Partage->Sous_serveur[i].pid == -1) continue;
-
-              liste = Partage->Sous_serveur[i].Clients;
-              while(liste)                                            /* Parcours de la liste des clients */
-               { struct CLIENT *client;
-                 client = (struct CLIENT *)liste->data;
-
-                 g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s\n",
-                             i, client->ident.version, client->util->nom, client->machine,
-                             client->mode, client->defaut, ctime(&client->seconde) );
-                 Write_admin ( client->connexion, chaine );
-
-                 liste = liste->next;
-               }
+              liste = liste->next;
             }
-        } else
-#endif
+           pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+         }
+     } else
     if ( ! strcmp ( commande, "mbus" ) )
      { Admin_modbus_list ( client );
      } else

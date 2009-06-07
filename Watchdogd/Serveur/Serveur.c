@@ -162,7 +162,10 @@
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
 
+    pthread_mutex_lock( &Partage->Sous_serveur[client->Id_serveur].synchro );
     Partage->Sous_serveur[client->Id_serveur].Clients = g_list_remove( Partage->Sous_serveur[client->Id_serveur].Clients, client );
+    pthread_mutex_unlock( &Partage->Sous_serveur[client->Id_serveur].synchro );
+    
     Fermer_connexion( client->connexion );
     pthread_mutex_destroy( &client->mutex_write );
     pthread_mutex_destroy( &client->mutex_struct_used );
@@ -235,7 +238,9 @@
           Deconnecter( client );
         }
        else
-        { Partage->Sous_serveur[ss_id].Clients = g_list_append( Partage->Sous_serveur[ss_id].Clients, client );
+        { pthread_mutex_lock( &Partage->Sous_serveur[ss_id].synchro );
+          Partage->Sous_serveur[ss_id].Clients = g_list_append( Partage->Sous_serveur[ss_id].Clients, client );
+          pthread_mutex_unlock( &Partage->Sous_serveur[ss_id].synchro );
           Info_n( Config.log, DEBUG_CONNEXION, "SSRV: Connexion acceptée ID", id);
           Info_c( Config.log, DEBUG_CONNEXION, "SSRV: ------------- Machine", client->machine );
           Partage->Sous_serveur[ss_id].nb_client++;                      /* Nous gerons un client de plus !! */

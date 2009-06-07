@@ -346,7 +346,7 @@
  int main ( int argc, char *argv[], char *envp[] )
   { struct sigaction sig;
     gchar strpid[12];
-    gint fd_lock;
+    gint fd_lock, i;
     gboolean fg;
 
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
@@ -406,7 +406,6 @@
     else
      { gint import;
        pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
-       gint i;
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 
@@ -426,13 +425,6 @@
        Partage->top              = 0;
        Partage->top_cdg_plugin_dls = 0;
        
-       Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
-       for (i=0; i<Config.max_serveur; i++)
-        { Partage->Sous_serveur[i].pid = -1;
-          Partage->Sous_serveur[i].nb_client = -1;
-          Partage->Sous_serveur[i].type_info = TYPE_INFO_VIDE;                    /* Pas d'info à traiter */
-        }
-
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_rs485.synchro, &attr );
@@ -443,6 +435,14 @@
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
              
+       Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
+       for (i=0; i<Config.max_serveur; i++)
+        { Partage->Sous_serveur[i].pid = -1;
+          Partage->Sous_serveur[i].nb_client = -1;
+          Partage->Sous_serveur[i].type_info = TYPE_INFO_VIDE;                    /* Pas d'info à traiter */
+          pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
+        }
+
        sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
        sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
        sigaction( SIGPIPE, &sig, NULL );
@@ -522,6 +522,9 @@ encore:
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_audio.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
+    for (i=0; i<Config.max_serveur; i++)
+     { pthread_mutex_destroy( &Partage->Sous_serveur[i].synchro ); }
+
     close(fd_lock);
 
     if (Socket_ecoute>0) close(Socket_ecoute);
