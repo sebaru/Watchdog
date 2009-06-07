@@ -171,7 +171,7 @@
 
     if (Partage->ea[ num ].val != val_int)
      { Partage->ea[ num ].val     = val_int;
-       /* Test le 26 mai 2009 Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int ); */
+       Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
      }
     Partage->ea[ num ].val_ech =                                                    /* Valeur à l'echelle */
                      (((gdouble)val_int * (Partage->ea[num].max - Partage->ea[num].min)) / 4095)
@@ -263,7 +263,7 @@
     if (num>=NBR_SORTIE_TOR) return;
 
     if ( (A(num) && !etat) || (!A(num) && etat) )
-     { /* Test 26 mai 2009 Ajouter_arch( MNEMO_SORTIE, num, etat ); */
+     { Ajouter_arch( MNEMO_SORTIE, num, etat );
        Partage->audit_bit_interne_per_sec++;
      }
 
