@@ -103,15 +103,15 @@
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].pid == -1) continue;
 
-           liste = Partage->Sous_serveur[i].Clients;
            pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+           liste = Partage->Sous_serveur[i].Clients;
            while(liste)                                            /* Parcours de la liste des clients */
-            { struct CLIENT *client;
-              client = (struct CLIENT *)liste->data;
+            { struct CLIENT *client_srv;
+              client_srv = (struct CLIENT *)liste->data;
 
               g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s\n",
-                          i, client->ident.version, client->util->nom, client->machine,
-                          client->mode, client->defaut, ctime(&client->seconde) );
+                          i, client_srv->ident.version, client_srv->util->nom, client_srv->machine,
+                          client_srv->mode, client_srv->defaut, ctime(&client_srv->seconde) );
               Write_admin ( client->connexion, chaine );
 
               liste = liste->next;
