@@ -214,8 +214,28 @@
          }
      } else
     if ( ! strcmp ( commande, "audit" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Bit/s : %d\n", Partage->audit_bit_interne_per_sec_hold );
+     { gint num;
+       g_snprintf( chaine, sizeof(chaine), " Bit/s : %d\n", Partage->audit_bit_interne_per_sec_hold );
        Write_admin ( client->connexion, chaine );
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       num = g_list_length( Partage->com_msrv.liste_i );                   /* Recuperation du numero de i */
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des I      : reste %d\n", num );
+       Write_admin ( client->connexion, chaine );
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       num = g_list_length( Partage->com_msrv.liste_msg_off );             /* Recuperation du numero de i */
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg OFF: reste %d\n", num );
+       Write_admin ( client->connexion, chaine );
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       num = g_list_length( Partage->com_msrv.liste_msg_on );              /* Recuperation du numero de i */
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg ON : reste %d\n", num );
+       Write_admin ( client->connexion, chaine );
+       
      } else
     if ( ! strcmp ( commande, "ping" ) )
      { Write_admin ( client->connexion, " Pong !\n" );

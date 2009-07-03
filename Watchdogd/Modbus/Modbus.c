@@ -355,7 +355,7 @@
     module->started = FALSE;
     module->request = FALSE;
     module->nbr_deconnect++;
-    module->date_retente = time(NULL) + MODBUS_RETRY;
+    module->date_retente = 0;
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Deconnecter_module", module->id );
     SB( module->bit, 0 );                                     /* Mise a zero du bit interne lié au module */
   }
