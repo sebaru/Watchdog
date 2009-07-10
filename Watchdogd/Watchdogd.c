@@ -219,7 +219,7 @@
          &initdb,           0, "Database initialisation", NULL },
        { "initrsa",    'r', POPT_ARG_NONE,
          &initrsa,          0, "RSA initialisation", NULL },
-       { "debug",'d',       POPT_ARG_INT,
+       { "debug",      'd', POPT_ARG_INT,
          &debug_level,      0, "Debug level", "LEVEL" },
        { "max_client", 'm', POPT_ARG_INT,
          &max_client,       0, "Maximum of connexions allowed", "MAX" },
@@ -262,8 +262,10 @@
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
 
-    if (single) Config.single = TRUE;                                      /* Demarrage en mode single ?? */
-           else Config.single = FALSE;
+printf("1 Config.single = %d\n", Config.single );
+    if (single) Config.single = 1;                                      /* Demarrage en mode single ?? */
+           else Config.single = 0;
+printf("2 Config.single = %d\n", Config.single );
 
     Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
     if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
