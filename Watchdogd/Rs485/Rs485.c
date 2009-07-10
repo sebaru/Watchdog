@@ -551,10 +551,10 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
                    char *ptr;
                    nbr_oct_lu = 0;
                    for (cpt=0; cpt<sizeof(Trame); cpt++)
-                     { printf("%d %02X ", nbr_oct_lu, (unsigned char)*((unsigned char *)&Trame +cpt) ); }
+                     { printf("%02X ",(unsigned char)*((unsigned char *)&Trame +cpt) ); }
                    printf(" entete   = %d nbr_lu = %d\n", TAILLE_ENTETE, nbr_oct_lu );
-                   printf(" source   = %d\n", Trame.source );
                    printf(" dest     = %d\n", Trame.dest );
+                   printf(" source   = %d\n", Trame.source );
                    printf(" fonction = %d\n", Trame.fonction );
                    printf(" taille   = %d\n", Trame.taille );
                    ptr = &Trame + TAILLE_ENTETE + Trame.taille - 1;
