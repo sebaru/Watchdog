@@ -37,7 +37,6 @@
  #include <string.h>
  #include <stdlib.h>
  #include <signal.h>
- #include <semaphore.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
@@ -549,10 +548,15 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
               { nbr_oct_lu = nbr_oct_lu + cpt;
    	        if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
                  { int crc_recu;
+                   char *ptr;
                    nbr_oct_lu = 0;
                    for (cpt=0; cpt<sizeof(Trame); cpt++)
                      { printf("%d %02X ", nbr_oct_lu, (unsigned char)*((unsigned char *)&Trame +cpt) ); }
                    printf(" entete = %d taille = %d\n", TAILLE_ENTETE, Trame.taille );
+                   ptr = &Trame + TAILLE_ENTETE + Trame.taille - 1;
+                   printf(" CRC = %02X", *ptr );
+                   ptr = &Trame + TAILLE_ENTETE + Trame.taille - 2;
+                   printf(" CRC = %02X", *ptr );
                    crc_recu =   (*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 1)) & 0xFF;
                    crc_recu += ((*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 2)) & 0xFF)<<8;
 Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5.5" );
