@@ -499,12 +499,13 @@ encore:
              if (!Demarrer_audio())                                                /* Démarrage A.U.D.I.O */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
 
-             if (!Demarrer_admin())                                                    /* Démarrage ADMIN */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
-
              if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
            }
+
+          if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
+           { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
           Stopper_fils();                                              /* Arret de tous les fils watchdog */
