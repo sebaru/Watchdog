@@ -230,7 +230,7 @@
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
        { "single",     's', POPT_ARG_NONE,
-         &help,             0, "Don't start thread", NULL },
+         &single,           0, "Don't start thread", NULL },
        POPT_TABLEEND
      };
     poptContext context;
