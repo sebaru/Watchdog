@@ -561,8 +561,8 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
                    printf(" CRC = %02X", *ptr );
                    ptr = &Trame + TAILLE_ENTETE + Trame.taille - 2;
                    printf(" CRC = %02X", *ptr );
-                   crc_recu =   (*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 1)) & 0xFF;
-                   crc_recu += ((*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 2)) & 0xFF)<<8;
+                   crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
+                   crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
 Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5.5" );
                    if (crc_recu != Calcul_crc16(&Trame))
                     { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
