@@ -559,11 +559,13 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
                     { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
                    else
                     { pthread_mutex_lock( &Partage->com_dls.synchro );
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 6" );
                       if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;
                          liste = liste->next;
                        }
                       pthread_mutex_unlock( &Partage->com_dls.synchro );
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 7" );
                     }
                    memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                  }
