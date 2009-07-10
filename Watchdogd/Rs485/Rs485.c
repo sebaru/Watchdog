@@ -435,7 +435,7 @@
      { Info( Config.log, DEBUG_INFO, "RS485: Acces RS485 impossible, terminé");
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else { Info_n( Config.log, DEBUG_INFO, "RS485: Acces RS485 fait", fd_rs485 ); }
+    else { Info_n( Config.log, DEBUG_INFO, "RS485: Acces RS485 FD", fd_rs485 ); }
 
     Partage->com_rs485.Modules_RS485 = NULL;                    /* Initialisation des variables du thread */
 
@@ -449,6 +449,8 @@
     id_en_cours = 0;
     attente_reponse = FALSE;
 
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 1" );
+       
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { usleep(1);
        sched_yield();
@@ -491,11 +493,14 @@
            Rs485_is_actif() == FALSE)
         { sleep(2); continue; }
 
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 2" );
+
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->actif != TRUE) { liste = liste->next; continue; }
 
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 3" );
           if ( attente_reponse == FALSE )
            { if ( module->date_retente <= Partage->top )                         /* module banni ou non ? */
               { if (module->date_ana > Partage->top)                        /* Ana toutes les 10 secondes */
@@ -525,6 +530,7 @@
              else { module->date_retente = 0; }
            }
 
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 4" );
           FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RS485 */
           FD_SET(fd_rs485, &fdselect );
           tv.tv_sec = 1;
