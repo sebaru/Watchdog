@@ -435,6 +435,7 @@
      { Info( Config.log, DEBUG_INFO, "RS485: Acces RS485 impossible, terminé");
        pthread_exit(GINT_TO_POINTER(-1));
      }
+    else { Info_n( Config.log, DEBUG_INFO, "RS485: Acces RS485 fait", fd_rs485 ); }
 
     Partage->com_rs485.Modules_RS485 = NULL;                    /* Initialisation des variables du thread */
 
@@ -480,7 +481,7 @@
         }
 
        if (Partage->com_rs485.admin_stop)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stoping module" );
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stopping module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
           if (module) module->actif = 0;
           Partage->com_rs485.admin_stop = 0;
