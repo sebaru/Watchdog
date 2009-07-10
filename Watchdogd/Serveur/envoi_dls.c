@@ -290,7 +290,7 @@
           g_snprintf( cible,  sizeof(cible),  "libdls%d.so", dls.id );
           Info( Config.log, DEBUG_DLS, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
           execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
-                  "-Wall", "-ldls", source, "-o", cible, NULL );
+                  "-Wall", "-ldls", source, "-fPIC", "-o", cible, NULL );
           Info( Config.log, DEBUG_FORK, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
           g_snprintf( erreur.message, sizeof(erreur.message), "Lancement compilateur failed !" );
           Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );

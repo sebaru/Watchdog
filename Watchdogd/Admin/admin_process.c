@@ -71,10 +71,6 @@
         { if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
            { Info( Config.log, DEBUG_FORK, "Admin: Pb AUDIO -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "admin" ) )
-        { if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb Admin -> Arret" ); }
-        } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info( Config.log, DEBUG_FORK, "Admin: Pb DLS -> Arret" ); }
