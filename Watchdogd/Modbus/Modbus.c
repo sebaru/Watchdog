@@ -598,7 +598,7 @@
      { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  attendu",
                module->transaction_id );
        Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  reponse",
-               module->response.transaction_id );
+               ntohs(module->response.transaction_id) );
                                             /* On laisse tomber la trame recue, et on attends la suivante */
        memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
        return;
