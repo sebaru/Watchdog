@@ -552,7 +552,7 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
                    nbr_oct_lu = 0;
                    for (cpt=0; cpt<sizeof(Trame); cpt++)
                      { printf("%d %02X ", nbr_oct_lu, (unsigned char)*((unsigned char *)&Trame +cpt) ); }
-                   printf("\n");
+                   printf(" entete = %d taille = %d\n", TAILLE_ENTETE, Trame.taille );
                    crc_recu =   (*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 1)) & 0xFF;
                    crc_recu += ((*(char *)((unsigned int)&Trame + TAILLE_ENTETE + Trame.taille - 2)) & 0xFF)<<8;
 Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5.5" );
