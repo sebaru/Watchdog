@@ -394,6 +394,7 @@
      }
 #endif
 
+printf("Config.single = %d\n", Config.single );
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
     Info( Config.log, DEBUG_INFO, "Start" );
@@ -484,7 +485,6 @@ encore:
         { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
        else
         { pthread_t TID;
-printf("Config.single = %d\n", Config.single );
           if (Config.single == FALSE)                                          /* Si demarrage des thread */
            { if (!Demarrer_arch())                                         /* Demarrage gestion Archivage */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
