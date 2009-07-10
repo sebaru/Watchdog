@@ -141,8 +141,12 @@
              commande[taille] = 0;                                           /* Caractère de fin de ligne */
 
              if ( ! strcmp ( commande, "quit" ) ) break;                                 /* On s'arrete ? */
-             else { if (taille) memcpy( commande_hold, commande, sizeof(commande_hold) );
-                           else memcpy( commande, commande_hold, sizeof(commande) );
+             else if ( ! strcmp ( commande, "!" ) )
+                  { write ( Socket, commande_hold, strlen(commande_hold) );
+                    fsync(Socket);                                                   /* Flush la sortie ! */
+                  }
+             else if (taille)
+                  { memcpy( commande_hold, commande, sizeof(commande_hold) );
                     write ( Socket, commande, strlen(commande) );
                     fsync(Socket);                                                   /* Flush la sortie ! */
                   }
