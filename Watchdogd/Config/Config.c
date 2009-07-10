@@ -100,5 +100,6 @@
     Info_c( Config.log, DEBUG_CONFIG, "Config db password          ", Config.db_password );
     Info_n( Config.log, DEBUG_CONFIG, "Config db port              ", Config.db_port );
     Info_c( Config.log, DEBUG_CONFIG, "Config crypto key           ", Config.crypto_key );
+    Info_n( Config.log, DEBUG_CONFIG, "Config single               ", Config.single );
   }
 /*--------------------------------------------------------------------------------------------------------*/

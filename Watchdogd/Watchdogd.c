@@ -245,6 +245,7 @@
     initdb         = 0;    
     fg             = 0;
     help           = 0;
+    single         = 0;
 
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
     while ( (rc = poptGetNextOpt( context )) != -1)                      /* Parse de la ligne de commande */
@@ -262,10 +263,8 @@
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
 
-printf("1 Config.single = %d\n", Config.single );
     if (single) Config.single = 1;                                      /* Demarrage en mode single ?? */
            else Config.single = 0;
-printf("2 Config.single = %d\n", Config.single );
 
     Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
     if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
@@ -396,11 +395,9 @@ printf("2 Config.single = %d\n", Config.single );
      }
 #endif
 
-printf("Config.single = %d\n", Config.single );
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
     Info( Config.log, DEBUG_INFO, "Start" );
-printf("Config.single = %d\n", Config.single );
     Print_config();
 
     Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
