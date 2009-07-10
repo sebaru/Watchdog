@@ -497,7 +497,9 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 2" );
 
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
-        { module = (struct MODULE_RS485 *)liste->data;
+        {
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 2.5" );
+          module = (struct MODULE_RS485 *)liste->data;
           if (module->actif != TRUE) { liste = liste->next; continue; }
 
 Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 3" );
@@ -536,6 +538,7 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 4" );
           tv.tv_sec = 1;
           tv.tv_usec= 0;
           retval = select(fd_rs485+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
+Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
           if (retval>=0 && FD_ISSET(fd_rs485, &fdselect) )
 	   { int bute, cpt;
              if (nbr_oct_lu<TAILLE_ENTETE)
