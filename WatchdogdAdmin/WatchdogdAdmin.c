@@ -145,8 +145,9 @@
                   { write ( Socket, commande_hold, strlen(commande_hold) );
                     fsync(Socket);                                                   /* Flush la sortie ! */
                   }
-             else if (taille)
-                  { memcpy( commande_hold, commande, sizeof(commande_hold) );
+             else 
+                  { if (taille) { memcpy( commande_hold, commande, sizeof(commande_hold) ); }
+                    else  { memcpy( commande, "nocde", sizeof(commande) ); }
                     write ( Socket, commande, strlen(commande) );
                     fsync(Socket);                                                   /* Flush la sortie ! */
                   }
