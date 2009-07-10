@@ -44,6 +44,7 @@
     guint max_login_failed;                                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */
+    gint single;                                                                /* Demarrage des thread ? */
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"

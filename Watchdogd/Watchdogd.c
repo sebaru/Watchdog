@@ -205,7 +205,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, port, debug_level, max_client, fg, initdb, initrsa;
+  { gint help, port, debug_level, max_client, fg, initdb, initrsa, single;
     gchar *home, *file;
     gint nbr_bytes;
     gchar *chaine;
@@ -229,6 +229,8 @@
          &file,             0, "Configuration file", "FILE" },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
+       { "single",     's', POPT_ARG_NONE,
+         &help,             0, "Don't start thread", NULL },
        POPT_TABLEEND
      };
     poptContext context;
@@ -259,6 +261,9 @@
        exit(EXIT_OK);
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
+
+    if (single) Config.single = TRUE;                                      /* Demarrage en mode single ?? */
+           else Config.single = FALSE;
 
     Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
     if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
@@ -420,7 +425,7 @@
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
 
-       Partage->Arret            = 0;                     /* On n'arrete pas tout de suite le serveur ;-) */
+       Partage->Arret            = TOURNE;
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        Partage->top              = 0;
        Partage->top_cdg_plugin_dls = 0;
@@ -477,29 +482,29 @@ encore:
        if (!Ssl_ctx)
         { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
        else
-       if (!Demarrer_arch())                                               /* Demarrage gestion Archivage */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
-       else
-       if (!Demarrer_rs485())                                           /* Demarrage gestion module RS485 */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
-       else
-       if (!Demarrer_modbus())                                         /* Demarrage gestion module MODBUS */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
-       else
-       if (!Demarrer_sms())                                                           /* Démarrage S.M.S. */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
-       else
-       if (!Demarrer_audio())                                                      /* Démarrage A.U.D.I.O */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
-       else
-       if (!Demarrer_admin())                                                      /* Démarrage A.U.D.I.O */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
-       else
-       if (!Demarrer_dls())                                                           /* Démarrage D.L.S. */
-        { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
-       else
         { pthread_t TID;
-          /*sigaction( SIGCHLD, &sig, NULL );*/
+          if (Config.single == FALSE)                                          /* Si demarrage des thread */
+           { if (!Demarrer_arch())                                         /* Demarrage gestion Archivage */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
+
+             if (!Demarrer_rs485())                                     /* Demarrage gestion module RS485 */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
+
+             if (!Demarrer_modbus())                                   /* Demarrage gestion module MODBUS */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
+
+             if (!Demarrer_sms())                                                     /* Démarrage S.M.S. */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
+
+             if (!Demarrer_audio())                                                /* Démarrage A.U.D.I.O */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
+
+             if (!Demarrer_admin())                                                    /* Démarrage ADMIN */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+
+             if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
+           }
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
           Stopper_fils();                                              /* Arret de tous les fils watchdog */

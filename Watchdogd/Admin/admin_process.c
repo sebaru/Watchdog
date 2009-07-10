@@ -44,6 +44,43 @@
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
+    if ( ! strcmp ( commande, "start" ) )
+     { gchar thread[128], chaine[128];
+       sscanf ( ligne, "%s %s", commande, thread );
+
+       g_snprintf( chaine, sizeof(chaine), " Starting %s\n", thread );
+       Write_admin ( client->connexion, chaine );
+
+       if ( ! strcmp ( thread, "arch" ) )
+        { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb ARCH -> Arret" ); }
+        } else
+       if ( ! strcmp ( thread, "rs485" ) )
+        { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb RS485 -> Arret" ); }
+        } else
+       if ( ! strcmp ( thread, "modbus" ) )
+        { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb MODBUS -> Arret" ); }
+        } else
+       if ( ! strcmp ( thread, "sms" ) )
+        { if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb SMS -> Arret" ); }
+        } else
+       if ( ! strcmp ( thread, "audio" ) )
+        { if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb AUDIO -> Arret" ); }
+        } else
+       if ( ! strcmp ( thread, "admin" ) )
+        { if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb Admin -> Arret" ); }
+        } else
+       if ( ! strcmp ( thread, "dls" ) )
+        { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb DLS -> Arret" ); }
+        } 
+
+     } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : SHUTDOWN demandé" );
        Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
