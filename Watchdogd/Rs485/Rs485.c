@@ -448,8 +448,6 @@
     id_en_cours = 0;
     attente_reponse = FALSE;
 
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 1" );
-       
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { usleep(1);
        sched_yield();
@@ -492,16 +490,11 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 1" );
            Rs485_is_actif() == FALSE)
         { sleep(2); continue; }
 
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 2" );
-
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
-        {
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 2.5" );
-          module = (struct MODULE_RS485 *)liste->data;
+        { module = (struct MODULE_RS485 *)liste->data;
           if (module->actif != TRUE) { liste = liste->next; continue; }
 
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 3" );
           if ( attente_reponse == FALSE )
            { if ( module->date_retente <= Partage->top )                         /* module banni ou non ? */
               { if (module->date_ana > Partage->top)                        /* Ana toutes les 10 secondes */
@@ -531,13 +524,11 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 3" );
              else { module->date_retente = 0; }
            }
 
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 4" );
           FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RS485 */
           FD_SET(fd_rs485, &fdselect );
           tv.tv_sec = 1;
           tv.tv_usec= 0;
           retval = select(fd_rs485+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
           if (retval>=0 && FD_ISSET(fd_rs485, &fdselect) )
 	   { int bute, cpt;
              if (nbr_oct_lu<TAILLE_ENTETE)
@@ -548,8 +539,8 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
               { nbr_oct_lu = nbr_oct_lu + cpt;
    	        if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
                  { int crc_recu;
-                   char *ptr;
                    nbr_oct_lu = 0;
+#ifdef bouh
                    for (cpt=0; cpt<sizeof(Trame); cpt++)
                      { printf("%02X ",(unsigned char)*((unsigned char *)&Trame +cpt) ); }
                    printf(" entete   = %d nbr_lu = %d\n", TAILLE_ENTETE, nbr_oct_lu );
@@ -557,25 +548,18 @@ Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5" );
                    printf(" source   = %d\n", Trame.source );
                    printf(" fonction = %d\n", Trame.fonction );
                    printf(" taille   = %d\n", Trame.taille );
-                   ptr = &Trame + TAILLE_ENTETE + Trame.taille - 1;
-                   printf(" CRC = %02X", *ptr );
-                   ptr = &Trame + TAILLE_ENTETE + Trame.taille - 2;
-                   printf(" CRC = %02X", *ptr );
+#endif
                    crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
                    crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 5.5" );
                    if (crc_recu != Calcul_crc16(&Trame))
                     { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
                    else
-                    { 
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 6" );
-                      pthread_mutex_lock( &Partage->com_dls.synchro );
+                    { pthread_mutex_lock( &Partage->com_dls.synchro );
                       if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;
                          liste = liste->next;
                        }
                       pthread_mutex_unlock( &Partage->com_dls.synchro );
-Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: 7" );
                     }
                    memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                  }
