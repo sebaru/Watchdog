@@ -31,7 +31,7 @@
  #include <unistd.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
- #define DEBUG
+ /*#define DEBUG*/
 /**********************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
