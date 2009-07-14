@@ -188,13 +188,4 @@
   { if (!db) return(0);
     return ( mysql_insert_id(db->mysql) );
   }
-/**********************************************************************************************************/
-/* initDb_watchdog: initialisation des tables de la Db_watchdog watchdog                                  */
-/* entrées: un log et une database                                                                        */
-/* sortie: Un pointeur sur une chaine de caractere si probleme, null sinon                                */
-/**********************************************************************************************************/
- gchar *Init_db_watchdog( void )
-  { 
-return("test");
-  } 
 /*--------------------------------------------------------------------------------------------------------*/

@@ -55,11 +55,11 @@
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info( Config.log, DEBUG_FORK, "Admin: Pb ARCH -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "rs485" ) )
+       if ( ! strcmp ( thread, "rs" ) )
         { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
            { Info( Config.log, DEBUG_FORK, "Admin: Pb RS485 -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "modbus" ) )
+       if ( ! strcmp ( thread, "mbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_FORK, "Admin: Pb MODBUS -> Arret" ); }
         } else
@@ -98,11 +98,18 @@
        Partage->Arret = RELOAD;
      } else
     if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
-       Write_admin ( client->connexion, "  RELOAD               - Reload configuration\n" );
-       Write_admin ( client->connexion, "  REBOOT               - Restart all processes\n" );
-       Write_admin ( client->connexion, "  CLEAR-REBOOT         - Restart all processes with no DATA import/expot\n" );
-       Write_admin ( client->connexion, "  SHUTDOWN             - Stop processes\n" );
+     { Write_admin ( client->connexion,
+                     "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
+       Write_admin ( client->connexion,
+                     "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls)\n" );
+       Write_admin ( client->connexion,
+                     "  RELOAD               - Reload configuration\n" );
+       Write_admin ( client->connexion,
+                     "  REBOOT               - Restart all processes\n" );
+       Write_admin ( client->connexion,
+                     "  CLEAR-REBOOT         - Restart all processes with no DATA import/export\n" );
+       Write_admin ( client->connexion,
+                     "  SHUTDOWN             - Stop processes\n" );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

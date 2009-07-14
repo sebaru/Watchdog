@@ -215,8 +215,6 @@
          &port,             0, "Port to listen to", "PORT" },
        { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
-       { "initdb",     'i', POPT_ARG_NONE,
-         &initdb,           0, "Database initialisation", NULL },
        { "initrsa",    'r', POPT_ARG_NONE,
          &initrsa,          0, "RSA initialisation", NULL },
        { "debug",      'd', POPT_ARG_INT,
@@ -242,7 +240,6 @@
     max_client     = -1;
     debug_level    = -1;
     initrsa        = 0;
-    initdb         = 0;    
     fg             = 0;
     help           = 0;
     single         = 0;
@@ -274,18 +271,6 @@
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
-
-    if (initdb)                                                   /* Doit-on initialiser les databases ?? */
-     { gchar *chaine;
-       Config.log = Info_init( "Watchdogd", Config.debug_level );                  /* Init msgs d'erreurs */
-       Print_config();
-       chaine = Init_db_watchdog();
-       if (chaine) { printf( " Initialisation of Databases: \n %s\n", chaine );
-                     g_free(chaine);
-                   }
-              else { printf( " Initialisation of Databases OK\n" ); }
-       exit(EXIT_OK);
-     }
 
     nbr_bytes = Config.taille_clef_rsa>>3;
     chaine = g_malloc0( nbr_bytes );

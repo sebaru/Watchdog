@@ -1,3 +1,0 @@
-#!/bin/sh
-
-rsync --progress -arv Include Watchdogd Client Commun WatchdogdAdmin /mnt/SalleCTI-home/sebastien/SQL/

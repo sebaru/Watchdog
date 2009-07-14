@@ -24,7 +24,6 @@
     MYSQL_ROW row;
   };
 /************************************* Prototypes de fonctions ********************************************/
- extern gchar *Init_db_watchdog( void );                                                 /* Dans initdb.c */
  extern gchar *Normaliser_chaine( struct LOG *log, gchar *pre_comment );
  extern struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
                                  gchar *user, gchar *password, guint port );
