@@ -49,7 +49,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_ENTREEANA:
-             { Client_mode( client, ENVOI_ENTREEANA );
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_entreeANA_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_ENTREEANA:

@@ -49,7 +49,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_CLASSE:
-             { Client_mode( client, ENVOI_CLASSE );
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_classes_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_CLASSE: 
@@ -78,8 +80,10 @@
             break;
 /********************************* Client en VALIDE, gestion des icones ***********************************/
        case SSTAG_CLIENT_WANT_PAGE_ICONE:
-            { Client_mode( client, ENVOI_ICONE );
-               client->classe_icone = ((struct CMD_ID_CLASSE *)connexion->donnees)->id;
+            { client->classe_icone = ((struct CMD_ID_CLASSE *)connexion->donnees)->id;
+              Ref_client( client );                              /* Indique que la structure est utilisée */
+              pthread_create( &tid, NULL, (void *)Envoyer_icones_thread, client );
+              pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_ICONE:

@@ -36,6 +36,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_atelier( gint Id_serveur, struct CLIENT *client )
   { struct CONNEXION *connexion;
+    pthread_t tid;
     connexion = client->connexion;
 
     if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SYNOPTIQUE) )
@@ -48,7 +49,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE:
-             { Client_mode( client, ENVOI_SYNOPTIQUE );
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE:

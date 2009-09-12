@@ -34,9 +34,6 @@
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,
-    ENVOI_DLS,
-    ENVOI_SYNOPTIQUE,
-    ENVOI_MNEMONIQUE,
     ENVOI_MNEMONIQUE_FOR_COURBE,
     ENVOI_MNEMONIQUE_FOR_HISTO_COURBE,                 /* Envoi des infos mnemo pour la page histo_courbe */
     ENVOI_MOTIF_ATELIER,                                     /* Envoi des motifs associés à un synoptique */
@@ -51,15 +48,11 @@
     ENVOI_IXXX_SUPERVISION,
     ENVOI_GROUPE_FOR_SYNOPTIQUE,
     ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,      /* Envoi des groupes pour la fenetre propriete synoptique */
-    ENVOI_ICONE,
     ENVOI_ICONE_FOR_ATELIER,
-    ENVOI_CLASSE,
     ENVOI_CLASSE_FOR_ATELIER,
     ENVOI_SYNOPTIQUE_FOR_ATELIER,                      /* Envoi de la liste des syn pour choix passerelle */
     ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE,              /* Envoi de la liste des syn pour choix de palette */
     ENVOI_PALETTE_FOR_ATELIER_PALETTE,
-    ENVOI_HISTO_HARD,
-    ENVOI_ENTREEANA,
 
     ENVOI_SOURCE_DLS,
     ENVOI_SCENARIO,                                                       /* Envoi des scenario au client */

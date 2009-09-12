@@ -49,7 +49,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE:
-             { Client_mode( client, ENVOI_MNEMONIQUE );
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_MNEMONIQUE:

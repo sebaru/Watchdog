@@ -89,10 +89,7 @@
        case ENVOI_PALETTE               : return("ENVOI_PALETTE");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
-       case ENVOI_DLS                   : return("ENVOI_DLS");
        case ENVOI_SOURCE_DLS            : return("ENVOI_SOURCE_DLS");
-       case ENVOI_SYNOPTIQUE            : return("ENVOI_SYNOPTIQUE");
-       case ENVOI_MNEMONIQUE            : return("ENVOI_MNEMONIQUE");
        case ENVOI_MNEMONIQUE_FOR_COURBE : return("ENVOI_MNEMONIQUE_FOR_COURBE");
        case ENVOI_MNEMONIQUE_FOR_HISTO_COURBE : return("ENVOI_MNEMONIQUE_FOR_HISTO_COURBE");
        case ENVOI_MOTIF_ATELIER         : return("ENVOI_MOTIF_ATELIER");
@@ -106,12 +103,8 @@
        case ENVOI_CAPTEUR_SUPERVISION     : return("ENVOI_CAPTEUR_SUPERVISION");
        case ENVOI_IXXX_SUPERVISION      : return("ENVOI_IXXX_SUPERVISION");
        case ENVOI_GROUPE_FOR_SYNOPTIQUE : return("ENVOI_GROUPE_FOR_SYNOPTIQUE");
-       case ENVOI_ICONE                 : return("ENVOI_ICONE");
        case ENVOI_SCENARIO              : return("ENVOI_SCENARIO");
        case ENVOI_SCENARIO_SUP          : return("ENVOI_SCENARIO_SUP");
-       case ENVOI_CLASSE                : return("ENVOI_CLASSE");
-       case ENVOI_HISTO_HARD            : return("ENVOI_HISTO_HARD");
-       case ENVOI_ENTREEANA             : return("ENVOI_ENTREEANA");
        
        case ENVOI_CLASSE_FOR_ATELIER    : return("ENVOI_CLASSE_FOR_ATELIER");
        case ENVOI_ICONE_FOR_ATELIER     : return("ENVOI_ICONE_FOR_ATELIER");
@@ -360,26 +353,7 @@
                                                           client );
                                           pthread_detach( tid );
                                           break;
-                case ENVOI_DLS          : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_plugins_dls_thread, client );
-                                          pthread_detach( tid );
-                                          break;
-
                 case ENVOI_SOURCE_DLS   : if(Envoyer_source_dls( client )) Client_mode(client, VALIDE);
-                                          break;
-                case ENVOI_SYNOPTIQUE   : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_synoptiques_thread, client );
-                                          pthread_detach( tid );
-                                          break;
-                case ENVOI_MNEMONIQUE   : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_mnemoniques_thread, client );
-                                          pthread_detach( tid );
                                           break;
                 case ENVOI_MNEMONIQUE_FOR_COURBE:
                                           Client_mode( client, VALIDE );
@@ -469,21 +443,11 @@
                                                           client );
                                           pthread_detach( tid );
                                               break;   
-                case ENVOI_ICONE        : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL, (void *)Envoyer_icones_thread, client );
-                                          pthread_detach( tid );
-                                          break;
                 case ENVOI_ICONE_FOR_ATELIER:
                                           Client_mode( client, VALIDE );
                                           Ref_client( client );  /* Indique que la structure est utilisée */
                                           pthread_create( &tid, NULL,
                                                           (void *)Envoyer_icones_pour_atelier_thread, client );
-                                          pthread_detach( tid );
-                                          break;
-                case ENVOI_CLASSE       : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL, (void *)Envoyer_classes_thread, client );
                                           pthread_detach( tid );
                                           break;
                 case ENVOI_CLASSE_FOR_ATELIER:
@@ -517,12 +481,6 @@
                                           pthread_detach( tid );
                                           break;
 
-                case ENVOI_ENTREEANA    : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL, (void *)Envoyer_entreeANA_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
                 case ENVOI_SCENARIO     : Client_mode( client, VALIDE );
                                           Ref_client( client );  /* Indique que la structure est utilisée */
                                           pthread_create( &tid, NULL, (void *)Envoyer_scenario_thread, client );
