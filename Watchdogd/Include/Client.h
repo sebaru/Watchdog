@@ -33,11 +33,8 @@
     ENVOI_GIF,
     VALIDE,
 
-    ENVOI_GROUPE,
-    ENVOI_UTIL,
     ENVOI_GROUPE_FOR_UTIL,
     ENVOI_DLS,
-    ENVOI_MESSAGE,
     ENVOI_SYNOPTIQUE,
     ENVOI_MNEMONIQUE,
     ENVOI_MNEMONIQUE_FOR_COURBE,
@@ -45,7 +42,6 @@
     ENVOI_MOTIF_ATELIER,                                     /* Envoi des motifs associés à un synoptique */
     ENVOI_COMMENT_ATELIER,                                 /* Envoi des comments associés à un synoptique */
     ENVOI_PASSERELLE_ATELIER,                              /* Envoi des passerelles dans l'atelier client */
-    ENVOI_PALETTE_ATELIER,                                     /* Envoi des palette dans l'atelier client */
     ENVOI_CAPTEUR_ATELIER,                                     /* Envoi des capteur dans l'atelier client */
     ENVOI_MOTIF_SUPERVISION,                                         /* Envoi des motifs a la supervision */
     ENVOI_COMMENT_SUPERVISION,                                     /* Envoi des comments à la supervision */
@@ -64,8 +60,6 @@
     ENVOI_PALETTE_FOR_ATELIER_PALETTE,
     ENVOI_HISTO_HARD,
     ENVOI_ENTREEANA,
-    ENVOI_ENTREEANA_FOR_COURBE,                          /* Envoi des infos entreeana pour la page courbe */
-    ENVOI_ENTREEANA_FOR_HISTO_COURBE,              /* Envoi des infos entreeana pour la page histo_courbe */
 
     ENVOI_SOURCE_DLS,
     ENVOI_SCENARIO,                                                       /* Envoi des scenario au client */

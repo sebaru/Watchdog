@@ -50,12 +50,15 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SOURCE_FOR_COURBE:
-             { Client_mode( client, ENVOI_ENTREEANA_FOR_COURBE );
+             { Ref_client( client );  /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_entreeANA_for_courbe_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_ADD_COURBE:
              { while (client->courbe.id != -1) { printf("attends\n"); sched_yield(); }
                memcpy( &client->courbe, connexion->donnees, sizeof(struct CMD_ID_COURBE) );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Proto_ajouter_courbe_thread, client );
                pthread_detach( tid );
              }

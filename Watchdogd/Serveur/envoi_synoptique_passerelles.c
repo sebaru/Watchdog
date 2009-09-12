@@ -174,7 +174,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_passerelleDB( Config.log, db, client->syn.id ) )
-     { Client_mode( client, ENVOI_PALETTE_ATELIER );                            /* Si pas de comments ... */
+     { Client_mode( client, ENVOI_CAPTEUR_ATELIER );                            /* Si pas de comments ... */
        Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
@@ -188,7 +188,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
      { pass = Recuperer_passerelleDB_suite( Config.log, db );
        if (!pass)
         { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_PALETTE_ATELIER );               /* Si pas de comments ... */
+          Client_mode( client, ENVOI_CAPTEUR_ATELIER );               /* Si pas de comments ... */
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
