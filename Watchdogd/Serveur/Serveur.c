@@ -100,11 +100,9 @@
        case ENVOI_MOTIF_SUPERVISION     : return("ENVOI_MOTIF_SUPERVISION");
        case ENVOI_PASSERELLE_SUPERVISION: return("ENVOI_PASSERELLE_SUPERVISION");
        case ENVOI_PALETTE_SUPERVISION   : return("ENVOI_PALETTE_SUPERVISION");
-       case ENVOI_CAPTEUR_SUPERVISION     : return("ENVOI_CAPTEUR_SUPERVISION");
+       case ENVOI_CAPTEUR_SUPERVISION   : return("ENVOI_CAPTEUR_SUPERVISION");
        case ENVOI_IXXX_SUPERVISION      : return("ENVOI_IXXX_SUPERVISION");
        case ENVOI_GROUPE_FOR_SYNOPTIQUE : return("ENVOI_GROUPE_FOR_SYNOPTIQUE");
-       case ENVOI_SCENARIO              : return("ENVOI_SCENARIO");
-       case ENVOI_SCENARIO_SUP          : return("ENVOI_SCENARIO_SUP");
        
        case ENVOI_CLASSE_FOR_ATELIER    : return("ENVOI_CLASSE_FOR_ATELIER");
        case ENVOI_ICONE_FOR_ATELIER     : return("ENVOI_ICONE_FOR_ATELIER");
@@ -478,18 +476,6 @@
                                           pthread_create( &tid, NULL,
                                                           (void *)Envoyer_palette_atelier_thread,
                                                           client );
-                                          pthread_detach( tid );
-                                          break;
-
-                case ENVOI_SCENARIO     : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL, (void *)Envoyer_scenario_thread, client );
-                                          pthread_detach( tid );
-                                          break;
-                case ENVOI_SCENARIO_SUP : Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_scenario_sup_thread, client );
                                           pthread_detach( tid );
                                           break;
               }

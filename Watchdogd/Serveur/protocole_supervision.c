@@ -100,7 +100,9 @@
                sce = (struct CMD_WANT_SCENARIO_MOTIF *)connexion->donnees;
                printf("Envoi scenario bitm %d %d\n", sce->bit_clic, sce->bit_clic2 );
                memcpy ( &client->sce, sce, sizeof( struct CMD_WANT_SCENARIO_MOTIF ) );
-               Client_mode( client, ENVOI_SCENARIO_SUP );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_scenario_sup_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_SUP_EDIT_SCENARIO:

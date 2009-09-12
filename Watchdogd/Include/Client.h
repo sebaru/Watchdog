@@ -55,8 +55,6 @@
     ENVOI_PALETTE_FOR_ATELIER_PALETTE,
 
     ENVOI_SOURCE_DLS,
-    ENVOI_SCENARIO,                                                       /* Envoi des scenario au client */
-    ENVOI_SCENARIO_SUP,                                                   /* Envoi des scenario au client */
 
     DECONNECTE                                                                        /* Deconnexion SOFT */
   };
