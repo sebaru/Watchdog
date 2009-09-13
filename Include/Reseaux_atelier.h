@@ -256,14 +256,6 @@
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
   };
 
-/******************************************** Gestion des camera ******************************************/
- struct CMD_TYPE_CAMERA
-  { guint   id;                                                                 /* ID unique de la camera */
-    gchar   libelle[NBR_CARAC_LIBELLE_CAMERA_UTF8];                               /* Libelle de la camera */
-    gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                             /* Libelle de la camera */
-    gint    type;                                                            /* petite, moyenne, grande ? */
-  };
-
 /************************************************* Tag de communication ***********************************/
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE,                      /* Ajout d'un groupe dans la liste cliente */
