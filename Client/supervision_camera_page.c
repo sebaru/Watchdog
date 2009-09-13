@@ -58,7 +58,7 @@
 
  void Test ( void )
 {
-struct CMD_TYPE_CAMERA camera={ 0, "testseb", "http://guest:guest@192.168.0.30/cgi/mjpg/mjpg.cgi", 0 };
+struct CMD_TYPE_CAMERA camera={ 0, 0, "testseb", "http://guest:guest@192.168.0.30/cgi/mjpg/mjpg.cgi", 0 };
 Creer_page_supervision_camera( &camera );
 
 

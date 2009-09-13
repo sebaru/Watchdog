@@ -130,6 +130,14 @@
                                                          client, mnemo );
              }
             break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_CAMERA_SUP:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CAMERA_SUP,
+                                                 client, mnemo );
+             }
+            break;
 /************************************* Gestion des commentaires synoptiques *******************************/
        case SSTAG_CLIENT_ATELIER_ADD_COMMENT: 
              { struct CMD_ADD_COMMENT *comment;

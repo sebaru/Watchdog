@@ -92,6 +92,12 @@
                Proto_afficher_mnemo_atelier_pass( mnemo );
              }
             break;
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CAMERA_SUP:
+             { struct CMD_SHOW_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_SHOW_MNEMONIQUE *)connexion->donnees;
+               Proto_afficher_mnemo_camera_sup_atelier( mnemo );
+             }
+            break;
        case SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK:
              { struct CMD_SHOW_MOTIF *motif;
                motif = (struct CMD_SHOW_MOTIF *)connexion->donnees;
