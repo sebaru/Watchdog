@@ -154,6 +154,25 @@
                Info_n( Config.log, DEBUG_INFO, "fin edit comment numéro", comment->id );
              }
             break;
+/************************************* Gestion des commentaires synoptiques *******************************/
+       case SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP: 
+             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+               Proto_ajouter_camera_sup_atelier( client, camera_sup );
+             }
+            break;
+       case SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP:
+             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+               Proto_effacer_camera_sup_atelier( client, camera_sup );
+             }
+            break;
+       case SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP:
+             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+               Proto_valider_editer_camera_sup_atelier( client, camera_sup );
+             }
+            break;
 /************************************* Gestion des passerelle synoptiques *********************************/
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER:
              { printf("Le client desire les syn pour atelier\n" );

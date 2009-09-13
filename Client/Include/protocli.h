@@ -220,6 +220,7 @@
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_scenario ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
 
 
  extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
@@ -284,6 +285,7 @@
  extern gchar *Type_bit_interne ( gint num );
  extern gchar *Type_bit_interne_court ( gint num );
  extern gint Type_bit_interne_int ( gchar *type );
+ extern void Creer_page_mnemonique( void );
 
  extern void Menu_ajouter_editer_mnemonique ( struct CMD_EDIT_MNEMONIQUE *edit_mnemo );/* ajout_synoptique.c*/
 

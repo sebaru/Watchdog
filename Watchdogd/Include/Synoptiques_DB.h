@@ -18,6 +18,7 @@
  #define NOM_TABLE_PASSERELLE     "syns_pass"
  #define NOM_TABLE_PALETTE        "syns_palettes"
  #define NOM_TABLE_CAPTEUR        "syns_capteurs"
+ #define NOM_TABLE_CAMERASUP      "syns_camerasup"
 
  struct SYNOPTIQUEDB
   { guint id;                                                      /* Numero du message dans la structure */
@@ -89,6 +90,19 @@
     gint   bit_controle;            /* Numéro du bit interne de controle de l'aspect du bouton passerelle */
     guint  position_x;                                                       /* en abscisses et ordonnées */
     guint  position_y;
+    gfloat angle;
+  };
+/************************************** Définition d'une camera de supervision ****************************/
+ struct CAMERASUPDB
+  { gint  id;
+    gint  syn_id;
+    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
+    gint  camera_src_id;
+    gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
+    gint  position_x;
+    gint  position_y;
+    gfloat largeur;                                               /* Taille de l'image sur le synoptique */
+    gfloat hauteur;
     gfloat angle;
   };
 /*************************************** Définitions des prototypes ***************************************/
