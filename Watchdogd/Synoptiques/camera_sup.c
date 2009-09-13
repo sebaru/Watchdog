@@ -134,8 +134,9 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
                 " FROM %s,%s WHERE %s.id=%d AND camera_src_id=%s.num",
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP,
-                NOM_TABLE_CAMERA, NOM_TABLE_CAMERASUP, id, NOM_TABLE_CAMERA );
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP,
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,
+                NOM_TABLE_CAMERASUP, id, NOM_TABLE_CAMERA );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
