@@ -122,6 +122,7 @@ Creer_page_camera( &camera );
 
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( infos->camera.libelle ) );
     gtk_widget_show_all( page->child );
+    gtk_widget_realize ( infos->video_output );
     gtk_main_iteration_do( TRUE );
     gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink), GDK_WINDOW_XWINDOW (infos->video_output->window));
     gst_element_set_state (infos->pipeline, GST_STATE_PLAYING);                   /* Allumage du pipeline */

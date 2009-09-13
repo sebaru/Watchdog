@@ -63,7 +63,7 @@
                    { Edit_syn.groupe = 1; }
                   else
                    { Edit_syn.groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data); }
-                  Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE,
+                  Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE,
                                 (gchar *)&Edit_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
                 }
                else
@@ -79,7 +79,7 @@
                   else
                    { new_syn.groupe = GPOINTER_TO_INT ( g_list_nth_data( Liste_index_groupe, index_groupe ) ); }
 
-                  Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ADD_SYNOPTIQUE,
+                  Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_ADD_SYNOPTIQUE,
                                 (gchar *)&new_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
                 }
              }

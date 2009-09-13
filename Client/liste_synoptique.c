@@ -69,7 +69,7 @@
                memcpy( &rezo_synoptique.libelle, libelle, sizeof(rezo_synoptique.libelle) );
                g_free( libelle );
 
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_DEL_SYNOPTIQUE,
+               Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_DEL_SYNOPTIQUE,
                              (gchar *)&rezo_synoptique, sizeof(struct CMD_ID_SYNOPTIQUE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
@@ -89,7 +89,7 @@
 /**********************************************************************************************************/
  static void Menu_ajouter_synoptique ( void )
   { Menu_ajouter_editer_synoptique(NULL);
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
+    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
 /* Menu_effacer_synoptique: Retrait des synoptiques selectionnés                                          */
@@ -143,9 +143,9 @@
     g_free( libelle );
 
 printf("on veut editer le synoptique num %d %s\n", rezo_synoptique.id, rezo_synoptique.libelle );
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_EDIT_SYNOPTIQUE,
+    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_EDIT_SYNOPTIQUE,
                   (gchar *)&rezo_synoptique, sizeof(struct CMD_ID_SYNOPTIQUE) );
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
+    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -185,57 +185,6 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     Creer_page_atelier( rezo_synoptique.id, rezo_synoptique.libelle );
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_SYNOPTIQUE,
                    (gchar *)&rezo_synoptique, sizeof(struct CMD_ID_SYNOPTIQUE) );
-  }
-/**********************************************************************************************************/
-/* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Menu_exporter_synoptique( void )
-  { 
-#ifdef bouh
-    GnomePrintConfig *config;
-    GtkSourceBuffer *buffer;
-    GtkSourcePrintJob *pjob;
-    gchar *mnemo, *libelle;
-    gchar chaine[256];
-   
-    buffer = gtk_source_buffer_new ( NULL );                             /* Creation d'un buffer sans TAG */
-    
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_synoptique) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )                                                   /* Pour tous les objets du tableau */
-     { gtk_tree_model_get( store, &iter, COLONNE_MNEMO, &mnemo, COLONNE_LIBELLE, &libelle, -1 );
-       memset( chaine, ' ', sizeof(chaine) );
-       memcpy( chaine +  0, mnemo, strlen(mnemo) );
-       memcpy( chaine + 1 + NBR_CARAC_MNEMO_SYNOPTIQUE, libelle, strlen(libelle) );
-       chaine[ 1 + NBR_CARAC_MNEMO_SYNOPTIQUE+strlen(libelle)  ] = '\n';
-       chaine[ 1 + NBR_CARAC_MNEMO_SYNOPTIQUE+strlen(libelle)+1] = 0;
-
-       gtk_text_buffer_insert_at_cursor( GTK_TEXT_BUFFER(buffer), chaine, -1 );
-       g_free(mnemo);
-       g_free(libelle);
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-
-    config = gnome_print_config_default();
-    gnome_print_config_set_int (config, GNOME_PRINT_KEY_NUM_COPIES, 1);
-    gnome_print_config_set_boolean (config, GNOME_PRINT_KEY_COLLATE, FALSE);
-
-    pjob = gtk_source_print_job_new_with_buffer (config, buffer);
-    gtk_source_print_job_set_print_numbers (pjob, FALSE );
-    gtk_source_print_job_set_wrap_mode (pjob, FALSE );
-    gtk_source_print_job_set_tabs_width (pjob, 8);
-    gtk_source_print_job_set_header_format (pjob, "Synoptiques - %F %r", NULL, "page %N/%Q", TRUE );
-    gtk_source_print_job_set_print_header (pjob, TRUE);
-    gtk_source_print_job_set_footer_format (pjob, NULL, NULL, SIGNATURE_PRINT, TRUE );
-    gtk_source_print_job_set_print_footer (pjob, TRUE);
-
-    dialog = gnome_print_dialog_new ( NULL, "Imprimer les plugins DLS", GNOME_PRINT_DIALOG_RANGE );
-    g_signal_connect (dialog, "response", G_CALLBACK (Exporter_cb), pjob );
-    gtk_widget_show_all( dialog );
-#endif
   }
 /**********************************************************************************************************/
 /* Gerer_popup_synoptique: Gestion du menu popup quand on clique droite sur la liste des synoptiques      */
@@ -367,8 +316,8 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_exporter_synoptique), NULL );
+/*    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_exporter_synoptique), NULL );*/
 
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );

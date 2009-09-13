@@ -59,7 +59,7 @@
 /**********************************************************************************************************/
  void Menu_want_synoptique ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE )) return;
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE, NULL, 0 );
+    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
 /* Menu_want_mnemonique: l'utilisateur desire editer la base syns                                         */
