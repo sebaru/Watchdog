@@ -72,7 +72,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(libelle,location,type) VALUES "
+                "INSERT INTO %s(libelle,location,type,num) VALUES "
                 "('%s','%s',%d,%d)", NOM_TABLE_CAMERA, libelle, location, camera->type, camera->num );
     g_free(libelle);
     g_free(location);
