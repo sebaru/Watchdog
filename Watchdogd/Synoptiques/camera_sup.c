@@ -67,7 +67,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(syn_id,libelle,camera_src_id,posx,posy,largeur,hauteur,angle)"
-                " VALUES (%d,'%s',%d,%d,%d,%d,%d,%f)", NOM_TABLE_CAMERASUP,
+                " VALUES (%d,'%s',%d,%d,%d,%f,%f,%f)", NOM_TABLE_CAMERASUP,
                 camera_sup->syn_id, libelle, camera_sup->camera_src_id,
                 camera_sup->position_x, camera_sup->position_y,
                 camera_sup->largeur, camera_sup->hauteur,
@@ -132,9 +132,10 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,syn_id,libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
+                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
                 " FROM %s,%s WHERE id=%d AND camera_src_id=%s.num",
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id, NOM_TABLE_CAMERA );
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP,
+                NOM_TABLE_CAMERA, id, NOM_TABLE_CAMERA );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -179,7 +180,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',posx=%d,posy=%d,largeur=%d,hauteur=%d,angle=%f"
+                "libelle='%s',posx=%d,posy=%d,largeur=%f,hauteur=%f,angle=%f"
                 " WHERE id=%d;", NOM_TABLE_CAMERASUP,
                 libelle, camera_sup->position_x, camera_sup->position_y,
                 camera_sup->largeur, camera_sup->hauteur, camera_sup->angle,
