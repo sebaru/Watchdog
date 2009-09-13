@@ -42,6 +42,7 @@
      COLONNE_LOCATION,
      COLONNE_TYPE_INT,
      COLONNE_TYPE_STRING,
+     COLONNE_NUM,
      NBR_COLONNE
   };
 /********************************* Définitions des prototypes programme ***********************************/
@@ -375,13 +376,21 @@
                                               G_TYPE_STRING,                                   /* libelle */
                                               G_TYPE_STRING,                                  /* location */
                                               G_TYPE_UINT,                                        /* type */
-                                              G_TYPE_STRING                                /* type_string */
+                                              G_TYPE_STRING,                               /* type_string */
+                                              G_TYPE_UINT                                          /* Num */
                                );
 
     Liste_camera = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );          /* Creation de la vue */
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), Liste_camera );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Numéro"), renderer,
+                                                         "text", COLONNE_NUM,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM);                    /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_camera), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -464,6 +473,7 @@
                          COLONNE_LIBELLE, camera->libelle,
                          COLONNE_LOCATION, camera->location,
                          COLONNE_TYPE_INT, camera->type,
+                         COLONNE_NUM, camera->num,
                          COLONNE_TYPE_STRING, Type_camera_vers_string(camera->type),
                          -1
                        );

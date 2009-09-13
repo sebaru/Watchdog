@@ -35,6 +35,7 @@
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
+ static GtkWidget *Spin_num;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                        /* Libelle du camera */
  static GtkWidget *Entry_location;                                               /* Location de la camera */
  static GtkWidget *Combo_type;                                                             /* Type camera */
@@ -50,6 +51,7 @@
      { case GTK_RESPONSE_OK:
              { if (edition)
                 { Edit_camera.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Combo_type) );
+                  Edit_camera.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   g_snprintf( Edit_camera.libelle, sizeof(Edit_camera.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   g_snprintf( Edit_camera.location, sizeof(Edit_camera.location),
@@ -60,6 +62,7 @@
                 }
                else
                 { struct CMD_TYPE_CAMERA new_camera;
+                  new_camera.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   new_camera.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Combo_type) );
                   g_snprintf( new_camera.libelle, sizeof(new_camera.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
@@ -116,6 +119,11 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
+    texte = gtk_label_new( _("Numéro") );              /* Id unique du entreeANA en cours d'edition/ajout */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
+    Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 0, 1 );
+
     texte = gtk_label_new( _("Type") );                                           /* Le type de la camera */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
     Combo_type = gtk_combo_box_new_text();
@@ -137,6 +145,7 @@
 
     if (edit_camera)                                                       /* Si edition d'un camera */
      { Edit_camera.id = edit_camera->id;
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_camera->num );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_camera->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_location), edit_camera->location );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), edit_camera->type );
