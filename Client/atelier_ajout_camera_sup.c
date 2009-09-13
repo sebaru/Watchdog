@@ -80,7 +80,8 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK: if (!trame_camera_sup)                              /* Ajout d'un camera_sup */
-                              { add_camera_sup.position_x = TAILLE_SYNOPTIQUE_X/2;
+                              { g_snprintf( add_camera_sup.libelle, sizeof(add_camera_sup.libelle), "new" );
+                                add_camera_sup.position_x = TAILLE_SYNOPTIQUE_X/2;
                                 add_camera_sup.position_y = TAILLE_SYNOPTIQUE_Y/2;                            
                                 add_camera_sup.syn_id  = infos->syn.id;
                                 add_camera_sup.angle   = 0.0;
