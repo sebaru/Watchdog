@@ -19,6 +19,7 @@
  #include "Reseaux_mnemonique.h"
  #include "Reseaux_entreeana.h"
  #include "Reseaux_supervision.h"
+ #include "Reseaux_camera.h"
  #include "Reseaux_histo.h"
  #include "Reseaux_atelier.h"
  #include "Reseaux_courbe.h"
@@ -78,6 +79,7 @@
     TAG_COURBE,                                                                   /* Gestions des courbes */
     TAG_HISTO_COURBE,                                                 /* Gestions des historiques courbes */
     TAG_SCENARIO,                                                                 /* Gestion des scenario */
+    TAG_CAMERA,                                                                     /* Gestion des camera */
   };
 /************************************* Définitions des prototypes *****************************************/
  extern gint Recevoir_reseau( struct LOG *Log, struct CONNEXION *Connexion );

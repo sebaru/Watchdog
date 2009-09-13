@@ -58,7 +58,7 @@
 
  void Test ( void )
 {
-struct CMD_SHOW_CAMERA camera={ "testseb", "http://guest:guest@192.168.0.30/cgi/mjpg/mjpg.cgi", 0, 0, 100, 100 };
+struct CMD_TYPE_CAMERA camera={ 0, "testseb", "http://guest:guest@192.168.0.30/cgi/mjpg/mjpg.cgi", 0 };
 Creer_page_camera( &camera );
 
 
@@ -84,7 +84,7 @@ Creer_page_camera( &camera );
 
     page->type   = TYPE_PAGE_CAMERA;
     Liste_pages  = g_list_append( Liste_pages, page );
-    memcpy( &infos->camera, camera, sizeof( struct CMD_SHOW_CAMERA) );
+    memcpy( &infos->camera, camera, sizeof( struct CMD_TYPE_CAMERA) );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;

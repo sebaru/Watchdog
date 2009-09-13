@@ -8,6 +8,7 @@
  #define _RESEAUX_ATELIER_H_
 
  #include "Cst_atelier.h"
+ #include "Cst_synoptiques.h"
 
  struct CMD_SHOW_SYNOPTIQUE
   { guint id;                                                      /* Numero du message dans la structure */
