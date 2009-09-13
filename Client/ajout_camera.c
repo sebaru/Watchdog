@@ -135,13 +135,13 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Entry_lib = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_CAMERA );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 2, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 1, 2 );
 
     texte = gtk_label_new( _("Location") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
     Entry_location = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_location), NBR_CARAC_LOCATION_CAMERA );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_location, 2, 4, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_location, 1, 4, 2, 3 );
 
     if (edit_camera)                                                       /* Si edition d'un camera */
      { Edit_camera.id = edit_camera->id;
@@ -150,6 +150,8 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_location), edit_camera->location );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), edit_camera->type );
      }
+    else gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 );
+
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
   }

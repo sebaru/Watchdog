@@ -69,6 +69,7 @@
     if (camera)
      { edit_camera.id         = camera->id;                                 /* Recopie des info editables */
        edit_camera.type       = camera->type;
+       edit_camera.num        = camera->num;
        memcpy( &edit_camera.libelle,  camera->libelle,  sizeof(edit_camera.libelle) );
        memcpy( &edit_camera.location, camera->location, sizeof(edit_camera.location) );
 
