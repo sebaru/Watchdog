@@ -119,7 +119,7 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
-    texte = gtk_label_new( _("Numéro") );              /* Id unique du entreeANA en cours d'edition/ajout */
+    texte = gtk_label_new( _("Numero") );              /* Id unique du entreeANA en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 0, 1 );
