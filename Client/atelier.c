@@ -149,6 +149,9 @@ printf("fin Detruire page atelier\n");
     struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct CMD_EDIT_CAPTEUR edit_capteur;
     struct CAPTEUR *capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct CMD_TYPE_CAMERA_SUP *camera_sup, edit_camera_sup;
+
     GList *objet;
     if ( !(infos && infos->Trame_atelier && infos->Trame_atelier->trame_items) )
      { printf("Erreur parametre Menu_enregistrer_synoptique\n"); return; }
@@ -228,6 +231,19 @@ printf("fin Detruire page atelier\n");
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR,
                               (gchar *)&edit_capteur, sizeof(struct CMD_EDIT_CAPTEUR) );
                break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
+               camera_sup = trame_camera_sup->camera_sup;
+               edit_camera_sup.id           = camera_sup->id;           /* Correspond a l'id de la camera */
+               edit_camera_sup.position_x   = camera_sup->position_x;        /* en abscisses et ordonnées */
+               edit_camera_sup.position_y   = camera_sup->position_y;        /* en abscisses et ordonnées */
+               edit_camera_sup.angle        = camera_sup->angle;
+               edit_camera_sup.largeur      = camera_sup->largeur; /* Taille de l'image sur le synoptique */
+               edit_camera_sup.hauteur      = camera_sup->hauteur;
+
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
+                              (gchar *)&edit_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+               break;
 
           default: printf("Enregistrer_synoptique: type inconnu\n" );
         }
@@ -235,7 +251,7 @@ printf("fin Detruire page atelier\n");
      }
   }
 /**********************************************************************************************************/
-/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                            */
+/* Changer_option_zoom: Change le niveau de zoom du canvas                                                */
 /* Entrée: la page en question                                                                            */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
@@ -429,6 +445,20 @@ printf("fin Detruire page atelier\n");
     gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_ajouter_editer_capteur), NULL );
+
+/******************************************** Camera de supervision ***************************************/
+    frame = gtk_frame_new( _("Camera") );
+    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
+    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
+
+    vboite = gtk_vbox_new( FALSE, 6 );
+    gtk_container_add( GTK_CONTAINER(frame), vboite );
+    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
+
+    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
+    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_ajouter_editer_camera_sup), NULL );
 
 /************************************************* fin ****************************************************/
     gtk_widget_show_all( page->child );

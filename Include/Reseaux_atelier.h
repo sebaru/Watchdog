@@ -232,6 +232,18 @@
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
   };
 
+ struct CMD_TYPE_CAMERA_SUP
+  { gint  id;
+    gint  syn_id;
+    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
+    gint  camera_src_id;
+    gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
+    gint  position_x;
+    gint  position_y;
+    gfloat largeur;                                               /* Taille de l'image sur le synoptique */
+    gfloat hauteur;
+    gfloat angle;
+  };
 /************************************************* Tag de communication ***********************************/
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,  /* Envoi des groupes pour l'edition motif */
@@ -248,13 +260,13 @@
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN, /* Le serveur envoi des palettes dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,     /* Le serveur envoi des capteurs dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN, /* Le serveur envoi des capteurs dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,    /* Le serveur envoi des camera dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN,/* Le serveur envoi des camera dans l'atelier client */
 
     SSTAG_CLIENT_ATELIER_DEL_MOTIF,                  /* Le client desire editer par atelier le synoptique */
     SSTAG_SERVEUR_ATELIER_DEL_MOTIF_OK,              /* Le client desire editer par atelier le synoptique */
-
     SSTAG_CLIENT_ATELIER_ADD_MOTIF,                    /* Le client desire ajouter un motif au synoptique */
     SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK,                                          /* L'ajout est un succes */
-
     SSTAG_CLIENT_ATELIER_EDIT_MOTIF,                /* Le client envoi les propriétés du motif au serveur */
 
     SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE,              /* Le client veut un mnemonique du bit TYPE-NUM (B001) */
@@ -266,6 +278,9 @@
     SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS,                         /* Le client desire un mnémonique Ixxx */
     SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS,
 
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_CAMERA_SUP,                         /* Le client desire un mnémonique Ixxx */
+    SSTAG_SERVEUR_TYPE_NUM_MNEMO_CAMERA_SUP,
+
     SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER,        /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER, /* Le serveur envoie les données classes pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER_FIN,
@@ -275,35 +290,33 @@
 
     SSTAG_CLIENT_ATELIER_ADD_COMMENT,  /* Le client veut ajouter un commentaire au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK,                   /* Le serveur valide l'ajout d'un commentaire */
-
     SSTAG_CLIENT_ATELIER_DEL_COMMENT,                           /* Le client veut detruire un commentaire */
     SSTAG_SERVEUR_ATELIER_DEL_COMMENT_OK,            /* Le client desire editer par atelier le synoptique */
-
     SSTAG_CLIENT_ATELIER_EDIT_COMMENT,            /* Le client envoi les propriétés du comment au serveur */
 
     SSTAG_CLIENT_ATELIER_ADD_PASS,            /* Le client veut ajouter un pass au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_PASS_OK,                             /* Le serveur valide l'ajout d'un pass */
-
     SSTAG_CLIENT_ATELIER_DEL_PASS,                                     /* Le client veut detruire un pass */
     SSTAG_SERVEUR_ATELIER_DEL_PASS_OK,               /* Le client desire editer par atelier le synoptique */
-
     SSTAG_CLIENT_ATELIER_EDIT_PASS,                  /* Le client envoi les propriétés du pass au serveur */
 
     SSTAG_CLIENT_ATELIER_ADD_PALETTE,      /* Le client veut ajouter un palette au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_PALETTE_OK,                       /* Le serveur valide l'ajout d'un palette */
-
     SSTAG_CLIENT_ATELIER_DEL_PALETTE,                               /* Le client veut detruire un palette */
     SSTAG_SERVEUR_ATELIER_DEL_PALETTE_OK,            /* Le client desire editer par atelier le synoptique */
-
     SSTAG_CLIENT_ATELIER_EDIT_PALETTE,            /* Le client envoi les propriétés du palette au serveur */
 
     SSTAG_CLIENT_ATELIER_ADD_CAPTEUR,      /* Le client veut ajouter un capteur au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK,                       /* Le serveur valide l'ajout d'un capteur */
-
     SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,                               /* Le client veut detruire un capteur */
     SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK,                                             /* Destruction OKAY */
-
     SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR,            /* Le serveur envoi les propriétés du capteur au client */
+
+    SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,/* Le client veut ajouter une camera_sup au syn en cours d'edition */
+    SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,                /* Le serveur valide l'ajout d'une camera_sup */
+    SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,                        /* Le client veut detruire une camera_sup */
+    SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,                                          /* Destruction OKAY */
+    SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,      /* Le serveur envoi les propriétés du camera_sup au client */
 
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER,    /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER,

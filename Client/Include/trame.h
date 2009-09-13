@@ -9,6 +9,7 @@
 
  #include <gnome.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
+ #include <gst/gst.h>
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
  #include "Reseaux.h"
 
@@ -22,7 +23,8 @@
         TYPE_PASSERELLE,
         TYPE_COMMENTAIRE,
         TYPE_MOTIF,
-        TYPE_CAPTEUR
+        TYPE_CAPTEUR,
+        TYPE_CAMERA_SUP
       };
 
  struct TRAME_ITEM_MOTIF
@@ -111,11 +113,33 @@
     gint selection;
   };
 
+ struct TRAME_ITEM_CAMERA_SUP
+  { gint type;
+    GooCanvasItem *item;
+    GtkWidget *video_output;
+    GstElement *pipeline;
+    cairo_matrix_t transform;
+    cairo_matrix_t transform_hg;
+    cairo_matrix_t transform_hd;
+    cairo_matrix_t transform_bg;
+    cairo_matrix_t transform_bd;
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *select_hg;
+    GooCanvasItem *select_hd;
+    GooCanvasItem *select_bg;
+    GooCanvasItem *select_bd;
+
+    struct CMD_TYPE_CAMERA_SUP *camera_sup;
+    gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+  };
+
+
  struct TRAME_ITEM
   { union { struct TRAME_ITEM_MOTIF motif;
             struct TRAME_ITEM_PASS pass;
             struct TRAME_ITEM_COMMENT comment;
             struct TRAME_ITEM_CAPTEUR capteur;
+            struct TRAME_ITEM_CAMERA_SUP camera_sup;
           };
   };
 

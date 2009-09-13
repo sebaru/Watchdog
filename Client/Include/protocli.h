@@ -390,6 +390,13 @@
  extern void Proto_cacher_une_palette_atelier( struct CMD_ID_PALETTE *palette );
  extern void Proto_afficher_un_syn_for_palette_atelier( struct CMD_SHOW_SYNOPTIQUE *synoptique );
 
+                                                                       /* Dans atelier_ajout_camera_sup.c */
+ extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
+ extern void Proto_afficher_mnemo_camera_sup_atelier ( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Menu_ajouter_editer_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
+ extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );
+
  extern void Creer_page_liste_histo_hard( void );                              /* Dans liste_histo_hard.c */
  extern void Proto_effacer_liste_histo_hard( gint page_id );
  extern void Proto_afficher_un_histo_hard( struct CMD_SHOW_HISTO_HARD *histo );
