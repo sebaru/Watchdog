@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           CptHoraire EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
-	  Synoptiques
+	  Synoptiques Camera
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -33,6 +33,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Histo/libhisto.la \
 		    Utilisateur/libutil.la \
 		    Synoptiques/libsyn.la \
+		    Camera/libcamera.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)

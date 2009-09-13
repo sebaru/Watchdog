@@ -11,7 +11,7 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         protocole_entreeana.c protocole_entreeana.c protocole_histo_courbe.c \
                         protocole_mnemonique.c protocole_supervision.c protocole_atelier.c \
                         protocole_icone.c protocole_histo.c protocole_courbe.c  \
-			protocole_scenario.c protocole_synoptique.c \
+			protocole_scenario.c protocole_synoptique.c protocole_camera.c \
                         envoi_groupe.c envoi_util.c envoi_dls.c envoi_histo.c envoi_message.c \
                         envoi_synoptique.c envoi_synoptique_motifs.c envoi_synoptique_palettes.c \
                         envoi_synoptique_comments.c envoi_synoptique_passerelles.c \

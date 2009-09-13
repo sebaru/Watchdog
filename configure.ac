@@ -64,7 +64,7 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
 
 dnl parametres par defaut
-CFLAGS="-Wall -pipe"
+CFLAGS="-Wall -pipe -O2"
 YACC="$YACC -d"
 
 LIBW_MAJOR_VERSION=2
@@ -105,6 +105,7 @@ Watchdogd/EntreeANA/Makefile \
 Watchdogd/Message/Makefile \
 Watchdogd/Mnemonique/Makefile \
 Watchdogd/Scenario/Makefile \
+Watchdogd/Camera/Makefile \
 Watchdogd/Icones/Makefile \
 Watchdogd/Histo/Makefile \
 Watchdogd/Utilisateur/Makefile \

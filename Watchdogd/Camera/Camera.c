@@ -75,7 +75,7 @@
                 "INSERT INTO %s(libelle,location,type) VALUES "
                 "('%s','%s',%d)", NOM_TABLE_CAMERA, libelle, location, camera->type );
     g_free(libelle);
-    g_free(objet);
+    g_free(location);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -138,7 +138,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", num );
+       Info_n( log, DEBUG_DB, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", id );
        return(NULL);
      }
 
@@ -181,7 +181,7 @@
                 "WHERE id=%d",
                 NOM_TABLE_CAMERA, libelle, location, camera->type, camera->id );
     g_free(libelle);
-    g_free(objet);
+    g_free(location);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

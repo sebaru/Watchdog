@@ -171,7 +171,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cameraDB_par_id( Config.log, Db_watchdog, id );
+    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
