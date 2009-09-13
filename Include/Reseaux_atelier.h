@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Include/Reseaux_atelier.h:   Sous_tag de l'atelier pour watchdog 2.0 par lefevre Sebastien             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 10:44:55 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 
@@ -256,6 +256,15 @@
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
   };
 
+/******************************************** Gestion des camera ******************************************/
+ struct CMD_TYPE_CAMERA
+  { guint   id;                                                                 /* ID unique de la camera */
+    gchar   libelle[NBR_CARAC_LIBELLE_CAMERA_UTF8];                               /* Libelle de la camera */
+    gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                             /* Libelle de la camera */
+    gint    type;                                                            /* petite, moyenne, grande ? */
+  };
+
+/************************************************* Tag de communication ***********************************/
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE,                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */

@@ -20,6 +20,7 @@
  #include "Rs485.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
+ #include "Camera_DB.h"
  #include "Sms.h"
  #include "Dls.h"
  #include "Histo_DB.h"

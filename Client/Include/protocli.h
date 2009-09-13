@@ -29,6 +29,7 @@
  #define _PROTOCLI_H_
 
  #include <gnome.h>
+ #include <gst/gst.h>
  #include <openssl/ssl.h>
  #include <gtkdatabox.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
@@ -58,7 +59,8 @@
     TYPE_PAGE_SUPERVISION,                                            /* Supervision graphique synoptique */
     TYPE_PAGE_COURBE,                                              /* Affichage des courbes en temps reel */
     TYPE_PAGE_HISTO_COURBE,
-    TYPE_PAGE_SCENARIO                                                            /* Gestion des scenario */
+    TYPE_PAGE_SCENARIO,                                                           /* Gestion des scenario */
+    TYPE_PAGE_CAMERA                                                       /* Page affichant une camera ! */
   };
 
  struct PAGE_NOTEBOOK
@@ -73,6 +75,12 @@
     GtkWidget *Option_zoom;                                           /* Choix du zoom sur la supervision */
     GtkWidget *Box_palette;                                               /* Widget de la boite a palette */
     struct TRAME *Trame;                                               /* La trame de fond de supervision */
+  };
+
+ struct TYPE_INFO_CAMERA
+  { struct CMD_TYPE_CAMERA camera;                                              /* Structure de la camera */
+    GtkWidget *video_output;                                                    /* Widget de sortie video */
+    GstElement *pipeline;                                                         /* Pipeline de commande */
   };
 
  struct COURBE
@@ -457,7 +465,7 @@
  extern void Creer_fenetre_scenario( struct MOTIF *motif );
 
  extern void Test ( void );                                                              /* Dans camera.c */
- extern void Test2 ( void );
+ extern void Creer_page_camera ( struct CMD_TYPE_CAMERA *camera );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

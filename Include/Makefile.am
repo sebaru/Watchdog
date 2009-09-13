@@ -6,7 +6,7 @@
 
 noinst_HEADERS =  Cst_message.h Cst_utilisateur.h Erreur.h Reseaux.h \
                   Version.h Cst_dls.h Cst_mnemoniques.h Cst_synoptiques.h Cst_atelier.h Cst_icone.h \
-		  Cst_entreeana.h Cst_scenario.h Cst_camera.h \
+		  Cst_entreeana.h Cst_scenario.h \
                   Reseaux_gtk_message.h Reseaux_connexion.h Reseaux_icone.h \
                   Reseaux_dls.h Reseaux_utilisateur.h \
                   Reseaux_message.h Reseaux_mnemonique.h Reseaux_scenario.h \
