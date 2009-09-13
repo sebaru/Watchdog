@@ -63,31 +63,6 @@
     return( (struct TRAME_ITEM_CAMERA_SUP *)(liste->data) );
   }
 /**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- void Proto_afficher_mnemo_camera_sup_atelier ( struct CMD_SHOW_MNEMONIQUE *mnemo )
-  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
-    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
-              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
-    gtk_entry_set_text( GTK_ENTRY(Entry_camsrc), chaine );
-  }
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- static void Afficher_mnemo_camera_sup ( void )
-  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
-
-    mnemo.type = MNEMO_CAMERA;
-    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_camsrc) );
-    
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMO_CAMERA_SUP,
-                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
-  }
-/**********************************************************************************************************/
 /* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
@@ -161,16 +136,16 @@
 
     adj = gtk_adjustment_new( 0, 0, NBR_BIT_DLS-1, 1, 100, 0 );
     Spin_camsrc = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
-    g_signal_connect( G_OBJECT(Spin_camsrc), "changed",
-                      G_CALLBACK(Afficher_mnemo_camera_sup), NULL );
+/*    g_signal_connect( G_OBJECT(Spin_camsrc), "changed",
+                      G_CALLBACK(Afficher_mnemo_camera_sup), NULL );*/
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_camsrc, 1, 2, 0, 1 );
 
-    Entry_camsrc = gtk_entry_new();
+/*    Entry_camsrc = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_camsrc), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_camsrc, 2, 4, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_camsrc, 2, 4, 0, 1 );*/
 
     if (trame_camera_sup)
-     { gtk_entry_set_text( GTK_ENTRY(Entry_camsrc), trame_camera_sup->camera_sup->libelle );
+     { /*gtk_entry_set_text( GTK_ENTRY(Entry_camsrc), trame_camera_sup->camera_sup->libelle );*/
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_camsrc), trame_camera_sup->camera_sup->camera_src_id );
      }
     gtk_widget_show_all( F_ajout_camera_sup );

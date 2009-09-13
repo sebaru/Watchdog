@@ -392,7 +392,6 @@
 
                                                                        /* Dans atelier_ajout_camera_sup.c */
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
- extern void Proto_afficher_mnemo_camera_sup_atelier ( struct CMD_SHOW_MNEMONIQUE *mnemo );
  extern void Menu_ajouter_editer_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );

@@ -278,9 +278,6 @@
     SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS,                         /* Le client desire un mnémonique Ixxx */
     SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS,
 
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_CAMERA_SUP,                         /* Le client desire un mnémonique Ixxx */
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_CAMERA_SUP,
-
     SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER,        /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER, /* Le serveur envoie les données classes pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER_FIN,
