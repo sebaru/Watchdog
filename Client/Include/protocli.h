@@ -272,6 +272,7 @@
  extern void Proto_cacher_un_synoptique( struct CMD_ID_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
  extern void Proto_rafraichir_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
+ extern void Creer_page_synoptique( void );
 
  extern void Menu_ajouter_editer_synoptique ( struct CMD_EDIT_SYNOPTIQUE *edit_syn );/* ajout_synoptique.c*/
  extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_SHOW_GROUPE *groupe );
@@ -293,6 +294,7 @@
  extern void Proto_afficher_une_classe( struct CMD_SHOW_CLASSE *classe );
  extern void Proto_rafraichir_une_classe( struct CMD_SHOW_CLASSE *classe );
  extern void Proto_envoyer_gif ( struct CMD_ADD_ICONE *icone );
+ extern void Creer_page_icone( void );
 
  extern void Menu_ajouter_editer_icone ( struct CMD_EDIT_ICONE *edit_icone );            /* ajout_icone.c */
  extern void Menu_ajouter_editer_classe ( struct CMD_EDIT_CLASSE *edit_classe );

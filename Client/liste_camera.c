@@ -384,6 +384,14 @@
     gtk_container_add( GTK_CONTAINER(scroll), Liste_camera );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
+    g_object_set( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
+                                                         "text", COLONNE_TYPE_STRING,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TYPE_STRING);            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_camera), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Libelle"), renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
@@ -395,14 +403,6 @@
                                                          "text", COLONNE_LOCATION,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LOCATION);               /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_camera), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
-                                                         "text", COLONNE_TYPE_STRING,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TYPE_STRING);            /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_camera), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_camera), TRUE );*/
