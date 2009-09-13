@@ -19,5 +19,10 @@
  #define NBR_CARAC_LIBELLE_COMMENT     50                               /* taille max du libelle du motif */
  #define NBR_CARAC_LIBELLE_COMMENT_UTF8  (6*NBR_CARAC_LIBELLE_COMMENT)
 
+ #define NBR_CARAC_LIBELLE_CAMERA       20
+ #define NBR_CARAC_LIBELLE_CAMERA_UTF8  (6*NBR_CARAC_LIBELLE_CAMERA)
+ #define NBR_CARAC_LOCATION_CAMERA      50
+ #define NBR_CARAC_LOCATION_CAMERA_UTF8 (6*NBR_CARAC_LOCATION_CAMERA)
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
