@@ -100,6 +100,8 @@
                             Menu_want_histo_courbe, GNOME_STOCK_PIXMAP_BOOK_YELLOW ),
     GNOMEUIINFO_ITEM_STOCK( N_("Scenario"), N_("Edit Scenario"),
                             Menu_want_scenario, GNOME_STOCK_PIXMAP_SCORES ),
+    GNOMEUIINFO_ITEM_STOCK( N_("Camera"), N_("Edit Camera"),
+                            Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_serveur[]=

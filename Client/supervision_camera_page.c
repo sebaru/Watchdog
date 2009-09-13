@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
-/* Client/camera.c               Affichage des cameras de supervision                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    sam. 12 sept. 2009 16:53:33 CEST */
+/* Client/supervision_page_camera.c          Affichage des cameras de supervision  en plien ecran         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   sam. 12 sept. 2009 16:53:33 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -48,7 +48,7 @@
 /* Entrée: la page en question                                                                            */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Detruire_page_camera( struct PAGE_NOTEBOOK *page )
+ void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_CAMERA *infos;
     infos = (struct TYPE_INFO_CAMERA *)page->infos;
     gst_element_set_state (infos->pipeline, GST_STATE_NULL);                    /* Extinction du pipeline */
@@ -59,7 +59,7 @@
  void Test ( void )
 {
 struct CMD_TYPE_CAMERA camera={ 0, "testseb", "http://guest:guest@192.168.0.30/cgi/mjpg/mjpg.cgi", 0 };
-Creer_page_camera( &camera );
+Creer_page_supervision_camera( &camera );
 
 
 }
@@ -68,7 +68,7 @@ Creer_page_camera( &camera );
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Creer_page_camera ( struct CMD_TYPE_CAMERA *camera )
+ void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA *camera )
   { GtkWidget *bouton, *boite, *hboite;
     struct TYPE_INFO_CAMERA *infos;
     struct PAGE_NOTEBOOK *page;
@@ -81,7 +81,7 @@ Creer_page_camera( &camera );
     infos = (struct TYPE_INFO_CAMERA *)page->infos;
     if (!page->infos) { g_free(page); return; }
 
-    page->type   = TYPE_PAGE_CAMERA;
+    page->type   = TYPE_PAGE_SUPERVISION_CAMERA;
     Liste_pages  = g_list_append( Liste_pages, page );
     memcpy( &infos->camera, camera, sizeof( struct CMD_TYPE_CAMERA) );
 

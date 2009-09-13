@@ -86,6 +86,11 @@
           case TYPE_PAGE_HISTO_COURBE:
                Detruire_page_histo_courbe( page_a_virer );
                break;
+#ifdef bouh
+          case TYPE_PAGE_SUPERVISION_CAMERA:
+               Detruire_page_supervision_camera( page_a_virer );
+               break;
+#endif
         }
        gtk_notebook_remove_page( GTK_NOTEBOOK(Notebook), num );
        Liste_pages = g_list_remove( Liste_pages, page_a_virer );

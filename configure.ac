@@ -64,7 +64,7 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
 
 dnl parametres par defaut
-CFLAGS="-Wall -pipe -ggdb"
+CFLAGS="-Wall -pipe"
 YACC="$YACC -d"
 
 LIBW_MAJOR_VERSION=2

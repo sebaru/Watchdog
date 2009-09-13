@@ -22,7 +22,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c \
 			  liste_icone.c ajout_icone.c \
-			  liste_entreeana.c ajout_entreeana.c \
+			  liste_entreeana.c ajout_entreeana.c liste_camera.c ajout_camera.c \
 			  liste_scenario.c ajout_scenario.c protocole_scenario.c \
 			  atelier.c atelier_clic_trame.c atelier_selection.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \
@@ -33,7 +33,8 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  supervision.c supervision_clic.c supervision_comment.c \
                           supervision_passerelle.c supervision_palette.c \
                           supervision_capteur.c supervision_scenario.c \
-			  trame.c camera.c \
+			  supervision_camera_page.c \
+			  trame.c \
 			  print.c \
                           courbe.c histo_courbe.c
 

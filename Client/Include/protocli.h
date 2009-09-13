@@ -60,7 +60,8 @@
     TYPE_PAGE_COURBE,                                              /* Affichage des courbes en temps reel */
     TYPE_PAGE_HISTO_COURBE,
     TYPE_PAGE_SCENARIO,                                                           /* Gestion des scenario */
-    TYPE_PAGE_CAMERA                                                       /* Page affichant une camera ! */
+    TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
+    TYPE_PAGE_SUPERVISION_CAMERA,                                          /* Page affichant une camera ! */
   };
 
  struct PAGE_NOTEBOOK
@@ -217,6 +218,8 @@
  extern void Gerer_protocole_histo_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_scenario ( struct CONNEXION *connexion );
 
 
  extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
@@ -249,6 +252,7 @@
 
  extern void Creer_page_source_dls( struct CMD_ID_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
  extern void Proto_append_source_dls( struct CMD_EDIT_SOURCE_DLS *dls, gchar *buffer );
+ extern void Proto_afficher_mnemo_dls ( struct CMD_SHOW_MNEMONIQUE *mnemo );
 
  extern void Proto_afficher_un_histo( struct CMD_SHOW_HISTO *histo );               /* Dans liste_histo.c */
  extern void Proto_cacher_un_histo( struct CMD_ID_HISTO *histo );
@@ -300,6 +304,7 @@
  extern void Menu_want_icone ( void );
  extern void Menu_want_synoptique ( void );
  extern void Menu_want_mnemonique ( void );
+ extern void Menu_want_camera ( void );
  extern void Menu_want_histo_hard ( void );
  extern void Menu_want_supervision( void );
  extern void Menu_want_entreeANA ( void );
@@ -431,7 +436,8 @@
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
  extern gboolean CB_sortir_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
-
+ extern void Proto_ajouter_courbe( struct CMD_ID_COURBE *courbe );
+ extern void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe );
                                                                                    /* Dans histo_courbe.c */
  extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_SHOW_ENTREEANA *entreeANA );
  extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_SHOW_MNEMONIQUE *mnemo );
@@ -464,8 +470,20 @@
  extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce );
  extern void Creer_fenetre_scenario( struct MOTIF *motif );
 
- extern void Test ( void );                                                              /* Dans camera.c */
- extern void Creer_page_camera ( struct CMD_TYPE_CAMERA *camera );
+                                                                        /* Dans supervision_page_camera.c */
+ extern void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA *camera );
+ extern void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page );
+ extern void Test ( void );                                                   
+
+ extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
+ extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );
+ extern void Proto_rafraichir_un_camera( struct CMD_TYPE_CAMERA *camera );
+ extern void Creer_page_camera( void );                               
+ extern gchar *Type_camera_vers_string ( guint type );
+
+                                                                                   /* Dans ajout_camera.c */
+ extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
+
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

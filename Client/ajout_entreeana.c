@@ -3,6 +3,27 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 25 jun 2004 15:13:34 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * ajout_entreeana.c
+ * This file is part of <Watchdog>
+ *
+ * Copyright (C) 2009 - 
+ *
+ * <Watchdog> is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * <Watchdog> is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with <Watchdog>; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
 
  #include <gnome.h>
  
@@ -57,13 +78,6 @@
     gtk_widget_destroy(F_ajout);
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* CB_Valider: Simule l'appui sur le bouton OK                                                            */
-/* Entrée: rien                                                                                           */
-/* sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void CB_valider ( void )
-  { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
 /**********************************************************************************************************/
 /* Ajouter_entreeANA: Ajoute un entreeANA au systeme                                                      */
 /* Entrée: rien                                                                                           */

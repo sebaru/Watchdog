@@ -43,17 +43,6 @@
  void Gerer_protocole_synoptique ( struct CONNEXION *connexion )
   { static GList *Arrivee_synoptique = NULL;
     static GList *Arrivee_groupe = NULL;
-    static GList *Arrivee_synoptique_for_synoptique = NULL;
-    static GList *Arrivee_classe = NULL;
-    static GList *Arrivee_synoptique_for_synoptique_palette = NULL;
-    static GList *Arrivee_motif = NULL;
-    static GList *Arrivee_icone = NULL;
-    static GList *Arrivee_pass = NULL;
-    static GList *Arrivee_capteur = NULL;
-    static GList *Arrivee_comment = NULL;
-    static GList *Arrivee_palette = NULL;
-    static GList *Arrivee_groupe_propriete_syn = NULL;
-    static int save_id;
            
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK:
