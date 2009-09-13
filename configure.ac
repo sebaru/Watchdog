@@ -21,13 +21,13 @@ AC_ISC_POSIX
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
-GNOME2_CFLAGS="`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0`"
+GNOME2_CFLAGS="`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0 gstreamer-0.10 gstreamer-interfaces-0.10`"
 AC_SUBST(GNOME2_CFLAGS)
 
 BONOBO_CFLAGS=`pkg-config --cflags libbonobo-2.0`
 AC_SUBST(BONOBO_CFLAGS)
 
-GNOME2_LIBS="`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0`"
+GNOME2_LIBS="`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0 gstreamer-0.10 gstreamer-interfaces-0.10`"
 AC_SUBST(GNOME2_LIBS)
 
 MYSQL_CFLAGS=`mysql_config --cflags`

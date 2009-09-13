@@ -456,6 +456,8 @@
  extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce );
  extern void Creer_fenetre_scenario( struct MOTIF *motif );
 
+ extern void Test ( void );                                                              /* Dans camera.c */
+ extern void Test2 ( void );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

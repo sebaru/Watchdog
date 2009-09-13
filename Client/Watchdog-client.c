@@ -143,6 +143,11 @@
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK( N_("Quit"), N_("Stop and quit"),
                             Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
+    GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_ITEM_STOCK( N_("Test"), N_("Test"),
+                            Test, GNOME_STOCK_PIXMAP_STOP ),
+    GNOMEUIINFO_ITEM_STOCK( N_("Test2"), N_("Test"),
+                            Test2, GNOME_STOCK_PIXMAP_STOP ),
     GNOMEUIINFO_END
   };
   
