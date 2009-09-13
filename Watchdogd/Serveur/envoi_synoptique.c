@@ -70,7 +70,7 @@
        memcpy( &edit_syn.libelle, syn->libelle, sizeof(edit_syn.libelle) );
        memcpy( &edit_syn.mnemo,   syn->mnemo,   sizeof(edit_syn.mnemo) );
 
-       Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
+       Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
                   (gchar *)&edit_syn, sizeof(struct CMD_EDIT_SYNOPTIQUE) );
        g_free(syn);                                                                 /* liberation mémoire */
      }
@@ -113,7 +113,7 @@
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
+              else { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
                                    (gchar *)syn, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
                      g_free(syn);
                    }
@@ -140,7 +140,7 @@
     retour = Retirer_synoptiqueDB( Config.log, Db_watchdog, rezo_syn );
 
     if (retour)
-     { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_DEL_SYNOPTIQUE_OK,
+     { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_DEL_SYNOPTIQUE_OK,
                      (gchar *)rezo_syn, sizeof(struct CMD_ID_SYNOPTIQUE) );
      }
     else
@@ -189,7 +189,7 @@
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,
+              else { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,
                                    (gchar *)syn, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
                      g_free(syn);
                    }
@@ -251,8 +251,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_synoptiques_thread ( struct CLIENT *client )
-  { Envoyer_synoptiques_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE,
-                                                  SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN );
+  { Envoyer_synoptiques_tag( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE,
+                                                     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
     return(NULL);

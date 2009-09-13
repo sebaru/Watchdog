@@ -19,6 +19,7 @@
  #include "Reseaux_mnemonique.h"
  #include "Reseaux_entreeana.h"
  #include "Reseaux_supervision.h"
+ #include "Reseaux_synoptique.h"
  #include "Reseaux_camera.h"
  #include "Reseaux_histo.h"
  #include "Reseaux_atelier.h"
@@ -70,6 +71,7 @@
     TAG_ICONE,                                                                      /* Gestion des icones */
     TAG_DLS,                                                    /* Gestion des plugins et des sources DLS */
     TAG_UTILISATEUR,                                                  /* Gestion des utilisateurs/groupes */
+    TAG_SYNOPTIQUE,                                                            /* Gestion des synoptiques */
     TAG_MNEMONIQUE,                                                            /* Gestion des mnemoniques */
     TAG_MESSAGE,                                                                  /* Gestion des messages */
     TAG_ENTREEANA,                                                    /* Gestions des entrees analogiques */

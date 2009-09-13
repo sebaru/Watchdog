@@ -69,8 +69,7 @@ Creer_page_camera( &camera );
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Creer_page_camera ( struct CMD_TYPE_CAMERA *camera )
-  { GtkWidget *bouton, *boite, *hboite, *scroll, *frame;
-    GtkAdjustment *adj;
+  { GtkWidget *bouton, *boite, *hboite;
     struct TYPE_INFO_CAMERA *infos;
     struct PAGE_NOTEBOOK *page;
     GstElement *source, *jpegdec, *ffmpeg, *sink;
@@ -110,6 +109,16 @@ Creer_page_camera( &camera );
     gst_element_link_many (source, jpegdec, ffmpeg, sink, NULL);
  
     /* gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);*/
+
+/************************************ Les boutons de controles ********************************************/
+    boite = gtk_vbox_new( FALSE, 6 );
+    gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
+
+    bouton = gtk_button_new_from_stock( GTK_STOCK_CLOSE );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Detruire_page), page );
+
 
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( infos->camera.libelle ) );
     gtk_widget_show_all( page->child );

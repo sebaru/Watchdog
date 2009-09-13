@@ -41,8 +41,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_atelier ( struct CONNEXION *connexion )
-  { static GList *Arrivee_synoptique = NULL;
-    static GList *Arrivee_groupe = NULL;
+  { static GList *Arrivee_groupe = NULL;
     static GList *Arrivee_synoptique_for_atelier = NULL;
     static GList *Arrivee_classe = NULL;
     static GList *Arrivee_synoptique_for_atelier_palette = NULL;
@@ -56,66 +55,7 @@
     static int save_id;
            
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)connexion->donnees;
-               Proto_afficher_un_synoptique( syn );
-             }
-            break;
-       case SSTAG_SERVEUR_DEL_SYNOPTIQUE_OK:
-             { struct CMD_ID_SYNOPTIQUE *syn;
-               syn = (struct CMD_ID_SYNOPTIQUE *)connexion->donnees;
-               Proto_cacher_un_synoptique( syn );
-             }
-            break;
-       case SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK:
-             { struct CMD_EDIT_SYNOPTIQUE *syn;
-               syn = (struct CMD_EDIT_SYNOPTIQUE *)connexion->donnees;
-               Menu_ajouter_editer_synoptique( syn );
-             }
-            break;
-       case SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)connexion->donnees;
-               Proto_rafraichir_un_synoptique( syn );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
-               Set_progress_plusun();
-
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
-               if (!syn) return; 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_SHOW_SYNOPTIQUE ) );
-               Arrivee_synoptique = g_list_append( Arrivee_synoptique, syn );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN:
-             { g_list_foreach( Arrivee_synoptique, (GFunc)Proto_afficher_un_synoptique, NULL );
-               g_list_foreach( Arrivee_synoptique, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_synoptique );
-               Arrivee_synoptique = NULL;
-               Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE:
-             { struct CMD_SHOW_GROUPE *groupe;
-               Set_progress_plusun();
-
-               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
-               if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
-               Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN:
-             { Proto_afficher_les_groupes_pour_synoptique( Arrivee_groupe );
-               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_groupe );
-               Arrivee_groupe = NULL;
-               Proto_fin_affichage_groupes_pour_synoptique();
-             }
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
+     { case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
              { struct CMD_SHOW_GROUPE *groupe;
                Set_progress_plusun();
 

@@ -48,40 +48,7 @@
      }
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
-               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_thread, client );
-               pthread_detach( tid );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE:
-             { Client_mode( client, ENVOI_GROUPE_FOR_SYNOPTIQUE );
-             }
-            break;
-       case SSTAG_CLIENT_EDIT_SYNOPTIQUE:
-             { struct CMD_ID_SYNOPTIQUE *syn;
-               syn = (struct CMD_ID_SYNOPTIQUE *)connexion->donnees;
-               Proto_editer_synoptique( client, syn );
-             }
-            break;
-       case SSTAG_CLIENT_ADD_SYNOPTIQUE:
-             { struct CMD_ADD_SYNOPTIQUE *syn;
-               syn = (struct CMD_ADD_SYNOPTIQUE *)connexion->donnees;
-               Proto_ajouter_synoptique( client, syn );
-             }
-            break;
-       case SSTAG_CLIENT_DEL_SYNOPTIQUE:
-             { struct CMD_ID_SYNOPTIQUE *syn;
-               syn = (struct CMD_ID_SYNOPTIQUE *)connexion->donnees;
-               Proto_effacer_synoptique( client, syn );
-             }
-            break;
-       case SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE:
-             { struct CMD_EDIT_SYNOPTIQUE *syn;
-               syn = (struct CMD_EDIT_SYNOPTIQUE *)connexion->donnees;
-               Proto_valider_editer_synoptique( client, syn );
-             }
-            break;
+     { 
 /********************************************* atelier ****************************************************/
        case SSTAG_CLIENT_ATELIER_SYNOPTIQUE:
              { struct CMD_ID_SYNOPTIQUE *syn;
