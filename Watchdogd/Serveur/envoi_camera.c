@@ -48,6 +48,7 @@
 
     rezo_camera->id         = camera->id;
     rezo_camera->type       = camera->type;
+    rezo_camera->num        = camera->num;
     memcpy( &rezo_camera->libelle,  camera->libelle,  sizeof(rezo_camera->libelle) );
     memcpy( &rezo_camera->location, camera->location, sizeof(rezo_camera->location) );
     return( rezo_camera );

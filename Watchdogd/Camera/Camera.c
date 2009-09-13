@@ -73,7 +73,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(libelle,location,type) VALUES "
-                "('%s','%s',%d)", NOM_TABLE_CAMERA, libelle, location, camera->type );
+                "('%s','%s',%d,%d)", NOM_TABLE_CAMERA, libelle, location, camera->type, camera->num );
     g_free(libelle);
     g_free(location);
 
@@ -90,7 +90,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,location,type"
+                "SELECT id,libelle,location,type,num"
                 " FROM %s ORDER BY libelle", NOM_TABLE_CAMERA );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -116,6 +116,7 @@
        memcpy( camera->location, db->row[2], sizeof(camera->location  ) );
        camera->id          = atoi(db->row[0]);
        camera->type        = atoi(db->row[3]);
+       camera->num         = atoi(db->row[4]);
      }
     return(camera);
   }
@@ -129,7 +130,7 @@
     struct CAMERADB *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,location,type FROM %s WHERE id=%d",
+                "SELECT id,libelle,location,type,num FROM %s WHERE id=%d",
                 NOM_TABLE_CAMERA, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -149,6 +150,7 @@
      { memcpy( camera->libelle,  db->row[1], sizeof(camera->libelle) );       /* Recopie dans la structure */
        memcpy( camera->location, db->row[2], sizeof(camera->location  ) );
        camera->type = atoi(db->row[3]);
+       camera->num  = atoi(db->row[4]);
        camera->id   = id;
      }
     Liberer_resultat_SQL ( log, db );
@@ -177,9 +179,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',location='%s',type=%d "
+                "libelle='%s',location='%s',type=%d,num=%d "
                 "WHERE id=%d",
-                NOM_TABLE_CAMERA, libelle, location, camera->type, camera->id );
+                NOM_TABLE_CAMERA, libelle, location, camera->type, camera->num, camera->id );
     g_free(libelle);
     g_free(location);
 
