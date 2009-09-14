@@ -140,6 +140,20 @@
     gtk_widget_show_all( F_ajout_camera_sup );
   }
 /**********************************************************************************************************/
+/* Afficher_un_camera: Ajoute un camera dans la liste des cameras                                         */
+/* Entrée: une reference sur le camera                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera )
+  { GtkListStore *store;
+    GtkTreeIter iter;
+
+    if (!Tester_page_notebook(TYPE_PAGE_ATELIER)) return;
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_camera) ));
+    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
+    Rafraichir_visu_camera ( store, &iter, camera );
+  }
+/**********************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */

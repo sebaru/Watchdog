@@ -52,6 +52,7 @@
     static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_groupe_propriete_syn = NULL;
+    static GList *Arrivee_camera_for_atelier = NULL;
     static int save_id;
            
     switch ( Reseau_ss_tag ( connexion ) )
@@ -168,6 +169,25 @@
                g_list_foreach( Arrivee_synoptique_for_atelier, (GFunc)g_free, NULL );
                g_list_free( Arrivee_synoptique_for_atelier );
                Arrivee_synoptique_for_atelier = NULL;
+             }
+            break;
+/******************************************** Reception des cameras ***************************************/
+       case SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER:
+             { struct CMD_TYPE_CAMERA *cam;
+               Set_progress_plusun();
+
+               cam = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
+               if (!cam) return; 
+               memcpy( cam, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA ) );
+               Arrivee_camera_for_atelier = g_list_append( Arrivee_camera_for_atelier, cam );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER_FIN:
+             { g_list_foreach( Arrivee_camera_for_atelier,
+                               (GFunc)Proto_afficher_un_camera_for_atelier, NULL );
+               g_list_foreach( Arrivee_camera_for_atelier, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_camera_for_atelier );
+               Arrivee_camera_for_atelier = NULL;
              }
             break;
 

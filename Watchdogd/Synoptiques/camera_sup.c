@@ -57,22 +57,14 @@
 /**********************************************************************************************************/
  gint Ajouter_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup )
   { gchar requete[512];
-    gchar *libelle;
-
-    libelle = Normaliser_chaine ( log, camera_sup->libelle );               /* Formatage correct des chaines */
-    if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_camera_supDB: Normalisation impossible" );
-       return(-1);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(syn_id,libelle,camera_src_id,posx,posy,largeur,hauteur,angle)"
-                " VALUES (%d,'%s',%d,%d,%d,%f,%f,%f)", NOM_TABLE_CAMERASUP,
-                camera_sup->syn_id, libelle, camera_sup->camera_src_id,
+                "INSERT INTO %s(syn_id,camera_src_id,posx,posy,largeur,hauteur,angle)"
+                " VALUES (%d,%d,%d,%d,%f,%f,%f)", NOM_TABLE_CAMERASUP,
+                camera_sup->syn_id, camera_sup->camera_src_id,
                 camera_sup->position_x, camera_sup->position_y,
                 camera_sup->largeur, camera_sup->hauteur,
                 camera_sup->angle );
-    g_free(libelle);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -87,9 +79,10 @@
   { gchar requete[2048];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,syn_id,libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
+                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
                 " FROM %s,%s WHERE syn_id=%d AND camera_src_id=%s.id",
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id_syn, NOM_TABLE_CAMERA );
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERASUP,
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id_syn, NOM_TABLE_CAMERA );
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
@@ -109,7 +102,9 @@
     camera_sup = (struct CAMERASUPDB *)g_malloc0( sizeof(struct CAMERASUPDB) );
     if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
     else
-     { camera_sup->id           = atoi(db->row[0]);
+     { memcpy( camera_sup->libelle, db->row[2], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
+       memcpy( camera_sup->location, db->row[4], sizeof(camera_sup->location) );/* Recopie dans la structure */
+       camera_sup->id           = atoi(db->row[0]);
        camera_sup->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée le camera_sup */
        camera_sup->camera_src_id= atoi(db->row[3]);
        camera_sup->position_x   = atoi(db->row[5]);                             /* en abscisses et ordonnées */
@@ -117,8 +112,6 @@
        camera_sup->largeur      = atof(db->row[7]);
        camera_sup->hauteur      = atof(db->row[8]);
        camera_sup->angle        = atof(db->row[9]);
-       memcpy( camera_sup->libelle, db->row[2], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
-       memcpy( camera_sup->location, db->row[4], sizeof(camera_sup->location) );/* Recopie dans la structure */
      }
     return(camera_sup);
   }
@@ -151,7 +144,9 @@
     camera_sup = (struct CAMERASUPDB *)g_malloc0( sizeof(struct CAMERASUPDB) );
     if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB: Erreur allocation mémoire" );
     else
-     { camera_sup->id           = id;
+     { memcpy( camera_sup->libelle, db->row[1], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
+       memcpy( camera_sup->location, db->row[3], sizeof(camera_sup->location) );/* Recopie dans la structure */
+       camera_sup->id           = id;
        camera_sup->syn_id       = atoi(db->row[0]);                   /* Synoptique ou est placée le camera_sup */
        camera_sup->camera_src_id= atoi(db->row[2]);
        camera_sup->position_x   = atoi(db->row[4]);                             /* en abscisses et ordonnées */
@@ -159,8 +154,6 @@
        camera_sup->largeur      = atof(db->row[6]);
        camera_sup->hauteur      = atof(db->row[7]);
        camera_sup->angle        = atof(db->row[8]);
-       memcpy( camera_sup->libelle, db->row[1], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
-       memcpy( camera_sup->location, db->row[3], sizeof(camera_sup->location) );/* Recopie dans la structure */
      }
     return(camera_sup);
   }

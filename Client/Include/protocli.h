@@ -404,6 +404,7 @@
                                                                        /* Dans atelier_ajout_camera_sup.c */
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
  extern void Menu_ajouter_camera_sup ( void );
+ extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );
 
@@ -500,6 +501,8 @@
  extern void Creer_page_camera( void );                               
  extern gchar *Type_camera_vers_string ( guint type );
  extern void Creer_liste_camera ( GtkWidget **Liste_camera, GtkWidget **Scroll );
+ extern  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera );
+
 
 
                                                                                    /* Dans ajout_camera.c */

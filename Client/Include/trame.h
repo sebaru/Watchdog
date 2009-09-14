@@ -173,10 +173,13 @@
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
+ extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
+                                                               struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern void Trame_del_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
+ extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille );
  extern void Trame_effacer_trame ( struct TRAME *trame );
  extern void Trame_detruire_trame ( struct TRAME *trame );
