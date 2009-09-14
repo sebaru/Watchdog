@@ -40,8 +40,7 @@
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
  static GtkWidget *F_ajout_camera_sup = NULL;                 /* Fenetre graphique de choix de camera_sup */
- static GtkWidget *Spin_camsrc;
- static GtkWidget *Entry_camsrc;                                                /* Libelle proprement dit */
+ static GtkWidget *Liste_camera;                      /* GtkTreeView pour la gestion des cameras Watchdog */
 
 /**********************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
@@ -67,88 +66,77 @@
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
- static gboolean CB_ajouter_editer_camera_sup ( GtkDialog *dialog, gint reponse,
-                                                struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
+ static gboolean CB_ajouter_camera_sup ( GtkDialog *dialog, gint reponse, gpointer data )
   { struct CMD_TYPE_CAMERA_SUP add_camera_sup;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
-    gchar *type;
+    GtkTreeSelection *selection;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    gint id;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);         /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
-    switch(reponse)
-     { case GTK_RESPONSE_OK: if (!trame_camera_sup)                              /* Ajout d'un camera_sup */
-                              { g_snprintf( add_camera_sup.libelle, sizeof(add_camera_sup.libelle), "new" );
-                                add_camera_sup.position_x = TAILLE_SYNOPTIQUE_X/2;
-                                add_camera_sup.position_y = TAILLE_SYNOPTIQUE_Y/2;                            
-                                add_camera_sup.syn_id  = infos->syn.id;
-                                add_camera_sup.angle   = 0.0;
-                                add_camera_sup.camera_src_id
-                                         = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_camsrc) );
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_camera) );
 
-                                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
-                                               (gchar *)&add_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
-                                printf("Requete d'ajout de camera_supaire envoyée au serveur....\n");
-                                return(TRUE);                             /* On laisse la fenetre ouverte */
-                              }
-                             else                                                          /* Mise a jour */
-                              { trame_camera_sup->camera_sup->camera_src_id
-                                         = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_camsrc) );
-                              }
-                             break;
-       case GTK_RESPONSE_CLOSE: break;
+    switch(reponse)
+     { case GTK_RESPONSE_OK:
+            lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+            printf("lignes = %p\n", lignes );
+            if (lignes)
+             { gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
+               gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &id, -1 );                 /* Recup du id */
+               g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+               g_list_free (lignes);                                                /* Liberation mémoire */
+
+               add_camera_sup.position_x    = TAILLE_SYNOPTIQUE_X/2;
+               add_camera_sup.position_y    = TAILLE_SYNOPTIQUE_Y/2;                            
+               add_camera_sup.syn_id        = infos->syn.id;
+               add_camera_sup.angle         = 0.0;
+               add_camera_sup.camera_src_id = id;
+
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
+                              (gchar *)&add_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+               return(TRUE);                                              /* On laisse la fenetre ouverte */
+             }
+       case GTK_RESPONSE_CLOSE:
+            break;
      }
     gtk_widget_destroy( F_ajout_camera_sup );
     F_ajout_camera_sup = NULL;
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Commenter: Met en route le processus permettant de camera_super un synoptique                             */
+/* Commenter: Met en route le processus permettant de camera_super un synoptique                          */
 /* Entrée: widget/data                                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  { GtkWidget *hboite, *table, *label;
-    GtkObject *adj;
+ void Menu_ajouter_camera_sup ( void )
+  { GtkWidget *hboite, *scroll;
     if (F_ajout_camera_sup) return;
-    F_ajout_camera_sup = gtk_dialog_new_with_buttons( (trame_camera_sup ? _("Edit") : _("Add a Camera Sup")),
+    F_ajout_camera_sup = gtk_dialog_new_with_buttons( _("Add a Camera Sup" ),
                                              GTK_WINDOW(F_client),
                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                              GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
                                              GTK_STOCK_OK, GTK_RESPONSE_OK,
                                              NULL);
     g_signal_connect( F_ajout_camera_sup, "response",
-                      G_CALLBACK(CB_ajouter_editer_camera_sup), trame_camera_sup );
+                      G_CALLBACK(CB_ajouter_camera_sup), NULL );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_camera_sup)->vbox ), hboite, TRUE, TRUE, 0 );
     
-    table = gtk_table_new( 1, 4, TRUE );
-    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
-    gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
+/***************************************** La liste des cameras *******************************************/
+    Creer_liste_camera ( &Liste_camera, &scroll );
+    gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-/************************************* Entrys de commande *************************************************/
-    label = gtk_label_new( _("Camera Number") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 0, 1 );
-
-    adj = gtk_adjustment_new( 0, 0, NBR_BIT_DLS-1, 1, 100, 0 );
-    Spin_camsrc = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
-/*    g_signal_connect( G_OBJECT(Spin_camsrc), "changed",
-                      G_CALLBACK(Afficher_mnemo_camera_sup), NULL );*/
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_camsrc, 1, 2, 0, 1 );
-
-/*    Entry_camsrc = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_camsrc), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_camsrc, 2, 4, 0, 1 );*/
-
-    if (trame_camera_sup)
-     { /*gtk_entry_set_text( GTK_ENTRY(Entry_camsrc), trame_camera_sup->camera_sup->libelle );*/
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_camsrc), trame_camera_sup->camera_sup->camera_src_id );
-     }
+    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER,
+                   NULL, 0 );                                                    /* demande infos serveur */
     gtk_widget_show_all( F_ajout_camera_sup );
   }
 /**********************************************************************************************************/

@@ -154,7 +154,13 @@
                Info_n( Config.log, DEBUG_INFO, "fin edit comment numéro", comment->id );
              }
             break;
-/************************************* Gestion des commentaires synoptiques *******************************/
+/************************************* Gestion des cameras synoptiques ************************************/
+       case SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER:
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_cameras_for_atelier_thread, client );
+               pthread_detach( tid );
+             }
+            break;
        case SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP: 
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;

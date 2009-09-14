@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/ajout_camera.c        Addition/Edition d'un camera Watchdog2.0                            */
+/* Client/ajout_camera.c        Addition/Edition d'un camera Watchdog2.0                                  */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 25 jun 2004 15:13:34 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/

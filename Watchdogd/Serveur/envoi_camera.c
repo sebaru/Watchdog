@@ -204,7 +204,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_cameras_thread ( struct CLIENT *client )
+ static void *Envoyer_cameras_thread_tag ( struct CLIENT *client, guint tag, guint sstag, guint sstag_fin )
   { struct CMD_TYPE_CAMERA *rezo_camera;
     struct CMD_ENREG nbr;
     struct CAMERADB *camera;
@@ -233,7 +233,7 @@
     for( ; ; )
      { camera = Recuperer_cameraDB_suite( Config.log, db );
        if (!camera)
-        { Envoi_client ( client, TAG_CAMERA, SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN, NULL, 0 );
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
@@ -243,10 +243,28 @@
        if (rezo_camera)
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, TAG_CAMERA, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
+          Envoi_client ( client, tag, sstag,
                          (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
           g_free(rezo_camera);
         }
      }
+  }
+/**********************************************************************************************************/
+/* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_cameras_thread ( struct CLIENT *client )
+  { Envoyer_cameras_thread_tag( client, TAG_CAMERA, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
+                                                    SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN );
+  }
+/**********************************************************************************************************/
+/* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client )
+  { Envoyer_cameras_thread_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER,
+                                                     SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER_FIN );
   }
 /*--------------------------------------------------------------------------------------------------------*/

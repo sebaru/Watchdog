@@ -225,6 +225,7 @@
  extern void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );
  extern void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
+ extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

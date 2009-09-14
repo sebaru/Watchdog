@@ -234,7 +234,6 @@ printf("fin Detruire page atelier\n");
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                camera_sup = trame_camera_sup->camera_sup;
-               edit_camera_sup.id           = camera_sup->id;           /* Correspond a l'id de la camera */
                edit_camera_sup.position_x   = camera_sup->position_x;        /* en abscisses et ordonnées */
                edit_camera_sup.position_y   = camera_sup->position_y;        /* en abscisses et ordonnées */
                edit_camera_sup.angle        = camera_sup->angle;
@@ -458,7 +457,7 @@ printf("fin Detruire page atelier\n");
     bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
     gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_editer_camera_sup), NULL );
+                              G_CALLBACK(Menu_ajouter_camera_sup), NULL );
 
 /************************************************* fin ****************************************************/
     gtk_widget_show_all( page->child );

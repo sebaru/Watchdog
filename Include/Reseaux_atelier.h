@@ -313,7 +313,7 @@
     SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,                /* Le serveur valide l'ajout d'une camera_sup */
     SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,                        /* Le client veut detruire une camera_sup */
     SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,                                          /* Destruction OKAY */
-    SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,      /* Le serveur envoi les propriétés du camera_sup au client */
+    SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
 
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER,    /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER,
@@ -322,6 +322,10 @@
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE,     /* noms des syn pour les choix de palettes */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE, 
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE_FIN,
+
+    SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER,                 /* noms des syn pour les choix de palettes */
+    SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER, 
+    SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER_FIN,
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC,                    /* Envoi des informations mnemonique à l'atelier */
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC,                   /* Envoi des informations mnemonique à l'atelier */
