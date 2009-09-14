@@ -95,6 +95,8 @@
 
                add_camera_sup.position_x    = TAILLE_SYNOPTIQUE_X/2;
                add_camera_sup.position_y    = TAILLE_SYNOPTIQUE_Y/2;                            
+               add_camera_sup.largeur       = DEFAULT_CAMERA_LARGEUR;
+               add_camera_sup.hauteur       = DEFAULT_CAMERA_HAUTEUR;                            
                add_camera_sup.syn_id        = infos->syn.id;
                add_camera_sup.angle         = 0.0;
                add_camera_sup.camera_src_id = id;
