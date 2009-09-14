@@ -74,7 +74,7 @@
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gint id;
+    gint num;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);         /* Verification des contraintes */
@@ -89,7 +89,7 @@
             printf("lignes = %p\n", lignes );
             if (lignes)
              { gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &id, -1 );                 /* Recup du id */
+               gtk_tree_model_get( store, &iter, COL_CAMERA_NUM, &num, -1 );              /* Recup du num */
                g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
                g_list_free (lignes);                                                /* Liberation mémoire */
 
@@ -99,7 +99,7 @@
                add_camera_sup.hauteur       = DEFAULT_CAMERA_HAUTEUR;                            
                add_camera_sup.syn_id        = infos->syn.id;
                add_camera_sup.angle         = 0.0;
-               add_camera_sup.camera_src_id = id;
+               add_camera_sup.camera_src_id = num;
 
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
                               (gchar *)&add_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );

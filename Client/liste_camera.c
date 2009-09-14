@@ -357,7 +357,8 @@
                                               G_TYPE_STRING,                                  /* location */
                                               G_TYPE_UINT,                                        /* type */
                                               G_TYPE_STRING,                               /* type_string */
-                                              G_TYPE_STRING                                        /* Num */
+                                              G_TYPE_UINT,                                         /* num */
+                                              G_TYPE_STRING                                 /* Num string */
                                );
 
     liste = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                 /* Creation de la vue */
@@ -368,9 +369,9 @@
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Numero"), renderer,
-                                                         "text", COL_CAMERA_NUM,
+                                                         "text", COL_CAMERA_NUM_STRING,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_NUM);                 /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_NUM_STRING);          /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
@@ -477,7 +478,8 @@
                          COL_CAMERA_LIBELLE, camera->libelle,
                          COL_CAMERA_LOCATION, camera->location,
                          COL_CAMERA_TYPE_INT, camera->type,
-                         COL_CAMERA_NUM, chaine,
+                         COL_CAMERA_NUM, camera->num,
+                         COL_CAMERA_NUM_STRING, chaine,
                          COL_CAMERA_TYPE_STRING, Type_camera_vers_string(camera->type),
                          -1
                        );
