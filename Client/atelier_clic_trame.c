@@ -448,7 +448,8 @@ printf("Clic sur capteur: page trouvée, %p \n", trame_capteur);
 
     Clic_general( infos, event );                                                /* Fonction de base clic */
 
-    Mettre_a_jour_description( infos, 0, trame_camera_sup->camera_sup->libelle );
+    Mettre_a_jour_description( infos, trame_camera_sup->camera_sup->camera_src_id,
+                                      trame_camera_sup->camera_sup->libelle );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
         { goo_canvas_item_raise( trame_camera_sup->select_hg, NULL );
