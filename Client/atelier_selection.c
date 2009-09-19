@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/atelier_selection.c         gestion des selections synoptique                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 28 mar 2009 16:46:06 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   sam. 19 sept. 2009 13:22:22 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -44,22 +44,30 @@
 /**********************************************************************************************************/
  gboolean Tester_selection ( struct TYPE_INFO_ATELIER *infos, gint groupe )
   { GList *objet;
-    struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
+    struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     if (!infos->Selection.items) return(FALSE);
 
     objet = infos->Selection.items;
     switch( *((gint *)objet->data) )
-     { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-                              return( groupe == trame_motif->groupe_dpl );
-       case TYPE_COMMENTAIRE: trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
-                              return( groupe == trame_comm->groupe_dpl );
-       case TYPE_PASSERELLE:  trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-                              return( groupe == trame_pass->groupe_dpl );
-       case TYPE_CAPTEUR:       trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-                              return( groupe == trame_capteur->groupe_dpl );
+     { case TYPE_MOTIF:
+            trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
+            return( groupe == trame_motif->groupe_dpl );
+       case TYPE_COMMENTAIRE:
+            trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
+            return( groupe == trame_comm->groupe_dpl );
+       case TYPE_PASSERELLE:
+            trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
+            return( groupe == trame_pass->groupe_dpl );
+       case TYPE_CAPTEUR:
+            trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
+            return( groupe == trame_capteur->groupe_dpl );
+       case TYPE_CAMERA_SUP:
+            trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
+            return( groupe == trame_camera_sup->groupe_dpl );
        default: return(FALSE);
      }
   }
@@ -76,41 +84,47 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Tout_deselectionner ( struct TYPE_INFO_ATELIER *infos )
-  { struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
+  { struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
 
     objet = infos->Selection.items;
     while (objet)
      { switch( *((gint *)objet->data) )
-        { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-                                 g_object_set( trame_motif->select_hg,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 g_object_set( trame_motif->select_hd,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 g_object_set( trame_motif->select_bg,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 g_object_set( trame_motif->select_bd,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 trame_motif->selection = FALSE;
-                                 break;
-          case TYPE_COMMENTAIRE: trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
-                                 g_object_set( trame_comm->select_mi,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 trame_comm->selection = FALSE;
-                                 break;
-          case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-                                 g_object_set( trame_pass->select_mi,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 trame_pass->selection = FALSE;
-                                 break;
-          case TYPE_CAPTEUR      : trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-                                 g_object_set( trame_capteur->select_mi,
-                                               "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                 trame_capteur->selection = FALSE;
-                                 break;
+        { case TYPE_MOTIF:
+               trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
+               g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_motif->selection = FALSE;
+               break;
+          case TYPE_COMMENTAIRE:
+               trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
+               g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_comm->selection = FALSE;
+               break;
+          case TYPE_PASSERELLE:
+               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
+               g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_pass->selection = FALSE;
+               break;
+          case TYPE_CAPTEUR:
+               trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
+               g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_capteur->selection = FALSE;
+               break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
+               g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_camera_sup->selection = FALSE;
+               break;
           default: printf("Tout_deselectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -126,99 +140,103 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint groupe, gboolean deselect )
-  { struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
+  { struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
  printf("Selectionner groupe %d\n", groupe );   
     objet = infos->Trame_atelier->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
-        { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-                                 if (trame_motif->groupe_dpl == groupe)
-                                  { if (!trame_motif->selection)
-                                     { g_object_set( trame_motif->select_hg,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       g_object_set( trame_motif->select_hd,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       g_object_set( trame_motif->select_bg,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       g_object_set( trame_motif->select_bd,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       trame_motif->selection = TRUE;
-                                       infos->Selection.items = g_list_append( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                    else if (deselect)
-                                     { g_object_set( trame_motif->select_hg,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       g_object_set( trame_motif->select_hd,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       g_object_set( trame_motif->select_bg,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       g_object_set( trame_motif->select_bd,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       trame_motif->selection = FALSE;
-                                       infos->Selection.items = g_list_remove( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                  }
-                                 break;
-         case TYPE_COMMENTAIRE: trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
-                                 if (trame_comm->groupe_dpl == groupe)
-                                  { if (!trame_comm->selection)
-                                     { g_object_set( trame_comm->select_mi,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       trame_comm->selection = TRUE;
-                                       infos->Selection.items = g_list_append( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                    else if (deselect)
-                                     { g_object_set( trame_comm->select_mi,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       trame_comm->selection = FALSE;
-                                       infos->Selection.items = g_list_remove( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                  }
-                                 break;
-          case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-                                 if (trame_pass->groupe_dpl == groupe)
-                                  { if (!trame_pass->selection)
-                                     { g_object_set( trame_pass->select_mi,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       trame_pass->selection = TRUE;
-                                       infos->Selection.items = g_list_append( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                    else if (deselect)
-                                     { g_object_set( trame_pass->select_mi,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       trame_pass->selection = FALSE;
-                                       infos->Selection.items = g_list_remove( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                  }
-                                 break;
-          case TYPE_CAPTEUR      : trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-                                 if (trame_capteur->groupe_dpl == groupe)
-                                  { if (!trame_capteur->selection)
-                                     { g_object_set( trame_capteur->select_mi,
-                                                     "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                                       trame_capteur->selection = TRUE;
-                                       infos->Selection.items = g_list_append( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                    else if (deselect)
-                                     { g_object_set( trame_capteur->select_mi,
-                                                     "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                                       trame_capteur->selection = FALSE;
-                                       infos->Selection.items = g_list_remove( infos->Selection.items,
-                                                                               objet->data );
-                                     }
-                                  }
-                                 break;
+        { case TYPE_MOTIF:
+               trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
+               if (trame_motif->groupe_dpl == groupe)
+                { if (!trame_motif->selection)
+                   { g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_motif->selection = TRUE;
+                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                   }
+                  else if (deselect)
+                   { g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     g_object_set( trame_motif->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     g_object_set( trame_motif->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_motif->selection = FALSE;
+                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                   }
+                }
+              break;
+         case TYPE_COMMENTAIRE:
+              trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
+              if (trame_comm->groupe_dpl == groupe)
+               { if (!trame_comm->selection)
+                  { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                    trame_comm->selection = TRUE;
+                    infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                  }
+                 else if (deselect)
+                  { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                    trame_comm->selection = FALSE;
+                    infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                  }
+                }
+               break;
+          case TYPE_PASSERELLE:
+               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
+               if (trame_pass->groupe_dpl == groupe)
+                { if (!trame_pass->selection)
+                   { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_pass->selection = TRUE;
+                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                   }
+                  else if (deselect)
+                   { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_pass->selection = FALSE;
+                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                   }
+                }
+               break;
+          case TYPE_CAPTEUR:
+               trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
+               if (trame_capteur->groupe_dpl == groupe)
+                { if (!trame_capteur->selection)
+                   { g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_capteur->selection = TRUE;
+                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                   }
+                  else if (deselect)
+                   { g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_capteur->selection = FALSE;
+                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                   }
+                }
+               break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
+               if (trame_camera_sup->groupe_dpl == groupe)
+                { if (!trame_camera_sup->selection)
+                   { g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_camera_sup->selection = TRUE;
+                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                   }
+                  else if (deselect)
+                   { g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_camera_sup->selection = FALSE;
+                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                   }
+                }
+              break;
           default: printf("Selectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -231,10 +249,11 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Deplacer_selection ( struct TYPE_INFO_ATELIER *infos, gint deltax, gint deltay )
-  { struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
+  { struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *selection;
     gint largeur_grille;
     gint dx, dy, new_x, new_y;
@@ -244,76 +263,90 @@
     while(selection)
      { dx = deltax; dy = deltay;
        switch ( *((gint *)selection->data) )
-        { case TYPE_PASSERELLE : trame_pass = ((struct TRAME_ITEM_PASS *)(selection->data));
-                                 new_x = trame_pass->pass->position_x+dx;
-                                 new_y = trame_pass->pass->position_y+dy;
+        { case TYPE_PASSERELLE:
+               trame_pass = ((struct TRAME_ITEM_PASS *)(selection->data));
+               new_x = trame_pass->pass->position_x+dx;
+               new_y = trame_pass->pass->position_y+dy;
 
-                                 if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
-                                  { new_x = new_x/largeur_grille * largeur_grille;
-                                    new_y = new_y/largeur_grille * largeur_grille;
-                                  }
+               if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
+                { new_x = new_x/largeur_grille * largeur_grille;
+                  new_y = new_y/largeur_grille * largeur_grille;
+                }
 
-                                 if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                                  { trame_pass->pass->position_x = new_x; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
+                { trame_pass->pass->position_x = new_x; }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
+                { trame_pass->pass->position_y = new_y; }
+               Trame_rafraichir_passerelle(trame_pass);                                 /* Refresh visuel */
+               break;
 
-                                 if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                                  { trame_pass->pass->position_y = new_y; }
+          case TYPE_COMMENTAIRE:
+               trame_comm = ((struct TRAME_ITEM_COMMENT *)(selection->data));
+               new_x = trame_comm->comment->position_x+dx;
+               new_y = trame_comm->comment->position_y+dy;
 
-                                 Trame_rafraichir_passerelle(trame_pass);               /* Refresh visuel */
-                                 break;
+               if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
+                { new_x = new_x/largeur_grille * largeur_grille;
+                  new_y = new_y/largeur_grille * largeur_grille;
+                }
 
-          case TYPE_COMMENTAIRE: trame_comm = ((struct TRAME_ITEM_COMMENT *)(selection->data));
-                                 new_x = trame_comm->comment->position_x+dx;
-                                 new_y = trame_comm->comment->position_y+dy;
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
+                { trame_comm->comment->position_x = new_x; }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
+                { trame_comm->comment->position_y = new_y; }
+               Trame_rafraichir_comment(trame_comm);                                    /* Refresh visuel */
+               break;
 
-                                 if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
-                                  { new_x = new_x/largeur_grille * largeur_grille;
-                                    new_y = new_y/largeur_grille * largeur_grille;
-                                  }
+          case TYPE_CAPTEUR:
+               trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)(selection->data));
+               new_x = trame_capteur->capteur->position_x+dx;
+               new_y = trame_capteur->capteur->position_y+dy;
 
-                                 if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                                  { trame_comm->comment->position_x = new_x; }
+               if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
+                { new_x = new_x/largeur_grille * largeur_grille;
+                  new_y = new_y/largeur_grille * largeur_grille;
+                }
 
-                                 if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                                  { trame_comm->comment->position_y = new_y; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
+                { trame_capteur->capteur->position_x = new_x; }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
+                { trame_capteur->capteur->position_y = new_y; }
 
-                                 Trame_rafraichir_comment(trame_comm);                  /* Refresh visuel */
-                                 break;
+               Trame_rafraichir_capteur(trame_capteur);                                 /* Refresh visuel */
+               break;
 
-          case TYPE_CAPTEUR      : trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)(selection->data));
-                                 new_x = trame_capteur->capteur->position_x+dx;
-                                 new_y = trame_capteur->capteur->position_y+dy;
+          case TYPE_MOTIF:
+               trame_motif = ((struct TRAME_ITEM_MOTIF *)(selection->data));
+               new_x = trame_motif->motif->position_x+dx;
+               new_y = trame_motif->motif->position_y+dy;
 
-                                 if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
-                                  { new_x = new_x/largeur_grille * largeur_grille;
-                                    new_y = new_y/largeur_grille * largeur_grille;
-                                  }
+               if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
+                { new_x = new_x/largeur_grille * largeur_grille;
+                  new_y = new_y/largeur_grille * largeur_grille;
+                }
 
-                                 if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                                  { trame_capteur->capteur->position_x = new_x; }
+               if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
+                { trame_motif->motif->position_x = new_x; }
+               if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
+                { trame_motif->motif->position_y = new_y; }
+               Trame_rafraichir_motif(trame_motif);                                     /* Refresh visuel */
+               break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)(selection->data));
+               new_x = trame_camera_sup->camera_sup->position_x+dx;
+               new_y = trame_camera_sup->camera_sup->position_y+dy;
 
-                                 if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                                  { trame_capteur->capteur->position_y = new_y; }
+               if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
+                { new_x = new_x/largeur_grille * largeur_grille;
+                  new_y = new_y/largeur_grille * largeur_grille;
+                }
 
-                                 Trame_rafraichir_capteur(trame_capteur);                   /* Refresh visuel */
-                                 break;
-
-          case TYPE_MOTIF      : trame_motif = ((struct TRAME_ITEM_MOTIF *)(selection->data));
-                                 new_x = trame_motif->motif->position_x+dx;
-                                 new_y = trame_motif->motif->position_y+dy;
-
-                                 if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
-                                  { new_x = new_x/largeur_grille * largeur_grille;
-                                    new_y = new_y/largeur_grille * largeur_grille;
-                                  }
-
-                                 if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
-                                  { trame_motif->motif->position_x = new_x; }
-
-                                 if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
-                                  { trame_motif->motif->position_y = new_y; }
-                                 Trame_rafraichir_motif(trame_motif);                   /* Refresh visuel */
-                                 break;
+               if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
+                { trame_camera_sup->camera_sup->position_x = new_x; }
+               if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
+                { trame_camera_sup->camera_sup->position_y = new_y; }
+               Trame_rafraichir_camera_sup(trame_camera_sup);                           /* Refresh visuel */
+               break;
           default: printf("Deplacer_selection: type inconnu\n" );
         }
        selection = selection->next;
@@ -327,14 +360,16 @@
  void Effacer_selection ( void )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
-    struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
+    struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct CMD_ID_MOTIF id_motif;
     struct CMD_ID_COMMENT id_comment;
     struct CMD_ID_CAPTEUR id_capteur;
     struct CMD_ID_PASSERELLE id_pass;
+    struct CMD_TYPE_CAMERA_SUP id_camera_sup;
     GList *selection;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
@@ -344,38 +379,43 @@
     selection = infos->Selection.items;
     while(selection)                                                 /* Pour tous les objets selectionnés */
      { switch ( *((gint *)selection->data) )
-        { case TYPE_PASSERELLE : trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
-                                 id_pass.id = trame_pass->pass->id;
-                                 memcpy( id_pass.libelle, trame_pass->pass->libelle,
-                                         sizeof(id_pass.libelle) );
-                                 printf("Envoi demande effacement %d %s\n", id_pass.id, id_pass.libelle);
-                                 Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_PASS,
-                                                (gchar *)&id_pass, sizeof( struct CMD_ID_PASSERELLE ) );
-                                 break;
-          case TYPE_COMMENTAIRE: trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
-                                 id_comment.id = trame_comm->comment->id;
-                                 memcpy( id_comment.libelle, trame_comm->comment->libelle,
-                                         sizeof(id_comment.libelle) );
-                                 printf("Envoi demande effacement %d %s\n", id_comment.id, id_comment.libelle);
-                                 Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_COMMENT,
-                                                (gchar *)&id_comment, sizeof( struct CMD_ID_COMMENT ) );
-                                 break;
-          case TYPE_MOTIF      : trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-                                 id_motif.id = trame_motif->motif->id;
-                                 memcpy( id_motif.libelle, trame_motif->motif->libelle,
-                                         sizeof(id_motif.libelle) );
-                                 printf("Envoi demande effacement %d %s\n", id_motif.id, id_motif.libelle);
-                                 Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_MOTIF,
-                                                (gchar *)&id_motif, sizeof( struct CMD_ID_MOTIF ) );
-                                 break;
-          case TYPE_CAPTEUR      : trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
-                                 id_capteur.id = trame_capteur->capteur->id;
-                                 memcpy( id_capteur.libelle, trame_capteur->capteur->libelle,
-                                         sizeof(id_capteur.libelle) );
-                                 printf("Envoi demande effacement %d %s\n", id_capteur.id, id_capteur.libelle);
-                                 Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,
-                                                (gchar *)&id_capteur, sizeof( struct CMD_ID_CAPTEUR ) );
-                                 break;
+        { case TYPE_PASSERELLE:
+               trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
+               id_pass.id = trame_pass->pass->id;
+               memcpy( id_pass.libelle, trame_pass->pass->libelle, sizeof(id_pass.libelle) );
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_PASS,
+                              (gchar *)&id_pass, sizeof( struct CMD_ID_PASSERELLE ) );
+               break;
+          case TYPE_COMMENTAIRE:
+               trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
+               id_comment.id = trame_comm->comment->id;
+               memcpy( id_comment.libelle, trame_comm->comment->libelle, sizeof(id_comment.libelle) );
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_COMMENT,
+                              (gchar *)&id_comment, sizeof( struct CMD_ID_COMMENT ) );
+               break;
+          case TYPE_MOTIF:
+               trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
+               id_motif.id = trame_motif->motif->id;
+               memcpy( id_motif.libelle, trame_motif->motif->libelle, sizeof(id_motif.libelle) );
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_MOTIF,
+                              (gchar *)&id_motif, sizeof( struct CMD_ID_MOTIF ) );
+               break;
+          case TYPE_CAPTEUR:
+               trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
+               id_capteur.id = trame_capteur->capteur->id;
+               memcpy( id_capteur.libelle, trame_capteur->capteur->libelle,
+                       sizeof(id_capteur.libelle) );
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,
+                              (gchar *)&id_capteur, sizeof( struct CMD_ID_CAPTEUR ) );
+               break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
+               id_camera_sup.id = trame_camera_sup->camera_sup->id;
+               memcpy( id_camera_sup.libelle, trame_camera_sup->camera_sup->libelle,
+                       sizeof(id_camera_sup.libelle) );
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
+                              (gchar *)&id_camera_sup, sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               break;
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Effacer_selection: type inconnu\n" );
         }
@@ -383,50 +423,6 @@
      }
     printf("Fin effacer_groupe\n");
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Dupliquer_selection: Duplique les motifs actuellement selectionnés                                     */
-/* Entrée: Rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Dupliquer_selection ( void )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *selection;
-    gint new_groupe;
-    
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-
-    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
-    new_groupe = Nouveau_groupe();
-    while(selection)
-     { switch ( *((gint *)selection->data) )
-        { /*case TYPE_PASSERELLE : trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
-                                 trame_pass = Dupliquer_passerelle ( trame_pass->pass );
-                                 trame_pass->pass->groupe = new_groupe;
-                                 break;
-          case TYPE_COMMENTAIRE: trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
-                                 trame_comm = Dupliquer_commentaire ( trame_comm->comm );
-                                 trame_comm->comm->groupe = new_groupe;
-                                 break;*/
-          case TYPE_MOTIF      : trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-                                 trame_motif = Trame_dupliquer_motif ( Trame_atelier, trame_motif );
-                                 if (trame_motif)
-                                  { g_signal_connect( G_OBJECT(trame_motif->item), "event",
-                                                      G_CALLBACK(Clic_sur_motif), trame_motif );
-                                    trame_motif->groupe_dpl = new_groupe;
-                                  }
-                                 break;
-          default: printf("Dupliquer_selection: type inconnu\n" );
-        }
-       selection = selection->next;
-     }
-    printf("Fin dupliquer_selection\n");
-  }
-#endif
 /**********************************************************************************************************/
 /* Fusionner_selection: Fusionne les elements selectionnés dans un meme groupe                            */
 /* Entrée: rien                                                                                           */
@@ -435,10 +431,6 @@
  void Fusionner_selection ( void )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
-    struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
     GList *selection;
     gint new_groupe;
  
@@ -450,18 +442,21 @@
     new_groupe = Nouveau_groupe();
     while(selection)
     { switch ( *((gint *)selection->data) )
-       { case TYPE_PASSERELLE : trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
-                                trame_pass->groupe_dpl = new_groupe;
-                                break;
-         case TYPE_COMMENTAIRE: trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
-                                trame_comm->groupe_dpl = new_groupe;
-                                break;
-         case TYPE_MOTIF      : trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-                                trame_motif->groupe_dpl = new_groupe;
-                                break;
-         case TYPE_CAPTEUR      : trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
-                                trame_capteur->groupe_dpl = new_groupe;
-                                break;
+       { case TYPE_PASSERELLE:
+              ((struct TRAME_ITEM_PASS *)selection->data)->groupe_dpl = new_groupe;
+              break;
+         case TYPE_COMMENTAIRE:
+              ((struct TRAME_ITEM_COMMENT *)selection->data)->groupe_dpl = new_groupe;
+              break;
+         case TYPE_MOTIF:
+              ((struct TRAME_ITEM_MOTIF *)selection->data)->groupe_dpl = new_groupe;
+              break;
+         case TYPE_CAPTEUR:
+              ((struct TRAME_ITEM_CAPTEUR *)selection->data)->groupe_dpl = new_groupe;
+              break;
+         case TYPE_CAMERA_SUP:
+              ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
+              break;
          default: printf("Fusionner_selection: type inconnu\n" );
        }
       selection = selection->next;
@@ -476,28 +471,27 @@
  void Detacher_selection ( void )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
-    struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
     switch ( infos->Selection.type )
-     {   case TYPE_PASSERELLE : trame_pass = ((struct TRAME_ITEM_PASS *)infos->Selection.trame_pass);
-                                trame_pass->groupe_dpl = Nouveau_groupe();
-                                break;
-         case TYPE_COMMENTAIRE: trame_comm = ((struct TRAME_ITEM_COMMENT *)infos->Selection.trame_comment);
-                                trame_comm->groupe_dpl = Nouveau_groupe();
-                                break;
-         case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)infos->Selection.trame_motif;
-                                trame_motif->groupe_dpl = Nouveau_groupe();
-                                break;
-         case TYPE_CAPTEUR      : trame_capteur = (struct TRAME_ITEM_CAPTEUR *)infos->Selection.trame_capteur;
-                                trame_capteur->groupe_dpl = Nouveau_groupe();
-                                break;
+       { case TYPE_PASSERELLE:
+              ((struct TRAME_ITEM_PASS *)infos->Selection.trame_pass)->groupe_dpl = Nouveau_groupe();
+              break;
+         case TYPE_COMMENTAIRE:
+              ((struct TRAME_ITEM_COMMENT *)infos->Selection.trame_comment)->groupe_dpl = Nouveau_groupe();
+              break;
+         case TYPE_MOTIF:
+              ((struct TRAME_ITEM_MOTIF *)infos->Selection.trame_motif)->groupe_dpl = Nouveau_groupe();
+              break;
+         case TYPE_CAPTEUR:
+              ((struct TRAME_ITEM_CAPTEUR *)infos->Selection.trame_capteur)->groupe_dpl = Nouveau_groupe();
+              break;
+         case TYPE_CAMERA_SUP:
+              ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
+              break;
          default: printf("Detacher_selection: type inconnu\n" );
      }
     printf("Fin detacher_selection\n");
@@ -508,10 +502,11 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Rotationner_selection ( struct TYPE_INFO_ATELIER *infos )
-  { struct TRAME_ITEM_MOTIF   *trame_motif;
-    struct TRAME_ITEM_PASS    *trame_pass;
-    struct TRAME_ITEM_COMMENT *trame_comm;
-    struct TRAME_ITEM_CAPTEUR   *trame_capteur;
+  { struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *selection;
     gfloat angle;
 
@@ -521,22 +516,31 @@
     selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
     while(selection)
      { switch ( *((gint *)selection->data) )
-       { case TYPE_MOTIF      : trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-                                trame_motif->motif->angle = angle;
-                                Trame_rafraichir_motif(trame_motif);
-                                break;
-         case TYPE_PASSERELLE : trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
-                                trame_pass->pass->angle = angle;
-                                Trame_rafraichir_passerelle(trame_pass);
-                                break;
-         case TYPE_COMMENTAIRE: trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
-                                trame_comm->comment->angle = angle;
-                                Trame_rafraichir_comment(trame_comm);
-                                break;
-         case TYPE_CAPTEUR    : trame_capteur = (struct TRAME_ITEM_CAPTEUR *)selection->data;
-                                trame_capteur->capteur->angle = angle;
-                                Trame_rafraichir_capteur(trame_capteur);
-                                break;
+       { case TYPE_MOTIF:
+              trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
+              trame_motif->motif->angle = angle;
+              Trame_rafraichir_motif(trame_motif);
+              break;
+         case TYPE_PASSERELLE:
+              trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
+              trame_pass->pass->angle = angle;
+              Trame_rafraichir_passerelle(trame_pass);
+              break;
+         case TYPE_COMMENTAIRE:
+              trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
+              trame_comm->comment->angle = angle;
+              Trame_rafraichir_comment(trame_comm);
+              break;
+         case TYPE_CAPTEUR:
+              trame_capteur = (struct TRAME_ITEM_CAPTEUR *)selection->data;
+              trame_capteur->capteur->angle = angle;
+              Trame_rafraichir_capteur(trame_capteur);
+              break;
+         case TYPE_CAMERA_SUP:
+              trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
+              trame_camera_sup->camera_sup->angle = angle;
+              Trame_rafraichir_camera_sup(trame_camera_sup);
+              break;
          default: printf("Rotationner_selection: type inconnu\n" );
        }
       selection = selection->next;

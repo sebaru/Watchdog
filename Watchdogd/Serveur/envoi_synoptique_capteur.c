@@ -185,7 +185,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
      { capteur = Recuperer_capteurDB_suite( Config.log, db );
        if (!capteur)
         { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE );
+          Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );

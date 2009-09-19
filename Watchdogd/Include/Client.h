@@ -40,6 +40,7 @@
     ENVOI_COMMENT_ATELIER,                                 /* Envoi des comments associés à un synoptique */
     ENVOI_PASSERELLE_ATELIER,                              /* Envoi des passerelles dans l'atelier client */
     ENVOI_CAPTEUR_ATELIER,                                     /* Envoi des capteur dans l'atelier client */
+    ENVOI_CAMERA_SUP_ATELIER,                               /* Envoi des camera_sup dans l'atelier client */
     ENVOI_MOTIF_SUPERVISION,                                         /* Envoi des motifs a la supervision */
     ENVOI_COMMENT_SUPERVISION,                                     /* Envoi des comments à la supervision */
     ENVOI_PASSERELLE_SUPERVISION,                         /* Envoi des infos passerelles à la supervision */

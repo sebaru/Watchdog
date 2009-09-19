@@ -394,6 +394,12 @@
                                                           (void *)Envoyer_capteur_atelier_thread, client );
                                           pthread_detach( tid );
                                           break;
+                case ENVOI_CAMERA_SUP_ATELIER:
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
 
                 case ENVOI_MOTIF_SUPERVISION:
                                           Client_mode( client, VALIDE );

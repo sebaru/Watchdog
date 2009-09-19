@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/atelier_clic_trame.c        Gestion des evenements sur la trame                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 29 jan 2006 21:34:43 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   sam. 19 sept. 2009 11:59:15 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -177,24 +177,33 @@ printf("Afficher_propriete: debut\n");
                                    }
                                 }
                                switch (infos->Selection.type)        /* Mise a jour des entrys positions */
-                                { case TYPE_PASSERELLE : x = infos->Selection.trame_pass->pass->position_x;
-                                                         y = infos->Selection.trame_pass->pass->position_y;
-                                                         angle = infos->Selection.trame_pass->pass->angle;
-                                                         break;
-                                  case TYPE_COMMENTAIRE: x = infos->Selection.trame_comment->comment->position_x;
-                                                         y = infos->Selection.trame_comment->comment->position_y;
-                                                         angle = infos->Selection.trame_comment->comment->angle;
-                                                         break;
-                                  case TYPE_MOTIF      : x = infos->Selection.trame_motif->motif->position_x;
-                                                         y = infos->Selection.trame_motif->motif->position_y;
-                                                         angle = infos->Selection.trame_motif->motif->angle;
-                                                         break;
-                                  case TYPE_CAPTEUR    : x = infos->Selection.trame_capteur->capteur->position_x;
-                                                         y = infos->Selection.trame_capteur->capteur->position_y;
-                                                         angle = infos->Selection.trame_capteur->capteur->angle;
-                                                         break;
+                                { case TYPE_PASSERELLE:
+                                       x = infos->Selection.trame_pass->pass->position_x;
+                                       y = infos->Selection.trame_pass->pass->position_y;
+                                       angle = infos->Selection.trame_pass->pass->angle;
+                                       break;
+                                  case TYPE_COMMENTAIRE:
+                                       x = infos->Selection.trame_comment->comment->position_x;
+                                       y = infos->Selection.trame_comment->comment->position_y;
+                                       angle = infos->Selection.trame_comment->comment->angle;
+                                       break;
+                                  case TYPE_MOTIF:
+                                       x = infos->Selection.trame_motif->motif->position_x;
+                                       y = infos->Selection.trame_motif->motif->position_y;
+                                       angle = infos->Selection.trame_motif->motif->angle;
+                                       break;
+                                  case TYPE_CAPTEUR:
+                                       x = infos->Selection.trame_capteur->capteur->position_x;
+                                       y = infos->Selection.trame_capteur->capteur->position_y;
+                                       angle = infos->Selection.trame_capteur->capteur->angle;
+                                       break;
+                                  case TYPE_CAMERA_SUP:
+                                       x = infos->Selection.trame_camera_sup->camera_sup->position_x;
+                                       y = infos->Selection.trame_camera_sup->camera_sup->position_y;
+                                       angle = infos->Selection.trame_camera_sup->camera_sup->angle;
+                                       break;
                                   default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
-                                           x=-1; y=-1;
+                                           x=-1; y=-1; angle = 0.0;
                                 }
                                if (Appui)
                                 { Clic_x = x;
@@ -406,5 +415,52 @@ printf("Clic sur capteur: page trouvée, %p \n", trame_capteur);
      }
     else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
               event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
+  }
+/**********************************************************************************************************/
+/* Clic_sur_motif: Appelé quand un evenement est capté sur un motif                                       */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
+                            struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
+  { struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+    static GtkWidget *Popup = NULL;
+    static GnomeUIInfo Popup_camera_sup[]=
+     { /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
+       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_SEPARATOR,
+       GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
+       GNOMEUIINFO_END
+     };
+
+    if (!(trame_camera_sup && event)) return;
+
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    infos->Selection.type = TYPE_CAMERA_SUP;
+    infos->Selection.groupe = trame_camera_sup->groupe_dpl;
+    infos->Selection.trame_camera_sup = trame_camera_sup;
+
+    Clic_general( infos, event );                                                /* Fonction de base clic */
+
+    Mettre_a_jour_description( infos, 0, trame_camera_sup->camera_sup->libelle );
+    if (event->type == GDK_BUTTON_PRESS)
+     { if ( event->button.button == 1)
+        { goo_canvas_item_raise( trame_camera_sup->select_hg, NULL );
+          goo_canvas_item_raise( trame_camera_sup->select_hd, NULL );
+          goo_canvas_item_raise( trame_camera_sup->select_bg, NULL );
+          goo_canvas_item_raise( trame_camera_sup->select_bd, NULL );
+        }
+       else if (event->button.button == 3)
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_camera_sup );                  /* Creation menu */
+          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+
+        }
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

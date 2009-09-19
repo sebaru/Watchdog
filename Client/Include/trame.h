@@ -131,6 +131,7 @@
 
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+    gint selection;
   };
 
 
@@ -155,6 +156,7 @@
  extern void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment );
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_rafraichir_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
                                    guchar r, guchar v, guchar b );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b );

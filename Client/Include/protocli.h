@@ -171,6 +171,7 @@
                struct TRAME_ITEM_PASS  *trame_pass;          /* Pointeur sur l'item selectionné principal */
                struct TRAME_ITEM_COMMENT *trame_comment;
                struct TRAME_ITEM_CAPTEUR *trame_capteur;
+               struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
              };
 
        GList *items;                                      /* Tous les items faisant parti de la selection */
@@ -345,6 +346,8 @@
                              struct TRAME_ITEM_PASS *trame_pass );
  extern void Clic_sur_capteur ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                                 struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
+                            struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern gint Nouveau_groupe ( void );
  
                                                                               /* Dans atelier_selection.c */

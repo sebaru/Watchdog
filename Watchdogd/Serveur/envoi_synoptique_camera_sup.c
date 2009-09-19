@@ -189,7 +189,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
      { camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
        if (!camera_sup)
         { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE );
+          /* Test 19/09/2009 Client_mode( client, ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE );*/
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );

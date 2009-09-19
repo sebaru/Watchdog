@@ -184,7 +184,7 @@ printf("Proto_afficher_camera_sup_atelier posx=%d,posy=%d,larg=%f,haut=%f src_ca
     trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
     trame_camera_sup->groupe_dpl = Nouveau_groupe();              /* Numéro de groupe pour le deplacement */
 
-/*    g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-press-event",
+    g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-press-event",
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-release-event",
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
@@ -193,7 +193,7 @@ printf("Proto_afficher_camera_sup_atelier posx=%d,posy=%d,larg=%f,haut=%f src_ca
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "leave-notify-event",
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "motion-notify-event",
-                      G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );*/
+                      G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
   }
 /**********************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                          */
