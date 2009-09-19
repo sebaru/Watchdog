@@ -646,12 +646,22 @@ printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->h
 
     if ( flag )
      { GdkPixbuf *pixbuf;
+       gchar chaine[256];
+
        trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
                                                      -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
                                                       DEFAULT_CAMERA_LARGEUR*1.0,  DEFAULT_CAMERA_HAUTEUR*1.0,
                                                       "fill-color", "blue",
                                                       "stroke-color", "yellow",
                                                       NULL);
+
+       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->camera_src_id );
+       goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
+                                                            -1, GTK_ANCHOR_CENTER,
+                                                            "fill-color", "yellow",
+                                                            "font", "arial bold 14",
+                                                            NULL);
+
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hg.gif", NULL );
        trame_camera_sup->select_hg = goo_canvas_image_new ( trame->canvas_root,

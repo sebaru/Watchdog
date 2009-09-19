@@ -51,6 +51,7 @@
     static GList *Arrivee_capteur = NULL;
     static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
+    static GList *Arrivee_camera_sup = NULL;
     static GList *Arrivee_groupe_propriete_syn = NULL;
     static GList *Arrivee_camera_for_atelier = NULL;
     static int save_id;
@@ -188,6 +189,24 @@
                g_list_foreach( Arrivee_camera_for_atelier, (GFunc)g_free, NULL );
                g_list_free( Arrivee_camera_for_atelier );
                Arrivee_camera_for_atelier = NULL;
+             }
+            break;
+/*********************************** Reception des cameras de supervision *********************************/
+       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP:
+             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+               Set_progress_plusun();
+
+               camera_sup = (struct CMD_SHOW_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               if (!camera_sup) return; 
+               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA_SUP ) );
+               Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN:
+             { g_list_foreach( Arrivee_camera_sup, (GFunc)Proto_afficher_un_camera_sup_atelier, NULL );
+               g_list_foreach( Arrivee_camera_sup, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_camera_sup );
+               Arrivee_camera_sup = NULL;
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK:

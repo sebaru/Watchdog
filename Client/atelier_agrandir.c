@@ -16,14 +16,47 @@
  #include "protocli.h"
 
 /**********************************************************************************************************/
-/* Agrandir_général: Fonction appelée quand on resize un motif                                            */
-/* Entrée: une structure TRAME_ITEM_MOTIF                                                                 */
-/* Sortie: rien                                                                                           */
+/* Agrandir_general_motif: Mise a jour des données de base                                                */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
- void Agrandir_general ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { if (!(trame_motif && trame_motif->motif)) return;
+ static void Agrandir_general_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gdouble dx, gdouble dy,
+                                      gdouble dposx, gdouble dposy )
+  {
+       if (   trame_motif->motif->largeur + dx > (trame_motif->motif->gif_largeur>>1)
+           && trame_motif->motif->hauteur + dy > (trame_motif->motif->gif_hauteur>>1)
+           && trame_motif->motif->largeur + dx < (gdouble)TAILLE_SYNOPTIQUE_X
+           && trame_motif->motif->hauteur + dy < (gdouble)TAILLE_SYNOPTIQUE_Y )
+        {
+          trame_motif->motif->position_x += (dposx/2);            /* /2 car milieu de motif > dpl moindre */
+          trame_motif->motif->position_y += (dposy/2);
+          trame_motif->motif->largeur    += dx;
+          trame_motif->motif->hauteur    += dy;
 
-    Trame_rafraichir_motif(trame_motif);
+          Trame_rafraichir_motif(trame_motif);
+        }
+  }
+/**********************************************************************************************************/
+/* Agrandir_general_motif: Mise a jour des données de base                                                */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ static void Agrandir_general_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup,
+                                           gdouble dx, gdouble dy,
+                                           gdouble dposx, gdouble dposy )
+  {
+       if (   trame_camera_sup->camera_sup->largeur + dx > (DEFAULT_CAMERA_LARGEUR>>1)
+           && trame_camera_sup->camera_sup->hauteur + dy > (DEFAULT_CAMERA_HAUTEUR>>1)
+           && trame_camera_sup->camera_sup->largeur + dx < (gdouble)TAILLE_SYNOPTIQUE_X
+           && trame_camera_sup->camera_sup->hauteur + dy < (gdouble)TAILLE_SYNOPTIQUE_Y )
+        {
+          trame_camera_sup->camera_sup->position_x += (dposx/2);  /* /2 car milieu de motif > dpl moindre */
+          trame_camera_sup->camera_sup->position_y += (dposy/2);
+          trame_camera_sup->camera_sup->largeur    += dx;
+          trame_camera_sup->camera_sup->hauteur    += dy;
+
+          Trame_rafraichir_camera_sup(trame_camera_sup);
+        }
   }
 
 /**********************************************************************************************************/
@@ -35,7 +68,7 @@
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
     static gint Appui = 0;
-    gdouble taille_x, taille_y, dx, dy;
+    gdouble dx, dy;
     gdouble dx_trame, dy_trame;
     gdouble cosinus, sinus;
 
@@ -57,20 +90,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       taille_x = trame_motif->motif->largeur + dx;
-       taille_y = trame_motif->motif->hauteur + dy;
-       if (   taille_x > (trame_motif->motif->gif_largeur>>1)
-           && taille_y > (trame_motif->motif->gif_hauteur>>1)
-           && taille_x < (gdouble)TAILLE_SYNOPTIQUE_X
-           && taille_y < (gdouble)TAILLE_SYNOPTIQUE_Y )
-        {
-          trame_motif->motif->position_x += (dx_trame/2);         /* /2 car milieu de motif > dpl moindre */
-          trame_motif->motif->position_y += (dy_trame/2);
-          trame_motif->motif->largeur = taille_x;
-          trame_motif->motif->hauteur = taille_y;
-
-          Agrandir_general( trame_motif );         /* Met à jour les données des bases TRAME et visuelles */
-        }
+       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -84,7 +104,7 @@
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
     static gint Appui = 0;
-    gdouble taille_x, taille_y, dx, dy;
+    gdouble dx, dy;
     gdouble dx_trame, dy_trame;
     gdouble cosinus, sinus;
 
@@ -107,21 +127,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       taille_x = trame_motif->motif->largeur - dx;
-       taille_y = trame_motif->motif->hauteur + dy;
-
-       if (   taille_x > (trame_motif->motif->gif_largeur>>1)
-           && taille_y > (trame_motif->motif->gif_hauteur>>1)
-           && taille_x < (gdouble)TAILLE_SYNOPTIQUE_X
-           && taille_y < (gdouble)TAILLE_SYNOPTIQUE_Y )
-        {
-          trame_motif->motif->position_x += (dx_trame/2);         /* /2 car milieu de motif > dpl moindre */
-          trame_motif->motif->position_y += (dy_trame/2);
-          trame_motif->motif->largeur = taille_x;
-          trame_motif->motif->hauteur = taille_y;
-
-          Agrandir_general( trame_motif );         /* Met à jour les données des bases TRAME et visuelles */
-        }
+       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -135,7 +141,7 @@
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
     static gint Appui = 0;
-    gdouble taille_x, taille_y, dx, dy;
+    gdouble dx, dy;
     gdouble dx_trame, dy_trame;
     gdouble cosinus, sinus;
 
@@ -158,21 +164,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       taille_x = trame_motif->motif->largeur - dx;
-       taille_y = trame_motif->motif->hauteur - dy;
-
-       if (   taille_x > (trame_motif->motif->gif_largeur>>1)
-           && taille_y > (trame_motif->motif->gif_hauteur>>1)
-           && taille_x < (gdouble)TAILLE_SYNOPTIQUE_X
-           && taille_y < (gdouble)TAILLE_SYNOPTIQUE_Y )
-        {
-          trame_motif->motif->position_x += (dx_trame/2);         /* /2 car milieu de motif > dpl moindre */
-          trame_motif->motif->position_y += (dy_trame/2);
-          trame_motif->motif->largeur = taille_x;
-          trame_motif->motif->hauteur = taille_y;
-
-          Agrandir_general( trame_motif );         /* Met à jour les données des bases TRAME et visuelles */
-        }
+       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -186,7 +178,7 @@
                     GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
   { static gdouble Clic_x, Clic_y;
     static gint Appui = 0;
-    gdouble taille_x, taille_y, dx, dy;
+    gdouble dx, dy;
     gdouble dx_trame, dy_trame;
     gdouble cosinus, sinus;
 
@@ -209,21 +201,154 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       taille_x = trame_motif->motif->largeur + dx;
-       taille_y = trame_motif->motif->hauteur - dy;
+       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
+       Clic_x = event->motion.x_root;
+       Clic_y = event->motion.y_root;
+     }
+  }
+/**********************************************************************************************************/
+/* Agrandir_bd: Appelé quand un evenement est capté sur un carré de selection BD                          */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ void Agrandir_bd_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
+                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
+  { static gdouble Clic_x, Clic_y;
+    static gint Appui = 0;
+    gdouble dx, dy;
+    gdouble dx_trame, dy_trame;
+    gdouble cosinus, sinus;
 
-       if (   taille_x > (trame_motif->motif->gif_largeur>>1)
-           && taille_y > (trame_motif->motif->gif_hauteur>>1)
-           && taille_x < (gdouble)TAILLE_SYNOPTIQUE_X
-           && taille_y < (gdouble)TAILLE_SYNOPTIQUE_Y )
-        {
-          trame_motif->motif->position_x += (dx_trame/2);         /* /2 car milieu de motif > dpl moindre */
-          trame_motif->motif->position_y += (dy_trame/2);
-          trame_motif->motif->largeur = taille_x;
-          trame_motif->motif->hauteur = taille_y;
+    if (!(trame_camera_sup && event)) return;
+    if (event->type == GDK_BUTTON_PRESS)
+     { Clic_x = event->button.x_root;
+       Clic_y = event->button.y_root;
+       Appui = 1;
+     }
+    else if (event->type == GDK_BUTTON_RELEASE)
+     { Appui = 0;
+     }
+    else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
+     { dx_trame = (event->motion.x_root - Clic_x);
+       dy_trame = (event->motion.y_root - Clic_y);
+       cosinus  = cos(trame_camera_sup->camera_sup->angle*PI/180);
+       sinus    = sin(trame_camera_sup->camera_sup->angle*PI/180);
 
-          Agrandir_general( trame_motif );         /* Met à jour les données des bases TRAME et visuelles */
-        }
+       dx = dx_trame*cosinus + dy_trame*sinus;
+       dy =-dx_trame*sinus   + dy_trame*cosinus;
+
+       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
+       Clic_x = event->motion.x_root;
+       Clic_y = event->motion.y_root;
+     }
+  }
+/**********************************************************************************************************/
+/* Agrandir_bg: Appelé quand un evenement est capté sur un carré de selection BG                          */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ void Agrandir_bg_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
+                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
+  { static gdouble Clic_x, Clic_y;
+    static gint Appui = 0;
+    gdouble dx, dy;
+    gdouble dx_trame, dy_trame;
+    gdouble cosinus, sinus;
+
+    if (!(trame_camera_sup && event)) return;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { Clic_x = event->button.x_root;
+       Clic_y = event->button.y_root;
+       Appui = 1;
+     }
+    else if (event->type == GDK_BUTTON_RELEASE)
+     { Appui = 0;
+     }
+    else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
+     { dx_trame = (event->motion.x_root - Clic_x);
+       dy_trame = (event->motion.y_root - Clic_y);
+       cosinus  = cos(trame_camera_sup->camera_sup->angle*PI/180);
+       sinus    = sin(trame_camera_sup->camera_sup->angle*PI/180);
+
+       dx = dx_trame*cosinus + dy_trame*sinus;
+       dy =-dx_trame*sinus   + dy_trame*cosinus;
+
+       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
+       Clic_x = event->motion.x_root;
+       Clic_y = event->motion.y_root;
+     }
+  }
+/**********************************************************************************************************/
+/* Agrandir_hg: Appelé quand un evenement est capté sur un carré de selection HG                          */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ void Agrandir_hg_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
+                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
+  { static gdouble Clic_x, Clic_y;
+    static gint Appui = 0;
+    gdouble dx, dy;
+    gdouble dx_trame, dy_trame;
+    gdouble cosinus, sinus;
+
+    if (!(trame_camera_sup && event)) return;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { Clic_x = event->button.x_root;
+       Clic_y = event->button.y_root;
+       Appui = 1;
+     }
+    else if (event->type == GDK_BUTTON_RELEASE)
+     { Appui = 0;
+     }
+    else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
+     { dx_trame = (event->motion.x_root - Clic_x);
+       dy_trame = (event->motion.y_root - Clic_y);
+       cosinus  = cos(trame_camera_sup->camera_sup->angle*PI/180);
+       sinus    = sin(trame_camera_sup->camera_sup->angle*PI/180);
+
+       dx = dx_trame*cosinus + dy_trame*sinus;
+       dy =-dx_trame*sinus   + dy_trame*cosinus;
+
+       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
+       Clic_x = event->motion.x_root;
+       Clic_y = event->motion.y_root;
+     }
+  }
+/**********************************************************************************************************/
+/* Agrandir_hd: Appelé quand un evenement est capté sur un carré de selection HD                          */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ void Agrandir_hd_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
+                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
+  { static gdouble Clic_x, Clic_y;
+    static gint Appui = 0;
+    gdouble dx, dy;
+    gdouble dx_trame, dy_trame;
+    gdouble cosinus, sinus;
+
+    if (!(trame_camera_sup && event)) return;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { Clic_x = event->button.x_root;
+       Clic_y = event->button.y_root;
+       Appui = 1;
+     }
+    else if (event->type == GDK_BUTTON_RELEASE)
+     { Appui = 0;
+     }
+    else if (event->type == GDK_MOTION_NOTIFY && (event->motion.state & 0x100) && Appui)
+     { dx_trame = (event->motion.x_root - Clic_x);
+       dy_trame = (event->motion.y_root - Clic_y);
+       cosinus  = cos(trame_camera_sup->camera_sup->angle*PI/180);
+       sinus    = sin(trame_camera_sup->camera_sup->angle*PI/180);
+
+       dx = dx_trame*cosinus + dy_trame*sinus;
+       dy =-dx_trame*sinus   + dy_trame*cosinus;
+
+       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }

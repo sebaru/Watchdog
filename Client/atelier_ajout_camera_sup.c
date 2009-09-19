@@ -194,6 +194,34 @@ printf("Proto_afficher_camera_sup_atelier posx=%d,posy=%d,larg=%f,haut=%f src_ca
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "motion-notify-event",
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
+
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_hg), "button-press-event",
+                      G_CALLBACK(Agrandir_hg_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_hg), "button-release-event",
+                      G_CALLBACK(Agrandir_hg_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_hg), "motion-notify-event",
+                      G_CALLBACK(Agrandir_hg_camera_sup), trame_camera_sup );
+
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_hd), "button-press-event",
+                      G_CALLBACK(Agrandir_hd_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_hd), "button-release-event",
+                      G_CALLBACK(Agrandir_hd_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_hd), "motion-notify-event",
+                      G_CALLBACK(Agrandir_hd_camera_sup), trame_camera_sup );
+
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_bg), "button-press-event",
+                      G_CALLBACK(Agrandir_bg_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_bg), "button-release-event",
+                      G_CALLBACK(Agrandir_bg_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_bg), "motion-notify-event",
+                      G_CALLBACK(Agrandir_bg_camera_sup), trame_camera_sup );
+
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_bd), "button-press-event",
+                      G_CALLBACK(Agrandir_bd_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_bd), "button-release-event",
+                      G_CALLBACK(Agrandir_bd_camera_sup), trame_camera_sup );
+    g_signal_connect( G_OBJECT(trame_camera_sup->select_bd), "motion-notify-event",
+                      G_CALLBACK(Agrandir_bd_camera_sup), trame_camera_sup );
   }
 /**********************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                          */
