@@ -3,7 +3,30 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 28 nov 2004 14:11:04 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+ /*
+  * timer.c
+  * This file is part of <program name>
+  *
+  * Copyright (C) 2009 - 
+  *
+  * <program name> is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation; either version 2 of the License, or
+  * (at your option) any later version.
+  *
+  * <program name> is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * You should have received a copy of the GNU General Public License
+  * along with <program name>; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+  * Boston, MA  02110-1301  USA
+  */
+  
  #include <gnome.h>
+ #include <gst/gst.h>
  #include "Config_cli.h"
  #include "client.h"
 
@@ -130,6 +153,7 @@
  gboolean Timer ( gpointer data )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_PASS *trame_pass;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     static gint nbr_cligno = 0;
@@ -156,6 +180,11 @@
           case TYPE_CAPTEUR:     break;
           case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
                                  Timer_pass( trame_pass, (nbr_cligno < 1 ? 1 : 0) );
+                                 break;
+          case TYPE_CAMERA_SUP : trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)liste_motifs->data;
+                                 if (trame_camera_sup->start < 10)
+                                  { trame_camera_sup->start++; }
+                                 else gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_PLAYING);
                                  break;
           default: printf("Timer: type inconnu\n" );
         }

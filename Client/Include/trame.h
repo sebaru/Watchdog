@@ -118,6 +118,7 @@
     GooCanvasItem *item;
     GtkWidget *video_output;
     GstElement *pipeline;
+    gint start;                                           /* Utilisé par timer.c pour allumer le pipeline */
     cairo_matrix_t transform;
     cairo_matrix_t transform_hg;
     cairo_matrix_t transform_hd;

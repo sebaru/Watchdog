@@ -109,8 +109,8 @@
  void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   {
     if (trame_camera_sup->pipeline)
-     { 
-       #warning to be determined
+     { gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_NULL);      /* Extinction du pipeline */
+       gst_object_unref( GST_OBJECT(trame_camera_sup->pipeline) );
      }
     if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
     if (trame_camera_sup->select_hd) goo_canvas_item_remove( trame_camera_sup->select_hd );
@@ -632,7 +632,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
  struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                         struct CMD_TYPE_CAMERA_SUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    GstElement *source, *jpegdec, *ffmpeg, *sink;
+    GstElement *source, *jpegdec, *ffmpeg, *sink, *scale;
 
     if (!(trame && camera_sup)) return(NULL);
 
@@ -710,17 +710,22 @@ printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->h
 
        jpegdec  = gst_element_factory_make ("jpegdec", NULL);
        ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
-       sink    = gst_element_factory_make ( "ximagesink", NULL );
+       scale    = gst_element_factory_make ("videoscale", NULL );
+/*       g_object_set (G_OBJECT (scale), "video/x-raw-yuv", NULL);*/
+/* trame_camera_sup->camera_sup->largeur,
+                                       "height",trame_camera_sup->camera_sup->hauteur, 
+                                       NULL);*/
+       sink     = gst_element_factory_make ("ximagesink", NULL );
 
-       gst_bin_add_many (GST_BIN (trame_camera_sup->pipeline), source, jpegdec, ffmpeg, sink, NULL);
-       gst_element_link_many (source, jpegdec, ffmpeg, sink, NULL);
+       gst_bin_add_many (GST_BIN (trame_camera_sup->pipeline), source, jpegdec, ffmpeg, scale, sink, NULL);
+       gst_element_link_many (source, jpegdec, ffmpeg, scale, sink, NULL);
  
-    /* gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);*/
+       gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);
        gtk_widget_realize ( trame_camera_sup->video_output );
        gtk_main_iteration_do( TRUE );
        gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink),
                                      GDK_WINDOW_XWINDOW (trame_camera_sup->video_output->window));
-       gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_PLAYING);     /* Allumage du pipeline */
+/*       gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_PLAYING);     /* Allumage du pipeline */
 
      }
 

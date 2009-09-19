@@ -40,7 +40,7 @@
 
     memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
 
-    trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame, camera_sup );
+    trame_camera_sup = Trame_ajout_camera_sup ( FALSE, infos->Trame, camera_sup );
 /*    g_signal_connect( G_OBJECT(trame_camera_sup->item_entry), "event",
                       G_CALLBACK(Clic_sur_camera_sup_supervision), trame_camera_sup );*/
   }
