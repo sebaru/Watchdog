@@ -164,22 +164,14 @@
 /**********************************************************************************************************/
  gboolean Modifier_camera_supDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup )
   { gchar requete[1024];
-    gchar *libelle;
-
-    libelle = Normaliser_chaine ( log, camera_sup->libelle );                 /* Formatage correct des chaines */
-    if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_camera_supDB: Normalisation impossible" );
-       return(-1);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',posx=%d,posy=%d,largeur=%f,hauteur=%f,angle=%f"
+                "posx=%d,posy=%d,largeur=%f,hauteur=%f,angle=%f"
                 " WHERE id=%d;", NOM_TABLE_CAMERASUP,
-                libelle, camera_sup->position_x, camera_sup->position_y,
+                camera_sup->position_x, camera_sup->position_y,
                 camera_sup->largeur, camera_sup->hauteur, camera_sup->angle,
                 camera_sup->id );
-    g_free(libelle);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

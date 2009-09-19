@@ -149,7 +149,7 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_camera_sup_atelier" );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to save camera_sup %s", rezo_camera_sup->libelle);
+                   "Unable to save camera_sup %d", rezo_camera_sup->camera_src_id);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
