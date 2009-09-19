@@ -14,8 +14,8 @@
  #define NBR_CARAC_LIBELLE_COMMENT_UTF8  (6*NBR_CARAC_LIBELLE_COMMENT)
 
 /************************************** Qu'est-ce qu'une camera de supervision ?? *************************/
- #define DEFAULT_CAMERA_LARGEUR        120
- #define DEFAULT_CAMERA_HAUTEUR        90
+ #define DEFAULT_CAMERA_LARGEUR        160
+ #define DEFAULT_CAMERA_HAUTEUR        120
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

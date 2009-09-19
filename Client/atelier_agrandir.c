@@ -127,7 +127,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
+       Agrandir_general_motif( trame_motif, -dx, dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -164,7 +164,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
+       Agrandir_general_motif( trame_motif, -dx, -dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -201,7 +201,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       Agrandir_general_motif( trame_motif, dx, dy, dx_trame, dy_trame );
+       Agrandir_general_motif( trame_motif, dx, -dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -274,7 +274,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
+       Agrandir_general_camera_sup( trame_camera_sup, -dx, dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -311,7 +311,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
+       Agrandir_general_camera_sup( trame_camera_sup, -dx, -dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
@@ -348,7 +348,7 @@
        dx = dx_trame*cosinus + dy_trame*sinus;
        dy =-dx_trame*sinus   + dy_trame*cosinus;
 
-       Agrandir_general_camera_sup( trame_camera_sup, dx, dy, dx_trame, dy_trame );
+       Agrandir_general_camera_sup( trame_camera_sup, dx, -dy, dx_trame, dy_trame );
        Clic_x = event->motion.x_root;
        Clic_y = event->motion.y_root;
      }
