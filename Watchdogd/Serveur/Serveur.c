@@ -439,14 +439,18 @@
                                                           client );
                                           pthread_detach( tid );
                                           break;   
+                case ENVOI_CAMERA_SUP_SUPERVISION:
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_IXXX_SUPERVISION :
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_bit_init_supervision_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                              break;   
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );  /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_bit_init_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;   
                 case ENVOI_ICONE_FOR_ATELIER:
                                           Client_mode( client, VALIDE );
                                           Ref_client( client );  /* Indique que la structure est utilisée */

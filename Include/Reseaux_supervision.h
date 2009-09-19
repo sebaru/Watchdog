@@ -41,6 +41,8 @@
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN,  /* Le serveur envoi des palettes page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,      /* Le serveur envoi des capteurs page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN,  /* Le serveur envoi des capteurs page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,     /* Le serveur envoi des camera page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN, /* Le serveur envoi des camera page supervision */
 
     SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,        /* Un motif à changé d'etat, nous l'envoyons au client */
     SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,      /* Reponse si le numero Ixxx n'est pas utilisé dans le client */

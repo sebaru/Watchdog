@@ -240,7 +240,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
        capteur = Recuperer_capteurDB_suite( Config.log, db );
        if (!capteur)                                                                        /* Terminé ?? */
         { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_IXXX_SUPERVISION );
+          Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

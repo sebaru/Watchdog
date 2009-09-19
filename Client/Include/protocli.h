@@ -450,6 +450,9 @@
  extern void Proto_afficher_un_capteur_supervision( struct CMD_SHOW_CAPTEUR *rezo_capteur );
  extern void Proto_changer_etat_capteur( struct CMD_ETAT_BIT_CAPTEUR *etat_capteur );
 
+                                                                             /* Dans supervision_camera.c */
+ extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
+
  extern void Proto_afficher_une_entreeANA( struct CMD_SHOW_ENTREEANA *entree ); /* Dans liste_entreeana.c */
  extern void Proto_cacher_une_entreeANA( struct CMD_ID_ENTREEANA *entree );
  extern void Proto_rafraichir_une_entreeANA( struct CMD_SHOW_ENTREEANA *entree );

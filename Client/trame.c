@@ -30,6 +30,9 @@
  #include <gnome.h>                                                             /* Bibliothèque graphique */
  #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
  #include <gdk-pixbuf/gdk-pixdata.h>                                         /* Gestion des images/motifs */
+ #include <gdk/gdkx.h>
+ #include <gst/gst.h>
+ #include <gst/interfaces/xoverlay.h>
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
  #include <gif_lib.h>
  #include <string.h>
@@ -629,6 +632,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
  struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                         struct CMD_TYPE_CAMERA_SUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    GstElement *source, *jpegdec, *ffmpeg, *sink;
 
     if (!(trame && camera_sup)) return(NULL);
 
@@ -691,6 +695,33 @@ printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->h
        g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
        g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
        g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+     }
+    else
+     { trame_camera_sup->video_output = gtk_drawing_area_new ();
+       goo_canvas_widget_new( trame_camera_sup->item_groupe, trame_camera_sup->video_output,
+                              -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
+                               DEFAULT_CAMERA_LARGEUR*1.0,  DEFAULT_CAMERA_HAUTEUR*1.0,
+                              NULL);
+    /* Create gstreamer elements */
+       trame_camera_sup->pipeline = gst_pipeline_new (NULL);
+
+       source  = gst_element_factory_make ( "gnomevfssrc", NULL );
+       g_object_set (G_OBJECT (source), "location", trame_camera_sup->camera_sup->location, NULL);
+
+       jpegdec  = gst_element_factory_make ("jpegdec", NULL);
+       ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
+       sink    = gst_element_factory_make ( "ximagesink", NULL );
+
+       gst_bin_add_many (GST_BIN (trame_camera_sup->pipeline), source, jpegdec, ffmpeg, sink, NULL);
+       gst_element_link_many (source, jpegdec, ffmpeg, sink, NULL);
+ 
+    /* gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);*/
+       gtk_widget_realize ( trame_camera_sup->video_output );
+       gtk_main_iteration_do( TRUE );
+       gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink),
+                                     GDK_WINDOW_XWINDOW (trame_camera_sup->video_output->window));
+       gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_PLAYING);     /* Allumage du pipeline */
+
      }
 
     Trame_rafraichir_camera_sup ( trame_camera_sup );

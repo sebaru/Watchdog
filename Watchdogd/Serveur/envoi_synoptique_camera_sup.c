@@ -206,7 +206,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
         }
      }
   }
-#ifdef bouh
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
 /* Entrée: Néant                                                                                          */
@@ -261,5 +260,4 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
         }
      }
   }
-#endif
 /*--------------------------------------------------------------------------------------------------------*/
