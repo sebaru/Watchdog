@@ -173,6 +173,13 @@
      }
 
     memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+printf("Proto_afficher_camera_sup_atelier posx=%d,posy=%d,larg=%f,haut=%f src_cam=%d!!!\n",
+              camera_sup->position_x,
+              camera_sup->position_y,
+              camera_sup->largeur    ,
+              camera_sup->hauteur     ,
+              camera_sup->camera_src_id );
+
 
     trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
     trame_camera_sup->groupe_dpl = Nouveau_groupe();              /* Numéro de groupe pour le deplacement */

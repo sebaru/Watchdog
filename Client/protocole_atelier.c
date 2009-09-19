@@ -190,7 +190,19 @@
                Arrivee_camera_for_atelier = NULL;
              }
             break;
-
+       case SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK:
+             { struct CMD_TYPE_CAMERA_SUP *cam_sup;
+               cam_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+               Proto_afficher_un_camera_sup_atelier( cam_sup );
+             }
+            break;
+       case SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK:
+             { struct CMD_TYPE_CAMERA_SUP *cam_sup;
+               cam_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+               Proto_cacher_un_camera_sup_atelier( cam_sup );
+             }
+            break;
+/******************************************** Reception des palettes **************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE:
              { struct CMD_SHOW_SYNOPTIQUE *syn;
                Set_progress_plusun();
