@@ -200,6 +200,7 @@ printf("Afficher_propriete: debut\n");
                                   case TYPE_CAMERA_SUP:
                                        x = infos->Selection.trame_camera_sup->camera_sup->position_x;
                                        y = infos->Selection.trame_camera_sup->camera_sup->position_y;
+                                       angle = 0.0;
                                        break;
                                   default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
                                            x=-1; y=-1; angle = 0.0;

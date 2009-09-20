@@ -68,7 +68,7 @@ Creer_page_supervision_camera( &camera );
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA *camera )
+ void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA_SUP *camera )
   { GtkWidget *bouton, *boite, *hboite;
     struct TYPE_INFO_CAMERA *infos;
     struct PAGE_NOTEBOOK *page;
@@ -83,7 +83,7 @@ Creer_page_supervision_camera( &camera );
 
     page->type   = TYPE_PAGE_SUPERVISION_CAMERA;
     Liste_pages  = g_list_append( Liste_pages, page );
-    memcpy( &infos->camera, camera, sizeof( struct CMD_TYPE_CAMERA) );
+    memcpy( &infos->camera, camera, sizeof( struct CMD_TYPE_CAMERA_SUP) );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;

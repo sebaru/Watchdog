@@ -497,7 +497,6 @@
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CAPTEUR    *trame_capteur;
-    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *selection;
     gfloat angle;
 

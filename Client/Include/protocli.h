@@ -89,7 +89,7 @@
      NBR_COL_CAMERA
   };
  struct TYPE_INFO_CAMERA
-  { struct CMD_TYPE_CAMERA camera;                                              /* Structure de la camera */
+  { struct CMD_TYPE_CAMERA_SUP camera;                                          /* Structure de la camera */
     GtkWidget *video_output;                                                    /* Widget de sortie video */
     GstElement *pipeline;                                                         /* Pipeline de commande */
   };
@@ -289,6 +289,7 @@
  extern void Menu_ajouter_editer_synoptique ( struct CMD_EDIT_SYNOPTIQUE *edit_syn );/* ajout_synoptique.c*/
  extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_SHOW_GROUPE *groupe );
  extern void Proto_fin_affichage_groupes_pour_synoptique ( void );
+ extern void Proto_afficher_les_groupes_pour_synoptique ( GList *liste );
 
  extern void Proto_cacher_un_mnemonique( struct CMD_ID_MNEMONIQUE *mnemonique );/* Dans liste_mnemonique.c*/
  extern void Proto_afficher_un_mnemonique( struct CMD_SHOW_MNEMONIQUE *mnemonique );
@@ -377,8 +378,10 @@
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_SHOW_MNEMONIQUE *mnemo );
 
+                                                                   /* Dans atelier_propriete_passerelle.c */
+ extern void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass );
+ extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_SHOW_MNEMONIQUE *mnemo );
 
- extern void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass ); /* Dans atelier_propriete_passerelle.c */
  extern void Creer_fenetre_ajout_motif ( void );                            /* Dans atelier_ajout_motif.c */
  extern void Detruire_fenetre_ajout_motif ( void );
  extern void Choisir_motif_a_ajouter ( void );
@@ -398,6 +401,7 @@
  extern void Menu_ajouter_editer_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
  extern void Proto_afficher_un_capteur_atelier( struct CMD_SHOW_CAPTEUR *rezo_capteur );
  extern void Proto_cacher_un_capteur_atelier( struct CMD_ID_CAPTEUR *capteur );
+ extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_SHOW_MNEMONIQUE *mnemo );
 
                                                                           /* Dans atelier_ajout_palette.c */
  extern void Creer_fenetre_ajout_palette ( struct TYPE_INFO_ATELIER *infos );
@@ -426,6 +430,8 @@
                                                                                /* Dans supervision_clic.c */
  extern  void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
+ extern void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                               GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
 
                                                                             /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_SHOW_COMMENT *rezo_comment );
@@ -498,7 +504,7 @@
  extern void Creer_fenetre_scenario( struct MOTIF *motif );
 
                                                                         /* Dans supervision_page_camera.c */
- extern void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA *camera );
+ extern void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA_SUP *camera );
  extern void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page );
  extern void Test ( void );                                                   
 
