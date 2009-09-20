@@ -370,15 +370,6 @@
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Agrandir_hg ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Agrandir_bd_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
-                                      GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Agrandir_bg_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
-                                      GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Agrandir_hd_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
-                                      GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Agrandir_hg_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target,
-                                      GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
-
 
  extern void Creer_fenetre_propriete_TOR ( struct TYPE_INFO_ATELIER *infos ); /* Dans atelier_propriete.c */
  extern void Detruire_fenetre_propriete_TOR ();

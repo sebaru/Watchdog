@@ -113,10 +113,7 @@
        gst_object_unref( GST_OBJECT(trame_camera_sup->pipeline) );
      }
     if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
-    if (trame_camera_sup->select_hd) goo_canvas_item_remove( trame_camera_sup->select_hd );
-    if (trame_camera_sup->select_hg) goo_canvas_item_remove( trame_camera_sup->select_hg );
-    if (trame_camera_sup->select_bd) goo_canvas_item_remove( trame_camera_sup->select_bd );
-    if (trame_camera_sup->select_bg) goo_canvas_item_remove( trame_camera_sup->select_bg );
+    if (trame_camera_sup->select_mi) goo_canvas_item_remove( trame_camera_sup->select_mi );
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
@@ -229,69 +226,10 @@
                              (gdouble)trame_camera_sup->camera_sup->position_y
                            );
 
-    cairo_matrix_rotate ( &trame_camera_sup->transform,
-                          (gdouble)trame_camera_sup->camera_sup->angle*FACTEUR_PI );
-    cairo_matrix_scale  ( &trame_camera_sup->transform,
-                           (gdouble)trame_camera_sup->camera_sup->largeur/DEFAULT_CAMERA_LARGEUR,
-                           (gdouble)trame_camera_sup->camera_sup->hauteur/DEFAULT_CAMERA_HAUTEUR
-                        );
+    cairo_matrix_rotate ( &trame_camera_sup->transform, 0.0 );
+    cairo_matrix_scale  ( &trame_camera_sup->transform, 1.0, 1.0 );
 
     goo_canvas_item_set_transform ( trame_camera_sup->item_groupe, &trame_camera_sup->transform );
-
-    if ( trame_camera_sup->select_hd)
-     {
-       cairo_matrix_init_identity ( &trame_camera_sup->transform_hd );
-       cairo_matrix_translate ( &trame_camera_sup->transform_hd,
-                                (gdouble)trame_camera_sup->camera_sup->position_x,
-                                (gdouble)trame_camera_sup->camera_sup->position_y
-                              );
-       cairo_matrix_rotate ( &trame_camera_sup->transform_hd,
-                             (gdouble)trame_camera_sup->camera_sup->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_camera_sup->transform_hd,
-                                ((gdouble)trame_camera_sup->camera_sup->largeur/2),
-                                -((gdouble)trame_camera_sup->camera_sup->hauteur/2) - 9
-                              );
-       goo_canvas_item_set_transform ( trame_camera_sup->select_hd, &trame_camera_sup->transform_hd );
-
-       cairo_matrix_init_identity ( &trame_camera_sup->transform_bd );
-       cairo_matrix_translate ( &trame_camera_sup->transform_bd,
-                                (gdouble)trame_camera_sup->camera_sup->position_x,
-                                (gdouble)trame_camera_sup->camera_sup->position_y
-                              );
-       cairo_matrix_rotate ( &trame_camera_sup->transform_bd,
-                             (gdouble)trame_camera_sup->camera_sup->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_camera_sup->transform_bd,
-                                ((gdouble)trame_camera_sup->camera_sup->largeur/2),
-                                ((gdouble)trame_camera_sup->camera_sup->hauteur/2)
-                              );
-       goo_canvas_item_set_transform ( trame_camera_sup->select_bd, &trame_camera_sup->transform_bd );
-
-       cairo_matrix_init_identity ( &trame_camera_sup->transform_hg );
-       cairo_matrix_translate ( &trame_camera_sup->transform_hg,
-                                (gdouble)trame_camera_sup->camera_sup->position_x,
-                                (gdouble)trame_camera_sup->camera_sup->position_y
-                              );
-       cairo_matrix_rotate ( &trame_camera_sup->transform_hg,
-                             (gdouble)trame_camera_sup->camera_sup->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_camera_sup->transform_hg,
-                                -((gdouble)trame_camera_sup->camera_sup->largeur/2) - 9,
-                                -((gdouble)trame_camera_sup->camera_sup->hauteur/2) - 9
-                              );
-       goo_canvas_item_set_transform ( trame_camera_sup->select_hg, &trame_camera_sup->transform_hg );
-
-       cairo_matrix_init_identity ( &trame_camera_sup->transform_bg );
-       cairo_matrix_translate ( &trame_camera_sup->transform_bg,
-                                (gdouble)trame_camera_sup->camera_sup->position_x,
-                                (gdouble)trame_camera_sup->camera_sup->position_y
-                              );
-       cairo_matrix_rotate ( &trame_camera_sup->transform_bg,
-                             (gdouble)trame_camera_sup->camera_sup->angle*FACTEUR_PI );
-       cairo_matrix_translate ( &trame_camera_sup->transform_bg,
-                                -((gdouble)trame_camera_sup->camera_sup->largeur/2) - 9,
-                                ((gdouble)trame_camera_sup->camera_sup->hauteur/2)
-                              );
-       goo_canvas_item_set_transform ( trame_camera_sup->select_bg, &trame_camera_sup->transform_bg );
-     }
   }
 /**********************************************************************************************************/
 /* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
@@ -641,16 +579,10 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
 
     trame_camera_sup->camera_sup = camera_sup;
 
-#ifdef DEBUG_TRAME
-printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->hauteur );
-#endif
     trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-    if (!camera_sup->largeur) camera_sup->largeur = DEFAULT_CAMERA_LARGEUR;
-    if (!camera_sup->hauteur) camera_sup->hauteur = DEFAULT_CAMERA_HAUTEUR;
 
     if ( flag )
-     { GdkPixbuf *pixbuf;
-       gchar chaine[256];
+     { gchar chaine[256];
 
        trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
                                                      -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
@@ -667,34 +599,12 @@ printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->h
                                                             NULL);
 
 
-       pixbuf = gdk_pixbuf_new_from_file( "fleche_hg.gif", NULL );
-       trame_camera_sup->select_hg = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
-       gdk_pixbuf_unref(pixbuf);
+       trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
+                                                          -5.0, -5.0, 10.0, 10.0,
+                                                          "fill_color", "green",
+                                                          "stroke_color", "black", NULL);
 
-       pixbuf = gdk_pixbuf_new_from_file( "fleche_hd.gif", NULL );
-       trame_camera_sup->select_hd = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
-       gdk_pixbuf_unref(pixbuf);
-
-       pixbuf = gdk_pixbuf_new_from_file( "fleche_bg.gif", NULL );
-       trame_camera_sup->select_bg = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
-       gdk_pixbuf_unref(pixbuf);
-
-       pixbuf = gdk_pixbuf_new_from_file( "fleche_bd.gif", NULL );
-       trame_camera_sup->select_bd = goo_canvas_image_new ( trame->canvas_root,
-                                                       pixbuf, 0.0, 0.0,
-                                                       NULL );
-       gdk_pixbuf_unref(pixbuf);
-
-       g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-       g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-       g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-       g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+       g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
      }
     else
      { trame_camera_sup->video_output = gtk_drawing_area_new ();
@@ -711,10 +621,6 @@ printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->h
        jpegdec  = gst_element_factory_make ("jpegdec", NULL);
        ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
        scale    = gst_element_factory_make ("videoscale", NULL );
-/*       g_object_set (G_OBJECT (scale), "video/x-raw-yuv", NULL);*/
-/* trame_camera_sup->camera_sup->largeur,
-                                       "height",trame_camera_sup->camera_sup->hauteur, 
-                                       NULL);*/
        sink     = gst_element_factory_make ("ximagesink", NULL );
 
        gst_bin_add_many (GST_BIN (trame_camera_sup->pipeline), source, jpegdec, ffmpeg, scale, sink, NULL);
@@ -725,7 +631,6 @@ printf("New camera_sup: largeur %f haut%f\n", camera_sup->largeur, camera_sup->h
        gtk_main_iteration_do( TRUE );
        gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink),
                                      GDK_WINDOW_XWINDOW (trame_camera_sup->video_output->window));
-/*       gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_PLAYING);     /* Allumage du pipeline */
 
      }
 

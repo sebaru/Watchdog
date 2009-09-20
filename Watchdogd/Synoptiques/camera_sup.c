@@ -59,12 +59,10 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(syn_id,camera_src_id,posx,posy,largeur,hauteur,angle)"
-                " VALUES (%d,%d,%d,%d,%f,%f,%f)", NOM_TABLE_CAMERASUP,
+                "INSERT INTO %s(syn_id,camera_src_id,posx,posy)"
+                " VALUES (%d,%d,%d,%d)", NOM_TABLE_CAMERASUP,
                 camera_sup->syn_id, camera_sup->camera_src_id,
-                camera_sup->position_x, camera_sup->position_y,
-                camera_sup->largeur, camera_sup->hauteur,
-                camera_sup->angle );
+                camera_sup->position_x, camera_sup->position_y );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -79,7 +77,7 @@
   { gchar requete[2048];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
+                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,type"
                 " FROM %s,%s WHERE syn_id=%d AND camera_src_id=%s.num",
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id_syn, NOM_TABLE_CAMERA );
@@ -109,9 +107,7 @@
        camera_sup->camera_src_id= atoi(db->row[3]);
        camera_sup->position_x   = atoi(db->row[5]);                             /* en abscisses et ordonnées */
        camera_sup->position_y   = atoi(db->row[6]);
-       camera_sup->largeur      = atof(db->row[7]);
-       camera_sup->hauteur      = atof(db->row[8]);
-       camera_sup->angle        = atof(db->row[9]);
+       camera_sup->type         = atoi(db->row[7]);
      }
     return(camera_sup);
   }
@@ -125,7 +121,7 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,largeur,hauteur,angle"
+                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,type"
                 " FROM %s,%s WHERE %s.id=%d AND camera_src_id=%s.num",
                 NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,
@@ -151,9 +147,7 @@
        camera_sup->camera_src_id= atoi(db->row[2]);
        camera_sup->position_x   = atoi(db->row[4]);                             /* en abscisses et ordonnées */
        camera_sup->position_y   = atoi(db->row[5]);
-       camera_sup->largeur      = atof(db->row[6]);
-       camera_sup->hauteur      = atof(db->row[7]);
-       camera_sup->angle        = atof(db->row[8]);
+       camera_sup->type         = atoi(db->row[6]);
      }
     return(camera_sup);
   }
@@ -167,10 +161,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "posx=%d,posy=%d,largeur=%f,hauteur=%f,angle=%f"
+                "posx=%d,posy=%d"
                 " WHERE id=%d;", NOM_TABLE_CAMERASUP,
                 camera_sup->position_x, camera_sup->position_y,
-                camera_sup->largeur, camera_sup->hauteur, camera_sup->angle,
                 camera_sup->id );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */

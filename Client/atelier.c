@@ -237,9 +237,6 @@ printf("fin Detruire page atelier\n");
                edit_camera_sup.id           = camera_sup->id;           /* ID de la camera_sup a modifier */
                edit_camera_sup.position_x   = camera_sup->position_x;        /* en abscisses et ordonnées */
                edit_camera_sup.position_y   = camera_sup->position_y;        /* en abscisses et ordonnées */
-               edit_camera_sup.angle        = camera_sup->angle;
-               edit_camera_sup.largeur      = camera_sup->largeur; /* Taille de l'image sur le synoptique */
-               edit_camera_sup.hauteur      = camera_sup->hauteur;
 
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
                               (gchar *)&edit_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );

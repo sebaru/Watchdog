@@ -119,10 +119,7 @@
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-               g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-               g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-               g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-               g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
                trame_camera_sup->selection = FALSE;
                break;
           default: printf("Tout_deselectionner: type inconnu\n" );
@@ -220,18 +217,12 @@
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                if (trame_camera_sup->groupe_dpl == groupe)
                 { if (!trame_camera_sup->selection)
-                   { g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                   { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_camera_sup->selection = TRUE;
                      infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
                    }
                   else if (deselect)
-                   { g_object_set( trame_camera_sup->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     g_object_set( trame_camera_sup->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     g_object_set( trame_camera_sup->select_bg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     g_object_set( trame_camera_sup->select_bd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                   { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
                      trame_camera_sup->selection = FALSE;
                      infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
                    }
@@ -537,9 +528,6 @@
               Trame_rafraichir_capteur(trame_capteur);
               break;
          case TYPE_CAMERA_SUP:
-              trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
-              trame_camera_sup->camera_sup->angle = angle;
-              Trame_rafraichir_camera_sup(trame_camera_sup);
               break;
          default: printf("Rotationner_selection: type inconnu\n" );
        }

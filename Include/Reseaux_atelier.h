@@ -240,9 +240,7 @@
     gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
     gint  position_x;
     gint  position_y;
-    gfloat largeur;                                               /* Taille de l'image sur le synoptique */
-    gfloat hauteur;
-    gfloat angle;
+    gint  type;
   };
 /************************************************* Tag de communication ***********************************/
  enum 

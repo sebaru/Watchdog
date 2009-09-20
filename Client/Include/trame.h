@@ -28,7 +28,7 @@
       };
 
  struct TRAME_ITEM_MOTIF
-  { gint type;
+  { gint type;                                                                          /* Type de l'item */
     GooCanvasItem *item;
     cairo_matrix_t transform;
     cairo_matrix_t transform_hg;
@@ -63,7 +63,7 @@
   };
 
  struct TRAME_ITEM_PASS
-  { gint type;
+  { gint type;                                                                          /* Type de l'item */
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
     GooCanvasItem *item_rectangle_1;
@@ -91,7 +91,7 @@
   };
 
  struct TRAME_ITEM_COMMENT
-  { gint type;
+  { gint type;                                                                          /* Type de l'item */
     GooCanvasItem *item_groupe;
     GooCanvasItem *item;
     GooCanvasItem *select_mi;
@@ -102,7 +102,7 @@
   };
 
  struct TRAME_ITEM_CAPTEUR
-  { gint type;
+  { gint type;                                                                          /* Type de l'item */
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
     GooCanvasItem *item_entry;
@@ -114,21 +114,14 @@
   };
 
  struct TRAME_ITEM_CAMERA_SUP
-  { gint type;
+  { gint type;                                                                          /* Type de l'item */
     GooCanvasItem *item;
+    cairo_matrix_t transform;
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *select_mi;
     GtkWidget *video_output;
     GstElement *pipeline;
     gint start;                                           /* Utilisé par timer.c pour allumer le pipeline */
-    cairo_matrix_t transform;
-    cairo_matrix_t transform_hg;
-    cairo_matrix_t transform_hd;
-    cairo_matrix_t transform_bg;
-    cairo_matrix_t transform_bd;
-    GooCanvasItem *item_groupe;
-    GooCanvasItem *select_hg;
-    GooCanvasItem *select_hd;
-    GooCanvasItem *select_bg;
-    GooCanvasItem *select_bd;
 
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */

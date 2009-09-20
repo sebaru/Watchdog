@@ -101,9 +101,7 @@
     gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
     gint  position_x;
     gint  position_y;
-    gfloat largeur;                                               /* Taille de l'image sur le synoptique */
-    gfloat hauteur;
-    gfloat angle;
+    gint  type;
   };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db,
@@ -149,5 +147,12 @@
  extern struct CAPTEURDB *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db );
  extern struct CAPTEURDB *Rechercher_capteurDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_capteurDB( struct LOG *log, struct DB *db, struct CMD_EDIT_CAPTEUR *capteur );
+
+ extern gboolean Retirer_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern gint Ajouter_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern gboolean Recuperer_camera_supDB ( struct LOG *log, struct DB *db, gint id_syn );
+ extern struct CAMERASUPDB *Recuperer_camera_supDB_suite( struct LOG *log, struct DB *db );
+ extern struct CAMERASUPDB *Rechercher_camera_supDB ( struct LOG *log, struct DB *db, guint id );
+ extern gboolean Modifier_camera_supDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

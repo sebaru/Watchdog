@@ -200,7 +200,6 @@ printf("Afficher_propriete: debut\n");
                                   case TYPE_CAMERA_SUP:
                                        x = infos->Selection.trame_camera_sup->camera_sup->position_x;
                                        y = infos->Selection.trame_camera_sup->camera_sup->position_y;
-                                       angle = infos->Selection.trame_camera_sup->camera_sup->angle;
                                        break;
                                   default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
                                            x=-1; y=-1; angle = 0.0;
@@ -452,11 +451,7 @@ printf("Clic sur capteur: page trouvée, %p \n", trame_capteur);
                                       trame_camera_sup->camera_sup->libelle );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
-        { goo_canvas_item_raise( trame_camera_sup->select_hg, NULL );
-          goo_canvas_item_raise( trame_camera_sup->select_hd, NULL );
-          goo_canvas_item_raise( trame_camera_sup->select_bg, NULL );
-          goo_canvas_item_raise( trame_camera_sup->select_bd, NULL );
-        }
+        { goo_canvas_item_raise( trame_camera_sup->select_mi, NULL ); }
        else if (event->button.button == 3)
         { if (!Popup) Popup = gnome_popup_menu_new( Popup_camera_sup );                  /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );

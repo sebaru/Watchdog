@@ -95,10 +95,7 @@
 
                add_camera_sup.position_x    = TAILLE_SYNOPTIQUE_X/2;
                add_camera_sup.position_y    = TAILLE_SYNOPTIQUE_Y/2;                            
-               add_camera_sup.largeur       = DEFAULT_CAMERA_LARGEUR;
-               add_camera_sup.hauteur       = DEFAULT_CAMERA_HAUTEUR;                            
                add_camera_sup.syn_id        = infos->syn.id;
-               add_camera_sup.angle         = 0.0;
                add_camera_sup.camera_src_id = num;
 
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
@@ -187,34 +184,6 @@
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "motion-notify-event",
                       G_CALLBACK(Clic_sur_camera_sup), trame_camera_sup );
-
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_hg), "button-press-event",
-                      G_CALLBACK(Agrandir_hg_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_hg), "button-release-event",
-                      G_CALLBACK(Agrandir_hg_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_hg), "motion-notify-event",
-                      G_CALLBACK(Agrandir_hg_camera_sup), trame_camera_sup );
-
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_hd), "button-press-event",
-                      G_CALLBACK(Agrandir_hd_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_hd), "button-release-event",
-                      G_CALLBACK(Agrandir_hd_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_hd), "motion-notify-event",
-                      G_CALLBACK(Agrandir_hd_camera_sup), trame_camera_sup );
-
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_bg), "button-press-event",
-                      G_CALLBACK(Agrandir_bg_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_bg), "button-release-event",
-                      G_CALLBACK(Agrandir_bg_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_bg), "motion-notify-event",
-                      G_CALLBACK(Agrandir_bg_camera_sup), trame_camera_sup );
-
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_bd), "button-press-event",
-                      G_CALLBACK(Agrandir_bd_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_bd), "button-release-event",
-                      G_CALLBACK(Agrandir_bd_camera_sup), trame_camera_sup );
-    g_signal_connect( G_OBJECT(trame_camera_sup->select_bd), "motion-notify-event",
-                      G_CALLBACK(Agrandir_bd_camera_sup), trame_camera_sup );
   }
 /**********************************************************************************************************/
 /* Cacher_un_message: Enleve un message de la liste des messages                                          */

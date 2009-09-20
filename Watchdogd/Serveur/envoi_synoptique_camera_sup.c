@@ -50,9 +50,7 @@
     rezo_camera_sup->camera_src_id = camera_sup->camera_src_id;
     rezo_camera_sup->position_x    = camera_sup->position_x;                                      /* en abcisses */
     rezo_camera_sup->position_y    = camera_sup->position_y;                                     /* en ordonnées */
-    rezo_camera_sup->largeur       = camera_sup->largeur;                                      /* en abcisses */
-    rezo_camera_sup->hauteur       = camera_sup->hauteur;                                     /* en ordonnées */
-    rezo_camera_sup->angle         = camera_sup->angle;
+    rezo_camera_sup->type          = camera_sup->type;                                      /* en abcisses */
     memcpy( &rezo_camera_sup->libelle,  camera_sup->libelle,  sizeof(rezo_camera_sup->libelle) );
     memcpy( &rezo_camera_sup->location, camera_sup->location, sizeof(rezo_camera_sup->location) );
     return( rezo_camera_sup );
@@ -238,7 +236,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { struct CAMERA_SUP *camera_sup_new;;
+     { struct CMD_TYPE_CAMERA_SUP *camera_sup_new;;
        camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
        if (!camera_sup)                                                                        /* Terminé ?? */
         { Libere_DB_SQL( Config.log, &db );
