@@ -248,6 +248,10 @@
                   if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn_id != id )
                    { liste = liste->next; continue; }
                   break;
+             case TYPE_PAGE_SUPERVISION_CAMERA:
+                  if ( ((struct TYPE_INFO_CAMERA *)page->infos)->camera.camera_src_id != id )
+                   { liste = liste->next; continue; }
+                  break;
              case TYPE_PAGE_SOURCE_DLS:
                   if ( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id != id )
                    { liste = liste->next; continue; }

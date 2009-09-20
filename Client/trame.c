@@ -563,7 +563,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
     return(trame_motif);
   }
 /**********************************************************************************************************/
-/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                       */
+/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                             */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
@@ -579,7 +579,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
 
     trame_camera_sup->camera_sup = camera_sup;
 
-    trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
+    trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );    /* Groupe MOTIF */
 
     if ( flag )
      { gchar chaine[256];
@@ -631,10 +631,13 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
         }
        else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
         { trame_camera_sup->video_output = gtk_drawing_area_new ();
-          goo_canvas_widget_new( trame_camera_sup->item_groupe, trame_camera_sup->video_output,
-                                 -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
-                                  DEFAULT_CAMERA_LARGEUR*1.0,  DEFAULT_CAMERA_HAUTEUR*1.0,
-                                 NULL);
+          trame_camera_sup->item = goo_canvas_widget_new( trame_camera_sup->item_groupe,
+                                                          trame_camera_sup->video_output,
+                                                          -DEFAULT_CAMERA_LARGEUR/2.0,
+                                                          -DEFAULT_CAMERA_HAUTEUR/2.0,
+                                                           DEFAULT_CAMERA_LARGEUR*1.0,
+                                                           DEFAULT_CAMERA_HAUTEUR*1.0,
+                                                          NULL);
           /* Create gstreamer elements */
           trame_camera_sup->pipeline = gst_pipeline_new (NULL);
 

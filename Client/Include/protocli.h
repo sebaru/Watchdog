@@ -88,10 +88,12 @@
      COL_CAMERA_NUM_STRING,
      NBR_COL_CAMERA
   };
+ #define CAMERA_DELAI_START 4
  struct TYPE_INFO_CAMERA
   { struct CMD_TYPE_CAMERA_SUP camera;                                          /* Structure de la camera */
     GtkWidget *video_output;                                                    /* Widget de sortie video */
     GstElement *pipeline;                                                         /* Pipeline de commande */
+    guint start;
   };
 
  struct COURBE
@@ -506,7 +508,6 @@
                                                                         /* Dans supervision_page_camera.c */
  extern void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA_SUP *camera );
  extern void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page );
- extern void Test ( void );                                                   
 
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
  extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );

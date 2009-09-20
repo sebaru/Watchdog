@@ -119,14 +119,17 @@ printf("release !\n");
 /**********************************************************************************************************/
  void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                         GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
-  { static GtkWidget *Popup=NULL;
-    if (!(trame_camera_sup && event)) return;
+  { if (!(trame_camera_sup && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
      { appui_camera_sup = trame_camera_sup; }
     else if (event->type == GDK_BUTTON_RELEASE && appui_camera_sup)
      { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
-        { Creer_page_supervision_camera ( trame_camera_sup->camera_sup );
+        { if (!Chercher_page_notebook ( TYPE_PAGE_SUPERVISION_CAMERA,
+                                        trame_camera_sup->camera_sup->camera_src_id,
+                                        TRUE )
+             )
+           { Creer_page_supervision_camera ( trame_camera_sup->camera_sup ); }
         }
        appui_camera_sup = NULL;               /* L'action est faite, on ne selectionne donc plus le motif */
      }

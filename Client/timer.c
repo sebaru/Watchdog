@@ -155,6 +155,7 @@
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_SUPERVISION *infos;
+    struct TYPE_INFO_CAMERA *infos_cam;
     struct PAGE_NOTEBOOK *page;
     static gint nbr_cligno = 0;
     GList *liste_motifs;
@@ -162,7 +163,21 @@
     if (Client_en_cours.mode != VALIDE) return(TRUE);
 
     page = Page_actuelle();
-    if (! (page && page->type == TYPE_PAGE_SUPERVISION) ) return(TRUE);
+    if (!page) return (TRUE);
+
+    if (page->type == TYPE_PAGE_SUPERVISION_CAMERA)              /* Allumage des pipeline des page CAMERA */
+     { infos_cam = (struct TYPE_INFO_CAMERA *)page->infos;
+       if (!infos_cam) return(TRUE);
+
+       if (infos_cam->start < CAMERA_DELAI_START)
+        { infos_cam->start++; }
+       else if (infos_cam->start == CAMERA_DELAI_START && infos_cam->pipeline)
+        { gst_element_set_state (infos_cam->pipeline, GST_STATE_PLAYING);
+          infos_cam->start++; 
+        }
+     }
+
+    if (page->type != TYPE_PAGE_SUPERVISION) return(TRUE);
 
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (! (infos && infos->Trame) ) return(TRUE);
@@ -182,9 +197,14 @@
                                  Timer_pass( trame_pass, (nbr_cligno < 1 ? 1 : 0) );
                                  break;
           case TYPE_CAMERA_SUP : trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)liste_motifs->data;
-                                 if (trame_camera_sup->start < 10)
+                                 if (trame_camera_sup->start < CAMERA_DELAI_START)
                                   { trame_camera_sup->start++; }
-                                 else gst_element_set_state (trame_camera_sup->pipeline, GST_STATE_PLAYING);
+                                 else if (trame_camera_sup->start == CAMERA_DELAI_START 
+                                       && trame_camera_sup->pipeline)
+                                  { gst_element_set_state (trame_camera_sup->pipeline,
+                                                           GST_STATE_PLAYING);
+                                    trame_camera_sup->start++; 
+                                  }
                                  break;
           default: printf("Timer: type inconnu\n" );
         }

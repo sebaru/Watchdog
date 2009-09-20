@@ -54,15 +54,6 @@
     gst_element_set_state (infos->pipeline, GST_STATE_NULL);                    /* Extinction du pipeline */
     gst_object_unref( GST_OBJECT(infos->pipeline) );
   }
-
-
- void Test ( void )
-{
-struct CMD_TYPE_CAMERA camera={ 0, 0, "testseb", "http://guest:guest@192.168.0.30/cgi/mjpg/mjpg.cgi", 0 };
-Creer_page_supervision_camera( &camera );
-
-
-}
 /**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
 /* Entrée: rien                                                                                           */
@@ -91,7 +82,6 @@ Creer_page_supervision_camera( &camera );
 
     infos->video_output = gtk_drawing_area_new ();
     gtk_box_pack_start (GTK_BOX (hboite), infos->video_output, TRUE, TRUE, 0);
-    /*gtk_widget_set_size_request (infos->video_output, 640, 480);*/
 
 /**************************************** Trame proprement dite *******************************************/
     
@@ -124,8 +114,9 @@ Creer_page_supervision_camera( &camera );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( infos->camera.libelle ) );
     gtk_widget_show_all( page->child );
     gtk_widget_realize ( infos->video_output );
+    gtk_widget_realize ( page->child );
     gtk_main_iteration_do( TRUE );
     gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink), GDK_WINDOW_XWINDOW (infos->video_output->window));
-    gst_element_set_state (infos->pipeline, GST_STATE_PLAYING);                   /* Allumage du pipeline */
+    Chercher_page_notebook ( TYPE_PAGE_SUPERVISION_CAMERA, camera->camera_src_id, TRUE );
  }
 /*--------------------------------------------------------------------------------------------------------*/

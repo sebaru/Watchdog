@@ -200,7 +200,6 @@
     gchar *libelle;
     guint nbr;
 
-
     if (reponse == GTK_RESPONSE_ACCEPT)
      {
        if( infos->Courbes[infos->slot_id].actif )                          /* Enleve la précédente courbe */
@@ -222,7 +221,6 @@
        gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_courbe.id, -1 );                /* Recup du id */
        gtk_tree_model_get( store, &iter, COLONNE_TYPE, &rezo_courbe.type, -1 );          /* Recup du type */
        gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-printf(" courbe select: %s%d %s\n", Type_bit_interne_court(rezo_courbe.type), rezo_courbe.id, libelle );
        memcpy( &rezo_courbe.libelle, libelle, sizeof(rezo_courbe.libelle) );
        g_free( libelle );
        rezo_courbe.slot_id = infos->slot_id;
@@ -231,7 +229,6 @@ printf(" courbe select: %s%d %s\n", Type_bit_interne_court(rezo_courbe.type), re
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = TRUE;                /* Récupération des données EANA dans la structure COURBE */
        new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
-printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
                new_courbe->eana.id = rezo_courbe.id;
@@ -258,14 +255,12 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
        g_list_free (lignes);                                                        /* Liberation mémoire */
 
-       printf("Envoi serveur TAG_CLIENT_ADD_COURBE %d\n", rezo_courbe.id );
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_ADD_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
      }
     else if (reponse == GTK_RESPONSE_REJECT)                            /* On retire la courbe de la visu */
      { rezo_courbe.slot_id = infos->slot_id;
 
-       printf("Envoi serveur TAG_CLIENT_DEL_COURBE %d\n", rezo_courbe.slot_id );
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_DEL_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
 
@@ -276,7 +271,6 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        gtk_widget_queue_draw (infos->Databox);
      }
     gtk_widget_destroy(F_source);
-printf("New courbe (%d) apres: type=%d\n", infos->slot_id, new_courbe->type );
     F_source = NULL;
     return(TRUE);
   }
