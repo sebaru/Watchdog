@@ -581,58 +581,80 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
 
     trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
 
-    if ( flag || camera_sup->type == CAMERA_MODE_ICONE )
+    if ( flag )
      { gchar chaine[256];
+       if ( camera_sup->type == CAMERA_MODE_ICONE )
+        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
+                                                        -55.0, -15.0, 110.0, 30.0,
+                                                        "fill-color", "blue",
+                                                        "stroke-color", "yellow",
+                                                        NULL);
 
-       trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                     -55.0, -15.0, 110.0, 30.0,
-                                                     "fill-color", "blue",
-                                                     "stroke-color", "yellow",
-                                                     NULL);
+        }
+       else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
+        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
+                                                        -DEFAULT_CAMERA_LARGEUR/2, -DEFAULT_CAMERA_HAUTEUR/2,
+                                                        DEFAULT_CAMERA_LARGEUR, DEFAULT_CAMERA_HAUTEUR,
+                                                        "fill-color", "blue",
+                                                        "stroke-color", "yellow",
+                                                        NULL);
 
+        }
        g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->camera_src_id );
        goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
+                                                         -1, GTK_ANCHOR_CENTER,
+                                                         "fill-color", "yellow",
+                                                         "font", "arial bold 14",
+                                                         NULL);
+       trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
+                                                          -5.0, -5.0, 10.0, 10.0,
+                                                          "fill_color", "green",
+                                                          "stroke_color", "black", NULL);
+
+       g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+     }
+    else
+     { gchar chaine[256];
+       if ( camera_sup->type == CAMERA_MODE_ICONE )
+        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
+                                                        -55.0, -15.0, 110.0, 30.0,
+                                                        "fill-color", "blue",
+                                                        "stroke-color", "yellow",
+                                                        NULL);
+
+          g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->camera_src_id );
+          goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
                                                             -1, GTK_ANCHOR_CENTER,
                                                             "fill-color", "yellow",
                                                             "font", "arial bold 14",
-                                                            NULL);
-
-
-       if (flag)
-        { trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
-                                                             -5.0, -5.0, 10.0, 10.0,
-                                                             "fill_color", "green",
-                                                             "stroke_color", "black", NULL);
-
-          g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                                                         NULL);
         }
-     }
-    else
-     { trame_camera_sup->video_output = gtk_drawing_area_new ();
-       goo_canvas_widget_new( trame_camera_sup->item_groupe, trame_camera_sup->video_output,
-                              -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
-                               DEFAULT_CAMERA_LARGEUR*1.0,  DEFAULT_CAMERA_HAUTEUR*1.0,
-                              NULL);
-    /* Create gstreamer elements */
-       trame_camera_sup->pipeline = gst_pipeline_new (NULL);
+       else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
+        { trame_camera_sup->video_output = gtk_drawing_area_new ();
+          goo_canvas_widget_new( trame_camera_sup->item_groupe, trame_camera_sup->video_output,
+                                 -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
+                                  DEFAULT_CAMERA_LARGEUR*1.0,  DEFAULT_CAMERA_HAUTEUR*1.0,
+                                 NULL);
+          /* Create gstreamer elements */
+          trame_camera_sup->pipeline = gst_pipeline_new (NULL);
 
-       source  = gst_element_factory_make ( "gnomevfssrc", NULL );
-       g_object_set (G_OBJECT (source), "location", trame_camera_sup->camera_sup->location, NULL);
+          source  = gst_element_factory_make ( "gnomevfssrc", NULL );
+          g_object_set (G_OBJECT (source), "location", trame_camera_sup->camera_sup->location, NULL);
 
-       jpegdec  = gst_element_factory_make ("jpegdec", NULL);
-       ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
-       scale    = gst_element_factory_make ("videoscale", NULL );
-       sink     = gst_element_factory_make ("ximagesink", NULL );
+          jpegdec  = gst_element_factory_make ("jpegdec", NULL);
+          ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
+          scale    = gst_element_factory_make ("videoscale", NULL );
+          sink     = gst_element_factory_make ("ximagesink", NULL );
 
-       gst_bin_add_many (GST_BIN (trame_camera_sup->pipeline), source, jpegdec, ffmpeg, scale, sink, NULL);
-       gst_element_link_many (source, jpegdec, ffmpeg, scale, sink, NULL);
+          gst_bin_add_many (GST_BIN (trame_camera_sup->pipeline), source, jpegdec, ffmpeg, scale, sink, NULL);
+          gst_element_link_many (source, jpegdec, ffmpeg, scale, sink, NULL);
  
-       gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);
-       gtk_widget_realize ( trame_camera_sup->video_output );
-       gtk_main_iteration_do( TRUE );
-       gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink),
-                                     GDK_WINDOW_XWINDOW (trame_camera_sup->video_output->window));
-
+          gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);
+          gtk_widget_realize ( trame_camera_sup->video_output );
+          gtk_main_iteration_do( TRUE );
+          gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink),
+                                        GDK_WINDOW_XWINDOW (trame_camera_sup->video_output->window));
+        }
      }
 
     Trame_rafraichir_camera_sup ( trame_camera_sup );

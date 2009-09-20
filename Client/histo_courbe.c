@@ -157,7 +157,6 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        gtk_widget_queue_draw (infos->Databox);
      }
     gtk_widget_destroy(F_source);
-printf("New courbe (%d) apres: type=%d\n", infos->slot_id, new_courbe->type );
     F_source = NULL;
     return(TRUE);
   }
