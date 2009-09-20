@@ -72,7 +72,7 @@ Creer_page_supervision_camera( &camera );
   { GtkWidget *bouton, *boite, *hboite;
     struct TYPE_INFO_CAMERA *infos;
     struct PAGE_NOTEBOOK *page;
-    GstElement *source, *jpegdec, *ffmpeg, *sink;
+    GstElement *source, *jpegdec, *ffmpeg, *scale, *sink;
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -103,10 +103,11 @@ Creer_page_supervision_camera( &camera );
 
     jpegdec  = gst_element_factory_make ("jpegdec", NULL);
     ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
-    sink    = gst_element_factory_make ( "ximagesink", NULL );
+    scale    = gst_element_factory_make ("videoscale", NULL );
+    sink     = gst_element_factory_make ("ximagesink", NULL );
 
-    gst_bin_add_many (GST_BIN (infos->pipeline), source, jpegdec, ffmpeg, sink, NULL);
-    gst_element_link_many (source, jpegdec, ffmpeg, sink, NULL);
+    gst_bin_add_many (GST_BIN (infos->pipeline), source, jpegdec, ffmpeg, scale, sink, NULL);
+    gst_element_link_many (source, jpegdec, ffmpeg, scale, sink, NULL);
  
     /* gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);*/
 

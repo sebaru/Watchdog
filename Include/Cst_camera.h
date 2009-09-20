@@ -13,9 +13,8 @@
  #define NBR_CARAC_LOCATION_CAMERA_UTF8 (6*NBR_CARAC_LOCATION_CAMERA)
 
  enum
-  { CAMERA_PETIT,                                                     /* Definitions des types de cameras */
-    CAMERA_MOYEN,
-    CAMERA_GRAND,
+  { CAMERA_MODE_INCRUSTATION,                                         /* Definitions des types de cameras */
+    CAMERA_MODE_ICONE,
     NBR_TYPE_CAMERA
   };
 #endif

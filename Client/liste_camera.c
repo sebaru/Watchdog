@@ -66,9 +66,8 @@
 /**********************************************************************************************************/
  gchar *Type_camera_vers_string ( guint32 type )
   { switch (type)
-     { case CAMERA_PETIT: return( _("Petit") );
-       case CAMERA_MOYEN: return( _("Moyen") );
-       case CAMERA_GRAND: return( _("Grand") );
+     { case CAMERA_MODE_INCRUSTATION: return( _("Incrustation") );
+       case CAMERA_MODE_ICONE: return( _("Icone") );
      }
     return( _("Unknown") );
   }

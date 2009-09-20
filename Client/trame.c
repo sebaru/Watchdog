@@ -581,15 +581,14 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
 
     trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
 
-    if ( flag )
+    if ( flag || camera_sup->type == CAMERA_MODE_ICONE )
      { gchar chaine[256];
 
        trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                     -DEFAULT_CAMERA_LARGEUR/2.0, -DEFAULT_CAMERA_HAUTEUR/2.0,
-                                                      DEFAULT_CAMERA_LARGEUR*1.0,  DEFAULT_CAMERA_HAUTEUR*1.0,
-                                                      "fill-color", "blue",
-                                                      "stroke-color", "yellow",
-                                                      NULL);
+                                                     -55.0, -15.0, 110.0, 30.0,
+                                                     "fill-color", "blue",
+                                                     "stroke-color", "yellow",
+                                                     NULL);
 
        g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->camera_src_id );
        goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
@@ -599,12 +598,14 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
                                                             NULL);
 
 
-       trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
-                                                          -5.0, -5.0, 10.0, 10.0,
-                                                          "fill_color", "green",
-                                                          "stroke_color", "black", NULL);
+       if (flag)
+        { trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
+                                                             -5.0, -5.0, 10.0, 10.0,
+                                                             "fill_color", "green",
+                                                             "stroke_color", "black", NULL);
 
-       g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+          g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+        }
      }
     else
      { trame_camera_sup->video_output = gtk_drawing_area_new ();
