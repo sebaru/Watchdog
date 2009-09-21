@@ -13,7 +13,7 @@
  struct CMD_TYPE_CAMERA
   { guint   id;                                                                 /* ID unique de la camera */
     guint   num;
-    gchar   libelle[NBR_CARAC_LIBELLE_CAMERA_UTF8];                               /* Libelle de la camera */
+    gchar   libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                           /* Libelle de la camera */
     gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                             /* Libelle de la camera */
     gint    type;                                                            /* petite, moyenne, grande ? */
   };

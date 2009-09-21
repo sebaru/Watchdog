@@ -57,24 +57,17 @@
 /**********************************************************************************************************/
  gint Ajouter_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
   { gchar requete[200];
-    gchar *libelle, *location;
+    gchar *location;
 
-    libelle = Normaliser_chaine ( log, camera->libelle );                /* Formatage correct des chaines */
-    if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation impossible" );
-       return(-1);
-     }
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { g_free(libelle);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation impossible" );
+     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation impossible" );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(libelle,location,type,num) VALUES "
-                "('%s','%s',%d,%d)", NOM_TABLE_CAMERA, libelle, location, camera->type, camera->num );
-    g_free(libelle);
+                "INSERT INTO %s(location,type,num) VALUES "
+                "('%s',%d,%d)", NOM_TABLE_CAMERA, location, camera->type, camera->num );
     g_free(location);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -90,8 +83,12 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,location,type,num"
-                " FROM %s ORDER BY libelle", NOM_TABLE_CAMERA );
+                "SELECT id,location,%s.type,%s.num,mnemo"
+                " FROM %s,%s WHERE %s.num=%s.num AND %s.type=%d ORDER BY libelle",
+                NOM_TABLE_CAMERA, NOM_TABLE_CAMERA,
+                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
+                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, MNEMO_CAMERA                 /* Where */
+              );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -112,16 +109,16 @@
     camera = (struct CAMERADB *)g_malloc0( sizeof(struct CAMERADB) );
     if (!camera) Info( log, DEBUG_MEM, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( camera->libelle,  db->row[1], sizeof(camera->libelle) );       /* Recopie dans la structure */
-       memcpy( camera->location, db->row[2], sizeof(camera->location  ) );
+     { memcpy( camera->location, db->row[1], sizeof(camera->location  ) );
+       memcpy( camera->libelle, db->row[4], sizeof(camera->libelle ) );
        camera->id          = atoi(db->row[0]);
-       camera->type        = atoi(db->row[3]);
-       camera->num         = atoi(db->row[4]);
+       camera->type        = atoi(db->row[2]);
+       camera->num         = atoi(db->row[3]);
      }
     return(camera);
   }
 /**********************************************************************************************************/
-/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                                 */
+/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -130,8 +127,13 @@
     struct CAMERADB *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,location,type,num FROM %s WHERE id=%d",
-                NOM_TABLE_CAMERA, id );
+                "SELECT location,%s.type,%s.num,mnemo"
+                " FROM %s,%s WHERE %s.num=%s.num AND %s.type=%d AND %s.id=%d",
+                NOM_TABLE_CAMERA, NOM_TABLE_CAMERA,
+                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
+                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, MNEMO_CAMERA,                /* Where */
+                NOM_TABLE_CAMERA, id
+              );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -147,10 +149,10 @@
     if (!camera)
      { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" ); }
     else
-     { memcpy( camera->libelle,  db->row[1], sizeof(camera->libelle) );       /* Recopie dans la structure */
-       memcpy( camera->location, db->row[2], sizeof(camera->location  ) );
-       camera->type = atoi(db->row[3]);
-       camera->num  = atoi(db->row[4]);
+     { memcpy( camera->libelle,  db->row[3], sizeof(camera->libelle) );       /* Recopie dans la structure */
+       memcpy( camera->location, db->row[0], sizeof(camera->location  ) );
+       camera->type = atoi(db->row[1]);
+       camera->num  = atoi(db->row[2]);
        camera->id   = id;
      }
     Liberer_resultat_SQL ( log, db );
@@ -163,26 +165,19 @@
 /**********************************************************************************************************/
  gboolean Modifier_cameraDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
   { gchar requete[1024];
-    gchar *libelle, *location;
+    gchar *location;
 
-    libelle = Normaliser_chaine ( log, camera->libelle );
-    if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_cameraDB: Normalisation impossible" );
-       return(FALSE);
-     }
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { g_free(libelle);
-       Info( log, DEBUG_DB, "Modifier_cameraDB: Normalisation impossible" );
+     { Info( log, DEBUG_DB, "Modifier_cameraDB: Normalisation impossible" );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',location='%s',type=%d,num=%d "
+                "location='%s',type=%d,num=%d "
                 "WHERE id=%d",
-                NOM_TABLE_CAMERA, libelle, location, camera->type, camera->num, camera->id );
-    g_free(libelle);
+                NOM_TABLE_CAMERA, location, camera->type, camera->num, camera->id );
     g_free(location);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
