@@ -90,7 +90,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT location,%s.type,libelle"
-                " FROM %s,%s WHERE %s.num=%d AND %s.type=%d",
+                " FROM %s,%s WHERE %s.id=%d AND %s.type=%d",
                 NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
                 NOM_TABLE_CAMERA, id, NOM_TABLE_MNEMO, MNEMO_CAMERA                              /* Where */

@@ -280,7 +280,6 @@
                                               G_TYPE_STRING,                                  /* location */
                                               G_TYPE_UINT,                                        /* type */
                                               G_TYPE_STRING,                               /* type_string */
-                                              G_TYPE_UINT,                                         /* num */
                                               G_TYPE_STRING                                 /* Num string */
                                );
 
