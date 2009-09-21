@@ -38,43 +38,6 @@
  #include "Camera_DB.h"
 
 /**********************************************************************************************************/
-/* Retirer_cameraDB: Elimination d'une camera                                                             */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Retirer_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
-  { gchar requete[200];
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, camera->id );
-
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Ajouter_cameraDB: Ajout ou edition d'un camera                                                         */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure camera                        */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gint Ajouter_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
-  { gchar requete[200];
-    gchar *location;
-
-    location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
-    if (!location)
-     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation impossible" );
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(location,type,num) VALUES "
-                "('%s',%d,%d)", NOM_TABLE_CAMERA, location, camera->type, camera->num );
-    g_free(location);
-
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL( log, db ) );
-  }
-/**********************************************************************************************************/
 /* Recuperer_liste_id_cameraDB: Recupération de la liste des ids des cameras                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */

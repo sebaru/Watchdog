@@ -84,7 +84,6 @@
      COL_CAMERA_LOCATION,
      COL_CAMERA_TYPE_INT,
      COL_CAMERA_TYPE_STRING,
-     COL_CAMERA_NUM,
      COL_CAMERA_NUM_STRING,
      NBR_COL_CAMERA
   };
@@ -510,14 +509,11 @@
  extern void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page );
 
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
- extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_rafraichir_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Creer_page_camera( void );                               
  extern gchar *Type_camera_vers_string ( guint type );
  extern void Creer_liste_camera ( GtkWidget **Liste_camera, GtkWidget **Scroll );
  extern  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera );
-
-
 
                                                                                    /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );

@@ -89,7 +89,7 @@
             printf("lignes = %p\n", lignes );
             if (lignes)
              { gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COL_CAMERA_NUM, &num, -1 );              /* Recup du num */
+               gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &num, -1 );               /* Recup du num */
                g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
                g_list_free (lignes);                                                /* Liberation mémoire */
 

@@ -60,18 +60,6 @@
                Proto_editer_camera( client, syn );
              }
             break;
-       case SSTAG_CLIENT_ADD_CAMERA:
-             { struct CMD_TYPE_CAMERA *syn;
-               syn = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_ajouter_camera( client, syn );
-             }
-            break;
-       case SSTAG_CLIENT_DEL_CAMERA:
-             { struct CMD_TYPE_CAMERA *syn;
-               syn = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_effacer_camera( client, syn );
-             }
-            break;
        case SSTAG_CLIENT_VALIDE_EDIT_CAMERA:
              { struct CMD_TYPE_CAMERA *syn;
                syn = (struct CMD_TYPE_CAMERA *)connexion->donnees;

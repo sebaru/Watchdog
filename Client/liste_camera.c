@@ -39,23 +39,17 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
- static void Menu_effacer_camera ( void );
  static void Menu_editer_camera ( void );
- static void Menu_ajouter_camera ( void );
  static void Menu_exporter_camera ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_camera, GNOME_STOCK_PIXMAP_ADD ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_camera, GNOME_STOCK_PIXMAP_OPEN ),
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_camera, GNOME_STOCK_PIXMAP_OPEN ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Export"), NULL, Menu_exporter_camera, GNOME_STOCK_PIXMAP_PRINT ),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_camera, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
   };
 
  static GnomeUIInfo Menu_popup_nonselect[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_camera, GNOME_STOCK_PIXMAP_ADD ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_exporter_camera, GNOME_STOCK_PIXMAP_PRINT ),
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_camera, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_END
   };
 
@@ -70,76 +64,6 @@
        case CAMERA_MODE_ICONE: return( _("Icone") );
      }
     return( _("Unknown") );
-  }
-/**********************************************************************************************************/
-/* CB_effacer_camera: Fonction appelée qd on appuie sur un des boutons de l'interface                     */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
- static gboolean CB_effacer_camera ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_TYPE_CAMERA rezo_camera;
-    GtkTreeSelection *selection;
-    GtkTreeModel *store;
-    GList *lignes;
-    GtkTreeIter iter;
-
-    switch(reponse)
-     { case GTK_RESPONSE_YES:
-            selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );
-            store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_camera) );
-            lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-            while ( lignes )
-             { gchar *libelle;
-               gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &rezo_camera.id, -1 );       /* Recup du id */
-               gtk_tree_model_get( store, &iter, COL_CAMERA_LIBELLE, &libelle, -1 );
-
-               memcpy( &rezo_camera.libelle, libelle, sizeof(rezo_camera.libelle) );
-               g_free( libelle );
-
-               Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_DEL_CAMERA,
-                             (gchar *)&rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
-               gtk_tree_selection_unselect_iter( selection, &iter );
-               lignes = lignes->next;
-             }
-            g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-            g_list_free (lignes);                                                   /* Liberation mémoire */
-            break;
-       default: break;
-     }
-    gtk_widget_destroy( GTK_WIDGET(dialog) );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Menu_ajouter_camera: Ajout d'un camera                                                               */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_ajouter_camera ( void )
-  { Menu_ajouter_editer_camera(NULL); }
-/**********************************************************************************************************/
-/* Menu_effacer_camera: Retrait des cameras selectionnés                                                */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_effacer_camera ( void )
-  { GtkTreeSelection *selection;
-    GtkWidget *dialog;
-    guint nbr;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );
-
-    nbr = gtk_tree_selection_count_selected_rows( selection );
-    printf("Menu effacer camera: nbr=%d\n", nbr );
-    if (!nbr) return;                                                       /* Si rien n'est selectionné */
-
-    dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
-                                      GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                      GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-                                      _("Do you want to delete %d camera%c ?"), nbr, (nbr>1 ? 's' : ' ') );
-    g_signal_connect( dialog, "response",
-                      G_CALLBACK(CB_effacer_camera), NULL );
-    gtk_widget_show_all( dialog );
   }
 /**********************************************************************************************************/
 /* Menu_editer_camera: Demande d'edition du camera selectionné                                          */
@@ -442,23 +366,10 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_editer_camera), NULL );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_editer_camera), NULL );
-
     bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_exporter_camera), NULL );
-
-    separateur = gtk_hseparator_new();
-    gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_REMOVE );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_effacer_camera), NULL );
 
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Edit Camera") ) );
@@ -471,13 +382,12 @@
  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera )
   { gchar chaine[24];
 
-    g_snprintf( chaine, sizeof(chaine), "%04d", camera->num );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->id );
     gtk_list_store_set ( store, iter,
                          COL_CAMERA_ID, camera->id,
                          COL_CAMERA_LIBELLE, camera->libelle,
                          COL_CAMERA_LOCATION, camera->location,
                          COL_CAMERA_TYPE_INT, camera->type,
-                         COL_CAMERA_NUM, camera->num,
                          COL_CAMERA_NUM_STRING, chaine,
                          COL_CAMERA_TYPE_STRING, Type_camera_vers_string(camera->type),
                          -1

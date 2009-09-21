@@ -48,7 +48,6 @@
 
     rezo_camera->id         = camera->id;
     rezo_camera->type       = camera->type;
-    rezo_camera->num        = camera->num;
     memcpy( &rezo_camera->libelle,  camera->libelle,  sizeof(rezo_camera->libelle) );
     memcpy( &rezo_camera->location, camera->location, sizeof(rezo_camera->location) );
     return( rezo_camera );
@@ -69,7 +68,6 @@
     if (camera)
      { edit_camera.id         = camera->id;                                 /* Recopie des info editables */
        edit_camera.type       = camera->type;
-       edit_camera.num        = camera->num;
        memcpy( &edit_camera.libelle,  camera->libelle,  sizeof(edit_camera.libelle) );
        memcpy( &edit_camera.location, camera->location, sizeof(edit_camera.location) );
 
@@ -127,75 +125,6 @@
                           "Unable to locate camera %s", rezo_camera->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-         }
-  }
-/**********************************************************************************************************/
-/* Proto_effacer_camera: Retrait du camera en parametre                                                   */
-/* Entrée: le client demandeur et le camera en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    retour = Retirer_cameraDB( Config.log, Db_watchdog, rezo_camera );
-
-    if (retour)
-     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_DEL_CAMERA_OK,
-                     (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
-     }
-    else
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete camera %s", rezo_camera->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_ajouter_camera: Un client nous demande d'ajouter un camera Watchdog                              */
-/* Entrée: le camera à créer                                                                              */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { struct CAMERADB *result;
-    gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    id = Ajouter_cameraDB ( Config.log, Db_watchdog, rezo_camera );
-    if (id == -1)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add camera %s", rezo_camera->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, id );
-           if (!result) 
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate camera %s", rezo_camera->libelle);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-           else
-            { struct CMD_TYPE_CAMERA *camera;
-              camera = Preparer_envoi_camera ( result );
-              g_free(result);
-              if (!camera)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_ADD_CAMERA_OK,
-                                   (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-                     g_free(camera);
-                   }
             }
          }
   }
