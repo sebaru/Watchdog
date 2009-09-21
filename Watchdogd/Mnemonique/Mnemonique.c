@@ -44,7 +44,16 @@
 /**********************************************************************************************************/
  gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ID_MNEMONIQUE *mnemo )
   { gchar requete[200];
-
+#ifdef bouh
+    switch (mnemo->type)
+     { case MNEMO_CAMERA:
+            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+            "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, mnemo->num );
+            Lancer_requete_SQL ( log, db, requete );
+            break;
+       default:
+     }
+#endif
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MNEMO, mnemo->id );
 
@@ -58,6 +67,7 @@
  gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MNEMONIQUE *mnemo )
   { gchar requete[200];
     gchar *libelle, *objet, *acro;
+    gint last_id;
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
@@ -88,7 +98,21 @@
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
-    return( Recuperer_last_ID_SQL( log, db ) );
+
+    last_id = Recuperer_last_ID_SQL( log, db );
+
+    switch (mnemo->type)
+     { case MNEMO_CAMERA:
+            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+            "INSERT INTO %s(location,type,num) VALUES "
+            "('To be determined',0,%d)", NOM_TABLE_CAMERA, last_id );
+            Lancer_requete_SQL ( log, db, requete );
+            break;
+       default:
+            break;
+     }
+
+    return( last_id );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
