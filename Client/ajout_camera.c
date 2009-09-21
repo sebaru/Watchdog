@@ -134,7 +134,7 @@
     texte = gtk_label_new( _("Libelle") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Entry_lib = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_entry_set_editable( GTK_ENTRY(Entry_lib), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 1, 2 );
 
     texte = gtk_label_new( _("Location") );

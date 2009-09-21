@@ -83,7 +83,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,location,%s.type,%s.num,mnemo"
+                "SELECT id,location,%s.type,%s.num,libelle"
                 " FROM %s,%s WHERE %s.num=%s.num AND %s.type=%d ORDER BY libelle",
                 NOM_TABLE_CAMERA, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
@@ -127,7 +127,7 @@
     struct CAMERADB *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,%s.num,mnemo"
+                "SELECT location,%s.type,%s.num,libelle"
                 " FROM %s,%s WHERE %s.num=%s.num AND %s.type=%d AND %s.id=%d",
                 NOM_TABLE_CAMERA, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */

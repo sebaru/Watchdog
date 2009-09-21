@@ -53,6 +53,7 @@
   { if (Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE )) return;
     Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_WANT_PAGE_CAMERA, NULL, 0 );
     Creer_page_camera();
+    Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE );
   }
 /**********************************************************************************************************/
 /* Menu_want_icone: l'utilisateur desire editer la base icons                                             */
