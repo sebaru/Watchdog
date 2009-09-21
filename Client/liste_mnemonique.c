@@ -37,6 +37,7 @@
     { 0x0, 0x0,    0x0,    0xFFFF },
     { 0x0, 0x0,    0x7FFF, 0xCFFF },
     { 0x0, 0x0,    0x7FFF, 0x0    },
+    { 0x0, 0x3FFF, 0x1FFF, 0xEFFF },
   };
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
   { "Bistable      B",
@@ -48,6 +49,7 @@
     "Sortie ANA    AA",
     "Icone         I",
     "Compteur H    CH",
+    "Camera        CAM",
   };
  static gchar *TYPE_BIT_INTERNE_COURT[ NBR_TYPE_MNEMO ]=    /* Type des différents bits internes utilisés */
   { "B",
@@ -59,6 +61,7 @@
     "AA",
     "I",
     "CH",
+    "CAM",
   };
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
