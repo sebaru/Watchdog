@@ -75,12 +75,15 @@
 /**********************************************************************************************************/
  gboolean Recuperer_camera_supDB ( struct LOG *log, struct DB *db, gint id_syn )
   { gchar requete[2048];
+    struct CMD_TYPE_CAMERA camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,type"
-                " FROM %s,%s WHERE syn_id=%d AND camera_src_id=%s.num",
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id_syn, NOM_TABLE_CAMERA );
+                " FROM %s,%s,%s WHERE syn_id=%d AND camera_src_id=%s.num AND %s.id_mnemo=%s.id",
+                NOM_TABLE_CAMERASUP, NOM_TABLE_MNEMO,
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* From */
+                id_syn, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO /* Where */
+              );
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
@@ -122,10 +125,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,type"
-                " FROM %s,%s WHERE %s.id=%d AND camera_src_id=%s.num",
+                " FROM %s,%s,%s WHERE %s.id=%d AND camera_src_id=%s.num AND %s.id_mnemo=%s.id",
                 NOM_TABLE_CAMERA,
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,
-                NOM_TABLE_CAMERASUP, id, NOM_TABLE_CAMERA );
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* FROM */
+                NOM_TABLE_CAMERASUP, id, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,NOM_TABLE_MNEMO );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
