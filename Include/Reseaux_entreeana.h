@@ -10,9 +10,10 @@
  #include "Cst_entreeana.h"
 
  struct CMD_TYPE_ENTREEANA
-  { guint  unite;                                                                         /* Km, h, ° ... */
+  { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
+    guint  unite;                                                                         /* Km, h, ° ... */
     guint  num;                                                                         /* Numero de l'EA */
-    gfloat min;                                                       /* Etat, prealarme, defaut, alarme */
+    gfloat min;
     gfloat max;
     gchar libelle[ NBR_CARAC_LIBELLE_ENTREEANA_UTF8+1 ];
   };

@@ -54,7 +54,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     for (i = 0; i<NBR_ENTRE_ANA; i++)
-     { struct ENTREEANA_DB *eana;
+     { struct CMD_TYPE_ENTREEANA *eana;
        eana = Rechercher_entreeANADB ( Config.log, db, i );
        if (eana)
         { Partage->ea[i].min = eana->min;
@@ -79,14 +79,12 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.num,%s.min,%s.max,%s.unite,%s.libelle"
-                " FROM %s,%s WHERE %s.num=%s.num AND %s.type=%d ORDER BY %s.num",
-                NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
-                NOM_TABLE_MNEMO,
+                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo"
+                " FROM %s,%s WHERE %s.id_mnemo=%s.id ORDER BY %s.num",
+                NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* Where */
-                NOM_TABLE_MNEMO, MNEMO_ENTREE_ANA, /* And */
-                NOM_TABLE_ENTREEANA /* Order by */
+                NOM_TABLE_MNEMO /* Order by */
               );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -96,8 +94,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct ENTREEANA_DB *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
-  { struct ENTREEANA_DB *entreeana;
+ struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_ENTREEANA *entreeana;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -105,14 +103,14 @@
        return(NULL);
      }
 
-    entreeana = (struct ENTREEANA_DB *)g_malloc0( sizeof(struct ENTREEANA_DB) );
+    entreeana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
     if (!entreeana) Info( log, DEBUG_MEM, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
-     { entreeana->num   = atoi(db->row[0]);
-       entreeana->min   = atof(db->row[1]);
-       entreeana->max   = atof(db->row[2]);
-       entreeana->unite = atoi(db->row[3]);
-       memcpy( entreeana->libelle, db->row[4], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
+     { entreeana->id_mnemo = atoi(db->row[4]);
+       entreeana->min      = atof(db->row[0]);
+       entreeana->max      = atof(db->row[1]);
+       entreeana->unite    = atoi(db->row[2]);
+       memcpy( entreeana->libelle, db->row[3], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
      }
     return(entreeana);
   }
@@ -121,8 +119,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct ENTREEANA_DB *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num )
-  { struct ENTREEANA_DB *entreeana;
+ struct CMD_TYPE_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num )
+  { struct CMD_TYPE_ENTREEANA *entreeana;
     gchar requete[512];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -146,7 +144,7 @@
        return(NULL);
      }
 
-    entreeana = (struct ENTREEANA_DB *)g_malloc0( sizeof(struct ENTREEANA_DB) );
+    entreeana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
     if (!entreeana)
      { Info( log, DEBUG_MEM, "Rechercher_entreeanaDB: Mem error" ); }
     else

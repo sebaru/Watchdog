@@ -126,14 +126,16 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 1, 2 );
 
     texte = gtk_label_new( _("Location") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
     Entry_location = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_location), NBR_CARAC_LOCATION_CAMERA );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_location, 1, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_location, 1, 4, 2, 3 );
 
     if (edit_camera)                                                       /* Si edition d'un camera */
-     { Edit_camera.id_mnemo = edit_camera->id_mnemo;
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Entry_num), edit_camera->num );
+     { gchar chaine[32];
+       g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), edit_camera->num );
+       Edit_camera.id_mnemo = edit_camera->id_mnemo;
+       gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine);
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_camera->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_location), edit_camera->location );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), edit_camera->type );
