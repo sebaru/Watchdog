@@ -275,14 +275,14 @@ printf("on veut editer le entreeANA %s %d\n", rezo_entreeANA.libelle, rezo_entre
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    gint num;
+    gint id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_entreeANA) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &num, -1 );
-       if ( num == entreeANA->num ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == entreeANA->id_mnemo ) break;
 
        valide = gtk_tree_model_iter_next( store, &iter );
      }
