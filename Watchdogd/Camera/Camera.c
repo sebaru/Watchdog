@@ -60,8 +60,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CAMERADB *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db )
-  { struct CAMERADB *camera;
+ struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_CAMERA *camera;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -69,7 +69,7 @@
        return(NULL);
      }
 
-    camera = (struct CAMERADB *)g_malloc0( sizeof(struct CAMERADB) );
+    camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera) Info( log, DEBUG_MEM, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( camera->location, db->row[0], sizeof(camera->location  ) );
@@ -84,9 +84,9 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CAMERADB *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint id )
   { gchar requete[200];
-    struct CAMERADB *camera;
+    struct CMD_TYPE_CAMERA *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT location,%s.type,libelle"
@@ -106,7 +106,7 @@
        return(NULL);
      }
 
-    camera = g_malloc0( sizeof(struct CAMERADB) );
+    camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera)
      { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" ); }
     else

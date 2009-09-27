@@ -35,44 +35,22 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_camera: convertit une structure CAMERA en structure CMD_TYPE_CAMERA                     */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_TYPE_CAMERA *Preparer_envoi_camera ( struct CAMERADB *camera )
-  { struct CMD_TYPE_CAMERA *rezo_camera;
 
-    rezo_camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
-    if (!rezo_camera) { return(NULL); }
-
-    rezo_camera->id         = camera->id;
-    rezo_camera->type       = camera->type;
-    memcpy( &rezo_camera->libelle,  camera->libelle,  sizeof(rezo_camera->libelle) );
-    memcpy( &rezo_camera->location, camera->location, sizeof(rezo_camera->location) );
-    return( rezo_camera );
-  }
 /**********************************************************************************************************/
 /* Proto_editer_camera: Le client desire editer un camera                                                 */
 /* Entrée: le client demandeur et le camera en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { struct CMD_TYPE_CAMERA edit_camera;
-    struct CAMERADB *camera;
+  { struct CMD_TYPE_CAMERA *camera;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
     camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
 
     if (camera)
-     { edit_camera.id         = camera->id;                                 /* Recopie des info editables */
-       edit_camera.type       = camera->type;
-       memcpy( &edit_camera.libelle,  camera->libelle,  sizeof(edit_camera.libelle) );
-       memcpy( &edit_camera.location, camera->location, sizeof(edit_camera.location) );
-
-       Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
-                     (gchar *)&edit_camera, sizeof(struct CMD_TYPE_CAMERA) );
+     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
+                     (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
        g_free(camera);                                                              /* liberation mémoire */
      }
     else
@@ -89,7 +67,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { struct CAMERADB *result;
+  { struct CMD_TYPE_CAMERA *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -103,28 +81,17 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
-           if (result) 
-            { struct CMD_TYPE_CAMERA *camera;
-              camera = Preparer_envoi_camera ( result );
-              g_free(result);
-              if (!camera)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
-                                   (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-                     g_free(camera);
-                   }
-            }
-           else
+         { if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate camera %s", rezo_camera->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+           else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
+                                (gchar *)result, sizeof(struct CMD_TYPE_CAMERA) );
+                  g_free(result);
+                }
             }
          }
   }
@@ -134,9 +101,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void *Envoyer_cameras_thread_tag ( struct CLIENT *client, guint tag, guint sstag, guint sstag_fin )
-  { struct CMD_TYPE_CAMERA *rezo_camera;
+  { struct CMD_TYPE_CAMERA *camera;
     struct CMD_ENREG nbr;
-    struct CAMERADB *camera;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCAMERA", 0, 0, 0 );
@@ -167,15 +133,11 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-       rezo_camera = Preparer_envoi_camera( camera );
-       g_free(camera);
-       if (rezo_camera)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
-          g_free(rezo_camera);
-        }
+       Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
+       g_free(camera);
      }
   }
 /**********************************************************************************************************/

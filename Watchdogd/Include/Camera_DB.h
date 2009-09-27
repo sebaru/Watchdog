@@ -12,18 +12,11 @@
 
  #define NOM_TABLE_CAMERA       "cameras"
 
- struct CAMERADB
-  { guint   id;                                                          /* Numéro du bit interne associé */
-    gchar   libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                           /* Libelle de la camera */
-    gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                             /* Libelle de la camera */
-    gint    type;                                                            /* petite, moyenne, grande ? */
-  };
-
 /*************************************** Définitions des prototypes ***************************************/
- extern struct CAMERADB *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint num );
- extern struct CAMERADB *Rechercher_cameraDB_par_id ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint num );
+ extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB_par_id ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Recuperer_cameraDB ( struct LOG *log, struct DB *db );
- extern struct CAMERADB *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Modifier_cameraDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *msg );
 
 #endif
