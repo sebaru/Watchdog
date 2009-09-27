@@ -46,11 +46,11 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,%s.num,libelle"
-                " FROM %s,%s WHERE %s.type=%d ORDER BY libelle",
+                "SELECT location,%s.type,%s.num,libelle,objet,id_mnemo"
+                " FROM %s,%s WHERE id_mnemo=%s.id ORDER BY libelle",
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
-                NOM_TABLE_MNEMO, MNEMO_CAMERA                                                    /* Where */
+                NOM_TABLE_MNEMO                                                                  /* Where */
               );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -73,9 +73,11 @@
     if (!camera) Info( log, DEBUG_MEM, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( camera->location, db->row[0], sizeof(camera->location  ) );
-       memcpy( camera->libelle, db->row[3], sizeof(camera->libelle ) );
-       camera->id          = atoi(db->row[2]);
-       camera->type        = atoi(db->row[1]);
+       memcpy( camera->libelle,  db->row[3], sizeof(camera->libelle ) );
+       memcpy( camera->objet,    db->row[4], sizeof(camera->objet    ) );
+       camera->id_mnemo   = atoi(db->row[5]);
+       camera->num        = atoi(db->row[2]);
+       camera->type       = atoi(db->row[1]);
      }
     return(camera);
   }
@@ -89,8 +91,8 @@
     struct CMD_TYPE_CAMERA *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,libelle"
-                " FROM %s,%s WHERE %s.id=%d AND %s.type=%d",
+                "SELECT location,%s.type,libelle,objet,num"
+                " FROM %s,%s WHERE %s.id_mnemo=%d AND %s.type=%d",
                 NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
                 NOM_TABLE_CAMERA, id, NOM_TABLE_MNEMO, MNEMO_CAMERA                              /* Where */
@@ -110,10 +112,12 @@
     if (!camera)
      { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" ); }
     else
-     { memcpy( camera->libelle,  db->row[2], sizeof(camera->libelle) );       /* Recopie dans la structure */
-       memcpy( camera->location, db->row[0], sizeof(camera->location  ) );
-       camera->type = atoi(db->row[1]);
-       camera->id   = id;
+     { memcpy( camera->libelle,  db->row[2], sizeof(camera->libelle  ) );    /* Recopie dans la structure */
+       memcpy( camera->location, db->row[0], sizeof(camera->location ) );
+       memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
+       camera->type     = atoi(db->row[1]);
+       camera->num      = atoi(db->row[4]);
+       camera->id_mnemo = id;
      }
     Liberer_resultat_SQL ( log, db );
     return(camera);
@@ -136,8 +140,8 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "location='%s',type=%d "
-                "WHERE id=%d",
-                NOM_TABLE_CAMERA, location, camera->type, camera->id );
+                "WHERE id_mnemo=%d",
+                NOM_TABLE_CAMERA, location, camera->type, camera->id_mnemo );
     g_free(location);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */

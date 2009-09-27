@@ -44,16 +44,26 @@
 /**********************************************************************************************************/
  gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ID_MNEMONIQUE *mnemo )
   { gchar requete[200];
-#ifdef bouh
-    switch (mnemo->type)
-     { case MNEMO_CAMERA:
-            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-            "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, mnemo->num );
-            Lancer_requete_SQL ( log, db, requete );
-            break;
-       default:
+    struct MNEMONIQUEDB *mnemo_a_virer;
+
+    mnemo_a_virer = Rechercher_mnemoDB ( log, db, mnemo->id );
+    if (mnemo_a_virer)
+     { switch (mnemo_a_virer->type)
+        { case MNEMO_CAMERA:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CAMERA, mnemo_a_virer->id );
+               Lancer_requete_SQL ( log, db, requete );
+               break;
+          case MNEMO_ENTREE_ANA:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_ENTREEANA, mnemo_a_virer->id );
+               Lancer_requete_SQL ( log, db, requete );
+               break;
+          default:
+               break;
+        }
+       g_free(mnemo_a_virer);
      }
-#endif
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MNEMO, mnemo->id );
 
@@ -104,8 +114,14 @@
     switch (mnemo->type)
      { case MNEMO_CAMERA:
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-            "INSERT INTO %s(location,type,num) VALUES "
-            "('To be determined',0,%d)", NOM_TABLE_CAMERA, last_id );
+                        "INSERT INTO %s(location,type,id_mnemo) VALUES "
+                        "('To be determined',0,%d)", NOM_TABLE_CAMERA, last_id );
+            Lancer_requete_SQL ( log, db, requete );
+            break;
+       case MNEMO_ENTREE_ANA:
+            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                        "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
+                        "(%f,%f,%d,%d)", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
             Lancer_requete_SQL ( log, db, requete );
             break;
        default:

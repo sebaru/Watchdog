@@ -87,7 +87,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &rezo_camera.id, -1 );                  /* Recup du id */
+    gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &rezo_camera.id_mnemo, -1 );          /* Recup du id */
     gtk_tree_model_get( store, &iter, COL_CAMERA_LIBELLE, &libelle, -1 );
 
     memcpy( &rezo_camera.libelle, libelle, sizeof(rezo_camera.libelle) );
@@ -276,6 +276,8 @@
     *Scroll = scroll;
 
     store = gtk_list_store_new ( NBR_COL_CAMERA, G_TYPE_UINT,                                       /* Id */
+                                              G_TYPE_UINT,                                         /* Num */
+                                              G_TYPE_STRING,                                     /* objet */
                                               G_TYPE_STRING,                                   /* libelle */
                                               G_TYPE_STRING,                                  /* location */
                                               G_TYPE_UINT,                                        /* type */
@@ -302,6 +304,13 @@
                                                          "text", COL_CAMERA_TYPE_STRING,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_TYPE_STRING);         /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Objet"), renderer,
+                                                         "text", COL_CAMERA_OBJET,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_OBJET);               /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
@@ -381,9 +390,11 @@
  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera )
   { gchar chaine[24];
 
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->id );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->num );
     gtk_list_store_set ( store, iter,
-                         COL_CAMERA_ID, camera->id,
+                         COL_CAMERA_ID, camera->id_mnemo,
+                         COL_CAMERA_NUM, camera->num,
+                         COL_CAMERA_OBJET, camera->objet,
                          COL_CAMERA_LIBELLE, camera->libelle,
                          COL_CAMERA_LOCATION, camera->location,
                          COL_CAMERA_TYPE_INT, camera->type,
@@ -423,7 +434,7 @@
 
     while ( valide )
      { gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &id, -1 );
-       if ( id == camera->id )
+       if ( id == camera->id_mnemo )
         { printf("elimination camera %s\n", camera->libelle );
           break;
         }
@@ -449,7 +460,7 @@
 
     while ( valide )
      { gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &id, -1 );
-       if ( id == camera->id )
+       if ( id == camera->id_mnemo )
         { printf("maj camera %s\n", camera->libelle );
           break;
         }

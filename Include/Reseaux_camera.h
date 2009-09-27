@@ -11,9 +11,11 @@
 
 /******************************************** Gestion des camera ******************************************/
  struct CMD_TYPE_CAMERA
-  { guint   id;                                                                 /* ID unique de la camera */
+  { guint   id_mnemo;                                             /* ID unique du mnemonique de la camera */
+    guint   num;                                                                   /* Numéro de la camera */
     gchar   libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                           /* Libelle de la camera */
-    gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                             /* Libelle de la camera */
+    gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                            /* Location de la camera */
+    gchar   objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
     gint    type;                                                            /* petite, moyenne, grande ? */
   };
 

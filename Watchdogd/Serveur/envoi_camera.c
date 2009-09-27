@@ -46,7 +46,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
+    camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id_mnemo );
 
     if (camera)
      { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
@@ -80,7 +80,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
+    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id_mnemo );
          { if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
