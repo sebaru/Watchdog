@@ -75,12 +75,11 @@
 /**********************************************************************************************************/
  gboolean Recuperer_camera_supDB ( struct LOG *log, struct DB *db, gint id_syn )
   { gchar requete[2048];
-    struct CMD_TYPE_CAMERA camera;
-
+    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,type"
+                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,%s.type"
                 " FROM %s,%s,%s WHERE syn_id=%d AND camera_src_id=%s.num AND %s.id_mnemo=%s.id",
-                NOM_TABLE_CAMERASUP, NOM_TABLE_MNEMO,
+                NOM_TABLE_CAMERASUP, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* From */
                 id_syn, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO /* Where */
               );
@@ -124,9 +123,9 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,type"
+                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,%s,type"
                 " FROM %s,%s,%s WHERE %s.id=%d AND camera_src_id=%s.num AND %s.id_mnemo=%s.id",
-                NOM_TABLE_CAMERA,
+                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* FROM */
                 NOM_TABLE_CAMERASUP, id, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,NOM_TABLE_MNEMO );
 
