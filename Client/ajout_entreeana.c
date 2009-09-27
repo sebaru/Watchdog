@@ -41,7 +41,7 @@
  static GtkWidget *Spin_min;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Spin_max;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Option_unite;                                   /* Unite correspondante à l'entrée ana */
- static struct CMD_EDIT_ENTREEANA Edit_entree;                              /* Message en cours d'édition */
+ static struct CMD_TYPE_ENTREEANA Edit_entree;                              /* Message en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_entreeANA: Fonction appelée qd on appuie sur un des boutons de l'interface           */
@@ -58,17 +58,7 @@
                   Edit_entree.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
 
                   Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,
-                                (gchar *)&Edit_entree, sizeof( struct CMD_EDIT_ENTREEANA ) );
-                }
-               else
-                { struct CMD_ADD_ENTREEANA new_entree;
-                  new_entree.min = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_min) );
-                  new_entree.max = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_max) );
-                  new_entree.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-                  new_entree.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
-
-                  Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_ADD_ENTREEANA,
-                                (gchar *)&new_entree, sizeof( struct CMD_EDIT_ENTREEANA ) );
+                                (gchar *)&Edit_entree, sizeof( struct CMD_TYPE_ENTREEANA ) );
                 }
              }
             break;
@@ -83,15 +73,15 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_entreeANA ( struct CMD_EDIT_ENTREEANA *edit_entree )
+ void Menu_ajouter_editer_entreeANA ( struct CMD_TYPE_ENTREEANA *edit_entree )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt;
 
     if (edit_entree)
-     { memcpy( &Edit_entree, edit_entree, sizeof(struct CMD_EDIT_ENTREEANA) );
+     { memcpy( &Edit_entree, edit_entree, sizeof(struct CMD_TYPE_ENTREEANA) );
                                                                           /* Save pour utilisation future */
      }
-    else memset (&Edit_entree, 0, sizeof(struct CMD_EDIT_ENTREEANA) );             /* Sinon RAZ structure */
+    else memset (&Edit_entree, 0, sizeof(struct CMD_TYPE_ENTREEANA) );             /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_entree ? _("Edit a entreeANA") : _("Add a entreeANA")),
                                            GTK_WINDOW(F_client),
@@ -147,7 +137,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 2, 4, 5 );
 
     if (edit_entree)                                                       /* Si edition d'un entreeANA */
-     { Edit_entree.id = edit_entree->id;
+     { Edit_entree.num = edit_entree->num;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_entree->libelle );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_entree->unite );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_entree->num );

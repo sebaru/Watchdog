@@ -37,7 +37,7 @@
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 
  enum
-  {  COLONNE_ID,
+  {  COLONNE_NUM_INT,
      COLONNE_NUM,
      COLONNE_MIN,
      COLONNE_MAX,
@@ -48,91 +48,12 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
- static void Menu_effacer_entreeANA ( void );
  static void Menu_editer_entreeANA ( void );
- static void Menu_ajouter_entreeANA ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_entreeANA, GNOME_STOCK_PIXMAP_ADD ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_entreeANA, GNOME_STOCK_PIXMAP_OPEN ),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_entreeANA, GNOME_STOCK_PIXMAP_CLEAR ),
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_entreeANA, GNOME_STOCK_PIXMAP_OPEN ),
     GNOMEUIINFO_END
   };
-
- static GnomeUIInfo Menu_popup_nonselect[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_entreeANA, GNOME_STOCK_PIXMAP_ADD ),
-    GNOMEUIINFO_END
-  };
-
-/**********************************************************************************************************/
-/* CB_effacer_entreeANA: Fonction appelée qd on appuie sur un des boutons de l'interface                  */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
- static gboolean CB_effacer_entreeANA ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_ENTREEANA rezo_entreeANA;
-    GtkTreeSelection *selection;
-    GtkTreeModel *store;
-    GList *lignes;
-    GtkTreeIter iter;
-
-    switch(reponse)
-     { case GTK_RESPONSE_YES:
-            selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_entreeANA) );
-            store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_entreeANA) );
-            lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-            while ( lignes )
-             { gchar *libelle;
-               gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_entreeANA.id, -1 );     /* Recup du id */
-               gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-
-               memcpy( &rezo_entreeANA.libelle, libelle, sizeof(rezo_entreeANA.libelle) );
-               g_free( libelle );
-
-               Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_DEL_ENTREEANA,
-                             (gchar *)&rezo_entreeANA, sizeof(struct CMD_ID_ENTREEANA) );
-               gtk_tree_selection_unselect_iter( selection, &iter );
-               lignes = lignes->next;
-             }
-            g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-            g_list_free (lignes);                                                   /* Liberation mémoire */
-            break;
-       default: break;
-     }
-    gtk_widget_destroy( GTK_WIDGET(dialog) );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Menu_ajouter_entreeANA: Ajout d'un entreeANA                                                           */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_ajouter_entreeANA ( void )
-  { Menu_ajouter_editer_entreeANA(NULL); }
-/**********************************************************************************************************/
-/* Menu_effacer_entreeANA: Retrait des entreeANAs selectionnés                                            */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_effacer_entreeANA ( void )
-  { GtkTreeSelection *selection;
-    GtkWidget *dialog;
-    guint nbr;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_entreeANA) );
-
-    nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                       /* Si rien n'est selectionné */
-
-    dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
-                                      GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                      GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-                                      _("Do you want to delete %d entreeANA%c ?"), nbr, (nbr>1 ? 's' : ' ') );
-    g_signal_connect( dialog, "response",
-                      G_CALLBACK(CB_effacer_entreeANA), NULL );
-  }
 /**********************************************************************************************************/
 /* Menu_editer_entreeANA: Demande d'edition du entreeANA selectionné                                      */
 /* Entrée: rien                                                                                           */
@@ -140,7 +61,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_entreeANA ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_ENTREEANA rezo_entreeANA;
+    struct CMD_TYPE_ENTREEANA rezo_entreeANA;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -155,14 +76,14 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_entreeANA.id, -1 );                /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_NUM_INT, &rezo_entreeANA.num, -1 );          /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
 
     memcpy( &rezo_entreeANA.libelle, libelle, sizeof(rezo_entreeANA.libelle) );
     g_free( libelle );
 printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_EDIT_ENTREEANA,
-                  (gchar *)&rezo_entreeANA, sizeof(struct CMD_ID_ENTREEANA) );
+                  (gchar *)&rezo_entreeANA, sizeof(struct CMD_TYPE_ENTREEANA) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -172,7 +93,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static gboolean Gerer_popup_entreeANA ( GtkWidget *widget, GdkEventButton *event, gpointer data )
-  { static GtkWidget *Popup_select=NULL, *Popup_nonselect=NULL;
+  { static GtkWidget *Popup_select=NULL;
     GtkTreeSelection *selection;
     gboolean ya_selection;
     GtkTreePath *path;
@@ -181,7 +102,6 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
 
     if ( event->button == 3 )                                                         /* Gestion du popup */
      { if (!Popup_select)    Popup_select = gnome_popup_menu_new( Menu_popup_select );
-       if (!Popup_nonselect) Popup_nonselect = gnome_popup_menu_new( Menu_popup_nonselect );
 
        ya_selection = FALSE;
        selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_entreeANA) );/* On recupere selection */
@@ -196,8 +116,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
            }
         } else ya_selection = TRUE;                              /* ya bel et bien qqchose de selectionné */
 
-       gnome_popup_menu_do_popup_modal( (ya_selection ? Popup_select : Popup_nonselect),
-                                        NULL, NULL, event, NULL, F_client );
+       if (ya_selection) gnome_popup_menu_do_popup_modal( Popup_select, NULL, NULL, event, NULL, F_client );
        return(TRUE);
      }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
@@ -232,7 +151,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                     /* Num_int */
                                               G_TYPE_STRING,                                       /* Num */
                                               G_TYPE_DOUBLE,                                       /* min */
                                               G_TYPE_DOUBLE,                                       /* max */
@@ -247,9 +166,9 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne de l'id du entreeANA */
     colonne = gtk_tree_view_column_new_with_attributes ( _("EAid (DB)"), renderer,
-                                                         "text", COLONNE_ID,
+                                                         "text", COLONNE_NUM_INT,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                     /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM_INT);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_entreeANA), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne de l'id du entreeANA */
@@ -311,19 +230,6 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_editer_entreeANA), NULL );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_editer_entreeANA), NULL );
-
-    separateur = gtk_hseparator_new();
-    gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_REMOVE );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_effacer_entreeANA), NULL );
-
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Edit EA") ) );
   }
@@ -332,7 +238,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
 /* Entrée: une reference sur le entreeANA                                                                 */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_entreeANA( GtkTreeIter *iter, struct CMD_SHOW_ENTREEANA *entreeANA )
+ static void Rafraichir_visu_entreeANA( GtkTreeIter *iter, struct CMD_TYPE_ENTREEANA *entreeANA )
   { GtkTreeModel *store;
     gchar chaine[20];
        
@@ -341,9 +247,9 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     printf("maj entreeANA %s unite %d %s\n", entreeANA->libelle,
            entreeANA->unite, Unite_vers_string(entreeANA->unite) );
           
-    g_snprintf( chaine, sizeof(chaine), "EA%04d", entreeANA->num );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), entreeANA->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, entreeANA->id,
+                         COLONNE_NUM_INT, entreeANA->num,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, entreeANA->min,
                          COLONNE_MAX, entreeANA->max,
@@ -357,7 +263,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
 /* Entrée: une reference sur le entreeANA                                                                 */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_entreeANA( struct CMD_SHOW_ENTREEANA *entreeANA )
+ void Proto_afficher_une_entreeANA( struct CMD_TYPE_ENTREEANA *entreeANA )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -368,48 +274,22 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     Rafraichir_visu_entreeANA ( &iter, entreeANA );
   }
 /**********************************************************************************************************/
-/* Cacher_un_entreeANA: Enleve un entreeANA de la liste des entreeANAs                                    */
-/* Entrée: une reference sur le entreeANA                                                                 */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_cacher_une_entreeANA( struct CMD_ID_ENTREEANA *entreeANA )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    gint id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_entreeANA) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == entreeANA->id )
-        { printf("elimination entreeANA %s\n", entreeANA->libelle );
-          break;
-        }
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-
-    if (valide)
-     { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
-  }
-/**********************************************************************************************************/
 /* Proto_rafrachir_un_entreeANA: Rafraichissement du entreeANA en parametre                               */
 /* Entrée: une reference sur le entreeANA                                                                 */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_une_entreeANA( struct CMD_SHOW_ENTREEANA *entreeANA )
+ void Proto_rafraichir_une_entreeANA( struct CMD_TYPE_ENTREEANA *entreeANA )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    gint id;
+    gint num;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_entreeANA) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if ( id == entreeANA->id ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_NUM_INT, &num, -1 );
+       if ( num == entreeANA->num ) break;
 
        valide = gtk_tree_model_iter_next( store, &iter );
      }

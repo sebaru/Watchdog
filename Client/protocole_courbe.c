@@ -47,12 +47,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_COURBE:
-             { struct CMD_SHOW_ENTREEANA *eana;
+             { struct CMD_TYPE_ENTREEANA *eana;
                Set_progress_plusun();
 
-               eana = (struct CMD_SHOW_ENTREEANA *)g_malloc0( sizeof( struct CMD_SHOW_ENTREEANA ) );
+               eana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof( struct CMD_TYPE_ENTREEANA ) );
                if (!eana) return; 
-               memcpy( eana, connexion->donnees, sizeof(struct CMD_SHOW_ENTREEANA ) );
+               memcpy( eana, connexion->donnees, sizeof(struct CMD_TYPE_ENTREEANA ) );
                Arrivee_eana = g_list_append( Arrivee_eana, eana );
              }
             break;

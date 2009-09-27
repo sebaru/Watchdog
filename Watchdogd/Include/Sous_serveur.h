@@ -105,10 +105,7 @@
  extern void *Envoyer_entreeANA_thread ( struct CLIENT *client );                /* Dans envoi_entreana.c */
  extern void *Envoyer_entreeANA_for_courbe_thread ( struct CLIENT *client );
  extern void *Envoyer_entreeANA_for_histo_courbe_thread ( struct CLIENT *client );
- extern void Proto_editer_entreeANA ( struct CLIENT *client, struct CMD_ID_ENTREEANA *rezo_entree );
- extern void Proto_valider_editer_entreeANA ( struct CLIENT *client, struct CMD_EDIT_ENTREEANA *rezo_entree );
- extern void Proto_effacer_entreeANA ( struct CLIENT *client, struct CMD_ID_ENTREEANA *rezo_entree );
- extern void Proto_ajouter_entreeANA ( struct CLIENT *client, struct CMD_ADD_ENTREEANA *rezo_entree );
+ extern void Proto_valider_editer_entreeANA ( struct CLIENT *client, struct CMD_TYPE_ENTREEANA *rezo_entree );
 
                                                                                /* Dans envoi_synoptique.c */
  extern void *Envoyer_synoptiques_thread ( struct CLIENT *client );

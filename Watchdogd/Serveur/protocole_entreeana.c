@@ -60,18 +60,6 @@
                Proto_editer_entreeANA( client, entree );
              }
             break;
-       case SSTAG_CLIENT_ADD_ENTREEANA:
-             { struct CMD_ADD_ENTREEANA *entree;
-               entree = (struct CMD_ADD_ENTREEANA *)connexion->donnees;
-               Proto_ajouter_entreeANA( client, entree );
-             }
-            break;
-       case SSTAG_CLIENT_DEL_ENTREEANA:
-             { struct CMD_ID_ENTREEANA *entree;
-               entree = (struct CMD_ID_ENTREEANA *)connexion->donnees;
-               Proto_effacer_entreeANA( client, entree );
-             }
-            break;
        case SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA:
              { struct CMD_EDIT_ENTREEANA *entree;
                entree = (struct CMD_EDIT_ENTREEANA *)connexion->donnees;

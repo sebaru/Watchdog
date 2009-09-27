@@ -231,7 +231,6 @@
        new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.id = rezo_courbe.id;
                new_courbe->eana.num = rezo_courbe.id;
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
@@ -627,7 +626,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_SHOW_ENTREEANA *source )
+ static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_TYPE_ENTREEANA *source )
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
@@ -639,7 +638,6 @@
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
-printf("EntreANA for courbe: id=%d, num=%d\n", source->id, source->num);
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
@@ -690,7 +688,7 @@ printf("EntreANA for courbe: id=%d, num=%d\n", source->id, source->num);
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_EA_for_courbe( struct CMD_SHOW_ENTREEANA *source )
+ void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_ENTREEANA *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 

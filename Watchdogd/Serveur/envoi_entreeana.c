@@ -36,17 +36,16 @@
  #include "watchdogd.h"
  #include "Cst_entreeana.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_entree: convertit une structure ENTREEANA_DB en structure CMD_SHOW_ENTREEANA            */
+/* Preparer_envoi_entree: convertit une structure ENTREEANA_DB en structure CMD_TYPE_ENTREEANA            */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_ENTREEANA *Preparer_envoi_entree ( struct ENTREEANA_DB *entree )
-  { struct CMD_SHOW_ENTREEANA *rezo_entree;
+ static struct CMD_TYPE_ENTREEANA *Preparer_envoi_entree ( struct ENTREEANA_DB *entree )
+  { struct CMD_TYPE_ENTREEANA *rezo_entree;
 
-    rezo_entree = (struct CMD_SHOW_ENTREEANA *)g_malloc0( sizeof(struct CMD_SHOW_ENTREEANA) );
+    rezo_entree = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
     if (!rezo_entree) { return(NULL); }
 
-    rezo_entree->id    = entree->id;
     rezo_entree->num   = entree->num;
     rezo_entree->min   = entree->min;
     rezo_entree->max   = entree->max;
@@ -59,24 +58,23 @@
 /* Entrée: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_entreeANA ( struct CLIENT *client, struct CMD_ID_ENTREEANA *rezo_entree )
-  { struct CMD_EDIT_ENTREEANA edit_entree;
+ void Proto_editer_entreeANA ( struct CLIENT *client, struct CMD_TYPE_ENTREEANA *rezo_entree )
+  { struct CMD_TYPE_ENTREEANA edit_entree;
     struct ENTREEANA_DB *entree;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id );
+    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
 
     if (entree)
-     { edit_entree.id    = entree->id;                                      /* Recopie des info editables */
-       edit_entree.num   = entree->num;
+     { edit_entree.num   = entree->num;
        edit_entree.min   = entree->min;
        edit_entree.max   = entree->max;
        edit_entree.unite = entree->unite;
        memcpy( &edit_entree.libelle, entree->libelle, sizeof(edit_entree.libelle) );
 
        Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_EDIT_ENTREEANA_OK,
-                  (gchar *)&edit_entree, sizeof(struct CMD_EDIT_ENTREEANA) );
+                  (gchar *)&edit_entree, sizeof(struct CMD_TYPE_ENTREEANA) );
        g_free(entree);                                                              /* liberation mémoire */
      }
     else
@@ -92,7 +90,7 @@
 /* Entrée: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_entreeANA ( struct CLIENT *client, struct CMD_EDIT_ENTREEANA *rezo_entree )
+ void Proto_valider_editer_entreeANA ( struct CLIENT *client, struct CMD_TYPE_ENTREEANA *rezo_entree )
   { struct ENTREEANA_DB *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -109,9 +107,9 @@
     else { Partage->ea[rezo_entree->num].min = rezo_entree->min;        /* Mise à jour min et max de l'ea */
            Partage->ea[rezo_entree->num].max = rezo_entree->max;
            
-           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id );
+           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
            if (result) 
-            { struct CMD_SHOW_ENTREEANA *entree;
+            { struct CMD_TYPE_ENTREEANA *entree;
               entree = Preparer_envoi_entree ( result );
               g_free(result);
               if (!entree)
@@ -122,7 +120,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,
-                                   (gchar *)entree, sizeof(struct CMD_SHOW_ENTREEANA) );
+                                   (gchar *)entree, sizeof(struct CMD_TYPE_ENTREEANA) );
                      g_free(entree);
                      Charger_eana ();
                    }
@@ -137,83 +135,12 @@
          }
   }
 /**********************************************************************************************************/
-/* Proto_effacer_entree: Retrait du entree en parametre                                                   */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_effacer_entreeANA ( struct CLIENT *client, struct CMD_ID_ENTREEANA *rezo_entree )
-  { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    retour = Retirer_entreeANADB( Config.log, Db_watchdog, rezo_entree );
-
-    if (retour)
-     { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_DEL_ENTREEANA_OK,
-                     (gchar *)rezo_entree, sizeof(struct CMD_ID_ENTREEANA) );
-       Charger_eana ();
-     }
-    else
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete entree %s", rezo_entree->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_ajouter_entree: Un client nous demande d'ajouter un entree Watchdog                              */
-/* Entrée: le entree à créer                                                                              */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_ajouter_entreeANA ( struct CLIENT *client, struct CMD_ADD_ENTREEANA *rezo_entree )
-  { struct ENTREEANA_DB *result;
-    gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    id = Ajouter_entreeANADB ( Config.log, Db_watchdog, rezo_entree );
-    if (id == -1)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add entree %d", rezo_entree->num);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_entreeANADB( Config.log, Db_watchdog, id );
-           if (!result) 
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate entree %d", rezo_entree->num);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-           else
-            { struct CMD_SHOW_ENTREEANA *entree;
-              entree = Preparer_envoi_entree ( result );
-              g_free(result);
-              if (!entree)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                 Charger_eana ();
-               }
-              else { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_ADD_ENTREEANA_OK,
-                                   (gchar *)entree, sizeof(struct CMD_SHOW_ENTREEANA) );
-                     g_free(entree);
-                   }
-            }
-         }
-  }
-/**********************************************************************************************************/
 /* Envoyer_entreeANA_tag : Envoie les entreANA au client. Attention, c'est un thread !                    */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_entreeANA_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
-  { struct CMD_SHOW_ENTREEANA *rezo_entree;
+  { struct CMD_TYPE_ENTREEANA *rezo_entree;
     struct CMD_ENREG nbr;
     struct ENTREEANA_DB *entree;
     struct DB *db;
@@ -253,7 +180,7 @@
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
           Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_entree, sizeof(struct CMD_SHOW_ENTREEANA) );
+                         (gchar *)rezo_entree, sizeof(struct CMD_TYPE_ENTREEANA) );
           g_free(rezo_entree);
         }
      }

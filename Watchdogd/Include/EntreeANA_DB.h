@@ -14,8 +14,7 @@
  #define NOM_TABLE_ENTREEANA    "eana"
 
  struct ENTREEANA_DB
-  { guint  id;                                                                      /* Numero de l'entrée */
-    guint  num;                                                                         /* Numero de l'EA */
+  { guint  num;                                                                         /* Numero de l'EA */
     guint  unite;                                                                           /* °C, °K, Km */
     gfloat min;                                                       /* Etat, prealarme, defaut, alarme */
     gfloat max;
@@ -24,12 +23,9 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_eana ( void );
- extern struct ENTREEANA_DB *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id );
+ extern struct ENTREEANA_DB *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num );
  extern gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db );
  extern struct ENTREEANA_DB *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db );
- extern gint Ajouter_entreeANADB ( struct LOG *log, struct DB *db, struct CMD_ADD_ENTREEANA *entreeana );
- extern gboolean Retirer_entreeANADB ( struct LOG *log, struct DB *db, struct CMD_ID_ENTREEANA *entreeana );
- extern gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_EDIT_ENTREEANA *entreeana );
- extern struct ENTREEANA_DB *Rechercher_entreeANADB_par_num ( struct LOG *log, struct DB *db, guint num );
+ extern gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_ENTREEANA *entreeana );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

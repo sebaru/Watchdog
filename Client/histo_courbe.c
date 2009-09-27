@@ -114,7 +114,6 @@
 printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.id = rezo_courbe.id;
                new_courbe->eana.num = rezo_courbe.id;
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
@@ -297,7 +296,7 @@ printf("Envoie want page source for histo courbe\n");
        rezo_courbe.type = infos->Courbes[cpt].type;
        switch ( rezo_courbe.type )
         { case MNEMO_ENTREE_ANA:
-               rezo_courbe.id = infos->Courbes[cpt].eana.id;
+               rezo_courbe.id = infos->Courbes[cpt].eana.num;
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
@@ -538,7 +537,7 @@ printf("Envoie want page source for histo courbe\n");
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_EA_histo( GtkTreeIter *iter, struct CMD_SHOW_ENTREEANA *source )
+ static void Rafraichir_visu_source_EA_histo( GtkTreeIter *iter, struct CMD_TYPE_ENTREEANA *source )
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
@@ -549,9 +548,6 @@ printf("Envoie want page source for histo courbe\n");
     infos = (struct TYPE_INFO_COURBE *)page->infos;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
-
-printf("EntreANA for histo courbe: id=%d, num=%d min %f max %f\n",
-        source->id, source->num, source->min, source->max );
 
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -603,7 +599,7 @@ printf("EntreANA for histo courbe: id=%d, num=%d min %f max %f\n",
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_SHOW_ENTREEANA *source )
+ void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_ENTREEANA *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 
