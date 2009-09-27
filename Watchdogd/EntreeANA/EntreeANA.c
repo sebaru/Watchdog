@@ -119,19 +119,18 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num )
+ struct CMD_TYPE_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id )
   { struct CMD_TYPE_ENTREEANA *entreeana;
     gchar requete[512];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.num,%s.min,%s.max,%s.unite,%s.libelle"
-                " FROM %s,%s WHERE %s.type=%d AND %s.num=%d",
-                NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
+                " FROM %s,%s WHERE %s.id_mnemo=%d",
+                NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_MNEMO,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
-                NOM_TABLE_MNEMO, MNEMO_ENTREE_ANA, /* And */
-                NOM_TABLE_ENTREEANA, num /* AND */
+                NOM_TABLE_ENTREEANA, id /* WHERE */
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -140,7 +139,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_entreeanaDB: EntreANA non trouvé dans la BDD", num );
+       Info_n( log, DEBUG_DB, "Rechercher_entreeanaDB: EntreANA non trouvé dans la BDD", id );
        return(NULL);
      }
 
@@ -148,10 +147,11 @@
     if (!entreeana)
      { Info( log, DEBUG_MEM, "Rechercher_entreeanaDB: Mem error" ); }
     else
-     { entreeana->num   = atoi(db->row[0]);
-       entreeana->min   = atof(db->row[1]);
-       entreeana->max   = atof(db->row[2]);
-       entreeana->unite = atoi(db->row[3]);
+     { entreeana->id_mnemo = id;;
+       entreeana->num      = atoi(db->row[0]);
+       entreeana->min      = atof(db->row[1]);
+       entreeana->max      = atof(db->row[2]);
+       entreeana->unite    = atoi(db->row[3]);
        memcpy( entreeana->libelle, db->row[4], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
      }
     Liberer_resultat_SQL ( log, db );
@@ -168,9 +168,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "min=%f,max=%f,unite=%d WHERE num=%d",
+                "min=%f,max=%f,unite=%d WHERE id_mnemo=%d",
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max,
-                entreeana->unite, entreeana->num );
+                entreeana->unite, entreeana->id_mnemo );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

@@ -37,7 +37,7 @@
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 
  enum
-  {  COLONNE_NUM_INT,
+  {  COLONNE_ID,
      COLONNE_NUM,
      COLONNE_MIN,
      COLONNE_MAX,
@@ -76,7 +76,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_NUM_INT, &rezo_entreeANA.num, -1 );          /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_entreeANA.id_mnemo, -1 );          /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
 
     memcpy( &rezo_entreeANA.libelle, libelle, sizeof(rezo_entreeANA.libelle) );
@@ -151,7 +151,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                     /* Num_int */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* id */
                                               G_TYPE_STRING,                                       /* Num */
                                               G_TYPE_DOUBLE,                                       /* min */
                                               G_TYPE_DOUBLE,                                       /* max */
@@ -163,13 +163,6 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_entreeANA) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), Liste_entreeANA );
-
-    renderer = gtk_cell_renderer_text_new();                              /* Colonne de l'id du entreeANA */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EAid (DB)"), renderer,
-                                                         "text", COLONNE_NUM_INT,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM_INT);                /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_entreeANA), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne de l'id du entreeANA */
     colonne = gtk_tree_view_column_new_with_attributes ( _("EA"), renderer,
@@ -249,7 +242,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
           
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), entreeANA->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_NUM_INT, entreeANA->num,
+                         COLONNE_ID, entreeANA->id_mnemo,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, entreeANA->min,
                          COLONNE_MAX, entreeANA->max,
@@ -288,7 +281,7 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM_INT, &num, -1 );
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &num, -1 );
        if ( num == entreeANA->num ) break;
 
        valide = gtk_tree_model_iter_next( store, &iter );
