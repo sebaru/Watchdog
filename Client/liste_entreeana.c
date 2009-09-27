@@ -81,7 +81,7 @@
 
     memcpy( &rezo_entreeANA.libelle, libelle, sizeof(rezo_entreeANA.libelle) );
     g_free( libelle );
-printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
+printf("on veut editer le entreeANA %s %d\n", rezo_entreeANA.libelle, rezo_entreeANA.id_mnemo );
     Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_EDIT_ENTREEANA,
                   (gchar *)&rezo_entreeANA, sizeof(struct CMD_TYPE_ENTREEANA) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
@@ -237,8 +237,8 @@ printf("on veut editer le entreeANA %s\n", rezo_entreeANA.libelle );
        
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_entreeANA) );           /* Acquisition du modele */
 
-    printf("maj entreeANA %s unite %d %s\n", entreeANA->libelle,
-           entreeANA->unite, Unite_vers_string(entreeANA->unite) );
+    printf("maj entreeANA %s unite %d %s id_mnemo %d\n", entreeANA->libelle,
+           entreeANA->unite, Unite_vers_string(entreeANA->unite), entreeANA->id_mnemo );
           
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), entreeANA->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,

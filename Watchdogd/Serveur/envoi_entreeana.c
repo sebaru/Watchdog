@@ -45,7 +45,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
+    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
 
     if (entree)
      { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_EDIT_ENTREEANA_OK,
