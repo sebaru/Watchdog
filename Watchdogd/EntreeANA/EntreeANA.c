@@ -46,29 +46,37 @@
   { struct DB *db;
     gint i;
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database,        /* Connexion en tant que user normal */
+    for (i = 0; i<NBR_ENTRE_ANA; i++)                                                   /* RAZ du tableau */
+     { Partage->ea[i].min = 0.0;
+       Partage->ea[i].max = 100.0;
+       Partage->ea[i].unite = 0;
+     }
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
      { Info( Config.log, DEBUG_INFO, "Charger_eana: Connexion DB failed" );
        return;
-     }                                                                           /* Si pas de histos (??) */
+     }                                                                                  /* Si pas d'accès */
 
-    for (i = 0; i<NBR_ENTRE_ANA; i++)
-     { struct CMD_TYPE_ENTREEANA *eana;
-       eana = Rechercher_entreeANADB ( Config.log, db, i );
-       if (eana)
-        { Partage->ea[i].min = eana->min;
-          Partage->ea[i].max = eana->max;
-          Partage->ea[i].unite = eana->unite;
-          g_free(eana);
+    if (!Recuperer_entreeANADB( Config.log, db ))
+     { Libere_DB_SQL( Config.log, &db );
+       return;
+     }                                                                         /* Si pas d'enregistrement */
+
+    for( ; ; )
+     { struct CMD_TYPE_ENTREEANA *entree;
+       entree = Recuperer_entreeANADB_suite( Config.log, db );
+       if (!entree)
+        { Libere_DB_SQL( Config.log, &db );
+          return;
         }
-       else
-        { Partage->ea[i].min = 0.0;
-          Partage->ea[i].max = 100.0;
-          Partage->ea[i].unite = 0;
-        }
+
+       Partage->ea[entree->num].min   = entree->min;                            /* Mise a jour du tableau */
+       Partage->ea[entree->num].max   = entree->max;
+       Partage->ea[entree->num].unite = entree->unite;
+       g_free(entree);
      }
-    Libere_DB_SQL( Config.log, &db );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */
