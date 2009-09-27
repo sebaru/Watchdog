@@ -82,7 +82,7 @@
     else { Partage->ea[rezo_entree->num].min = rezo_entree->min;        /* Mise à jour min et max de l'ea */
            Partage->ea[rezo_entree->num].max = rezo_entree->max;
            
-           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
+           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
            if (result) 
             { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_ENTREEANA) );
@@ -104,8 +104,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_entreeANA_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
-  { struct CMD_TYPE_ENTREEANA *rezo_entree;
-    struct CMD_ENREG nbr;
+  { struct CMD_ENREG nbr;
     struct CMD_TYPE_ENTREEANA *entree;
     struct DB *db;
 

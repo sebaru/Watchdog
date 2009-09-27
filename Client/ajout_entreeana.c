@@ -108,7 +108,7 @@
 
     texte = gtk_label_new( _("EA") );                 /* Id unique du entreeANA en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-    Entry_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    Entry_num = gtk_entry_new ();
     gtk_entry_set_editable( GTK_ENTRY(Entry_num), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_num, 1, 2, 0, 1 );
 
