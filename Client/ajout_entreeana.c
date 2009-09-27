@@ -36,7 +36,7 @@
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
- static GtkWidget *Spin_num;                              /* Numéro du entreeANA en cours d'édition/ajout */
+ static GtkWidget *Entry_num;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                     /* Libelle du entreeANA */
  static GtkWidget *Spin_min;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Spin_max;                              /* Numéro du entreeANA en cours d'édition/ajout */
@@ -54,7 +54,6 @@
              { if (edition)
                 { Edit_entree.min = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_min) );
                   Edit_entree.max = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_max) );
-                  Edit_entree.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   Edit_entree.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
 
                   Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,
@@ -109,8 +108,9 @@
 
     texte = gtk_label_new( _("EA") );                 /* Id unique du entreeANA en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-    Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 0, 1 );
+    Entry_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    gtk_entry_set_editable( GTK_ENTRY(Entry_num), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_num, 1, 2, 0, 1 );
 
     texte = gtk_label_new( _("min") );                /* Id unique du entreeANA en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
@@ -137,15 +137,17 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 2, 4, 5 );
 
     if (edit_entree)                                                       /* Si edition d'un entreeANA */
-     { Edit_entree.num = edit_entree->num;
+     { gchar chaine[32];
+       Edit_entree.id_mnemo = edit_entree->id_mnemo;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_entree->libelle );
+       g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), edit_entree->num );
+       gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_entree->unite );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_entree->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min), edit_entree->min );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max), edit_entree->max );
        gtk_widget_grab_focus( Entry_lib );
      }
-    else { gtk_widget_grab_focus( Spin_num );
+    else { gtk_widget_grab_focus( Entry_num );
          }
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
   }

@@ -79,9 +79,9 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo"
+                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo,%s.num"
                 " FROM %s,%s WHERE %s.id_mnemo=%s.id ORDER BY %s.num",
-                NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO,
+                NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* Where */
                 NOM_TABLE_MNEMO /* Order by */
@@ -107,6 +107,7 @@
     if (!entreeana) Info( log, DEBUG_MEM, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
      { entreeana->id_mnemo = atoi(db->row[4]);
+       entreeana->num      = atoi(db->row[5]);
        entreeana->min      = atof(db->row[0]);
        entreeana->max      = atof(db->row[1]);
        entreeana->unite    = atoi(db->row[2]);
