@@ -536,3 +536,7 @@
 
  - Mar 09
          28   Migration sous GooCanvas. Ajout des propriétés angle pour les commentaires, les passerelles, capteurs
+
+ - Sep 09
+         27   Creation des CAMERA et CAMERA_SUP dans la base de données, l'atelier et la supervision.
+
