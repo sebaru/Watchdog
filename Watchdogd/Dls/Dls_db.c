@@ -38,7 +38,7 @@
 /* Entrées: un log, une db, un nom                                                                        */
 /* Sortie: true si pas de pb, false sinon                                                                 */
 /**********************************************************************************************************/
- gboolean Retirer_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_ID_PLUGIN_DLS *dls )
+ gboolean Retirer_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[200];
 
     g_snprintf( (gchar *)requete, sizeof(requete),                                           /* Requete SQL */
@@ -57,7 +57,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_ADD_PLUGIN_DLS *dls )
+ gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[200];
     gchar *nom;
 
@@ -153,7 +153,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PLUGIN_DLS *dls )
+ gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[1024];
     gchar *nom;
 

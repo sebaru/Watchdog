@@ -258,14 +258,14 @@
  extern void Proto_fin_affichage_groupes_existants ( void );
  extern void Menu_ajouter_editer_utilisateur ( struct CMD_EDIT_UTILISATEUR *edit_util );
 
- extern void Proto_afficher_un_plugin_dls( struct CMD_SHOW_PLUGIN_DLS *dls );  /* Dans liste_plugin_dls.c */ 
- extern void Proto_cacher_un_plugin_dls( struct CMD_ID_PLUGIN_DLS *dls );
- extern void Proto_rafraichir_un_plugin_dls( struct CMD_SHOW_PLUGIN_DLS *dls );
+ extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );  /* Dans liste_plugin_dls.c */ 
+ extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
+ extern void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern void Creer_page_plugin_dls( void );
 
- extern void Menu_ajouter_editer_plugin_dls ( struct CMD_EDIT_PLUGIN_DLS *edit_dls );/* ajout_plugin_dls.c */
+ extern void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls );/* ajout_plugin_dls.c */
 
- extern void Creer_page_source_dls( struct CMD_ID_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
+ extern void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
  extern void Proto_append_source_dls( struct CMD_EDIT_SOURCE_DLS *dls, gchar *buffer );
  extern void Proto_afficher_mnemo_dls ( struct CMD_SHOW_MNEMONIQUE *mnemo );
 

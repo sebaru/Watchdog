@@ -260,7 +260,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Creer_page_source_dls( struct CMD_ID_PLUGIN_DLS *rezo_dls )
+ void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur;
     struct TYPE_INFO_SOURCE_DLS *infos;
     struct PAGE_NOTEBOOK *page;

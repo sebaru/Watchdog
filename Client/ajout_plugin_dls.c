@@ -37,7 +37,7 @@
  static GtkWidget *F_ajout;               /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du plugin en cours d'edition */
  static GtkWidget *Check_actif;                                 /* Le plugin est-il activé dans le dls ? */
- static struct CMD_EDIT_PLUGIN_DLS Edit_dls;                                /* Message en cours d'édition */
+ static struct CMD_TYPE_PLUGIN_DLS Edit_dls;                                /* Message en cours d'édition */
 /**********************************************************************************************************/
 /* CB_ajouter_editer_groupe: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -54,17 +54,17 @@
 
                   printf("Edit_dlsON = %d\n", Edit_dls.on );
                   Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_PLUGIN_DLS,
-                                (gchar *)&Edit_dls, sizeof( struct CMD_EDIT_PLUGIN_DLS ) );
+                                (gchar *)&Edit_dls, sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                 }
                else
-                { struct CMD_ADD_PLUGIN_DLS plugin_dls;
+                { struct CMD_TYPE_PLUGIN_DLS plugin_dls;
 
                   g_snprintf( plugin_dls.nom, sizeof(plugin_dls.nom),
                               "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
                   plugin_dls.on = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON(Check_actif) );
                   printf("Plugin ON = %d\n", plugin_dls.on );
                   Envoi_serveur( TAG_DLS, SSTAG_CLIENT_ADD_PLUGIN_DLS,
-                                 (gchar *)&plugin_dls, sizeof(struct CMD_ADD_PLUGIN_DLS) );
+                                 (gchar *)&plugin_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
                 }
              }
             break;
@@ -79,13 +79,13 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_plugin_dls ( struct CMD_EDIT_PLUGIN_DLS *edit_dls )
+ void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls )
   { GtkWidget *frame, *vboite, *table, *texte;
 
     if (edit_dls)
-     { memcpy( &Edit_dls, edit_dls, sizeof(struct CMD_EDIT_PLUGIN_DLS) ); /* Save pour utilisation future */
+     { memcpy( &Edit_dls, edit_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) ); /* Save pour utilisation future */
      }
-    else memset (&Edit_dls, 0, sizeof(struct CMD_EDIT_PLUGIN_DLS) );               /* Sinon RAZ structure */
+    else memset (&Edit_dls, 0, sizeof(struct CMD_TYPE_PLUGIN_DLS) );               /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_dls ? _("Edit a plugin") : _("Add a plugin")),
                                            GTK_WINDOW(F_client),

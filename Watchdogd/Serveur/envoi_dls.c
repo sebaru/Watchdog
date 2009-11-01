@@ -43,14 +43,14 @@
  #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
  #endif
 /**********************************************************************************************************/
-/* Preparer_envoi_groupe: convertit une structure PLUGIN_DLS en structure CMD_SHOW_PLUGIN_DLS             */
+/* Preparer_envoi_groupe: convertit une structure PLUGIN_DLS en structure CMD_TYPE_PLUGIN_DLS             */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_PLUGIN_DLS *Preparer_envoi_plugin_dls ( struct PLUGIN_DLS *dls )
-  { struct CMD_SHOW_PLUGIN_DLS *rezo_dls;
+ static struct CMD_TYPE_PLUGIN_DLS *Preparer_envoi_plugin_dls ( struct PLUGIN_DLS *dls )
+  { struct CMD_TYPE_PLUGIN_DLS *rezo_dls;
 
-    rezo_dls = (struct CMD_SHOW_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_SHOW_PLUGIN_DLS) );
+    rezo_dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!rezo_dls) { return(NULL); }
 
     rezo_dls->id = dls->id;
@@ -77,7 +77,7 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_ID_PLUGIN_DLS *rezo_dls )
+ void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -90,7 +90,7 @@
     retour = Retirer_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls );
     if (retour)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
-                     (gchar *)rezo_dls, sizeof(struct CMD_ID_PLUGIN_DLS) );
+                     (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -106,8 +106,8 @@
 /* Entrée: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_ID_PLUGIN_DLS *rezo_dls )
-  { struct CMD_EDIT_PLUGIN_DLS edit_dls;
+ void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
+  { struct CMD_TYPE_PLUGIN_DLS edit_dls;
     struct PLUGIN_DLS *dls;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -120,7 +120,7 @@
        memcpy( &edit_dls.nom, dls->nom, sizeof(edit_dls.nom) );
 
        Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
-                  (gchar *)&edit_dls, sizeof(struct CMD_EDIT_PLUGIN_DLS) );
+                  (gchar *)&edit_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
        g_free(dls);                                                                 /* liberation mémoire */
      }
     else
@@ -136,7 +136,7 @@
 /* Entrée: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_EDIT_PLUGIN_DLS *rezo_dls )
+ void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct PLUGIN_DLS *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -152,7 +152,7 @@
      }
     else { result = Rechercher_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls->id );
            if (result) 
-            { struct CMD_SHOW_PLUGIN_DLS *dls;
+            { struct CMD_TYPE_PLUGIN_DLS *dls;
               dls = Preparer_envoi_plugin_dls ( result );
               g_free(result);
               if (!dls)
@@ -187,7 +187,7 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_ID_PLUGIN_DLS *rezo_dls )
+ void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gchar chaine[80];
 
     client->transfert.buffer = g_malloc0( Config.taille_bloc_reseau );
@@ -213,7 +213,7 @@
     lockf( client->transfert.fd, F_LOCK, 0 );                                  /* Verrouillage du fichier */
     ((struct CMD_EDIT_SOURCE_DLS *)client->transfert.buffer)->id = rezo_dls->id;
     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK,
-                  (gchar *)rezo_dls, sizeof(struct CMD_ID_PLUGIN_DLS) );
+                  (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     Client_mode( client, ENVOI_SOURCE_DLS );
   }
 /**********************************************************************************************************/
@@ -322,7 +322,7 @@
 /* Entrée: le groupe à créer                                                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_ADD_PLUGIN_DLS *rezo_dls )
+ void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct PLUGIN_DLS *result;
     gint id;
     struct DB *Db_watchdog;
@@ -346,7 +346,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_PLUGIN_DLS *dls;
+            { struct CMD_TYPE_PLUGIN_DLS *dls;
               gchar chaine[80];
               gint id_fichier;
 
@@ -373,7 +373,7 @@
                                       (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                       }
                      else { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,/* Tout va bien */
-                                          (gchar *)dls, sizeof(struct CMD_SHOW_PLUGIN_DLS) );
+                                          (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
                             g_free(dls);
                           }
                    }
@@ -386,7 +386,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_plugins_dls_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_PLUGIN_DLS *rezo_dls;
+  { struct CMD_TYPE_PLUGIN_DLS *rezo_dls;
     struct CMD_ENREG nbr;
     struct PLUGIN_DLS *dls;
     struct DB *db;
@@ -426,7 +426,7 @@
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
-                         (gchar *)rezo_dls, sizeof(struct CMD_SHOW_PLUGIN_DLS) );
+                         (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
           g_free(rezo_dls);
         }
      }

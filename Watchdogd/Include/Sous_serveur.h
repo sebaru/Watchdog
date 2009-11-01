@@ -85,16 +85,16 @@
                                                 struct CMD_EDIT_UTILISATEUR *rezo_util );
 
  extern void *Envoyer_plugins_dls_thread ( struct CLIENT *client );                   /* Dans envoi_dls.c */
- extern void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_ID_PLUGIN_DLS *rezo_dls );
- extern void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_ADD_PLUGIN_DLS *rezo_dls );
- extern void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_ID_PLUGIN_DLS *rezo_dls );
+ extern void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
+ extern void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
+ extern void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern gboolean Envoyer_source_dls ( struct CLIENT *client );
  extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_EDIT_SOURCE_DLS *edit_dls,
                                        gchar *buffer );
  extern void *Proto_compiler_source_dls( struct CLIENT *client );
  extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, gint id );
- extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_ID_PLUGIN_DLS *rezo_dls );
- extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_EDIT_PLUGIN_DLS *rezo_dls );
+ extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
+ extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
 
  extern void *Envoyer_messages_thread ( struct CLIENT *client );                  /* Dans envoi_message.c */
  extern void Proto_editer_message ( struct CLIENT *client, struct CMD_ID_MESSAGE *rezo_msg );

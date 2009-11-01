@@ -23,32 +23,32 @@
                
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK:
-             { struct CMD_SHOW_PLUGIN_DLS *dls;
-               dls = (struct CMD_SHOW_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_afficher_un_plugin_dls( dls );
              }
             break;
        case SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK:
-             { struct CMD_ID_PLUGIN_DLS *dls;
-               dls = (struct CMD_ID_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_cacher_un_plugin_dls( dls );
              }
             break;
        case SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK:
-             { struct CMD_EDIT_PLUGIN_DLS *dls;
-               dls = (struct CMD_EDIT_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Menu_ajouter_editer_plugin_dls( dls );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK:
-             { struct CMD_SHOW_PLUGIN_DLS *dls;
-               dls = (struct CMD_SHOW_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_rafraichir_un_plugin_dls( dls );
              }
             break;
        case SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK:
-             { struct CMD_ID_PLUGIN_DLS *dls;
-               dls = (struct CMD_ID_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Creer_page_source_dls( dls );
              }
             break;
@@ -61,12 +61,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS:
-             { struct CMD_SHOW_PLUGIN_DLS *dls;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plusun();
 
-               dls = (struct CMD_SHOW_PLUGIN_DLS *)g_malloc0( sizeof( struct CMD_SHOW_PLUGIN_DLS ) );
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                if (!dls) return; 
-               memcpy( dls, connexion->donnees, sizeof(struct CMD_SHOW_PLUGIN_DLS ) );
+               memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
                printf("One plugin receive %s\n", dls->nom );
                Arrivee_dls = g_list_append( Arrivee_dls, dls );
              }

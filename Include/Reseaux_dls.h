@@ -9,13 +9,7 @@
 
  #include "Cst_dls.h"
 
- struct CMD_SHOW_PLUGIN_DLS
-  { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    guint id;
-    guint on;
-  };
-
- struct CMD_EDIT_PLUGIN_DLS
+ struct CMD_TYPE_PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     guint id;
     guint on;
@@ -24,15 +18,6 @@
  struct CMD_EDIT_SOURCE_DLS
   { guint id;
     guint taille;                                 /* Taille des données qui suivent dans le paquet reseau */
-  };
-
- struct CMD_ADD_PLUGIN_DLS
-  { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    guint on;
-  };
- struct CMD_ID_PLUGIN_DLS
-  { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    guint id;
   };
 
  enum 

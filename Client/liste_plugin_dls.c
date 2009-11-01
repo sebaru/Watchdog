@@ -70,7 +70,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_plugin_dls ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_PLUGIN_DLS rezo_dls;
+  { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -91,7 +91,7 @@
                g_free( nom );
 
                Envoi_serveur( TAG_DLS, SSTAG_CLIENT_DEL_PLUGIN_DLS,
-                              (gchar *)&rezo_dls, sizeof(struct CMD_ID_PLUGIN_DLS) );
+                              (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -141,7 +141,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_source_dls ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_PLUGIN_DLS rezo_dls;
+    struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -163,7 +163,7 @@
     g_free( nom );
     if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja créé et affichée ? */
      { Envoi_serveur( TAG_DLS, SSTAG_CLIENT_EDIT_SOURCE_DLS,
-                      (gchar *)&rezo_dls, sizeof(struct CMD_ID_PLUGIN_DLS) );
+                      (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
@@ -175,7 +175,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_plugin_dls ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_PLUGIN_DLS rezo_dls;
+    struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -196,7 +196,7 @@
     memcpy( &rezo_dls.nom, nom, sizeof(rezo_dls.nom) );
     g_free( nom );
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_EDIT_PLUGIN_DLS,
-                   (gchar *)&rezo_dls, sizeof(struct CMD_ID_PLUGIN_DLS) );
+                   (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
   }
@@ -428,7 +428,7 @@
 /* Entrée: une reference sur le plugin_dls                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_plugin_dls( GtkTreeIter *iter, struct CMD_SHOW_PLUGIN_DLS *plugin_dls )
+ static void Rafraichir_visu_plugin_dls( GtkTreeIter *iter, struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) );          /* Acquisition du modele */
@@ -445,7 +445,7 @@
 /* Entrée: une reference sur le plugin_dls                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_plugin_dls( struct CMD_SHOW_PLUGIN_DLS *plugin_dls )
+ void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkListStore *store;
     GtkTreeIter iter;
     if (!Tester_page_notebook(TYPE_PAGE_PLUGIN_DLS)) Creer_page_plugin_dls();
@@ -459,7 +459,7 @@ printf("Recu un plugin DLS\n");
 /* Entrée: une reference sur le plugin_dls                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_plugin_dls( struct CMD_ID_PLUGIN_DLS *plugin_dls )
+ void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -485,7 +485,7 @@ printf("Recu un plugin DLS\n");
 /* Entrée: une reference sur le plugin_dls                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_plugin_dls( struct CMD_SHOW_PLUGIN_DLS *plugin_dls )
+ void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
