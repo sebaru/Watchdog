@@ -25,12 +25,9 @@
 
     ENVOI_DONNEES,                                        /* Envoi des données GIF... au client si besoin */
     ENVOI_HISTO,
-    ENVOI_INHIB,
-    ENVOI_PALETTE,
 
     VALIDE_NON_ROOT,
 
-    ENVOI_GIF,
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,

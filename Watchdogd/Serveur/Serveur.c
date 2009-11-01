@@ -85,8 +85,6 @@
        case ATTENTE_NEW_PASSWORD        : return("ATTENTE_NEW_PASSWORD");
        case ENVOI_DONNEES               : return("ENVOI_DONNEES");
        case ENVOI_HISTO                 : return("ENVOI_HISTO");
-       case ENVOI_INHIB                 : return("ENVOI_INHIB");
-       case ENVOI_PALETTE               : return("ENVOI_PALETTE");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
        case ENVOI_SOURCE_DLS            : return("ENVOI_SOURCE_DLS");
@@ -111,8 +109,6 @@
                                         : return("ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE");
        case ENVOI_PALETTE_FOR_ATELIER_PALETTE
                                         : return("ENVOI_PALETTE_FOR_ATELIER_PALETTE");
-
-       case ENVOI_GIF                   : return("ENVOI_GIF");
 
        case VALIDE_NON_ROOT             : return("VALIDE_NON_ROOT");
        case VALIDE                      : return("VALIDE");
@@ -306,25 +302,18 @@
                                                  taille += Ajouter_repertoire_liste( client, "Gif",
                                                                                      client->ident.version_d );
                                                  client->transfert.taille = taille;
-                                                 Client_mode (client, ENVOI_GIF );
                                                  break;
                                               }
                                            }
                                           Client_mode ( client, new_mode );
                                           break;
-                case ENVOI_GIF          : if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
-                                          break;
-                case ENVOI_DONNEES      : /*if (Envoyer_donnees( client ))*/ Client_mode (client, ENVOI_HISTO);
+                case ENVOI_DONNEES      : if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
                                           break;
                 case ENVOI_HISTO        : Ref_client( client );  /* Indique que la structure est utilisée */
                                           pthread_create( &tid, NULL,
                                                           (void *)Envoyer_histo_thread, client );
                                           pthread_detach( tid );
                                           Client_mode( client, VALIDE_NON_ROOT );
-                                          break;
-                case ENVOI_INHIB        : /*if(Envoyer_inhib( client ))*/ Client_mode (client, ENVOI_PALETTE);
-                                          break;
-                case ENVOI_PALETTE      : /*if(Envoyer_palette( client ))*/ Client_mode (client, VALIDE_NON_ROOT);
                                           break;
 
                 case VALIDE_NON_ROOT    : /*Client_mode(client, VALIDE); */           /* Etat transitoire */
@@ -402,43 +391,35 @@
                      break;
 
                 case ENVOI_MOTIF_SUPERVISION:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL, (void *)Envoyer_motif_supervision_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;   
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_motif_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;   
                 case ENVOI_COMMENT_SUPERVISION:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_comment_supervision_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_comment_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_PASSERELLE_SUPERVISION:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_passerelle_supervision_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;   
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_passerelle_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;   
                 case ENVOI_PALETTE_SUPERVISION:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_palette_supervision_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;   
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_palette_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;   
                 case ENVOI_CAPTEUR_SUPERVISION:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_capteur_supervision_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;   
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_capteur_supervision_thread, client );
+                     pthread_detach( tid );
+                     break;   
                 case ENVOI_CAMERA_SUP_SUPERVISION:
                      Client_mode( client, VALIDE );
                      Ref_client( client );                       /* Indique que la structure est utilisée */
@@ -452,42 +433,33 @@
                      pthread_detach( tid );
                      break;   
                 case ENVOI_ICONE_FOR_ATELIER:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_icones_pour_atelier_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_icones_pour_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_CLASSE_FOR_ATELIER:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_classes_pour_atelier_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_classes_pour_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_SYNOPTIQUE_FOR_ATELIER:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_synoptiques_pour_atelier_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE:
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_synoptiques_pour_atelier_palette_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_PALETTE_FOR_ATELIER_PALETTE:
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_palette_atelier_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
               }
 /****************************************** Envoi des chaines capteurs ************************************/
              if (client->mode == VALIDE && client->bit_capteurs)
