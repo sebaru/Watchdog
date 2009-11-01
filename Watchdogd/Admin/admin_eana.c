@@ -60,8 +60,13 @@
        return;
      }
 
+    if (!Recuperer_entreeANADB_simple( Config.log, db ))
+     { Libere_DB_SQL( Config.log, &db );
+       return;
+     }                                                                           /* Si pas de histos (??) */
+
     for( ; ; )
-     { entree = Recuperer_entreeANADB_suite( Config.log, db );
+     { entree = Recuperer_entreeANADB_simple_suite( Config.log, db );
        if (!entree)
         { Libere_DB_SQL( Config.log, &db );
           return;
@@ -216,7 +221,7 @@
        Write_admin ( client->connexion,
                      "  stop id                                - Demarre le module id\n" );
        Write_admin ( client->connexion,
-                     "  rs                                     - Affiche les status des equipements RS485\n" );
+                     "  ea                                     - Affiche les configs EANA\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }

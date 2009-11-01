@@ -59,14 +59,14 @@
        return;
      }                                                                                  /* Si pas d'accès */
 
-    if (!Recuperer_entreeANADB( Config.log, db ))
+    if (!Recuperer_entreeANADB_simple( Config.log, db ))
      { Libere_DB_SQL( Config.log, &db );
        return;
      }                                                                         /* Si pas d'enregistrement */
 
     for( ; ; )
      { struct CMD_TYPE_ENTREEANA *entree;
-       entree = Recuperer_entreeANADB_suite( Config.log, db );
+       entree = Recuperer_entreeANADB_simple_suite( Config.log, db );
        if (!entree)
         { Libere_DB_SQL( Config.log, &db );
           return;
@@ -83,7 +83,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db )
+ gboolean Recuperer_entreeANADB_simple ( struct LOG *log, struct DB *db )
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -101,7 +101,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_simple_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_ENTREEANA *entreeana;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */

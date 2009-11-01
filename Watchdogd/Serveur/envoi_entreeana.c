@@ -45,7 +45,9 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
+#ifdef bouh
     entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
+#endif
 
     if (entree)
      { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_EDIT_ENTREEANA_OK,
@@ -122,7 +124,7 @@
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
-
+#ifdef bouh
     if (!Recuperer_entreeANADB( Config.log, db ))
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        Libere_DB_SQL( Config.log, &db );
@@ -148,6 +150,7 @@
        Envoi_client ( client, tag, sstag, (gchar *)entree, sizeof(struct CMD_TYPE_ENTREEANA) );
        g_free(entree);
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_classes: Envoi des classes au client GID_CLASSE                                                */
