@@ -16,8 +16,8 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_eana ( void );
  extern struct CMD_TYPE_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num );
- extern gboolean Recuperer_entreeANADB_simple ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_simple_suite( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db );
  extern gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_ENTREEANA *entreeana );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

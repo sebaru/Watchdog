@@ -39,14 +39,14 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static gboolean Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
+ static void Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
   { struct timeval tv;
     struct MSGDB *msg;
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
      { Info_n( Config.log, DEBUG_INFO,
                "MSRV: Gerer_arrive_message_dls_on: Message non trouvé", num );
-       return(FALSE);                                 /* On n'a pas trouvé le message, alors on s'en va ! */
+       return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     else if (msg->not_inhibe)                                /* Distribution du message aux sous serveurs */
      { struct HISTODB histo;
@@ -77,7 +77,6 @@
         }
      }
     g_free( msg );                                                 /* On a plus besoin de cette reference */
-    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
@@ -130,7 +129,7 @@
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Recu message DLS", num );
 
     if (etat)                                                         /* Le message est une apparition ?? */
-     { if ( ! Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num ) ) return;
+     { Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
      }
     else                                                   /* Le message doit disparaitre de l'historique */
      { Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );

@@ -197,9 +197,8 @@
 
     nbr_enreg_max = max;
     nbr_enreg     = 0;
-    if (max) g_snprintf( chaine, sizeof(chaine), "%s", texte );
-    else     g_snprintf( chaine, sizeof(chaine), _("done") );
     progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
+    g_snprintf( chaine, sizeof(chaine), "%s", texte );
     gtk_progress_bar_set_text( progress, chaine );
   }
 /**********************************************************************************************************/

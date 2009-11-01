@@ -1,20 +1,20 @@
 /**********************************************************************************************************/
 /* Watchdogd/Db/Synoptiques/camera_sup.c       Ajout/retrait de module camera_sup dans les synoptiques    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 27 sept. 2009 17:50:19 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 29 jan 2006 15:09:58 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * camera_sup.c
- * This file is part of Watchdog
+ * This file is part of <program name>
  *
  * Copyright (C) 2009 - sebastien
  *
- * Watchdog is free software; you can redistribute it and/or modify
+ * <program name> is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * Watchdog is distributed in the hope that it will be useful,
+ * <program name> is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
