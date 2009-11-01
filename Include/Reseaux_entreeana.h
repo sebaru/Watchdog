@@ -10,8 +10,7 @@
  #include "Cst_entreeana.h"
 
  struct CMD_TYPE_ENTREEANA
-  { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
-    guint  unite;                                                                         /* Km, h, ° ... */
+  { guint  unite;                                                                         /* Km, h, ° ... */
     guint  num;                                                                         /* Numero de l'EA */
     gfloat min;
     gfloat max;

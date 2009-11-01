@@ -84,7 +84,6 @@
           case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( connexion ); break;
           case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
           case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
-          case TAG_ENTREEANA   : Gerer_protocole_entreeana    ( connexion ); break;
           case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
           case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
           case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;

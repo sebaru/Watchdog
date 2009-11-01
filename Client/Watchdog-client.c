@@ -92,8 +92,6 @@
                             Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Histo hard"), N_("histo_hard"),
                             Menu_want_histo_hard, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_Entree ANA"), N_("Edit IANA"),
-                            Menu_want_entreeANA, GNOME_STOCK_PIXMAP_BOOK_RED ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Courbes"), N_("Show Curves"),
                             Menu_want_courbe, GNOME_STOCK_MENU_CONVERT ),
     GNOMEUIINFO_ITEM_STOCK( N_("Histo Courbes"), N_("Histo Curves"),

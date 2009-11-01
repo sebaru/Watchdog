@@ -45,7 +45,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
+    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
 
     if (entree)
      { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_EDIT_ENTREEANA_OK,
@@ -54,8 +54,10 @@
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
+#ifdef bouh
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to locate entree %s", rezo_entree->libelle);
+#endif
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -74,15 +76,17 @@
     retour = Modifier_entreeANADB ( Config.log, Db_watchdog, rezo_entree );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
+#ifdef bouh
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to edit entree %s", rezo_entree->libelle);
+#endif
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { Partage->ea[rezo_entree->num].min = rezo_entree->min;        /* Mise à jour min et max de l'ea */
            Partage->ea[rezo_entree->num].max = rezo_entree->max;
            
-           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
+           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->num );
            if (result) 
             { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_ENTREEANA) );
@@ -91,8 +95,10 @@
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
+#ifdef bouh
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate entree %s", rezo_entree->libelle);
+#endif
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
