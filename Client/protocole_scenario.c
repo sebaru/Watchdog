@@ -54,36 +54,36 @@
              }
             break;
        case SSTAG_SERVEUR_ADD_SCENARIO_OK:
-             { struct CMD_SHOW_SCENARIO *sce;
-               sce = (struct CMD_SHOW_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *sce;
+               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_afficher_un_scenario( sce );
              }
             break;
        case SSTAG_SERVEUR_DEL_SCENARIO_OK:
-             { struct CMD_ID_SCENARIO *sce;
-               sce = (struct CMD_ID_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *sce;
+               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_cacher_un_scenario( sce );
              }
             break;
        case SSTAG_SERVEUR_EDIT_SCENARIO_OK:
-             { struct CMD_EDIT_SCENARIO *sce;
-               sce = (struct CMD_EDIT_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *sce;
+               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Menu_ajouter_editer_scenario( sce );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_SCENARIO_OK:
-             { struct CMD_SHOW_SCENARIO *sce;
-               sce = (struct CMD_SHOW_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *sce;
+               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_rafraichir_un_scenario( sce );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SCENARIO:
-             { struct CMD_SHOW_SCENARIO *sce;
+             { struct CMD_TYPE_SCENARIO *sce;
                Set_progress_plusun();
 printf("Addprogress scenario\n");
-               sce = (struct CMD_SHOW_SCENARIO *)g_malloc0( sizeof( struct CMD_SHOW_SCENARIO ) );
+               sce = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
                if (!sce) return; 
-               memcpy( sce, connexion->donnees, sizeof(struct CMD_SHOW_SCENARIO ) );
+               memcpy( sce, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
                Arrivee_scenario = g_list_append( Arrivee_scenario, sce );
              }
             break;

@@ -39,14 +39,14 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_scenario: convertit une structure MSG en structure CMD_SHOW_SCENARIO                    */
+/* Preparer_envoi_scenario: convertit une structure MSG en structure CMD_TYPE_SCENARIO                    */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_SCENARIO *Preparer_envoi_sc ( struct SCENARIO_DB *sc )
-  { struct CMD_SHOW_SCENARIO *rezo_sc;
+ static struct CMD_TYPE_SCENARIO *Preparer_envoi_sc ( struct SCENARIO_DB *sc )
+  { struct CMD_TYPE_SCENARIO *rezo_sc;
 
-    rezo_sc = (struct CMD_SHOW_SCENARIO *)g_malloc0( sizeof(struct CMD_SHOW_SCENARIO) );
+    rezo_sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
     if (!rezo_sc) { return(NULL); }
 
     rezo_sc->id        = sc->id;
@@ -81,8 +81,8 @@
 /* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_scenario ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc )
-  { struct CMD_EDIT_SCENARIO edit_sc;
+ void Proto_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
+  { struct CMD_TYPE_SCENARIO edit_sc;
     struct SCENARIO_DB *sc;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -119,7 +119,7 @@
        memcpy( &edit_sc.libelle, sc->libelle, sizeof(rezo_sc->libelle) );
 
        Envoi_client( client, TAG_SCENARIO, SSTAG_SERVEUR_EDIT_SCENARIO_OK,
-                  (gchar *)&edit_sc, sizeof(struct CMD_EDIT_SCENARIO) );
+                  (gchar *)&edit_sc, sizeof(struct CMD_TYPE_SCENARIO) );
        g_free(sc);                                                                  /* liberation mémoire */
      }
     else
@@ -135,7 +135,7 @@
 /* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_EDIT_SCENARIO *rezo_sc )
+ void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { struct SCENARIO_DB *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -151,7 +151,7 @@
      }
     else { result = Rechercher_scenarioDB( Config.log, Db_watchdog, rezo_sc->id );
            if (result) 
-            { struct CMD_SHOW_SCENARIO *sc;
+            { struct CMD_TYPE_SCENARIO *sc;
               sc = Preparer_envoi_sc ( result );
               g_free(result);
               if (!sc)
@@ -162,7 +162,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_SCENARIO, SSTAG_SERVEUR_VALIDE_EDIT_SCENARIO_OK,
-                                   (gchar *)sc, sizeof(struct CMD_SHOW_SCENARIO) );
+                                   (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
                      g_free(sc);
                      Charger_scenario ();
                    }
@@ -181,7 +181,7 @@
 /* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc,
+ void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc,
                                           gint tag, gint sstag )
   { gboolean retour;
     struct DB *Db_watchdog;
@@ -191,7 +191,7 @@
 
     if (retour)
      { Envoi_client( client, tag, sstag,
-                     (gchar *)rezo_sc, sizeof(struct CMD_ID_SCENARIO) );
+                     (gchar *)rezo_sc, sizeof(struct CMD_TYPE_SCENARIO) );
        Charger_scenario ();
      }
     else
@@ -207,7 +207,7 @@
 /* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_scenario ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc )
+ void Proto_effacer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { Proto_effacer_scenario_tag (client, rezo_sc, TAG_SCENARIO, SSTAG_SERVEUR_DEL_SCENARIO_OK );
   }
 /**********************************************************************************************************/
@@ -215,7 +215,7 @@
 /* Entrée: le sc à créer                                                                                  */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_ADD_SCENARIO *rezo_sc )
+ void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { struct SCENARIO_DB *result;
     gint id;
     struct DB *Db_watchdog;
@@ -238,7 +238,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_SCENARIO *sc;
+            { struct CMD_TYPE_SCENARIO *sc;
               sc = Preparer_envoi_sc ( result );
               g_free(result);
               if (!sc)
@@ -249,7 +249,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_SCENARIO, SSTAG_SERVEUR_ADD_SCENARIO_OK,
-                                   (gchar *)sc, sizeof(struct CMD_SHOW_SCENARIO) );
+                                   (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
                      g_free(sc);
                      Charger_scenario ();
                    }
@@ -262,7 +262,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_scenario_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_SCENARIO *rezo_sc;
+  { struct CMD_TYPE_SCENARIO *rezo_sc;
     struct CMD_ENREG nbr;
     struct SCENARIO_DB *sc;
     struct DB *db;
@@ -302,7 +302,7 @@
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           Envoi_client ( client, TAG_SCENARIO, SSTAG_SERVEUR_ADDPROGRESS_SCENARIO,
-                         (gchar *)rezo_sc, sizeof(struct CMD_SHOW_SCENARIO) );
+                         (gchar *)rezo_sc, sizeof(struct CMD_TYPE_SCENARIO) );
           g_free(rezo_sc);
         }
      }

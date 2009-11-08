@@ -114,7 +114,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure sc                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_ADD_SCENARIO *scenario )
+ gint Ajouter_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *scenario )
   { gchar requete[4096];
     gchar *libelle;
 
@@ -152,7 +152,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure scenario                      */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_EDIT_SCENARIO *scenario )
+ gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *scenario )
   { gchar requete[512], *libelle;
 
     libelle = Normaliser_chaine ( log, scenario->libelle );              /* Formatage correct des chaines */
@@ -186,7 +186,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_ID_SCENARIO *sc )
+ gboolean Retirer_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *sc )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

@@ -57,7 +57,7 @@
  static GtkWidget *Check_jours[8];                                                /* valide quels jours ? */
  static GtkWidget *Check_mois[13];                                                 /* valide quels mois ? */
  static GtkWidget *Check_actif;                                  /* Le scenario est-il actif ou inhibe ?? */
- static struct CMD_EDIT_SCENARIO Edit_sce;                                  /* Message en cours d'édition */
+ static struct CMD_TYPE_SCENARIO Edit_sce;                                  /* Message en cours d'édition */
 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
@@ -120,10 +120,10 @@
                   Edit_sce.bit_m     = (En_cours_M ? Motif->bit_clic : Motif->bit_clic2);
 
                   Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_VALIDE_EDIT_SCENARIO,
-                                (gchar *)&Edit_sce, sizeof( struct CMD_EDIT_SCENARIO ) );
+                                (gchar *)&Edit_sce, sizeof( struct CMD_TYPE_SCENARIO ) );
                 }
                else
-                { struct CMD_ADD_SCENARIO new_sce;
+                { struct CMD_TYPE_SCENARIO new_sce;
                   g_snprintf( new_sce.libelle, sizeof(new_sce.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   new_sce.actif     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
@@ -153,7 +153,7 @@
                   new_sce.bit_m     = (En_cours_M ? Motif->bit_clic : Motif->bit_clic2);
 
                   Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_ADD_SCENARIO,
-                                (gchar *)&new_sce, sizeof( struct CMD_EDIT_SCENARIO ) );
+                                (gchar *)&new_sce, sizeof( struct CMD_TYPE_SCENARIO ) );
                 }
              }
             break;
@@ -168,15 +168,15 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_supervision_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce )
+ void Menu_supervision_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce )
   { GtkWidget *frame, *table, *texte, *hboite;
 
     if (edit_sce)
-     { memcpy( &Edit_sce, edit_sce, sizeof(struct CMD_EDIT_SCENARIO) );   /* Save pour utilisation future */
+     { memcpy( &Edit_sce, edit_sce, sizeof(struct CMD_TYPE_SCENARIO) );   /* Save pour utilisation future */
        if (Edit_sce.bit_m == Motif->bit_clic) En_cours_M = TRUE;
        else En_cours_M = FALSE;
      }
-    else memset (&Edit_sce, 0, sizeof(struct CMD_EDIT_SCENARIO) );                 /* Sinon RAZ structure */
+    else memset (&Edit_sce, 0, sizeof(struct CMD_TYPE_SCENARIO) );                 /* Sinon RAZ structure */
 
     F_ajout2 = gtk_dialog_new_with_buttons( (edit_sce ? _("Edit a scenario") : _("Add a scenario")),
                                            GTK_WINDOW(F_client),
@@ -344,7 +344,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_scenario ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_SCENARIO rezo_scenario;
+  { struct CMD_TYPE_SCENARIO rezo_scenario;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -365,7 +365,7 @@
                g_free( libelle );
 
                Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_DEL_SCENARIO,
-                             (gchar *)&rezo_scenario, sizeof(struct CMD_ID_SCENARIO) );
+                             (gchar *)&rezo_scenario, sizeof(struct CMD_TYPE_SCENARIO) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -407,7 +407,7 @@
 /**********************************************************************************************************/
  static void Menu_supervision_editer_scenario ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_SCENARIO rezo_scenario;
+    struct CMD_TYPE_SCENARIO rezo_scenario;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -429,7 +429,7 @@
     memcpy( &rezo_scenario.libelle, libelle, sizeof(rezo_scenario.libelle) );
     g_free( libelle );
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_EDIT_SCENARIO,
-                  (gchar *)&rezo_scenario, sizeof(struct CMD_ID_SCENARIO) );
+                  (gchar *)&rezo_scenario, sizeof(struct CMD_TYPE_SCENARIO) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -594,7 +594,7 @@
 /* Entrée: une reference sur le scenario                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_scenario( GtkTreeIter *iter, struct CMD_SHOW_SCENARIO *scenario )
+ static void Rafraichir_visu_scenario( GtkTreeIter *iter, struct CMD_TYPE_SCENARIO *scenario )
   { GtkTreeModel *store;
     gchar chaine[20];
 
@@ -621,7 +621,7 @@ printf("Rafraichir visu_scenario fin\n");
 /* Entrée: une reference sur le scenario                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_supervision_afficher_un_scenario( struct CMD_SHOW_SCENARIO *scenario )
+ void Proto_supervision_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -636,7 +636,7 @@ printf("Rafraichir visu_scenario fin\n");
 /* Entrée: une reference sur le scenario                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_supervision_cacher_un_scenario( struct CMD_ID_SCENARIO *scenario )
+ void Proto_supervision_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -662,7 +662,7 @@ printf("Rafraichir visu_scenario fin\n");
 /* Entrée: une reference sur le scenario                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_supervision_rafraichir_un_scenario( struct CMD_SHOW_SCENARIO *scenario )
+ void Proto_supervision_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

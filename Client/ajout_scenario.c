@@ -22,7 +22,7 @@
  static GtkWidget *Check_jours[8];                                                /* valide quels jours ? */
  static GtkWidget *Check_mois[13];                                                 /* valide quels mois ? */
  static GtkWidget *Check_actif;                                  /* Le scenario est-il actif ou inhibe ?? */
- static struct CMD_EDIT_SCENARIO Edit_sce;                                  /* Message en cours d'édition */
+ static struct CMD_TYPE_SCENARIO Edit_sce;                                  /* Message en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_scenario: Fonction appelée qd on appuie sur un des boutons de l'interface             */
@@ -62,10 +62,10 @@
                   Edit_sce.bit_m     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitm) );
 
                   Envoi_serveur( TAG_SCENARIO, SSTAG_CLIENT_VALIDE_EDIT_SCENARIO,
-                                (gchar *)&Edit_sce, sizeof( struct CMD_EDIT_SCENARIO ) );
+                                (gchar *)&Edit_sce, sizeof( struct CMD_TYPE_SCENARIO ) );
                 }
                else
-                { struct CMD_ADD_SCENARIO new_sce;
+                { struct CMD_TYPE_SCENARIO new_sce;
                   g_snprintf( new_sce.libelle, sizeof(new_sce.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   new_sce.actif     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
@@ -95,7 +95,7 @@
                   new_sce.bit_m     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitm) );
 
                   Envoi_serveur( TAG_SCENARIO, SSTAG_CLIENT_ADD_SCENARIO,
-                                (gchar *)&new_sce, sizeof( struct CMD_EDIT_SCENARIO ) );
+                                (gchar *)&new_sce, sizeof( struct CMD_TYPE_SCENARIO ) );
                 }
              }
             break;
@@ -134,13 +134,13 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce )
+ void Menu_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce )
   { GtkWidget *frame, *table, *texte, *hboite;
 
     if (edit_sce)
-     { memcpy( &Edit_sce, edit_sce, sizeof(struct CMD_EDIT_SCENARIO) );    /* Save pour utilisation future */
+     { memcpy( &Edit_sce, edit_sce, sizeof(struct CMD_TYPE_SCENARIO) );    /* Save pour utilisation future */
      }
-    else memset (&Edit_sce, 0, sizeof(struct CMD_EDIT_SCENARIO) );                  /* Sinon RAZ structure */
+    else memset (&Edit_sce, 0, sizeof(struct CMD_TYPE_SCENARIO) );                  /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_sce ? _("Edit a scenario") : _("Add a scenario")),
                                            GTK_WINDOW(F_client),

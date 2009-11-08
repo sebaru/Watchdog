@@ -97,7 +97,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_scenario ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_SCENARIO rezo_scenario;
+  { struct CMD_TYPE_SCENARIO rezo_scenario;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -118,7 +118,7 @@
                g_free( libelle );
 
                Envoi_serveur( TAG_SCENARIO, SSTAG_CLIENT_DEL_SCENARIO,
-                             (gchar *)&rezo_scenario, sizeof(struct CMD_ID_SCENARIO) );
+                             (gchar *)&rezo_scenario, sizeof(struct CMD_TYPE_SCENARIO) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -168,7 +168,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_scenario ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_SCENARIO rezo_scenario;
+    struct CMD_TYPE_SCENARIO rezo_scenario;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -189,7 +189,7 @@
     memcpy( &rezo_scenario.libelle, libelle, sizeof(rezo_scenario.libelle) );
     g_free( libelle );
     Envoi_serveur( TAG_SCENARIO, SSTAG_CLIENT_EDIT_SCENARIO,
-                  (gchar *)&rezo_scenario, sizeof(struct CMD_ID_SCENARIO) );
+                  (gchar *)&rezo_scenario, sizeof(struct CMD_TYPE_SCENARIO) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -467,7 +467,7 @@
 /* Entrée: une reference sur le scenario                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_scenario( GtkTreeIter *iter, struct CMD_SHOW_SCENARIO *scenario )
+ static void Rafraichir_visu_scenario( GtkTreeIter *iter, struct CMD_TYPE_SCENARIO *scenario )
   { GtkTreeModel *store;
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_scenario) );             /* Acquisition du modele */
 printf("Rafraichir visu_scenario %d\n", scenario->id);
@@ -508,7 +508,7 @@ printf("Rafraichir visu_scenario fin\n");
 /* Entrée: une reference sur le scenario                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_scenario( struct CMD_SHOW_SCENARIO *scenario )
+ void Proto_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -523,7 +523,7 @@ printf("Rafraichir visu_scenario fin\n");
 /* Entrée: une reference sur le scenario                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_scenario( struct CMD_ID_SCENARIO *scenario )
+ void Proto_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -549,7 +549,7 @@ printf("Rafraichir visu_scenario fin\n");
 /* Entrée: une reference sur le scenario                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_scenario( struct CMD_SHOW_SCENARIO *scenario )
+ void Proto_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

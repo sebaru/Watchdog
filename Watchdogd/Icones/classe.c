@@ -137,6 +137,7 @@
        return(NULL);
      }
 
+    classe = (struct CLASSEDB *)g_malloc0( sizeof(struct CLASSEDB) );
     if (!classe) Info( log, DEBUG_MEM, "Rechercher_classeDB: Mem error" );
     else
      { memcpy( classe->libelle, db->row[0], sizeof(classe->libelle) );       /* Recopie dans la structure */

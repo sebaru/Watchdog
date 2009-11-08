@@ -67,33 +67,6 @@
     return( (struct TRAME_ITEM_COMMENT *)(liste->data) );
   }
 /**********************************************************************************************************/
-/* Fermer_comment: Annule un ajout de commentaire                                                         */
-/* Entrée: widget/data                                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Fermer_comment ( GtkWidget *widget, gpointer data )
-  { gtk_widget_destroy(F_ajout_comment);
-    F_ajout_comment = NULL;
-  }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Effacer_commentaire: Elimination d'un commentaire du synoptique en cours d'edition                     */
-/* Entrée: une structure de reference                                                                     */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Effacer_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm )
-  { if (!trame_comm) return;
-
-    Syn_select->acces_syn->commentaires = g_list_remove( Syn_select->acces_syn->commentaires,
-                                                         trame_comm->comm );
-    g_free( trame_comm->comm );                                    /* Liberation des données (x,y, nom..) */
-
-    Trame->trame_items = g_list_remove( Trame->trame_items, trame_comm );
-    goo_canvas_item_remove( trame_comm->item_groupe );
-    g_free( trame_comm );
-  }
-#endif
-/**********************************************************************************************************/
 /* Changer_commentaire: Synchronise le commentaire avec le preview gnome                                  */
 /* Entrée: widget/data                                                                                    */
 /* Sortie: Néant                                                                                          */
@@ -102,43 +75,6 @@
   { gnome_font_picker_set_preview_text( GNOME_FONT_PICKER(Font_comment), 
                                         gtk_entry_get_text( GTK_ENTRY(Entry_comment) ) );
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Valider_commentaire: Appelée quand on clique sur OK ou cancel de la boite d'entrer du commentaire      */
-/* Entrée: Evenement/Clic                                                                                 */
-/* Sortie: Les variables de deplacement sont mise à jour                                                  */
-/**********************************************************************************************************/
- void Valider_commentaire ( GtkWidget *widget, gpointer data )
-  { struct TRAME_ITEM_COMMENT *trame_comm;
-    struct COMMENTAIRE *comm;
-
-    comm = g_malloc0(sizeof (struct COMMENTAIRE));
-    if (!comm)
-     { gnome_warning_dialog("Pas assez de mémoire pour ajout."); }
-    else
-     { strncpy( comm->libelle, gtk_entry_get_text (GTK_ENTRY(Entry_comment)), TAILLE_LIBELLE_comment+1 );
-       strncpy( comm->font, gnome_font_picker_get_font_name(GNOME_FONT_PICKER(Font_comment)),
-                TAILLE_FONT+1 );
-       gnome_color_picker_get_i8 ( GNOME_COLOR_PICKER(Couleur_comment),
-                                   &comm->rouge, &comm->vert, &comm->bleu, NULL );
-       comm->position_x = TAILLE_SYNOPTIQUE_X/2;
-       comm->position_y = TAILLE_SYNOPTIQUE_Y/2;                            
-
-       Syn_select->acces_syn->commentaires = g_list_append( Syn_select->acces_syn->commentaires,
-                                                            comm );
-                                                               /* Integration dans la base de données syn */
-
-       trame_comm = Trame_ajout_commentaire( TRUE, Trame, comm );
-       if (!trame_comm)
-        { gnome_warning_dialog("Probleme lors de l'ajout de la commentaire"); return; }
-
-       trame_comm->comm->groupe = Nouveau_groupe (0);   /* On donne un new groupe composé d'1 commentaire */
-       gtk_signal_connect( GTK_OBJECT(trame_comm->item), "event",
-                           GTK_SIGNAL_FUNC(Clic_sur_commentaire), trame_comm );
-     }
-    Fermer_comment(NULL, NULL);
-  }
-#endif
 /**********************************************************************************************************/
 /* Mise_en_style_prog: Charge un style préprogrammé dans le code source                                   */
 /* Entrée: widget, un numero de style                                                                     */
@@ -167,52 +103,6 @@
             break;
      }
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Changer_police_comment: Permet de changer la police de caractere d'un commentaire de synoptique        */
-/* Entrée: Niet                                                                                           */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
- void Changer_police_comment( GtkWidget *widget, gpointer type )
-  { static GtkWidget *Font=NULL;
-  printf("Change_font !!\n");
-    if (!Font)
-     { Font = gtk_font_selection_new();
-       printf("Ca boume ??\n");
-     }
-    gtk_widget_show_all(Font);
-  }
-
-/**********************************************************************************************************/
-/* Dupliquer_commentaire: Appelée quand on appuie sur Dupliquer du menu popup                             */
-/* Entrée: reference commentaire                                                                          */
-/* Sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- struct TRAME_ITEM_COMMENT *Dupliquer_commentaire ( struct COMMENTAIRE *comm_source )
-  { struct TRAME_ITEM_COMMENT *trame_comm;
-    struct COMMENTAIRE *comm;
-
-    if (!(comm_source)) return(NULL);
-
-    trame_comm = NULL;
-    comm = g_malloc0(sizeof (struct COMMENTAIRE));
-    if (!comm)
-     { gnome_warning_dialog("Pas assez de mémoire pour ajout."); }
-    else
-     { memcpy( comm, comm_source, sizeof(struct COMMENTAIRE) );                           /* Recopie info */
-       Syn_select->acces_syn->commentaires = g_list_append( Syn_select->acces_syn->commentaires, comm );
-                                                               /* Integration dans la base de données syn */
-       trame_comm = Trame_ajout_commentaire( TRUE, Trame, comm );
-       if (!trame_comm)
-        { gnome_warning_dialog("Probleme lors de l'ajout de la commentaire"); return(NULL); }
-
-       trame_comm->comm->groupe = Nouveau_groupe(0);           /* On donne un new groupe composé d'1 comm */
-       gtk_signal_connect( GTK_OBJECT(trame_comm->item), "event",
-                           GTK_SIGNAL_FUNC(Clic_sur_commentaire), trame_comm );
-     }
-    return(trame_comm);
-  }
-#endif
 /**********************************************************************************************************/
 /* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */

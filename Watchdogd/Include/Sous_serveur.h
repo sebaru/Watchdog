@@ -209,19 +209,19 @@
  extern void Proto_ajouter_histo_courbe_thread ( struct CLIENT *client );
 
                                                                                  /* Dans envoi_scenario.h */
- extern void Proto_editer_scenario ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc );
- extern void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_EDIT_SCENARIO *rezo_sc );
- extern void Proto_effacer_scenario ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc );
- extern void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc,
+ extern void Proto_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
+ extern void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
+ extern void Proto_effacer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
+ extern void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc,
                                           gint tag, gint sstag );
- extern void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_ADD_SCENARIO *rezo_sc );
+ extern void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
  extern void *Envoyer_scenario_thread ( struct CLIENT *client );
 
                                                                       /* Dans envoi_synoptique_scenario.h */
- extern void Proto_editer_scenario_sup ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc );
- extern void Proto_valider_editer_scenario_sup ( struct CLIENT *client, struct CMD_EDIT_SCENARIO *rezo_sc );
- extern void Proto_effacer_scenario_sup ( struct CLIENT *client, struct CMD_ID_SCENARIO *rezo_sc );
- extern void Proto_ajouter_scenario_sup ( struct CLIENT *client, struct CMD_ADD_SCENARIO *rezo_sc );
+ extern void Proto_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
+ extern void Proto_valider_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
+ extern void Proto_effacer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
+ extern void Proto_ajouter_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
  extern void *Envoyer_scenario_sup_thread ( struct CLIENT *client );
 
                                                                                    /* Dans envoi_camera.c */

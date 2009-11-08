@@ -489,20 +489,20 @@
  extern void Proto_append_histo_courbe( struct CMD_APPEND_COURBE *append_courbe );
 
 
- extern void Proto_afficher_un_scenario( struct CMD_SHOW_SCENARIO *scenario );   /* Dans liste_scenario.c */
- extern void Proto_cacher_un_scenario( struct CMD_ID_SCENARIO *scenario );
- extern void Proto_rafraichir_un_scenario( struct CMD_SHOW_SCENARIO *scenario );
+ extern void Proto_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );   /* Dans liste_scenario.c */
+ extern void Proto_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
+ extern void Proto_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
  extern void Creer_page_scenario( void );
 
                                                                                  /* Dans ajout_scenario.c */
- extern void Menu_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce);
+ extern void Menu_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce);
  extern void Proto_afficher_mnemo_scenario ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
                                                                            /* Dans supervision_scenario.c */
- extern void Proto_supervision_afficher_un_scenario( struct CMD_SHOW_SCENARIO *scenario );
- extern void Proto_supervision_cacher_un_scenario( struct CMD_ID_SCENARIO *scenario );
- extern void Proto_supervision_rafraichir_un_scenario( struct CMD_SHOW_SCENARIO *scenario );
- extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce );
+ extern void Proto_supervision_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
+ extern void Proto_supervision_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
+ extern void Proto_supervision_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
+ extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce );
  extern void Creer_fenetre_scenario( struct MOTIF *motif );
 
                                                                         /* Dans supervision_page_camera.c */

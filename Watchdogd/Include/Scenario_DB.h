@@ -66,9 +66,9 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern void Checker_scenario ( guint num );
  extern void Charger_scenario ( void );
- extern gint Ajouter_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_ADD_SCENARIO *sc );
- extern gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_EDIT_SCENARIO *scenario );
- extern gboolean Retirer_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_ID_SCENARIO *sc );
+ extern gint Ajouter_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *sc );
+ extern gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *scenario );
+ extern gboolean Retirer_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *sc );
  extern struct SCENARIO_DB *Rechercher_scenarioDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Recuperer_scenarioDB ( struct LOG *log, struct DB *db );
  extern struct SCENARIO_DB *Recuperer_scenarioDB_suite( struct LOG *log, struct DB *db );

@@ -190,41 +190,6 @@ printf("Envoi demande d'effacement palette %d\n", palette.id );
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 /**********************************************************************************************************/
-/* Effacer_message: Retrait des messages selectionnés                                                     */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Modifier_palettes_monter ( struct TYPE_INFO_ATELIER *infos )
-  { GtkTreeSelection *selection;
-    struct CMD_EDIT_PALETTE palette;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_palette) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_palette) );
-
-printf("demande de montage palette\n" );
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    while ( lignes )
-     { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_PALETTE_ID, &palette.id, -1 );            /* Recup du id */
-       gtk_tree_model_get( store, &iter, COLONNE_POSITION, &palette.position, -1 );/* Recup du id */
-       gtk_tree_model_get( store, &iter, COLONNE_MNEMO_SYN_PALETTE, &palette.libelle, -1 );/* Recup du id */
-
-       palette.syn_id = infos->syn.id;
-       if (palette.position) palette.position--;
-
-printf("Envoi demande de montage palette %d\n", palette.id );
-       Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PALETTE,
-                      (gchar *)&palette, sizeof(struct CMD_EDIT_PALETTE) );
-       gtk_tree_selection_unselect_iter( selection, &iter );
-       lignes = lignes->next;
-     }
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
-  }
-/**********************************************************************************************************/
 /* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */

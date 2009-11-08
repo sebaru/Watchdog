@@ -56,26 +56,26 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_SCENARIO:
-             { struct CMD_ID_SCENARIO *msg;
-               msg = (struct CMD_ID_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *msg;
+               msg = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_editer_scenario( client, msg );
              }
             break;
        case SSTAG_CLIENT_ADD_SCENARIO:
-             { struct CMD_ADD_SCENARIO *msg;
-               msg = (struct CMD_ADD_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *msg;
+               msg = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_ajouter_scenario( client, msg );
              }
             break;
        case SSTAG_CLIENT_DEL_SCENARIO:
-             { struct CMD_ID_SCENARIO *msg;
-               msg = (struct CMD_ID_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *msg;
+               msg = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_effacer_scenario( client, msg );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SCENARIO:
-             { struct CMD_EDIT_SCENARIO *msg;
-               msg = (struct CMD_EDIT_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *msg;
+               msg = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_valider_editer_scenario( client, msg );
              }
             break;
