@@ -67,7 +67,6 @@
                   Edit_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
                   index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
                   Edit_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-printf("num_syn=%d\n", Edit_msg.num_syn );
                   Edit_msg.num_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
                                 (gchar *)&Edit_msg, sizeof( struct CMD_EDIT_MESSAGE ) );
@@ -108,7 +107,6 @@ printf("num_syn=%d\n", Edit_msg.num_syn );
     g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->mnemo, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
     if (Edit_msg.num_syn == syn->id)
      { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_syn),
                                  g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
@@ -202,7 +200,7 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, 2, 3 );
 
-    texte = gtk_label_new( _("Monostable") );                            /* Numéro du bit M a positionner */
+    texte = gtk_label_new( _("Profil Audio") );                          /* Numéro du bit M a positionner */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
     Spin_bit_voc = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     g_signal_connect( G_OBJECT(Spin_bit_voc), "changed",
