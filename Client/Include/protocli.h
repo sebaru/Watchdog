@@ -275,13 +275,13 @@
  extern void Creer_page_histo( void );                               
  extern gchar *Type_vers_string ( guint type );
 
- extern void Proto_afficher_un_message( struct CMD_SHOW_MESSAGE *message );       /* Dans liste_message.c */
- extern void Proto_cacher_un_message( struct CMD_ID_MESSAGE *message );
- extern void Proto_rafraichir_un_message( struct CMD_SHOW_MESSAGE *message );
+ extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );       /* Dans liste_message.c */
+ extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
+ extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
  extern void Proto_afficher_un_syn_for_message ( struct CMD_SHOW_SYNOPTIQUE *syn );
  extern void Creer_page_message( void );
 
- extern void Menu_ajouter_editer_message ( struct CMD_EDIT_MESSAGE *edit_msg );   /* Dans ajout_message.c */
+ extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );   /* Dans ajout_message.c */
  extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  extern void Proto_cacher_un_synoptique( struct CMD_ID_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/

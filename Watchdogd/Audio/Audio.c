@@ -59,7 +59,7 @@
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_audio ( void )
-  { struct MSGDB *msg;
+  { struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
     guint num;
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );

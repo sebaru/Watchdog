@@ -169,7 +169,7 @@
                      pthread_mutex_unlock( &Partage->com_dls.synchro );
                       
                      Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
-                                   (gchar *)dls, sizeof(struct CMD_SHOW_MESSAGE) );
+                                   (gchar *)dls, sizeof(struct CMD_TYPE_MESSAGE) );
                      g_free(dls);
                    }
             }

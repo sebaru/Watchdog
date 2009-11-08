@@ -16,7 +16,7 @@
  #define NOM_TABLE_HISTO_HARD  "histo_hard"
 
  struct HISTODB
-  { struct MSGDB msg;
+  { struct CMD_TYPE_MESSAGE msg;
     gchar nom_ack [ NBR_CARAC_LOGIN_UTF8 + 1 ];
     guint date_create_sec;
     guint date_create_usec;

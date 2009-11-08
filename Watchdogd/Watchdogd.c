@@ -205,7 +205,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, port, debug_level, max_client, fg, initdb, initrsa, single;
+  { gint help, port, debug_level, max_client, fg, initrsa, single;
     gchar *home, *file;
     gint nbr_bytes;
     gchar *chaine;

@@ -9,40 +9,16 @@
 
  #include "Cst_message.h"
 
- struct CMD_SHOW_MESSAGE
+ struct CMD_TYPE_MESSAGE
   { guint  id;
     guint  num;                                                    /* Numero du message dans la structure */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
-/*    guint  num_syn;     */            /* Numéro du fichier syn correspondant(pas l'index dans la table) */
-    gboolean not_inhibe;                          /* Flag pour la gestion par exemple de l'inhibition ... */
-    gboolean sms;                                                                       /* Envoi de sms ? */
-  };
- struct CMD_EDIT_MESSAGE
-  { guint  id;                                                     /* Numero du message dans la structure */
-    guint  num;                                                    /* Numero du message dans la structure */
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
-    guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean not_inhibe;                          /* Flag pour la gestion par exemple de l'inhibition ... */
     gboolean sms;                                                                       /* Envoi de sms ? */
     guint  num_syn;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint  num_voc;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
-  };
- struct CMD_ADD_MESSAGE
-  { guint  num;                                                    /* Numero du message dans la structure */
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
-    guchar type;                                                       /* Etat, prealarme, defaut, alarme */
-    gboolean not_inhibe;                          /* Flag pour la gestion par exemple de l'inhibition ... */
-    gboolean sms;                                                                       /* Envoi de sms ? */
-    guint  num_syn;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
-    guint  num_voc;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
-  };
- struct CMD_ID_MESSAGE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
   };
 
  enum 

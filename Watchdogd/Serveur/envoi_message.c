@@ -35,52 +35,22 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_message: convertit une structure MSG en structure CMD_SHOW_MESSAGE                      */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_SHOW_MESSAGE *Preparer_envoi_msg ( struct MSGDB *msg )
-  { struct CMD_SHOW_MESSAGE *rezo_msg;
 
-    rezo_msg = (struct CMD_SHOW_MESSAGE *)g_malloc0( sizeof(struct CMD_SHOW_MESSAGE) );
-    if (!rezo_msg) { return(NULL); }
-
-    rezo_msg->id         = msg->id;
-    rezo_msg->num        = msg->num;
-    rezo_msg->type       = msg->type;
-    rezo_msg->not_inhibe = msg->not_inhibe;
-    rezo_msg->sms        = msg->sms;
-    memcpy( &rezo_msg->libelle, msg->libelle, sizeof(rezo_msg->libelle) );
-    memcpy( &rezo_msg->objet, msg->objet, sizeof(rezo_msg->objet) );
-    return( rezo_msg );
-  }
 /**********************************************************************************************************/
 /* Proto_editer_msg: Le client desire editer un msg                                                       */
 /* Entrée: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_message ( struct CLIENT *client, struct CMD_ID_MESSAGE *rezo_msg )
-  { struct CMD_EDIT_MESSAGE edit_msg;
-    struct MSGDB *msg;
+ void Proto_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
+  { struct CMD_TYPE_MESSAGE *msg;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
     msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, rezo_msg->id );
 
     if (msg)
-     { edit_msg.id         = msg->id;                                       /* Recopie des info editables */
-       edit_msg.num        = msg->num;
-       edit_msg.type       = msg->type;
-       edit_msg.not_inhibe = msg->not_inhibe;
-       edit_msg.sms        = msg->sms;
-       edit_msg.num_syn    = msg->num_syn;
-       edit_msg.num_voc    = msg->num_voc;
-       memcpy( &edit_msg.libelle, msg->libelle, sizeof(edit_msg.libelle) );
-       memcpy( &edit_msg.objet, msg->objet, sizeof(edit_msg.objet) );
-
-       Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_EDIT_MESSAGE_OK,
-                  (gchar *)&edit_msg, sizeof(struct CMD_EDIT_MESSAGE) );
+     { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_EDIT_MESSAGE_OK,
+                  (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
        g_free(msg);                                                                 /* liberation mémoire */
      }
     else
@@ -96,10 +66,10 @@
 /* Entrée: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_EDIT_MESSAGE *rezo_msg )
-  { struct MSGDB *result;
-    gboolean retour;
+ void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
+  { struct CMD_TYPE_MESSAGE *msg;
     struct DB *Db_watchdog;
+    gboolean retour;
     Db_watchdog = client->Db_watchdog;
 
     retour = Modifier_messageDB ( Config.log, Db_watchdog, rezo_msg );
@@ -110,22 +80,11 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_messageDB_par_id( Config.log, Db_watchdog, rezo_msg->id );
-           if (result) 
-            { struct CMD_SHOW_MESSAGE *msg;
-              msg = Preparer_envoi_msg ( result );
-              g_free(result);
-              if (!msg)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,
-                                   (gchar *)msg, sizeof(struct CMD_SHOW_MESSAGE) );
-                     g_free(msg);
-                   }
+    else { msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, rezo_msg->id );
+           if (msg) 
+            { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,
+                            (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
+              g_free(msg);
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
@@ -141,7 +100,7 @@
 /* Entrée: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_message ( struct CLIENT *client, struct CMD_ID_MESSAGE *rezo_msg )
+ void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -150,7 +109,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_DEL_MESSAGE_OK,
-                     (gchar *)rezo_msg, sizeof(struct CMD_ID_MESSAGE) );
+                     (gchar *)rezo_msg, sizeof(struct CMD_TYPE_MESSAGE) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -165,10 +124,10 @@
 /* Entrée: le msg à créer                                                                                 */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_message ( struct CLIENT *client, struct CMD_ADD_MESSAGE *rezo_msg )
-  { struct MSGDB *result;
-    gint id;
+ void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
+  { struct CMD_TYPE_MESSAGE *msg;
     struct DB *Db_watchdog;
+    gint id;
     Db_watchdog = client->Db_watchdog;
 
     id = Ajouter_messageDB ( Config.log, Db_watchdog, rezo_msg );
@@ -179,8 +138,8 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
-           if (!result) 
+    else { msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
+           if (!msg) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate message %s", rezo_msg->libelle);
@@ -188,20 +147,9 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_MESSAGE *msg;
-              msg = Preparer_envoi_msg ( result );
-              g_free(result);
-              if (!msg)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_ADD_MESSAGE_OK,
-                                   (gchar *)msg, sizeof(struct CMD_SHOW_MESSAGE) );
-                     g_free(msg);
-                   }
+            { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_ADD_MESSAGE_OK,
+                            (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
+              g_free(msg);
             }
          }
   }
@@ -211,9 +159,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_messages_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_MESSAGE *rezo_msg;
+  { struct CMD_TYPE_MESSAGE *rezo_msg;
     struct CMD_ENREG nbr;
-    struct MSGDB *msg;
+    struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
@@ -244,15 +192,11 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-       rezo_msg = Preparer_envoi_msg( msg );
-       g_free(msg);
-       if (rezo_msg)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,
-                         (gchar *)rezo_msg, sizeof(struct CMD_SHOW_MESSAGE) );
-          g_free(rezo_msg);
-        }
+       Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,
+                      (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
+       g_free(msg);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

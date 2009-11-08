@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_messageDB ( struct LOG *log, struct DB *db, struct CMD_ID_MESSAGE *msg )
+ gboolean Retirer_messageDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -55,7 +55,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_messageDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MESSAGE *msg )
+ gint Ajouter_messageDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
   { gchar requete[200];
     gchar *libelle, *objet;
 
@@ -102,8 +102,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MSGDB *Recuperer_messageDB_suite( struct LOG *log, struct DB *db )
-  { struct MSGDB *msg;
+ struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_MESSAGE *msg;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -111,7 +111,7 @@
        return(NULL);
      }
 
-    msg = (struct MSGDB *)g_malloc0( sizeof(struct MSGDB) );
+    msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) Info( log, DEBUG_MEM, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( msg->libelle, db->row[2], sizeof(msg->libelle) );                /* Recopie dans la structure */
@@ -131,9 +131,9 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MSGDB *Rechercher_messageDB ( struct LOG *log, struct DB *db, guint num )
+ struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( struct LOG *log, struct DB *db, guint num )
   { gchar requete[200];
-    struct MSGDB *msg;
+    struct CMD_TYPE_MESSAGE *msg;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,type,num_syn,num_voc,not_inhibe,objet,sms FROM %s WHERE num=%d",
@@ -149,7 +149,7 @@
        return(NULL);
      }
 
-    msg = g_malloc0( sizeof(struct MSGDB) );
+    msg = g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
      { Info( log, DEBUG_MEM, "Rechercher_msgDB: Mem error" ); }
     else
@@ -171,9 +171,9 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MSGDB *Rechercher_messageDB_par_id ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( struct LOG *log, struct DB *db, guint id )
   { gchar requete[200];
-    struct MSGDB *msg;
+    struct CMD_TYPE_MESSAGE *msg;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms FROM %s WHERE id=%d",
@@ -188,7 +188,7 @@
        return(NULL);
      }
 
-    msg = g_malloc0( sizeof(struct MSGDB) );
+    msg = g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
      { Info( log, DEBUG_MEM, "Rechercher_msgDB_par_id: Mem error" ); }
     else
@@ -210,7 +210,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_messageDB( struct LOG *log, struct DB *db, struct CMD_EDIT_MESSAGE *msg )
+ gboolean Modifier_messageDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
   { gchar requete[1024];
     gchar *libelle, *objet;
 

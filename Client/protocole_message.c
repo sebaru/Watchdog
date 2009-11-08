@@ -46,37 +46,37 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_MESSAGE_OK:
-             { struct CMD_SHOW_MESSAGE *msg;
-               msg = (struct CMD_SHOW_MESSAGE *)connexion->donnees;
+             { struct CMD_TYPE_MESSAGE *msg;
+               msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
                Proto_afficher_un_message( msg );
              }
             break;
        case SSTAG_SERVEUR_DEL_MESSAGE_OK:
-             { struct CMD_ID_MESSAGE *msg;
-               msg = (struct CMD_ID_MESSAGE *)connexion->donnees;
+             { struct CMD_TYPE_MESSAGE *msg;
+               msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
                Proto_cacher_un_message( msg );
              }
             break;
        case SSTAG_SERVEUR_EDIT_MESSAGE_OK:
-             { struct CMD_EDIT_MESSAGE *msg;
-               msg = (struct CMD_EDIT_MESSAGE *)connexion->donnees;
+             { struct CMD_TYPE_MESSAGE *msg;
+               msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
                Menu_ajouter_editer_message( msg );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK:
-             { struct CMD_SHOW_MESSAGE *msg;
-               msg = (struct CMD_SHOW_MESSAGE *)connexion->donnees;
+             { struct CMD_TYPE_MESSAGE *msg;
+               msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
                Proto_rafraichir_un_message( msg );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MESSAGE:
-             { struct CMD_SHOW_MESSAGE *msg;
+             { struct CMD_TYPE_MESSAGE *msg;
                Set_progress_plusun();
 
-               msg = (struct CMD_SHOW_MESSAGE *)g_malloc0( sizeof( struct CMD_SHOW_MESSAGE ) );
+               msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof( struct CMD_TYPE_MESSAGE ) );
                if (!msg) return; 
 
-               memcpy( msg, connexion->donnees, sizeof(struct CMD_SHOW_MESSAGE ) );
+               memcpy( msg, connexion->donnees, sizeof(struct CMD_TYPE_MESSAGE ) );
                Arrivee_message = g_list_append( Arrivee_message, msg );
              }
             break;

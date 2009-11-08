@@ -40,6 +40,7 @@
   {  COLONNE_NOTINHIB,
      COLONNE_SMS,
      COLONNE_ID,
+     COLONNE_AUDIO,
      COLONNE_NUM,
      COLONNE_TYPE_INT,
      COLONNE_TYPE_STRING,
@@ -80,7 +81,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_message ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_MESSAGE rezo_message;
+  { struct CMD_TYPE_MESSAGE rezo_message;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -101,7 +102,7 @@
                g_free( libelle );
 
                Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_DEL_MESSAGE,
-                             (gchar *)&rezo_message, sizeof(struct CMD_ID_MESSAGE) );
+                             (gchar *)&rezo_message, sizeof(struct CMD_TYPE_MESSAGE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -151,7 +152,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_message ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_MESSAGE rezo_message;
+    struct CMD_TYPE_MESSAGE rezo_message;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -172,7 +173,7 @@
     memcpy( &rezo_message.libelle, libelle, sizeof(rezo_message.libelle) );
     g_free( libelle );
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_EDIT_MESSAGE,
-                  (gchar *)&rezo_message, sizeof(struct CMD_ID_MESSAGE) );
+                  (gchar *)&rezo_message, sizeof(struct CMD_TYPE_MESSAGE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -366,6 +367,7 @@
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_BOOLEAN,                               /* Not_inhibe */
                                               G_TYPE_BOOLEAN,                                      /* SMS */
                                               G_TYPE_UINT,                                          /* Id */
+                                              G_TYPE_STRING,                                     /* Audio */
                                               G_TYPE_STRING,                                       /* Num */
                                               G_TYPE_UINT,                                 /* Int du type */
                                               G_TYPE_STRING,                            /* String du Type */
@@ -399,6 +401,13 @@
                                                          "text", COLONNE_NUM,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM);                    /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Audio"), renderer,
+                                                         "text", COLONNE_AUDIO,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_AUDIO);                  /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
@@ -475,12 +484,18 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_message( GtkTreeIter *iter, struct CMD_SHOW_MESSAGE *message )
+ static void Rafraichir_visu_message( GtkTreeIter *iter, struct CMD_TYPE_MESSAGE *message )
   { GtkTreeModel *store;
-    gchar chaine[10];
-printf("not_inhib=%d  sms = %d\n", message->not_inhibe, message->sms );
+    gchar chaine[10], audio[10];
+
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_message) );             /* Acquisition du modele */
+
     g_snprintf( chaine, sizeof(chaine), "%04d", message->num);
+    if (message->num_voc)
+     { g_snprintf( audio, sizeof(audio), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), message->num_voc ); }
+    else
+     { g_snprintf( audio, sizeof(audio), "- no -"); }
+
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NOTINHIB, message->not_inhibe,
                          COLONNE_SMS, message->sms,
@@ -500,7 +515,7 @@ printf("not_inhib=%d  sms = %d\n", message->not_inhibe, message->sms );
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_message( struct CMD_SHOW_MESSAGE *message )
+ void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -515,7 +530,7 @@ printf("not_inhib=%d  sms = %d\n", message->not_inhibe, message->sms );
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_message( struct CMD_ID_MESSAGE *message )
+ void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -541,7 +556,7 @@ printf("not_inhib=%d  sms = %d\n", message->not_inhibe, message->sms );
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_message( struct CMD_SHOW_MESSAGE *message )
+ void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

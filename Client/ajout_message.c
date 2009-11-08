@@ -45,7 +45,7 @@
  static GtkWidget *Spin_bit_voc;                                                   /* Numéro du bit vocal */
  static GtkWidget *Entry_bit_voc;                                /* Mnémonique correspondant au bit vocal */
  static GList *Liste_index_syn;
- static struct CMD_EDIT_MESSAGE Edit_msg;                                   /* Message en cours d'édition */
+ static struct CMD_TYPE_MESSAGE Edit_msg;                                   /* Message en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_message: Fonction appelée qd on appuie sur un des boutons de l'interface             */
@@ -69,10 +69,10 @@
                   Edit_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
                   Edit_msg.num_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
-                                (gchar *)&Edit_msg, sizeof( struct CMD_EDIT_MESSAGE ) );
+                                (gchar *)&Edit_msg, sizeof( struct CMD_TYPE_MESSAGE ) );
                 }
                else
-                { struct CMD_ADD_MESSAGE new_msg;
+                { struct CMD_TYPE_MESSAGE new_msg;
                   g_snprintf( new_msg.libelle, sizeof(new_msg.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   g_snprintf( new_msg.objet, sizeof(new_msg.objet),
@@ -86,7 +86,7 @@
                   new_msg.num_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
 
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
-                                (gchar *)&new_msg, sizeof( struct CMD_EDIT_MESSAGE ) );
+                                (gchar *)&new_msg, sizeof( struct CMD_TYPE_MESSAGE ) );
                 }
              }
             break;
@@ -142,14 +142,14 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_message ( struct CMD_EDIT_MESSAGE *edit_msg )
+ void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt;
 
     if (edit_msg)
-     { memcpy( &Edit_msg, edit_msg, sizeof(struct CMD_EDIT_MESSAGE) );    /* Save pour utilisation future */
+     { memcpy( &Edit_msg, edit_msg, sizeof(struct CMD_TYPE_MESSAGE) );    /* Save pour utilisation future */
      }
-    else memset (&Edit_msg, 0, sizeof(struct CMD_EDIT_MESSAGE) );                  /* Sinon RAZ structure */
+    else memset (&Edit_msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );                  /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_msg ? _("Edit a message") : _("Add a message")),
                                            GTK_WINDOW(F_client),

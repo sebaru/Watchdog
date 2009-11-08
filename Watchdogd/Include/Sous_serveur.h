@@ -97,10 +97,10 @@
  extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
 
  extern void *Envoyer_messages_thread ( struct CLIENT *client );                  /* Dans envoi_message.c */
- extern void Proto_editer_message ( struct CLIENT *client, struct CMD_ID_MESSAGE *rezo_msg );
- extern void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_EDIT_MESSAGE *rezo_msg );
- extern void Proto_effacer_message ( struct CLIENT *client, struct CMD_ID_MESSAGE *rezo_msg );
- extern void Proto_ajouter_message ( struct CLIENT *client, struct CMD_ADD_MESSAGE *rezo_msg );
+ extern void Proto_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
+ extern void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
+ extern void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
+ extern void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
 
  extern void *Envoyer_entreeANA_thread ( struct CLIENT *client );                /* Dans envoi_entreana.c */
  extern void *Envoyer_entreeANA_for_courbe_thread ( struct CLIENT *client );

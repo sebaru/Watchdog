@@ -41,7 +41,7 @@
 /**********************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
   { struct timeval tv;
-    struct MSGDB *msg;
+    struct CMD_TYPE_MESSAGE *msg;
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
      { Info_n( Config.log, DEBUG_INFO,
@@ -62,7 +62,7 @@
        Partage->new_histo.type    = msg->type;
        Partage->new_histo.num_syn = msg->num_syn;
 
-       memcpy( &histo.msg, msg, sizeof(struct MSGDB) );
+       memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
        memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
        histo.date_create_sec  = Partage->new_histo.date_create_sec;
        histo.date_create_usec = Partage->new_histo.date_create_usec;

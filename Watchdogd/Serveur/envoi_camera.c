@@ -148,6 +148,7 @@
  void *Envoyer_cameras_thread ( struct CLIENT *client )
   { Envoyer_cameras_thread_tag( client, TAG_CAMERA, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
                                                     SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN );
+    return(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
@@ -157,5 +158,6 @@
  void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client )
   { Envoyer_cameras_thread_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER,
                                                      SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER_FIN );
+    return(NULL);
   }
 /*--------------------------------------------------------------------------------------------------------*/
