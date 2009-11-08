@@ -44,7 +44,10 @@
   { static GList *Arrivee_scenario = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE:
+     { case SSTAG_SERVEUR_CREATE_PAGE_SCENARIO_OK:
+             { Creer_page_scenario();
+             }
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE:
              { struct CMD_SHOW_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_SHOW_MNEMONIQUE *)connexion->donnees;
                Proto_afficher_mnemo_scenario( mnemo );
