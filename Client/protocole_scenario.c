@@ -48,8 +48,8 @@
              { Creer_page_scenario();
              }
        case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE:
-             { struct CMD_SHOW_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_SHOW_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_afficher_mnemo_scenario( mnemo );
              }
             break;
