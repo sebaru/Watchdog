@@ -173,7 +173,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
-    if ( ! Recuperer_camera_supDB( Config.log, db, client->syn.id ) )
+    if ( (! Recuperer_camera_supDB( Config.log, db, client->syn.id )) || db->nbr_result == 0 )
      { Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );

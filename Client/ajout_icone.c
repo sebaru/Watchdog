@@ -48,7 +48,7 @@
  static GtkWidget *Entry_file;                                                        /* Libelle du icone */
  static GtkWidget *Option_classe;            /* Pour le choix d'appartenance du icone à tel ou tel groupe */
  static struct CMD_EDIT_CLASSE Edit_classe;                                 /* Message en cours d'édition */
- static struct CMD_EDIT_ICONE Edit_icone;                                   /* Message en cours d'édition */
+ static struct CMD_TYPE_ICONE Edit_icone;                                   /* Message en cours d'édition */
  static GList *GListe_classe;                                           /* Liste des libelles des classes */
 
  static GtkWidget *Entry_classe_id;                       /* Numéro de la classe en cours d'édition/ajout */
@@ -140,10 +140,10 @@
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
                   Edit_icone.id_classe = classe_icone;
                   Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_VALIDE_EDIT_ICONE,
-                                (gchar *)&Edit_icone, sizeof( struct CMD_EDIT_ICONE ) );
+                                (gchar *)&Edit_icone, sizeof( struct CMD_TYPE_ICONE ) );
                 }
                else
-                { struct CMD_ADD_ICONE new_syn;
+                { struct CMD_TYPE_ICONE new_syn;
                   g_snprintf( new_syn.libelle, sizeof(new_syn.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
                   g_snprintf( new_syn.nom_fichier, sizeof(new_syn.nom_fichier),
@@ -151,7 +151,7 @@
                   new_syn.id_classe = classe_icone;
                   
                   Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE,
-                                 (gchar *)&new_syn, sizeof( struct CMD_ADD_ICONE ) );
+                                 (gchar *)&new_syn, sizeof( struct CMD_TYPE_ICONE ) );
                 }
              }
             break;
@@ -168,16 +168,16 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_icone ( struct CMD_EDIT_ICONE *edit_icone )
+ void Menu_ajouter_editer_icone ( struct CMD_TYPE_ICONE *edit_icone )
   { GtkWidget *frame, *table, *texte, *hboite, *menu;
     GList *item;
     GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
     if (edit_icone)
-     { memcpy( &Edit_icone, edit_icone, sizeof(struct CMD_EDIT_ICONE) );  /* Save pour utilisation future */
+     { memcpy( &Edit_icone, edit_icone, sizeof(struct CMD_TYPE_ICONE) );  /* Save pour utilisation future */
      }
-    else memset (&Edit_icone, 0, sizeof(struct CMD_EDIT_ICONE) );                  /* Sinon RAZ structure */
+    else memset (&Edit_icone, 0, sizeof(struct CMD_TYPE_ICONE) );                  /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_icone ? _("Edit a icon") : _("Add a icon")),
                                            GTK_WINDOW(F_client),

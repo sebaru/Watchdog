@@ -81,52 +81,53 @@
 /********************************* Client en VALIDE, gestion des icones ***********************************/
        case SSTAG_CLIENT_WANT_PAGE_ICONE:
             { client->classe_icone = ((struct CMD_ID_CLASSE *)connexion->donnees)->id;
+              Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK, NULL, 0 );
               Ref_client( client );                              /* Indique que la structure est utilisée */
               pthread_create( &tid, NULL, (void *)Envoyer_icones_thread, client );
               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_ICONE:
-             { struct CMD_ID_ICONE *icone;
-               icone = (struct CMD_ID_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_editer_icone( client, icone );
              }
             break;
        case SSTAG_CLIENT_ADD_ICONE:
-             { struct CMD_ADD_ICONE *icone;
-               icone = (struct CMD_ADD_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_ajouter_icone( client, icone );
              }
             break;
        case SSTAG_CLIENT_ADD_ICONE_DEB_FILE:
-             { struct CMD_ADD_ICONE *icone;
-               icone = (struct CMD_ADD_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_ajouter_icone_deb_file( client, icone );
              }
             break;
        case SSTAG_CLIENT_ADD_ICONE_FILE:
-             { struct CMD_ADD_ICONE *icone;
-               icone = (struct CMD_ADD_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_ajouter_icone_file( client, icone,
-                                         connexion->entete.taille_donnees - sizeof(struct CMD_ADD_ICONE),
-                                         connexion->donnees + sizeof(struct CMD_ADD_ICONE) );
+                                         connexion->entete.taille_donnees - sizeof(struct CMD_TYPE_ICONE),
+                                         connexion->donnees + sizeof(struct CMD_TYPE_ICONE) );
              }
             break;
        case SSTAG_CLIENT_ADD_ICONE_FIN_FILE:
-             { struct CMD_ADD_ICONE *icone;
-               icone = (struct CMD_ADD_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_ajouter_icone_fin_file( client, icone );
              }
             break;
        case SSTAG_CLIENT_DEL_ICONE:
-             { struct CMD_ID_ICONE *icone;
-               icone = (struct CMD_ID_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_effacer_icone( client, icone );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_ICONE:
-             { struct CMD_EDIT_ICONE *icone;
-               icone = (struct CMD_EDIT_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *icone;
+               icone = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_valider_editer_icone( client, icone );
              }
             break;

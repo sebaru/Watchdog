@@ -43,7 +43,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_iconeDB ( struct LOG *log, struct DB *db, struct CMD_ID_ICONE *icone )
+ gboolean Retirer_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone )
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -61,7 +61,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_iconeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_ICONE *icone )
+ gint Ajouter_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone )
   { gchar requete[200];
     gchar *libelle;
 
@@ -153,7 +153,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_iconeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_ICONE *icone )
+ gboolean Modifier_iconeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone )
   { gchar requete[1024];
     gchar *libelle;
 

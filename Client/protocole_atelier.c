@@ -356,11 +356,11 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_ICONE_FOR_ATELIER:
-             { struct CMD_SHOW_ICONE *ico;
+             { struct CMD_TYPE_ICONE *ico;
 
-               ico = (struct CMD_SHOW_ICONE *)g_malloc0( sizeof( struct CMD_SHOW_ICONE ) );
+               ico = (struct CMD_TYPE_ICONE *)g_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
                if (!ico) return; 
-               memcpy( ico, connexion->donnees, sizeof(struct CMD_SHOW_ICONE ) );
+               memcpy( ico, connexion->donnees, sizeof(struct CMD_TYPE_ICONE ) );
                Arrivee_icone = g_list_append( Arrivee_icone, ico );
              }
             break;

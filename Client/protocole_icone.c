@@ -45,33 +45,37 @@
     static GList *Arrivee_icone = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADD_ICONE_WANT_FILE:
-             { struct CMD_ADD_ICONE *ico;
-               ico = (struct CMD_ADD_ICONE *)connexion->donnees;
+     { case SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK:
+             { Creer_page_icone();
+             }
+            break;
+       case SSTAG_SERVEUR_ADD_ICONE_WANT_FILE:
+             { struct CMD_TYPE_ICONE *ico;
+               ico = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_envoyer_gif( ico );
              }
             break;
        case SSTAG_SERVEUR_ADD_ICONE_OK:
-             { struct CMD_SHOW_ICONE *ico;
-               ico = (struct CMD_SHOW_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *ico;
+               ico = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_afficher_un_icone( ico );
              }
             break;
        case SSTAG_SERVEUR_DEL_ICONE_OK:
-             { struct CMD_ID_ICONE *ico;
-               ico = (struct CMD_ID_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *ico;
+               ico = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_cacher_un_icone( ico );
              }
             break;
        case SSTAG_SERVEUR_EDIT_ICONE_OK:
-             { struct CMD_EDIT_ICONE *ico;
-               ico = (struct CMD_EDIT_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *ico;
+               ico = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Menu_ajouter_editer_icone( ico );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_ICONE_OK:
-             { struct CMD_SHOW_ICONE *ico;
-               ico = (struct CMD_SHOW_ICONE *)connexion->donnees;
+             { struct CMD_TYPE_ICONE *ico;
+               ico = (struct CMD_TYPE_ICONE *)connexion->donnees;
                Proto_rafraichir_un_icone( ico );
              }
             break;
@@ -118,12 +122,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_ICONE:
-             { struct CMD_SHOW_ICONE *ico;
+             { struct CMD_TYPE_ICONE *ico;
                Set_progress_plusun();
 
-               ico = (struct CMD_SHOW_ICONE *)g_malloc0( sizeof( struct CMD_SHOW_ICONE ) );
+               ico = (struct CMD_TYPE_ICONE *)g_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
                if (!ico) return; 
-               memcpy( ico, connexion->donnees, sizeof(struct CMD_SHOW_ICONE ) );
+               memcpy( ico, connexion->donnees, sizeof(struct CMD_TYPE_ICONE ) );
                Arrivee_icone = g_list_append( Arrivee_icone, ico );
              }
             break;

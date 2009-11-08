@@ -371,7 +371,7 @@
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_icone_atelier( GtkTreeIter *iter, struct CMD_SHOW_ICONE *icone )
+ static void Rafraichir_visu_icone_atelier( GtkTreeIter *iter, struct CMD_TYPE_ICONE *icone )
   { GtkTreeModel *store;
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_icone) );          /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -386,7 +386,7 @@
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_icone_atelier( struct CMD_SHOW_ICONE *icone )
+ void Proto_afficher_un_icone_atelier( struct CMD_TYPE_ICONE *icone )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

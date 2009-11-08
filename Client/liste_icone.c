@@ -93,7 +93,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_icone ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_ICONE rezo_icone;
+  { struct CMD_TYPE_ICONE rezo_icone;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -114,7 +114,7 @@
                g_free( libelle );
 
                Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_DEL_ICONE,
-                             (gchar *)&rezo_icone, sizeof(struct CMD_ID_ICONE) );
+                             (gchar *)&rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -165,7 +165,7 @@ printf("hello !\n");
 /**********************************************************************************************************/
  static void Menu_editer_icone ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_ICONE rezo_icone;
+    struct CMD_TYPE_ICONE rezo_icone;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -187,7 +187,7 @@ printf("hello !\n");
     g_free( libelle );
 printf("on veut editer le icone %s\n", rezo_icone.libelle );
     Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_EDIT_ICONE,
-                  (gchar *)&rezo_icone, sizeof(struct CMD_ID_ICONE) );
+                  (gchar *)&rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -561,7 +561,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_icone( GtkTreeIter *iter, struct CMD_SHOW_ICONE *icone )
+ static void Rafraichir_visu_icone( GtkTreeIter *iter, struct CMD_TYPE_ICONE *icone )
   { GtkTreeModel *store;
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_icone) );          /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -576,7 +576,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_icone( struct CMD_SHOW_ICONE *icone )
+ void Proto_afficher_un_icone( struct CMD_TYPE_ICONE *icone )
   { GtkTreeSelection *selection;
     GtkTreeModel *store;
     GtkTreeIter iter;
@@ -608,7 +608,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_icone( struct CMD_ID_ICONE *icone )
+ void Proto_cacher_un_icone( struct CMD_TYPE_ICONE *icone )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -634,8 +634,8 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_icone( struct CMD_SHOW_ICONE *icone )
-  { struct CMD_ID_ICONE id_icone;
+ void Proto_rafraichir_un_icone( struct CMD_TYPE_ICONE *icone )
+  { struct CMD_TYPE_ICONE id_icone;
     GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -745,10 +745,10 @@ printf("bouh\n");
   }
 /**********************************************************************************************************/
 /* Proto_envoyer_gif: Procedure d'envoi d'un fichier gif au serveur                                       */
-/* Entrée: la requete serveur sous forme de struct CMD_ADD_ICONE                                          */
+/* Entrée: la requete serveur sous forme de struct CMD_TYPE_ICONE                                          */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Proto_envoyer_gif ( struct CMD_ADD_ICONE *icone )
+ void Proto_envoyer_gif ( struct CMD_TYPE_ICONE *icone )
   { gchar from_fichier[80], to_fichier[80];
     gint source, cible, taille;
     gchar buffer[1024];
@@ -784,21 +784,21 @@ printf("bouh\n");
        close(cible);
 
        memcpy ( icone->nom_fichier, to_fichier, sizeof(icone->nom_fichier) );
-       memcpy ( buffer, icone, sizeof(struct CMD_ADD_ICONE) );
+       memcpy ( buffer, icone, sizeof(struct CMD_TYPE_ICONE) );
        source = open( to_fichier, O_RDONLY );
        Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_DEB_FILE,
-                      (gchar *)icone, sizeof(struct CMD_ADD_ICONE) );
+                      (gchar *)icone, sizeof(struct CMD_TYPE_ICONE) );
 
 /*       while (Attendre_envoi_disponible(Config.log, Connexion)==-1) usleep(1);*/
-       while ( (taille = read( source, buffer + sizeof(struct CMD_ADD_ICONE),
-                                sizeof(buffer) - sizeof(struct CMD_ADD_ICONE) ) ) > 0 )
+       while ( (taille = read( source, buffer + sizeof(struct CMD_TYPE_ICONE),
+                                sizeof(buffer) - sizeof(struct CMD_TYPE_ICONE) ) ) > 0 )
         { Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_FILE,
-                         (gchar *)&buffer, taille + sizeof(struct CMD_ADD_ICONE) );
+                         (gchar *)&buffer, taille + sizeof(struct CMD_TYPE_ICONE) );
           printf("Envoi données gif au serveur: %d\n", taille );
         }
        close(source);
        Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_FIN_FILE,
-                      (gchar *)&buffer, sizeof(struct CMD_ADD_ICONE) );
+                      (gchar *)&buffer, sizeof(struct CMD_TYPE_ICONE) );
        Client_en_cours.mode = VALIDE;
      }
   }

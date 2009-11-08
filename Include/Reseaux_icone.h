@@ -27,33 +27,18 @@
     gchar libelle[ NBR_CARAC_CLASSE_ICONE_UTF8+1 ];
   };
 
- struct CMD_SHOW_ICONE
+ struct CMD_TYPE_ICONE
   { guint id;                                                      /* Numero du message dans la structure */
     gchar libelle[ NBR_CARAC_LIBELLE_ICONE_UTF8+1 ];
     guint id_classe;
-  };
- struct CMD_EDIT_ICONE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar libelle[ NBR_CARAC_LIBELLE_ICONE_UTF8+1 ];
-    guint id_classe;
-  };
-
- struct CMD_ADD_ICONE
-  { gchar libelle[ NBR_CARAC_LIBELLE_ICONE_UTF8+1 ];
     gchar nom_fichier[ 128 ];
-    guint id;                                                      /* Numero du message dans la structure */
-    guint id_classe;
-  };
-
- struct CMD_ID_ICONE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar libelle[ NBR_CARAC_LIBELLE_ICONE_UTF8+1 ];
   };
 
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_ICONE,                           /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_ICONE_FIN,                       /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_CLIENT_WANT_PAGE_ICONE,
+    SSTAG_CLIENT_WANT_PAGE_ICONE,                                         /* Le client veut la page Icone */
+    SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK,                        /* Le serveur repond OK pour creer la page */
     SSTAG_CLIENT_ADD_ICONE,                                /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_ICONE_WANT_FILE,       /* Le serveur a ajouté l'icone, il lui manque le fichier gif */
     SSTAG_CLIENT_ADD_ICONE_DEB_FILE,                       /* Le client commance à envoyer le fichier gif */

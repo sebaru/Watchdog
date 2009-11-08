@@ -39,14 +39,14 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_icone: convertit une structure MSG en structure CMD_SHOW_ICONE                          */
+/* Preparer_envoi_icone: convertit une structure MSG en structure CMD_TYPE_ICONE                          */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_ICONE *Preparer_envoi_icone ( struct ICONEDB *icone )
-  { struct CMD_SHOW_ICONE *rezo_icone;
+ static struct CMD_TYPE_ICONE *Preparer_envoi_icone ( struct ICONEDB *icone )
+  { struct CMD_TYPE_ICONE *rezo_icone;
 
-    rezo_icone = (struct CMD_SHOW_ICONE *)g_malloc0( sizeof(struct CMD_SHOW_ICONE) );
+    rezo_icone = (struct CMD_TYPE_ICONE *)g_malloc0( sizeof(struct CMD_TYPE_ICONE) );
     if (!rezo_icone) { return(NULL); }
 
     rezo_icone->id         = icone->id;
@@ -59,8 +59,8 @@
 /* Entrée: le client demandeur et le icone en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_icone ( struct CLIENT *client, struct CMD_ID_ICONE *rezo_icone )
-  { struct CMD_EDIT_ICONE edit_icone;
+ void Proto_editer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
+  { struct CMD_TYPE_ICONE edit_icone;
     struct ICONEDB *icone;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -73,7 +73,7 @@
        memcpy( &edit_icone.libelle, icone->libelle, sizeof(edit_icone.libelle) );
 
        Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_EDIT_ICONE_OK,
-                  (gchar *)&edit_icone, sizeof(struct CMD_EDIT_ICONE) );
+                  (gchar *)&edit_icone, sizeof(struct CMD_TYPE_ICONE) );
        g_free(icone);                                                               /* liberation mémoire */
      }
     else
@@ -89,7 +89,7 @@
 /* Entrée: le client demandeur et le icone en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_icone ( struct CLIENT *client, struct CMD_EDIT_ICONE *rezo_icone )
+ void Proto_valider_editer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { struct ICONEDB *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -105,7 +105,7 @@
      }
     else { result = Rechercher_iconeDB( Config.log, Db_watchdog, rezo_icone->id );
            if (result) 
-            { struct CMD_SHOW_ICONE *icone;
+            { struct CMD_TYPE_ICONE *icone;
               icone = Preparer_envoi_icone ( result );
               g_free(result);
               if (!icone)
@@ -116,7 +116,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_VALIDE_EDIT_ICONE_OK,
-                                   (gchar *)icone, sizeof(struct CMD_SHOW_ICONE) );
+                                   (gchar *)icone, sizeof(struct CMD_TYPE_ICONE) );
                      g_free(icone);
                    }
             }
@@ -134,7 +134,7 @@
 /* Entrée: le client demandeur et le icone en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_icone ( struct CLIENT *client, struct CMD_ID_ICONE *rezo_icone )
+ void Proto_effacer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { gchar nom_fichier[80];
     gboolean retour;
     struct DB *Db_watchdog;
@@ -145,7 +145,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
     if (retour)
      { Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_DEL_ICONE_OK,
-                     (gchar *)rezo_icone, sizeof(struct CMD_ID_ICONE) );
+                     (gchar *)rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
        g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif", rezo_icone->id );
        unlink(nom_fichier);
      }
@@ -162,7 +162,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: le icone à créer                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_icone ( struct CLIENT *client, struct CMD_ADD_ICONE *rezo_icone )
+ void Proto_ajouter_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { struct ICONEDB *result;
     gint id;
     struct DB *Db_watchdog;
@@ -185,7 +185,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_ICONE *icone;
+            { struct CMD_TYPE_ICONE *icone;
               icone = Preparer_envoi_icone ( result );
               g_free(result);
               if (!icone)
@@ -198,9 +198,9 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
               else { rezo_icone->id = id;
                      Info_c( Config.log, DEBUG_INFO, "Envoi demande file icone", rezo_icone->libelle );
                      Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_ADD_ICONE_WANT_FILE,
-                                   (gchar *)rezo_icone, sizeof(struct CMD_ADD_ICONE) );
+                                   (gchar *)rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
                      Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_ADD_ICONE_OK,
-                                   (gchar *)icone, sizeof(struct CMD_SHOW_ICONE) );
+                                   (gchar *)icone, sizeof(struct CMD_TYPE_ICONE) );
                      g_free(icone);
                    }
             }
@@ -211,7 +211,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: le icone à créer                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_icone_deb_file( struct CLIENT *client, struct CMD_ADD_ICONE *icone )
+ void Proto_ajouter_icone_deb_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone )
   { gchar nom_fichier[80];
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%s", icone->nom_fichier );
     Info_c ( Config.log, DEBUG_INFO, "Rapatriement du fichier", icone->nom_fichier );
@@ -222,7 +222,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: le icone à créer                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_ADD_ICONE *icone,
+ void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone,
                                 gint taille, gchar *buffer )
   { gchar nom_fichier[80];
     gint id, test;
@@ -237,7 +237,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: le icone à créer                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_ADD_ICONE *icone )
+ void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone )
   { Changer_version_donnees( Config.log, 0 );          /* Mise à jour de la date de dernière modification */
   }
 /**********************************************************************************************************/
@@ -246,7 +246,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_icones_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_SHOW_ICONE *rezo_icone;
+  { struct CMD_TYPE_ICONE *rezo_icone;
     struct CMD_ENREG nbr;
     struct ICONEDB *icone;
     struct DB *db;
@@ -285,7 +285,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
           Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_icone, sizeof(struct CMD_SHOW_ICONE) );
+                         (gchar *)rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
           g_free(rezo_icone);
         }
      }
