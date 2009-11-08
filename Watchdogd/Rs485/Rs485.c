@@ -61,7 +61,7 @@
     return(NULL);
   }
 /**********************************************************************************************************/
-/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                       */
+/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -98,8 +98,8 @@
        module->sa_max   = atoi(db->row[9]);
        module->actif    = atoi(db->row[10]);
                                                                         /* Ajout dans la liste de travail */
-       Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id       = ", module->id    );
-       Info_n( Config.log, DEBUG_RS485, "                   -  actif   = ", module->actif );
+       Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id    = ", module->id    );
+       Info_n( Config.log, DEBUG_RS485, "                   -  actif = ", module->actif );
      }
     Liberer_resultat_SQL ( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
