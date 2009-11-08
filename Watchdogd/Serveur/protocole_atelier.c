@@ -87,7 +87,7 @@
             break;
        case SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER:
              { Client_mode( client, ENVOI_ICONE_FOR_ATELIER );
-               client->classe_icone = ((struct CMD_ID_CLASSE *)connexion->donnees)->id;
+               client->classe_icone = ((struct CMD_TYPE_CLASSE *)connexion->donnees)->id;
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC:

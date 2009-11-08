@@ -339,11 +339,11 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER:
-             { struct CMD_SHOW_CLASSE *classe;
+             { struct CMD_TYPE_CLASSE *classe;
                Set_progress_plusun();
-               classe = (struct CMD_SHOW_CLASSE *)g_malloc0( sizeof( struct CMD_SHOW_CLASSE ) );
+               classe = (struct CMD_TYPE_CLASSE *)g_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
                if (!classe) return; 
-               memcpy( classe, connexion->donnees, sizeof(struct CMD_SHOW_CLASSE ) );
+               memcpy( classe, connexion->donnees, sizeof(struct CMD_TYPE_CLASSE ) );
                Arrivee_classe = g_list_append( Arrivee_classe, classe );
              }
             break;

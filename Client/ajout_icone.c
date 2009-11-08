@@ -47,7 +47,7 @@
  static GtkWidget *Entry_libelle;                                                     /* Libelle du icone */
  static GtkWidget *Entry_file;                                                        /* Libelle du icone */
  static GtkWidget *Option_classe;            /* Pour le choix d'appartenance du icone à tel ou tel groupe */
- static struct CMD_EDIT_CLASSE Edit_classe;                                 /* Message en cours d'édition */
+ static struct CMD_TYPE_CLASSE Edit_classe;                                 /* Message en cours d'édition */
  static struct CMD_TYPE_ICONE Edit_icone;                                   /* Message en cours d'édition */
  static GList *GListe_classe;                                           /* Liste des libelles des classes */
 
@@ -323,14 +323,14 @@
                 { g_snprintf( Edit_classe.libelle, sizeof(Edit_classe.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_classe_libelle) ) );
                   Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_VALIDE_EDIT_CLASSE,
-                                (gchar *)&Edit_classe, sizeof( struct CMD_EDIT_CLASSE ) );
+                                (gchar *)&Edit_classe, sizeof( struct CMD_TYPE_CLASSE ) );
                 }
                else
-                { struct CMD_ADD_CLASSE new_classe;
+                { struct CMD_TYPE_CLASSE new_classe;
                   g_snprintf( new_classe.libelle, sizeof(new_classe.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_classe_libelle) ) );
                   Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_CLASSE,
-                                (gchar *)&new_classe, sizeof( struct CMD_EDIT_CLASSE ) );
+                                (gchar *)&new_classe, sizeof( struct CMD_TYPE_CLASSE ) );
                 }
              }
             break;
@@ -345,12 +345,12 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_classe ( struct CMD_EDIT_CLASSE *edit_classe )
+ void Menu_ajouter_editer_classe ( struct CMD_TYPE_CLASSE *edit_classe )
   { GtkWidget *frame, *table, *texte, *hboite;
     if (edit_classe)
-     { memcpy( &Edit_classe, edit_classe, sizeof(struct CMD_EDIT_CLASSE) );/* Save pour utilisation future */
+     { memcpy( &Edit_classe, edit_classe, sizeof(struct CMD_TYPE_CLASSE) );/* Save pour utilisation future */
      }
-    else memset (&Edit_classe, 0, sizeof(struct CMD_EDIT_CLASSE) );                 /* Sinon RAZ structure */
+    else memset (&Edit_classe, 0, sizeof(struct CMD_TYPE_CLASSE) );                 /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_classe ? _("Edit a class") : _("Add a class")),
                                            GTK_WINDOW(F_client),

@@ -307,14 +307,14 @@
  extern void Proto_cacher_un_icone( struct CMD_TYPE_ICONE *icone );                   /* Dans liste_icone.c */
  extern void Proto_afficher_un_icone( struct CMD_TYPE_ICONE *icone );
  extern void Proto_rafraichir_un_icone( struct CMD_TYPE_ICONE *icone );
- extern void Proto_cacher_une_classe( struct CMD_ID_CLASSE *classe );
- extern void Proto_afficher_une_classe( struct CMD_SHOW_CLASSE *classe );
- extern void Proto_rafraichir_une_classe( struct CMD_SHOW_CLASSE *classe );
+ extern void Proto_cacher_une_classe( struct CMD_TYPE_CLASSE *classe );
+ extern void Proto_afficher_une_classe( struct CMD_TYPE_CLASSE *classe );
+ extern void Proto_rafraichir_une_classe( struct CMD_TYPE_CLASSE *classe );
  extern void Proto_envoyer_gif ( struct CMD_TYPE_ICONE *icone );
  extern void Creer_page_icone( void );
 
  extern void Menu_ajouter_editer_icone ( struct CMD_TYPE_ICONE *edit_icone );            /* ajout_icone.c */
- extern void Menu_ajouter_editer_classe ( struct CMD_EDIT_CLASSE *edit_classe );
+ extern void Menu_ajouter_editer_classe ( struct CMD_TYPE_CLASSE *edit_classe );
 
  extern void Menu_want_plugin_dls ( void );                                                /* Dans menu.c */
  extern void Menu_want_util ( void );
@@ -388,7 +388,7 @@
  extern void Creer_fenetre_ajout_motif ( void );                            /* Dans atelier_ajout_motif.c */
  extern void Detruire_fenetre_ajout_motif ( void );
  extern void Choisir_motif_a_ajouter ( void );
- extern void Proto_afficher_une_classe_atelier( struct CMD_SHOW_CLASSE *classe );
+ extern void Proto_afficher_une_classe_atelier( struct CMD_TYPE_CLASSE *classe );
  extern void Proto_afficher_un_icone_atelier( struct CMD_TYPE_ICONE *icone );
 
  extern void Creer_fenetre_ajout_commentaire ( void );                    /* Dans atelier_ajout_comment.c */

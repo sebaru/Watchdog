@@ -235,7 +235,7 @@ printf("on veut editer le icone %s\n", rezo_icone.libelle );
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_classe ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_CLASSE rezo_classe;
+  { struct CMD_TYPE_CLASSE rezo_classe;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -255,7 +255,7 @@ printf("on veut editer le icone %s\n", rezo_icone.libelle );
                g_free( libelle );
 
                Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_DEL_CLASSE,
-                             (gchar *)&rezo_classe, sizeof(struct CMD_ID_CLASSE) );
+                             (gchar *)&rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -305,7 +305,7 @@ printf("on veut editer le icone %s\n", rezo_icone.libelle );
 /**********************************************************************************************************/
  static void Menu_editer_classe ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_CLASSE rezo_classe;
+    struct CMD_TYPE_CLASSE rezo_classe;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -327,7 +327,7 @@ printf("on veut editer le icone %s\n", rezo_icone.libelle );
     g_free( libelle );
 printf("on veut editer le classe %s\n", rezo_classe.libelle );
     Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_EDIT_CLASSE,
-                  (gchar *)&rezo_classe, sizeof(struct CMD_ID_CLASSE) );
+                  (gchar *)&rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -338,7 +338,7 @@ printf("on veut editer le classe %s\n", rezo_classe.libelle );
 /**********************************************************************************************************/
  static void Clic_classe ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_CLASSE rezo_classe;
+    struct CMD_TYPE_CLASSE rezo_classe;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -360,7 +360,7 @@ printf("bouh\n");
     gtk_tree_model_get( store, &iter, COLONNE_CLASSE_ID, &rezo_classe.id, -1 );            /* Recup du id */
     printf("on veut printer la classe %d\n", rezo_classe.id );
     Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_WANT_PAGE_ICONE,
-                   (gchar *)&rezo_classe, sizeof(struct CMD_ID_CLASSE) );
+                   (gchar *)&rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -667,7 +667,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_classe( GtkTreeIter *iter, struct CMD_SHOW_CLASSE *classe )
+ static void Rafraichir_visu_classe( GtkTreeIter *iter, struct CMD_TYPE_CLASSE *classe )
   { GtkTreeModel *store;
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_classe) );          /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -681,7 +681,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_classe( struct CMD_SHOW_CLASSE *classe )
+ void Proto_afficher_une_classe( struct CMD_TYPE_CLASSE *classe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
 
@@ -697,7 +697,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_une_classe( struct CMD_ID_CLASSE *classe )
+ void Proto_cacher_une_classe( struct CMD_TYPE_CLASSE *classe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -723,7 +723,7 @@ printf("bouh\n");
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_une_classe( struct CMD_SHOW_CLASSE *classe )
+ void Proto_rafraichir_une_classe( struct CMD_TYPE_CLASSE *classe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

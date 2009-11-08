@@ -183,10 +183,10 @@
 
  extern void *Envoyer_classes_thread ( struct CLIENT *client );                    /* Dans envoi_classe.c */
  extern void *Envoyer_classes_pour_atelier_thread ( struct CLIENT *client );
- extern void Proto_editer_classe ( struct CLIENT *client, struct CMD_ID_CLASSE *rezo_classe );
- extern void Proto_valider_editer_classe ( struct CLIENT *client, struct CMD_EDIT_CLASSE *rezo_classe );
- extern void Proto_effacer_classe ( struct CLIENT *client, struct CMD_ID_CLASSE *rezo_classe );
- extern void Proto_ajouter_classe ( struct CLIENT *client, struct CMD_ADD_CLASSE *rezo_classe );
+ extern void Proto_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
+ extern void Proto_valider_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
+ extern void Proto_effacer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
+ extern void Proto_ajouter_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
 
  extern void *Envoyer_icones_thread ( struct CLIENT *client );                      /* Dans envoi_icone.c */
  extern void *Envoyer_icones_pour_atelier_thread ( struct CLIENT *client );

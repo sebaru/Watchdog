@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_classeDB ( struct LOG *log, struct DB *db, struct CMD_ID_CLASSE *classe )
+ gboolean Retirer_classeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CLASSE *classe )
   { gchar requete[200];
     
     if (classe->id == 0) return(TRUE);                              /* La classe 0 n'est pas destructible */
@@ -60,7 +60,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_classeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_CLASSE *classe )
+ gint Ajouter_classeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CLASSE *classe )
   { gchar requete[200];
     gchar *libelle;
 
@@ -149,7 +149,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_classeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_CLASSE *classe )
+ gboolean Modifier_classeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CLASSE *classe )
   { gchar requete[1024];
     gchar *libelle;
 

@@ -80,36 +80,36 @@
              }
             break;
        case SSTAG_SERVEUR_ADD_CLASSE_OK:
-             { struct CMD_SHOW_CLASSE *classe;
-               classe = (struct CMD_SHOW_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_afficher_une_classe( classe );
              }
             break;
        case SSTAG_SERVEUR_DEL_CLASSE_OK:
-             { struct CMD_ID_CLASSE *classe;
-               classe = (struct CMD_ID_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_cacher_une_classe( classe );
              }
             break;
        case SSTAG_SERVEUR_EDIT_CLASSE_OK:
-             { struct CMD_EDIT_CLASSE *classe;
-               classe = (struct CMD_EDIT_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Menu_ajouter_editer_classe( classe );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_CLASSE_OK:
-             { struct CMD_SHOW_CLASSE *classe;
-               classe = (struct CMD_SHOW_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_rafraichir_une_classe( classe );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_CLASSE:
-             { struct CMD_SHOW_CLASSE *classe;
+             { struct CMD_TYPE_CLASSE *classe;
                Set_progress_plusun();
 
-               classe = (struct CMD_SHOW_CLASSE *)g_malloc0( sizeof( struct CMD_SHOW_CLASSE ) );
+               classe = (struct CMD_TYPE_CLASSE *)g_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
                if (!classe) return; 
-               memcpy( classe, connexion->donnees, sizeof(struct CMD_SHOW_CLASSE ) );
+               memcpy( classe, connexion->donnees, sizeof(struct CMD_TYPE_CLASSE ) );
                Arrivee_classe = g_list_append( Arrivee_classe, classe );
              }
             break;

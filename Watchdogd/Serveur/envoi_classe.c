@@ -37,14 +37,14 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Preparer_envoi_classe: convertit une structure MSG en structure CMD_SHOW_CLASSE                        */
+/* Preparer_envoi_classe: convertit une structure MSG en structure CMD_TYPE_CLASSE                        */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_CLASSE *Preparer_envoi_classe ( struct CLASSEDB *classe )
-  { struct CMD_SHOW_CLASSE *rezo_classe;
+ static struct CMD_TYPE_CLASSE *Preparer_envoi_classe ( struct CLASSEDB *classe )
+  { struct CMD_TYPE_CLASSE *rezo_classe;
 
-    rezo_classe = (struct CMD_SHOW_CLASSE *)g_malloc0( sizeof(struct CMD_SHOW_CLASSE) );
+    rezo_classe = (struct CMD_TYPE_CLASSE *)g_malloc0( sizeof(struct CMD_TYPE_CLASSE) );
     if (!rezo_classe) { return(NULL); }
 
     rezo_classe->id         = classe->id;
@@ -56,8 +56,8 @@
 /* Entrée: le client demandeur et le classe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_classe ( struct CLIENT *client, struct CMD_ID_CLASSE *rezo_classe )
-  { struct CMD_EDIT_CLASSE edit_classe;
+ void Proto_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
+  { struct CMD_TYPE_CLASSE edit_classe;
     struct CLASSEDB *classe;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -69,7 +69,7 @@
        memcpy( &edit_classe.libelle, classe->libelle, sizeof(edit_classe.libelle) );
 
        Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_EDIT_CLASSE_OK,
-                  (gchar *)&edit_classe, sizeof(struct CMD_EDIT_CLASSE) );
+                  (gchar *)&edit_classe, sizeof(struct CMD_TYPE_CLASSE) );
        g_free(classe);                                                              /* liberation mémoire */
      }
     else
@@ -85,7 +85,7 @@
 /* Entrée: le client demandeur et le classe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_classe ( struct CLIENT *client, struct CMD_EDIT_CLASSE *rezo_classe )
+ void Proto_valider_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { struct CLASSEDB *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -101,7 +101,7 @@
      }
     else { result = Rechercher_classeDB( Config.log, Db_watchdog, rezo_classe->id );
            if (result) 
-            { struct CMD_SHOW_CLASSE *classe;
+            { struct CMD_TYPE_CLASSE *classe;
               classe = Preparer_envoi_classe ( result );
               g_free(result);
               if (!classe)
@@ -112,7 +112,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_VALIDE_EDIT_CLASSE_OK,
-                                   (gchar *)classe, sizeof(struct CMD_SHOW_CLASSE) );
+                                   (gchar *)classe, sizeof(struct CMD_TYPE_CLASSE) );
                      g_free(classe);
                    }
             }
@@ -130,7 +130,7 @@
 /* Entrée: le client demandeur et le classe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_classe ( struct CLIENT *client, struct CMD_ID_CLASSE *rezo_classe )
+ void Proto_effacer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -140,7 +140,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_DEL_CLASSE_OK,
-                     (gchar *)rezo_classe, sizeof(struct CMD_ID_CLASSE) );
+                     (gchar *)rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -155,7 +155,7 @@
 /* Entrée: le classe à créer                                                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_classe ( struct CLIENT *client, struct CMD_ADD_CLASSE *rezo_classe )
+ void Proto_ajouter_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { struct CLASSEDB *result;
     gint id;
     struct DB *Db_watchdog;
@@ -178,7 +178,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_CLASSE *classe;
+            { struct CMD_TYPE_CLASSE *classe;
               classe = Preparer_envoi_classe ( result );
               g_free(result);
               if (!classe)
@@ -189,7 +189,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_ADD_CLASSE_OK,
-                                   (gchar *)classe, sizeof(struct CMD_SHOW_CLASSE) );
+                                   (gchar *)classe, sizeof(struct CMD_TYPE_CLASSE) );
                      g_free(classe);
                    }
             }
@@ -201,7 +201,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_classes_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_SHOW_CLASSE *rezo_classe;
+  { struct CMD_TYPE_CLASSE *rezo_classe;
     struct CMD_ENREG nbr;
     struct CLASSEDB *classe;
     struct DB *db;
@@ -240,7 +240,7 @@
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
           Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_classe, sizeof(struct CMD_SHOW_CLASSE) );
+                         (gchar *)rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
           g_free(rezo_classe);
         }
      }

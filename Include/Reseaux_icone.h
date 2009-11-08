@@ -9,20 +9,7 @@
 
  #include "Cst_icone.h"
 
- struct CMD_SHOW_CLASSE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar libelle[ NBR_CARAC_CLASSE_ICONE_UTF8+1 ];
-  };
- struct CMD_EDIT_CLASSE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar libelle[ NBR_CARAC_CLASSE_ICONE_UTF8+1 ];
-  };
-
- struct CMD_ADD_CLASSE
-  { gchar libelle[ NBR_CARAC_CLASSE_ICONE_UTF8+1 ];
-  };
-
- struct CMD_ID_CLASSE
+ struct CMD_TYPE_CLASSE
   { guint id;                                                      /* Numero du message dans la structure */
     gchar libelle[ NBR_CARAC_CLASSE_ICONE_UTF8+1 ];
   };

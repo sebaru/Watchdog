@@ -55,32 +55,32 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_CLASSE: 
-             { struct CMD_ID_CLASSE *classe;
-               classe = (struct CMD_ID_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_editer_classe( client, classe );
              }
             break;
        case SSTAG_CLIENT_ADD_CLASSE:
-             { struct CMD_ADD_CLASSE *classe;
-               classe = (struct CMD_ADD_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_ajouter_classe( client, classe );
              }
             break;
        case SSTAG_CLIENT_DEL_CLASSE:
-             { struct CMD_ID_CLASSE *classe;
-               classe = (struct CMD_ID_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_effacer_classe( client, classe );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_CLASSE:
-             { struct CMD_EDIT_CLASSE *classe;
-               classe = (struct CMD_EDIT_CLASSE *)connexion->donnees;
+             { struct CMD_TYPE_CLASSE *classe;
+               classe = (struct CMD_TYPE_CLASSE *)connexion->donnees;
                Proto_valider_editer_classe( client, classe );
              }
             break;
 /********************************* Client en VALIDE, gestion des icones ***********************************/
        case SSTAG_CLIENT_WANT_PAGE_ICONE:
-            { client->classe_icone = ((struct CMD_ID_CLASSE *)connexion->donnees)->id;
+            { client->classe_icone = ((struct CMD_TYPE_CLASSE *)connexion->donnees)->id;
               Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK, NULL, 0 );
               Ref_client( client );                              /* Indique que la structure est utilisée */
               pthread_create( &tid, NULL, (void *)Envoyer_icones_thread, client );

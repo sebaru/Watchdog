@@ -118,7 +118,7 @@
 /**********************************************************************************************************/
  static void Clic_classe_atelier ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_CLASSE rezo_classe;
+    struct CMD_TYPE_CLASSE rezo_classe;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -137,7 +137,7 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_CLASSE_ID, &rezo_classe.id, -1 );            /* Recup du id */
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER,
-                   (gchar *)&rezo_classe, sizeof(struct CMD_ID_CLASSE) );
+                   (gchar *)&rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
 
@@ -343,7 +343,7 @@
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_classe_atelier( GtkTreeIter *iter, struct CMD_SHOW_CLASSE *classe )
+ static void Rafraichir_visu_classe_atelier( GtkTreeIter *iter, struct CMD_TYPE_CLASSE *classe )
   { GtkTreeModel *store;
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_classe) );       /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -357,7 +357,7 @@
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_classe_atelier( struct CMD_SHOW_CLASSE *classe )
+ void Proto_afficher_une_classe_atelier( struct CMD_TYPE_CLASSE *classe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
 
