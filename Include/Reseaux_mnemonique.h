@@ -9,15 +9,7 @@
 
  #include "Cst_mnemoniques.h"
 
- struct CMD_SHOW_MNEMONIQUE
-  { guint id;                                                      /* Numero du message dans la structure */
-    guint type;
-    guint num;
-    gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
-    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-  };
- struct CMD_EDIT_MNEMONIQUE
+ struct CMD_TYPE_MNEMONIQUE
   { guint id;                                                      /* Numero du message dans la structure */
     guint type;
     guint num;
@@ -26,18 +18,6 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
   };
 
- struct CMD_ADD_MNEMONIQUE
-  { guint type;
-    guint num;
-    gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
-    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-  };
-
- struct CMD_ID_MNEMONIQUE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-  };
  struct CMD_TYPE_NUM_MNEMONIQUE
   { guint type;
     guint num;
@@ -46,7 +26,8 @@
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE,
+    SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE,                            /* Le client demande la page mnemonique */
+    SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK,              /* Les serveur repond OK pour la creation de la page */
     SSTAG_CLIENT_ADD_MNEMONIQUE,                           /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,                                   /* L'ajout du groupe est un succes */
 

@@ -120,7 +120,7 @@ printf("Edit_msg->num_syn = %d  %d\n", Edit_msg.num_syn, syn->id );
 /* Entre: widget, data.                                                                                   */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- void Proto_afficher_mnemo_voc_message ( struct CMD_SHOW_MNEMONIQUE *mnemo )
+ void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
     snprintf( chaine, sizeof(chaine), "%s%04d  %s",
               Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */

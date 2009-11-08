@@ -107,7 +107,7 @@
     guint type;
     union
      { struct CMD_TYPE_ENTREEANA eana;                                            /* Libelle de la courbe */
-       struct CMD_SHOW_MNEMONIQUE mnemo;
+       struct CMD_TYPE_MNEMONIQUE mnemo;
      };
   };
 
@@ -267,7 +267,7 @@
 
  extern void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
  extern void Proto_append_source_dls( struct CMD_EDIT_SOURCE_DLS *dls, gchar *buffer );
- extern void Proto_afficher_mnemo_dls ( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  extern void Proto_afficher_un_histo( struct CMD_SHOW_HISTO *histo );               /* Dans liste_histo.c */
  extern void Proto_cacher_un_histo( struct CMD_ID_HISTO *histo );
@@ -282,7 +282,7 @@
  extern void Creer_page_message( void );
 
  extern void Menu_ajouter_editer_message ( struct CMD_EDIT_MESSAGE *edit_msg );   /* Dans ajout_message.c */
- extern void Proto_afficher_mnemo_voc_message ( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  extern void Proto_cacher_un_synoptique( struct CMD_ID_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
@@ -294,15 +294,15 @@
  extern void Proto_fin_affichage_groupes_pour_synoptique ( void );
  extern void Proto_afficher_les_groupes_pour_synoptique ( GList *liste );
 
- extern void Proto_cacher_un_mnemonique( struct CMD_ID_MNEMONIQUE *mnemonique );/* Dans liste_mnemonique.c*/
- extern void Proto_afficher_un_mnemonique( struct CMD_SHOW_MNEMONIQUE *mnemonique );
- extern void Proto_rafraichir_un_mnemonique( struct CMD_SHOW_MNEMONIQUE *smnemonique );
+ extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique );/* Dans liste_mnemonique.c*/
+ extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique );
+ extern void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *smnemonique );
  extern gchar *Type_bit_interne ( gint num );
  extern gchar *Type_bit_interne_court ( gint num );
  extern gint Type_bit_interne_int ( gchar *type );
  extern void Creer_page_mnemonique( void );
 
- extern void Menu_ajouter_editer_mnemonique ( struct CMD_EDIT_MNEMONIQUE *edit_mnemo );/* ajout_synoptique.c*/
+ extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo );/* ajout_synoptique.c*/
 
  extern void Proto_cacher_un_icone( struct CMD_TYPE_ICONE *icone );                   /* Dans liste_icone.c */
  extern void Proto_afficher_un_icone( struct CMD_TYPE_ICONE *icone );
@@ -379,11 +379,11 @@
  extern void Detruire_fenetre_propriete_TOR ();
  extern void Editer_propriete_TOR ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
 
                                                                    /* Dans atelier_propriete_passerelle.c */
  extern void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass );
- extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  extern void Creer_fenetre_ajout_motif ( void );                            /* Dans atelier_ajout_motif.c */
  extern void Detruire_fenetre_ajout_motif ( void );
@@ -404,7 +404,7 @@
  extern void Menu_ajouter_editer_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
  extern void Proto_afficher_un_capteur_atelier( struct CMD_SHOW_CAPTEUR *rezo_capteur );
  extern void Proto_cacher_un_capteur_atelier( struct CMD_ID_CAPTEUR *capteur );
- extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
                                                                           /* Dans atelier_ajout_palette.c */
  extern void Creer_fenetre_ajout_palette ( struct TYPE_INFO_ATELIER *infos );
@@ -466,7 +466,7 @@
                           gpointer           user_data);
                                                                                          /* Dans courbe.c */
  extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_ENTREEANA *entreeANA );
- extern void Proto_afficher_une_source_for_courbe( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );
  extern void Creer_page_courbe ( gchar *libelle );
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
@@ -475,7 +475,7 @@
  extern void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe );
                                                                                    /* Dans histo_courbe.c */
  extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_ENTREEANA *entreeANA );
- extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );
  extern void Creer_page_histo_courbe ( gchar *libelle );
  extern void Detruire_page_histo_courbe( struct PAGE_NOTEBOOK *page );
  extern gint Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe );
@@ -496,7 +496,7 @@
 
                                                                                  /* Dans ajout_scenario.c */
  extern void Menu_ajouter_editer_scenario ( struct CMD_EDIT_SCENARIO *edit_sce);
- extern void Proto_afficher_mnemo_scenario ( struct CMD_SHOW_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_scenario ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
                                                                            /* Dans supervision_scenario.c */
  extern void Proto_supervision_afficher_un_scenario( struct CMD_SHOW_SCENARIO *scenario );

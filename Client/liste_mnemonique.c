@@ -130,7 +130,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_MNEMONIQUE rezo_mnemonique;
+  { struct CMD_TYPE_MNEMONIQUE rezo_mnemonique;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -151,7 +151,7 @@
                g_free( libelle );
 
                Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_DEL_MNEMONIQUE,
-                             (gchar *)&rezo_mnemonique, sizeof(struct CMD_ID_MNEMONIQUE) );
+                             (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -201,7 +201,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_mnemonique ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_MNEMONIQUE rezo_mnemonique;
+    struct CMD_TYPE_MNEMONIQUE rezo_mnemonique;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -223,7 +223,7 @@
     g_free( libelle );
 printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_EDIT_MNEMONIQUE,
-                  (gchar *)&rezo_mnemonique, sizeof(struct CMD_ID_MNEMONIQUE) );
+                  (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -485,7 +485,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_SHOW_MNEMONIQUE *mnemonique )
+ static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_TYPE_MNEMONIQUE *mnemonique )
   { GtkTreeModel *store;
     gchar chaine[60];
        
@@ -508,7 +508,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_mnemonique( struct CMD_SHOW_MNEMONIQUE *mnemonique )
+ void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -523,7 +523,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_mnemonique( struct CMD_ID_MNEMONIQUE *mnemonique )
+ void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -549,7 +549,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_mnemonique( struct CMD_SHOW_MNEMONIQUE *mnemonique )
+ void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

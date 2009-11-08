@@ -62,8 +62,7 @@
 /**********************************************************************************************************/
  static gboolean Changer_vue (GooCanvasItem *canvasitem, GooCanvasItem *target,
                               GdkEvent          *event, struct PASSERELLE *pass )
-  { struct CMD_ID_SYNOPTIQUE cmd;
-    if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
+  { if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
        )
     return(FALSE);

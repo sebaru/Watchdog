@@ -21,7 +21,7 @@
  static GtkWidget *Entry_lib;                                                    /* Libelle du mnemonique */
  static GtkWidget *Entry_acro;                                                  /* Acronyme du mnemonique */
  static GtkWidget *Entry_objet;                                                    /* Objet du mnemonique */
- static struct CMD_EDIT_MNEMONIQUE Edit_mnemo;                              /* Message en cours d'édition */
+ static struct CMD_TYPE_MNEMONIQUE Edit_mnemo;                              /* Message en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
@@ -42,10 +42,10 @@
                   Edit_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
                   Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,
-                                (gchar *)&Edit_mnemo, sizeof( struct CMD_EDIT_MNEMONIQUE ) );
+                                (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
                 }
                else
-                { struct CMD_ADD_MNEMONIQUE new_mnemo;
+                { struct CMD_TYPE_MNEMONIQUE new_mnemo;
                   g_snprintf( new_mnemo.libelle, sizeof(new_mnemo.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   g_snprintf( new_mnemo.objet, sizeof(new_mnemo.objet),
@@ -56,7 +56,7 @@
                   new_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
                   Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_ADD_MNEMONIQUE,
-                                (gchar *)&new_mnemo, sizeof( struct CMD_EDIT_MNEMONIQUE ) );
+                                (gchar *)&new_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
                 }
              }
             break;
@@ -78,14 +78,14 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_mnemonique ( struct CMD_EDIT_MNEMONIQUE *edit_mnemo )
+ void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo )
   { GtkWidget *frame, *table, *texte, *hboite, *menu;
     int cpt;
 
     if (edit_mnemo)                                                       /* Save pour utilisation future */
-     { memcpy( &Edit_mnemo, edit_mnemo, sizeof(struct CMD_EDIT_MNEMONIQUE) );
+     { memcpy( &Edit_mnemo, edit_mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
      }
-    else memset (&Edit_mnemo, 0, sizeof(struct CMD_EDIT_MNEMONIQUE) );             /* Sinon RAZ structure */
+    else memset (&Edit_mnemo, 0, sizeof(struct CMD_TYPE_MNEMONIQUE) );             /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_mnemo ? _("Edit a mnemonique") : _("Add a mnemonique")),
                                            GTK_WINDOW(F_client),

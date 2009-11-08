@@ -49,7 +49,8 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_CREATE_PAGE_SYNOPTIQUE_OK, NULL, 0 );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_thread, client );
                pthread_detach( tid );
              }

@@ -49,32 +49,33 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK, NULL, 0 );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_thread, client );
                pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_MNEMONIQUE:
-             { struct CMD_ID_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_ID_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_editer_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_ADD_MNEMONIQUE:
-             { struct CMD_ADD_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_ADD_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_ajouter_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_DEL_MNEMONIQUE:
-             { struct CMD_ID_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_ID_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_effacer_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE:
-             { struct CMD_EDIT_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_EDIT_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_valider_editer_mnemonique( client, mnemo );
              }
             break;

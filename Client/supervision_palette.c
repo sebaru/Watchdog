@@ -27,7 +27,6 @@
 /**********************************************************************************************************/
  static void Changer_vue( GtkWidget *bouton, gpointer data )
   { struct CMD_ID_SYNOPTIQUE cmd;
-    const gchar *libelle;
     gint syn_cible_id;
     syn_cible_id = GPOINTER_TO_INT(data);
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, syn_cible_id, TRUE )) return;

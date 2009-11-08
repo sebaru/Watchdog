@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ID_MNEMONIQUE *mnemo )
+ gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar requete[200];
     struct MNEMONIQUEDB *mnemo_a_virer;
 
@@ -74,7 +74,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure mnemo                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MNEMONIQUE *mnemo )
+ gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar requete[200];
     gchar *libelle, *objet, *acro;
     gint last_id;
@@ -247,7 +247,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_mnemoDB( struct LOG *log, struct DB *db, struct CMD_EDIT_MNEMONIQUE *mnemo )
+ gboolean Modifier_mnemoDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar requete[1024];
     gchar *libelle, *objet, *acronyme;
 

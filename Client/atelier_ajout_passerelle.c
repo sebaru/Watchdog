@@ -128,7 +128,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Creer_fenetre_ajout_passerelle ( void )
-  { GtkWidget *hboite, *scroll, *table;
+  { GtkWidget *hboite, *scroll;
     GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;

@@ -657,7 +657,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_SHOW_MNEMONIQUE *source )
+ static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMONIQUE *source )
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
@@ -701,7 +701,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_for_courbe( struct CMD_SHOW_MNEMONIQUE *source )
+ void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMONIQUE *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 

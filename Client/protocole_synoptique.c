@@ -45,7 +45,11 @@
     static GList *Arrivee_groupe = NULL;
            
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_SYNOPTIQUE_OK:
+             { Creer_page_synoptique();
+             }
+            break;
+       case SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK:
              { struct CMD_SHOW_SYNOPTIQUE *syn;
                syn = (struct CMD_SHOW_SYNOPTIQUE *)connexion->donnees;
                Proto_afficher_un_synoptique( syn );

@@ -467,7 +467,7 @@ printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id
 /* Entre: widget, data.                                                                                   */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- void Proto_afficher_mnemo_atelier ( int tag, struct CMD_SHOW_MNEMONIQUE *mnemo )
+ void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
     snprintf( chaine, sizeof(chaine), "%s%04d  %s",
               Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */

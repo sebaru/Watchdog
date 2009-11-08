@@ -37,6 +37,7 @@
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE,                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_CREATE_PAGE_SYNOPTIQUE_OK,                          /* OK pour creer la page synoptique */
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE,
     SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE,        /* Affichage des groupes pour appartenance synoptique */
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE,      /* Envoi des groupes pour l'edition utilisateur */
