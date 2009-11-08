@@ -22,6 +22,7 @@
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA,                       /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FIN,
+    SSTAG_SERVEUR_CREATE_PAGE_ENTREEANA_OK,                     /* OK pour affichage de la page entreeANA */
     SSTAG_CLIENT_WANT_PAGE_ENTREEANA,
 
     SSTAG_CLIENT_EDIT_ENTREEANA,                               /* Le client demande l'edition d'un groupe */

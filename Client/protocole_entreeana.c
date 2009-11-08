@@ -21,7 +21,10 @@
  void Gerer_protocole_entreeana ( struct CONNEXION *connexion )
   { static GList *Arrivee_eana = NULL;
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_EDIT_ENTREEANA_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_ENTREEANA_OK:
+             { Creer_page_entreeANA();
+             }
+       case SSTAG_SERVEUR_EDIT_ENTREEANA_OK:
              { struct CMD_TYPE_ENTREEANA *eana;
                eana = (struct CMD_TYPE_ENTREEANA *)connexion->donnees;
                Menu_ajouter_editer_entreeANA( eana );

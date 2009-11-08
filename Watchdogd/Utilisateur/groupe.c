@@ -243,7 +243,6 @@
  gint Ajouter_groupeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_GROUPE *groupe )
   { gchar *nom, *comment;
     gchar requete[4096];
-    long retour;
   
     nom     = Normaliser_chaine ( log, groupe->nom );
     if (!nom)
