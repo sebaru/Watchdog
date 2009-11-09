@@ -494,7 +494,11 @@
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
-          if (module->actif != TRUE) { liste = liste->next; continue; }
+          if (module->actif != TRUE)                 /* Le le module est administravely down, on le zappe */
+           { SB(module->bit, 0);
+             liste = liste->next;
+             continue;
+           }
 
           if ( attente_reponse == FALSE )
            { if ( module->date_retente <= Partage->top )                         /* module banni ou non ? */

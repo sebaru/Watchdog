@@ -57,9 +57,9 @@
        module = (struct MODULE_RS485 *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " RS485[%02d] -> actif=%d,ea=%03d-%03d,e=%03d-%03d,ec=%03d-%03d,s=%03d-%03d,"
+                   " RS485[%02d] -> actif=%d,bit=%d,ea=%03d-%03d,e=%03d-%03d,ec=%03d-%03d,s=%03d-%03d,"
                    "sa=%03d-%03d,req=%d,ret=%d,ana=%d\n",
-                   module->id, module->actif, module->ea_min, module->ea_max,
+                   module->id, module->actif, module->bit, module->ea_min, module->ea_max,
                    module->e_min, module->e_max, module->ec_min, module->ec_max,
                    module->s_min, module->s_max, module->sa_min, module->sa_max,
                    (gint)module->date_requete, (gint)module->date_retente, (gint)module->date_ana
