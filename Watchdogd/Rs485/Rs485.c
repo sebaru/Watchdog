@@ -75,7 +75,7 @@
 
 /********************************************** Chargement des modules ************************************/
     g_snprintf( requete, sizeof(requete), "SELECT ea_min,ea_max,e_min,e_max,ec_min,ec_max,"
-                                          "s_min,s_max,sa_min,sa_max,actif FROM %s WHERE id=%d",
+                                          "s_min,s_max,sa_min,sa_max,actif,bit FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_RS485, id
               );
 
@@ -97,6 +97,7 @@
        module->sa_min   = atoi(db->row[8]);
        module->sa_max   = atoi(db->row[9]);
        module->actif    = atoi(db->row[10]);
+       module->bit      = atoi(db->row[11]);
                                                                         /* Ajout dans la liste de travail */
        Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id    = ", module->id    );
        Info_n( Config.log, DEBUG_RS485, "                   -  actif = ", module->actif );
@@ -518,10 +519,13 @@
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
                 Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->id );
+                SB(module->bit, 0);
                 liste = liste->next;
                 continue;
               }
-             else { module->date_retente = 0; }
+             else { module->date_retente = 0;
+                    SB(module->bit, 1);
+                  }
            }
 
           FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RS485 */

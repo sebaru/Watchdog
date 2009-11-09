@@ -36,7 +36,8 @@
   };
 
  struct MODULE_RS485
-  { gint id;
+  { guint id;
+    guint bit;                              /* Bit bistable correspondant au bon fonctionnement du module */
     gboolean actif;
     gint ea_min, ea_max;
     gint e_min, e_max;
