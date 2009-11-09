@@ -11,7 +11,8 @@ noinst_HEADERS =  Cst_message.h Cst_utilisateur.h Erreur.h Reseaux.h \
                   Reseaux_dls.h Reseaux_utilisateur.h Reseaux_camera.h Reseaux_synoptique.h \
                   Reseaux_message.h Reseaux_mnemonique.h Reseaux_scenario.h \
                   Reseaux_entreeana.h Reseaux_supervision.h Reseaux_histo.h Reseaux_atelier.h \
-                  Reseaux_courbe.h Reseaux_histo_courbe.h Reseaux_fichier.h
+                  Reseaux_courbe.h Reseaux_histo_courbe.h Reseaux_fichier.h \
+                  boule_bleue.xpm boule_verte.xpm boule_rouge.xpm boule_jaune.xpm boule_orange.xpm
 
 pkginclude_HEADERS = Module_DLS.h
 
