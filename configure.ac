@@ -88,11 +88,13 @@ ALL_LINGUAS=""
 AC_OUTPUT( \
 Makefile \
 Include/Makefile \
+IncludeClient/Makefile \
+CommunClient/Makefile \
 Commun/Makefile \
-Client/Include/Makefile \
 Commun/Reseaux/Makefile \
-Client/Config_cli/Makefile \
 Client/Makefile \
+Client/Include/Makefile \
+Client/Config_cli/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Sms/Makefile \

@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Client/Makefile.am                                     Profil de compilation du client Watchdog        */
-#* Projet WatchDog version 2.0       Gestion d'habitat                       sam 13 mar 2004 17:53:37 CET */
+#* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 09 nov. 2009 12:14:13 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Config_cli
@@ -34,17 +34,17 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           supervision_passerelle.c supervision_palette.c \
                           supervision_capteur.c supervision_scenario.c \
 			  supervision_camera_page.c supervision_camera.c \
-			  trame.c \
 			  print.c \
                           courbe.c histo_courbe.c
 
 Watchdog_client_LDADD  = $(top_srcdir)/Commun/libwatchdog.la \
+                         $(top_srcdir)/CommunClient/libwatchdogcli.la \
                          Config_cli/libconfig_cli.la \
                          $(GNOME2_LIBS) \
 			 -lgtkdatabox 
-#                         -lungif
 
 INCLUDES=$(GNOME_INCLUDEDIR) -I$(top_srcdir)/Include \
+                             -I$(top_srcdir)/IncludeClient \
                              -IInclude \
                              $(GNOME2_CFLAGS)
 

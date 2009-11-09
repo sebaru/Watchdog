@@ -500,6 +500,7 @@
                          COLONNE_NOTINHIB, message->not_inhibe,
                          COLONNE_SMS, message->sms,
                          COLONNE_ID, message->id,
+                         COLONNE_AUDIO, audio,
                          COLONNE_NUM, chaine,
                          COLONNE_TYPE_INT, message->type,
                          COLONNE_TYPE_STRING, Type_vers_string(message->type),
