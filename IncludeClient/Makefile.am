@@ -5,6 +5,7 @@
 #**********************************************************************************************************/
 
 noinst_HEADERS =  trame.h motifs.h \
-                  boule_bleue.xpm boule_verte.xpm boule_rouge.xpm boule_jaune.xpm boule_orange.xpm
+                  boule_bleue.xpm boule_verte.xpm boule_rouge.xpm boule_jaune.xpm boule_orange.xpm \
+		  Config_cli.h client.h protocli.h
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -3,17 +3,16 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 09 nov. 2009 12:14:13 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config_cli
 
 bin_PROGRAMS = Watchdog-client
-Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
+Watchdog_client_SOURCES = Watchdog-client.c ihm.c \
                           protocole.c protocole_gtk_message.c protocole_icone.c \
                           protocole_dls.c protocole_utilisateur.c protocole_mnemonique.c \
                           protocole_message.c protocole_connexion.c protocole_histo_courbe.c \
                           protocole_entreeana.c protocole_supervision.c protocole_histo.c \
                           protocole_atelier.c protocole_courbe.c protocole_fichier.c \
 			  protocole_synoptique.c protocole_camera.c \
-                          ssl.c menu.c ident.c timer.c \
+                          menu.c timer.c \
 			  liste_groupe.c ajout_groupe.c \
 			  liste_util.c ajout_util.c \
 			  liste_plugin_dls.c ajout_plugin_dls.c edit_source_dls.c \
@@ -39,7 +38,6 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 
 Watchdog_client_LDADD  = $(top_srcdir)/Commun/libwatchdog.la \
                          $(top_srcdir)/CommunClient/libwatchdogcli.la \
-                         Config_cli/libconfig_cli.la \
                          $(GNOME2_LIBS) \
 			 -lgtkdatabox 
 

@@ -93,8 +93,6 @@ CommunClient/Makefile \
 Commun/Makefile \
 Commun/Reseaux/Makefile \
 Client/Makefile \
-Client/Include/Makefile \
-Client/Config_cli/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Sms/Makefile \
