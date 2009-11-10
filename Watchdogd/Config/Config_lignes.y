@@ -34,7 +34,7 @@ int erreur;                                                             /* Compt
 %token   PORT_RS485
 %token   CRYPTO_KEY TAILLE_CLEF_DH TAILLE_CLEF_RSA
 %token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_FORK D_MODBUS
-%token   D_ADMIN D_CONNEXION D_DLS D_RS485
+%token   D_ADMIN D_CONNEXION D_DLS D_RS485 D_ONDULEUR
 
 
 %%
@@ -129,6 +129,7 @@ one_debug:
                 | D_MODBUS    { $$ = DEBUG_MODBUS;    }
                 | D_ADMIN     { $$ = DEBUG_ADMIN;     }
                 | D_RS485     { $$ = DEBUG_RS485;     }
+                | D_ONDULEUR  { $$ = DEBUG_ONDULEUR;  }
                 | D_ALL       { $$ = ~0; }
 		;
 %%

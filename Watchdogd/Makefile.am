@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           CptHoraire EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
-	  Synoptiques Camera
+	  Synoptiques Camera Onduleur
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -34,14 +34,16 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Utilisateur/libutil.la \
 		    Synoptiques/libsyn.la \
 		    Camera/libcamera.la \
+		    Onduleur/libonduleur.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS)
+Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS)
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 $(GLIB_CFLAGS) \
 	 $(BONOBO_CFLAGS) \
-	 $(MYSQL_CFLAGS)
+	 $(MYSQL_CFLAGS) \
+	 $(UPS_CFLAGS)
 
 MAINTAINERCLEANFILES = Makefile.in

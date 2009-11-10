@@ -38,13 +38,14 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_sms    = 0;                                   /* Le tid du SMS en cours d'execution */
- static pthread_t TID_dls    = 0;                                   /* Le tid du DLS en cours d'execution */
- static pthread_t TID_rs485  = 0;                                 /* Le tid du rs485 en cours d'execution */
- static pthread_t TID_arch   = 0;                                  /* Le tid du ARCH en cours d'execution */
- static pthread_t TID_modbus = 0;                                /* Le tid du MODBUS en cours d'execution */
- static pthread_t TID_audio  = 0;                                /* Le tid du AUDIO  en cours d'execution */
- static pthread_t TID_admin  = 0;                                /* Le tid du ADMIN  en cours d'execution */
+ static pthread_t TID_sms      = 0;                                 /* Le tid du SMS en cours d'execution */
+ static pthread_t TID_dls      = 0;                                 /* Le tid du DLS en cours d'execution */
+ static pthread_t TID_rs485    = 0;                               /* Le tid du rs485 en cours d'execution */
+ static pthread_t TID_arch     = 0;                                /* Le tid du ARCH en cours d'execution */
+ static pthread_t TID_modbus   = 0;                              /* Le tid du MODBUS en cours d'execution */
+ static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
+ static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
+ static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
@@ -63,6 +64,22 @@
      }
     else nbr_thread++;
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_sous_serveur: nbr_thread"), nbr_thread );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_onduleur ( void )
+  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
+    if ( pthread_create( &TID_onduleur, NULL, (void *)Run_onduleur, NULL ) )
+     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_onduleur: pthread_create failed") );
+       return(FALSE);
+     }
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_onduleur: thread dls seems to be running",
+                   TID_onduleur );
+         }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -308,6 +325,10 @@
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for DLS to finish"), TID_dls );
     if (TID_dls) { pthread_join( TID_dls, NULL ); }                                    /* Attente fin DLS */
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, DLS is down"), TID_dls );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), TID_onduleur );
+    if (TID_onduleur) { pthread_join( TID_onduleur, NULL ); }                     /* Attente fin ONDULEUR */
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), TID_onduleur );
 
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
     if (TID_rs485) { pthread_join( TID_rs485, NULL ); }                              /* Attente fin RS485 */

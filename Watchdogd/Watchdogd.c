@@ -401,13 +401,14 @@
 
        memset( &Partage->new_histo,    0, sizeof(Partage->new_histo) );
        memset( &Partage->del_histo,    0, sizeof(Partage->del_histo) );
-       memset( &Partage->com_msrv, 0, sizeof(Partage->com_msrv) );
+       memset( &Partage->com_msrv,     0, sizeof(Partage->com_msrv) );
        memset( &Partage->com_rs485,    0, sizeof(Partage->com_rs485) );
        memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
-       memset( &Partage->com_sms, 0, sizeof(Partage->com_sms) );
-       memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );
+       memset( &Partage->com_sms,      0, sizeof(Partage->com_sms) );
+       memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
+       memset( &Partage->com_onduleur, 0, sizeof(Partage->com_onduleur) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
 
        Partage->Arret            = TOURNE;
@@ -423,6 +424,7 @@
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
+       pthread_mutex_init( &Partage->com_onduleur.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
              
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
@@ -486,6 +488,9 @@ encore:
 
              if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
+
+             if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR -> Arret" ); }
            }
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */

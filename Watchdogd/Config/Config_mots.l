@@ -137,6 +137,9 @@ blanc         [\t ]+
 "RS485"                    { Config_lval.val = D_RS485;
                              return(D_RS485);
                            }
+"ONDULEUR"                 { Config_lval.val = D_ONDULEUR;
+                             return(D_ONDULEUR);
+                           }
 "CONNEXION"                { Config_lval.val = D_CONNEXION;
                              return(D_CONNEXION);
                            }

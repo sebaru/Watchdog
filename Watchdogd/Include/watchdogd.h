@@ -17,6 +17,7 @@
  #include "Client.h"
  #include "Cpth_DB.h"
  #include "Modbus.h"
+ #include "Onduleur.h"
  #include "Rs485.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
@@ -115,6 +116,7 @@
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
+    struct COM_ONDULEUR com_onduleur;                                      /* Com avec le thread ONDULEUR */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
@@ -154,6 +156,7 @@
  extern gboolean Demarrer_sms ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_audio ( void );
+ extern gboolean Demarrer_onduleur ( void );
  extern gboolean Demarrer_admin ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */

@@ -611,7 +611,7 @@
 
     else
      { int nbr, cpt_e;
-       module->date_last_reponse = time(NULL);                          /* Estampillage de la date */
+       module->date_last_reponse = time(NULL);                                 /* Estampillage de la date */
        nbr = module->response.nbr;
        switch ( module->response.fct )
         { case MBUS_ENTRE_TOR:                                       /* Quelles type de borne d'entrées ? */
@@ -713,7 +713,7 @@
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 10 < time(NULL))              /* Detection attente trop longue */
+    if (module->date_last_reponse + 10 < time(NULL))                     /* Detection attente trop longue */
      { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
                module->id );
        Deconnecter_module( module );
