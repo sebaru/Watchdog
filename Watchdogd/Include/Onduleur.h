@@ -11,7 +11,7 @@
  #define ONDULEUR_PORT_TCP    3493                        /* Port de connexion TCP pour accès aux modules */
  #define ONDULEUR_RETRY       1800                    /* 3 moinutes entre chaque retry si pb de connexion */
 
- #define NOM_TABLE_MODULE_ONDULEUR   "modbus_onduleurs"
+ #define NOM_TABLE_MODULE_ONDULEUR   "onduleurs"
 
  struct COM_ONDULEUR                                                 /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */

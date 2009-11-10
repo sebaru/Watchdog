@@ -75,6 +75,10 @@
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info( Config.log, DEBUG_FORK, "Admin: Pb DLS -> Arret" ); }
         } 
+       if ( ! strcmp ( thread, "onduleur" ) )
+        { if (!Demarrer_onduleur())                                                 /* Démarrage ONDULEUR */
+           { Info( Config.log, DEBUG_FORK, "Admin: Pb ONDULEUR -> Arret" ); }
+        } 
 
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
@@ -101,7 +105,7 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls)\n" );
+                     "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls,onduleur)\n" );
        Write_admin ( client->connexion,
                      "  RELOAD               - Reload configuration\n" );
        Write_admin ( client->connexion,
