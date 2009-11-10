@@ -8,7 +8,8 @@ SUBDIRS=
 noinst_LTLIBRARIES     = libonduleur.la
 libonduleur_la_SOURCES = Onduleur.c
 
-INCLUDES= $(UPS_CFLAGS) \
+INCLUDES= $(GNOME2_CFLAGS) \
+	  $(UPS_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
