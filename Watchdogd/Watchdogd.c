@@ -153,7 +153,7 @@
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes;
-    gint scenario_test_date;
+    gint cpt_1_minute;
     struct DB *db;
     gint cpt;
 
@@ -165,13 +165,11 @@
      { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
 
     cpt_5_minutes = Partage->top + 3000;
-    scenario_test_date = Partage->top + 600;
+    cpt_1_minute = Partage->top + 600;
 
     sleep(1);
     while( Partage->Arret < FIN )
      { Gerer_jeton();                                          /* Don du jeton au serveur le moins chargé */
-       Gerer_manque_process();                               /* Detection du manque de serveurs en ecoute */
-/*     Gerer_fifo_admin();                                       /* Gestion de l'interface d'admin locale */
 
        Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
@@ -184,10 +182,11 @@
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
         }
 
-       if (scenario_test_date < Partage->top)                             /* Update DB toutes les minutes */
+       if (cpt_1_minute < Partage->top)                                   /* Update DB toutes les minutes */
         { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
            { Checker_scenario( cpt ); }
-          scenario_test_date = Partage->top + 600;                       /* Sauvegarde toutes les minutes */
+          Gerer_manque_process();                            /* Detection du manque de serveurs en ecoute */
+          cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
        usleep(1000);
