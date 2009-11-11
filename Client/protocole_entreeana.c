@@ -24,6 +24,7 @@
      { case SSTAG_SERVEUR_CREATE_PAGE_ENTREEANA_OK:
              { Creer_page_entreeANA();
              }
+            break;
        case SSTAG_SERVEUR_EDIT_ENTREEANA_OK:
              { struct CMD_TYPE_ENTREEANA *eana;
                eana = (struct CMD_TYPE_ENTREEANA *)connexion->donnees;

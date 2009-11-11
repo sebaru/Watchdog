@@ -9,7 +9,7 @@
  #include <upsclient.h>
 
  #define ONDULEUR_PORT_TCP    3493                        /* Port de connexion TCP pour accès aux modules */
- #define ONDULEUR_RETRY       1800                    /* 3 moinutes entre chaque retry si pb de connexion */
+ #define ONDULEUR_RETRY       1800                     /* 3 minutes entre chaque retry si pb de connexion */
 
  #define NOM_TABLE_MODULE_ONDULEUR   "onduleurs"
 
@@ -26,8 +26,13 @@
  struct MODULE_ONDULEUR
   { guint id;                                                 /* Numéro du module dans la base de données */
     gboolean actif;                                                        /* Le module doit-il tourner ? */
-    guint bit;                                       /* Bit interne B d'etat communication avec le module */
     gchar host[32];                                                     /* Adresses IP du module ONDULEUR */
+    gchar ups[32];                                                      /* Adresses IP du module ONDULEUR */
+    guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
+    guint ea_ups_load;                                                     /* Numéro de l'EA pour le load */
+    guint ea_ups_real_power;                                         /* Numéro de l'EA pour le real power */
+    guint ea_battery_charge;                                    /* Numéro de l'EA pour la charge batterie */
+    guint ea_input_voltage;                                        /* Numéro de l'EA pour l'input voltage */
 
     UPSCONN_t upsconn;                                                      /* Connexion UPS à l'onduleur */
     gboolean started;                                                                  /* Est-il actif ?? */

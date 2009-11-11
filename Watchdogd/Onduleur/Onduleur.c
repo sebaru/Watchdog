@@ -67,7 +67,9 @@
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT host,bit,actif FROM %s WHERE id=%d",
+    g_snprintf( requete, sizeof(requete), "SELECT host,ups,bit_comm,actif,"
+                                          "ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage"
+                                          " FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_ONDULEUR, id
               );
 
@@ -78,14 +80,17 @@
 
     while ( Recuperer_ligne_SQL (Config.log, db) )
      { g_snprintf( module->host, sizeof(module->host), "%s", db->row[0] );
-       module->id    = id;
-       module->bit   = atoi(db->row[1] );
-       module->actif = atoi(db->row[2] );
+       g_snprintf( module->ups,  sizeof(module->ups),  "%s", db->row[1] );
+       module->id                = id;
+       module->bit_comm          = atoi(db->row[2] );
+       module->actif             = atoi(db->row[3] );
+       module->ea_ups_load       = atoi(db->row[4] );
+       module->ea_ups_real_power = atoi(db->row[5] );
+       module->ea_battery_charge = atoi(db->row[6] );
+       module->ea_input_voltage  = atoi(db->row[7] );
                                                                         /* Ajout dans la liste de travail */
        Info_n( Config.log, DEBUG_ONDULEUR, "Charger_modules_ONDULEUR:  id    = ", module->id   );
        Info_c( Config.log, DEBUG_ONDULEUR, "                        -  host  = ", module->host );
-       Info_n( Config.log, DEBUG_ONDULEUR, "                        -  bit   = ", module->bit  );
-       Info_n( Config.log, DEBUG_ONDULEUR, "                        -  actif = ", module->actif );
      }
     Liberer_resultat_SQL ( Config.log, db );
     return(TRUE);
@@ -193,7 +198,7 @@
     module->nbr_deconnect++;
     module->date_retente = 0;
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->id );
-    SB( module->bit, 0 );                                     /* Mise a zero du bit interne lié au module */
+    SB( module->bit_comm, 0 );                                /* Mise a zero du bit interne lié au module */
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
@@ -210,7 +215,7 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->host );
-    SB( module->bit, 1 );                                        /* Mise a 1 du bit interne lié au module */
+    SB( module->bit_comm, 1 );                                   /* Mise a 1 du bit interne lié au module */
 
     return(TRUE);
   }
