@@ -242,7 +242,8 @@
     char **answer;
     guint numa;
     int retour;
- 
+
+Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: interroger_onduleur........................................" ); 
     retour = upscli_get( module->upsconn, 2, query, &numa, &answer);
     if (retour == -1)
      { Deconnecter_module ( module );
@@ -320,6 +321,8 @@
        if (Partage->com_onduleur.Modules_ONDULEUR == NULL ||        /* Si pas de module référencés, on attend */
            Onduleur_is_actif() == FALSE)
         { sleep(2); continue; }
+
+Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: début traitement boucle........................................" ); 
 
        liste = Partage->com_onduleur.Modules_ONDULEUR;
        while (liste)
