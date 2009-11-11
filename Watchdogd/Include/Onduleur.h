@@ -29,7 +29,7 @@
     guint bit;                                       /* Bit interne B d'etat communication avec le module */
     gchar host[32];                                                     /* Adresses IP du module ONDULEUR */
 
-    UPSCONN_t *upsconn;                                                        /* Connexion UPS à l'onduleur */
+    UPSCONN_t upsconn;                                                      /* Connexion UPS à l'onduleur */
     gboolean started;                                                                  /* Est-il actif ?? */
     guint nbr_deconnect;
     time_t date_retente;
