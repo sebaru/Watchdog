@@ -184,15 +184,18 @@
                 "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           continue;
         }
-       Charger_un_MODBUS_DB( module, atoi (db->row[0]) );
-                                                                        /* Ajout dans la liste de travail */
-       Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-       Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS:  id       = ", module->id       );
-       Info_n( Config.log, DEBUG_MODBUS, "                   -  actif    = ", module->actif    );
-       Info_c( Config.log, DEBUG_MODBUS, "                   -  ip       = ", module->ip       );
-       Info_n( Config.log, DEBUG_MODBUS, "                   -  bit      = ", module->bit      );
-       Info_n( Config.log, DEBUG_MODBUS, "                   -  watchdog = ", module->watchdog );
+       if (Charger_un_MODBUS_DB( module, atoi (db->row[0]) ))
+        {                                                               /* Ajout dans la liste de travail */
+          pthread_mutex_lock( &Partage->com_modbus.synchro );
+          Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
+          pthread_mutex_unlock( &Partage->com_modbus.synchro );
+          cpt++;                                           /* Nous avons ajouté un module dans la liste ! */
+          Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS:  id       = ", module->id       );
+          Info_n( Config.log, DEBUG_MODBUS, "                   -  actif    = ", module->actif    );
+          Info_c( Config.log, DEBUG_MODBUS, "                   -  ip       = ", module->ip       );
+          Info_n( Config.log, DEBUG_MODBUS, "                   -  bit      = ", module->bit      );
+          Info_n( Config.log, DEBUG_MODBUS, "                   -  watchdog = ", module->watchdog );
+        } else g_free(module);
      }
     Liberer_resultat_SQL ( Config.log, db );
     Info_n( Config.log, DEBUG_INFO, "Charger_tous_MODBUS: module MODBUS found  !", cpt );

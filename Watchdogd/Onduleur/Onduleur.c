@@ -68,7 +68,7 @@
 
 /********************************************** Chargement des modules ************************************/
     g_snprintf( requete, sizeof(requete), "SELECT host,ups,bit_comm,actif,"
-                                          "ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage"
+                                          "ea_ups_load,ea_ups_realpower,ea_battery_charge,ea_input_voltage"
                                           " FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_ONDULEUR, id
               );
@@ -130,10 +130,14 @@
                 "Charger_tous_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
           continue;
         }
-       Charger_un_ONDULEUR_DB( module, atoi (db->row[0]) );
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+       if (Charger_un_ONDULEUR_DB( module, atoi (db->row[0]) ))
+        { cpt++;                                           /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
-       Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
+          pthread_mutex_lock( &Partage->com_onduleur.synchro );
+          Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
+          pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+        }
+       else g_free(module);
      }
     Liberer_resultat_SQL ( Config.log, db );
     Info_n( Config.log, DEBUG_INFO, "Charger_tous_ONDULEUR: module ONDULEUR found  !", cpt );

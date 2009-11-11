@@ -142,14 +142,16 @@
           continue;
         }
 
-       Charger_un_RS485_DB( module, atoi (db->row[0]) );
-                                                                        /* Ajout dans la liste de travail */
-       pthread_mutex_lock( &Partage->com_rs485.synchro );
-       Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
-       pthread_mutex_unlock( &Partage->com_rs485.synchro );
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-       Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id      = ", module->id    );
-       Info_n( Config.log, DEBUG_RS485, "                  -  actif   = ", module->actif );
+       if (Charger_un_RS485_DB( module, atoi (db->row[0]) ))
+        {                                                               /* Ajout dans la liste de travail */
+          pthread_mutex_lock( &Partage->com_rs485.synchro );
+          Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
+          pthread_mutex_unlock( &Partage->com_rs485.synchro );
+          cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+          Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id      = ", module->id    );
+          Info_n( Config.log, DEBUG_RS485, "                  -  actif   = ", module->actif );
+        }
+       else g_free(module);
      }
     Liberer_resultat_SQL ( Config.log, db );
     Info_n( Config.log, DEBUG_INFO, "Charger_tous_RS485: module RS485 found  !", cpt );
