@@ -239,9 +239,9 @@
  void Run_serveur ( gint id )
   { time_t version_d_serveur;
     struct sigaction sig;
-    guint Top, Arret;
     pthread_t tid;
     gchar nom[16];
+    guint Arret;
 
     g_snprintf(nom, sizeof(nom), "W-SRV%03d", id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
