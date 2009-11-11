@@ -203,9 +203,6 @@
  static gboolean Connecter_module ( struct MODULE_ONDULEUR *module )
   { int connexion;
 
-Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: host", module->host );
-Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: port", ONDULEUR_PORT_TCP );
-
     if ( (connexion = upscli_connect( &module->upsconn, module->host, ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: connexion refused by module",
                (char *)upscli_strerror(&module->upsconn) );
@@ -245,10 +242,11 @@ Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: port", ONDULEUR
     guint numa;
     int retour;
 
-Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: interroger_onduleur........................................" ); 
     retour = upscli_get( &module->upsconn, 2, query, &numa, &answer);
     if (retour == -1)
-     { Deconnecter_module ( module );
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER",
+               (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
        module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
        return;
      }
