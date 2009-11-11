@@ -242,23 +242,57 @@
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static void Interroger_onduleur( struct MODULE_ONDULEUR *module )
-  { const char *query[] = { "VAR", "Evo1750", "ups.load" };
+  { const char *query[3];
+    guint numa, valeur;
     char **answer;
-    guint numa;
     int retour;
 
+    query[0] = "VAR";
+    query[1] = module->ups;
+
+    query[2] = "ups.load";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER",
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER load",
                (char *)upscli_strerror(&module->upsconn) );
        Deconnecter_module ( module );
        module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
        return;
      }
-    else
-     {     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: load", answer[3] );
 
+    valeur = atoi (answer[3]);
+    printf("Préparation : EA[%d] = %d\n", module->ea_ups_load, valeur );
+
+    query[2] = "ups.realpower";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
+               (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
+       module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
+       return;
      }
+
+    query[2] = "battery.charge";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER battery_charge",
+               (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
+       module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
+       return;
+     }
+
+    query[2] = "input.voltage";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER input_voltage",
+               (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
+       module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
+       return;
+     }
+
     module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
   }
 
