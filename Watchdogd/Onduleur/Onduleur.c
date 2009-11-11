@@ -237,12 +237,12 @@
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static void Interroger_onduleur( struct MODULE_ONDULEUR *module )
-  { const char *query[] = { "VAR", "ups.load" };
+  { const char *query[] = { "VAR", "Evo1750", "ups.load" };
     char **answer;
     guint numa;
     int retour;
 
-    retour = upscli_get( &module->upsconn, 2, query, &numa, &answer);
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER",
                (char *)upscli_strerror(&module->upsconn) );
