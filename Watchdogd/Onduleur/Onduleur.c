@@ -251,7 +251,7 @@
        return;
      }
     else
-     {     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: load", answer[2] );
+     {     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: load", answer[3] );
 
      }
     module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
