@@ -65,6 +65,7 @@
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
        Write_admin ( client->connexion, "  rs                   - Affiche les status des equipements RS485\n" );
+       Write_admin ( client->connexion, "  onduleur             - Affiche les status des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  ping                 - Ping Watchdog\n" );
        Write_admin ( client->connexion, "  help                 - This help\n" );
        Write_admin ( client->connexion, "  mode type_mode       - Change de mode (" );
@@ -124,6 +125,9 @@
      } else
     if ( ! strcmp ( commande, "rs" ) )
      { Admin_rs485_list ( client );
+     } else
+    if ( ! strcmp ( commande, "onduleur" ) )
+     { Admin_onduleur_list ( client );
      } else
     if ( ! strcmp ( commande, "dls" ) )
      { Admin_dls_list ( client );

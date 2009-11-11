@@ -17,6 +17,7 @@
     MODE_ADMIN_PROCESS,
     MODE_ADMIN_RS485,
     MODE_ADMIN_DLS,
+    MODE_ADMIN_ONDULEUR,
     NBR_MODE_ADMIN
   };
  extern gchar *Mode_admin[NBR_MODE_ADMIN];
@@ -42,6 +43,8 @@
  extern void Admin_rs485_list ( struct CLIENT_ADMIN *client );
  extern void Admin_dls ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_dls_list ( struct CLIENT_ADMIN *client );
+ extern void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_onduleur_list ( struct CLIENT_ADMIN *client );
  extern void Write_admin ( gint fd, gchar *chaine );
 
 #endif

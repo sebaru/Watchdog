@@ -204,6 +204,9 @@
  static gboolean Connecter_module ( struct MODULE_ONDULEUR *module )
   { int connexion;
 
+Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: host", module->host );
+Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: port", ONDULEUR_PORT_TCP );
+
     if ( (connexion = upscli_connect( module->upsconn, module->host, ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: connexion refused by module",
                (char *)upscli_strerror(module->upsconn) );
