@@ -14,6 +14,12 @@
  #define NBR_CARAC_LIBELLE_ENTREEANA_UTF8  (6*NBR_CARAC_LIBELLE_ENTREEANA)
 
  #define COURBE_TEMPS_TOP             5  /* 1 point = 5 secondes sur la grille courbes */
+
+ enum
+  { ENTREEANA_NON_INTERP,
+    ENTREEANA_4_20_MA_12BITS
+  };
+
  enum
   { UNITE_DEGRE_C,                                                   /* Definitions des types de messages */
     UNITE_DEGRE_K,

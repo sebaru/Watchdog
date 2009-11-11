@@ -203,6 +203,7 @@
     module->date_retente = 0;
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->id );
     SB( module->bit_comm, 0 );                                /* Mise a zero du bit interne lié au module */
+#warning "Ajouter SEA (num, inrange=0"
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
