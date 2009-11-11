@@ -206,11 +206,11 @@
 
     if ( (connexion = upscli_connect( module->upsconn, module->host, ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: connexion refused by module",
-               module->host );
+               (char *)upscli_strerror(module->upsconn) );
        return(FALSE);
      }
 
-    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->id );
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->host );
     SB( module->bit, 1 );                                        /* Mise a 1 du bit interne lié au module */
 
     return(TRUE);
