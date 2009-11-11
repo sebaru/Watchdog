@@ -322,8 +322,6 @@ Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: interroger_onduleur................
            Onduleur_is_actif() == FALSE)
         { sleep(2); continue; }
 
-Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: début traitement boucle........................................" ); 
-
        liste = Partage->com_onduleur.Modules_ONDULEUR;
        while (liste)
         { module = (struct MODULE_ONDULEUR *)liste->data;
