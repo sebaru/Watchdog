@@ -170,7 +170,6 @@
      { Partage->ea[ num ].val     = val_int;
        Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
      }
-printf(" SEA %d %d %d type=%d\n", num, val_int, inrange, Partage->ea[num].type );
     switch ( Partage->ea[num].type )
      { case ENTREEANA_NON_INTERP:
             Partage->ea[ num ].val_ech = Partage->ea[ num ].val;               /* Pas d'interprétation !! */
@@ -185,6 +184,8 @@ printf(" SEA %d %d %d type=%d\n", num, val_int, inrange, Partage->ea[num].type )
      }
     Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
     Partage->ea[ num ].inrange = inrange;
+printf(" SEA %d %d %d type=%d  --- %d %d %f\n", num, val_int, inrange, Partage->ea[num].type,
+       Partage->ea[num].inrange, Partage->ea[num].val, Partage->ea[num].val_ech );
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
