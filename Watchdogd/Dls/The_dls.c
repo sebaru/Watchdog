@@ -70,8 +70,9 @@
 /**********************************************************************************************************/
  double EA_ech( int num )
   { if (num<NBR_ENTRE_ANA) return (0.0);
-    switch ( Partage->ea[num].type )
-     { case ENTREEANA_NON_INTERP: return ((gint)Partage->ea[ num ].val);       /* Retour du "int" as-is ! */
+
+    switch ( Partage->ea[ num ].type )
+     { case ENTREEANA_NON_INTERP: return ((gdouble)(Partage->ea[ num ].val));    /* Retour du "int" as-is ! */
        default: return (Partage->ea[ num ].val_ech);
      }
   }
@@ -169,10 +170,19 @@
      { Partage->ea[ num ].val     = val_int;
        Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
      }
-    Partage->ea[ num ].val_ech =                                                    /* Valeur à l'echelle */
-                     (((gdouble)val_int * (Partage->ea[num].max - Partage->ea[num].min)) / 4095)
-                     + Partage->ea[num].min;
-       
+
+    switch ( Partage->ea[num].type )
+     { case ENTREEANA_NON_INTERP:
+            Partage->ea[ num ].val_ech = Partage->ea[ num ].val;               /* Pas d'interprétation !! */
+            break;
+       case ENTREEANA_4_20_MA_12BITS:
+            Partage->ea[ num ].val_ech =                                            /* Valeur à l'echelle */
+                                 (((gdouble)val_int * (Partage->ea[num].max - Partage->ea[num].min)) / 4095)
+                                 + Partage->ea[num].min;
+            break;
+       default:
+            Partage->ea[num].val_ech = 0.0;
+     }
     Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
     Partage->ea[ num ].inrange = inrange;
   }

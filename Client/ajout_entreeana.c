@@ -153,6 +153,7 @@
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), edit_entree->num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_entree->unite );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_entree->type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min), edit_entree->min );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max), edit_entree->max );
        gtk_widget_grab_focus( Entry_lib );
