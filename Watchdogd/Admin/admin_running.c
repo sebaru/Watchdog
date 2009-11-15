@@ -147,7 +147,7 @@
     if ( ! strcmp ( commande, "getea" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " EA%03d = %d, inrange=%d\n", num, EA_ech(num), EA_inrange(num) );
+       g_snprintf( chaine, sizeof(chaine), " EA%03d = %f, inrange=%d\n", num, EA_ech(num), EA_inrange(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setm" ) )
