@@ -69,8 +69,8 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  double EA_ech( int num )
-  { if (num<NBR_ENTRE_ANA) return (0.0);
-    return (Partage->ea[ num ].val_ech);
+  { if (num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
+    else return (0.0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
@@ -180,8 +180,6 @@
      }
     Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
     Partage->ea[ num ].inrange = inrange;
-printf(" SEA %d %d %d type=%d  --- %d %d %f\n", num, val_int, inrange, Partage->ea[num].type,
-       Partage->ea[num].inrange, Partage->ea[num].val, Partage->ea[num].val_ech );
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */

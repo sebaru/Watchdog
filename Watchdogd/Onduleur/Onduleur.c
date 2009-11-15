@@ -270,7 +270,6 @@
 
     valeur = atoi (answer[3]);
     SEA( module->ea_ups_load, valeur, 1);                                  /* Numéro de l'EA pour le load */
-    printf("Préparation : EA[%d] = %d\n", module->ea_ups_load, valeur );
 
     query[2] = "ups.realpower";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
