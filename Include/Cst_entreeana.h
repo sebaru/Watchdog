@@ -36,6 +36,7 @@
     UNITE_SECONDE,
     UNITE_HEURE,
     UNITE_DATE,
+    UNITE_VOLTS,
     NBR_TYPE_UNITE
   };
 

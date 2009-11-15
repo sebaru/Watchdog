@@ -58,10 +58,10 @@
        module = (struct MODULE_ONDULEUR *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine), "\n"
-                   " ONDULEUR[%02d] -> Host=%s, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
+                   " ONDULEUR[%02d] -> Host=%s, UPS=%s, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
                    "                   bit_comm=%d, ea_ups_load=%d, ea_ups_real_power=%d\n"
                    "                   ea_battery_charge=%d, ea_input_voltage=%d\n",
-                   module->id, module->host, module->actif, module->started,
+                   module->id, module->host, module->ups, module->actif, module->started,
                    module->nbr_deconnect, (int)module->date_retente, module->bit_comm,
                    module->ea_ups_load, module->ea_ups_real_power,
                    module->ea_battery_charge, module->ea_input_voltage 

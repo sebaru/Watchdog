@@ -44,7 +44,8 @@
     "% HR",
     "s",
     "h",
-    "A"
+    "A",
+    "V"
   };
 
  static gchar *TYPE_EA[NBR_TYPE_ENTREEANA] =
