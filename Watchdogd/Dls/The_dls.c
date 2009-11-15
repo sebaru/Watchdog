@@ -70,11 +70,7 @@
 /**********************************************************************************************************/
  double EA_ech( int num )
   { if (num<NBR_ENTRE_ANA) return (0.0);
-
-    switch ( Partage->ea[ num ].type )
-     { case ENTREEANA_NON_INTERP: return ((gdouble)(Partage->ea[ num ].val));    /* Retour du "int" as-is ! */
-       default: return (Partage->ea[ num ].val_ech);
-     }
+    return (Partage->ea[ num ].val_ech);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
