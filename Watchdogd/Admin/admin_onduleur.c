@@ -58,11 +58,11 @@
        module = (struct MODULE_ONDULEUR *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n ONDULEUR[%02d] -> Host=%s, bit_comm=%d, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
-                   "                     ea_ups_load=%d, ea_ups_real_power=%d, ea_battery_charge=%d\n"
-                   "                     ea_input_voltage=%d\n",
-                   module->id, module->host, module->bit_comm, module->actif, module->started,
-                   module->nbr_deconnect, (int)module->date_retente,
+                   "\n ONDULEUR[%02d] -> Host=%s, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
+                   "                     bit_comm=%d,, ea_ups_load=%d, ea_ups_real_power=%d\n"
+                   "                     ea_battery_charge=%d\n, ea_input_voltage=%d\n",
+                   module->id, module->host, module->actif, module->started,
+                   module->nbr_deconnect, (int)module->date_retente, module->bit_comm,
                    module->ea_ups_load, module->ea_ups_real_power,
                    module->ea_battery_charge, module->ea_input_voltage 
                  );
@@ -142,8 +142,10 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static gint Admin_onduleur_add ( struct CLIENT_ADMIN *client, gchar *ip_orig, guint bit, guint watchdog )
-  { gchar requete[128], *ip;
+ static gint Admin_onduleur_add ( struct CLIENT_ADMIN *client, gchar *host_orig, gchar *ups_orig,
+                                  guint bit_comm, guint ea_ups_load, guint ea_ups_realpower,
+                                  guint ea_battery_charge, guint ea_input_voltage )
+  { gchar requete[256], *host, *ups;
     struct DB *db;
     gint id;
 
@@ -155,18 +157,29 @@
        return(-1);
      }
 
-    ip = Normaliser_chaine ( Config.log, ip_orig );                      /* Formatage correct des chaines */
-    if (!ip)
+    host = Normaliser_chaine ( Config.log, host_orig );                  /* Formatage correct des chaines */
+    if (!host)
      { Info( Config.log, DEBUG_ADMIN, "Admin_onduleur_add: Normalisation impossible" );
        Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
 
+    ups = Normaliser_chaine ( Config.log, ups_orig );                    /* Formatage correct des chaines */
+    if (!host)
+     { Info( Config.log, DEBUG_ADMIN, "Admin_onduleur_add: Normalisation impossible" );
+       g_free(host);
+       Libere_DB_SQL( Config.log, &db );
+       return(-1);
+     }
+
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(actif,ip,bit,watchdog) VALUES (FALSE,'%s',%d,%d)",
-                NOM_TABLE_MODULE_ONDULEUR, ip, bit, watchdog
+                "INSERT INTO %s(host,ups,bit_comm,actif,ea_ups_load,ea_ups_realpower,ea_battery_charge,ea_input_voltage) "
+                "VALUES ('%s','%s',%d,%d,%d,%d,%d,%d)",
+                NOM_TABLE_MODULE_ONDULEUR, host, ups, bit_comm, 0,
+                ea_ups_load,ea_ups_realpower,ea_battery_charge,ea_input_voltage
               );
-    g_free(ip);
+    g_free(host);
+    g_free(ups);
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
      { Libere_DB_SQL( Config.log, &db );
@@ -239,14 +252,19 @@
      { Admin_onduleur_reload(client);
      }
     else if ( ! strcmp ( commande, "add" ) )
-     { gchar ip[128], chaine[128];
-       guint bit, watchdog;
-       sscanf ( ligne, "%s %s %d %d", commande, ip, &bit, &watchdog );/* Découpage de la ligne de commande */
-       if ( bit >= NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " bit should be < NBR_BIT_DLS\n" ); }
+     { guint bit_comm, ea_ups_load, ea_ups_realpower, ea_battery_charge, ea_input_voltage;
+       gchar host[128], ups[128], chaine[128];
+       sscanf ( ligne, "%s %s %s %d %d %d %d %d", commande, host, ups, 
+                &bit_comm, &ea_ups_load, &ea_ups_realpower, &ea_battery_charge, &ea_input_voltage
+              );                                                     /* Découpage de la ligne de commande */
+
+       if ( bit_comm >= NBR_BIT_DLS )
+        { Write_admin ( client->connexion, " bit_comm should be < NBR_BIT_DLS\n" ); }
        else
         { int id;
-          id = Admin_onduleur_add ( client, ip, bit, watchdog );
+          id = Admin_onduleur_add ( client, host, ups, bit_comm,
+                                    ea_ups_load, ea_ups_realpower, ea_battery_charge, ea_input_voltage
+                                  );
           if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d added\n", id ); }
           else          { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR NOT added\n" ); }
           Write_admin ( client->connexion, chaine );
@@ -261,7 +279,8 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'ONDULEUR'\n" );
        Write_admin ( client->connexion,
-                     "  add ip bit watchdog                    - Ajoute un module ONDULEUR\n" );
+                     "  add host ups bit_com ea_ups_load ea_ups_realpower ea_battery_charge ea_input_voltage\n"
+                     "                                         - Ajoute un module ONDULEUR\n" );
        Write_admin ( client->connexion,
                      "  delete id                              - Supprime le module id\n" );
        Write_admin ( client->connexion,
