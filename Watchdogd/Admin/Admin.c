@@ -231,7 +231,8 @@
            { client = (struct CLIENT_ADMIN *)liste->data;
 
              if ( Partage->top > client->last_use + 3000 )    /* Deconnexion = 300 secondes si inactivité */
-              { Deconnecter_admin ( client ); 
+              { Write_admin( client->connexion, "timeout\n" );
+                Deconnecter_admin ( client ); 
                 liste = Clients;
                 continue;
               }

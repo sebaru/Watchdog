@@ -52,7 +52,6 @@
  extern void Run_dls ( void );                                                          /* Dans The_dls.c */
  extern int E( int num );
  extern int EA_inrange( int num );
- extern int EA_int( int num );
  extern double EA_ech( int num );
  extern int EA_ech_inf( double val, int num );
  extern int EA_ech_inf_egal( double val, int num );

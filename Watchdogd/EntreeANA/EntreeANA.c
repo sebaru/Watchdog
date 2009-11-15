@@ -75,6 +75,7 @@
        Partage->ea[entree->num].min   = entree->min;                            /* Mise a jour du tableau */
        Partage->ea[entree->num].max   = entree->max;
        Partage->ea[entree->num].unite = entree->unite;
+       Partage->ea[entree->num].type  = entree->type;
        g_free(entree);
      }
   }
@@ -87,9 +88,10 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo,%s.num"
+                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo,%s.num,%s.type"
                 " FROM %s,%s WHERE %s.id_mnemo=%s.id ORDER BY %s.num",
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
+                NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* Where */
                 NOM_TABLE_MNEMO /* Order by */
@@ -119,6 +121,7 @@
        entreeana->min      = atof(db->row[0]);
        entreeana->max      = atof(db->row[1]);
        entreeana->unite    = atoi(db->row[2]);
+       entreeana->type     = atoi(db->row[6]);
        memcpy( entreeana->libelle, db->row[3], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
      }
     return(entreeana);
@@ -133,11 +136,11 @@
     gchar requete[512];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.num,%s.min,%s.max,%s.unite,%s.libelle"
+                "SELECT %s.num,%s.min,%s.max,%s.unite,%s.libelle,%s.type"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%d",
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
-                NOM_TABLE_MNEMO,
+                NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, id /* WHERE */
               );
@@ -161,6 +164,7 @@
        entreeana->min      = atof(db->row[1]);
        entreeana->max      = atof(db->row[2]);
        entreeana->unite    = atoi(db->row[3]);
+       entreeana->type     = atoi(db->row[5]);
        memcpy( entreeana->libelle, db->row[4], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
      }
     Liberer_resultat_SQL ( log, db );
@@ -177,9 +181,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "min=%f,max=%f,unite=%d WHERE id_mnemo=%d",
+                "min=%f,max=%f,unite=%d,type=%d WHERE id_mnemo=%d",
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max,
-                entreeana->unite, entreeana->id_mnemo );
+                entreeana->unite, entreeana->type, entreeana->id_mnemo );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

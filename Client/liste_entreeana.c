@@ -39,6 +39,7 @@
  enum
   {  COLONNE_ID,
      COLONNE_NUM,
+     COLONNE_TYPE,
      COLONNE_MIN,
      COLONNE_MAX,
      COLONNE_UNITE,
@@ -153,6 +154,7 @@ printf("on veut editer le entreeANA %s %d\n", rezo_entreeANA.libelle, rezo_entre
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* id */
                                               G_TYPE_STRING,                                       /* Num */
+                                              G_TYPE_STRING,                               /* type_string */
                                               G_TYPE_DOUBLE,                                       /* min */
                                               G_TYPE_DOUBLE,                                       /* max */
                                               G_TYPE_STRING,                                     /* Unite */
@@ -169,6 +171,13 @@ printf("on veut editer le entreeANA %s %d\n", rezo_entreeANA.libelle, rezo_entre
                                                          "text", COLONNE_NUM,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM);                    /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_entreeANA), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                           /* Colonne du libelle de entreeANA */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
+                                                         "text", COLONNE_TYPE,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TYPE);                   /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_entreeANA), colonne );
 
     renderer = gtk_cell_renderer_text_new();                           /* Colonne du libelle de entreeANA */
@@ -244,6 +253,7 @@ printf("on veut editer le entreeANA %s %d\n", rezo_entreeANA.libelle, rezo_entre
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, entreeANA->id_mnemo,
                          COLONNE_NUM, chaine,
+                         COLONNE_TYPE, Type_ea_vers_string(entreeANA->type),
                          COLONNE_MIN, entreeANA->min,
                          COLONNE_MAX, entreeANA->max,
                          COLONNE_UNITE, Unite_vers_string(entreeANA->unite),

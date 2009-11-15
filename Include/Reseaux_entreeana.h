@@ -14,6 +14,7 @@
     guint  unite;                                                                         /* Km, h, ° ... */
     gfloat min;
     gfloat max;
+    guint  type;                                                               /* Type de gestion de l'EA */
                                                                                         /* Vient du mnemo */
     guint  num;                                                                         /* Numero de l'EA */
     gchar libelle[ NBR_CARAC_LIBELLE_ENTREEANA_UTF8+1 ];

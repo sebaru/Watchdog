@@ -73,6 +73,7 @@
   { gdouble min;
     gdouble max;
     gdouble val_ech;
+    gint    type;
     gint    val;
     gint    unite;
     time_t  date;

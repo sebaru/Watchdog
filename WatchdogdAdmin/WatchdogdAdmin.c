@@ -156,6 +156,7 @@
            { taille = read( Socket, reponse, sizeof(reponse) );
              reponse[taille] = 0;
              printf("%s", reponse ); fflush(stdout);
+             if ( !strcmp(reponse, "timeout\n") ) break;                               /* Fin sur Timeout */
            }
 	} else break;
        usleep(100);

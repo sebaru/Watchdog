@@ -66,45 +66,41 @@
     else return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre ANA                                                                      */
-/**********************************************************************************************************/
- int EA_int( int num )
-  { if (num<NBR_ENTRE_ANA) return(Partage->ea[ num ].val);
-    else return(0);
-  }
-/**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  double EA_ech( int num )
-  { if (num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
-    else return(0.0);
+  { if (num<NBR_ENTRE_ANA) return (0.0);
+    switch ( Partage->ea[num].type )
+     { case ENTREEANA_NON_INTERP: return ((gint)Partage->ea[ num ].val);       /* Retour du "int" as-is ! */
+       default: return (Partage->ea[ num ].val_ech);
+     }
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int EA_ech_inf( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (Partage->ea[ num ].val_ech >= val) ) return(0);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) >= val) ) return(0);
     else return(1);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int EA_ech_inf_egal( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (Partage->ea[ num ].val_ech > val) ) return(0);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) > val) ) return(0);
     else return(1);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int EA_ech_sup( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (Partage->ea[ num ].val_ech <= val) ) return(0);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) <= val) ) return(0);
     else return(1);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int EA_ech_sup_egal( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (Partage->ea[ num ].val_ech < val) ) return(0);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) < val) ) return(0);
     else return(1);
   }
 /**********************************************************************************************************/

@@ -17,7 +17,8 @@
 
  enum
   { ENTREEANA_NON_INTERP,
-    ENTREEANA_4_20_MA_12BITS
+    ENTREEANA_4_20_MA_12BITS,
+    NBR_TYPE_ENTREEANA
   };
 
  enum
@@ -42,6 +43,7 @@
 
  extern gchar *Unite_vers_string ( guint type );
  extern gint String_vers_unite ( guchar *unite );
+ extern gchar *Type_ea_vers_string ( guint type );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
