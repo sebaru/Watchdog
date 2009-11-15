@@ -43,9 +43,9 @@
     Write_admin ( client->connexion, " ONDULEUR Reloading done\n" );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_onduleur_list : L'utilisateur admin lance la commande "list" en mode onduleur                    */
+/* Entrée: La connexion client ADMIN                                                                      */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  void Admin_onduleur_list ( struct CLIENT_ADMIN *client )
   { GList *liste_modules;
