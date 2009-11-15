@@ -337,6 +337,7 @@
   { struct sigaction sig;
     gchar strpid[12];
     gint fd_lock, i;
+    gint import;
     gboolean fg;
 
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
@@ -394,8 +395,7 @@
     if (!Partage)
      { Info( Config.log, DEBUG_MEM, "Shared memory failed to allocate" ); }
     else
-     { gint import;
-       pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
+     { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 

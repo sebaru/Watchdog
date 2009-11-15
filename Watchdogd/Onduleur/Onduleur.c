@@ -203,7 +203,10 @@
     module->date_retente = 0;
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->id );
     SB( module->bit_comm, 0 );                                /* Mise a zero du bit interne lié au module */
-#warning "Ajouter SEA (num, inrange=0"
+    SEA( module->ea_ups_load, 0, 0);                                       /* Numéro de l'EA pour le load */
+    SEA( module->ea_ups_real_power, 0, 0);                           /* Numéro de l'EA pour le real power */
+    SEA( module->ea_battery_charge, 0, 0);                      /* Numéro de l'EA pour la charge batterie */
+    SEA( module->ea_input_voltage, 0, 0);
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
@@ -266,6 +269,7 @@
      }
 
     valeur = atoi (answer[3]);
+    SEA( module->ea_ups_load, valeur, 1);                                  /* Numéro de l'EA pour le load */
     printf("Préparation : EA[%d] = %d\n", module->ea_ups_load, valeur );
 
     query[2] = "ups.realpower";
@@ -277,6 +281,8 @@
        module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
        return;
      }
+    valeur = atoi (answer[3]);
+    SEA( module->ea_ups_real_power, valeur, 1);                      /* Numéro de l'EA pour le real power */
 
     query[2] = "battery.charge";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
@@ -287,6 +293,8 @@
        module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
        return;
      }
+    valeur = atoi (answer[3]);
+    SEA( module->ea_battery_charge, valeur, 1);                 /* Numéro de l'EA pour la charge batterie */
 
     query[2] = "input.voltage";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
@@ -297,6 +305,8 @@
        module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On ne retentera que dans longtemps */
        return;
      }
+    valeur = atoi (answer[3]);
+    SEA( module->ea_input_voltage, valeur, 1);
 
     module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
   }
