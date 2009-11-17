@@ -86,8 +86,7 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CPTH_DB *Rechercher_cpthDB ( struct LOG *log, struct DB *db, guint id )
-  { gchar valeur[20];
-    struct CPTH_DB *cpth;
+  { struct CPTH_DB *cpth;
     gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

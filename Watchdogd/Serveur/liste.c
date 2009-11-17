@@ -23,9 +23,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Liberer_liste( struct CLIENT *client )
-  { GList *liste;
-
-    g_list_foreach( client->transfert.fichiers, (GFunc)g_free, NULL );
+  { g_list_foreach( client->transfert.fichiers, (GFunc)g_free, NULL );
     g_list_free( client->transfert.fichiers );
     client->transfert.fichiers = NULL;
   }
@@ -47,16 +45,10 @@
     else g_snprintf( nouveau->fichier_absolu, sizeof(nouveau->fichier_absolu), "%s", fichier );
     g_snprintf( nouveau->fichier, sizeof(nouveau->fichier), "%s", fichier );
     stat( nouveau->fichier_absolu, &info );
-    printf("Ajouter_fichier_liste: date fich %d, date client %d fichier %s fichiers %p\n",
-           info.st_mtime, version_d_client, nouveau->fichier, client->transfert.fichiers );
     if ( info.st_mtime <= version_d_client )
-     { printf("Sortie liste\n"); g_free(nouveau); return(0); }
-printf("One\n");
+     { g_free(nouveau); return(0); }
     nouveau->taille = info.st_size;
-printf("Two\n");
     client->transfert.fichiers = g_list_append( client->transfert.fichiers, nouveau );
-printf("Three\n");
-    printf("%s ajouté !\n", nouveau->fichier );
     return(nouveau->taille);
   }
 /**********************************************************************************************************/

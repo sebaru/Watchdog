@@ -178,7 +178,6 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
  void *Envoyer_comment_supervision_thread ( struct CLIENT *client )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_COMMENT *comment;
-    struct DB *Db_watchdog;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiComment", 0, 0, 0 );

@@ -198,8 +198,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { struct CMD_TYPE_CAMERA_SUP *camera_sup_new;;
-       camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
+     { camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
        if (!camera_sup)                                                                        /* Terminé ?? */
         { Libere_DB_SQL( Config.log, &db );
           Client_mode( client, ENVOI_IXXX_SUPERVISION );

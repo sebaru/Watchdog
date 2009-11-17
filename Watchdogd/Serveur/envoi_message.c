@@ -159,8 +159,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_messages_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_MESSAGE *rezo_msg;
-    struct CMD_ENREG nbr;
+  { struct CMD_ENREG nbr;
     struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
 
