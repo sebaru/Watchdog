@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_commentDB ( struct LOG *log, struct DB *db, struct CMD_ID_COMMENT *comment )
+ gboolean Retirer_commentDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -55,7 +55,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure comment                       */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_commentDB ( struct LOG *log, struct DB *db, struct CMD_ADD_COMMENT *comment )
+ gint Ajouter_commentDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment )
   { gchar requete[512];
     gchar *libelle, *font;
 
@@ -104,8 +104,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct COMMENTDB *Recuperer_commentDB_suite( struct LOG *log, struct DB *db )
-  { struct COMMENTDB *comment;
+ struct CMD_TYPE_COMMENT *Recuperer_commentDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_COMMENT *comment;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -113,7 +113,7 @@
        return(NULL);
      }
 
-    comment = (struct COMMENTDB *)g_malloc0( sizeof(struct COMMENTDB) );
+    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info( log, DEBUG_MEM, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( comment->libelle, db->row[2], sizeof(comment->libelle) );     /* Recopie dans la structure */
@@ -134,8 +134,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct COMMENTDB *Rechercher_commentDB ( struct LOG *log, struct DB *db, guint id )
-  { struct COMMENTDB *comment;
+ struct CMD_TYPE_COMMENT *Rechercher_commentDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_COMMENT *comment;
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -152,7 +152,7 @@
        return(NULL);
      }
 
-    comment = (struct COMMENTDB *)g_malloc0( sizeof(struct COMMENTDB) );
+    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info( log, DEBUG_MEM, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( comment->libelle, db->row[1], sizeof(comment->libelle) );     /* Recopie dans la structure */
@@ -173,7 +173,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_commentDB( struct LOG *log, struct DB *db, struct CMD_EDIT_COMMENT *comment )
+ gboolean Modifier_commentDB( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment )
   { gchar requete[1024];
     gchar *libelle, *font;
 

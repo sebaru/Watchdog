@@ -46,30 +46,30 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_SHOW_HISTO:
-             { struct CMD_SHOW_HISTO *histo;
-               histo = (struct CMD_SHOW_HISTO *)connexion->donnees;
+             { struct CMD_TYPE_HISTO *histo;
+               histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
                Proto_afficher_un_histo( histo );
              }
             break;
        case SSTAG_SERVEUR_ACK_HISTO:
-             { struct CMD_SHOW_HISTO *histo;
-               histo = (struct CMD_SHOW_HISTO *)connexion->donnees;
+             { struct CMD_TYPE_HISTO *histo;
+               histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
                Proto_rafraichir_un_histo( histo );
              }
             break;
        case SSTAG_SERVEUR_DEL_HISTO:
-             { struct CMD_ID_HISTO *histo;
-               histo = (struct CMD_ID_HISTO *)connexion->donnees;
+             { struct CMD_TYPE_HISTO *histo;
+               histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
                Proto_cacher_un_histo( histo );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD:
-             { struct CMD_SHOW_HISTO_HARD *histo;
+             { struct CMD_TYPE_HISTO_HARD *histo;
                Set_progress_plusun();
 
-               histo = (struct CMD_SHOW_HISTO_HARD *)g_malloc0( sizeof( struct CMD_SHOW_HISTO_HARD ) );
+               histo = (struct CMD_TYPE_HISTO_HARD *)g_malloc0( sizeof( struct CMD_TYPE_HISTO_HARD ) );
                if (!histo) return; 
-               memcpy( histo, connexion->donnees, sizeof(struct CMD_SHOW_HISTO_HARD ) );
+               memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO_HARD ) );
                Arrivee_histo_hard = g_list_append( Arrivee_histo_hard, histo );
                page_id = histo->page_id;                        /* Sauvegarde de la page pour futur clear */
              }
@@ -99,11 +99,11 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADDPROGRESS_HISTO:
-             { struct CMD_SHOW_HISTO *histo;
+             { struct CMD_TYPE_HISTO *histo;
                Set_progress_plusun();
-               histo = (struct CMD_SHOW_HISTO *)g_malloc0( sizeof( struct CMD_SHOW_HISTO ) );
+               histo = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
                if (!histo) return; 
-               memcpy( histo, connexion->donnees, sizeof(struct CMD_SHOW_HISTO ) );
+               memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
      printf("Reception histo %s\n", histo->libelle );
                Arrivee_histo = g_list_append( Arrivee_histo, histo );
              }

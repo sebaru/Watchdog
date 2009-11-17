@@ -45,7 +45,7 @@
 /* Sortie: false si pb                                                                                    */
 /**********************************************************************************************************/
  gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db, struct UTILISATEURDB *util, guint syn_id )
-  { struct SYNOPTIQUEDB *syn;
+  { struct CMD_TYPE_SYNOPTIQUE *syn;
     gint cpt;
 
     if (util->id==UID_ROOT) return(TRUE);                            /* Le tech est dans tous les groupes */
@@ -73,7 +73,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_ID_SYNOPTIQUE *syn )
+ gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[200];
     
     if (syn->id == 0) return(TRUE);                                 /* Le synoptique 0 est indestructible */
@@ -132,7 +132,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_ADD_SYNOPTIQUE *syn )
+ gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[200];
     gchar *libelle, *mnemo;
 
@@ -178,8 +178,8 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct SYNOPTIQUEDB *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db )
-  { struct SYNOPTIQUEDB *syn;
+ struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_SYNOPTIQUE *syn;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -187,7 +187,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
        return(NULL);
      }
 
-    syn = (struct SYNOPTIQUEDB *)g_malloc0( sizeof(struct SYNOPTIQUEDB) );
+    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!syn) Info( log, DEBUG_MEM, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( syn->libelle, db->row[1], sizeof(syn->libelle) );             /* Recopie dans la structure */
@@ -202,8 +202,8 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct SYNOPTIQUEDB *Rechercher_synoptiqueDB ( struct LOG *log, struct DB *db, guint id )
-  { struct SYNOPTIQUEDB *syn;
+ struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_SYNOPTIQUE *syn;
     gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -219,7 +219,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
        return(NULL);
      }
 
-    syn = (struct SYNOPTIQUEDB *)g_malloc0( sizeof(struct SYNOPTIQUEDB) );
+    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!syn)
      { Info( log, DEBUG_MEM, "Rechercher_synoptiqueDB: Mem error" ); }
     else
@@ -235,7 +235,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_EDIT_SYNOPTIQUE *syn )
+ gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[1024];
     gchar *libelle, *mnemo;
 

@@ -133,8 +133,8 @@
     struct TEMPO Tempo_R[NBR_TEMPO];
 
                                                                    /* Interfacage serveur -> sous-serveur */
-    struct CMD_SHOW_HISTO    new_histo;                                   /* Envoi d'un histo aux clients */
-    struct CMD_ID_HISTO      del_histo;                                  /* Destruction d'un histo client */
+    struct CMD_TYPE_HISTO    new_histo;                                   /* Envoi d'un histo aux clients */
+    struct CMD_TYPE_HISTO    del_histo;                                  /* Destruction d'un histo client */
     struct CMD_ETAT_BIT_CTRL new_motif;                                        /* Changement d'etat motif */
 
     struct SOUS_SERVEUR *Sous_serveur;

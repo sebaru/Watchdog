@@ -25,7 +25,7 @@
 /* Entrée: une reference sur le capteur                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_capteur_supervision( struct CMD_SHOW_CAPTEUR *rezo_capteur )
+ void Proto_afficher_un_capteur_supervision( struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_SUPERVISION *infos;
     struct CAPTEUR *capteur;

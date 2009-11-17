@@ -455,7 +455,7 @@ printf("Changer_couleur %p\n", data);
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_SHOW_GROUPE *groupe )
+ void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_TYPE_GROUPE *groupe )
   {
 printf("Print groupe pour propriete synoptique \n");
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );

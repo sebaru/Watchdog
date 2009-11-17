@@ -125,10 +125,10 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_supervision ( void )
-  { struct CMD_ID_SYNOPTIQUE cmd;
+  { struct CMD_TYPE_SYNOPTIQUE cmd;
     cmd.id = 1;                                                                    /* Synoptique SITE = 1 */
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, cmd.id, TRUE )) return;
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
-                   (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                   (gchar *)&cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
   }
 /*--------------------------------------------------------------------------------------------------------*/

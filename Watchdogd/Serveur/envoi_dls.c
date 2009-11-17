@@ -211,7 +211,7 @@
      }
     client->transfert.index = 0;
     lockf( client->transfert.fd, F_LOCK, 0 );                                  /* Verrouillage du fichier */
-    ((struct CMD_EDIT_SOURCE_DLS *)client->transfert.buffer)->id = rezo_dls->id;
+    ((struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer)->id = rezo_dls->id;
     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK,
                   (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     Client_mode( client, ENVOI_SOURCE_DLS );
@@ -221,7 +221,7 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_source_dls( struct CLIENT *client, struct CMD_EDIT_SOURCE_DLS *edit_dls,
+ void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
                                 gchar *buffer )
   { gchar chaine[80];
     if (!client->id_creation_plugin_dls)
@@ -244,7 +244,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void *Proto_compiler_source_dls( struct CLIENT *client )
-  { struct CMD_EDIT_SOURCE_DLS dls;
+  { struct CMD_TYPE_SOURCE_DLS dls;
     gboolean retour;
     memcpy( &dls, &client->dls, sizeof(dls) );
 
@@ -438,15 +438,15 @@
 /**********************************************************************************************************/
  gboolean Envoyer_source_dls ( struct CLIENT *client )
   { gint taille, nbr_carac, taille_valide, taille_buffer;
-    struct CMD_EDIT_SOURCE_DLS *edit_dls;
+    struct CMD_TYPE_SOURCE_DLS *edit_dls;
     gchar *buffer;
     gchar *test;
 
     if (!client->transfert.buffer) return(TRUE);
     if (client->transfert.fd<0) return(TRUE);
-    edit_dls = (struct CMD_EDIT_SOURCE_DLS *)client->transfert.buffer;
-    buffer = client->transfert.buffer + sizeof(struct CMD_EDIT_SOURCE_DLS);
-    taille_buffer = Config.taille_bloc_reseau - sizeof(struct CMD_EDIT_SOURCE_DLS);
+    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer;
+    buffer = client->transfert.buffer + sizeof(struct CMD_TYPE_SOURCE_DLS);
+    taille_buffer = Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
 
     taille = read ( client->transfert.fd,
                     buffer + client->transfert.index,
@@ -464,7 +464,7 @@
     
     edit_dls->taille = taille_valide;
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS,
-                   (gchar *)client->transfert.buffer, taille_valide + sizeof(struct CMD_EDIT_SOURCE_DLS) );
+                   (gchar *)client->transfert.buffer, taille_valide + sizeof(struct CMD_TYPE_SOURCE_DLS) );
     memcpy( buffer, buffer + taille_valide, taille-taille_valide );
     return(FALSE);
   }

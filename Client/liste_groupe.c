@@ -66,7 +66,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_groupe ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_GROUPE rezo_groupe;
+  { struct CMD_TYPE_GROUPE rezo_groupe;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -87,7 +87,7 @@
                g_free( nom );
 
                Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_DEL_GROUPE,
-                              (gchar *)&rezo_groupe, sizeof(struct CMD_ID_GROUPE) );
+                              (gchar *)&rezo_groupe, sizeof(struct CMD_TYPE_GROUPE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -136,7 +136,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_groupe ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_GROUPE rezo_groupe;
+    struct CMD_TYPE_GROUPE rezo_groupe;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -158,7 +158,7 @@
     g_free( nom );
 
     Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_EDIT_GROUPE,
-                   (gchar *)&rezo_groupe, sizeof(struct CMD_ID_GROUPE) );
+                   (gchar *)&rezo_groupe, sizeof(struct CMD_TYPE_GROUPE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -308,7 +308,7 @@
 /* Entrée: une reference sur le groupe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_groupe( GtkTreeIter *iter, struct CMD_SHOW_GROUPE *groupe )
+ static void Rafraichir_visu_groupe( GtkTreeIter *iter, struct CMD_TYPE_GROUPE *groupe )
   { GtkTreeModel *store;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_groupe) );              /* Acquisition du modele */
@@ -325,7 +325,7 @@
 /* Entrée: une reference sur le groupe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_groupe( struct CMD_SHOW_GROUPE *groupe )
+ void Proto_afficher_un_groupe( struct CMD_TYPE_GROUPE *groupe )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -340,7 +340,7 @@
 /* Entrée: une reference sur le groupe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_groupe( struct CMD_ID_GROUPE *groupe )
+ void Proto_cacher_un_groupe( struct CMD_TYPE_GROUPE *groupe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -366,7 +366,7 @@
 /* Entrée: une reference sur le groupe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_groupe( struct CMD_SHOW_GROUPE *groupe )
+ void Proto_rafraichir_un_groupe( struct CMD_TYPE_GROUPE *groupe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

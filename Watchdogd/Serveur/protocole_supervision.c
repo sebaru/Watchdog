@@ -49,8 +49,8 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SUPERVISION:
-             { struct CMD_ID_SYNOPTIQUE *syn;
-               syn = (struct CMD_ID_SYNOPTIQUE *)connexion->donnees;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                printf("Le client desire le synoptique de supervision\n" );
 
                if ( ! Tester_groupe_synoptique( Config.log, client->Db_watchdog, client->util, syn->id) )
@@ -59,7 +59,7 @@
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
-               else { struct CMD_SHOW_SYNOPTIQUE *cmd;
+               else { struct CMD_TYPE_SYNOPTIQUE *cmd;
                       struct SYNOPTIQUEDB *syndb;
                       syndb = Rechercher_synoptiqueDB ( Config.log, client->Db_watchdog, syn->id );
                       if ( ! syndb )
@@ -73,7 +73,7 @@
                          g_free(syndb);
                          if (cmd)
                           { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
-                                           (gchar *)cmd, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
+                                           (gchar *)cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                             g_free(cmd);
                             client->num_supervision = syn->id;/* Sauvegarde du syn voulu pour envoi motif */
                             Client_mode( client, ENVOI_MOTIF_SUPERVISION );
@@ -106,13 +106,13 @@
              }
             break;
        case SSTAG_CLIENT_SUP_EDIT_SCENARIO:
-             { struct CMD_ID_SCENARIO *sce;
-               sce = (struct CMD_ID_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *sce;
+               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_editer_scenario_sup( client, sce );
              }
             break;
        case SSTAG_CLIENT_SUP_ADD_SCENARIO:
-             { struct CMD_ADD_SCENARIO *sce;
+             { struct CMD_TYPE_SCENARIO *sce;
 
                if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SCENARIO) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
@@ -120,13 +120,13 @@
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
-               else { sce = (struct CMD_ADD_SCENARIO *)connexion->donnees;
+               else { sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                       Proto_ajouter_scenario_sup( client, sce );
                     }
              }
             break;
        case SSTAG_CLIENT_SUP_DEL_SCENARIO:
-             { struct CMD_ID_SCENARIO *sce;
+             { struct CMD_TYPE_SCENARIO *sce;
 
                if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SCENARIO) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
@@ -134,14 +134,14 @@
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
-               else { sce = (struct CMD_ID_SCENARIO *)connexion->donnees;
+               else { sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                       Proto_effacer_scenario_sup( client, sce );
                     }
              }
             break;
        case SSTAG_CLIENT_SUP_VALIDE_EDIT_SCENARIO:
-             { struct CMD_EDIT_SCENARIO *sce;
-               sce = (struct CMD_EDIT_SCENARIO *)connexion->donnees;
+             { struct CMD_TYPE_SCENARIO *sce;
+               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
                Proto_valider_editer_scenario_sup( client, sce );
              }
             break;

@@ -53,10 +53,10 @@
              }
             break;
        case SSTAG_SERVEUR_SOURCE_DLS:
-             { struct CMD_EDIT_SOURCE_DLS *dls;
+             { struct CMD_TYPE_SOURCE_DLS *dls;
                gchar *buffer;
-               dls = (struct CMD_EDIT_SOURCE_DLS *)connexion->donnees;
-               buffer = (gchar *)dls + sizeof(struct CMD_EDIT_SOURCE_DLS);
+               dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
+               buffer = (gchar *)dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
                Proto_append_source_dls( dls, buffer );
              }
             break;

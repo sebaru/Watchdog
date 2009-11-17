@@ -164,7 +164,7 @@
   };
   
  struct TYPE_INFO_ATELIER
-  { struct CMD_ID_SYNOPTIQUE syn;                                  /* Id du synoptique en cours d'edition */
+  { struct CMD_TYPE_SYNOPTIQUE syn;                                  /* Id du synoptique en cours d'edition */
                                                 /* Interface de plus haut niveau: affichage du synoptique */
     struct TRAME *Trame_atelier;                                         /* La trame de fond de l'atelier */
     struct
@@ -242,21 +242,21 @@
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */
 
- extern void Proto_afficher_un_groupe( struct CMD_SHOW_GROUPE *groupe );           /* Dans liste_groupe.c */ 
- extern void Proto_cacher_un_groupe( struct CMD_ID_GROUPE *groupe );
- extern void Proto_rafraichir_un_groupe( struct CMD_SHOW_GROUPE *groupe );
+ extern void Proto_afficher_un_groupe( struct CMD_TYPE_GROUPE *groupe );           /* Dans liste_groupe.c */ 
+ extern void Proto_cacher_un_groupe( struct CMD_TYPE_GROUPE *groupe );
+ extern void Proto_rafraichir_un_groupe( struct CMD_TYPE_GROUPE *groupe );
  extern void Creer_page_groupe( void );
 
- extern void Menu_ajouter_editer_groupe ( struct CMD_EDIT_GROUPE *edit_groupe );   /* Dans ajout_groupe.c */
+ extern void Menu_ajouter_editer_groupe ( struct CMD_TYPE_GROUPE *edit_groupe );   /* Dans ajout_groupe.c */
 
- extern void Proto_afficher_un_utilisateur( struct CMD_SHOW_UTILISATEUR *util );     /* Dans liste_util.c */ 
- extern void Proto_cacher_un_utilisateur( struct CMD_ID_UTILISATEUR *util );
- extern void Proto_rafraichir_un_utilisateur( struct CMD_SHOW_UTILISATEUR *util );
+ extern void Proto_afficher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );     /* Dans liste_util.c */ 
+ extern void Proto_cacher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
+ extern void Proto_rafraichir_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
  extern void Creer_page_utilisateur( void );
 
- extern void Proto_afficher_un_groupe_existant ( struct CMD_SHOW_GROUPE *groupe );        /* ajout_util.c */
+ extern void Proto_afficher_un_groupe_existant ( struct CMD_TYPE_GROUPE *groupe );        /* ajout_util.c */
  extern void Proto_fin_affichage_groupes_existants ( void );
- extern void Menu_ajouter_editer_utilisateur ( struct CMD_EDIT_UTILISATEUR *edit_util );
+ extern void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util );
 
  extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );  /* Dans liste_plugin_dls.c */ 
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
@@ -266,31 +266,31 @@
  extern void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls );/* ajout_plugin_dls.c */
 
  extern void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
- extern void Proto_append_source_dls( struct CMD_EDIT_SOURCE_DLS *dls, gchar *buffer );
+ extern void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer );
  extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
- extern void Proto_afficher_un_histo( struct CMD_SHOW_HISTO *histo );               /* Dans liste_histo.c */
- extern void Proto_cacher_un_histo( struct CMD_ID_HISTO *histo );
- extern void Proto_rafraichir_un_histo( struct CMD_SHOW_HISTO *histo );
+ extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );               /* Dans liste_histo.c */
+ extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
+ extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Creer_page_histo( void );                               
  extern gchar *Type_vers_string ( guint type );
 
  extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );       /* Dans liste_message.c */
  extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
  extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
- extern void Proto_afficher_un_syn_for_message ( struct CMD_SHOW_SYNOPTIQUE *syn );
+ extern void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Creer_page_message( void );
 
  extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );   /* Dans ajout_message.c */
  extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
- extern void Proto_cacher_un_synoptique( struct CMD_ID_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
- extern void Proto_afficher_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
- extern void Proto_rafraichir_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique );
+ extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
+ extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
+ extern void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Creer_page_synoptique( void );
 
- extern void Menu_ajouter_editer_synoptique ( struct CMD_EDIT_SYNOPTIQUE *edit_syn );/* ajout_synoptique.c*/
- extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_SHOW_GROUPE *groupe );
+ extern void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn );/* ajout_synoptique.c*/
+ extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_TYPE_GROUPE *groupe );
  extern void Proto_fin_affichage_groupes_pour_synoptique ( void );
  extern void Proto_afficher_les_groupes_pour_synoptique ( GList *liste );
 
@@ -333,8 +333,8 @@
 
 
 
- extern void Proto_afficher_un_motif_atelier( struct CMD_SHOW_MOTIF *motif );           /* Dans atelier.c */
- extern void Proto_cacher_un_motif_atelier( struct CMD_ID_MOTIF *motif );
+ extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );           /* Dans atelier.c */
+ extern void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );
  extern void Reduire_en_vignette ( struct MOTIF *motif );
  extern void Creer_page_atelier( gint syn_id, gchar *libelle_syn );
  extern void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page );
@@ -392,25 +392,25 @@
  extern void Proto_afficher_un_icone_atelier( struct CMD_TYPE_ICONE *icone );
 
  extern void Creer_fenetre_ajout_commentaire ( void );                    /* Dans atelier_ajout_comment.c */
- extern void Proto_afficher_un_comment_atelier( struct CMD_SHOW_COMMENT *rezo_comment );
- extern void Proto_cacher_un_comment_atelier( struct CMD_ID_COMMENT *comment );
+ extern void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment );
+ extern void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment );
 
  extern void Creer_fenetre_ajout_passerelle ( void );                  /* Dans atelier_ajout_passerelle.c */
- extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_SHOW_SYNOPTIQUE *syn );
- extern void Proto_afficher_une_passerelle_atelier( struct CMD_SHOW_PASSERELLE *rezo_pass );
- extern void Proto_cacher_une_passerelle_atelier( struct CMD_ID_PASSERELLE *pass );
+ extern void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass );
+ extern void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass );
 
                                                                           /* Dans atelier_ajout_capteur.c */
  extern void Menu_ajouter_editer_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
- extern void Proto_afficher_un_capteur_atelier( struct CMD_SHOW_CAPTEUR *rezo_capteur );
- extern void Proto_cacher_un_capteur_atelier( struct CMD_ID_CAPTEUR *capteur );
+ extern void Proto_afficher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *rezo_capteur );
+ extern void Proto_cacher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *capteur );
  extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
                                                                           /* Dans atelier_ajout_palette.c */
  extern void Creer_fenetre_ajout_palette ( struct TYPE_INFO_ATELIER *infos );
- extern void Proto_afficher_une_palette_atelier( struct CMD_SHOW_PALETTE *rezo_palette );
- extern void Proto_cacher_une_palette_atelier( struct CMD_ID_PALETTE *palette );
- extern void Proto_afficher_un_syn_for_palette_atelier( struct CMD_SHOW_SYNOPTIQUE *synoptique );
+ extern void Proto_afficher_une_palette_atelier( struct CMD_TYPE_PALETTE *rezo_palette );
+ extern void Proto_cacher_une_palette_atelier( struct CMD_TYPE_PALETTE *palette );
+ extern void Proto_afficher_un_syn_for_palette_atelier( struct CMD_TYPE_SYNOPTIQUE *synoptique );
 
                                                                        /* Dans atelier_ajout_camera_sup.c */
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
@@ -421,12 +421,12 @@
 
  extern void Creer_page_liste_histo_hard( void );                              /* Dans liste_histo_hard.c */
  extern void Proto_effacer_liste_histo_hard( gint page_id );
- extern void Proto_afficher_un_histo_hard( struct CMD_SHOW_HISTO_HARD *histo );
+ extern void Proto_afficher_un_histo_hard( struct CMD_TYPE_HISTO_HARD *histo );
  
                                                                                     /* Dans supervision.c */
  extern void Creer_page_supervision( gchar *libelle, guint syn_id );
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
- extern void Proto_afficher_un_motif_supervision( struct CMD_SHOW_MOTIF *rezo_motif );
+ extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id );
 
@@ -437,17 +437,17 @@
                                                GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
 
                                                                             /* Dans supervision_comment.c */
- extern void Proto_afficher_un_comment_supervision( struct CMD_SHOW_COMMENT *rezo_comment );
+ extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
  
                                                                          /* Dans supervision_passerelle.c */
- extern void Proto_afficher_une_passerelle_supervision( struct CMD_SHOW_PASSERELLE *rezo_pass );
+ extern void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Changer_vue_directe ( guint num_syn );
 
                                                                             /* Dans supervision_palette.c */
- extern void Proto_afficher_une_palette_supervision( struct CMD_SHOW_PALETTE *rezo_palette );
+ extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
                                                                             /* Dans supervision_capteur.c */
- extern void Proto_afficher_un_capteur_supervision( struct CMD_SHOW_CAPTEUR *rezo_capteur );
+ extern void Proto_afficher_un_capteur_supervision( struct CMD_TYPE_CAPTEUR *rezo_capteur );
  extern void Proto_changer_etat_capteur( struct CMD_ETAT_BIT_CAPTEUR *etat_capteur );
 
                                                                              /* Dans supervision_camera.c */
@@ -471,7 +471,7 @@
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
  extern gboolean CB_sortir_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
- extern void Proto_ajouter_courbe( struct CMD_ID_COURBE *courbe );
+ extern void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe );
  extern void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe );
                                                                                    /* Dans histo_courbe.c */
  extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_ENTREEANA *entreeANA );
@@ -485,7 +485,7 @@
  extern void Menu_changer_echelle3 ( struct TYPE_INFO_COURBE *infos );
  extern void Menu_changer_echelle4 ( struct TYPE_INFO_COURBE *infos );
  extern void Menu_changer_echelle5 ( struct TYPE_INFO_COURBE *infos );
- extern void Proto_ajouter_histo_courbe( struct CMD_ID_COURBE *courbe );
+ extern void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe );
  extern void Proto_append_histo_courbe( struct CMD_APPEND_COURBE *append_courbe );
 
 

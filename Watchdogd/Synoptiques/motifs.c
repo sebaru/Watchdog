@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_motifDB ( struct LOG *log, struct DB *db, struct CMD_ID_MOTIF *motif )
+ gboolean Retirer_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -55,7 +55,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_ADD_MOTIF *motif )
+ gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
   { gchar requete[512];
     gchar *libelle;
 
@@ -100,8 +100,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MOTIFDB *Recuperer_motifDB_suite( struct LOG *log, struct DB *db )
-  { struct MOTIFDB *motif;
+ struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_MOTIF *motif;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -109,7 +109,7 @@
        return(NULL);
      }
 
-    motif = (struct MOTIFDB *)g_malloc0( sizeof(struct MOTIFDB) );
+    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info( log, DEBUG_MEM, "Recuperer_motifDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( motif->libelle, db->row[1], sizeof(motif->libelle) );         /* Recopie dans la structure */
@@ -138,8 +138,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MOTIFDB *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id )
-  { struct MOTIFDB *motif;
+ struct CMD_TYPE_MOTIF *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_MOTIF *motif;
     gchar requete[512];
 
 
@@ -158,7 +158,7 @@
        return(NULL);
      }
 
-    motif = (struct MOTIFDB *)g_malloc0( sizeof(struct MOTIFDB) );
+    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info( log, DEBUG_MEM, "Rechercher_motifDB: Erreur allocation mémoire" );
     else
      { memcpy( motif->libelle, db->row[0], sizeof(motif->libelle) );         /* Recopie dans la structure */
@@ -187,7 +187,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_motifDB( struct LOG *log, struct DB *db, struct CMD_EDIT_MOTIF *motif )
+ gboolean Modifier_motifDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
   { gchar requete[1024];
     gchar *libelle;
 

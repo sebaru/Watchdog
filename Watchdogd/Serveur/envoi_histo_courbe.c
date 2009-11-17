@@ -39,7 +39,7 @@
 /* Entrée: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_histo_courbe ( struct CLIENT *client, struct CMD_ID_COURBE *rezo_courbe )
+ void Proto_effacer_histo_courbe ( struct CLIENT *client, struct CMD_TYPE_COURBE *rezo_courbe )
   { /*struct COURBE *courbe;*/
 
   }
@@ -51,7 +51,7 @@
  void Proto_ajouter_histo_courbe_thread ( struct CLIENT *client )
   { struct CMD_APPEND_COURBE envoi_courbe;
     struct ARCHDB *arch;
-    struct CMD_ID_COURBE rezo_courbe;
+    struct CMD_TYPE_COURBE rezo_courbe;
     struct DB *db;
     guint i, delta_x;
 
@@ -72,7 +72,7 @@
 printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
 
     Envoi_client ( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_ADD_HISTO_COURBE_OK,  /* Envoi préparation au client */
-                   (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                   (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
 
     if (client->histo_courbe.date_first > client->histo_courbe.date_last)
      { client->histo_courbe.date_last = (guint) time(NULL);

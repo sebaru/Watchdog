@@ -39,7 +39,7 @@
 /* Entrée: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_courbe ( struct CLIENT *client, struct CMD_ID_COURBE *rezo_courbe )
+ void Proto_effacer_courbe ( struct CLIENT *client, struct CMD_TYPE_COURBE *rezo_courbe )
   { struct COURBE *courbe;
     GList *liste_courbe;
     courbe = NULL;
@@ -61,7 +61,7 @@
  void Proto_ajouter_courbe_thread ( struct CLIENT *client )
   { struct CMD_APPEND_COURBE envoi_courbe;
     struct ARCHDB *arch;
-    struct CMD_ID_COURBE rezo_courbe;
+    struct CMD_TYPE_COURBE rezo_courbe;
     struct COURBE *courbe;
     struct DB *db;
     GList *liste_courbe;
@@ -126,7 +126,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
      }                                                                           /* Si pas de histos (??) */
        
     Envoi_client ( client, TAG_COURBE, SSTAG_SERVEUR_ADD_COURBE_OK,        /* Envoi préparation au client */
-                   (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                   (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
 
     switch( courbe->type )
      { case MNEMO_ENTREE_ANA:

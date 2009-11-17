@@ -48,12 +48,12 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Changer_vue_directe ( guint num_syn )
-  { struct CMD_ID_SYNOPTIQUE cmd;
+  { struct CMD_TYPE_SYNOPTIQUE cmd;
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, num_syn, TRUE )) return;
 
     cmd.id = num_syn;
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
-                   (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                   (gchar *)&cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
   }
 /**********************************************************************************************************/
 /* Changer_vue: Demande au serveur une nouvelle vue                                                       */
@@ -75,7 +75,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_passerelle_supervision( struct CMD_SHOW_PASSERELLE *rezo_pass )
+ void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PASSERELLE *pass;

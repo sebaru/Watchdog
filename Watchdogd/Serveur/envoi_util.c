@@ -33,14 +33,14 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_util: convertit une structure UTILISATEUR en structure CMD_SHOW_UTILISATEUR             */
+/* Preparer_envoi_util: convertit une structure UTILISATEUR en structure CMD_TYPE_UTILISATEUR             */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_UTILISATEUR *Preparer_envoi_utilisateur ( struct UTILISATEURDB *util )
-  { struct CMD_SHOW_UTILISATEUR *rezo_util;
+ static struct CMD_TYPE_UTILISATEUR *Preparer_envoi_utilisateur ( struct UTILISATEURDB *util )
+  { struct CMD_TYPE_UTILISATEUR *rezo_util;
 
-    rezo_util = (struct CMD_SHOW_UTILISATEUR *)g_malloc0( sizeof(struct CMD_SHOW_UTILISATEUR) );
+    rezo_util = (struct CMD_TYPE_UTILISATEUR *)g_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
     if (!rezo_util) { return(NULL); }
 
     rezo_util->id = util->id;
@@ -53,8 +53,8 @@
 /* Entrée: le client demandeur et l'utilisateur en question                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_ID_UTILISATEUR *rezo_util )
-  { struct CMD_EDIT_UTILISATEUR edit_util;
+ void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
+  { struct CMD_TYPE_UTILISATEUR edit_util;
     struct UTILISATEURDB *util;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -75,7 +75,7 @@
        edit_util.changepass  = util->changepass;
 
        Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_EDIT_UTIL_OK,
-                     (gchar *)&edit_util, sizeof(struct CMD_EDIT_UTILISATEUR) );
+                     (gchar *)&edit_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        g_free(util);                                                                /* liberation mémoire */
        Client_mode( client, ENVOI_GROUPE_FOR_UTIL );
      }
@@ -92,7 +92,7 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_utilisateur ( struct CLIENT *client, struct CMD_EDIT_UTILISATEUR *rezo_util )
+ void Proto_valider_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { struct UTILISATEURDB *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -108,7 +108,7 @@
      }
     else { result = Rechercher_utilisateurDB( Config.log, Db_watchdog, rezo_util->id );
            if (result) 
-            { struct CMD_SHOW_UTILISATEUR *util;
+            { struct CMD_TYPE_UTILISATEUR *util;
               util = Preparer_envoi_utilisateur ( result );
               g_free(result);
               if (!util)
@@ -119,7 +119,7 @@
                                 (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                 }
               else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_VALIDE_EDIT_UTIL_OK,
-                                   (gchar *)util, sizeof(struct CMD_SHOW_UTILISATEUR) );
+                                   (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
                      g_free(util);
                   }
             }
@@ -137,7 +137,7 @@
 /* Entrée: le client demandeur et le utilisateur en question                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_utilisateur ( struct CLIENT *client, struct CMD_ID_UTILISATEUR *rezo_util )
+ void Proto_effacer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -146,7 +146,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_DEL_UTIL_OK,
-                     (gchar *)rezo_util, sizeof(struct CMD_ID_UTILISATEUR) );
+                     (gchar *)rezo_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -161,7 +161,7 @@
 /* Entrée: le utilisateur à créer                                                                         */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_ADD_UTILISATEUR *rezo_util )
+ void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { struct UTILISATEURDB *result;
     gint id;
     struct DB *Db_watchdog;
@@ -184,7 +184,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_UTILISATEUR *util;
+            { struct CMD_TYPE_UTILISATEUR *util;
               util = Preparer_envoi_utilisateur ( result );
               g_free(result);
               if (!util)
@@ -195,7 +195,7 @@
                                 (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                 }
               else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADD_UTIL_OK,
-                                   (gchar *)util, sizeof(struct CMD_SHOW_UTILISATEUR) );
+                                   (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
                      g_free(util);
                    }
             }
@@ -207,7 +207,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_utilisateurs_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_UTILISATEUR *rezo_util;
+  { struct CMD_TYPE_UTILISATEUR *rezo_util;
     struct UTILISATEURDB *util;
     struct CMD_ENREG nbr;
     struct DB *db;
@@ -243,7 +243,7 @@
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL,      /* Envoi des infos */
-                         (gchar *)rezo_util, sizeof(struct CMD_SHOW_UTILISATEUR) );
+                         (gchar *)rezo_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
           g_free(rezo_util);
         }
      }

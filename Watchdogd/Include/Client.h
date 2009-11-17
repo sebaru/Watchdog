@@ -104,10 +104,10 @@
     gint num_supervision;                                 /* Numéro du synoptique en cours de supervision */
     struct CMD_WANT_SCENARIO_MOTIF sce;                     /* numéro du monostable du scenario a envoyer */
     struct CMD_REQUETE_HISTO_HARD requete;                   /* Pour la sauvegarde de la requete en cours */
-    struct CMD_EDIT_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
+    struct CMD_TYPE_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
 
-    struct CMD_ID_COURBE courbe;                      /* Structure parametres Proto_ajouter_courbe_thread */
-    struct CMD_ID_SYNOPTIQUE syn;                     /* Structure parametres Proto_ajouter_courbe_thread */
+    struct CMD_TYPE_COURBE courbe;                    /* Structure parametres Proto_ajouter_courbe_thread */
+    struct CMD_TYPE_SYNOPTIQUE syn;                   /* Structure parametres Proto_ajouter_courbe_thread */
 
     struct CMD_HISTO_COURBE histo_courbe;        /* Structure pour travailler sur les historiques courbes */
   };     

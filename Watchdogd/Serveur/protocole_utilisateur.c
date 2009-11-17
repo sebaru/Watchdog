@@ -49,8 +49,8 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_EDIT_GROUPE:
-             { struct CMD_ID_GROUPE *groupe;
-               groupe = (struct CMD_ID_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_editer_groupe( client, groupe );
              }
             break;
@@ -61,20 +61,20 @@
              }
             break;
        case SSTAG_CLIENT_ADD_GROUPE:
-             { struct CMD_ADD_GROUPE *groupe;
-               groupe = (struct CMD_ADD_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_ajouter_groupe( client, groupe );
              }
             break;
        case SSTAG_CLIENT_DEL_GROUPE:
-             { struct CMD_ID_GROUPE *groupe;
-               groupe = (struct CMD_ID_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_effacer_groupe( client, groupe );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_GROUPE:
-             { struct CMD_EDIT_GROUPE *groupe;
-               groupe = (struct CMD_EDIT_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_valider_editer_groupe( client, groupe );
              }
             break;
@@ -94,26 +94,26 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_UTIL:
-             { struct CMD_ID_UTILISATEUR *util;
-               util = (struct CMD_ID_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_editer_utilisateur( client, util );
              }
             break;
        case SSTAG_CLIENT_ADD_UTIL:
-             { struct CMD_ADD_UTILISATEUR *util;
-               util = (struct CMD_ADD_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_ajouter_utilisateur( client, util );
              }
             break;
        case SSTAG_CLIENT_DEL_UTIL:
-             { struct CMD_ID_UTILISATEUR *util;
-               util = (struct CMD_ID_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_effacer_utilisateur( client, util );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_UTIL:
-             { struct CMD_EDIT_UTILISATEUR *util;
-               util = (struct CMD_EDIT_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_valider_editer_utilisateur( client, util );
              }
             break;

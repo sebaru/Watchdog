@@ -286,7 +286,7 @@
 /* Entrée: une reference sur le histo_hard a afficherb                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_histo_hard( struct CMD_SHOW_HISTO_HARD *histo )
+ void Proto_afficher_un_histo_hard( struct CMD_TYPE_HISTO_HARD *histo )
   { gchar chaine[50], date[128], ack[128], *date_create, *date_fin, *duree;
     struct TYPE_INFO_HISTO_HARD *infos;
     struct PAGE_NOTEBOOK *page;

@@ -34,12 +34,6 @@
     guint  gids[NBR_MAX_GROUPE_PAR_UTIL];                            /* Numéro des groupes d'appartenance */
   };
 
- struct GROUPEDB
-  { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    guint  id;
-  };
-
  enum                                                /* Enumeration des utilisateurs spéciaux de watchdog */
   { UID_ROOT,
     NBR_UTILISATEUR_RESERVE
@@ -60,25 +54,25 @@
 
 /************************************** Prototypes de fonctions *******************************************/
  extern gboolean Recuperer_groupesDB( struct LOG *log, struct DB *db );                  /* Dans groupe.c */
- extern struct GROUPEDB *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Tester_groupe_util( guint id_util, guint *groupes, guint id_groupe );
  extern gchar *Nom_groupe_reserve( gint id );
- extern gboolean Retirer_groupeDB( struct LOG *log, struct DB *db, struct CMD_ID_GROUPE *groupe );
- extern gint Ajouter_groupeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_GROUPE *groupe );
- extern struct GROUPEDB *Rechercher_groupeDB( struct LOG *log, struct DB *db, gint id );
- extern gboolean Modifier_groupeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_GROUPE *groupe );
+ extern gboolean Retirer_groupeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe );
+ extern gint Ajouter_groupeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe );
+ extern struct CMD_TYPE_GROUPE *Rechercher_groupeDB( struct LOG *log, struct DB *db, gint id );
+ extern gboolean Modifier_groupeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe );
  extern gboolean Groupe_set_groupe_utilDB( struct LOG *log, struct DB *db, guint id_util, guint *gids );
  extern gboolean Groupe_get_groupe_utilDB( struct LOG *log, struct DB *db, guint id, guint *gids );
 
  extern gboolean Recuperer_utilsDB( struct LOG *log, struct DB *db );
  extern struct UTILISATEURDB *Recuperer_utilsDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Retirer_utilisateurDB( struct LOG *log, struct DB *db,
-                                        struct CMD_ID_UTILISATEUR *util );
+                                        struct CMD_TYPE_UTILISATEUR *util );
  extern gint Ajouter_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,
-                                    struct CMD_ADD_UTILISATEUR *util );
+                                    struct CMD_TYPE_UTILISATEUR *util );
  extern struct UTILISATEURDB *Rechercher_utilisateurDB( struct LOG *log, struct DB *db, gint id );
  extern gboolean Modifier_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,
-                                         struct CMD_EDIT_UTILISATEUR *util );
+                                         struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Nom_utilisateur_reserve( gint id );
 
  extern gchar *Recuperer_clef ( struct LOG *log, struct DB *db, gchar *nom, gint *id );    /* Dans clef.c */

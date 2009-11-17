@@ -55,50 +55,50 @@
              }
             break;
        case SSTAG_CLIENT_ADD_PLUGIN_DLS:
-             { struct CMD_ADD_PLUGIN_DLS *dls;
-               dls = (struct CMD_ADD_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_ajouter_plugin_dls( client, dls );
              }
             break;
        case SSTAG_CLIENT_EDIT_PLUGIN_DLS:
-             { struct CMD_ID_PLUGIN_DLS *dls;
-               dls = (struct CMD_ID_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_editer_plugin_dls( client, dls );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_PLUGIN_DLS:
-             { struct CMD_EDIT_PLUGIN_DLS *dls;
-               dls = (struct CMD_EDIT_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_valider_editer_plugin_dls( client, dls );
              }
             break;
        case SSTAG_CLIENT_DEL_PLUGIN_DLS:
-             { struct CMD_ID_PLUGIN_DLS *dls;
-               dls = (struct CMD_ID_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_effacer_plugin_dls( client, dls );
              }
             break;
        case SSTAG_CLIENT_EDIT_SOURCE_DLS:
-             { struct CMD_ID_PLUGIN_DLS *dls;
-               dls = (struct CMD_ID_PLUGIN_DLS *)connexion->donnees;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_editer_source_dls( client, dls );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB:
-             { struct CMD_EDIT_SOURCE_DLS *edit_dls;
-               edit_dls = (struct CMD_EDIT_SOURCE_DLS *)connexion->donnees;
+             { struct CMD_TYPE_SOURCE_DLS *edit_dls;
+               edit_dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
                Proto_effacer_fichier_plugin_dls( client, edit_dls->id );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS:
-             { struct CMD_EDIT_SOURCE_DLS *edit_dls;
-               edit_dls = (struct CMD_EDIT_SOURCE_DLS *)connexion->donnees;
+             { struct CMD_TYPE_SOURCE_DLS *edit_dls;
+               edit_dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
                Proto_valider_source_dls( client, edit_dls,
-                                         (gchar *)edit_dls + sizeof(struct CMD_EDIT_SOURCE_DLS) );
+                                         (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS) );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN:
-             { memcpy( &client->dls, (struct CMD_EDIT_SOURCE_DLS *)connexion->donnees,
+             { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
                        sizeof( client->dls ) );
                Info_n( Config.log, DEBUG_FORK, "SSRV: Protole: Creation pthread compilation DLS", client->dls.id );
                pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls, client );

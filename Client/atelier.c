@@ -138,16 +138,16 @@ printf("fin Detruire page atelier\n");
 /**********************************************************************************************************/
  static void Menu_enregistrer_synoptique ( struct TYPE_INFO_ATELIER *infos )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct CMD_EDIT_MOTIF edit_motif;
+    struct CMD_TYPE_MOTIF edit_motif;
     struct MOTIF *motif;
     struct TRAME_ITEM_COMMENT *trame_comment;
-    struct CMD_EDIT_COMMENT edit_comment;
+    struct CMD_TYPE_COMMENT edit_comment;
     struct COMMENTAIRE *comment;
     struct TRAME_ITEM_PASS *trame_pass;
-    struct CMD_EDIT_PASSERELLE edit_pass;
+    struct CMD_TYPE_PASSERELLE edit_pass;
     struct PASSERELLE *pass;
     struct TRAME_ITEM_CAPTEUR *trame_capteur;
-    struct CMD_EDIT_CAPTEUR edit_capteur;
+    struct CMD_TYPE_CAPTEUR edit_capteur;
     struct CAPTEUR *capteur;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct CMD_TYPE_CAMERA_SUP *camera_sup, edit_camera_sup;
@@ -182,7 +182,7 @@ printf("fin Detruire page atelier\n");
                edit_motif.type_gestion = motif->type_gestion;              /* Statique/dynamique/cyclique */
                printf("Update motif id=%d, libelle=%s, posx=%d, posy=%d\n", edit_motif.id, edit_motif.libelle, edit_motif.position_x, edit_motif.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_MOTIF,
-                              (gchar *)&edit_motif, sizeof(struct CMD_EDIT_MOTIF) );
+                              (gchar *)&edit_motif, sizeof(struct CMD_TYPE_MOTIF) );
                break;
 
           case TYPE_COMMENTAIRE:
@@ -199,7 +199,7 @@ printf("fin Detruire page atelier\n");
                edit_comment.angle      = comment->angle;
                printf("Update comment id=%d, posx=%d, posy=%d\n", edit_comment.id, edit_comment.position_x, edit_comment.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_COMMENT,
-                              (gchar *)&edit_comment, sizeof(struct CMD_EDIT_COMMENT) );
+                              (gchar *)&edit_comment, sizeof(struct CMD_TYPE_COMMENT) );
                break;
 
           case TYPE_PASSERELLE:
@@ -215,7 +215,7 @@ printf("fin Detruire page atelier\n");
                edit_pass.angle      = pass->angle;
                printf("Update pass id=%d, posx=%d, posy=%d\n", edit_pass.id, edit_pass.position_x, edit_pass.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
-                              (gchar *)&edit_pass, sizeof(struct CMD_EDIT_PASSERELLE) );
+                              (gchar *)&edit_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
                break;
           case TYPE_CAPTEUR:
                trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
@@ -229,7 +229,7 @@ printf("fin Detruire page atelier\n");
                edit_capteur.angle        = capteur->angle;
                printf("Update capteur id=%d, bitctrl=%d%d, posx=%d, posy=%d\n", edit_capteur.id, edit_capteur.type, edit_capteur.bit_controle, edit_capteur.position_x, edit_capteur.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR,
-                              (gchar *)&edit_capteur, sizeof(struct CMD_EDIT_CAPTEUR) );
+                              (gchar *)&edit_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
@@ -469,7 +469,7 @@ printf("fin Detruire page atelier\n");
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_motif_atelier( struct CMD_SHOW_MOTIF *rezo_motif )
+ void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *rezo_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
     struct MOTIF *motif;
@@ -547,7 +547,7 @@ printf("fin Detruire page atelier\n");
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_motif_atelier( struct CMD_ID_MOTIF *motif )
+ void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
         

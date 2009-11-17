@@ -49,7 +49,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_synoptique ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_SYNOPTIQUE rezo_synoptique;
+  { struct CMD_TYPE_SYNOPTIQUE rezo_synoptique;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -70,7 +70,7 @@
                g_free( libelle );
 
                Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_DEL_SYNOPTIQUE,
-                             (gchar *)&rezo_synoptique, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                             (gchar *)&rezo_synoptique, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -121,7 +121,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_synoptique ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_SYNOPTIQUE rezo_synoptique;
+    struct CMD_TYPE_SYNOPTIQUE rezo_synoptique;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -144,7 +144,7 @@
 
 printf("on veut editer le synoptique num %d %s\n", rezo_synoptique.id, rezo_synoptique.libelle );
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_EDIT_SYNOPTIQUE,
-                  (gchar *)&rezo_synoptique, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                  (gchar *)&rezo_synoptique, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
@@ -156,7 +156,7 @@ printf("on veut editer le synoptique num %d %s\n", rezo_synoptique.id, rezo_syno
 /**********************************************************************************************************/
  static void Menu_atelier_synoptique ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_SYNOPTIQUE rezo_synoptique;
+    struct CMD_TYPE_SYNOPTIQUE rezo_synoptique;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -184,7 +184,7 @@ printf("on veut editer le synoptique num %d %s\n", rezo_synoptique.id, rezo_syno
 printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rezo_synoptique.libelle );
     Creer_page_atelier( rezo_synoptique.id, rezo_synoptique.libelle );
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_SYNOPTIQUE,
-                   (gchar *)&rezo_synoptique, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                   (gchar *)&rezo_synoptique, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
   }
 /**********************************************************************************************************/
 /* Gerer_popup_synoptique: Gestion du menu popup quand on clique droite sur la liste des synoptiques      */
@@ -335,7 +335,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 /* Entrée: une reference sur le synoptique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_synoptique( GtkTreeIter *iter, struct CMD_SHOW_SYNOPTIQUE *synoptique )
+ static void Rafraichir_visu_synoptique( GtkTreeIter *iter, struct CMD_TYPE_SYNOPTIQUE *synoptique )
   { GtkTreeModel *store;
        
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_synoptique) );          /* Acquisition du modele */
@@ -352,7 +352,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 /* Entrée: une reference sur le synoptique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique )
+ void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -367,7 +367,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 /* Entrée: une reference sur le synoptique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_synoptique( struct CMD_ID_SYNOPTIQUE *synoptique )
+ void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -393,7 +393,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 /* Entrée: une reference sur le synoptique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_synoptique( struct CMD_SHOW_SYNOPTIQUE *synoptique )
+ void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

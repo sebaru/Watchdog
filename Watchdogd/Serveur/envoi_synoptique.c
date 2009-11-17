@@ -35,14 +35,14 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_synoptique: convertit une structure MSG en structure CMD_SHOW_SYNOPTIQUE                */
+/* Preparer_envoi_synoptique: convertit une structure MSG en structure CMD_TYPE_SYNOPTIQUE                */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- struct CMD_SHOW_SYNOPTIQUE *Preparer_envoi_synoptique ( struct SYNOPTIQUEDB *syn )
-  { struct CMD_SHOW_SYNOPTIQUE *rezo_syn;
+ struct CMD_TYPE_SYNOPTIQUE *Preparer_envoi_synoptique ( struct CMD_TYPE_SYNOPTIQUE *syn )
+  { struct CMD_TYPE_SYNOPTIQUE *rezo_syn;
 
-    rezo_syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_SHOW_SYNOPTIQUE) );
+    rezo_syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!rezo_syn) { return(NULL); }
 
     rezo_syn->id         = syn->id;
@@ -56,9 +56,9 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_ID_SYNOPTIQUE *rezo_syn )
-  { struct CMD_EDIT_SYNOPTIQUE edit_syn;
-    struct SYNOPTIQUEDB *syn;
+ void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
+  { struct CMD_TYPE_SYNOPTIQUE edit_syn;
+    struct CMD_TYPE_SYNOPTIQUE *syn;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -71,7 +71,7 @@
        memcpy( &edit_syn.mnemo,   syn->mnemo,   sizeof(edit_syn.mnemo) );
 
        Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
-                  (gchar *)&edit_syn, sizeof(struct CMD_EDIT_SYNOPTIQUE) );
+                  (gchar *)&edit_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
        g_free(syn);                                                                 /* liberation mémoire */
      }
     else
@@ -87,8 +87,8 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_EDIT_SYNOPTIQUE *rezo_syn )
-  { struct SYNOPTIQUEDB *result;
+ void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
+  { struct CMD_TYPE_SYNOPTIQUE *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -103,7 +103,7 @@
      }
     else { result = Rechercher_synoptiqueDB( Config.log, Db_watchdog, rezo_syn->id );
            if (result) 
-            { struct CMD_SHOW_SYNOPTIQUE *syn;
+            { struct CMD_TYPE_SYNOPTIQUE *syn;
               syn = Preparer_envoi_synoptique ( result );
               g_free(result);
               if (!syn)
@@ -114,7 +114,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
-                                   (gchar *)syn, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
+                                   (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                      g_free(syn);
                    }
             }
@@ -132,7 +132,7 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_ID_SYNOPTIQUE *rezo_syn )
+ void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -141,7 +141,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_DEL_SYNOPTIQUE_OK,
-                     (gchar *)rezo_syn, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                     (gchar *)rezo_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -156,8 +156,8 @@
 /* Entrée: le syn à créer                                                                                 */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_ADD_SYNOPTIQUE *rezo_syn )
-  { struct SYNOPTIQUEDB *result;
+ void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
+  { struct CMD_TYPE_SYNOPTIQUE *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -179,7 +179,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_SYNOPTIQUE *syn;
+            { struct CMD_TYPE_SYNOPTIQUE *syn;
               syn = Preparer_envoi_synoptique ( result );
               g_free(result);
               if (!syn)
@@ -190,7 +190,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,
-                                   (gchar *)syn, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
+                                   (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                      g_free(syn);
                    }
             }
@@ -202,9 +202,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_synoptiques_tag ( struct CLIENT *client, int tag, gint sstag, gint sstag_fin )
-  { struct CMD_SHOW_SYNOPTIQUE *rezo_syn;
+  { struct CMD_TYPE_SYNOPTIQUE *rezo_syn;
     struct CMD_ENREG nbr;
-    struct SYNOPTIQUEDB *syn;
+    struct CMD_TYPE_SYNOPTIQUE *syn;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiSYN", 0, 0, 0 );
@@ -240,7 +240,7 @@
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
           Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_syn, sizeof(struct CMD_SHOW_SYNOPTIQUE) );
+                         (gchar *)rezo_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
           g_free(rezo_syn);
         }
      }

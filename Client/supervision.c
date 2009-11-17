@@ -200,7 +200,7 @@
 /* Entrée: une reference sur le motif                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_motif_supervision( struct CMD_SHOW_MOTIF *rezo_motif )
+ void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_SUPERVISION *infos;
     struct MOTIF *motif;

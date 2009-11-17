@@ -58,12 +58,12 @@
            
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
-             { struct CMD_SHOW_GROUPE *groupe;
+             { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe_propriete_syn = g_list_append( Arrivee_groupe_propriete_syn, groupe );
              }
             break;
@@ -95,72 +95,72 @@
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK:
-             { struct CMD_SHOW_MOTIF *motif;
-               motif = (struct CMD_SHOW_MOTIF *)connexion->donnees;
+             { struct CMD_TYPE_MOTIF *motif;
+               motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
                Proto_afficher_un_motif_atelier( motif );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_DEL_MOTIF_OK:
-             { struct CMD_ID_MOTIF *motif;
-               motif = (struct CMD_ID_MOTIF *)connexion->donnees;
+             { struct CMD_TYPE_MOTIF *motif;
+               motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
                Proto_cacher_un_motif_atelier( motif );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK:
-             { struct CMD_SHOW_COMMENT *comment;
-               comment = (struct CMD_SHOW_COMMENT *)connexion->donnees;
+             { struct CMD_TYPE_COMMENT *comment;
+               comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
                Proto_afficher_un_comment_atelier( comment );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_DEL_COMMENT_OK:
-             { struct CMD_ID_COMMENT *comment;
-               comment = (struct CMD_ID_COMMENT *)connexion->donnees;
+             { struct CMD_TYPE_COMMENT *comment;
+               comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
                Proto_cacher_un_comment_atelier( comment );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_PASS_OK:
-             { struct CMD_SHOW_PASSERELLE *pass;
-               pass = (struct CMD_SHOW_PASSERELLE *)connexion->donnees;
+             { struct CMD_TYPE_PASSERELLE *pass;
+               pass = (struct CMD_TYPE_PASSERELLE *)connexion->donnees;
                Proto_afficher_une_passerelle_atelier( pass );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_DEL_PASS_OK:
-             { struct CMD_ID_PASSERELLE *pass;
-               pass = (struct CMD_ID_PASSERELLE *)connexion->donnees;
+             { struct CMD_TYPE_PASSERELLE *pass;
+               pass = (struct CMD_TYPE_PASSERELLE *)connexion->donnees;
                Proto_cacher_une_passerelle_atelier( pass );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_PALETTE_OK:
-             { struct CMD_SHOW_PALETTE *palette;
-               palette = (struct CMD_SHOW_PALETTE *)connexion->donnees;
+             { struct CMD_TYPE_PALETTE *palette;
+               palette = (struct CMD_TYPE_PALETTE *)connexion->donnees;
                Proto_afficher_une_palette_atelier( palette );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_DEL_PALETTE_OK:
-             { struct CMD_ID_PALETTE *palette;
-               palette = (struct CMD_ID_PALETTE *)connexion->donnees;
+             { struct CMD_TYPE_PALETTE *palette;
+               palette = (struct CMD_TYPE_PALETTE *)connexion->donnees;
                Proto_cacher_une_palette_atelier( palette );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK:
-             { struct CMD_SHOW_CAPTEUR *capteur;
-               capteur = (struct CMD_SHOW_CAPTEUR *)connexion->donnees;
+             { struct CMD_TYPE_CAPTEUR *capteur;
+               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
                Proto_afficher_un_capteur_atelier( capteur );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK:
-             { struct CMD_ID_CAPTEUR *capteur;
-               capteur = (struct CMD_ID_CAPTEUR *)connexion->donnees;
+             { struct CMD_TYPE_CAPTEUR *capteur;
+               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
                Proto_cacher_un_capteur_atelier( capteur );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_SHOW_SYNOPTIQUE ) );
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_synoptique_for_atelier = g_list_append( Arrivee_synoptique_for_atelier, syn );
              }
             break;
@@ -223,12 +223,12 @@
             break;
 /******************************************** Reception des palettes **************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_SHOW_SYNOPTIQUE ) );
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_synoptique_for_atelier_palette = g_list_append( Arrivee_synoptique_for_atelier_palette, syn );
              }
             break;
@@ -242,12 +242,12 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF:
-             { struct CMD_SHOW_MOTIF *motif;
+             { struct CMD_TYPE_MOTIF *motif;
                Set_progress_plusun();
 
-               motif = (struct CMD_SHOW_MOTIF *)g_malloc0( sizeof( struct CMD_SHOW_MOTIF ) );
+               motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
                if (!motif) return; 
-               memcpy( motif, connexion->donnees, sizeof(struct CMD_SHOW_MOTIF ) );
+               memcpy( motif, connexion->donnees, sizeof(struct CMD_TYPE_MOTIF ) );
                Arrivee_motif = g_list_append( Arrivee_motif, motif );
                save_id = motif->syn_id;
              }
@@ -262,12 +262,12 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT:
-             { struct CMD_SHOW_COMMENT *comment;
+             { struct CMD_TYPE_COMMENT *comment;
                Set_progress_plusun();
 
-               comment = (struct CMD_SHOW_COMMENT *)g_malloc0( sizeof( struct CMD_SHOW_COMMENT ) );
+               comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
                if (!comment) return; 
-               memcpy( comment, connexion->donnees, sizeof(struct CMD_SHOW_COMMENT ) );
+               memcpy( comment, connexion->donnees, sizeof(struct CMD_TYPE_COMMENT ) );
                Arrivee_comment = g_list_append( Arrivee_comment, comment );
                save_id = comment->syn_id;
              }
@@ -282,12 +282,12 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS:
-             { struct CMD_SHOW_PASSERELLE *pass;
+             { struct CMD_TYPE_PASSERELLE *pass;
                Set_progress_plusun();
 
-               pass = (struct CMD_SHOW_PASSERELLE *)g_malloc0( sizeof( struct CMD_SHOW_PASSERELLE ) );
+               pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
                if (!pass) { printf("Pas assez de mémoire\n"); return;  }
-               memcpy( pass, connexion->donnees, sizeof(struct CMD_SHOW_PASSERELLE ) );
+               memcpy( pass, connexion->donnees, sizeof(struct CMD_TYPE_PASSERELLE ) );
                Arrivee_pass = g_list_append( Arrivee_pass, pass );
                save_id = pass->syn_id;
              }
@@ -302,12 +302,12 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR:
-             { struct CMD_SHOW_CAPTEUR *capteur;
+             { struct CMD_TYPE_CAPTEUR *capteur;
                Set_progress_plusun();
 
-               capteur = (struct CMD_SHOW_CAPTEUR *)g_malloc0( sizeof( struct CMD_SHOW_CAPTEUR ) );
+               capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
                if (!capteur) { printf("Pas assez de mémoire\n"); return;  }
-               memcpy( capteur, connexion->donnees, sizeof(struct CMD_SHOW_CAPTEUR ) );
+               memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
                Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
                save_id = capteur->syn_id;
              }
@@ -322,11 +322,11 @@
             break;
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE:
-             { struct CMD_SHOW_PALETTE *palette;
+             { struct CMD_TYPE_PALETTE *palette;
                Set_progress_plusun();
-               palette = (struct CMD_SHOW_PALETTE *)g_malloc0( sizeof( struct CMD_SHOW_PALETTE ) );
+               palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
                if (!palette) return; 
-               memcpy( palette, connexion->donnees, sizeof(struct CMD_SHOW_PALETTE ) );
+               memcpy( palette, connexion->donnees, sizeof(struct CMD_TYPE_PALETTE ) );
                Arrivee_palette = g_list_append( Arrivee_palette, palette );
              }
             break;

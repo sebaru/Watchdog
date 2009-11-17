@@ -122,7 +122,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Proto_append_source_dls( struct CMD_EDIT_SOURCE_DLS *dls, gchar *buffer )
+ void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer )
   { GtkTextBuffer *text_buffer;
     struct TYPE_INFO_SOURCE_DLS *infos;
     struct PAGE_NOTEBOOK *page;
@@ -144,7 +144,7 @@
  static void Valider_source_dls ( struct PAGE_NOTEBOOK *page )
   { GtkTextBuffer *text_buffer;
     GtkTextIter start, end;
-    struct CMD_EDIT_SOURCE_DLS *edit_dls;
+    struct CMD_TYPE_SOURCE_DLS *edit_dls;
     gchar *Source, *Source_fin, *source, *buffer_envoi;
     gint taille_max;
 
@@ -154,15 +154,15 @@
 
     Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );
 
-    edit_dls = (struct CMD_EDIT_SOURCE_DLS *)g_malloc0( Config_cli.taille_bloc_reseau );
+    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_malloc0( Config_cli.taille_bloc_reseau );
     if (!edit_dls) return;
-    buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_EDIT_SOURCE_DLS);
-    taille_max       = Config_cli.taille_bloc_reseau - sizeof(struct CMD_EDIT_SOURCE_DLS);
+    buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
+    taille_max       = Config_cli.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
     edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id;
     edit_dls->taille = 0;
                                                           /* Demande de suppression du fichier source DLS */
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,
-                   (gchar *)edit_dls, sizeof(struct CMD_EDIT_SOURCE_DLS) );
+                   (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
 
     source = Source;
     Source_fin = g_utf8_offset_to_pointer( Source, gtk_text_buffer_get_char_count( text_buffer ) );
@@ -174,13 +174,13 @@
        memcpy( buffer_envoi, source, taille );                                         /* Recopie mémoire */  
        edit_dls->taille = taille;
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
-                           (gchar *)edit_dls, taille + sizeof(struct CMD_EDIT_SOURCE_DLS) ))
+                           (gchar *)edit_dls, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) ))
         { printf("erreur envoi au serveur\n"); }
        printf("Octets envoyés: %d\n", taille);
        source += taille;
      }
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN,
-                   (gchar *)edit_dls, sizeof(struct CMD_EDIT_SOURCE_DLS) );
+                   (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
     g_free(Source);
     g_free(edit_dls);
   }

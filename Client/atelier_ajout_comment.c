@@ -109,7 +109,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajout_comment ( GtkDialog *dialog, gint reponse )
-  { struct CMD_ADD_COMMENT add_comment;
+  { struct CMD_TYPE_COMMENT add_comment;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
 
@@ -131,7 +131,7 @@
                              add_comment.syn_id = infos->syn.id;
 
                              Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_COMMENT,
-                                           (gchar *)&add_comment, sizeof(struct CMD_ADD_COMMENT) );
+                                           (gchar *)&add_comment, sizeof(struct CMD_TYPE_COMMENT) );
                              printf("Requete d'ajout de commentaire envoyée au serveur....\n");
                              return(TRUE);                                /* On laisse la fenetre ouverte */
                                  break;
@@ -210,7 +210,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_comment_atelier( struct CMD_SHOW_COMMENT *rezo_comment )
+ void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_ATELIER *infos;
     struct COMMENTAIRE *comment;
@@ -253,7 +253,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_comment_atelier( struct CMD_ID_COMMENT *comment )
+ void Proto_cacher_un_comment_atelier( struct CMD_TYPE_COMMENT *comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_ATELIER *infos;
         

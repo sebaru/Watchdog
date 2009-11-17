@@ -72,24 +72,24 @@
  extern void *Envoyer_groupes_pour_util_thread ( struct CLIENT *client );
  extern void *Envoyer_groupes_pour_synoptique_thread ( struct CLIENT *client );
  extern void *Envoyer_groupes_pour_propriete_synoptique_thread ( struct CLIENT *client );
- extern void Proto_ajouter_groupe ( struct CLIENT *client, struct CMD_ADD_GROUPE *rezo_groupe );
- extern void Proto_effacer_groupe ( struct CLIENT *client, struct CMD_ID_GROUPE *rezo_groupe );
- extern void Proto_editer_groupe ( struct CLIENT *client, struct CMD_ID_GROUPE *rezo_groupe );
- extern void Proto_valider_editer_groupe ( struct CLIENT *client, struct CMD_EDIT_GROUPE *rezo_groupe );
+ extern void Proto_ajouter_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe );
+ extern void Proto_effacer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe );
+ extern void Proto_editer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe );
+ extern void Proto_valider_editer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe );
 
  extern void *Envoyer_utilisateurs_thread ( struct CLIENT *client );                 /* Dans envoi_util.c */
- extern void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_ADD_UTILISATEUR *rezo_util );
- extern void Proto_effacer_utilisateur ( struct CLIENT *client, struct CMD_ID_UTILISATEUR *rezo_util );
- extern void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_ID_UTILISATEUR *rezo_util );
+ extern void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util );
+ extern void Proto_effacer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util );
+ extern void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util );
  extern void Proto_valider_editer_utilisateur ( struct CLIENT *client,
-                                                struct CMD_EDIT_UTILISATEUR *rezo_util );
+                                                struct CMD_TYPE_UTILISATEUR *rezo_util );
 
  extern void *Envoyer_plugins_dls_thread ( struct CLIENT *client );                   /* Dans envoi_dls.c */
  extern void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern gboolean Envoyer_source_dls ( struct CLIENT *client );
- extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_EDIT_SOURCE_DLS *edit_dls,
+ extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
                                        gchar *buffer );
  extern void *Proto_compiler_source_dls( struct CLIENT *client );
  extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, gint id );
@@ -112,11 +112,11 @@
  extern void *Envoyer_synoptiques_pour_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_atelier_palette_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_message_thread ( struct CLIENT *client );
- extern struct CMD_SHOW_SYNOPTIQUE *Preparer_envoi_synoptique ( struct SYNOPTIQUEDB *syn );
- extern void Proto_editer_synoptique_thread ( struct CLIENT *client, struct CMD_ID_SYNOPTIQUE *rezo_syn );
- extern void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_EDIT_SYNOPTIQUE *rezo_syn );
- extern void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_ID_SYNOPTIQUE *rezo_syn );
- extern void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_ADD_SYNOPTIQUE *rezo_syn );
+ extern struct CMD_TYPE_SYNOPTIQUE *Preparer_envoi_synoptique ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern void Proto_editer_synoptique_thread ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
+ extern void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
+ extern void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
+ extern void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
 
                                                                                  /* Dans envoi_bit_init.c */
  extern void Envoyer_bit_init_supervision_thread ( struct CLIENT *client );
@@ -126,24 +126,24 @@
  extern void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_passerelle_supervision_thread ( struct CLIENT *client );
  extern void Proto_ajouter_passerelle_atelier ( struct CLIENT *client,
-                                                struct CMD_ADD_PASSERELLE *rezo_pass );
+                                                struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client,
-                                                       struct CMD_EDIT_PASSERELLE *rezo_pass );
+                                                       struct CMD_TYPE_PASSERELLE *rezo_pass );
 
                                                                       /* Dans envoi_synoptique_comments.c */
  extern void *Envoyer_comment_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_comment_supervision_thread ( struct CLIENT *client );
- extern void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_ID_COMMENT *rezo_comment );
- extern void Proto_ajouter_comment_atelier ( struct CLIENT *client, struct CMD_ADD_COMMENT *rezo_motif );
+ extern void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment );
+ extern void Proto_ajouter_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_motif );
  extern void Proto_valider_editer_comment_atelier ( struct CLIENT *client,
-                                                    struct CMD_EDIT_COMMENT *rezo_comment );
+                                                    struct CMD_TYPE_COMMENT *rezo_comment );
 
                                                                         /* Dans envoi_synoptique_motifs.c */
  extern void *Envoyer_motif_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_motif_supervision_thread ( struct CLIENT *client );
- extern void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_ID_MOTIF *rezo_motif );
- extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_ADD_MOTIF *rezo_motif );
- extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_EDIT_MOTIF *rezo_motif );
+ extern void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
+ extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
+ extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
 
                                                                         /* Dans envoi_synoptique_motifs.c */
  extern void *Envoyer_camera_sup_atelier_thread ( struct CLIENT *client );
@@ -156,16 +156,16 @@
                                                                       /* Dans envoi_synoptique_palettes.c */
  extern void *Envoyer_palette_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_palette_supervision_thread ( struct CLIENT *client );
- extern void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_ID_PALETTE *rezo_palette );
- extern void Proto_ajouter_palette_atelier ( struct CLIENT *client, struct CMD_ADD_PALETTE *rezo_palette );
- extern void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_EDIT_PALETTE *rezo_palette );
+ extern void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
+ extern void Proto_ajouter_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
+ extern void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
 
                                                                          /* Dans envoi_synoptique_capteur.c */
  extern void *Envoyer_capteur_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_capteur_supervision_thread ( struct CLIENT *client );
- extern void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_ID_CAPTEUR *rezo_capteur );
- extern void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_ADD_CAPTEUR *rezo_capteur );
- extern void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_EDIT_CAPTEUR *rezo_capteur );
+ extern void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
+ extern void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
+ extern void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
 
  extern void *Envoyer_mnemoniques_thread ( struct CLIENT *client );            /* Dans envoi_mnemonique.c */
  extern void *Envoyer_mnemoniques_for_courbe_thread ( struct CLIENT *client );
@@ -179,7 +179,7 @@
  extern void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
  
  extern void *Envoyer_histo_thread ( struct CLIENT *client );                       /* Dans envoi_histo.c */
- extern void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_ID_HISTO *rezo_histo );
+ extern void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo );
 
  extern void *Envoyer_classes_thread ( struct CLIENT *client );                    /* Dans envoi_classe.c */
  extern void *Envoyer_classes_pour_atelier_thread ( struct CLIENT *client );
@@ -203,7 +203,7 @@
 
                                                                                    /* Dans envoi_courbe.c */
  extern void Proto_ajouter_courbe_thread ( struct CLIENT *client );
- extern void Proto_effacer_courbe ( struct CLIENT *client, struct CMD_ID_COURBE *rezo_courbe );
+ extern void Proto_effacer_courbe ( struct CLIENT *client, struct CMD_TYPE_COURBE *rezo_courbe );
 
                                                                                /* Dans envoi_histo_courbe */
  extern void Proto_ajouter_histo_courbe_thread ( struct CLIENT *client );

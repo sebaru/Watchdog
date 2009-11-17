@@ -34,34 +34,13 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_comment: convertit une structure COMMENTDB en structure CMD_SHOW_COMMENT                */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_SHOW_COMMENT *Preparer_envoi_comment ( struct COMMENTDB *comment )
-  { struct CMD_SHOW_COMMENT *rezo_comment;
 
-    rezo_comment = (struct CMD_SHOW_COMMENT *)g_malloc0( sizeof(struct CMD_SHOW_COMMENT) );
-    if (!rezo_comment) { return(NULL); }
-
-    memcpy( rezo_comment->libelle, comment->libelle, sizeof(comment->libelle) );     /* Recopie structure */
-    memcpy( rezo_comment->font, comment->font, sizeof(comment->font) );      /* Recopie dans la structure */
-    rezo_comment->id         = comment->id;
-    rezo_comment->syn_id     = comment->syn_id;
-    rezo_comment->position_x = comment->position_x;                          /* en abscisses et ordonnées */
-    rezo_comment->position_y = comment->position_y;
-    rezo_comment->rouge      = comment->rouge;
-    rezo_comment->vert       = comment->vert;
-    rezo_comment->bleu       = comment->bleu;
-    return( rezo_comment );
-  }
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_ID_COMMENT *rezo_comment )
+ void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -70,7 +49,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_COMMENT_OK,
-                     (gchar *)rezo_comment, sizeof(struct CMD_ID_COMMENT) );
+                     (gchar *)rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
        Info( Config.log, DEBUG_INFO, "MSRV: effacement comment OK" );
      }
     else
@@ -87,8 +66,8 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_comment_atelier ( struct CLIENT *client, struct CMD_ADD_COMMENT *rezo_comment )
-  { struct COMMENTDB *result;
+ void Proto_ajouter_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment )
+  { struct CMD_TYPE_COMMENT *result;
     struct DB *Db_watchdog;
     gint id;
     Info( Config.log, DEBUG_INFO, "MSRV: demande d'ajout comment" );
@@ -114,22 +93,10 @@
               Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK (2)" );
             }
            else
-            { struct CMD_SHOW_COMMENT *comment;
-              comment = Preparer_envoi_comment( result );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_COMMENT) );
               g_free(result);
-              if (!comment)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                 Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK (3)" );
-               }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK,
-                                   (gchar *)comment, sizeof(struct CMD_SHOW_COMMENT) );
-                     g_free(comment);
-                     Info_c( Config.log, DEBUG_INFO, "MSRV: ajout comment OK", rezo_comment->libelle );
-                   }
+              Info_c( Config.log, DEBUG_INFO, "MSRV: ajout comment OK", rezo_comment->libelle );
             }
          }
        Info_c( Config.log, DEBUG_INFO, "MSRV: ajout comment4", rezo_comment->libelle );
@@ -139,7 +106,7 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_comment_atelier ( struct CLIENT *client, struct CMD_EDIT_COMMENT *rezo_comment )
+ void Proto_valider_editer_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -160,9 +127,8 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_comment_atelier_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_COMMENT *rezo_comment;
-    struct CMD_ENREG nbr;
-    struct COMMENTDB *comment;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_COMMENT *comment;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiComment", 0, 0, 0 );
@@ -195,17 +161,13 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
           pthread_exit ( NULL );
         } 
 
-       rezo_comment = Preparer_envoi_comment( comment );
-       g_free(comment);
-       if (rezo_comment)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment LIB", rezo_comment->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment ID ", rezo_comment->id );
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
-                         (gchar *)rezo_comment, sizeof(struct CMD_SHOW_COMMENT) );
-          g_free(rezo_comment);
-        }
+       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment LIB", comment->libelle );
+       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment ID ", comment->id );
+       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
+                      (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
+       g_free(comment);
      }
   }
 /**********************************************************************************************************/
@@ -214,9 +176,8 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_comment_supervision_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_COMMENT *rezo_comment;
-    struct CMD_ENREG nbr;
-    struct COMMENTDB *comment;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_COMMENT *comment;
     struct DB *Db_watchdog;
     struct DB *db;
 
@@ -250,18 +211,15 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
-       rezo_comment = Preparer_envoi_comment( comment );
-       g_free(comment);
-       if (rezo_comment)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment LIB", rezo_comment->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment ID ", rezo_comment->id );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
-                         (gchar *)rezo_comment, sizeof(struct CMD_SHOW_COMMENT) );
-          g_free(rezo_comment);
-        }
+       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment LIB", comment->libelle );
+       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment ID ", comment->id );
+       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
+                      (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
+       g_free(comment);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

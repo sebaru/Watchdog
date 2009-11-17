@@ -16,7 +16,7 @@
     guint  val;
   };
 
- struct CMD_ID_COURBE
+ struct CMD_TYPE_COURBE
   { guint  slot_id;                                           /* Pour affichage sur le bon slot du client */
     guint  id;                                                         /* Numéro de la courbe en question */
     guint  type;

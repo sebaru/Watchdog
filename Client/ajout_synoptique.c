@@ -42,7 +42,7 @@
  static GtkWidget *Entry_mnemo;                                               /* Mnemonique du synoptique */
  static GtkWidget *Combo_groupe;        /* Pour le choix d'appartenance du synoptique à tel ou tel groupe */
  static GList *Liste_index_groupe; /* Pour correspondance index de l'option menu/Id du groupe en question */
- static struct CMD_EDIT_SYNOPTIQUE Edit_syn;                                /* Message en cours d'édition */
+ static struct CMD_TYPE_SYNOPTIQUE Edit_syn;                                /* Message en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_synoptique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
@@ -64,10 +64,10 @@
                   else
                    { Edit_syn.groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data); }
                   Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE,
-                                (gchar *)&Edit_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
+                                (gchar *)&Edit_syn, sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                 }
                else
-                { struct CMD_ADD_SYNOPTIQUE new_syn;
+                { struct CMD_TYPE_SYNOPTIQUE new_syn;
                   gint index_groupe;
                   g_snprintf( new_syn.libelle, sizeof(new_syn.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
@@ -80,7 +80,7 @@
                    { new_syn.groupe = GPOINTER_TO_INT ( g_list_nth_data( Liste_index_groupe, index_groupe ) ); }
 
                   Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_ADD_SYNOPTIQUE,
-                                (gchar *)&new_syn, sizeof( struct CMD_EDIT_SYNOPTIQUE ) );
+                                (gchar *)&new_syn, sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                 }
              }
             break;
@@ -103,13 +103,13 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_synoptique ( struct CMD_EDIT_SYNOPTIQUE *edit_syn )
+ void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn )
   { GtkWidget *frame, *table, *texte, *hboite;
 
     if (edit_syn)
-     { memcpy( &Edit_syn, edit_syn, sizeof(struct CMD_EDIT_SYNOPTIQUE) );    /* Save pour utilisation future */
+     { memcpy( &Edit_syn, edit_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );    /* Save pour utilisation future */
      }
-    else memset (&Edit_syn, 0, sizeof(struct CMD_EDIT_SYNOPTIQUE) );                  /* Sinon RAZ structure */
+    else memset (&Edit_syn, 0, sizeof(struct CMD_TYPE_SYNOPTIQUE) );                  /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_syn ? _("Edit a synoptique") : _("Add a synoptique")),
                                            GTK_WINDOW(F_client),
@@ -180,10 +180,10 @@
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_les_groupes_pour_synoptique ( GList *liste )
-  { struct CMD_SHOW_GROUPE *groupe;
+  { struct CMD_TYPE_GROUPE *groupe;
 
     while( liste )
-     { groupe = (struct CMD_SHOW_GROUPE *)liste->data;
+     { groupe = (struct CMD_TYPE_GROUPE *)liste->data;
        gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
        Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
        liste = liste->next;

@@ -103,7 +103,7 @@
 /**********************************************************************************************************/
  static void Menu_acquitter_histo ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_HISTO histo;
+    struct CMD_TYPE_HISTO histo;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -116,7 +116,7 @@
      { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_NUM, &histo.id, -1 );                 /* Recup du id */
 
-       Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_ID_HISTO) );
+       Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -193,7 +193,7 @@
 /* Entrée: une reference sur l'utilisateur                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_histo( GtkTreeIter *iter, struct CMD_SHOW_HISTO *histo )
+ static void Rafraichir_visu_histo( GtkTreeIter *iter, struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
     gchar chaine[128], date[128], ack[128], *date_create;
     struct tm *temps;
@@ -242,7 +242,7 @@
 /* Entrée: une reference sur le groupe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_histo( struct CMD_SHOW_HISTO *histo )
+ void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -265,7 +265,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_histo( struct CMD_SHOW_HISTO *histo )
+ void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkListStore *store;
     GtkTreePath *path;
     GtkTreeIter iter;
@@ -288,7 +288,7 @@
 /* Entrée: une reference sur l'utilisateur                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_histo( struct CMD_ID_HISTO *histo )
+ void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

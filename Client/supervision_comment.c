@@ -25,7 +25,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_comment_supervision( struct CMD_SHOW_COMMENT *rezo_comment )
+ void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_SUPERVISION *infos;
     struct COMMENTAIRE *comment;

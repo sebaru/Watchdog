@@ -137,8 +137,8 @@
 /* Entrées: un log, une db , un id                                                                        */
 /* Sortie: une structure GROUPE                                                                           */
 /**********************************************************************************************************/
- struct GROUPEDB *Rechercher_groupeDB( struct LOG *log, struct DB *db, gint id )
-  { struct GROUPEDB *groupe;
+ struct CMD_TYPE_GROUPE *Rechercher_groupeDB( struct LOG *log, struct DB *db, gint id )
+  { struct CMD_TYPE_GROUPE *groupe;
     gchar requete[200];
 
     g_snprintf( requete, sizeof(requete), "SELECT name, comment FROM %s WHERE id=%d",
@@ -154,7 +154,7 @@
        return(NULL);
      }
 
-    groupe = (struct GROUPEDB *)g_malloc0( sizeof(struct GROUPEDB) );
+    groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!groupe) Info( log, DEBUG_MEM, "Rechercher_groupeDB: Erreur allocation mémoire" );
     else
      { groupe->id = id;
@@ -181,8 +181,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une structure GROUPE                                                                           */
 /**********************************************************************************************************/
- struct GROUPEDB *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db )
-  { struct GROUPEDB *groupe;
+ struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_GROUPE *groupe;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -190,7 +190,7 @@
        return(NULL);
      }
 
-    groupe = (struct GROUPEDB *)g_malloc0( sizeof(struct GROUPEDB) );
+    groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!groupe) Info( log, DEBUG_MEM, "Recuperer_groupeDB_suite: Erreur allocation mémoire" );
     else
      { groupe->id = atoi(db->row[0]);
@@ -221,7 +221,7 @@
 /* Entrées: un log, une db, un nom                                                                        */
 /* Sortie: true si pas de pb, false sinon                                                                 */
 /**********************************************************************************************************/
- gboolean Retirer_groupeDB( struct LOG *log, struct DB *db, struct CMD_ID_GROUPE *groupe )
+ gboolean Retirer_groupeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe )
   { gchar requete[200];
 
     if (groupe->id < NBR_GROUPE_RESERVE)
@@ -240,7 +240,7 @@
 /* Entrée: log, db, id, nom, comment                                                                      */
 /* Sortie: -1 si probleme, id sinon                                                                       */
 /**********************************************************************************************************/
- gint Ajouter_groupeDB ( struct LOG *log, struct DB *db, struct CMD_ADD_GROUPE *groupe )
+ gint Ajouter_groupeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe )
   { gchar *nom, *comment;
     gchar requete[4096];
   
@@ -270,7 +270,7 @@
 /* Entrées: un log, une db et un id de groupe et un commentaire                                           */
 /* Sortie: boolean false si probleme                                                                      */
 /**********************************************************************************************************/
- gboolean Modifier_groupeDB( struct LOG *log, struct DB *db, struct CMD_EDIT_GROUPE *groupe )
+ gboolean Modifier_groupeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe )
   { gchar requete[200];
     gchar *comment;
 

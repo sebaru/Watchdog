@@ -34,43 +34,13 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_motif: convertit une structure MOTIFDB en structure CMD_SHOW_MOTIF                      */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_SHOW_MOTIF *Preparer_envoi_motif ( struct MOTIFDB *motif )
-  { struct CMD_SHOW_MOTIF *rezo_motif;
 
-    rezo_motif = (struct CMD_SHOW_MOTIF *)g_malloc0( sizeof(struct CMD_SHOW_MOTIF) );
-    if (!rezo_motif) { return(NULL); }
-
-    rezo_motif->id = motif->id;
-    rezo_motif->icone_id = motif->icone_id;                                 /* Correspond au fichier .gif */
-    rezo_motif->syn_id = motif->syn_id;
-    rezo_motif->gid = motif->gid;                                /* Nom du groupe d'appartenance du motif */
-    rezo_motif->bit_controle = motif->bit_controle;                                         /* Ixxx, Cxxx */
-    rezo_motif->bit_clic = motif->bit_clic;   /* Bit à activer quand on clic avec le bouton gauche souris */
-    rezo_motif->bit_clic2 = motif->bit_clic2; /* Bit à activer quand on clic avec le bouton gauche souris */
-    rezo_motif->position_x = motif->position_x;                              /* en abscisses et ordonnées */
-    rezo_motif->position_y = motif->position_y;
-    rezo_motif->largeur = motif->largeur;                          /* Taille de l'image sur le synoptique */
-    rezo_motif->hauteur = motif->hauteur;
-    rezo_motif->angle = motif->angle;
-    rezo_motif->type_dialog = motif->type_dialog;/* Type de la boite de dialogue pour le clic de commande */
-    rezo_motif->rouge0 = motif->rouge0;
-    rezo_motif->vert0 = motif->vert0;
-    rezo_motif->bleu0 = motif->bleu0;
-    rezo_motif->type_gestion = motif->type_gestion;                        /* Statique/dynamique/cyclique */
-    memcpy( &rezo_motif->libelle, motif->libelle, sizeof(rezo_motif->libelle) );
-    return( rezo_motif );
-  }
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_ID_MOTIF *rezo_motif )
+ void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -79,7 +49,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_MOTIF_OK,
-                     (gchar *)rezo_motif, sizeof(struct CMD_ID_MOTIF) );
+                     (gchar *)rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -94,10 +64,10 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_ADD_MOTIF *rezo_motif )
-  { struct MOTIFDB *result;
-    gint id;
+ void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
+  { struct CMD_TYPE_MOTIF *result;
     struct DB *Db_watchdog;
+    gint id;
     Db_watchdog = client->Db_watchdog;
 
     rezo_motif->gid = GID_TOUTLEMONDE;               /* Par défaut, tout le monde peut acceder a ce motif */
@@ -118,20 +88,9 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_MOTIF *motif;
-              motif = Preparer_envoi_motif( result );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_MOTIF) );
               g_free(result);
-              if (!motif)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK,
-                                   (gchar *)motif, sizeof(struct CMD_SHOW_MOTIF) );
-                     g_free(motif);
-                   }
             }
          }
   }
@@ -140,11 +99,10 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_EDIT_MOTIF *rezo_motif )
+ void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-Info( Config.log, DEBUG_INFO, "Debut valider_editer_motif_atelier" );
 
     retour = Modifier_motifDB ( Config.log, Db_watchdog, rezo_motif );
     if (retour==FALSE)
@@ -154,7 +112,6 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_motif_atelier" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
   }
 
 /**********************************************************************************************************/
@@ -163,9 +120,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_motif_atelier_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_MOTIF *rezo_motif;
-    struct CMD_ENREG nbr;
-    struct MOTIFDB *motif;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_MOTIF *motif;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
@@ -199,21 +155,12 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
           pthread_exit ( NULL ); 
         }
 
-       rezo_motif = Preparer_envoi_motif( motif );
-       g_free(motif);
-       if (rezo_motif)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_motif_atelier: motif LIB", rezo_motif->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_motif_atelier: motif ID ", rezo_motif->id );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_motif_atelier: motif larg ", rezo_motif->largeur );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_motif_atelier: motif haut ", rezo_motif->hauteur );
-
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
-                         (gchar *)rezo_motif, sizeof(struct CMD_SHOW_MOTIF) );
-          g_free(rezo_motif);
-        }
+       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
+                      (gchar *)motif, sizeof(struct CMD_TYPE_MOTIF) );
+       g_free(motif);
      }
   }
 /**********************************************************************************************************/
@@ -222,9 +169,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_motif_supervision_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_MOTIF *rezo_motif;
+  { struct CMD_TYPE_MOTIF *motif;
     struct CMD_ENREG nbr;
-    struct MOTIFDB *motif;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
@@ -270,18 +216,12 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_motif_atelier" );
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
           Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn ", motif->bit_controle );
         }
-       rezo_motif = Preparer_envoi_motif( motif );
-       g_free(motif);
-       if (rezo_motif)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_motif_supervision: motif LIB", rezo_motif->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_motif_supervision: motif ID ", rezo_motif->id );
 
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-                         (gchar *)rezo_motif, sizeof(struct CMD_SHOW_MOTIF) );
-          g_free(rezo_motif);
-        }
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+                      (gchar *)motif, sizeof(struct CMD_TYPE_MOTIF) );
+       g_free(motif);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

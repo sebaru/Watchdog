@@ -46,36 +46,36 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_UTIL_OK:
-             { struct CMD_SHOW_UTILISATEUR *util;
-               util = (struct CMD_SHOW_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_afficher_un_utilisateur( util );
              }
             break;
        case SSTAG_SERVEUR_DEL_UTIL_OK:
-             { struct CMD_ID_UTILISATEUR *util;
-               util = (struct CMD_ID_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_cacher_un_utilisateur( util );
              }
             break;
        case SSTAG_SERVEUR_EDIT_UTIL_OK:
-             { struct CMD_EDIT_UTILISATEUR *util;
-               util = (struct CMD_EDIT_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Menu_ajouter_editer_utilisateur( util );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_UTIL_OK:
-             { struct CMD_SHOW_UTILISATEUR *util;
-               util = (struct CMD_SHOW_UTILISATEUR *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_rafraichir_un_utilisateur( util );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_UTIL:
-             { struct CMD_SHOW_UTILISATEUR *util;
+             { struct CMD_TYPE_UTILISATEUR *util;
                Set_progress_plusun();
 
-               util = (struct CMD_SHOW_UTILISATEUR *)g_malloc0( sizeof( struct CMD_SHOW_UTILISATEUR ) );
+               util = (struct CMD_TYPE_UTILISATEUR *)g_malloc0( sizeof( struct CMD_TYPE_UTILISATEUR ) );
                if (!util) return; 
-               memcpy( util, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               memcpy( util, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_util = g_list_append( Arrivee_util, util );
              }
             break;
@@ -88,12 +88,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL:
-             { struct CMD_SHOW_GROUPE *groupe;
+             { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe_for_util = g_list_append( Arrivee_groupe_for_util, groupe );
              }
             break;
@@ -107,36 +107,36 @@
             break;
 
        case SSTAG_SERVEUR_ADD_GROUPE_OK:
-             { struct CMD_SHOW_GROUPE *groupe;
-               groupe = (struct CMD_SHOW_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_afficher_un_groupe( groupe );
              }
             break;
        case SSTAG_SERVEUR_DEL_GROUPE_OK:
-             { struct CMD_ID_GROUPE *groupe;
-               groupe = (struct CMD_ID_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_cacher_un_groupe( groupe );
              }
             break;
        case SSTAG_SERVEUR_EDIT_GROUPE_OK:
-             { struct CMD_EDIT_GROUPE *groupe;
-               groupe = (struct CMD_EDIT_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Menu_ajouter_editer_groupe( groupe );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_GROUPE_OK:
-             { struct CMD_SHOW_GROUPE *groupe;
-               groupe = (struct CMD_SHOW_GROUPE *)connexion->donnees;
+             { struct CMD_TYPE_GROUPE *groupe;
+               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
                Proto_rafraichir_un_groupe( groupe );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE:
-             { struct CMD_SHOW_GROUPE *groupe;
+             { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );
              }
             break;

@@ -35,14 +35,14 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Preparer_envoi_histo: convertit une structure HISTO en structure CMD_SHOW_HISTO                        */
+/* Preparer_envoi_histo: convertit une structure HISTO en structure CMD_TYPE_HISTO                        */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_HISTO *Preparer_envoi_histo ( struct HISTODB *histo )
-  { struct CMD_SHOW_HISTO *rezo_histo;
+ static struct CMD_TYPE_HISTO *Preparer_envoi_histo ( struct HISTODB *histo )
+  { struct CMD_TYPE_HISTO *rezo_histo;
 
-    rezo_histo = (struct CMD_SHOW_HISTO *)g_malloc0( sizeof(struct CMD_SHOW_HISTO) );
+    rezo_histo = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (!rezo_histo) { return(NULL); }
 
     rezo_histo->id               = histo->msg.num;
@@ -61,8 +61,8 @@
 /* Entrée: le client demandeur et le histo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_ID_HISTO *rezo_histo )
-  { struct CMD_EDIT_HISTO edit_histo;
+ void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo )
+  { struct CMD_TYPE_HISTO edit_histo;
     struct HISTODB *result;
     gboolean retour;
     struct DB *Db_watchdog;
@@ -90,7 +90,7 @@
      }
     else { result = Rechercher_histoDB( Config.log, Db_watchdog, rezo_histo->id );
            if (result) 
-            { struct CMD_SHOW_HISTO *histo;
+            { struct CMD_TYPE_HISTO *histo;
               histo = Preparer_envoi_histo ( result );
               g_free(result);
               if (!histo)
@@ -101,7 +101,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_HISTO, SSTAG_SERVEUR_ACK_HISTO,
-                                   (gchar *)histo, sizeof(struct CMD_SHOW_HISTO) );
+                                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
                      g_free(histo);
                    }
             }
@@ -120,7 +120,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_histo_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_HISTO *rezo_histo;
+  { struct CMD_TYPE_HISTO *rezo_histo;
     struct HISTODB *histo;
     struct CMD_ENREG nbr;
     struct DB *db;
@@ -162,7 +162,7 @@
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO,
-                          (gchar *)rezo_histo, sizeof(struct CMD_SHOW_HISTO) );
+                          (gchar *)rezo_histo, sizeof(struct CMD_TYPE_HISTO) );
           g_free(rezo_histo);
         }
      }

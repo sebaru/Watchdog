@@ -50,36 +50,36 @@
              }
             break;
        case SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)connexion->donnees;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                Proto_afficher_un_synoptique( syn );
              }
             break;
        case SSTAG_SERVEUR_DEL_SYNOPTIQUE_OK:
-             { struct CMD_ID_SYNOPTIQUE *syn;
-               syn = (struct CMD_ID_SYNOPTIQUE *)connexion->donnees;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                Proto_cacher_un_synoptique( syn );
              }
             break;
        case SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK:
-             { struct CMD_EDIT_SYNOPTIQUE *syn;
-               syn = (struct CMD_EDIT_SYNOPTIQUE *)connexion->donnees;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                Menu_ajouter_editer_synoptique( syn );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)connexion->donnees;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                Proto_rafraichir_un_synoptique( syn );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_SHOW_SYNOPTIQUE ) );
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_synoptique = g_list_append( Arrivee_synoptique, syn );
              }
             break;
@@ -92,12 +92,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE:
-             { struct CMD_SHOW_GROUPE *groupe;
+             { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof( struct CMD_SHOW_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_SHOW_GROUPE ) );
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );
              }
             break;

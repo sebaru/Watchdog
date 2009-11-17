@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_ID_PASSERELLE *passerelle )
+ gboolean Retirer_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *passerelle )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -55,7 +55,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_ADD_PASSERELLE *passerelle )
+ gint Ajouter_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *passerelle )
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -95,8 +95,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct PASSERELLEDB *Recuperer_passerelleDB_suite( struct LOG *log, struct DB *db )
-  { struct PASSERELLEDB *passerelle;
+ struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_PASSERELLE *passerelle;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -104,7 +104,7 @@
        return(NULL);
      }
 
-    passerelle = (struct PASSERELLEDB *)g_malloc0( sizeof(struct PASSERELLEDB) );
+    passerelle = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!passerelle) Info( log, DEBUG_MEM, "Recuperer_passerelleDB_suite: Erreur allocation mémoire" );
     else
      { passerelle->id             = atoi(db->row[0]);
@@ -125,8 +125,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct PASSERELLEDB *Rechercher_passerelleDB ( struct LOG *log, struct DB *db, guint id )
-  { struct PASSERELLEDB *passerelle;
+ struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_PASSERELLE *passerelle;
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -149,7 +149,7 @@
        return(NULL);
      }
 
-    passerelle = (struct PASSERELLEDB *)g_malloc0( sizeof(struct PASSERELLEDB) );
+    passerelle = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!passerelle) Info( log, DEBUG_MEM, "Rechercher_paserelleDB: Erreur allocation mémoire" );
     else
      { passerelle->id             = id;
@@ -170,7 +170,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_passerelleDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PASSERELLE *passerelle )
+ gboolean Modifier_passerelleDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *passerelle )
   { gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

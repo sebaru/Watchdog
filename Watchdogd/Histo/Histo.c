@@ -64,7 +64,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_ID_HISTO *histo )
+ gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo )
   { gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -121,7 +121,7 @@
 /* Entrée: un log et une database, une structure de controle de la modification                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_EDIT_HISTO *histo )
+ gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo )
   { gchar requete[1024];
     gchar *nom_ack;
 

@@ -552,11 +552,11 @@
           switch( Partage->Sous_serveur[id].type_info )
            { case TYPE_INFO_NEW_HISTO:
                   Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                                (gchar *)&Partage->new_histo, sizeof(struct CMD_SHOW_HISTO) );
+                                (gchar *)&Partage->new_histo, sizeof(struct CMD_TYPE_HISTO) );
                   break;
              case TYPE_INFO_DEL_HISTO:
                   Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                                (gchar *)&Partage->del_histo, sizeof(struct CMD_ID_HISTO) );
+                                (gchar *)&Partage->del_histo, sizeof(struct CMD_TYPE_HISTO) );
                   break;
              case TYPE_INFO_NEW_MOTIF:
                   liste_clients = Partage->Sous_serveur[id].Clients;

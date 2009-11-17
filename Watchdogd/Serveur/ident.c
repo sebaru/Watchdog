@@ -63,7 +63,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  gint Tester_autorisation ( gint Id_serveur, struct CLIENT *client )
-  { struct CMD_ID_UTILISATEUR util;
+  { struct CMD_TYPE_UTILISATEUR util;
     gchar *clef, *crypt;
     gint id;
 
@@ -129,7 +129,7 @@
                _("Tester_autorisation: User have to change his password"), client->util->nom );
        util.id = client->util->id;
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CHANGEPASS,
-                     (gchar *)&util, sizeof(struct CMD_ID_UTILISATEUR) );
+                     (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        return(ATTENTE_NEW_PASSWORD);
      }
     Autoriser_client ( Id_serveur, client );

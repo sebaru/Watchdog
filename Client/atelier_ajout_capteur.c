@@ -100,7 +100,7 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_capteur ( GtkDialog *dialog, gint reponse,
                                            struct TRAME_ITEM_CAPTEUR *trame_capteur )
-  { struct CMD_ADD_CAPTEUR add_capteur;
+  { struct CMD_TYPE_CAPTEUR add_capteur;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     gchar *type;
@@ -124,7 +124,7 @@
                                 add_capteur.bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
 
                                 Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAPTEUR,
-                                               (gchar *)&add_capteur, sizeof(struct CMD_ADD_CAPTEUR) );
+                                               (gchar *)&add_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
                                 printf("Requete d'ajout de capteuraire envoyée au serveur....\n");
                                 return(TRUE);                             /* On laisse la fenetre ouverte */
                               }
@@ -224,7 +224,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_capteur_atelier( struct CMD_SHOW_CAPTEUR *rezo_capteur )
+ void Proto_afficher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_ATELIER *infos;
     struct CAPTEUR *capteur;
@@ -266,7 +266,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_capteur_atelier( struct CMD_ID_CAPTEUR *capteur )
+ void Proto_cacher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_ATELIER *infos;
         

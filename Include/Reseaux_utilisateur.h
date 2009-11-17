@@ -13,18 +13,13 @@
   { guint  id;
     gchar  code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
   };
- struct CMD_SHOW_UTILISATEUR
+ struct CMD_TYPE_UTILISATEUR
   { guint  id;
     gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
     gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-  };
- struct CMD_EDIT_UTILISATEUR
-  { guint    id;
-    gchar    nom[ NBR_CARAC_LOGIN_UTF8+1 ];
     gboolean cansetpass;
     gboolean setpassnow;
     gchar    code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
     guint    date_modif;
     guint    date_expire;
     gboolean actif;
@@ -33,39 +28,9 @@
     guint    gids[NBR_MAX_GROUPE_PAR_UTIL];
   };
 
- struct CMD_ADD_UTILISATEUR
+ struct CMD_TYPE_GROUPE
   { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
     gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    gchar  code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
-    guint  date_expire;
-    gboolean expire;
-    gboolean changepass;
-    gboolean actif;
-    gboolean cansetpass;
-    guint    gids[NBR_MAX_GROUPE_PAR_UTIL];
-  };
- struct CMD_ID_UTILISATEUR
-  { guint  id;
-    gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-  };
-
- struct CMD_SHOW_GROUPE
-  { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    guint  id;
-  };
- struct CMD_EDIT_GROUPE
-  { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    guint  id;
-  };
-
- struct CMD_ADD_GROUPE
-  { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-  };
- struct CMD_ID_GROUPE
-  { gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
     guint  id;
   };
 

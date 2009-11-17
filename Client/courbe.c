@@ -193,7 +193,7 @@
                                              struct TYPE_INFO_COURBE *infos )
   { GtkTreeSelection *selection;
     struct COURBE *new_courbe;
-    struct CMD_ID_COURBE rezo_courbe;
+    struct CMD_TYPE_COURBE rezo_courbe;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -255,13 +255,13 @@
        g_list_free (lignes);                                                        /* Liberation mémoire */
 
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_ADD_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
     else if (reponse == GTK_RESPONSE_REJECT)                            /* On retire la courbe de la visu */
      { rezo_courbe.slot_id = infos->slot_id;
 
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_DEL_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
 
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
@@ -773,12 +773,12 @@
 
     courbe = &infos->Courbes[append_courbe->slot_id];
     if ( ! (courbe && courbe->actif && Append_courbe( courbe, append_courbe) ) )
-     { struct CMD_ID_COURBE rezo_courbe;
+     { struct CMD_TYPE_COURBE rezo_courbe;
        rezo_courbe.type    = append_courbe->type;
        rezo_courbe.slot_id = append_courbe->slot_id;/* On demande au serveur de ne plus nous envoyer les infos */
        rezo_courbe.id      = 0;
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_DEL_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
     else gtk_widget_queue_draw (infos->Databox);                                /* Mise à jour du Databox */
   }
@@ -787,7 +787,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_ajouter_courbe( struct CMD_ID_COURBE *courbe )
+ void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe )
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
     struct COURBE *new_courbe;

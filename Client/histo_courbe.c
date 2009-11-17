@@ -75,7 +75,7 @@
                                                    struct TYPE_INFO_COURBE *infos )
   { GtkTreeSelection *selection;
     struct COURBE *new_courbe;
-    struct CMD_ID_COURBE rezo_courbe;
+    struct CMD_TYPE_COURBE rezo_courbe;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -140,14 +140,14 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
 
        printf("Envoi serveur TAG_CLIENT_ADD_HISTO_COURBE %d\n", rezo_courbe.id );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
     else if (reponse == GTK_RESPONSE_REJECT)                            /* On retire la courbe de la visu */
      { rezo_courbe.slot_id = infos->slot_id;
 
        printf("Envoi serveur TAG_CLIENT_DEL_COURBE %d\n", rezo_courbe.slot_id );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_DEL_HISTO_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
 
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
@@ -287,7 +287,7 @@ printf("Envoie want page source for histo courbe\n");
 /**********************************************************************************************************/
  static void Menu_rescale ( struct TYPE_INFO_COURBE *infos )
   { 
-    struct CMD_ID_COURBE rezo_courbe;
+    struct CMD_TYPE_COURBE rezo_courbe;
     guint cpt;
     for ( cpt=0; cpt<NBR_MAX_COURBES; cpt++ )
      { if (!infos->Courbes[cpt].actif) continue;
@@ -306,7 +306,7 @@ printf("Envoie want page source for histo courbe\n");
 
        printf("Envoi serveur TAG_CLIENT_ADD_HISTO_COURBE %d\n", rezo_courbe.slot_id );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
     /*gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );*/
   }
@@ -636,13 +636,13 @@ printf("Envoie want page source for histo courbe\n");
 
     courbe = &infos->Courbes[append_courbe->slot_id];
     if ( ! (courbe && courbe->actif && Append_courbe( courbe, append_courbe) ) )
-     { struct CMD_ID_COURBE rezo_courbe;
+     { struct CMD_TYPE_COURBE rezo_courbe;
        rezo_courbe.type = append_courbe->type;
        rezo_courbe.id = append_courbe->slot_id; /* On demande au serveur de ne plus nous envoyer les infos */
        rezo_courbe.id = 0;                      /* On demande au serveur de ne plus nous envoyer les infos */
        printf("Envoi serveur TAG_CLIENT_DEL_HISTO_COURBE %d\n", rezo_courbe.id );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_DEL_HISTO_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_ID_COURBE) );
+                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      } else gtk_widget_queue_draw (infos->Databox);
   }
 /**********************************************************************************************************/
@@ -650,7 +650,7 @@ printf("Envoie want page source for histo courbe\n");
 /* Entrée: une reference sur le source                                                                 */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_ajouter_histo_courbe( struct CMD_ID_COURBE *courbe )
+ void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe )
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
     struct COURBE *new_courbe;

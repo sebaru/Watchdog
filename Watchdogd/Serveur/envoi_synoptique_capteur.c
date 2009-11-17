@@ -34,32 +34,13 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_capteur: convertit une structure CAPTEURDB en structure CMD_SHOW_CAPTEUR                */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_SHOW_CAPTEUR *Preparer_envoi_capteur ( struct CAPTEURDB *capteur )
-  { struct CMD_SHOW_CAPTEUR *rezo_capteur;
 
-    rezo_capteur = (struct CMD_SHOW_CAPTEUR *)g_malloc0( sizeof(struct CMD_SHOW_CAPTEUR) );
-    if (!rezo_capteur) { return(NULL); }
-
-    rezo_capteur->id           = capteur->id;
-    rezo_capteur->syn_id       = capteur->syn_id;
-    rezo_capteur->bit_controle = capteur->bit_controle;
-    rezo_capteur->type         = capteur->type;
-    rezo_capteur->position_x   = capteur->position_x;                                      /* en abcisses */
-    rezo_capteur->position_y   = capteur->position_y;                                     /* en ordonnées */
-    memcpy( &rezo_capteur->libelle, capteur->libelle, sizeof(rezo_capteur->libelle) );
-    return( rezo_capteur );
-  }
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_ID_CAPTEUR *rezo_capteur )
+ void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -68,7 +49,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK,
-                     (gchar *)rezo_capteur, sizeof(struct CMD_ID_CAPTEUR) );
+                     (gchar *)rezo_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
        Info( Config.log, DEBUG_INFO, "MSRV: effacement capteur OK" );
      }
     else
@@ -85,8 +66,8 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_ADD_CAPTEUR *rezo_capteur )
-  { struct CAPTEURDB *result;
+ void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
+  { struct CMD_TYPE_CAPTEUR *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -111,22 +92,10 @@
               Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur NOK (2)" );
             }
            else
-            { struct CMD_SHOW_CAPTEUR *capteur;
-              capteur = Preparer_envoi_capteur( result );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_CAPTEUR) );
               g_free(result);
-              if (!capteur)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                 Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur NOK (3)" );
-               }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK,
-                                   (gchar *)capteur, sizeof(struct CMD_SHOW_CAPTEUR) );
-                     g_free(capteur);
-                     Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur OK" );
-                   }
+              Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur OK" );
             }
          }
   }
@@ -135,7 +104,7 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_EDIT_CAPTEUR *rezo_capteur )
+ void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -157,9 +126,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_capteur_atelier_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_CAPTEUR *rezo_capteur;
-    struct CMD_ENREG nbr;
-    struct CAPTEURDB *capteur;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_CAPTEUR *capteur;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );
@@ -191,17 +159,13 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
           pthread_exit ( NULL );
         }
 
-       rezo_capteur = Preparer_envoi_capteur( capteur );
-       g_free(capteur);
-       if (rezo_capteur)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass LIB", rezo_capteur->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass ID ", rezo_capteur->id );
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
-                         (gchar *)rezo_capteur, sizeof(struct CMD_SHOW_CAPTEUR) );
-          g_free(rezo_capteur);
-        }
+       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass LIB", capteur->libelle );
+       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass ID ", capteur->id );
+       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
+                      (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
+       g_free(capteur);
      }
   }
 /**********************************************************************************************************/
@@ -210,9 +174,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_capteur_supervision_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_CAPTEUR *rezo_capteur;
-    struct CMD_ENREG nbr;
-    struct CAPTEURDB *capteur;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_CAPTEUR *capteur;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );
@@ -257,18 +220,14 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
         }
        else g_free(capteur_new);
 
-       rezo_capteur = Preparer_envoi_capteur( capteur );
-       g_free(capteur);
-       if (rezo_capteur)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass LIB", rezo_capteur->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass ID ", rezo_capteur->id );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
-                         (gchar *)rezo_capteur, sizeof(struct CMD_SHOW_CAPTEUR) );
-          g_free(rezo_capteur);
-        }
+       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass LIB", capteur->libelle );
+       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass ID ", capteur->id );
+       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
+                      (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
+       g_free(capteur);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

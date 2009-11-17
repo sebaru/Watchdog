@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_capteurDB ( struct LOG *log, struct DB *db, struct CMD_ID_CAPTEUR *capteur )
+ gboolean Retirer_capteurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -55,7 +55,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_capteurDB ( struct LOG *log, struct DB *db, struct CMD_ADD_CAPTEUR *capteur )
+ gint Ajouter_capteurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur )
   { gchar requete[512];
     gchar *libelle;
 
@@ -95,8 +95,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CAPTEURDB *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db )
-  { struct CAPTEURDB *capteur;
+ struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_CAPTEUR *capteur;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -104,7 +104,7 @@
        return(NULL);
      }
 
-    capteur = (struct CAPTEURDB *)g_malloc0( sizeof(struct CAPTEURDB) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur) Info( log, DEBUG_MEM, "Recuperer_capteurDB_suite: Erreur allocation mémoire" );
     else
      { capteur->id           = atoi(db->row[0]);
@@ -123,8 +123,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CAPTEURDB *Rechercher_capteurDB ( struct LOG *log, struct DB *db, guint id )
-  { struct CAPTEURDB *capteur;
+ struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_CAPTEUR *capteur;
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -142,7 +142,7 @@
        return(NULL);
      }
 
-    capteur = (struct CAPTEURDB *)g_malloc0( sizeof(struct CAPTEURDB) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur) Info( log, DEBUG_MEM, "Recuperer_capteurDB: Erreur allocation mémoire" );
     else
      { capteur->id           = id;
@@ -161,7 +161,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_capteurDB( struct LOG *log, struct DB *db, struct CMD_EDIT_CAPTEUR *capteur )
+ gboolean Modifier_capteurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur )
   { gchar requete[1024];
     gchar *libelle;
 

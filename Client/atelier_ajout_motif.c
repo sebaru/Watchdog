@@ -182,7 +182,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajout_motif ( GtkDialog *dialog, gint reponse )
-  { struct CMD_ADD_MOTIF add_motif;
+  { struct CMD_TYPE_MOTIF add_motif;
     struct MOTIF *motif;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
@@ -213,7 +213,7 @@
                                  add_motif.vert0 = 0;
                                  add_motif.bleu0 = 0;
                                  Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_MOTIF,
-                                                (gchar *)&add_motif, sizeof(struct CMD_ADD_MOTIF) );
+                                                (gchar *)&add_motif, sizeof(struct CMD_TYPE_MOTIF) );
                                  printf("Requete envoyée au serveur....\n");
                                  return(TRUE);                            /* On laisse la fenetre ouverte */
                                  break;

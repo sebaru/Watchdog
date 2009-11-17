@@ -26,7 +26,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Changer_vue( GtkWidget *bouton, gpointer data )
-  { struct CMD_ID_SYNOPTIQUE cmd;
+  { struct CMD_TYPE_SYNOPTIQUE cmd;
     gint syn_cible_id;
     syn_cible_id = GPOINTER_TO_INT(data);
     if (Chercher_page_notebook( TYPE_PAGE_SUPERVISION, syn_cible_id, TRUE )) return;
@@ -34,14 +34,14 @@
     cmd.id = syn_cible_id;
 
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_PAGE_SUPERVISION,
-                   (gchar *)&cmd, sizeof(struct CMD_ID_SYNOPTIQUE) );
+                   (gchar *)&cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
   }
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_palette_supervision( struct CMD_SHOW_PALETTE *rezo_palette )
+ void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette )
   { struct TYPE_INFO_SUPERVISION *infos;
     GtkWidget *bouton;
         

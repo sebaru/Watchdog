@@ -66,7 +66,7 @@
 /* Entrées: un log, une db, un nom                                                                        */
 /* Sortie: true si pas de pb, false sinon                                                                 */
 /**********************************************************************************************************/
- gboolean Retirer_utilisateurDB( struct LOG *log, struct DB *db, struct CMD_ID_UTILISATEUR *util )
+ gboolean Retirer_utilisateurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_UTILISATEUR *util )
   { gchar requete[512];
 
     if (util->id < NBR_UTILISATEUR_RESERVE) 
@@ -89,7 +89,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gint Ajouter_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,
-                             struct CMD_ADD_UTILISATEUR *util )
+                             struct CMD_TYPE_UTILISATEUR *util )
   { gchar requete[1024];
     gchar *crypt;
     gint id;
@@ -140,7 +140,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gboolean Modifier_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,
-                                  struct CMD_EDIT_UTILISATEUR *util )
+                                  struct CMD_TYPE_UTILISATEUR *util )
   { gchar requete[1024], chaine[100];
     gchar *comment;
     gchar *crypt;

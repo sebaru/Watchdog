@@ -34,14 +34,14 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Preparer_envoi_groupe: convertit une structure GROUPE en structure CMD_SHOW_GROUPE                     */
+/* Preparer_envoi_groupe: convertit une structure GROUPE en structure CMD_TYPE_GROUPE                     */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_GROUPE *Preparer_envoi_groupe ( struct GROUPEDB *groupe )
-  { struct CMD_SHOW_GROUPE *rezo_groupe;
+ static struct CMD_TYPE_GROUPE *Preparer_envoi_groupe ( struct CMD_TYPE_GROUPE *groupe )
+  { struct CMD_TYPE_GROUPE *rezo_groupe;
 
-    rezo_groupe = (struct CMD_SHOW_GROUPE *)g_malloc0( sizeof(struct CMD_SHOW_GROUPE) );
+    rezo_groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!rezo_groupe) { return(NULL); }
 
     rezo_groupe->id = groupe->id;
@@ -54,9 +54,9 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_groupe ( struct CLIENT *client, struct CMD_ID_GROUPE *rezo_groupe )
-  { struct CMD_EDIT_GROUPE edit_groupe;
-    struct GROUPEDB *groupe;
+ void Proto_editer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
+  { struct CMD_TYPE_GROUPE edit_groupe;
+    struct CMD_TYPE_GROUPE *groupe;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -74,7 +74,7 @@
        memcpy( &edit_groupe.commentaire, groupe->commentaire, sizeof(edit_groupe.commentaire) );
 
        Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_EDIT_GROUPE_OK,
-                  (gchar *)&edit_groupe, sizeof(struct CMD_EDIT_GROUPE) );
+                  (gchar *)&edit_groupe, sizeof(struct CMD_TYPE_GROUPE) );
        g_free(groupe);                                                              /* liberation mémoire */
      }
     else
@@ -90,8 +90,8 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_groupe ( struct CLIENT *client, struct CMD_EDIT_GROUPE *rezo_groupe )
-  { struct GROUPEDB *result;
+ void Proto_valider_editer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
+  { struct CMD_TYPE_GROUPE *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -106,7 +106,7 @@
      }
     else { result = Rechercher_groupeDB( Config.log, Db_watchdog, rezo_groupe->id );
            if (result) 
-            { struct CMD_SHOW_GROUPE *groupe;
+            { struct CMD_TYPE_GROUPE *groupe;
               groupe = Preparer_envoi_groupe ( result );
               g_free(result);
               if (!groupe)
@@ -117,7 +117,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_VALIDE_EDIT_GROUPE_OK,
-                                   (gchar *)groupe, sizeof(struct CMD_SHOW_GROUPE) );
+                                   (gchar *)groupe, sizeof(struct CMD_TYPE_GROUPE) );
                      g_free(groupe);
                    }
             }
@@ -135,7 +135,7 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_groupe ( struct CLIENT *client, struct CMD_ID_GROUPE *rezo_groupe )
+ void Proto_effacer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -144,7 +144,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_DEL_GROUPE_OK,
-                     (gchar *)rezo_groupe, sizeof(struct CMD_ID_GROUPE) );
+                     (gchar *)rezo_groupe, sizeof(struct CMD_TYPE_GROUPE) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -159,8 +159,8 @@
 /* Entrée: le groupe à créer                                                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_groupe ( struct CLIENT *client, struct CMD_ADD_GROUPE *rezo_groupe )
-  { struct GROUPEDB *result;
+ void Proto_ajouter_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
+  { struct CMD_TYPE_GROUPE *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -182,7 +182,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_SHOW_GROUPE *groupe;
+            { struct CMD_TYPE_GROUPE *groupe;
               groupe = Preparer_envoi_groupe ( result );
               g_free(result);
               if (!groupe)
@@ -193,7 +193,7 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADD_GROUPE_OK,
-                                   (gchar *)groupe, sizeof(struct CMD_SHOW_GROUPE) );
+                                   (gchar *)groupe, sizeof(struct CMD_TYPE_GROUPE) );
                      g_free(groupe);
                    }
             }
@@ -205,9 +205,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_groupes_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_SHOW_GROUPE *rezo_groupe;
+  { struct CMD_TYPE_GROUPE *rezo_groupe;
     struct CMD_ENREG nbr;
-    struct GROUPEDB *groupe;
+    struct CMD_TYPE_GROUPE *groupe;
     struct DB *db;
     prctl(PR_SET_NAME, "W-EnvoiGrp", 0, 0, 0 );
 
@@ -242,7 +242,7 @@
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_groupe, sizeof(struct CMD_SHOW_GROUPE) );
+                         (gchar *)rezo_groupe, sizeof(struct CMD_TYPE_GROUPE) );
           g_free(rezo_groupe);
         }
      }

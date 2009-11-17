@@ -9,7 +9,7 @@
 
  #include "Cst_atelier.h"
 
- struct CMD_SHOW_MOTIF
+ struct CMD_TYPE_MOTIF
   { gint    id;                                                               /* Id du motif dans la base */
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gint    icone_id;                                                       /* Correspond au fichier .gif */
@@ -30,55 +30,8 @@
     gchar   type_gestion;                                                  /* Statique/dynamique/cyclique */
   };
 
- struct CMD_ADD_MOTIF
-  { gint    icone_id;                                                       /* Correspond au fichier .gif */
-    gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-    guint   gid;                                                 /* Nom du groupe d'appartenance du motif */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    gint    bit_clic;                         /* Bit à activer quand on clic avec le bouton gauche souris */
-    gint    bit_clic2;                        /* Bit à activer quand on clic avec le bouton gauche souris */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
-    guint   position_y;
-    gfloat  largeur;                                               /* Taille de l'image sur le synoptique */
-    gfloat  hauteur;
-    gfloat  angle;
-    gchar   type_dialog;                         /* Type de la boite de dialogue pour le clic de commande */
-    guchar  rouge0;
-    guchar  vert0;
-    guchar  bleu0;
-    gchar   type_gestion;                                                  /* Statique/dynamique/cyclique */
-  };
-
- struct CMD_EDIT_MOTIF
-  { gint    id;                                                             /* Correspond a l'id du motif */
-    gint    icone_id;                                                       /* Correspond au fichier .gif */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-    guint   gid;                                                 /* Nom du groupe d'appartenance du motif */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    gint    bit_clic;                         /* Bit à activer quand on clic avec le bouton gauche souris */
-    gint    bit_clic2;                        /* Bit à activer quand on clic avec le bouton gauche souris */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
-    guint   position_y;
-    gfloat largeur;                                               /* Taille de l'image sur le synoptique */
-    gfloat hauteur;
-    gfloat angle;
-    gchar   type_dialog;                         /* Type de la boite de dialogue pour le clic de commande */
-    guchar  rouge0;
-    guchar  vert0;
-    guchar  bleu0;
-    gchar   type_gestion;                                                  /* Statique/dynamique/cyclique */
-  };
-
- struct CMD_ID_MOTIF
-  { gint    id;                                                             /* Correspond au fichier .gif */
-    gint    syn_id;
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-  };
-
-
 /*********************************************** Gestion des commentaires *********************************/
- struct CMD_SHOW_COMMENT
+ struct CMD_TYPE_COMMENT
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gchar   libelle[NBR_CARAC_LIBELLE_COMMENT_UTF8+1];                           /* "Vanne gaz chaudière" */
@@ -90,38 +43,8 @@
     guint   position_y;
     gfloat  angle;
   };
-
- struct CMD_ADD_COMMENT
-  { gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-    gchar   font[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                  /* police de caractère */
-    guchar  rouge;
-    guchar  vert;
-    guchar  bleu;
-    guint   position_x;
-    guint   position_y;
-    gfloat  angle;
-  };
-
- struct CMD_EDIT_COMMENT
-  { gint    id;
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-    gchar   font[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                  /* police de caractère */
-    guchar  rouge;
-    guchar  vert;
-    guchar  bleu;
-    guint   position_x;
-    guint   position_y;
-    gfloat  angle;
-  };
-
- struct CMD_ID_COMMENT
-  { gint    id;                                                             /* Correspond au fichier .gif */
-    gint    syn_id;
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-  };
 /*********************************************** Gestion des passerelles **********************************/
- struct CMD_SHOW_PASSERELLE
+ struct CMD_TYPE_PASSERELLE
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
@@ -134,67 +57,16 @@
     gfloat  angle;
   };
 
- struct CMD_ADD_PASSERELLE
-  { gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
-    guint   position_y;
-    guint   bit_controle_1;                                       /* Numéro Ixxx du premier bit de retour */
-    guint   bit_controle_2;                                        /* Numéro Ixxx du second bit de retour */
-    gchar   libelle[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
-    gfloat  angle;
-  };
-
- struct CMD_EDIT_PASSERELLE
-  { gint    id;                                                             /* Correspond au fichier .gif */
-    gint    syn_id_cible;                                                   /* Numéro du synoptique cible */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
-    guint   position_y;
-    guint   bit_controle_1;                                       /* Numéro Ixxx du premier bit de retour */
-    guint   bit_controle_2;                                        /* Numéro Ixxx du second bit de retour */
-    gchar   libelle[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
-    gfloat  angle;
-  };
-
- struct CMD_ID_PASSERELLE
-  { gint    id;                                                             /* Correspond au fichier .gif */
-    gint    syn_id;
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-  };
 /*********************************************** Gestion des passerelles **********************************/
- struct CMD_SHOW_PALETTE
+ struct CMD_TYPE_PALETTE
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
     gchar   libelle[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
     guint   position;                                                        /* en abscisses et ordonnées */
-  };
-
- struct CMD_ADD_PALETTE
-  { gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
-    gchar   libelle[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
-    guint   position;                                                        /* en abscisses et ordonnées */
-
-  };
-
- struct CMD_EDIT_PALETTE
-  { gint    id;
-    gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
-    gchar   libelle[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
-    guint   position;                                                        /* en abscisses et ordonnées */
-  };
-
- struct CMD_ID_PALETTE
-  { gint    id;                                                             /* Correspond au fichier .gif */
-    gint    syn_id;
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
   };
 /*********************************************** Gestion des capteurs ***************************************/
- struct CMD_SHOW_CAPTEUR
+ struct CMD_TYPE_CAPTEUR
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                       /* Libelle du synoptique cible */
@@ -205,33 +77,7 @@
     gfloat  angle;
   };
 
- struct CMD_ADD_CAPTEUR
-  { gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                    /* Libelle du synoptique cible */
-    gint    type;                                                              /* type du bit de controle */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
-    guint   position_y;
-    gfloat  angle;
-  };
-
- struct CMD_EDIT_CAPTEUR
-  { gint    id;
-    gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                    /* Libelle du synoptique cible */
-    gint    type;                                                              /* type du bit de controle */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
-    guint   position_y;
-    gfloat  angle;
-  };
-
- struct CMD_ID_CAPTEUR
-  { gint    id;                                                             /* Correspond au fichier .gif */
-    gint    syn_id;
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-  };
-
+/*********************************************** Gestion des cameras de supervision *************************/
  struct CMD_TYPE_CAMERA_SUP
   { gint  id;
     gint  syn_id;

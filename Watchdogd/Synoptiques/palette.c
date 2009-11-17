@@ -42,7 +42,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_paletteDB ( struct LOG *log, struct DB *db, struct CMD_ID_PALETTE *palette )
+ gboolean Retirer_paletteDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *palette )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -55,7 +55,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_paletteDB ( struct LOG *log, struct DB *db, struct CMD_ADD_PALETTE *palette )
+ gint Ajouter_paletteDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *palette )
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -92,8 +92,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct PALETTEDB *Recuperer_paletteDB_suite( struct LOG *log, struct DB *db )
-  { struct PALETTEDB *palette;
+ struct CMD_TYPE_PALETTE *Recuperer_paletteDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_PALETTE *palette;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -101,7 +101,7 @@
        return(NULL);
      }
 
-    palette = (struct PALETTEDB *)g_malloc0( sizeof(struct PALETTEDB) );
+    palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
     if (!palette) Info( log, DEBUG_MEM, "Recuperer_paletteDB_suite: Erreur allocation mémoire" );
     else
      { palette->id           = atoi(db->row[0]);
@@ -117,8 +117,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct PALETTEDB *Rechercher_paletteDB ( struct LOG *log, struct DB *db, guint id )
-  { struct PALETTEDB *palette;
+ struct CMD_TYPE_PALETTE *Rechercher_paletteDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_PALETTE *palette;
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -139,7 +139,7 @@
        return(NULL);
      }
 
-    palette = (struct PALETTEDB *)g_malloc0( sizeof(struct PALETTEDB) );
+    palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
     if (!palette) Info( log, DEBUG_MEM, "Rechercher_paletteDB: Erreur allocation mémoire" );
     else
      { palette->id           = id;
@@ -155,7 +155,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_paletteDB( struct LOG *log, struct DB *db, struct CMD_EDIT_PALETTE *palette )
+ gboolean Modifier_paletteDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *palette )
   { gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

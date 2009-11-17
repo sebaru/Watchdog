@@ -133,7 +133,7 @@
 /**********************************************************************************************************/
  static void Ajouter_palettes ( struct TYPE_INFO_ATELIER *infos )
   { GtkTreeSelection *selection;
-    struct CMD_ADD_PALETTE palette;
+    struct CMD_TYPE_PALETTE palette;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -150,7 +150,7 @@
        palette.position = 0; /* Sera reintialisé par le serveur lors de l'ajout dans la BD */
        palette.syn_id = infos->syn.id;
        Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_PALETTE,
-                      (gchar *)&palette, sizeof(struct CMD_ADD_PALETTE) );
+                      (gchar *)&palette, sizeof(struct CMD_TYPE_PALETTE) );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -164,7 +164,7 @@
 /**********************************************************************************************************/
  static void Retirer_palettes ( struct TYPE_INFO_ATELIER *infos )
   { GtkTreeSelection *selection;
-    struct CMD_ID_PALETTE palette;
+    struct CMD_TYPE_PALETTE palette;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -182,7 +182,7 @@ printf("demande d'effacement palette\n" );
        palette.syn_id = infos->syn.id;
 printf("Envoi demande d'effacement palette %d\n", palette.id );
        Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_PALETTE,
-                      (gchar *)&palette, sizeof(struct CMD_ID_PALETTE) );
+                      (gchar *)&palette, sizeof(struct CMD_TYPE_PALETTE) );
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
      }
@@ -266,14 +266,14 @@ printf("creer fenetre palette 3\n");
 
     gtk_widget_show_all( infos->F_ajout_palette );
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE,
-                   (char *)&infos->syn, sizeof(struct CMD_ID_SYNOPTIQUE) );       /*demande infos serveur */
+                   (char *)&infos->syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );       /*demande infos serveur */
   }
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_palette_atelier( struct CMD_SHOW_PALETTE *rezo_palette )
+ void Proto_afficher_une_palette_atelier( struct CMD_TYPE_PALETTE *rezo_palette )
   { struct TYPE_INFO_ATELIER *infos;
     GtkListStore *store;
     GtkTreeIter iter;
@@ -297,7 +297,7 @@ printf("New Palette atelier: %d %s\n", rezo_palette->id, rezo_palette->libelle )
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_une_palette_atelier( struct CMD_ID_PALETTE *palette )
+ void Proto_cacher_une_palette_atelier( struct CMD_TYPE_PALETTE *palette )
   { struct TYPE_INFO_ATELIER *infos;
     GtkTreeModel *store;
     GtkTreeIter iter;
@@ -326,7 +326,7 @@ printf("New Palette atelier: %d %s\n", rezo_palette->id, rezo_palette->libelle )
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_syn_for_palette_atelier( struct CMD_SHOW_SYNOPTIQUE *synoptique )
+ void Proto_afficher_un_syn_for_palette_atelier( struct CMD_TYPE_SYNOPTIQUE *synoptique )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     GtkListStore *store;

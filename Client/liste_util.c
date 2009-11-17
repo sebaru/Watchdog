@@ -46,7 +46,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_utilisateur ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_ID_UTILISATEUR rezo_util;
+  { struct CMD_TYPE_UTILISATEUR rezo_util;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -67,7 +67,7 @@
                g_free( nom );
 
                Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_DEL_UTIL,
-                              (gchar *)&rezo_util, sizeof(struct CMD_ID_UTILISATEUR) );
+                              (gchar *)&rezo_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -119,7 +119,7 @@
 /**********************************************************************************************************/
  static void Menu_editer_utilisateur ( void )
   { GtkTreeSelection *selection;
-    struct CMD_ID_UTILISATEUR rezo_util;
+    struct CMD_TYPE_UTILISATEUR rezo_util;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -140,7 +140,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
     memcpy( &rezo_util.nom, nom, sizeof(rezo_util.nom) );
     g_free( nom );
     Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_EDIT_UTIL,
-                   (gchar *)&rezo_util, sizeof(struct CMD_ID_UTILISATEUR) );
+                   (gchar *)&rezo_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -287,7 +287,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
 /* Entrée: une reference sur l'utilisateur                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Rafraichir_visu_utilisateur( GtkTreeIter *iter, struct CMD_SHOW_UTILISATEUR *util )
+ void Rafraichir_visu_utilisateur( GtkTreeIter *iter, struct CMD_TYPE_UTILISATEUR *util )
   { GtkTreeModel *store;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_util) );                /* Acquisition du modele */
@@ -304,7 +304,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
 /* Entrée: une reference sur le groupe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_utilisateur( struct CMD_SHOW_UTILISATEUR *util )
+ void Proto_afficher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -319,7 +319,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
 /* Entrée: une reference sur l'utilisateur                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_utilisateur( struct CMD_ID_UTILISATEUR *util )
+ void Proto_cacher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -345,7 +345,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
 /* Entrée: une reference sur l'utilisateur                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_utilisateur( struct CMD_SHOW_UTILISATEUR *util )
+ void Proto_rafraichir_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

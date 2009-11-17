@@ -90,13 +90,13 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 printf("bouh\n");
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_SHOW_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_SHOW_SYNOPTIQUE ) );
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_syn = g_list_append( Arrivee_syn, syn );
              }
             break;

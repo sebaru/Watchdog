@@ -34,27 +34,7 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_camera_sup: convertit une structure CAMERASUPDB en structure CMD_TYPE_CAMERA_SUP        */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_TYPE_CAMERA_SUP *Preparer_envoi_camera_sup ( struct CAMERASUPDB *camera_sup )
-  { struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup;
 
-    rezo_camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
-    if (!rezo_camera_sup) { return(NULL); }
-
-    rezo_camera_sup->id            = camera_sup->id;
-    rezo_camera_sup->syn_id        = camera_sup->syn_id;
-    rezo_camera_sup->camera_src_id = camera_sup->camera_src_id;
-    rezo_camera_sup->position_x    = camera_sup->position_x;                                      /* en abcisses */
-    rezo_camera_sup->position_y    = camera_sup->position_y;                                     /* en ordonnées */
-    rezo_camera_sup->type          = camera_sup->type;                                      /* en abcisses */
-    memcpy( &rezo_camera_sup->libelle,  camera_sup->libelle,  sizeof(rezo_camera_sup->libelle) );
-    memcpy( &rezo_camera_sup->location, camera_sup->location, sizeof(rezo_camera_sup->location) );
-    return( rezo_camera_sup );
-  }
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
 /* Entrée: le client demandeur et le syn en question                                                      */
@@ -87,7 +67,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup )
-  { struct CAMERASUPDB *result;
+  { struct CMD_TYPE_CAMERA_SUP *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -112,22 +92,10 @@
               Info( Config.log, DEBUG_INFO, "MSRV: ajout camera_sup NOK (2)" );
             }
            else
-            { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-              camera_sup = Preparer_envoi_camera_sup( result );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_CAMERA_SUP) );
               g_free(result);
-              if (!camera_sup)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                 Info( Config.log, DEBUG_INFO, "MSRV: ajout camera_sup NOK (3)" );
-               }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,
-                                   (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
-                     g_free(camera_sup);
-                     Info( Config.log, DEBUG_INFO, "MSRV: ajout camera_sup OK" );
-                   }
+              Info( Config.log, DEBUG_INFO, "MSRV: ajout camera_sup OK" );
             }
          }
   }
@@ -159,9 +127,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_camera_sup_atelier_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup;
-    struct CMD_ENREG nbr;
-    struct CAMERASUPDB *camera_sup;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
@@ -193,15 +160,11 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
           pthread_exit ( NULL );
         }
 
-       rezo_camera_sup = Preparer_envoi_camera_sup( camera_sup );
-       g_free(camera_sup);
-       if (rezo_camera_sup)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
-                         (gchar *)rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
-          g_free(rezo_camera_sup);
-        }
+       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
+                      (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+       g_free(camera_sup);
      }
   }
 /**********************************************************************************************************/
@@ -210,9 +173,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_camera_sup_supervision_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup;
-    struct CMD_ENREG nbr;
-    struct CAMERASUPDB *camera_sup;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
@@ -246,16 +208,12 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
           pthread_exit( NULL );
         }
 
-       rezo_camera_sup = Preparer_envoi_camera_sup( camera_sup );
-       g_free(camera_sup);
-       if (rezo_camera_sup)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
-                         (gchar *)rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
-          g_free(rezo_camera_sup);
-        }
+       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
+                      (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+       g_free(camera_sup);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -9,28 +9,11 @@
 
  #include "Cst_synoptiques.h"
 
- struct CMD_SHOW_SYNOPTIQUE
+ struct CMD_TYPE_SYNOPTIQUE
   { guint id;                                                      /* Numero du message dans la structure */
     gchar  libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     gchar  mnemo[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];
     guint  groupe;
-  };
- struct CMD_EDIT_SYNOPTIQUE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar  libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  mnemo[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];
-    guint  groupe;
-  };
-
- struct CMD_ADD_SYNOPTIQUE
-  { gchar  libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  mnemo[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];
-    guint  groupe;
-  };
-
- struct CMD_ID_SYNOPTIQUE
-  { guint id;                                                      /* Numero du message dans la structure */
-    gchar libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
   };
 
 /************************************************* Tag de communication ***********************************/

@@ -75,7 +75,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajout_pass ( GtkDialog *dialog, gint reponse )
-  { struct CMD_ADD_PASSERELLE add_pass;
+  { struct CMD_TYPE_PASSERELLE add_pass;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeSelection *selection;
@@ -111,7 +111,7 @@
                add_pass.angle          = 0.0;
 
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_PASS,
-                              (gchar *)&add_pass, sizeof(struct CMD_ADD_PASSERELLE) );
+                              (gchar *)&add_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
                printf("Requete d'ajout de passerelle envoyée au serveur....\n");
                return(TRUE);                                              /* On laisse la fenetre ouverte */
              }
@@ -193,7 +193,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_passerelle_atelier( struct CMD_SHOW_PASSERELLE *rezo_pass )
+ void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_ATELIER *infos;
     struct PASSERELLE *pass;
@@ -233,7 +233,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_une_passerelle_atelier( struct CMD_ID_PASSERELLE *pass )
+ void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_ATELIER *infos;
         
@@ -252,7 +252,7 @@
 /* Entrée: une reference sur le icone                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_SHOW_SYNOPTIQUE *synoptique )
+ void Proto_afficher_un_syn_for_passerelle_atelier( struct CMD_TYPE_SYNOPTIQUE *synoptique )
   { GtkListStore *store;
     GtkTreeIter iter;
 

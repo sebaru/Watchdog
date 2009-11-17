@@ -51,8 +51,8 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_AFFICHE_PAGE_SUP:
-             { struct CMD_SHOW_SYNOPTIQUE *syn;
-               syn = (struct CMD_SHOW_SYNOPTIQUE *)connexion->donnees;
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                Creer_page_supervision( syn->libelle, syn->id );         /* Creation de la page synoptique */
                Chercher_page_notebook( TYPE_PAGE_SUPERVISION, syn->id, TRUE );    /* Affichage de la page */
              }
@@ -69,12 +69,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF:
-             { struct CMD_SHOW_MOTIF *motif;
+             { struct CMD_TYPE_MOTIF *motif;
                Set_progress_plusun();
 
-               motif = (struct CMD_SHOW_MOTIF *)g_malloc0( sizeof( struct CMD_SHOW_MOTIF ) );
+               motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
                if (!motif) return; 
-               memcpy( motif, connexion->donnees, sizeof(struct CMD_SHOW_MOTIF ) );
+               memcpy( motif, connexion->donnees, sizeof(struct CMD_TYPE_MOTIF ) );
                Arrivee_motif = g_list_append( Arrivee_motif, motif );
                save_id = motif->syn_id;               
              }
@@ -88,12 +88,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT:
-             { struct CMD_SHOW_COMMENT *comment;
+             { struct CMD_TYPE_COMMENT *comment;
                Set_progress_plusun();
 
-               comment = (struct CMD_SHOW_COMMENT *)g_malloc0( sizeof( struct CMD_SHOW_COMMENT ) );
+               comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
                if (!comment) return; 
-               memcpy( comment, connexion->donnees, sizeof(struct CMD_SHOW_COMMENT ) );
+               memcpy( comment, connexion->donnees, sizeof(struct CMD_TYPE_COMMENT ) );
                Arrivee_comment = g_list_append( Arrivee_comment, comment );
                save_id = comment->syn_id;
              }
@@ -107,12 +107,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS:
-             { struct CMD_SHOW_PASSERELLE *pass;
+             { struct CMD_TYPE_PASSERELLE *pass;
                Set_progress_plusun();
 
-               pass = (struct CMD_SHOW_PASSERELLE *)g_malloc0( sizeof( struct CMD_SHOW_PASSERELLE ) );
+               pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
                if (!pass) return; 
-               memcpy( pass, connexion->donnees, sizeof(struct CMD_SHOW_PASSERELLE ) );
+               memcpy( pass, connexion->donnees, sizeof(struct CMD_TYPE_PASSERELLE ) );
                Arrivee_pass = g_list_append( Arrivee_pass, pass );
                save_id = pass->syn_id;
              }
@@ -126,12 +126,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE:
-             { struct CMD_SHOW_PALETTE *palette;
+             { struct CMD_TYPE_PALETTE *palette;
                Set_progress_plusun();
 
-               palette = (struct CMD_SHOW_PALETTE *)g_malloc0( sizeof( struct CMD_SHOW_PALETTE ) );
+               palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
                if (!palette) return; 
-               memcpy( palette, connexion->donnees, sizeof(struct CMD_SHOW_PALETTE ) );
+               memcpy( palette, connexion->donnees, sizeof(struct CMD_TYPE_PALETTE ) );
                Arrivee_palette = g_list_append( Arrivee_palette, palette );
                save_id = palette->syn_id;
              }
@@ -145,12 +145,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR:
-             { struct CMD_SHOW_CAPTEUR *capteur;
+             { struct CMD_TYPE_CAPTEUR *capteur;
                Set_progress_plusun();
 
-               capteur = (struct CMD_SHOW_CAPTEUR *)g_malloc0( sizeof( struct CMD_SHOW_CAPTEUR ) );
+               capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
                if (!capteur) return; 
-               memcpy( capteur, connexion->donnees, sizeof(struct CMD_SHOW_CAPTEUR ) );
+               memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
                Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
                save_id = capteur->syn_id;
              }

@@ -102,7 +102,7 @@
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_syn_for_message ( struct CMD_SHOW_SYNOPTIQUE *syn )
+ void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar chaine[256];
     g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->mnemo, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );

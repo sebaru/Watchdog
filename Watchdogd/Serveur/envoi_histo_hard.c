@@ -33,14 +33,14 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_histo: convertit une structure HISTO_HARD en structure CMD_SHOW_HISTO_HARD              */
+/* Preparer_envoi_histo: convertit une structure HISTO_HARD en structure CMD_TYPE_HISTO_HARD              */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static struct CMD_SHOW_HISTO_HARD *Preparer_envoi_histo ( struct HISTO_HARDDB *histo )
-  { struct CMD_SHOW_HISTO_HARD *rezo_histo;
+ static struct CMD_TYPE_HISTO_HARD *Preparer_envoi_histo ( struct HISTO_HARDDB *histo )
+  { struct CMD_TYPE_HISTO_HARD *rezo_histo;
 
-    rezo_histo = (struct CMD_SHOW_HISTO_HARD *)g_malloc0( sizeof(struct CMD_SHOW_HISTO_HARD) );
+    rezo_histo = (struct CMD_TYPE_HISTO_HARD *)g_malloc0( sizeof(struct CMD_TYPE_HISTO_HARD) );
     if (!rezo_histo) { return(NULL); }
     rezo_histo->num         = histo->histo.msg.num;
     rezo_histo->type        = histo->histo.msg.type;
@@ -59,7 +59,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Proto_envoyer_histo_hard_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_HISTO_HARD *rezo_histo;
+  { struct CMD_TYPE_HISTO_HARD *rezo_histo;
     struct CMD_REQUETE_HISTO_HARD requete;
     struct HISTO_HARDDB *histo;
     struct CMD_ENREG nbr;
@@ -106,7 +106,7 @@
           /*printf("Envoi_histo_hard: num %d, type %d nom_ack %s, objet %s, libelle %s\n",
                   rezo_histo->num,rezo_histo->type,rezo_histo->nom_ack,rezo_histo->objet,rezo_histo->libelle );*/
           Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,
-                         (gchar *)rezo_histo, sizeof(struct CMD_SHOW_HISTO_HARD) );
+                         (gchar *)rezo_histo, sizeof(struct CMD_TYPE_HISTO_HARD) );
           g_free(rezo_histo);
         }
      }

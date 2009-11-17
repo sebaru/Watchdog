@@ -54,7 +54,7 @@
  static GtkWidget *Check_changepass;   /* L'utilisateur doit-il changer son password au prochain login ?? */
  static GtkWidget *Entry_pass1, *Entry_pass2;                            /* Acquisition des passwords ... */
  static GtkWidget *F_ajout;                                /* Widget visuel de la fenetre d'ajout/edition */
- static struct CMD_EDIT_UTILISATEUR Edit_util;                          /* Utilisateur en cours d'edition */
+ static struct CMD_TYPE_UTILISATEUR Edit_util;                          /* Utilisateur en cours d'edition */
 /**********************************************************************************************************/
 /* Visu_groupe: Creation d'un GtkTreeView permettant la visu des données des groupes                      */
 /* Entrées: kedal                                                                                         */
@@ -185,7 +185,7 @@
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_groupe_existant ( struct CMD_SHOW_GROUPE *groupe )
+ void Proto_afficher_un_groupe_existant ( struct CMD_TYPE_GROUPE *groupe )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     store = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grps) );
@@ -322,10 +322,10 @@
                gids = Recuperer_groupes_util();
                memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
                Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_VALIDE_EDIT_UTIL,
-                              (gchar *)&Edit_util, sizeof(struct CMD_EDIT_UTILISATEUR) );
+                              (gchar *)&Edit_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
              }
             else                                                             /* Si ajout d'un utilisateur */
-             { struct CMD_ADD_UTILISATEUR new_util;
+             { struct CMD_TYPE_UTILISATEUR new_util;
                guint *gids;
 
                g_snprintf( new_util.nom, sizeof(new_util.nom),
@@ -343,7 +343,7 @@
                gids = Recuperer_groupes_util();
                memcpy( new_util.gids, gids, sizeof(new_util.gids) );
                Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_ADD_UTIL,
-                              (gchar *)&new_util, sizeof(struct CMD_ADD_UTILISATEUR) );
+                              (gchar *)&new_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
               }
             break;
 
@@ -359,14 +359,14 @@
 /* Entrée: l'id et le nom de l'utilisateur                                                                */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_utilisateur ( struct CMD_EDIT_UTILISATEUR *edit_util )
+ void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util )
   { GtkWidget *bouton, *frame, *vboite, *table, *texte, *scroll, *separateur;
     time_t temps;
 
     if (edit_util)
-     { memcpy( &Edit_util, edit_util, sizeof(struct CMD_EDIT_UTILISATEUR) );/*Save pour utilisation future*/
+     { memcpy( &Edit_util, edit_util, sizeof(struct CMD_TYPE_UTILISATEUR) );/*Save pour utilisation future*/
      }
-    else memset (&Edit_util, 0, sizeof(struct CMD_EDIT_UTILISATEUR) );             /* Sinon RAZ structure */
+    else memset (&Edit_util, 0, sizeof(struct CMD_TYPE_UTILISATEUR) );             /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_util ? _("Edit a user") : _("Add a user")),
                                            GTK_WINDOW(F_client),

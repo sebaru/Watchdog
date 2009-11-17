@@ -30,11 +30,11 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Clear_histoDB ( void );
- extern gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_ID_HISTO *histo );
+ extern gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo );
  extern gboolean Ajouter_histoDB ( struct LOG *log, struct DB *db, struct HISTODB *histo );
  extern gboolean Recuperer_histoDB ( struct LOG *log, struct DB *db );
  extern struct HISTODB *Recuperer_histoDB_suite( struct LOG *log, struct DB *db );
- extern gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_EDIT_HISTO *histo );
+ extern gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo );
  extern struct HISTODB *Rechercher_histoDB( struct LOG *log, struct DB *db, gint id );
 
  extern gboolean Ajouter_histo_hardDB ( struct LOG *log, struct DB *db, struct HISTO_HARDDB *histo );

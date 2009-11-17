@@ -15,7 +15,7 @@
     guint on;
   };
  
- struct CMD_EDIT_SOURCE_DLS
+ struct CMD_TYPE_SOURCE_DLS
   { guint id;
     guint taille;                                 /* Taille des données qui suivent dans le paquet reseau */
   };

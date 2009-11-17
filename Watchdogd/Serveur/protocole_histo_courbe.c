@@ -56,15 +56,15 @@
             break;
        case SSTAG_CLIENT_ADD_HISTO_COURBE:
              { while (client->courbe.id != -1) { printf("attends\n"); sched_yield(); }
-               memcpy( &client->courbe, connexion->donnees, sizeof(struct CMD_ID_COURBE) );
+               memcpy( &client->courbe, connexion->donnees, sizeof(struct CMD_TYPE_COURBE) );
                Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Proto_ajouter_histo_courbe_thread, client );
                pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_DEL_HISTO_COURBE:
-             { struct CMD_ID_COURBE *courbe;
-               courbe = (struct CMD_ID_COURBE *)connexion->donnees;
+             { struct CMD_TYPE_COURBE *courbe;
+               courbe = (struct CMD_TYPE_COURBE *)connexion->donnees;
                Proto_effacer_histo_courbe( client, courbe );
              }
             break;

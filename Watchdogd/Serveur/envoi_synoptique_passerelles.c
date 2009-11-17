@@ -34,34 +34,13 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Preparer_envoi_passerelle: convertit une structure PASSERELLEDB en structure CMD_SHOW_PASSERELLE       */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_SHOW_PASSERELLE *Preparer_envoi_passerelle ( struct PASSERELLEDB *pass )
-  { struct CMD_SHOW_PASSERELLE *rezo_pass;
 
-    rezo_pass = (struct CMD_SHOW_PASSERELLE *)g_malloc0( sizeof(struct CMD_SHOW_PASSERELLE) );
-    if (!rezo_pass) { return(NULL); }
-
-    rezo_pass->id = pass->id;
-    rezo_pass->syn_id = pass->syn_id;
-    rezo_pass->syn_cible_id = pass->syn_cible_id;
-    rezo_pass->bit_controle = pass->bit_controle;                                           /* Ixxx, Cxxx */
-    rezo_pass->bit_controle_1 = pass->bit_controle_1;                                       /* Ixxx, Cxxx */
-    rezo_pass->bit_controle_2 = pass->bit_controle_2;                                       /* Ixxx, Cxxx */
-    rezo_pass->position_x = pass->position_x;                                /* en abscisses et ordonnées */
-    rezo_pass->position_y = pass->position_y;
-    memcpy( &rezo_pass->libelle, pass->libelle, sizeof(rezo_pass->libelle) );
-    return( rezo_pass );
-  }
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_passerelle_atelier ( struct CLIENT *client, struct CMD_ID_PASSERELLE *rezo_pass )
+ void Proto_effacer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -70,7 +49,7 @@
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_PASS_OK,
-                     (gchar *)rezo_pass, sizeof(struct CMD_ID_PASSERELLE) );
+                     (gchar *)rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        Info( Config.log, DEBUG_INFO, "MSRV: effacement pass OK" );
      }
     else
@@ -87,8 +66,8 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_passerelle_atelier ( struct CLIENT *client, struct CMD_ADD_PASSERELLE *rezo_pass )
-  { struct PASSERELLEDB *result;
+ void Proto_ajouter_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
+  { struct CMD_TYPE_PASSERELLE *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -113,22 +92,10 @@
               Info( Config.log, DEBUG_INFO, "MSRV: ajout pass NOK (2)" );
             }
            else
-            { struct CMD_SHOW_PASSERELLE *pass;
-              pass = Preparer_envoi_passerelle( result );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_PASS_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_PASSERELLE) );
               g_free(result);
-              if (!pass)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                 Info( Config.log, DEBUG_INFO, "MSRV: ajout pass NOK (3)" );
-               }
-              else { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_PASS_OK,
-                                   (gchar *)pass, sizeof(struct CMD_SHOW_PASSERELLE) );
-                     g_free(pass);
-                     Info( Config.log, DEBUG_INFO, "MSRV: ajout pass OK" );
-                   }
+              Info( Config.log, DEBUG_INFO, "MSRV: ajout pass OK" );
             }
          }
   }
@@ -137,7 +104,7 @@
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client, struct CMD_EDIT_PASSERELLE *rezo_pass )
+ void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -159,9 +126,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_PASSERELLE *rezo_pass;
-    struct CMD_ENREG nbr;
-    struct PASSERELLEDB *pass;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_PASSERELLE *pass;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiPass", 0, 0, 0 );
@@ -194,17 +160,13 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
           pthread_exit ( NULL );
         }
 
-       rezo_pass = Preparer_envoi_passerelle( pass );
-       g_free(pass);
-       if (rezo_pass)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass LIB", rezo_pass->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass ID ", rezo_pass->id );
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
-                         (gchar *)rezo_pass, sizeof(struct CMD_SHOW_PASSERELLE) );
-          g_free(rezo_pass);
-        }
+       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass LIB", pass->libelle );
+       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass ID ", pass->id );
+       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
+                      (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+       g_free(pass);
      }
   }
 /**********************************************************************************************************/
@@ -213,9 +175,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_passerelle_supervision_thread ( struct CLIENT *client )
-  { struct CMD_SHOW_PASSERELLE *rezo_pass;
-    struct CMD_ENREG nbr;
-    struct PASSERELLEDB *pass;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_PASSERELLE *pass;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiPass", 0, 0, 0 );
@@ -260,18 +221,14 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
           Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_2 );
         }
 
-       rezo_pass = Preparer_envoi_passerelle( pass );
-       g_free(pass);
-       if (rezo_pass)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          Info_c( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass LIB", rezo_pass->libelle );
-          Info_n( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass ID ", rezo_pass->id );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
-                         (gchar *)rezo_pass, sizeof(struct CMD_SHOW_PASSERELLE) );
-          g_free(rezo_pass);
-        }
+       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass LIB", pass->libelle );
+       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass ID ", pass->id );
+       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+                      (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+       g_free(pass);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

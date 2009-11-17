@@ -7,7 +7,7 @@
 #ifndef _RESEAUX_HISTO_H_
  #define _RESEAUX_HISTO_H_
 
- struct CMD_SHOW_HISTO
+ struct CMD_TYPE_HISTO
   { guint  id;                                                                /* Numero unique historique */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
@@ -18,17 +18,8 @@
     guint date_fixe;
     gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
   };
- struct CMD_EDIT_HISTO
-  { guint  id;                                                                /* Numero unique historique */
-    guint date_fixe;
-    gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
-  };
 
- struct CMD_ID_HISTO
-  { guint  id;                                                                /* Numero unique historique */
-  };
-
- struct CMD_SHOW_HISTO_HARD
+ struct CMD_TYPE_HISTO_HARD
   { guint num;                                           /* Numero du message correspondant (pas son id) */
     gchar  objet[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
@@ -40,6 +31,7 @@
     gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
     gint32 page_id;
   };
+
  struct CMD_REQUETE_HISTO_HARD
   { guint  id;                                                                /* Numero unique historique */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];

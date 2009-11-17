@@ -90,8 +90,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CAMERASUPDB *Recuperer_camera_supDB_suite( struct LOG *log, struct DB *db )
-  { struct CAMERASUPDB *camera_sup;
+ struct CMD_TYPE_CAMERA_SUP *Recuperer_camera_supDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_CAMERA_SUP *camera_sup;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -99,7 +99,7 @@
        return(NULL);
      }
 
-    camera_sup = (struct CAMERASUPDB *)g_malloc0( sizeof(struct CAMERASUPDB) );
+    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( camera_sup->libelle, db->row[2], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
@@ -118,8 +118,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CAMERASUPDB *Rechercher_camera_supDB ( struct LOG *log, struct DB *db, guint id )
-  { struct CAMERASUPDB *camera_sup;
+ struct CMD_TYPE_CAMERA_SUP *Rechercher_camera_supDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_CAMERA_SUP *camera_sup;
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -139,7 +139,7 @@
        return(NULL);
      }
 
-    camera_sup = (struct CAMERASUPDB *)g_malloc0( sizeof(struct CAMERASUPDB) );
+    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB: Erreur allocation mémoire" );
     else
      { memcpy( camera_sup->libelle, db->row[1], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
