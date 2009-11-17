@@ -180,7 +180,7 @@
     struct MNEMONIQUEDB *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT libelle,acronyme,objet,type,num FROM %s WHERE id=%d", NOM_TABLE_MNEMO, id );
+                "SELECT libelle,acronyme,objet,type,num FROM %s WHERE id=%d ORDER BY acronyme", NOM_TABLE_MNEMO, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
