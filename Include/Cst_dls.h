@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Include/Cst_dls.h         definition des constantes DLS partagées entre client et serveur              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:50:09 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 23 nov. 2009 20:25:07 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 
@@ -18,7 +18,7 @@
  #define NBR_BIT_CONTROLE      NBR_BIT_DLS  /* Ixxx */
  #define NBR_BIT_BISTABLE      NBR_BIT_DLS  /* Bxxx */
  #define NBR_BIT_MONOSTABLE    NBR_BIT_DLS  /* Mxxx */
- #define NBR_TEMPO             50
+ #define NBR_TEMPO             128
  #define NBR_MNEMONIQUE        NBR_BIT_DLS
  #define NBR_MESSAGE_ECRITS    NBR_BIT_DLS
  #define NBR_COMPTEUR_H        100

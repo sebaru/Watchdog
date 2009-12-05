@@ -49,31 +49,31 @@ blanc         [\t ]+
 %%
 {blanc}                    ;
 
-\n                         { ligne_source_dls++; }
+"\n"                       { ligne_source_dls++; }
 
  /******************************************** Methodes ***************************************************/
-"_E"                        { Dls_lval.val = ENTREE;
+"_E"                       { Dls_lval.val = ENTREE;
                              return ENTREE;
                            }
-"_EA"                       { Dls_lval.val = EANA;
+"_EA"                      { Dls_lval.val = EANA;
                              return EANA;
                            }
-"_A"                        { Dls_lval.val = SORTIE;
+"_A"                       { Dls_lval.val = SORTIE;
                              return SORTIE;
                            }
-"_I"                        { Dls_lval.val = ICONE;
+"_I"                       { Dls_lval.val = ICONE;
                              return ICONE;
                            }
-"_B"                        { Dls_lval.val = BI;
+"_B"                       { Dls_lval.val = BI;
                              return BI;
                            }
-"_M"                        { Dls_lval.val = MONO;
+"_M"                       { Dls_lval.val = MONO;
                              return MONO;
                            }
-"_TR"                       { Dls_lval.val = TEMPO;
+"_TR"                      { Dls_lval.val = TEMPO;
                              return TEMPO;
                            }
-"_CH"                       { Dls_lval.val = CPT_H;
+"_CH"                      { Dls_lval.val = CPT_H;
                              return CPT_H;
                            }
 "_MSG"                     { Dls_lval.val = MSG;

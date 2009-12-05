@@ -39,14 +39,14 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static void Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
+ static gboolean Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
   { struct timeval tv;
     struct CMD_TYPE_MESSAGE *msg;
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
      { Info_n( Config.log, DEBUG_INFO,
                "MSRV: Gerer_arrive_message_dls_on: Message non trouvé", num );
-       return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
+       return(FALSE);                                 /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     else if (msg->not_inhibe)                                /* Distribution du message aux sous serveurs */
      { struct HISTODB histo;
@@ -77,12 +77,13 @@
         }
      }
     g_free( msg );                                                 /* On a plus besoin de cette reference */
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static void Gerer_arrive_MSGxxx_dls_off ( struct DB *Db_watchdog, gint num )
+ static gboolean Gerer_arrive_MSGxxx_dls_off ( struct DB *Db_watchdog, gint num )
   { /* Le virer de la base histoDB */
     struct HISTO_HARDDB histo_hard;
     struct HISTODB *histo;
@@ -94,6 +95,29 @@
        time ( &histo_hard.date_fin );
        Ajouter_histo_hardDB( Config.log, Db_watchdog, &histo_hard );
        g_free(histo);
+     }
+    return(TRUE);
+  }
+
+/**********************************************************************************************************/
+/* Envoi_demande_traitement : Demande aux ssrv de traiter la requete                                      */
+/* Entrée : Le type de traitement (ajout ou suppression)                                                  */
+/* Sortie : rien                                                                                          */
+/**********************************************************************************************************/
+ static void Envoi_demande_traitement ( gint type )
+  { guint i;
+
+    for (i=0; i<Config.max_serveur; i++)                         /* Pour tous les eventuels fils serveurs */
+     { if (Partage->Sous_serveur[i].pid == -1 || 
+           Partage->Sous_serveur[i].nb_client == 0)
+           continue;                                                               /* Si offline, on swap */
+       Partage->Sous_serveur[i].type_info = type;
+     }
+    for (i=0; i<Config.max_serveur; i++)                              /* Attente traitement info par fils */
+     { if (Partage->Sous_serveur[i].pid == -1 || 
+           Partage->Sous_serveur[i].nb_client == 0)
+           continue;                                                               /* Si offline, on swap */
+       while(Partage->Arret<FIN && Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
      }
   }
 /**********************************************************************************************************/
@@ -107,45 +131,25 @@
            Partage->com_msrv.liste_msg_off)
        ) return;                                                        /* Si pas de message, on se barre */
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
     if (Partage->com_msrv.liste_msg_off)
-     { num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
-       etat  = FALSE;
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_off = g_list_remove ( Partage->com_msrv.liste_msg_off,
-                                                             GINT_TO_POINTER(num) );
+                                                         GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter OFF",
                                       g_list_length(Partage->com_msrv.liste_msg_off) );
+       if (Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num )) Envoi_demande_traitement( TYPE_INFO_DEL_HISTO );
      }
     else
-     { num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
-       etat  = TRUE;
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_on = g_list_remove ( Partage->com_msrv.liste_msg_on,
                                                             GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter ON",
                                       g_list_length(Partage->com_msrv.liste_msg_on) );
-     }
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Recu message DLS", num );
-
-    if (etat)                                                         /* Le message est une apparition ?? */
-     { Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
-     }
-    else                                                   /* Le message doit disparaitre de l'historique */
-     { Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
-     }
-
-    for (i=0; i<Config.max_serveur; i++)                         /* Pour tous les eventuels fils serveurs */
-     { if (Partage->Sous_serveur[i].pid == -1 || 
-           Partage->Sous_serveur[i].nb_client == 0)
-           continue;                                                               /* Si offline, on swap */
-       Partage->Sous_serveur[i].type_info = (etat ? TYPE_INFO_NEW_HISTO : TYPE_INFO_DEL_HISTO);
-     }
-    for (i=0; i<Config.max_serveur; i++)                              /* Attente traitement info par fils */
-     { if (Partage->Sous_serveur[i].pid == -1 || 
-           Partage->Sous_serveur[i].nb_client == 0)
-           continue;                                                               /* Si offline, on swap */
-       while(Partage->Arret<FIN && Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
+       if (Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num )) Envoi_demande_traitement( TYPE_INFO_NEW_HISTO );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

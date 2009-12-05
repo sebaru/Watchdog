@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:32:59 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 29 nov 2009 20:32:59 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -177,9 +177,9 @@ une_instr:      MOINS START DONNE action PVIRGULE
 
 expr:           expr OU facteur
                 {{ int taille;
-                   taille = strlen($1)+strlen($3)+5;
+                   taille = strlen($1)+strlen($3)+7;
                    $$ = New_chaine( taille );
-                   g_snprintf( $$, taille, "%s || %s", $1, $3 );
+                   g_snprintf( $$, taille, "(%s || %s)", $1, $3 );
                    g_free($1); g_free($3);
                 }}
 

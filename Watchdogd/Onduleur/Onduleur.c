@@ -255,6 +255,8 @@
     char **answer;
     int retour;
 
+    module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
+
     query[0] = "VAR";
     query[1] = module->ups;
 
@@ -266,8 +268,8 @@
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
+          return;
         }
-       return;
      }
     else { valeur = atoi (answer[3]);
            SEA( module->ea_ups_load, valeur, 1);                           /* Numéro de l'EA pour le load */
@@ -281,9 +283,8 @@
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
+          return;
         }
-       return;
-       return;
      }
     else { valeur = atoi (answer[3]);
            SEA( module->ea_ups_real_power, valeur, 1);               /* Numéro de l'EA pour le real power */
@@ -297,8 +298,8 @@
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
+          return;
         }
-       return;
      }
     else { valeur = atoi (answer[3]);
            SEA( module->ea_battery_charge, valeur, 1);          /* Numéro de l'EA pour la charge batterie */
@@ -312,17 +313,13 @@
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
+          return;
         }
-       return;
-       return;
      }
     else { valeur = atoi (answer[3]);
            SEA( module->ea_input_voltage, valeur, 1);
          }
-
-    module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
   }
-
 /**********************************************************************************************************/
 /* Main: Fonction principale du ONDULEUR                                                                  */
 /**********************************************************************************************************/
