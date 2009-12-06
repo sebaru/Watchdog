@@ -74,6 +74,48 @@
  static void CB_valider ( void )
   { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
 /**********************************************************************************************************/
+/* Set_max_bit: Met a jour la range Spinbutton selon le type de mnemonique                                */
+/* Entrée : Rien                                                                                          */
+/* Sortie : Rien                                                                                          */
+/**********************************************************************************************************/
+ static void Set_max_bit ( void )
+  { switch ( gtk_option_menu_get_history( GTK_OPTION_MENU(Option_type) ) )
+     { case MNEMO_BISTABLE:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_BIT_BISTABLE );
+            break;
+       case MNEMO_MONOSTABLE:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_BIT_MONOSTABLE );
+            break;
+       case MNEMO_TEMPO:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_TEMPO );
+            break;
+       case MNEMO_ENTREE:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_ENTRE_TOR );
+            break;
+       case MNEMO_SORTIE:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_SORTIE_TOR );
+            break;
+       case MNEMO_ENTREE_ANA:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_ENTRE_ANA );
+            break;
+       case MNEMO_SORTIE_ANA:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_ENTRE_ANA );
+            break;
+       case MNEMO_MOTIF:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_BIT_CONTROLE );
+            break;
+       case MNEMO_CPTH:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_COMPTEUR_H );
+            break;
+       case MNEMO_CAMERA:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, 1.0 );
+            break;
+       default: 
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, 1.0 );
+            break;
+     }
+  }
+/**********************************************************************************************************/
 /* Ajouter_mnemonique: Ajoute un mnemonique au systeme                                                    */
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
@@ -121,6 +163,7 @@
      }
     gtk_option_menu_set_menu( GTK_OPTION_MENU(Option_type), menu );
     gtk_table_attach_defaults( GTK_TABLE(table), Option_type, 1, 2, 0, 1 );
+    g_signal_connect_swapped( G_OBJECT(menu), "changed", G_CALLBACK(Set_max_bit), NULL );
 
     texte = gtk_label_new( _("Num") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
@@ -145,6 +188,7 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 3, 4 );
 
+    Set_max_bit();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
     if (edit_mnemo)                                                          /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_mnemo->libelle );
