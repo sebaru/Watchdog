@@ -38,7 +38,7 @@
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
                   g_snprintf( Edit_mnemo.acronyme, sizeof(Edit_mnemo.acronyme),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-                  Edit_mnemo.type = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_type) );
+                  Edit_mnemo.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
                   Edit_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
                   Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,
@@ -52,7 +52,7 @@
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
                   g_snprintf( new_mnemo.acronyme, sizeof(new_mnemo.acronyme),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-                  new_mnemo.type = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_type) );
+                  new_mnemo.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
                   new_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
                   Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_ADD_MNEMONIQUE,
@@ -79,7 +79,7 @@
 /* Sortie : Rien                                                                                          */
 /**********************************************************************************************************/
  static void Set_max_bit ( void )
-  { switch ( gtk_option_menu_get_history( GTK_OPTION_MENU(Option_type) ) )
+  { switch ( gtk_combo_box_get_active ( GTK_COMBO_BOX(Option_type) ) )
      { case MNEMO_BISTABLE:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_BIT_BISTABLE );
             break;
@@ -121,7 +121,7 @@
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo )
-  { GtkWidget *frame, *table, *texte, *hboite, *menu;
+  { GtkWidget *frame, *table, *texte, *hboite;
     int cpt;
 
     if (edit_mnemo)                                                       /* Save pour utilisation future */
@@ -155,15 +155,11 @@
 
     texte = gtk_label_new( _("Type") );    /* Création de l'option menu pour le choix du type de mnemonique */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-    Option_type = gtk_option_menu_new();
-    menu = gtk_menu_new();
+    Option_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_MNEMO; cpt++ )
-     { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_bit_interne(cpt) ) );
-     }
-    gtk_option_menu_set_menu( GTK_OPTION_MENU(Option_type), menu );
+     { gtk_combo_box_append_text( GTK_COMBO_BOX(Option_type),Type_bit_interne(cpt) ); }
     gtk_table_attach_defaults( GTK_TABLE(table), Option_type, 1, 2, 0, 1 );
-    g_signal_connect_swapped( G_OBJECT(menu), "changed", G_CALLBACK(Set_max_bit), NULL );
+    g_signal_connect_swapped( G_OBJECT(Option_type), "changed", G_CALLBACK(Set_max_bit), NULL );
 
     texte = gtk_label_new( _("Num") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
@@ -194,7 +190,7 @@
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_mnemo->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro), edit_mnemo->acronyme );
        gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_mnemo->objet );
-       gtk_option_menu_set_history( GTK_OPTION_MENU(Option_type), edit_mnemo->type );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_mnemo->type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)edit_mnemo->num );
      }
     gtk_widget_grab_focus( Entry_lib );
