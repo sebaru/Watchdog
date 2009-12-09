@@ -213,6 +213,7 @@
     bit = 1<<(num & 0x07);
     if (etat) Partage->m[numero] |= bit;
     else      Partage->m[numero] &= ~bit;
+    Partage->audit_bit_interne_per_sec++;                            /* On ne compte pas les bits système */
   }
 /**********************************************************************************************************/
 /* SI: Positionnement d'un motif TOR                                                                      */
