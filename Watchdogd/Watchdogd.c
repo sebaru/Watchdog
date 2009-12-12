@@ -61,7 +61,7 @@
     if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
                 Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
               }
-    else      { Info_c( Config.log, DEBUG_FORK, "Could not export", FICHIER_EXPORT ); }
+    else      { Info_c( Config.log, DEBUG_FORK, "Could not export", strerror(errno) ); }
     close (fd);
   }
 /**********************************************************************************************************/

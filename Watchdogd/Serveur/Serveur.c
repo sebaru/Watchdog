@@ -291,98 +291,91 @@
               }
 
              switch (client->mode)
-              { case ATTENTE_CONNEXION_SSL: Connecter_ssl ( client ); /* Tentative de connexion securisée */
-                                            break;
-                case ENVOI_AUTORISATION : new_mode = Tester_autorisation( id, client );
-                                          if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */
-                                           { version_d_serveur = Lire_version_donnees( Config.log );
-                                             if ( version_d_serveur > client->ident.version_d )
-                                              {  gint taille;
-                                                 taille = 0;
-                                                 taille += Ajouter_repertoire_liste( client, "Gif",
-                                                                                     client->ident.version_d );
-                                                 client->transfert.taille = taille;
-                                                 break;
-                                              }
-                                           }
-                                          Client_mode ( client, new_mode );
-                                          break;
-                case ENVOI_DONNEES      : if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
-                                          break;
-                case ENVOI_HISTO        : Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_histo_thread, client );
-                                          pthread_detach( tid );
-                                          Client_mode( client, VALIDE_NON_ROOT );
-                                          break;
+              { case ATTENTE_CONNEXION_SSL:
+                     Connecter_ssl ( client );                        /* Tentative de connexion securisée */
+                     break;
+                case ENVOI_AUTORISATION :
+                     new_mode = Tester_autorisation( id, client );
+                     if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */
+                      { version_d_serveur = Lire_version_donnees( Config.log );
+                        if ( version_d_serveur > client->ident.version_d )
+                         {  gint taille;
+                            taille = 0;
+                            taille += Ajouter_repertoire_liste( client, "Gif", client->ident.version_d );
+                            client->transfert.taille = taille;
+                         }
+                      }
+                     Client_mode ( client, new_mode );
+                     break;
+                case ENVOI_DONNEES      :
+                     if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
+                     break;
+                case ENVOI_HISTO        :
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
+                     pthread_detach( tid );
+                     Client_mode( client, VALIDE_NON_ROOT );
+                     break;
 
                 case VALIDE_NON_ROOT    : /*Client_mode(client, VALIDE); */           /* Etat transitoire */
-                                          break;
+                     break;
                 case ENVOI_GROUPE_FOR_UTIL:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_groupes_pour_util_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_GROUPE_FOR_SYNOPTIQUE:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_groupes_pour_synoptique_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_synoptique_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                  (void *)Envoyer_groupes_pour_propriete_synoptique_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
-                case ENVOI_SOURCE_DLS   : if(Envoyer_source_dls( client )) Client_mode(client, VALIDE);
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
+                     pthread_detach( tid );
+                     break;
+                case ENVOI_SOURCE_DLS   :
+                     if(Envoyer_source_dls( client )) Client_mode(client, VALIDE);
+                     break;
                 case ENVOI_MNEMONIQUE_FOR_COURBE:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_mnemoniques_for_courbe_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_courbe_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_MNEMONIQUE_FOR_HISTO_COURBE:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_mnemoniques_for_histo_courbe_thread,
-                                                          client );
-                                          pthread_detach( tid );
-                                          break;
-                case ENVOI_MOTIF_ATELIER: Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_motif_atelier_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_histo_courbe_thread, client );
+                     pthread_detach( tid );
+                     break;
+                case ENVOI_MOTIF_ATELIER:
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_motif_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_COMMENT_ATELIER:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_comment_atelier_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_comment_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_PASSERELLE_ATELIER:
-                                          Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_passerelle_atelier_thread, client );
-                                          pthread_detach( tid );
-                                          break;
-                case ENVOI_CAPTEUR_ATELIER: Client_mode( client, VALIDE );
-                                          Ref_client( client );  /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_capteur_atelier_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_passerelle_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
+                case ENVOI_CAPTEUR_ATELIER:
+                     Client_mode( client, VALIDE );
+                     Ref_client( client );                       /* Indique que la structure est utilisée */
+                     pthread_create( &tid, NULL, (void *)Envoyer_capteur_atelier_thread, client );
+                     pthread_detach( tid );
+                     break;
                 case ENVOI_CAMERA_SUP_ATELIER:
                      Client_mode( client, VALIDE );
                      Ref_client( client );                       /* Indique que la structure est utilisée */

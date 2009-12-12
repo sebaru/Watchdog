@@ -149,9 +149,9 @@
     EVP_CIPHER_CTX_cleanup(&ctx);                                                    /* Cryptage effectué */
 
     if (outlen>NBR_CARAC_CODE_CRYPTE)
-     { Info_n( log, DEBUG_CRYPTO, "Crypter: clef cryptée tronquée !!", outlen );
+     { Info_n( log, DEBUG_CRYPTO, "Crypter: clef cryptee tronquée !!", outlen );
        outlen = NBR_CARAC_CODE_CRYPTE;
-     } else Info_n( log, DEBUG_CRYPTO, "Crypter: taille clef cryptée !!", outlen );
+     } else Info_n( log, DEBUG_CRYPTO, "Crypter: taille clef cryptee !!", outlen );
 
     result = (gchar *)g_malloc0( outlen );
     if (!result)

@@ -1,9 +1,31 @@
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/liste.c        Creation des listes de fichiers pour envoi aux clients                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 oct 2003 13:01:25 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 09 déc. 2009 20:51:20 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * liste.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2009 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ 
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -70,14 +92,10 @@
      }
 
     while( (fichier = readdir( repertoire )) )
-     { if (!fichier)                                              /* Est-on deja a la fin du repertoire?? */
-        { closedir( repertoire );
-          return(0);
-        }
-
-       if (!strncmp( fichier->d_name, ".", 1 )) continue;
+     { if (!strncmp( fichier->d_name, ".", 1 )) continue;
        taille += Ajouter_fichier_liste( client, Repertoire, fichier->d_name, version_d_client );
      }
+    closedir( repertoire );
     return(taille);
   }
 /*--------------------------------------------------------------------------------------------------------*/

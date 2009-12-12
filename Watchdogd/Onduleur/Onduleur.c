@@ -156,13 +156,19 @@
     module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
     if (!module)                                                   /* Si probleme d'allocation mémoire */
      { Info( Config.log, DEBUG_MEM,
-            "Charger_un_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
+             "Charger_un_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
        return;
      }
-    pthread_mutex_lock( &Partage->com_onduleur.synchro );
-    Charger_un_ONDULEUR_DB ( module, id );
-    Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
-    pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+    if ( Charger_un_ONDULEUR_DB ( module, id ) )                              /* Chargement de l'onduleur */
+     { pthread_mutex_lock( &Partage->com_onduleur.synchro );
+       Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
+       pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+     }
+    else 
+     { Info( Config.log, DEBUG_MEM,
+             "Charger_un_ONDULEUR: Erreur chargement module ONDULEUR" );
+       g_free(module);                                                          /* Probleme de chargement */
+     }
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -406,7 +412,9 @@
               }
            }
           else
-           { Interroger_onduleur ( module );
+           { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Debut Interroger_ONDULEUR", module->id );
+             Interroger_onduleur ( module );
+             Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Fin Interroger_ONDULEUR", module->id );
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
