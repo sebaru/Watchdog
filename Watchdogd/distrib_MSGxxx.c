@@ -127,28 +127,26 @@
  void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog )
   { gint i, num, etat;
 
-    if (! (Partage->com_msrv.liste_msg_on  ||
-           Partage->com_msrv.liste_msg_off)
-       ) return;                                                        /* Si pas de message, on se barre */
-
-    if (Partage->com_msrv.liste_msg_off)
+    if (Partage->com_msrv.liste_msg_off)                        /* Priorité à la disparition des messages */
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_off = g_list_remove ( Partage->com_msrv.liste_msg_off,
                                                          GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter OFF",
                                       g_list_length(Partage->com_msrv.liste_msg_off) );
+       Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Disparition msg", num );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        if (Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num )) Envoi_demande_traitement( TYPE_INFO_DEL_HISTO );
      }
-    else
+    else if (Partage->com_msrv.liste_msg_on)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_on = g_list_remove ( Partage->com_msrv.liste_msg_on,
                                                             GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter ON",
                                       g_list_length(Partage->com_msrv.liste_msg_on) );
+       Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Apparition msg", num );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        if (Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num )) Envoi_demande_traitement( TYPE_INFO_NEW_HISTO );
      }
   }
