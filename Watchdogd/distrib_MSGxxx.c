@@ -61,6 +61,9 @@
        Partage->new_histo.date_create_usec = tv.tv_usec;
        Partage->new_histo.type    = msg->type;
        Partage->new_histo.num_syn = msg->num_syn;
+       Partage->new_histo.id = msg->num;
+       memcpy( &Partage->new_histo.libelle, msg->libelle, sizeof(msg->libelle) );
+       memcpy( &Partage->new_histo.objet, msg->objet, sizeof(msg->objet) );
 
        memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
        memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
@@ -68,13 +71,7 @@
        histo.date_create_usec = Partage->new_histo.date_create_usec;
        histo.date_fixe = 0;
 
-       if (Ajouter_histoDB( Config.log, Db_watchdog, &histo ))                     /* Si ajout dans DB OK */
-        {
-/***************************** Création de la structure passée aux clients ********************************/
-          Partage->new_histo.id = msg->num;
-          memcpy( &Partage->new_histo.libelle, msg->libelle, sizeof(msg->libelle) );
-          memcpy( &Partage->new_histo.objet, msg->objet, sizeof(msg->objet) );
-        }
+       Ajouter_histoDB( Config.log, Db_watchdog, &histo );                         /* Si ajout dans DB OK */
      }
     g_free( msg );                                                 /* On a plus besoin de cette reference */
     return(TRUE);

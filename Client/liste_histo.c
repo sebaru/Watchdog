@@ -55,9 +55,9 @@
   };
  GdkColor COULEUR_FOND[]=
   { { 0x0, 0xAFFF, 0xAFFF, 0xAFFF }, /* Info */
-    { 0x0, 0x7FFF, 0x0,    0x0    }, /* PreAlarme */
+    { 0x0, 0x7FFF, 0x0,    0x0    }, /* Alerte */
     { 0x0, 0xFFFF, 0xFFFF, 0x0    }, /* Trouble */
-    { 0x0, 0xFFFF, 0x0,    0x0    }, /* ALARM */
+    { 0x0, 0xFFFF, 0x0,    0x0    }, /* Alarme */
     { 0x0, 0x0,    0xFFFF, 0x0    }  /* Veille */
   };
  GdkColor COULEUR_TEXTE[]=
@@ -89,8 +89,8 @@
  gchar *Type_vers_string ( guint32 type )
   { switch (type)
      { case MSG_ETAT     : return( _("Info") );
-       case MSG_PREALARME: return( _("PreAlarm") );
-       case MSG_ALARME   : return( _("ALARM") );
+       case MSG_ALERTE   : return( _("Alerte") );
+       case MSG_ALARME   : return( _("Alarme") );
        case MSG_DEFAUT   : return( _("Trouble") );
        case MSG_VEILLE   : return( _("Veille") );
      }

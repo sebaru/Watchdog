@@ -13,7 +13,7 @@
  #define NBR_CARAC_OBJET_MSG_UTF8    (6*NBR_CARAC_OBJET_MSG)
  enum
   { MSG_ETAT,                                                        /* Definitions des types de messages */
-    MSG_PREALARME,
+    MSG_ALERTE,
     MSG_DEFAUT,
     MSG_ALARME,
     MSG_VEILLE,
