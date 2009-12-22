@@ -292,7 +292,7 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    gint32 id;
+    guint id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
@@ -305,7 +305,7 @@
 
     if (valide)
      { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
-    else { printf("Del_histo: non trouvé\n"); }
+    else { printf("Del_histo: non trouvé %d\n", id); }
   }
 /**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
