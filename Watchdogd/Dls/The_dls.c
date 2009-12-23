@@ -272,13 +272,12 @@ printf("Debut Real SA\n");
      {
        num = GPOINTER_TO_INT(Liste_A_off->data);
 printf("Real SA Off %d\n", num);
-       if (num<NBR_SORTIE_TOR)
-        { numero = num>>3;
-          bit = 1<<(num & 0x07);
-          Partage->a[numero] &= ~bit;
-          Ajouter_arch( MNEMO_SORTIE, num, 0 );
-          Partage->audit_bit_interne_per_sec++;
-        }
+       numero = num>>3;
+       bit = 1<<(num & 0x07);
+       Partage->a[numero] &= ~bit;
+       Ajouter_arch( MNEMO_SORTIE, num, 0 );
+       Partage->audit_bit_interne_per_sec++;
+
        Liste_A_off = g_list_remove ( Liste_A_off, GINT_TO_POINTER(num) );
        Liste_A_on  = g_list_remove ( Liste_A_on,  GINT_TO_POINTER(num) );            /* Arret prioritaire */
      }
@@ -287,13 +286,12 @@ printf("Real SA Off %d\n", num);
      {
        num = GPOINTER_TO_INT(Liste_A_on->data);
 printf("Real SA On %d\n", num);
-       if (num<NBR_SORTIE_TOR)
-        { numero = num>>3;
-          bit = 1<<(num & 0x07);
-          Partage->a[numero] |= bit;
-          Ajouter_arch( MNEMO_SORTIE, num, 1 );
-          Partage->audit_bit_interne_per_sec++;
-        }
+       numero = num>>3;
+       bit = 1<<(num & 0x07);
+       Partage->a[numero] |= bit;
+       Ajouter_arch( MNEMO_SORTIE, num, 1 );
+       Partage->audit_bit_interne_per_sec++;
+
        Liste_A_on = g_list_remove ( Liste_A_on, GINT_TO_POINTER(num) );              /* Arret prioritaire */
      }
 printf("Fin Real SA\n");
@@ -304,15 +302,15 @@ printf("Fin Real SA\n");
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { 
+  { if (num>=NBR_SORTIE_TOR) return;
     if ( (A(num) && etat) || (!A(num) && !etat) ) return;
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
     if ( etat )
-     { Liste_A_off = g_list_append( Liste_A_off, GINT_TO_POINTER(num) ); }
+     { Liste_A_on  = g_list_append( Liste_A_on,  GINT_TO_POINTER(num) ); }
     else
-     { Liste_A_on  = g_list_append( Liste_A_on, GINT_TO_POINTER(num) ); }
+     { Liste_A_off = g_list_append( Liste_A_off, GINT_TO_POINTER(num) ); }
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
