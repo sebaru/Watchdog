@@ -479,6 +479,7 @@
 
        Raz_cde_exterieure();                        /* Mise à zero des monostables de commande exterieure */
        Real_SA();                                                           /* Positionnement des sorties */
+       Partage->audit_tour_dls_per_sec++;               /* Gestion de l'audit nbr de tour DLS par seconde */
        usleep(1000);
        sched_yield();
      }

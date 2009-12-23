@@ -222,6 +222,9 @@
        g_snprintf( chaine, sizeof(chaine), " Bit/s : %d\n", Partage->audit_bit_interne_per_sec_hold );
        Write_admin ( client->connexion, chaine );
 
+       g_snprintf( chaine, sizeof(chaine), " Tour/s : %d\n", Partage->audit_tour_dls_per_sec_hold );
+       Write_admin ( client->connexion, chaine );
+
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_list_length( Partage->com_msrv.liste_i );                   /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );

@@ -111,6 +111,10 @@
                         Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
                         Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
                         Partage->audit_bit_interne_per_sec = 0;
+
+                        Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
+                        Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
+                        Partage->audit_tour_dls_per_sec = 0;
                       }
 
                      Partage->top_cdg_plugin_dls++;                          /* Chien de garde plugin DLS */

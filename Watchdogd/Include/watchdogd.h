@@ -107,6 +107,8 @@
     guint top_cdg_plugin_dls;                                    /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;     
     guint audit_bit_interne_per_sec_hold;
+    guint audit_tour_dls_per_sec;     
+    guint audit_tour_dls_per_sec_hold;
     guchar Arret;                                                  /* != 0 si l'arret systeme est demandé */
 
                                                                                 /* Interfacage avec D.L.S */
