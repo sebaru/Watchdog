@@ -532,7 +532,7 @@ encore:
 
     if (Partage->Arret != CLEARREBOOT) Exporter();           /* Tente d'exporter les données avant reload */
     else { unlink ( FICHIER_EXPORT ); }
-    if (Partage->Arret == REBOOT)
+    if (Partage->Arret == REBOOT || Partage->Arret == CLEARREBOOT)
      { gint pid;
        Info( Config.log, DEBUG_INFO, "Rebooting ..." );
        pid = fork();

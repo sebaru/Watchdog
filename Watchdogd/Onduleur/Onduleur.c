@@ -412,10 +412,7 @@
               }
            }
           else
-           { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Debut Interroger_ONDULEUR", module->id );
-             Interroger_onduleur ( module );
-             Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Fin Interroger_ONDULEUR", module->id );
-           }
+           { Interroger_onduleur ( module ); }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
      }
