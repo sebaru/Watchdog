@@ -304,7 +304,9 @@ printf("Fin Real SA\n");
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
+  { 
+    if ( (A(num) && etat) || (!A(num) && !etat) ) return;
+    if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
     if ( etat )
