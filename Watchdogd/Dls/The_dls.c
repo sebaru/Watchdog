@@ -267,11 +267,8 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
-printf("Debut Real SA\n");
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
-     {
-       num = GPOINTER_TO_INT(Liste_A_off->data);
-printf("Real SA Off %d\n", num);
+     { num = GPOINTER_TO_INT(Liste_A_off->data);
        numero = num>>3;
        bit = 1<<(num & 0x07);
        Partage->a[numero] &= ~bit;
@@ -283,9 +280,7 @@ printf("Real SA Off %d\n", num);
      }
 
     while ( Liste_A_on )                                                         /* Mise a un des sorties */
-     {
-       num = GPOINTER_TO_INT(Liste_A_on->data);
-printf("Real SA On %d\n", num);
+     { num = GPOINTER_TO_INT(Liste_A_on->data);
        numero = num>>3;
        bit = 1<<(num & 0x07);
        Partage->a[numero] |= bit;
@@ -294,7 +289,6 @@ printf("Real SA On %d\n", num);
 
        Liste_A_on = g_list_remove ( Liste_A_on, GINT_TO_POINTER(num) );              /* Arret prioritaire */
      }
-printf("Fin Real SA\n");
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
