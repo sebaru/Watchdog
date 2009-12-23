@@ -481,13 +481,7 @@
        Real_SA();                                                           /* Positionnement des sorties */
        Partage->audit_tour_dls_per_sec++;               /* Gestion de l'audit nbr de tour DLS par seconde */
 /************************************ Gestion des 1000 tours DLS par seconde ******************************/
-        { static gint temps = 0;
-          if (Partage->audit_tour_dls_per_sec_hold > 1000)
-           { temps = temps + 10; }
-          else if (Partage->audit_tour_dls_per_sec_hold < 900)
-           { if (temps) temps = temps - 10; }
-          usleep(temps);
-        }
+       usleep(Partage->com_dls.temps_sched);
        sched_yield();
      }
     Decharger_plugins();                                                  /* Dechargement des modules DLS */
