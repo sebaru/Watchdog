@@ -42,6 +42,8 @@
  #include "Dls.h"
 
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
+ static GList *Liste_A_on=NULL;                                       /* Listes des actionneurs a activer */
+ static GList *Liste_A_off=NULL;                                   /* Listes des actionneurs a desactiver */
 /**********************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
 /* Entrée: le temps avant, et le temps apres l'action                                                     */
@@ -189,16 +191,16 @@
  void SB( int num, int etat )
   { gint numero, bit;
     if (num>=NBR_BIT_BISTABLE) return;
-
-    /*if ( (!B(num) && !etat) || (B(num) && etat) ) return;*/
     numero = num>>3;
     bit = 1<<(num & 0x07);
-
-    if (num>10) Partage->audit_bit_interne_per_sec++;                /* On ne compte pas les bits système */
-    if (etat)
-     { Partage->b[numero] |= bit; }
+    if (etat)                                                                       /* Mise a jour du bit */
+     { Partage->b[numero] |= bit; 
+       Partage->audit_bit_interne_per_sec++;
+     }
     else
-     { Partage->b[numero] &= ~bit; }
+     { Partage->b[numero] &= ~bit;
+       Partage->audit_bit_interne_per_sec++;
+     }
   }
 /**********************************************************************************************************/
 /* SM: Positionnement d'un monostable DLS                                                                 */
@@ -207,13 +209,17 @@
 /**********************************************************************************************************/
  void SM( int num, int etat )
   { gint numero, bit;
-
     if (num>=NBR_BIT_MONOSTABLE) return;
     numero = num>>3;
     bit = 1<<(num & 0x07);
-    if (etat) Partage->m[numero] |= bit;
-    else      Partage->m[numero] &= ~bit;
-    Partage->audit_bit_interne_per_sec++;                            /* On ne compte pas les bits système */
+    if (etat)                                                                       /* Mise a jour du bit */
+     { Partage->m[numero] |= bit; 
+       Partage->audit_bit_interne_per_sec++;
+     }
+    else
+     { Partage->m[numero] &= ~bit;
+       Partage->audit_bit_interne_per_sec++;
+     }
   }
 /**********************************************************************************************************/
 /* SI: Positionnement d'un motif TOR                                                                      */
@@ -254,25 +260,54 @@
     else                                               /* Initialisation tempo, si elle ne l'est pas deja */
     if (!Partage->Tempo_R[num].consigne) Partage->Tempo_R[num].consigne = Partage->top + cons;
   }
+/**********************************************************************************************************/
+/* SA: Positionnement d'un actionneur DLS                                                                 */
+/* Entrée: numero, etat                                                                                   */
+/* Sortie: Neant                                                                                          */
+/**********************************************************************************************************/
+ static void Real_SA( void )
+  { gint num, numero, bit;
 
+    while ( Liste_A_off )                                                      /* Mise a zero des sorties */
+     {
+       num = GPOINTER_TO_INT(Liste_A_off->data);
+       if (num<NBR_SORTIE_TOR)
+        { numero = num>>3;
+          bit = 1<<(num & 0x07);
+          Partage->a[numero] &= ~bit;
+          Ajouter_arch( MNEMO_SORTIE, num, 0 );
+          Partage->audit_bit_interne_per_sec++;
+        }
+       Liste_A_off = g_list_remove ( Liste_A_off, GINT_TO_POINTER(num) );
+       Liste_A_on  = g_list_remove ( Liste_A_on,  GINT_TO_POINTER(num) );            /* Arret prioritaire */
+     }
+
+    while ( Liste_A_on )                                                         /* Mise a un des sorties */
+     {
+       num = GPOINTER_TO_INT(Liste_A_on->data);
+       if (num<NBR_SORTIE_TOR)
+        { numero = num>>3;
+          bit = 1<<(num & 0x07);
+          Partage->a[numero] |= bit;
+          Ajouter_arch( MNEMO_SORTIE, num, 1 );
+          Partage->audit_bit_interne_per_sec++;
+        }
+       Liste_A_on = g_list_remove ( Liste_A_on, GINT_TO_POINTER(num) );              /* Arret prioritaire */
+     }
+  }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { gint numero, bit;
-    if (num>=NBR_SORTIE_TOR) return;
+  { if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
+    if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
-    if ( (A(num) && !etat) || (!A(num) && etat) )
-     { Ajouter_arch( MNEMO_SORTIE, num, etat );
-       Partage->audit_bit_interne_per_sec++;
-     }
-
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if (etat) { Partage->a[numero] |= bit;  }
-         else { Partage->a[numero] &= ~bit; }
+    if ( etat )
+     { Liste_A_off = g_list_append( Liste_A_off, GINT_TO_POINTER(num) ); }
+    else
+     { Liste_A_on  = g_list_append( Liste_A_on, GINT_TO_POINTER(num) ); }
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
@@ -446,6 +481,7 @@
        SB(3, 1);                                  /* B3 est toujours à un apres le premier tour programme */
 
        Raz_cde_exterieure();                        /* Mise à zero des monostables de commande exterieure */
+       Real_SA();                                                           /* Positionnement des sorties */
        usleep(1000);
        sched_yield();
      }
