@@ -412,7 +412,7 @@
 
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_STOR) );
 
-    requete.transaction_id = htons(module->transaction_id);
+    requete.transaction_id = 0;
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.adresse        = htons( 0x100A );
@@ -427,7 +427,7 @@
      }
 
     module->transaction_id++;
-    requete.transaction_id = htons(module->transaction_id);
+    requete.transaction_id = 0;
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.adresse        = htons( 0x1009 );
@@ -443,7 +443,7 @@
      }
 
     module->transaction_id++;
-    requete.transaction_id = htons(module->transaction_id);
+    requete.transaction_id = 0;
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.adresse        = htons( 0x1000 );
@@ -457,8 +457,7 @@
        Deconnecter_module( module );
      }
 
-    module->transaction_id++;
-    requete.transaction_id = htons(module->transaction_id);
+    requete.transaction_id = 0;
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.adresse        = htons( 0x100A );
@@ -472,7 +471,7 @@
        Deconnecter_module( module );
      }
 
-    module->transaction_id++;
+    module->transaction_id=0;
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
