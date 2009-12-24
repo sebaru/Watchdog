@@ -471,7 +471,7 @@
        Deconnecter_module( module );
      }
 
-    module->transaction_id=0;
+    module->transaction_id=1;
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
