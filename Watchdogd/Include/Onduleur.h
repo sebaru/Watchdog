@@ -9,7 +9,7 @@
  #include <upsclient.h>
 
  #define ONDULEUR_PORT_TCP    3493                        /* Port de connexion TCP pour accès aux modules */
- #define ONDULEUR_RETRY       1800                     /* 3 minutes entre chaque retry si pb de connexion */
+ #define ONDULEUR_RETRY       9 /*1800*/                     /* 3 minutes entre chaque retry si pb de connexion */
 
  #define NOM_TABLE_MODULE_ONDULEUR   "onduleurs"
 
