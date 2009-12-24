@@ -596,11 +596,17 @@
   { struct BORNE_MODBUS *borne;
     borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
 
-    if (module->transaction_id != ntohs(module->response.transaction_id))
-     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  attendu",
-               module->transaction_id );
-       Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  reponse",
-               ntohs(module->response.transaction_id) );
+    if (ntohs(module->response.transaction_id) != module->transaction_id)             /* Mauvaise reponse */
+     { if (ntohs(module->response.transaction_id))              /* Reponse aux trames d'initialisation ?? */
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  attendu",
+                  module->transaction_id );
+          Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: wrong transaction_id  reponse",
+                  ntohs(module->response.transaction_id) );
+        }
+       else
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: trame d'init reçue",
+                  ntohs(module->response.transaction_id) );
+        }
                                             /* On laisse tomber la trame recue, et on attends la suivante */
        memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
        return;
@@ -701,7 +707,7 @@
         }
      }
 
-    module->request = FALSE;                                          /* Une requete a été traitée */
+    module->request = FALSE;                                                 /* Une requete a été traitée */
     module->transaction_id++;
     memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
   }
