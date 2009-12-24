@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Modbus/Modbus.c  Gestion des modules MODBUS Watchdgo 2.0                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 16 avr 2009 16:27:30 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     jeu. 24 déc. 2009 12:59:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -604,8 +604,7 @@
                   ntohs(module->response.transaction_id) );
         }
        else
-        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: trame d'init reçue",
-                  ntohs(module->response.transaction_id) );
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: trame d'init recue", module->id );
         }
                                             /* On laisse tomber la trame recue, et on attends la suivante */
        memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );

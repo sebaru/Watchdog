@@ -344,7 +344,7 @@
      }
 
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { usleep(1000);
+     { sleep(1);
        sched_yield();
 
        if (Partage->com_onduleur.reload == TRUE)
@@ -387,7 +387,7 @@
           Partage->com_onduleur.admin_stop = 0;
         }
 
-       if (Partage->com_onduleur.Modules_ONDULEUR == NULL ||        /* Si pas de module référencés, on attend */
+       if (Partage->com_onduleur.Modules_ONDULEUR == NULL ||    /* Si pas de module référencés, on attend */
            Onduleur_is_actif() == FALSE)
         { sleep(2); continue; }
 
