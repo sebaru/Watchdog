@@ -281,6 +281,7 @@
            SEA( module->ea_ups_load, valeur, 1);                           /* Numéro de l'EA pour le load */
          }
 
+#ifdef bouh
     query[2] = "ups.realpower";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
@@ -295,6 +296,7 @@
     else { valeur = atoi (answer[3]);
            SEA( module->ea_ups_real_power, valeur, 1);               /* Numéro de l'EA pour le real power */
          }
+#endif
 
     query[2] = "battery.charge";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);

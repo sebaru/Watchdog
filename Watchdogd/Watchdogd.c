@@ -497,10 +497,7 @@ encore:
              if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
 
-#warning Desactivation Onduleur
-#ifdef bouh
              if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
-#endif
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR -> Arret" ); }
            }
 
