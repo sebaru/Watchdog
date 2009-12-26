@@ -269,8 +269,8 @@
     query[2] = "ups.load";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER load",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER load",
+               upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
@@ -281,12 +281,11 @@
            SEA( module->ea_ups_load, valeur, 1);                           /* Numéro de l'EA pour le load */
          }
 
-#ifdef bouh
     query[2] = "ups.realpower";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
+               upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
@@ -296,13 +295,12 @@
     else { valeur = atoi (answer[3]);
            SEA( module->ea_ups_real_power, valeur, 1);               /* Numéro de l'EA pour le real power */
          }
-#endif
 
     query[2] = "battery.charge";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER battery_charge",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER battery_charge",
+               upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
@@ -316,8 +314,8 @@
     query[2] = "input.voltage";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER input_voltage",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER input_voltage",
+               upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
         { Deconnecter_module ( module );
           module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
