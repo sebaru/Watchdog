@@ -117,7 +117,7 @@
     struct timeval tv;
     fd_set fdselect;
 
-    g_snprintf( Socket_file, sizeof(Socket_file), "socket.wdg" );                           /* Par défaut */
+    g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );

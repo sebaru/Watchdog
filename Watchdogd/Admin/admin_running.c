@@ -191,12 +191,9 @@
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
-     { char chaine[128], msg[128];
+     { char chaine[128];
        GList *liste;
        gint i;
-
-       memset( msg, 0, sizeof(msg) );
-       sscanf ( ligne, "%s %s", commande, msg );                  /* Découpage de la ligne de commande */
 
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].pid == -1) continue;
@@ -206,7 +203,7 @@
               struct CLIENT *client_wat;
               client_wat = (struct CLIENT *)liste->data;
 
-              g_snprintf( erreur.message, sizeof(erreur.message), msg );
+              g_snprintf( erreur.message, sizeof(erreur.message), commande + 5 );
               Envoi_client( client_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
 
