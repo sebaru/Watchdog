@@ -23,6 +23,7 @@
  #define NBR_MESSAGE_ECRITS    NBR_BIT_DLS
  #define NBR_COMPTEUR_H        100
  #define NBR_SCENARIO          100
+ #define NBR_CAMERA            16
 
 /*********************************************** prototypes de fonctions **********************************/
  #endif

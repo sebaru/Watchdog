@@ -78,7 +78,7 @@
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,%s.type"
-                " FROM %s,%s,%s WHERE syn_id=%d AND camera_src_id=%s.num AND %s.id_mnemo=%s.id",
+                " FROM %s,%s,%s WHERE syn_id=%d AND camera_src_id=%s.id AND %s.id_mnemo=%s.id",
                 NOM_TABLE_CAMERASUP, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* From */
                 id_syn, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO /* Where */
@@ -124,7 +124,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,%s,type"
-                " FROM %s,%s,%s WHERE %s.id=%d AND camera_src_id=%s.num AND %s.id_mnemo=%s.id",
+                " FROM %s,%s,%s WHERE %s.id=%d AND camera_src_id=%s.id AND %s.id_mnemo=%s.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* FROM */
                 NOM_TABLE_CAMERASUP, id, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,NOM_TABLE_MNEMO );
