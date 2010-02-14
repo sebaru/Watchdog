@@ -24,8 +24,8 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_COURBE_OK:
-             { struct CMD_ID_COURBE *courbe;
-               courbe = (struct CMD_ID_COURBE *)connexion->donnees;
+             { struct CMD_TYPE_COURBE *courbe;
+               courbe = (struct CMD_TYPE_COURBE *)connexion->donnees;
                printf("proto ajouter courbe !!\n");
                Proto_ajouter_courbe( courbe );
              }
