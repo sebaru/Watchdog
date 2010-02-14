@@ -124,9 +124,9 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,%s.type"
+                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,%s.type,%s.num"
                 " FROM %s,%s,%s WHERE %s.id=%d AND camera_src_id=%s.id AND %s.id_mnemo=%s.id",
-                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,
+                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* FROM */
                 NOM_TABLE_CAMERASUP, id, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,NOM_TABLE_MNEMO );
 
@@ -153,6 +153,7 @@
        camera_sup->position_x   = atoi(db->row[4]);                             /* en abscisses et ordonnées */
        camera_sup->position_y   = atoi(db->row[5]);
        camera_sup->type         = atoi(db->row[6]);
+       camera_sup->num          = atoi(db->row[7]);
      }
     return(camera_sup);
   }
