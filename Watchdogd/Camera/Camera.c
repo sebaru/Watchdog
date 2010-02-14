@@ -92,10 +92,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT location,%s.type,libelle,objet,num"
-                " FROM %s,%s WHERE %s.id_mnemo=%d AND %s.type=%d",
+                " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%d",
                 NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
-                NOM_TABLE_CAMERA, id, NOM_TABLE_MNEMO, MNEMO_CAMERA                              /* Where */
+                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,                                               /* Where */
+                NOM_TABLE_CAMERA, id
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
