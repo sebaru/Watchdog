@@ -47,7 +47,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_HISTO_COURBE_OK:
              { struct CMD_TYPE_COURBE *courbe;
-               courbe = (struct CMD_ID_COURBE *)connexion->donnees;
+               courbe = (struct CMD_TYPE_COURBE *)connexion->donnees;
                printf("proto ajouter courbe !!\n");
                Proto_ajouter_histo_courbe( courbe );
              }
