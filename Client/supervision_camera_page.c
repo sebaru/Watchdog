@@ -27,8 +27,7 @@
  
  #include <gnome.h>
  #include <gdk/gdkx.h>
- #include <gst/gst.h>
- #include <gst/interfaces/xoverlay.h>
+ #include <gtk-libvlc-media-player.h>                                                       /* Player VLC */
  #include <sys/time.h>
  
  #include "Reseaux.h"
@@ -51,8 +50,9 @@
  void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_CAMERA *infos;
     infos = (struct TYPE_INFO_CAMERA *)page->infos;
-    gst_element_set_state (infos->pipeline, GST_STATE_NULL);                    /* Extinction du pipeline */
-    gst_object_unref( GST_OBJECT(infos->pipeline) );
+
+    gtk_libvlc_media_player_stop(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc)); 
+    g_object_unref(G_OBJECT(infos->instance)); 
   }
 /**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
@@ -63,7 +63,7 @@
   { GtkWidget *bouton, *boite, *hboite;
     struct TYPE_INFO_CAMERA *infos;
     struct PAGE_NOTEBOOK *page;
-    GstElement *source, *jpegdec, *ffmpeg, *scale, *sink;
+    GtkLibVLCMedia *media;
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -80,26 +80,14 @@
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 
-    infos->video_output = gtk_drawing_area_new ();
-    gtk_box_pack_start (GTK_BOX (hboite), infos->video_output, TRUE, TRUE, 0);
+    infos->instance = gtk_libvlc_instance_new(NULL); 
+    infos->vlc = gtk_libvlc_media_player_new(infos->instance);
+    gtk_libvlc_media_player_set_volume (GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), 0.0);
 
-/**************************************** Trame proprement dite *******************************************/
-    
-    /* Create gstreamer elements */
-    infos->pipeline = gst_pipeline_new (NULL);
-
-    source  = gst_element_factory_make ( "gnomevfssrc", NULL );
-    g_object_set (G_OBJECT (source), "location", infos->camera.location, NULL);
-
-    jpegdec  = gst_element_factory_make ("jpegdec", NULL);
-    ffmpeg   = gst_element_factory_make ("ffmpegcolorspace", NULL );
-    scale    = gst_element_factory_make ("videoscale", NULL );
-    sink     = gst_element_factory_make ("ximagesink", NULL );
-
-    gst_bin_add_many (GST_BIN (infos->pipeline), source, jpegdec, ffmpeg, scale, sink, NULL);
-    gst_element_link_many (source, jpegdec, ffmpeg, scale, sink, NULL);
- 
-    /* gst_x_overlay_handle_events (GST_X_OVERLAY (sink), FALSE);*/
+    media = gtk_libvlc_media_new(infos->camera.location);
+    gtk_libvlc_media_player_add_media(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), media);
+    g_object_unref(media);         
+    gtk_libvlc_media_player_play(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), NULL); 
 
 /************************************ Les boutons de controles ********************************************/
     boite = gtk_vbox_new( FALSE, 6 );
@@ -113,10 +101,6 @@
 
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( infos->camera.libelle ) );
     gtk_widget_show_all( page->child );
-    gtk_widget_realize ( infos->video_output );
-    gtk_widget_realize ( page->child );
-    gtk_main_iteration_do( TRUE );
-    gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (sink), GDK_WINDOW_XWINDOW (infos->video_output->window));
     Chercher_page_notebook ( TYPE_PAGE_SUPERVISION_CAMERA, camera->camera_src_id, TRUE );
  }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -29,7 +29,6 @@
  #define _PROTOCLI_H_
 
  #include <gnome.h>
- #include <gst/gst.h>
  #include <openssl/ssl.h>
  #include <gtkdatabox.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
@@ -92,9 +91,8 @@
  #define CAMERA_DELAI_START 4
  struct TYPE_INFO_CAMERA
   { struct CMD_TYPE_CAMERA_SUP camera;                                          /* Structure de la camera */
-    GtkWidget *video_output;                                                    /* Widget de sortie video */
-    GstElement *pipeline;                                                         /* Pipeline de commande */
-    guint start;
+    GtkLibVLCInstance* instance;
+    GtkWidget *vlc;
   };
 
  struct COURBE

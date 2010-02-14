@@ -26,7 +26,6 @@
  */
  
  #include <gnome.h>
- #include <gst/gst.h>
  #include <string.h>
  #include <stdlib.h>
  #include <signal.h>
@@ -240,7 +239,6 @@
                               GNOME_PARAM_POPT_TABLE, Options, GNOME_PARAM_NONE );
     client = gnome_master_client();
     g_signal_connect( GTK_OBJECT( client ), "save_yourself", GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gst_init (NULL, NULL);                                                           /* Init de gstreamer */
 
     F_client = gnome_app_new( PROGRAMME, TITRE_F_CONFIG );                      /* Création de la fenetre */
     g_signal_connect( G_OBJECT( F_client ), "delete_event",
