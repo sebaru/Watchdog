@@ -77,10 +77,11 @@
     gfloat  angle;
   };
 
-/*********************************************** Gestion des cameras de supervision *************************/
+/*********************************************** Gestion des cameras de supervision ***********************/
  struct CMD_TYPE_CAMERA_SUP
   { gint  id;
     gint  syn_id;
+    gint  num;                                                       /* Némero (utilisateur) de la camera */
     gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
     gint  camera_src_id;
     gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */

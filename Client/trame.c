@@ -600,7 +600,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
                                                         NULL);
 
         }
-       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->camera_src_id );
+       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
        goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
                                                          -1, GTK_ANCHOR_CENTER,
                                                          "fill-color", "yellow",
