@@ -130,14 +130,14 @@
                 NOM_TABLE_CAMERASUP, id, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,NOM_TABLE_MNEMO );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { Info_n( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouvé dans la BDD", id );
+     { Info_c( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouve dans la BDD", requete );
        return(NULL);
      }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouve dans la BDD", id );
        return(NULL);
      }
 
