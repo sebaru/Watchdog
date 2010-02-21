@@ -46,7 +46,7 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK:
-             { Creer_page_icone();
+             { if (!Tester_page_notebook(TYPE_PAGE_ICONE)) { Creer_page_icone(); }
              }
             break;
        case SSTAG_SERVEUR_ADD_ICONE_WANT_FILE:
