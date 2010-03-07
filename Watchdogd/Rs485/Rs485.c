@@ -512,7 +512,7 @@
                    module->date_ana = Partage->top + 50;           /* Prochain update ana dans 2 secondes */
                  }
 
-                sched_yield();
+                usleep(1);
                 module->date_requete = Partage->top;
                 module->date_retente = 0;
                 attente_reponse = TRUE;
@@ -530,7 +530,6 @@
                 continue;
               }
              else { module->date_retente = 0;
-                    SB(module->bit, 1);
                   }
            }
 
@@ -568,6 +567,7 @@
                       if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;
                          liste = liste->next;
+                         SB(module->bit, 1);
                        }
                       pthread_mutex_unlock( &Partage->com_dls.synchro );
                     }
