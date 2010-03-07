@@ -36,24 +36,15 @@
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
 /**********************************************************************************************************/
- gboolean Ajouter_arch( gint type, gint num, gint valeur )
+ void Ajouter_arch( gint type, gint num, gint valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
-    GList *liste;
-    gint cpt;
 
-    pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
-    liste = Partage->com_arch.liste_arch;
-    cpt = 0;
-    while(liste)
-     { arch = Partage->com_arch.liste_arch->data;
-       if (arch->type == type && arch->num == num) cpt++;
-       liste = liste->next;
+    if (Partage->com_arch.taille_arch > 150)
+     { Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150) type", type );
+       Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
+       return;
      }
-    pthread_mutex_unlock( &Partage->com_arch.synchro );
-
-    if (cpt >= 50)                               /* Plus de 50 occurences d'un meme bit dans le tampon ?? */
-     { return(FALSE); }
 
     arch = (struct ARCHDB *)g_malloc( sizeof(struct ARCHDB) );
     if (!arch) return;
@@ -69,7 +60,6 @@
     Partage->com_arch.liste_arch = g_list_append( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
-    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */

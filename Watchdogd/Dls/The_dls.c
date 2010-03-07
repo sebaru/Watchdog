@@ -44,6 +44,8 @@
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
  static GList *Liste_A_on=NULL;                                       /* Listes des actionneurs a activer */
  static GList *Liste_A_off=NULL;                                   /* Listes des actionneurs a desactiver */
+ static GList *Liste_MSG_on=NULL;                                        /* Listes des messages a activer */
+ static GList *Liste_MSG_off=NULL;                                    /* Listes des messages a desactiver */
 /**********************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
 /* Entrée: le temps avant, et le temps apres l'action                                                     */
@@ -276,7 +278,6 @@
        Partage->audit_bit_interne_per_sec++;
 
        Liste_A_off = g_list_remove ( Liste_A_off, GINT_TO_POINTER(num) );
-       Liste_A_on  = g_list_remove ( Liste_A_on,  GINT_TO_POINTER(num) );            /* Arret prioritaire */
      }
 
     while ( Liste_A_on )                                                         /* Mise a un des sorties */
@@ -331,41 +332,62 @@
      { Partage->ch[ num ].actif = FALSE; }
   }
 /**********************************************************************************************************/
-/* MSG: Envoi d'un message au serveur                                                                     */
-/* Entrée: le numero du message, le type de clignotement                                                  */
+/* MSG: Positionnement des message DLS                                                                    */
+/* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
-  { gint numero, bit, nbr;
+  { gint numero, bit;
 
     if ( num>=NBR_MESSAGE_ECRITS ) return;
     numero = num>>3;
     bit = 1<<(num & 0x07);
-    if (etat)
-     { if (Partage->g[numero] & bit) return;
+
+    if ( ( (Partage->g[numero] & bit) &&  etat) ||
+         (!(Partage->g[numero] & bit) && !etat) ) return;
+
+    if ( g_list_find (Liste_MSG_off, GINT_TO_POINTER(num) ) ) return;/* Si deja position. dans le tour prg */
+    if ( g_list_find (Liste_MSG_on,  GINT_TO_POINTER(num) ) ) return;
+
+    if ( etat )
+     { Liste_MSG_on  = g_list_append( Liste_MSG_on,  GINT_TO_POINTER(num) ); }
+    else
+     { Liste_MSG_off = g_list_append( Liste_MSG_off, GINT_TO_POINTER(num) ); }
+    Partage->audit_bit_interne_per_sec++;
+  }
+/**********************************************************************************************************/
+/* MSG: Envoi d'un message au serveur                                                                     */
+/* Entrée: le numero du message, le type de clignotement                                                  */
+/* Sortie: Neant                                                                                          */
+/**********************************************************************************************************/
+ static void Real_MSG( void )
+  { gint numero, bit, num;
+
+    while ( Liste_MSG_off )                                                   /* Mise a zero des messages */
+     { num = GPOINTER_TO_INT(Liste_MSG_off->data);
+       numero = num>>3;
+       bit = 1<<(num & 0x07);
+
        Partage->g[numero] |= bit;
 
-       pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       nbr = g_list_length(Partage->com_msrv.liste_msg_on);
-       if ( nbr < 200 && ! g_list_find( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) ) )
-        { Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
-                                                              GINT_TO_POINTER(num) );
-        }
+       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Liste_MSG_off = g_list_remove ( Liste_MSG_off, GINT_TO_POINTER(num) );
      }
-    else
-     { if (! (Partage->g[numero] & bit)) return;
+
+    while ( Liste_MSG_on )                                                      /* Mise a un des messages */
+     { num = GPOINTER_TO_INT(Liste_MSG_on->data);
+       numero = num>>3;
+       bit = 1<<(num & 0x07);
+
        Partage->g[numero] &= ~bit;
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       nbr = g_list_length(Partage->com_msrv.liste_msg_off);
-       if ( nbr < 200 && ! g_list_find( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) ) )
-        { Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
-                                                               GINT_TO_POINTER(num) );
-        }
+       Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Liste_MSG_on = g_list_remove ( Liste_MSG_on, GINT_TO_POINTER(num) );          /* Arret prioritaire */
      }
-    Partage->audit_bit_interne_per_sec++;
   }
 /**********************************************************************************************************/
 /* Raz_cde_exterieure: Mise à zero des monostables de commande exterieure                                 */
@@ -479,6 +501,7 @@
 
        Raz_cde_exterieure();                        /* Mise à zero des monostables de commande exterieure */
        Real_SA();                                                           /* Positionnement des sorties */
+       Real_MSG();                                                         /* Positionnement des messages */
        Partage->audit_tour_dls_per_sec++;               /* Gestion de l'audit nbr de tour DLS par seconde */
 /************************************ Gestion des 1000 tours DLS par seconde ******************************/
        usleep(Partage->com_dls.temps_sched);
