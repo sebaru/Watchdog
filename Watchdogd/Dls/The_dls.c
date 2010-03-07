@@ -368,7 +368,7 @@
        numero = num>>3;
        bit = 1<<(num & 0x07);
 
-       Partage->g[numero] |= bit;
+       Partage->g[numero] &= ~bit;
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) );
@@ -381,7 +381,7 @@
        numero = num>>3;
        bit = 1<<(num & 0x07);
 
-       Partage->g[numero] &= ~bit;
+       Partage->g[numero] |= bit;
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
        Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) );
