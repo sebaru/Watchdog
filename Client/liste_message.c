@@ -501,6 +501,7 @@
                          COLONNE_SMS, message->sms,
                          COLONNE_ID, message->id,
                          COLONNE_NUM, chaine,
+                         COLONNE_AUDIO, audio,
                          COLONNE_TYPE_INT, message->type,
                          COLONNE_TYPE_STRING, Type_vers_string(message->type),
                          COLONNE_OBJET, message->objet,

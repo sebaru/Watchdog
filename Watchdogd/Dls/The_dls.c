@@ -302,6 +302,9 @@
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
+    Info_n( Config.log, DEBUG_INFO, "DLS: SA: Pas deja dans une liste  num", num );
+    Info_n( Config.log, DEBUG_INFO, "DLS: SA: Pas deja dans une liste etat", etat );
+       
     if ( etat )
      { Liste_A_on  = g_list_append( Liste_A_on,  GINT_TO_POINTER(num) ); }
     else
