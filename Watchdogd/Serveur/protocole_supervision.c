@@ -69,15 +69,11 @@
                                        (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                        }
                       else
-                       { cmd = Preparer_envoi_synoptique ( syndb );
+                       { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
+                                           (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                          g_free(syndb);
-                         if (cmd)
-                          { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
-                                           (gchar *)cmd, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                            g_free(cmd);
-                            client->num_supervision = syn->id;/* Sauvegarde du syn voulu pour envoi motif */
-                            Client_mode( client, ENVOI_MOTIF_SUPERVISION );
-                          }
+                         client->num_supervision = syn->id;   /* Sauvegarde du syn voulu pour envoi motif */
+                         Client_mode( client, ENVOI_MOTIF_SUPERVISION );
                        }
                     }
              }

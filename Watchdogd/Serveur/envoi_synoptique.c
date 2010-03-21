@@ -35,23 +35,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_synoptique: convertit une structure MSG en structure CMD_TYPE_SYNOPTIQUE                */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- struct CMD_TYPE_SYNOPTIQUE *Preparer_envoi_synoptique ( struct CMD_TYPE_SYNOPTIQUE *syn )
-  { struct CMD_TYPE_SYNOPTIQUE *rezo_syn;
-
-    rezo_syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-    if (!rezo_syn) { return(NULL); }
-
-    rezo_syn->id         = syn->id;
-    rezo_syn->groupe     = syn->groupe;
-    memcpy( &rezo_syn->libelle, syn->libelle, sizeof(rezo_syn->libelle) );
-    memcpy( &rezo_syn->mnemo,   syn->mnemo,   sizeof(rezo_syn->mnemo) );
-    return( rezo_syn );
-  }
-/**********************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                       */
 /* Entrée: le client demandeur et le syn en question                                                      */
 /* Sortie: Niet                                                                                           */
@@ -103,20 +86,9 @@
      }
     else { result = Rechercher_synoptiqueDB( Config.log, Db_watchdog, rezo_syn->id );
            if (result) 
-            { struct CMD_TYPE_SYNOPTIQUE *syn;
-              syn = Preparer_envoi_synoptique ( result );
+            { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
               g_free(result);
-              if (!syn)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
-                                   (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                     g_free(syn);
-                   }
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
@@ -179,20 +151,9 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_TYPE_SYNOPTIQUE *syn;
-              syn = Preparer_envoi_synoptique ( result );
+            { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
               g_free(result);
-              if (!syn)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,
-                                   (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                     g_free(syn);
-                   }
             }
          }
   }
@@ -202,8 +163,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_synoptiques_tag ( struct CLIENT *client, int tag, gint sstag, gint sstag_fin )
-  { struct CMD_TYPE_SYNOPTIQUE *rezo_syn;
-    struct CMD_ENREG nbr;
+  { struct CMD_ENREG nbr;
     struct CMD_TYPE_SYNOPTIQUE *syn;
     struct DB *db;
 
@@ -233,16 +193,11 @@
           return;
         }
 
-       rezo_syn = Preparer_envoi_synoptique( syn );
-       g_free(syn);
-       if (rezo_syn)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-          Envoi_client ( client, tag, sstag,
-                         (gchar *)rezo_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-          g_free(rezo_syn);
-        }
+       Envoi_client ( client, tag, sstag, (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+       g_free(syn);
      }
   }
 /**********************************************************************************************************/
