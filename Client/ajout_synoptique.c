@@ -105,7 +105,7 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn )
   { GtkWidget *frame, *table, *texte, *hboite;
-
+printf(" Flag ajouter synoptique \n" );
     if (edit_syn)
      { memcpy( &Edit_syn, edit_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );    /* Save pour utilisation future */
      }
@@ -181,6 +181,8 @@
 /**********************************************************************************************************/
  void Proto_afficher_les_groupes_pour_synoptique ( GList *liste )
   { struct CMD_TYPE_GROUPE *groupe;
+
+printf(" Flag afficher groupe pour syn \n" );
 
     while( liste )
      { groupe = (struct CMD_TYPE_GROUPE *)liste->data;

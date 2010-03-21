@@ -273,8 +273,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_groupes_pour_synoptique_thread ( struct CLIENT *client )
-  { Envoyer_groupes_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE,
-                                              SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN );
+  { Envoyer_groupes_tag( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE,
+                                                 SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN );
     pthread_exit(NULL);
   }
 /**********************************************************************************************************/
