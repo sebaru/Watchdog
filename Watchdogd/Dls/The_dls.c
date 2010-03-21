@@ -299,6 +299,8 @@
  void SA( int num, int etat )
   { if (num>=NBR_SORTIE_TOR) return;
     if ( (A(num) && etat) || (!A(num) && !etat) ) return;
+printf(" début SA : length OFF=%d, on=%d\n", g_list_length(Liste_A_off), g_list_length(Liste_A_on) );
+
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
@@ -309,6 +311,7 @@
      { Liste_A_on  = g_list_append( Liste_A_on,  GINT_TO_POINTER(num) ); }
     else
      { Liste_A_off = g_list_append( Liste_A_off, GINT_TO_POINTER(num) ); }
+printf(" fin SA : length OFF=%d, on=%d\n", g_list_length(Liste_A_off), g_list_length(Liste_A_on) );
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
