@@ -339,14 +339,7 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
-  { gint numero, bit;
-
-    if ( num>=NBR_MESSAGE_ECRITS ) return;
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-
-    if ( ( (Partage->g[numero] & bit) &&  etat) ||
-         (!(Partage->g[numero] & bit) && !etat) ) return;
+  { if ( num>=NBR_MESSAGE_ECRITS ) return;
 
     if ( g_list_find (Liste_MSG_off, GINT_TO_POINTER(num) ) ) return;/* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_MSG_on,  GINT_TO_POINTER(num) ) ) return;
@@ -355,7 +348,6 @@
      { Liste_MSG_on  = g_list_append( Liste_MSG_on,  GINT_TO_POINTER(num) ); }
     else
      { Liste_MSG_off = g_list_append( Liste_MSG_off, GINT_TO_POINTER(num) ); }
-    Partage->audit_bit_interne_per_sec++;
   }
 /**********************************************************************************************************/
 /* MSG: Envoi d'un message au serveur                                                                     */
@@ -369,12 +361,14 @@
      { num = GPOINTER_TO_INT(Liste_MSG_off->data);
        numero = num>>3;
        bit = 1<<(num & 0x07);
+       if ( (Partage->g[numero] & bit) )
+        { Partage->g[numero] &= ~bit;
 
-       Partage->g[numero] &= ~bit;
-
-       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Partage->audit_bit_interne_per_sec++;
+        }
        Liste_MSG_off = g_list_remove ( Liste_MSG_off, GINT_TO_POINTER(num) );
      }
 
@@ -382,12 +376,14 @@
      { num = GPOINTER_TO_INT(Liste_MSG_on->data);
        numero = num>>3;
        bit = 1<<(num & 0x07);
+       if ( !(Partage->g[numero] & bit) )
+        { Partage->g[numero] |= bit;
 
-       Partage->g[numero] |= bit;
-
-       pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Partage->audit_bit_interne_per_sec++;
+        }
        Liste_MSG_on = g_list_remove ( Liste_MSG_on, GINT_TO_POINTER(num) );          /* Arret prioritaire */
      }
   }
