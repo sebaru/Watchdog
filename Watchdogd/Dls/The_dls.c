@@ -269,6 +269,7 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
+printf("Real_SA ------------------------------- \n");
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(Liste_A_off->data);
        numero = num>>3;
