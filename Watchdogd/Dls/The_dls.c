@@ -272,23 +272,25 @@
 printf("Real_SA ------------------------------- \n");
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(Liste_A_off->data);
-       numero = num>>3;
-       bit = 1<<(num & 0x07);
-       Partage->a[numero] &= ~bit;
-       Ajouter_arch( MNEMO_SORTIE, num, 0 );
-       Partage->audit_bit_interne_per_sec++;
-
+       if ( A(num) )
+         { numero = num>>3;
+           bit = 1<<(num & 0x07);
+           Partage->a[numero] &= ~bit;
+           Ajouter_arch( MNEMO_SORTIE, num, 0 );
+           Partage->audit_bit_interne_per_sec++;
+         }
        Liste_A_off = g_list_remove ( Liste_A_off, GINT_TO_POINTER(num) );
      }
 
     while ( Liste_A_on )                                                         /* Mise a un des sorties */
      { num = GPOINTER_TO_INT(Liste_A_on->data);
-       numero = num>>3;
-       bit = 1<<(num & 0x07);
-       Partage->a[numero] |= bit;
-       Ajouter_arch( MNEMO_SORTIE, num, 1 );
-       Partage->audit_bit_interne_per_sec++;
-
+       if ( !A(num) )
+        { numero = num>>3;
+          bit = 1<<(num & 0x07);
+          Partage->a[numero] |= bit;
+          Ajouter_arch( MNEMO_SORTIE, num, 1 );
+          Partage->audit_bit_interne_per_sec++;
+        }
        Liste_A_on = g_list_remove ( Liste_A_on, GINT_TO_POINTER(num) );              /* Arret prioritaire */
      }
   }
@@ -299,7 +301,6 @@ printf("Real_SA ------------------------------- \n");
 /**********************************************************************************************************/
  void SA( int num, int etat )
   { if (num>=NBR_SORTIE_TOR) return;
-    if ( (A(num) && etat) || (!A(num) && !etat) ) return;
 printf(" début SA : length OFF=%d, on=%d\n", g_list_length(Liste_A_off), g_list_length(Liste_A_on) );
 
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
