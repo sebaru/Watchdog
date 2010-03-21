@@ -269,7 +269,6 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
-printf("Real_SA ------------------------------- \n");
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(Liste_A_off->data);
        if ( A(num) )
@@ -301,19 +300,14 @@ printf("Real_SA ------------------------------- \n");
 /**********************************************************************************************************/
  void SA( int num, int etat )
   { if (num>=NBR_SORTIE_TOR) return;
-printf(" début SA : length OFF=%d, on=%d\n", g_list_length(Liste_A_off), g_list_length(Liste_A_on) );
 
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
-    Info_n( Config.log, DEBUG_INFO, "DLS: SA: Pas deja dans une liste  num", num );
-    Info_n( Config.log, DEBUG_INFO, "DLS: SA: Pas deja dans une liste etat", etat );
-       
     if ( etat )
      { Liste_A_on  = g_list_append( Liste_A_on,  GINT_TO_POINTER(num) ); }
     else
      { Liste_A_off = g_list_append( Liste_A_off, GINT_TO_POINTER(num) ); }
-printf(" fin SA : length OFF=%d, on=%d\n", g_list_length(Liste_A_off), g_list_length(Liste_A_on) );
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
