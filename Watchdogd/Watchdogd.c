@@ -443,16 +443,6 @@
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
 
-       sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
-       sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-       sigaction( SIGPIPE, &sig, NULL );
-       sigaction( SIGHUP,  &sig, NULL );                                         /* Reinitialisation soft */
-       sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
-       sigaction( SIGALRM,  &sig, NULL );                                        /* Reinitialisation soft */
-       sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
-       sigaction( SIGUSR2, &sig, NULL );                               /* Reinitialisation DLS uniquement */
-       sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
-       sigaction( SIGTERM, &sig, NULL );
 encore:   
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
@@ -503,6 +493,17 @@ encore:
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+
+          sig.sa_handler = Traitement_signaux;                  /* Gestionnaire de traitement des signaux */
+          sig.sa_flags = SA_RESTART;  /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+          sigaction( SIGPIPE, &sig, NULL );
+          sigaction( SIGHUP,  &sig, NULL );                                      /* Reinitialisation soft */
+          sigaction( SIGINT,  &sig, NULL );                                      /* Reinitialisation soft */
+          sigaction( SIGALRM, &sig, NULL );                                      /* Reinitialisation soft */
+          sigaction( SIGUSR1, &sig, NULL );                            /* Reinitialisation DLS uniquement */
+          sigaction( SIGUSR2, &sig, NULL );                            /* Reinitialisation DLS uniquement */
+          sigaction( SIGIO, &sig, NULL );                              /* Reinitialisation DLS uniquement */
+          sigaction( SIGTERM, &sig, NULL );
 
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );

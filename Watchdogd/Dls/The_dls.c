@@ -279,7 +279,7 @@ printf("Real SA ------------------------------- \n");
            Ajouter_arch( MNEMO_SORTIE, num, 0 );
            Partage->audit_bit_interne_per_sec++;
          }
-       Liste_A_off = g_list_remove ( Liste_A_off, GINT_TO_POINTER(num) );
+       Liste_A_off = g_list_remove ( Liste_A_off, Liste_A_off->data );
      }
 
     while ( Liste_A_on )                                                         /* Mise a un des sorties */
@@ -291,7 +291,7 @@ printf("Real SA ------------------------------- \n");
           Ajouter_arch( MNEMO_SORTIE, num, 1 );
           Partage->audit_bit_interne_per_sec++;
         }
-       Liste_A_on = g_list_remove ( Liste_A_on, GINT_TO_POINTER(num) );              /* Arret prioritaire */
+       Liste_A_on = g_list_remove ( Liste_A_on, Liste_A_on->data );                  /* Arret prioritaire */
      }
 printf("Real SA fin------------------------- \n");
   }
@@ -374,7 +374,7 @@ printf("Real MSG off numero=%d bit=%d\n", numero, bit);
           Partage->audit_bit_interne_per_sec++;
         }
 printf("Real MSG off before\n");
-       Liste_MSG_off = g_list_remove ( Liste_MSG_off,  Liste_MSG_off->data );
+       Liste_MSG_off = g_list_remove ( Liste_MSG_off, Liste_MSG_off->data );
 printf("Real MSG off after\n");
      }
 
@@ -479,7 +479,7 @@ printf("Real MSG fin -------------------------- \n");
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
           Partage->com_dls.liste_plugin_reset = g_list_remove ( Partage->com_dls.liste_plugin_reset,
-                                                                     GINT_TO_POINTER(num) );
+                                                                GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           Reseter_un_plugin( num );
         }
