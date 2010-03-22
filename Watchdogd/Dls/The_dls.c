@@ -357,9 +357,7 @@
  static void Real_MSG( void )
   { gint numero, bit, num;
 
-printf("Real MSG ------------------------------ \n");
     pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
-
     while ( Liste_MSG_off )                                                   /* Mise a zero des messages */
      { num = GPOINTER_TO_INT(Liste_MSG_off->data);
        numero = num>>3;
@@ -370,9 +368,7 @@ printf("Real MSG ------------------------------ \n");
           Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) );
           Partage->audit_bit_interne_per_sec++;
         }
-printf("Real MSG off before\n");
        Liste_MSG_off = g_list_remove ( Liste_MSG_off, Liste_MSG_off->data );
-printf("Real MSG off after %p\n", Liste_MSG_off);
      }
 
     while ( Liste_MSG_on )                                                      /* Mise a un des messages */
@@ -385,11 +381,8 @@ printf("Real MSG off after %p\n", Liste_MSG_off);
           Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) );
           Partage->audit_bit_interne_per_sec++;
         }
-printf("Real MSG on before\n");
        Liste_MSG_on = g_list_remove ( Liste_MSG_on, Liste_MSG_on->data );            /* Arret prioritaire */
-printf("Real MSG on after %p\n", Liste_MSG_on);
      }
-printf("Real MSG fin -------------------------- \n");
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
