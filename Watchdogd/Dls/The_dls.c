@@ -372,7 +372,7 @@ printf("Real MSG ------------------------------ \n");
         }
 printf("Real MSG off before\n");
        Liste_MSG_off = g_list_remove ( Liste_MSG_off, Liste_MSG_off->data );
-printf("Real MSG off after\n");
+printf("Real MSG off after %p\n", Liste_MSG_off);
      }
 
     while ( Liste_MSG_on )                                                      /* Mise a un des messages */
@@ -387,7 +387,7 @@ printf("Real MSG off after\n");
         }
 printf("Real MSG on before\n");
        Liste_MSG_on = g_list_remove ( Liste_MSG_on, Liste_MSG_on->data );            /* Arret prioritaire */
-printf("Real MSG on after\n");
+printf("Real MSG on after %p\n", Liste_MSG_on);
      }
 printf("Real MSG fin -------------------------- \n");
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
