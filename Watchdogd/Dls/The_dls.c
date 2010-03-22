@@ -373,7 +373,9 @@ printf("Real MSG off numero=%d bit=%d\n", numero, bit);
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->audit_bit_interne_per_sec++;
         }
+printf("Real MSG off before");
        Liste_MSG_off = g_list_remove ( Liste_MSG_off, GINT_TO_POINTER(num) );
+printf("Real MSG off after");
      }
 
     while ( Liste_MSG_on )                                                      /* Mise a un des messages */
