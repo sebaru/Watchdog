@@ -374,7 +374,7 @@ printf("Real MSG off numero=%d bit=%d\n", numero, bit);
           Partage->audit_bit_interne_per_sec++;
         }
 printf("Real MSG off before\n");
-       Liste_MSG_off = g_list_remove ( Liste_MSG_off, GINT_TO_POINTER(num) );
+       Liste_MSG_off = g_list_remove ( Liste_MSG_off,  Liste_MSG_off->data );
 printf("Real MSG off after\n");
      }
 
@@ -393,7 +393,7 @@ printf("Real MSG on numero=%d bit=%d\n", numero, bit);
           Partage->audit_bit_interne_per_sec++;
         }
 printf("Real MSG on before\n");
-       Liste_MSG_on = g_list_remove ( Liste_MSG_on, GINT_TO_POINTER(num) );          /* Arret prioritaire */
+       Liste_MSG_on = g_list_remove ( Liste_MSG_on, Liste_MSG_on->data );            /* Arret prioritaire */
 printf("Real MSG on after\n");
      }
 printf("Real MSG fin -------------------------- \n");
