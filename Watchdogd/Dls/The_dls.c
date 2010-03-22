@@ -361,8 +361,10 @@ printf("Real SA fin------------------------- \n");
 printf("Real MSG ------------------------------ \n");
     while ( Liste_MSG_off )                                                   /* Mise a zero des messages */
      { num = GPOINTER_TO_INT(Liste_MSG_off->data);
+printf("Real MSG off num=%d\n", num);
        numero = num>>3;
        bit = 1<<(num & 0x07);
+printf("Real MSG off numero=%d bit=%d\n", numero, bit);
        if ( (Partage->g[numero] & bit) )
         { Partage->g[numero] &= ~bit;
 
@@ -376,8 +378,10 @@ printf("Real MSG ------------------------------ \n");
 
     while ( Liste_MSG_on )                                                      /* Mise a un des messages */
      { num = GPOINTER_TO_INT(Liste_MSG_on->data);
+printf("Real MSG on num=%d\n", num);
        numero = num>>3;
        bit = 1<<(num & 0x07);
+printf("Real MSG on numero=%d bit=%d\n", numero, bit);
        if ( !(Partage->g[numero] & bit) )
         { Partage->g[numero] |= bit;
 
