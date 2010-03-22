@@ -340,7 +340,7 @@
 /**********************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num>=NBR_MESSAGE_ECRITS ) return;
-
+return;
     if ( g_list_find (Liste_MSG_off, GINT_TO_POINTER(num) ) ) return;/* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_MSG_on,  GINT_TO_POINTER(num) ) ) return;
 
@@ -356,7 +356,7 @@
 /**********************************************************************************************************/
  static void Real_MSG( void )
   { gint numero, bit, num;
-
+return;
     pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
     while ( Liste_MSG_off )                                                   /* Mise a zero des messages */
      { num = GPOINTER_TO_INT(Liste_MSG_off->data);
