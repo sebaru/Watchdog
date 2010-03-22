@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 19:54:28 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 22 mars 2010 20:25:46 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -269,6 +269,7 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
+printf("Real SA ------------------------------- \n");
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(Liste_A_off->data);
        if ( A(num) )
@@ -292,6 +293,7 @@
         }
        Liste_A_on = g_list_remove ( Liste_A_on, GINT_TO_POINTER(num) );              /* Arret prioritaire */
      }
+printf("Real SA fin------------------------- \n");
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
@@ -356,7 +358,7 @@
 /**********************************************************************************************************/
  static void Real_MSG( void )
   { gint numero, bit, num;
-
+printf("Real MSG ------------------------------ \n");
     while ( Liste_MSG_off )                                                   /* Mise a zero des messages */
      { num = GPOINTER_TO_INT(Liste_MSG_off->data);
        numero = num>>3;
@@ -386,6 +388,7 @@
         }
        Liste_MSG_on = g_list_remove ( Liste_MSG_on, GINT_TO_POINTER(num) );          /* Arret prioritaire */
      }
+printf("Real MSG fin -------------------------- \n");
   }
 /**********************************************************************************************************/
 /* Raz_cde_exterieure: Mise à zero des monostables de commande exterieure                                 */
