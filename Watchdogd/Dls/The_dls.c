@@ -269,6 +269,7 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
+return;
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(Liste_A_off->data);
        if ( A(num) )
@@ -299,8 +300,15 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { if (num>=NBR_SORTIE_TOR) return;
+  { gint numero, bit;
+    if (num>=NBR_SORTIE_TOR) return;
 
+numero = num>>3;
+           bit = 1<<(num & 0x07);
+if (etat) { Partage->a[numero] |= bit; }
+    else { Partage->a[numero] &= ~bit; }
+    
+return;       
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
 
