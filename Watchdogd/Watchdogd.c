@@ -505,7 +505,7 @@ encore:
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
-          sleep(10);
+
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
           Stopper_fils();                                              /* Arret de tous les fils watchdog */

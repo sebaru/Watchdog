@@ -77,7 +77,7 @@
      { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_onduleur: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_onduleur: thread dls seems to be running",
+    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
                    TID_onduleur );
          }
     return(TRUE);
