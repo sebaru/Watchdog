@@ -269,13 +269,11 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
-if (Liste_A_off) g_list_free(Liste_A_off);
-if (Liste_A_on)  g_list_free(Liste_A_on);
-Liste_A_on = NULL;
-Liste_A_off = NULL;
-return;
-    while ( Liste_A_off )                                                      /* Mise a zero des sorties */
-     { num = GPOINTER_TO_INT(Liste_A_off->data);
+    GList *liste;
+
+    liste = Liste_A_off;
+    while ( liste )                                                            /* Mise a zero des sorties */
+     { num = GPOINTER_TO_INT(liste->data);
        if ( A(num) )
          { numero = num>>3;
            bit = 1<<(num & 0x07);
@@ -283,11 +281,14 @@ return;
            Ajouter_arch( MNEMO_SORTIE, num, 0 );
            Partage->audit_bit_interne_per_sec++;
          }
-       Liste_A_off = g_list_remove ( Liste_A_off, Liste_A_off->data );
+       liste = liste->next;
      }
+    g_list_free(Liste_A_off);
+    Liste_A_off = NULL;
 
-    while ( Liste_A_on )                                                         /* Mise a un des sorties */
-     { num = GPOINTER_TO_INT(Liste_A_on->data);
+    liste = Liste_A_on;
+    while ( liste )                                                              /* Mise a un des sorties */
+     { num = GPOINTER_TO_INT(liste->data);
        if ( !A(num) )
         { numero = num>>3;
           bit = 1<<(num & 0x07);
@@ -295,8 +296,10 @@ return;
           Ajouter_arch( MNEMO_SORTIE, num, 1 );
           Partage->audit_bit_interne_per_sec++;
         }
-       Liste_A_on = g_list_remove ( Liste_A_on, Liste_A_on->data );                  /* Arret prioritaire */
+       liste = liste->next;
      }
+    g_list_free(Liste_A_on);
+    Liste_A_on = NULL;
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
@@ -307,15 +310,15 @@ return;
   { gint numero, bit;
     if (num>=NBR_SORTIE_TOR) return;
 
+#ifdef bouh
 numero = num>>3;
            bit = 1<<(num & 0x07);
 if (etat) { Partage->a[numero] |= bit; }
      else { Partage->a[numero] &= ~bit; }
+#endif
     
-#ifdef bouh
     if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
-#endif
 
     if ( etat )
      { Liste_A_on  = g_list_append( Liste_A_on,  GINT_TO_POINTER(num) ); }
