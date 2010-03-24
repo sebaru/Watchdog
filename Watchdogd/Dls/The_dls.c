@@ -271,9 +271,12 @@
   { gint num, numero, bit;
     GList *liste;
 
+printf("REal_SA off -----------\n");
     liste = Liste_A_off;
     while ( liste )                                                            /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(liste->data);
+printf("Real_SA num = %d\n", num );
+printf("Real_SA A(num) = %d\n", A(num) );
        if ( A(num) )
          { numero = num>>3;
            bit = 1<<(num & 0x07);
@@ -282,13 +285,17 @@
            Partage->audit_bit_interne_per_sec++;
          }
        liste = liste->next;
+printf("liste = %p\n", liste );
      }
     g_list_free(Liste_A_off);
     Liste_A_off = NULL;
 
+printf("REal_SA on ------------\n");
     liste = Liste_A_on;
     while ( liste )                                                              /* Mise a un des sorties */
      { num = GPOINTER_TO_INT(liste->data);
+printf("Real_SA num = %d\n", num );
+printf("Real_SA A(num) = %d\n", A(num) );
        if ( !A(num) )
         { numero = num>>3;
           bit = 1<<(num & 0x07);
@@ -296,6 +303,7 @@
           Ajouter_arch( MNEMO_SORTIE, num, 1 );
           Partage->audit_bit_interne_per_sec++;
         }
+printf("liste = %p\n", liste );
        liste = liste->next;
      }
     g_list_free(Liste_A_on);
@@ -348,7 +356,7 @@
 /**********************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num>=NBR_MESSAGE_ECRITS ) return;
-
+return;
     if ( g_list_find (Liste_MSG_off, GINT_TO_POINTER(num) ) ) return;/* Si deja position. dans le tour prg */
     if ( g_list_find (Liste_MSG_on,  GINT_TO_POINTER(num) ) ) return;
 
@@ -365,7 +373,7 @@
  static void Real_MSG( void )
   { gint numero, bit, num;
     GList *liste;
-
+return;
     pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
     liste = Liste_MSG_off;
     while ( liste )                                                           /* Mise a zero des messages */
