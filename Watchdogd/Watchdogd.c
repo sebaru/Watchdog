@@ -160,12 +160,25 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
-  { gint cpt_5_minutes;
+  { struct sigaction sig;
+    gint cpt_5_minutes;
     gint cpt_1_minute;
     struct DB *db;
     gint cpt;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
+
+          sig.sa_handler = Traitement_signaux;                  /* Gestionnaire de traitement des signaux */
+          sig.sa_flags = SA_RESTART;  /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+          sigaction( SIGPIPE, &sig, NULL );
+          sigaction( SIGHUP,  &sig, NULL );                                      /* Reinitialisation soft */
+          sigaction( SIGINT,  &sig, NULL );                                      /* Reinitialisation soft */
+          sigaction( SIGALRM, &sig, NULL );                                      /* Reinitialisation soft */
+          sigaction( SIGUSR1, &sig, NULL );                            /* Reinitialisation DLS uniquement */
+          sigaction( SIGUSR2, &sig, NULL );                            /* Reinitialisation DLS uniquement */
+          sigaction( SIGIO, &sig, NULL );                              /* Reinitialisation DLS uniquement */
+          sigaction( SIGTERM, &sig, NULL );
+
     Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Debut boucle sans fin" );
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -342,8 +355,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
-  { struct sigaction sig;
-    gchar strpid[12];
+  { gchar strpid[12];
     gint fd_lock, i;
     gint import;
     gboolean fg;
@@ -493,17 +505,6 @@ encore:
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
            { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
-
-          sig.sa_handler = Traitement_signaux;                  /* Gestionnaire de traitement des signaux */
-          sig.sa_flags = SA_RESTART;  /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-          sigaction( SIGPIPE, &sig, NULL );
-          sigaction( SIGHUP,  &sig, NULL );                                      /* Reinitialisation soft */
-          sigaction( SIGINT,  &sig, NULL );                                      /* Reinitialisation soft */
-          sigaction( SIGALRM, &sig, NULL );                                      /* Reinitialisation soft */
-          sigaction( SIGUSR1, &sig, NULL );                            /* Reinitialisation DLS uniquement */
-          sigaction( SIGUSR2, &sig, NULL );                            /* Reinitialisation DLS uniquement */
-          sigaction( SIGIO, &sig, NULL );                              /* Reinitialisation DLS uniquement */
-          sigaction( SIGTERM, &sig, NULL );
 
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
