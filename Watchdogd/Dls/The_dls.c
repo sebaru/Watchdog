@@ -276,7 +276,7 @@ printf("REal_SA off -----------\n");
     while ( liste )                                                            /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(liste->data);
 printf("Real_SA num = %d\n", num );
-printf("Real_SA A(num) = %d\n", A(num) );
+printf("Real_SA num = %d, %d\n", num, A(num) );
        if ( A(num) )
          { numero = num>>3;
            bit = 1<<(num & 0x07);
@@ -294,8 +294,7 @@ printf("REal_SA on ------------\n");
     liste = Liste_A_on;
     while ( liste )                                                              /* Mise a un des sorties */
      { num = GPOINTER_TO_INT(liste->data);
-printf("Real_SA num = %d\n", num );
-printf("Real_SA A(num) = %d\n", A(num) );
+printf("Real_SA num = %d, %d\n", num, A(num) );
        if ( !A(num) )
         { numero = num>>3;
           bit = 1<<(num & 0x07);
@@ -303,8 +302,8 @@ printf("Real_SA A(num) = %d\n", A(num) );
           Ajouter_arch( MNEMO_SORTIE, num, 1 );
           Partage->audit_bit_interne_per_sec++;
         }
-printf("liste = %p\n", liste );
        liste = liste->next;
+printf("liste = %p\n", liste );
      }
     g_list_free(Liste_A_on);
     Liste_A_on = NULL;
