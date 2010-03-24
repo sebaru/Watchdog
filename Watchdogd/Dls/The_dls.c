@@ -269,8 +269,10 @@
 /**********************************************************************************************************/
  static void Real_SA( void )
   { gint num, numero, bit;
-g_list_free(Liste_A_off);
-g_list_free(Liste_A_on);
+if (Liste_A_off) g_list_free(Liste_A_off);
+if (Liste_A_on)  g_list_free(Liste_A_on);
+Liste_A_on = NULL;
+Liste_A_off = NULL;
 return;
     while ( Liste_A_off )                                                      /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(Liste_A_off->data);
