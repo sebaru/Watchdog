@@ -216,7 +216,7 @@
      } else
     if ( ! strcmp ( commande, "audit" ) )
      { gint num;
-       g_snprintf( chaine, sizeof(chaine), " Partage->Top : %d\n", Partage->Top );
+       g_snprintf( chaine, sizeof(chaine), " Partage->Top : %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Bit/s        : %d\n", Partage->audit_bit_interne_per_sec_hold );
