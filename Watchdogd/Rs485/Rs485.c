@@ -489,9 +489,18 @@
           Partage->com_rs485.admin_stop = 0;
         }
 
-       if (Partage->com_rs485.Modules_RS485 == NULL ||          /* Si pas de module référencés, on attend */
-           Rs485_is_actif() == FALSE)
+       if (Partage->com_rs485.Modules_RS485 == NULL )           /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
+
+       if (Rs485_is_actif() == FALSE)                     /* Si aucun module actif, on restart la comm RS */
+        { close(fd_rs485);
+          fd_rs485 = Init_rs485();
+          if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
+           { Info( Config.log, DEBUG_INFO, "RS485: Restart Acces RS485 impossible, terminé");
+             pthread_exit(GINT_TO_POINTER(-1));
+           }
+          continue;
+        }
 
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
