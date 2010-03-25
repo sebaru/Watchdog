@@ -91,8 +91,36 @@
 /**********************************************************************************************************/
  static void Traitement_signaux( int num )
   { char chaine[50];
+    if (num == SIGALRM)
+     { Partage->top++;
+       if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
+        { Info( Config.log, DEBUG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
+       if (!(Partage->top%10))                                              /* Cligno toutes les secondes */
+        { SB(4, !B(4));
+          Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
+          Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
+          Partage->audit_bit_interne_per_sec = 0;
+
+          Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
+          Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
+          Partage->audit_tour_dls_per_sec = 0;
+          if (Partage->audit_tour_dls_per_sec_hold > 1000)                      /* Moyennage tour DLS/sec */
+           { Partage->com_dls.temps_sched += 50; }
+          else if (Partage->audit_tour_dls_per_sec_hold < 900)
+           { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 50; }
+        }
+
+       Partage->top_cdg_plugin_dls++;                                        /* Chien de garde plugin DLS */
+       if (Partage->top_cdg_plugin_dls>50)
+        { Info( Config.log, DEBUG_INFO, "Traitement signaux: CDG plugin DLS !!" );
+          Partage->top_cdg_plugin_dls = 0;
+        }
+       return;
+     }
+
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-printf("Traitement_signaux: %s, %d\n", chaine, num );
+    Info_c( Config.log, DEBUG_INFO, "Traitement_signaux: traité par", chaine );
+
     switch (num)
      { case SIGQUIT:
        case SIGINT:  Info_n( Config.log, DEBUG_INFO, "SIGINT Caught", Partage->Arret );
@@ -105,30 +133,6 @@ printf("Traitement_signaux: %s, %d\n", chaine, num );
                      Info_n( Config.log, DEBUG_INFO, "Arret=fin", Partage->Arret );
                      break;
        case SIGCHLD: Info( Config.log, DEBUG_INFO, "SIGCHLD Caught" ); /* Si arret demandé du serveur */
-                     break;
-       case SIGALRM: Partage->top++;
-                     if (!Partage->top) /* Si on passe par zero, on le dit (DEBUG interference) */
-                      { Info( Config.log, DEBUG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
-                     if (!(Partage->top%10))                                /* Cligno toutes les secondes */
-                      { SB(4, !B(4));
-                        Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
-                        Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
-                        Partage->audit_bit_interne_per_sec = 0;
-
-                        Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
-                        Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
-                        Partage->audit_tour_dls_per_sec = 0;
-                        if (Partage->audit_tour_dls_per_sec_hold > 1000)        /* Moyennage tour DLS/sec */
-                         { Partage->com_dls.temps_sched += 50; }
-                        else if (Partage->audit_tour_dls_per_sec_hold < 900)
-                         { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 50; }
-                      }
-
-                     Partage->top_cdg_plugin_dls++;                          /* Chien de garde plugin DLS */
-                     if (Partage->top_cdg_plugin_dls>50)
-                      { Info( Config.log, DEBUG_INFO, "Traitement signaux: CDG plugin DLS !!" );
-                        Partage->top_cdg_plugin_dls = 0;
-                      }
                      break;
        case SIGPIPE: Info( Config.log, DEBUG_INFO, "Recu SIGPIPE" ); break;
        case SIGBUS:  Info( Config.log, DEBUG_INFO, "Recu SIGBUS" ); break;
