@@ -169,6 +169,7 @@
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes;
     gint cpt_1_minute;
+    sigset_t sigset;
     struct DB *db;
     gint cpt;
 
@@ -182,6 +183,15 @@
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute = Partage->top + 600;
+
+    sigfillset (&sigset);                                     /* Par défaut tous les signaux sont bloqués */
+    sigdelset (&sigset, SIGALRM);
+    sigdelset (&sigset, SIGPIPE);
+    sigdelset (&sigset, SIGHUP);
+    sigdelset (&sigset, SIGUSR1);
+    sigdelset (&sigset, SIGUSR2);
+    sigdelset (&sigset, SIGTERM);
+    pthread_sigmask( SIG_SETMASK, &sigset, NULL );
 
     sleep(1);
     while( Partage->Arret < FIN )
@@ -464,14 +474,7 @@
        sigaction( SIGTERM, &sig, NULL );
 
        sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
-       sigdelset (&sigset, SIGALRM);
-       sigdelset (&sigset, SIGPIPE);
-       sigdelset (&sigset, SIGHUP);
-       sigdelset (&sigset, SIGUSR1);
-       sigdelset (&sigset, SIGUSR2);
-       sigdelset (&sigset, SIGTERM);
        pthread_sigmask( SIG_SETMASK, &sigset, NULL );
-
 encore:   
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
