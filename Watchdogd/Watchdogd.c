@@ -160,24 +160,12 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
-  { struct sigaction sig;
-    gint cpt_5_minutes;
+  { gint cpt_5_minutes;
     gint cpt_1_minute;
     struct DB *db;
     gint cpt;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
-
-          sig.sa_handler = Traitement_signaux;                  /* Gestionnaire de traitement des signaux */
-          sig.sa_flags = SA_RESTART;  /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-          sigaction( SIGPIPE, &sig, NULL );
-          sigaction( SIGHUP,  &sig, NULL );                                      /* Reinitialisation soft */
-          sigaction( SIGINT,  &sig, NULL );                                      /* Reinitialisation soft */
-          sigaction( SIGALRM, &sig, NULL );                                      /* Reinitialisation soft */
-          sigaction( SIGUSR1, &sig, NULL );                            /* Reinitialisation DLS uniquement */
-          sigaction( SIGUSR2, &sig, NULL );                            /* Reinitialisation DLS uniquement */
-          sigaction( SIGIO, &sig, NULL );                              /* Reinitialisation DLS uniquement */
-          sigaction( SIGTERM, &sig, NULL );
 
     Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Debut boucle sans fin" );
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
@@ -355,8 +343,10 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
-  { gchar strpid[12];
+  { struct sigaction sig;
+    gchar strpid[12];
     gint fd_lock, i;
+    sigset_t sigset;
     gint import;
     gboolean fg;
 
@@ -455,6 +445,20 @@
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
 
+       sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
+       sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+       sigaction( SIGPIPE, &sig, NULL );
+       sigaction( SIGHUP,  &sig, NULL );                                         /* Reinitialisation soft */
+       sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
+       sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
+       sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
+       sigaction( SIGUSR2, &sig, NULL );                               /* Reinitialisation DLS uniquement */
+       sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
+       sigaction( SIGTERM, &sig, NULL );
+
+       sigemptyset (&sigset);
+       sigaddset (&sigset, SIGALRM);
+       pthread_sigmask( SIG_SETMASK, &sigset, NULL );
 encore:   
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
