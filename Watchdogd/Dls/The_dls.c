@@ -271,12 +271,9 @@
   { gint num, numero, bit;
     GList *liste;
 
-printf("REal_SA off -----------\n");
     liste = Liste_A_off;
     while ( liste )                                                            /* Mise a zero des sorties */
      { num = GPOINTER_TO_INT(liste->data);
-printf("Real_SA num = %d\n", num );
-printf("Real_SA num = %d, %d\n", num, A(num) );
        if ( A(num) )
          { numero = num>>3;
            bit = 1<<(num & 0x07);
@@ -285,16 +282,13 @@ printf("Real_SA num = %d, %d\n", num, A(num) );
            Partage->audit_bit_interne_per_sec++;
          }
        liste = liste->next;
-printf("liste = %p\n", liste );
      }
     g_list_free(Liste_A_off);
     Liste_A_off = NULL;
 
-printf("REal_SA on ------------\n");
     liste = Liste_A_on;
     while ( liste )                                                              /* Mise a un des sorties */
      { num = GPOINTER_TO_INT(liste->data);
-printf("Real_SA num = %d, %d\n", num, A(num) );
        if ( !A(num) )
         { numero = num>>3;
           bit = 1<<(num & 0x07);
@@ -303,7 +297,6 @@ printf("Real_SA num = %d, %d\n", num, A(num) );
           Partage->audit_bit_interne_per_sec++;
         }
        liste = liste->next;
-printf("liste = %p\n", liste );
      }
     g_list_free(Liste_A_on);
     Liste_A_on = NULL;

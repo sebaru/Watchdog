@@ -90,7 +90,10 @@
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
  static void Traitement_signaux( int num )
-  { switch (num)
+  { char chaine[50];
+    prctl(PR_GET_NAME, chaine, 0, 0, 0 );
+printf("Traitement_signaux: %s, %d\n", chaine, num );
+    switch (num)
      { case SIGQUIT:
        case SIGINT:  Info_n( Config.log, DEBUG_INFO, "SIGINT Caught", Partage->Arret );
                      Partage->Arret = FIN;                   /* On demande l'arret de la boucle programme */
