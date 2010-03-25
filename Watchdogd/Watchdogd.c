@@ -459,9 +459,15 @@ printf("Traitement_signaux: %s, %d\n", chaine, num );
        sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
        sigaction( SIGTERM, &sig, NULL );
 
-       sigemptyset (&sigset);
-       sigaddset (&sigset, SIGALRM);
+       sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
+       sigdelset (&sigset, SIGALRM);
+       sigdelset (&sigset, SIGPIPE);
+       sigdelset (&sigset, SIGHUP);
+       sigdelset (&sigset, SIGUSR1);
+       sigdelset (&sigset, SIGUSR2);
+       sigdelset (&sigset, SIGTERM);
        pthread_sigmask( SIG_SETMASK, &sigset, NULL );
+
 encore:   
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
