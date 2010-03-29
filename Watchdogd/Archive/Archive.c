@@ -103,24 +103,8 @@
                                        g_list_length(Partage->com_arch.liste_arch) );
 #endif
        Partage->com_arch.taille_arch--;
-
-       liste = Partage->com_arch.liste_arch;
-       while (liste)
-        { struct ARCHDB *arch_en_cours;
-          arch_en_cours = Partage->com_arch.liste_arch->data;                     /* Recuperation du arch */
-          if (arch->type == arch->type && arch->num == arch->num)
-           { Partage->com_arch.liste_arch = g_list_remove ( Partage->com_arch.liste_arch, arch_en_cours );
-             Partage->com_arch.taille_arch--;
-             liste = Partage->com_arch.liste_arch;
-           }
-          else
-          liste = liste->next;
-        }
-
        pthread_mutex_unlock( &Partage->com_arch.synchro );
-
        Ajouter_archDB ( Config.log, db, arch );
-
        g_free(arch);
      }
     Libere_DB_SQL( Config.log, &db );
