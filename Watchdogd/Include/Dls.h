@@ -34,6 +34,7 @@
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     guint temps_sched;
+    GList *Liste_A;
     GList *Liste_MSG;
   };
 

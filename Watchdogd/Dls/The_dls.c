@@ -42,7 +42,6 @@
  #include "Dls.h"
 
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
- static GList *Liste_A=NULL;                                          /* Listes des actionneurs a activer */
  struct BIT_A_CHANGER
   { gint num;
     gint actif;
@@ -273,8 +272,8 @@
     gint numero, bit;
     GList *liste;
 
-    if (!Liste_A) return;
-    liste = Liste_A;                                          /* Parcours de la liste des A a positionner */
+    if (!Partage->com_dls.Liste_A) return;
+    liste = Partage->com_dls.Liste_A;                         /* Parcours de la liste des A a positionner */
     while (liste)
      { bac = (struct BIT_A_CHANGER *)liste->data;
        numero = bac->num>>3;
@@ -292,8 +291,8 @@
        g_free(bac);
        liste = liste->next;
      }
-    g_list_free(Liste_A);
-    Liste_A = NULL;
+    g_list_free(Partage->com_dls.Liste_A);
+    Partage->com_dls.Liste_A = NULL;
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
@@ -305,7 +304,7 @@
     GList *liste;
     if (num>=NBR_SORTIE_TOR) return;
 
-    liste = Liste_A;                                          /* Parcours de la liste des A a positionner */
+    liste = Partage->com_dls.Liste_A;                         /* Parcours de la liste des A a positionner */
     while (liste)
      { bac = (struct BIT_A_CHANGER *)liste->data;
        if (bac->num == num) return;                        /* Si deja dans la liste on ne positionne rien */
@@ -316,7 +315,7 @@
     if (!bac) return;                                                           /* Si probleme de mémoire */
     bac->num = num;
     bac->actif = etat;
-    Liste_A = g_list_append( Liste_A, bac );
+    Partage->com_dls.Liste_A = g_list_append( Partage->com_dls.Liste_A, bac );
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
