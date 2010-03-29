@@ -288,7 +288,9 @@
 
     liste = Liste_A_on;
     while ( liste )                                                              /* Mise a un des sorties */
-     { num = GPOINTER_TO_INT(liste->data);
+     { printf("liste= %p\n", liste );
+       printf("           data = %p\n", liste->data );
+       num = GPOINTER_TO_INT(liste->data);
        if ( !A(num) )
         { numero = num>>3;
           bit = 1<<(num & 0x07);
