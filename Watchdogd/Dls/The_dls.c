@@ -43,9 +43,8 @@
 
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
  static GList *Liste_A=NULL;                                          /* Listes des actionneurs a activer */
- static GList *Liste_MSG_on=NULL;                                        /* Listes des messages a activer */
- static GList *Liste_MSG_off=NULL;                                    /* Listes des messages a desactiver */
- static struct BIT_A_CHANGER
+ static GList *Liste_MSG=NULL;                                           /* Listes des messages a activer */
+ struct BIT_A_CHANGER
   { gint num;
     gint actif;
   };
@@ -344,64 +343,66 @@
      { Partage->ch[ num ].actif = FALSE; }
   }
 /**********************************************************************************************************/
-/* MSG: Positionnement des message DLS                                                                    */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void MSG( int num, int etat )
-  { if ( num>=NBR_MESSAGE_ECRITS ) return;
-return;
-    if ( g_list_find (Liste_MSG_off, GINT_TO_POINTER(num) ) ) return;/* Si deja position. dans le tour prg */
-    if ( g_list_find (Liste_MSG_on,  GINT_TO_POINTER(num) ) ) return;
-
-    if ( etat )
-     { Liste_MSG_on  = g_list_append( Liste_MSG_on,  GINT_TO_POINTER(num) ); }
-    else
-     { Liste_MSG_off = g_list_append( Liste_MSG_off, GINT_TO_POINTER(num) ); }
-  }
-/**********************************************************************************************************/
 /* MSG: Envoi d'un message au serveur                                                                     */
 /* Entrée: le numero du message, le type de clignotement                                                  */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  static void Real_MSG( void )
-  { gint numero, bit, num;
+  { struct BIT_A_CHANGER *bac;
+    gint numero, bit;
     GList *liste;
-return;
+
     pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
-    liste = Liste_MSG_off;
-    while ( liste )                                                           /* Mise a zero des messages */
-     { num = GPOINTER_TO_INT(liste->data);
-       numero = num>>3;
-       bit = 1<<(num & 0x07);
-       if ( (Partage->g[numero] & bit) )
+    liste = Liste_MSG;                                        /* Parcours de la liste des A a positionner */
+    while (liste)
+     { bac = (struct BIT_A_CHANGER *)liste->data;
+       numero = bac->num>>3;
+       bit = 1<<(bac->num & 0x07);
+       if ( (Partage->g[numero] & bit) && bac->actif==0 )
         { Partage->g[numero] &= ~bit;
 
-          Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off, GINT_TO_POINTER(num) );
+          Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
+                                                           GINT_TO_POINTER(bac->num) );
           Partage->audit_bit_interne_per_sec++;
         }
-       liste = liste->next;
-     }
-    g_list_free(Liste_MSG_off);
-    Liste_MSG_off = NULL;
-
-    liste = Liste_MSG_on;
-    while ( liste )                                                      /* Mise a un des messages */
-     { num = GPOINTER_TO_INT(liste->data);
-       numero = num>>3;
-       bit = 1<<(num & 0x07);
-       if ( !(Partage->g[numero] & bit) )
+       else if ( !(Partage->g[numero] & bit) && bac->actif==1 )
         { Partage->g[numero] |= bit;
 
-          Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on, GINT_TO_POINTER(num) );
+          Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
+                                                          GINT_TO_POINTER(bac->num) );
           Partage->audit_bit_interne_per_sec++;
         }
+       g_free(bac);
        liste = liste->next;
      }
-    g_list_free(Liste_MSG_on);
-    Liste_MSG_on = NULL;
+    g_list_free(Liste_MSG);
+    Liste_MSG = NULL;
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
+/**********************************************************************************************************/
+/* MSG: Positionnement des message DLS                                                                    */
+/* Entrée: numero, etat                                                                                   */
+/* Sortie: Neant                                                                                          */
+/**********************************************************************************************************/
+ void MSG( int num, int etat )
+  { struct BIT_A_CHANGER *bac;
+    GList *liste;
+    if ( num>=NBR_MESSAGE_ECRITS ) return;
+
+    liste = Liste_MSG;                                        /* Parcours de la liste des A a positionner */
+    while (liste)
+     { bac = (struct BIT_A_CHANGER *)liste->data;
+       if (bac->num == num) return;                        /* Si deja dans la liste on ne positionne rien */
+       liste = liste->next;
+     }
+
+    bac = g_malloc0( sizeof( struct BIT_A_CHANGER ) );
+    if (!bac) return;                                                           /* Si probleme de mémoire */
+    bac->num = num;
+    bac->actif = etat;
+    Liste_MSG = g_list_append( Liste_MSG, bac );
+  }
+
 /**********************************************************************************************************/
 /* Raz_cde_exterieure: Mise à zero des monostables de commande exterieure                                 */
 /* Entrée: rien                                                                                           */
