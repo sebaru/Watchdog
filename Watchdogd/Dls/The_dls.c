@@ -272,14 +272,18 @@
 
     if ( Partage->a[num].etat==1 && etat==0 )
      { Partage->a[num].etat = 0;
-       if ( Partage->a[num].last_arch + 5 < Partage->top ) Ajouter_arch( MNEMO_SORTIE, num, 0 );
-       Partage->a[num].last_arch = Partage->top;
+       if ( Partage->a[num].last_arch + 5 < Partage->top ) 
+        { Ajouter_arch( MNEMO_SORTIE, num, 0 );
+          Partage->a[num].last_arch = Partage->top;
+        }
        Partage->audit_bit_interne_per_sec++;
      }
     else if ( Partage->a[num].etat==0 && etat==1 )
      { Partage->a[num].etat = 1;
-       if ( Partage->a[num].last_arch + 5 < Partage->top ) Ajouter_arch( MNEMO_SORTIE, num, 1 );
-       Partage->a[num].last_arch = Partage->top;
+       if ( Partage->a[num].last_arch + 5 < Partage->top )
+        { Ajouter_arch( MNEMO_SORTIE, num, 1 );
+          Partage->a[num].last_arch = Partage->top;
+        }
        Partage->audit_bit_interne_per_sec++;
      }
   }
