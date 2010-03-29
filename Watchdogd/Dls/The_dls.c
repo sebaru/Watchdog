@@ -481,7 +481,7 @@
           Partage->com_dls.admin_stop = 0;
         }
 
-       if (Partage->com_dls.liste_plugin_reset)                     /* A-t-on un plugin a reseter ?? */
+       if (Partage->com_dls.liste_plugin_reset)                          /* A-t-on un plugin a reseter ?? */
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
@@ -496,6 +496,7 @@
        SB(2, 1);                                                                   /* B2 est toujours à 1 */
        SI(1, 1, 255, 0, 0, 0 );                                               /* Icone toujours à 1:rouge */
 
+       pthread_mutex_lock( &Partage->com_dls.synchro );
        plugins = Partage->com_dls.Plugins;
        while(plugins)                                            /* On execute tous les modules un par un */
         { struct PLUGIN_DLS *plugin_actuel;
@@ -504,15 +505,14 @@
           if (plugin_actuel->on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
-             pthread_mutex_lock( &Partage->com_dls.synchro );
              plugin_actuel->go( plugin_actuel->starting );                          /* On appel le plugin */
-             pthread_mutex_unlock( &Partage->com_dls.synchro );
              gettimeofday( &tv_apres, NULL );
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->starting = 0;
            }
           plugins = plugins->next;
         }
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB(3, 1);                                  /* B3 est toujours à un apres le premier tour programme */
 
        Raz_cde_exterieure();                        /* Mise à zero des monostables de commande exterieure */
