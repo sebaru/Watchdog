@@ -108,7 +108,7 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int A( int num )
-  { return( (num<NBR_SORTIE_TOR) && ((Partage->a[ num>>3 ]) & (1<<(num%8))) ); }
+  { return( num<NBR_SORTIE_TOR && Partage->a[ num ].etat ); }
   
 /**********************************************************************************************************/
 /* Renvoie la valeur d'un bistable                                                                        */
@@ -268,19 +268,18 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { gint numero, bit;
-    if (num>=NBR_SORTIE_TOR) return;
+  { if (num>=NBR_SORTIE_TOR) return;
 
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if ( A(num) && etat==0 )
-     { Partage->a[numero] &= ~bit;
-       Ajouter_arch( MNEMO_SORTIE, num, 0 );
+    if ( Partage->a[num].etat==1 && etat==0 )
+     { Partage->a[num].etat = 0;
+       if ( Partage->a[num].last_arch + 5 < Partage->top ) Ajouter_arch( MNEMO_SORTIE, num, 0 );
+       Partage->a[num].last_arch = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
-    else if ( !A(num) && etat==1 )
-     { Partage->a[numero] |= bit;
-       Ajouter_arch( MNEMO_SORTIE, num, 1 );
+    else if ( Partage->a[num].etat==0 && etat==1 )
+     { Partage->a[num].etat = 1;
+       if ( Partage->a[num].last_arch + 5 < Partage->top ) Ajouter_arch( MNEMO_SORTIE, num, 1 );
+       Partage->a[num].last_arch = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
   }

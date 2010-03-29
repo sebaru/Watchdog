@@ -80,6 +80,12 @@
     guint   inrange;
   };
 
+ struct SORTIE_TOR
+  { gint num;
+    gchar etat;
+    gint last_arch;
+  };
+
  struct COURBE
   { guint id;
     guint slot_id;
@@ -128,7 +134,7 @@
     guint  ea_histo [ NBR_ENTRE_ANA ][TAILLEBUF_HISTO_EANA];                        /* Stockage EA en int */
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                  /* Monostables du DLS (DLS=rw, Sserveur=r) */
     guchar e [ NBR_ENTRE_TOR>>3 ];
-    guchar a [ NBR_SORTIE_TOR>>3 ];
+    struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                  /* Bistables */
     guchar g [ (NBR_MESSAGE_ECRITS>>3) + 1 ];                               /* Message vers veille et syn */
     struct I_MOTIF i[ (NBR_BIT_CONTROLE>>3) + 1 ];                                  /* DLS=rw, Sserveur=r */
