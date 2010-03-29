@@ -273,12 +273,12 @@
 
     numero = num>>3;
     bit = 1<<(num & 0x07);
-    if ( A(num) && etat )
+    if ( A(num) && etat==0 )
      { Partage->a[numero] &= ~bit;
        Ajouter_arch( MNEMO_SORTIE, num, 0 );
        Partage->audit_bit_interne_per_sec++;
      }
-    else if ( !A(num) && etat )
+    else if ( !A(num) && etat==1 )
      { Partage->a[numero] |= bit;
        Ajouter_arch( MNEMO_SORTIE, num, 1 );
        Partage->audit_bit_interne_per_sec++;
