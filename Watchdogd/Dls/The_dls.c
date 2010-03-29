@@ -42,10 +42,13 @@
  #include "Dls.h"
 
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
- static GList *Liste_A_on=NULL;                                       /* Listes des actionneurs a activer */
- static GList *Liste_A_off=NULL;                                   /* Listes des actionneurs a desactiver */
+ static GList *Liste_A=NULL;                                          /* Listes des actionneurs a activer */
  static GList *Liste_MSG_on=NULL;                                        /* Listes des messages a activer */
  static GList *Liste_MSG_off=NULL;                                    /* Listes des messages a desactiver */
+ static struct BIT_A_CHANGER
+  { gint num;
+    gint actif;
+  };
 /**********************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
 /* Entrée: le temps avant, et le temps apres l'action                                                     */
@@ -268,40 +271,30 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  static void Real_SA( void )
-  { gint num, numero, bit;
+  { struct BIT_A_CHANGER *bac;
+    gint numero, bit;
     GList *liste;
 
-    liste = Liste_A_off;
-    while ( liste )                                                            /* Mise a zero des sorties */
-     { num = GPOINTER_TO_INT(liste->data);
-       if ( A(num) )
-         { numero = num>>3;
-           bit = 1<<(num & 0x07);
-           Partage->a[numero] &= ~bit;
-           Ajouter_arch( MNEMO_SORTIE, num, 0 );
+    liste = Liste_A;                                          /* Parcours de la liste des A a positionner */
+    while (liste)
+     { bac = (struct BIT_A_CHANGER *)liste->data;
+       numero = bac->num>>3;
+       bit = 1<<(bac->num & 0x07);
+       if ( A(bac->num) && !bac->actif )
+         { Partage->a[numero] &= ~bit;
+           Ajouter_arch( MNEMO_SORTIE, bac->num, 0 );
            Partage->audit_bit_interne_per_sec++;
          }
-       liste = liste->next;
-     }
-    g_list_free(Liste_A_off);
-    Liste_A_off = NULL;
-
-    liste = Liste_A_on;
-    while ( liste )                                                              /* Mise a un des sorties */
-     { printf("liste= %p\n", liste );
-       printf("           data = %p\n", liste->data );
-       num = GPOINTER_TO_INT(liste->data);
-       if ( !A(num) )
-        { numero = num>>3;
-          bit = 1<<(num & 0x07);
-          Partage->a[numero] |= bit;
-          Ajouter_arch( MNEMO_SORTIE, num, 1 );
+       else if ( !A(bac->num) && bac->actif )
+        { Partage->a[numero] |= bit;
+          Ajouter_arch( MNEMO_SORTIE, bac->num, 1 );
           Partage->audit_bit_interne_per_sec++;
         }
+       g_free(bac);
        liste = liste->next;
      }
-    g_list_free(Liste_A_on);
-    Liste_A_on = NULL;
+    g_list_free(Liste_A);
+    Liste_A = NULL;
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
@@ -309,15 +302,22 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { if (num>=NBR_SORTIE_TOR) return;
+  { struct BIT_A_CHANGER *bac;
+    GList *liste;
+    if (num>=NBR_SORTIE_TOR) return;
 
-    if ( g_list_find (Liste_A_off, GINT_TO_POINTER(num) ) ) return; /* Si deja position. dans le tour prg */
-    if ( g_list_find (Liste_A_on,  GINT_TO_POINTER(num) ) ) return;
+    liste = Liste_A;                                          /* Parcours de la liste des A a positionner */
+    while (liste)
+     { bac = (struct BIT_A_CHANGER *)liste->data;
+       if (bac->num == num) return;                        /* Si deja dans la liste on ne positionne rien */
+       liste = liste->next;
+     }
 
-    if ( etat )
-     { Liste_A_on  = g_list_append( Liste_A_on,  GINT_TO_POINTER(num) ); }
-    else
-     { Liste_A_off = g_list_append( Liste_A_off, GINT_TO_POINTER(num) ); }
+    bac = g_malloc0( sizeof( struct BIT_A_CHANGER ) );
+    if (!bac) return;                                                           /* Si probleme de mémoire */
+    bac->num = num;
+    bac->actif = etat;
+    Liste_A = g_list_append( Liste_A, bac );
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
