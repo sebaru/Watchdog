@@ -46,11 +46,13 @@
        Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
        return;
      }
-
     liste = Partage->com_arch.liste_arch;
     pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
+printf(" longueur liste %d\n", g_list_length(Partage->com_arch.liste_arch) );
     while (liste)
-     { arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+     {
+       arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+printf(" arch %p\n", arch );
        if (arch->type == type && arch->num == num) break;
        liste = liste->next;
      }
