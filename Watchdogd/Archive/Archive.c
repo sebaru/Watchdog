@@ -48,9 +48,10 @@
      }
     liste = Partage->com_arch.liste_arch;
     pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
-printf(" longueur liste %d\n", g_list_length(Partage->com_arch.liste_arch) );
+printf(" longueur liste %p %d\n", liste, g_list_length(Partage->com_arch.liste_arch) );
     while (liste)
      {
+printf(" début\n" );
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
 printf(" arch %p\n", arch );
        if (arch->type == type && arch->num == num) break;
