@@ -39,26 +39,12 @@
  void Ajouter_arch( gint type, gint num, gint valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
-    GList *liste;
 
     if (Partage->com_arch.taille_arch > 150)
      { Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150) type", type );
        Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
        return;
      }
-    pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
-    liste = Partage->com_arch.liste_arch;
-printf(" longueur liste %p liste_arch %p %d\n", liste, Partage->com_arch.liste_arch, g_list_length(Partage->com_arch.liste_arch) );
-    while (liste)
-     {
-printf(" début\n" );
-       arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
-printf(" arch %p\n", arch );
-       if (arch->type == type && arch->num == num) break;
-       liste = liste->next;
-     }
-    pthread_mutex_unlock( &Partage->com_arch.synchro );
-    if (liste) return;                                              /* Si deja dans la base, on le swappe */
 
     arch = (struct ARCHDB *)g_malloc( sizeof(struct ARCHDB) );
     if (!arch) return;
@@ -80,6 +66,7 @@ printf(" arch %p\n", arch );
 /**********************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
+    GList *liste;
     guint top;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
@@ -116,6 +103,20 @@ printf(" arch %p\n", arch );
                                        g_list_length(Partage->com_arch.liste_arch) );
 #endif
        Partage->com_arch.taille_arch--;
+
+       liste = Partage->com_arch.liste_arch;
+       while (liste)
+        { struct ARCHDB *arch_en_cours;
+          arch_en_cours = Partage->com_arch.liste_arch->data;                     /* Recuperation du arch */
+          if (arch->type == arch->type && arch->num == arch->num)
+           { Partage->com_arch.liste_arch = g_list_remove ( Partage->com_arch.liste_arch, arch_en_cours );
+             Partage->com_arch.taille_arch--;
+             liste = Partage->com_arch.liste_arch;
+           }
+          else
+          liste = liste->next;
+        }
+
        pthread_mutex_unlock( &Partage->com_arch.synchro );
 
        Ajouter_archDB ( Config.log, db, arch );
