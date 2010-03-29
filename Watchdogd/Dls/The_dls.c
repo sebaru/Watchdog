@@ -274,6 +274,7 @@
     gint numero, bit;
     GList *liste;
 
+    if (!Liste_A) return;
     liste = Liste_A;                                          /* Parcours de la liste des A a positionner */
     while (liste)
      { bac = (struct BIT_A_CHANGER *)liste->data;
@@ -352,6 +353,7 @@
     gint numero, bit;
     GList *liste;
 
+    if (!Liste_MSG) return;
     pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
     liste = Liste_MSG;                                        /* Parcours de la liste des A a positionner */
     while (liste)
