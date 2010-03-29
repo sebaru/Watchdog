@@ -39,12 +39,23 @@
  void Ajouter_arch( gint type, gint num, gint valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
+    GList *liste;
 
     if (Partage->com_arch.taille_arch > 150)
      { Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150) type", type );
        Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
        return;
      }
+
+    liste = Partage->com_arch.liste_arch;
+    pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
+    while (liste)
+     { arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+       if (arch->type == type && arch->num == num) break;
+       liste = liste->next;
+     }
+    pthread_mutex_unlock( &Partage->com_arch.synchro );
+    if (liste) return;                                              /* Si deja dans la base, on le swappe */
 
     arch = (struct ARCHDB *)g_malloc( sizeof(struct ARCHDB) );
     if (!arch) return;

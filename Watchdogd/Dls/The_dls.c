@@ -267,55 +267,22 @@
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
- static void Real_SA( void )
-  { struct BIT_A_CHANGER *bac;
-    gint numero, bit;
-    GList *liste;
-
-    if (!Partage->com_dls.Liste_A) return;
-    liste = Partage->com_dls.Liste_A;                         /* Parcours de la liste des A a positionner */
-    while (liste)
-     { bac = (struct BIT_A_CHANGER *)liste->data;
-       numero = bac->num>>3;
-       bit = 1<<(bac->num & 0x07);
-       if ( A(bac->num) && !bac->actif )
-         { Partage->a[numero] &= ~bit;
-           Ajouter_arch( MNEMO_SORTIE, bac->num, 0 );
-           Partage->audit_bit_interne_per_sec++;
-         }
-       else if ( !A(bac->num) && bac->actif )
-        { Partage->a[numero] |= bit;
-          Ajouter_arch( MNEMO_SORTIE, bac->num, 1 );
-          Partage->audit_bit_interne_per_sec++;
-        }
-       g_free(bac);
-       liste = liste->next;
-     }
-    g_list_free(Partage->com_dls.Liste_A);
-    Partage->com_dls.Liste_A = NULL;
-  }
-/**********************************************************************************************************/
-/* SA: Positionnement d'un actionneur DLS                                                                 */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
  void SA( int num, int etat )
-  { struct BIT_A_CHANGER *bac;
-    GList *liste;
+  { gint numero, bit;
     if (num>=NBR_SORTIE_TOR) return;
 
-    liste = Partage->com_dls.Liste_A;                         /* Parcours de la liste des A a positionner */
-    while (liste)
-     { bac = (struct BIT_A_CHANGER *)liste->data;
-       if (bac->num == num) return;                        /* Si deja dans la liste on ne positionne rien */
-       liste = liste->next;
+    numero = num>>3;
+    bit = 1<<(num & 0x07);
+    if ( A(num) && etat )
+     { Partage->a[numero] &= ~bit;
+       Ajouter_arch( MNEMO_SORTIE, num, 0 );
+       Partage->audit_bit_interne_per_sec++;
      }
-
-    bac = g_malloc0( sizeof( struct BIT_A_CHANGER ) );
-    if (!bac) return;                                                           /* Si probleme de mémoire */
-    bac->num = num;
-    bac->actif = etat;
-    Partage->com_dls.Liste_A = g_list_append( Partage->com_dls.Liste_A, bac );
+    else if ( !A(num) && etat )
+     { Partage->a[numero] |= bit;
+       Ajouter_arch( MNEMO_SORTIE, num, 1 );
+       Partage->audit_bit_interne_per_sec++;
+     }
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur horaire                                                                         */
@@ -342,67 +309,35 @@
      { Partage->ch[ num ].actif = FALSE; }
   }
 /**********************************************************************************************************/
-/* MSG: Envoi d'un message au serveur                                                                     */
-/* Entrée: le numero du message, le type de clignotement                                                  */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- static void Real_MSG( void )
-  { struct BIT_A_CHANGER *bac;
-    gint numero, bit;
-    GList *liste;
-
-    if (!Partage->com_dls.Liste_MSG) return;
-    liste = Partage->com_dls.Liste_MSG;                       /* Parcours de la liste des A a positionner */
-    pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
-    while (liste)
-     { bac = (struct BIT_A_CHANGER *)liste->data;
-       numero = bac->num>>3;
-       bit = 1<<(bac->num & 0x07);
-       if ( (Partage->g[numero] & bit) && bac->actif==0 )
-        { Partage->g[numero] &= ~bit;
-
-          Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
-                                                           GINT_TO_POINTER(bac->num) );
-          Partage->audit_bit_interne_per_sec++;
-        }
-       else if ( !(Partage->g[numero] & bit) && bac->actif==1 )
-        { Partage->g[numero] |= bit;
-
-          Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
-                                                          GINT_TO_POINTER(bac->num) );
-          Partage->audit_bit_interne_per_sec++;
-        }
-       g_free(bac);
-       liste = liste->next;
-     }
-    g_list_free(Partage->com_dls.Liste_MSG);
-    Partage->com_dls.Liste_MSG = NULL;
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-  }
-/**********************************************************************************************************/
 /* MSG: Positionnement des message DLS                                                                    */
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
-  { struct BIT_A_CHANGER *bac;
-    GList *liste;
+  { gint numero, bit;
     if ( num>=NBR_MESSAGE_ECRITS ) return;
 
-    liste = Partage->com_dls.Liste_MSG;                       /* Parcours de la liste des A a positionner */
-    while (liste)
-     { bac = (struct BIT_A_CHANGER *)liste->data;
-       if (bac->num == num) return;                        /* Si deja dans la liste on ne positionne rien */
-       liste = liste->next;
+    numero = num>>3;
+    bit = 1<<(num & 0x07);
+    if ( (Partage->g[numero] & bit) && etat==0 )
+     { Partage->g[numero] &= ~bit;
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
+                                                        GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Partage->audit_bit_interne_per_sec++;
      }
+    else if ( !(Partage->g[numero] & bit) && etat==1 )
+     { Partage->g[numero] |= bit;
 
-    bac = g_malloc0( sizeof( struct BIT_A_CHANGER ) );
-    if (!bac) return;                                                           /* Si probleme de mémoire */
-    bac->num = num;
-    bac->actif = etat;
-    Partage->com_dls.Liste_MSG = g_list_append( Partage->com_dls.Liste_MSG, bac );
+       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
+                                                       GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Partage->audit_bit_interne_per_sec++;
+     }
   }
-
 /**********************************************************************************************************/
 /* Raz_cde_exterieure: Mise à zero des monostables de commande exterieure                                 */
 /* Entrée: rien                                                                                           */
@@ -514,8 +449,6 @@
        SB(3, 1);                                  /* B3 est toujours à un apres le premier tour programme */
 
        Raz_cde_exterieure();                        /* Mise à zero des monostables de commande exterieure */
-       Real_SA();                                                           /* Positionnement des sorties */
-       Real_MSG();                                                         /* Positionnement des messages */
        Partage->audit_tour_dls_per_sec++;               /* Gestion de l'audit nbr de tour DLS par seconde */
 /************************************ Gestion des 1000 tours DLS par seconde ******************************/
        usleep(Partage->com_dls.temps_sched);
