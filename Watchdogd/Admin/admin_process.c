@@ -81,6 +81,11 @@
         } 
 
      } else
+    if ( ! strcmp ( commande, "stop" ) )
+     { Info( Config.log, DEBUG_INFO, "Admin_process : stop process" );
+       Write_admin ( client->connexion, "stopping process\n" );
+       Stopper_fils(FALSE);                              /* Termine tous les process sauf le thread ADMIN */
+     } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : SHUTDOWN demandé" );
        Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
@@ -106,6 +111,8 @@
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
                      "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls,onduleur)\n" );
+       Write_admin ( client->connexion,
+                     "  stop                 - Stop all thread\n" );
        Write_admin ( client->connexion,
                      "  RELOAD               - Reload configuration\n" );
        Write_admin ( client->connexion,

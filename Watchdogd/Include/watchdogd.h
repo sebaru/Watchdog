@@ -158,7 +158,7 @@
  extern void Gerer_jeton ( void );                                                      /* Dans process.c */
  extern void Gerer_zombie ( void );
  extern void Gerer_manque_process ( void );
- extern void Stopper_fils ( void );
+ extern void Stopper_fils ( gint flag );
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_rs485 ( void );
  extern gboolean Demarrer_modbus ( void );

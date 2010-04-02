@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/sms.c        Gestion des SMS de Watchdog v2.0                                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 16 avr 2006 19:00:46 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   ven. 02 avril 2010 20:37:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -147,7 +147,7 @@
 
        Info( Config.log, DEBUG_DLS, "SMS: Run_sms send: debut" );
        pthread_mutex_lock( &Partage->com_sms.synchro );
-       liste_sms = Partage->com_sms.liste_sms;                    /* Sauvegarde du ptr sms a envoyer */
+       liste_sms = Partage->com_sms.liste_sms;                         /* Sauvegarde du ptr sms a envoyer */
        pthread_mutex_unlock( &Partage->com_sms.synchro );
 
        gn_sms_default_submit(&sms);                                          /* The memory is zeroed here */

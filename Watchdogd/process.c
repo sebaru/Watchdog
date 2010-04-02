@@ -308,7 +308,7 @@
 /* Stopper_fils: arret de tous les fils Watchdog                                                          */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Stopper_fils ( void )
+ void Stopper_fils ( gint flag )
   { gint i;
     Info( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Debut stopper_fils") );
 
@@ -350,9 +350,11 @@
     if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
-    if (TID_admin) { pthread_join( TID_admin, NULL ); }                              /* Attente fin ADMIN */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ADMIN is down"), TID_admin );
+    if (flag)
+     { Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
+       if (TID_admin) { pthread_join( TID_admin, NULL ); }                           /* Attente fin ADMIN */
+       Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ADMIN is down"), TID_admin );
+     }
 
     Info( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Fin stopper_fils") );
   }

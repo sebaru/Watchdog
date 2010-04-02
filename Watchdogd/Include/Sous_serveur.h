@@ -48,6 +48,8 @@
  extern void Gerer_protocole_histo( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_courbe( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_histo_courbe( gint Id_serveur, struct CLIENT *client );
+ extern void Gerer_protocole_synoptique( gint Id_serveur, struct CLIENT *client );
+ extern void Gerer_protocole_camera( gint Id_serveur, struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
  extern void Envoi_clients( gint ss_id, gint tag, gint sstag, gchar *buffer, gint taille );

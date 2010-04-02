@@ -528,7 +528,7 @@ encore:
 
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
-          Stopper_fils();                                              /* Arret de tous les fils watchdog */
+          Stopper_fils(TRUE);                                              /* Arret de tous les fils watchdog */
           SSL_CTX_free( Ssl_ctx );                                                  /* Libération mémoire */
         }
       }
