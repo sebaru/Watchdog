@@ -241,13 +241,15 @@
        Partage->i[num].bleu   = bleu;
        Partage->i[num].cligno = cligno;
 
-       pthread_mutex_lock( &Partage->com_msrv.synchro );      /* Ajout dans la liste de msg a traiter */
-       nbr = g_list_length( Partage->com_msrv.liste_i );
-       if ( nbr < 200 && (! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) )) )
-        { Partage->com_msrv.liste_i = g_list_append( Partage->com_msrv.liste_i,
-                                                     GINT_TO_POINTER(num) );
+       if ( Partage->i[num].last_send + 10 <= Partage->top ) 
+        { pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
+          nbr = g_list_length( Partage->com_msrv.liste_i );
+          if ( nbr < 200 && (! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) )) )
+           { Partage->com_msrv.liste_i = g_list_append( Partage->com_msrv.liste_i,
+                                                        GINT_TO_POINTER(num) );
+           }
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
         }
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Partage->audit_bit_interne_per_sec++;
      }
   }

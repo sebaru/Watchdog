@@ -102,6 +102,7 @@
     gint vert;
     gint bleu;
     gint cligno;
+    gint last_send;
   };
 
  struct TEMPO
