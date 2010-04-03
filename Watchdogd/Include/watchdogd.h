@@ -81,11 +81,14 @@
   };
 
  struct SORTIE_TOR
-  { gint num;
-    gchar etat;
+  { gchar etat;
     gint last_arch;
   };
 
+ struct MESSAGES
+  { gchar etat;
+    gint last_send;
+  };
  struct COURBE
   { guint id;
     guint slot_id;
@@ -136,8 +139,8 @@
     guchar e [ NBR_ENTRE_TOR>>3 ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                  /* Bistables */
-    guchar g [ (NBR_MESSAGE_ECRITS>>3) + 1 ];                               /* Message vers veille et syn */
-    struct I_MOTIF i[ (NBR_BIT_CONTROLE>>3) + 1 ];                                  /* DLS=rw, Sserveur=r */
+    struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                               /* Message vers veille et syn */
+    struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                           /* DLS=rw, Sserveur=r */
     struct TEMPO Tempo_R[NBR_TEMPO];
 
                                                                    /* Interfacage serveur -> sous-serveur */

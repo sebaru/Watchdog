@@ -317,27 +317,30 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
-  { gint numero, bit;
-    if ( num>=NBR_MESSAGE_ECRITS ) return;
+  { if ( num>=NBR_MESSAGE_ECRITS ) return;
 
-    numero = num>>3;
-    bit = 1<<(num & 0x07);
-    if ( (Partage->g[numero] & bit) && etat==0 )
-     { Partage->g[numero] &= ~bit;
+    if ( Partage->g[num].etat==1 && etat==0 )
+     { Partage->g[num].etat = 0;
 
-       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
-                                                        GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       if ( Partage->g[num].last_send + 5 <= Partage->top ) 
+        { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
+                                                           GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Partage->g[num].last_send = Partage->top;
+        }
        Partage->audit_bit_interne_per_sec++;
      }
-    else if ( !(Partage->g[numero] & bit) && etat==1 )
-     { Partage->g[numero] |= bit;
+    else if ( Partage->g[num].etat==0 && etat==1 )
+     { Partage->g[num].etat = 1;
 
-       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
-                                                       GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       if ( Partage->g[num].last_send + 5 <= Partage->top ) 
+        { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
+                                                          GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Partage->g[num].last_send = Partage->top;
+        }
        Partage->audit_bit_interne_per_sec++;
      }
   }
