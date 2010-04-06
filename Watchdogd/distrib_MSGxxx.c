@@ -52,7 +52,7 @@
      { struct HISTODB histo;
 
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
-       if (msg->sms) Envoyer_sms ( msg->libelle );
+       if (msg->sms) Envoyer_sms ( msg->libelle_sms );
        if (msg->num_voc) Ajouter_audio ( msg->num );
 
 /***************************** Création de la structure interne de stockage *******************************/   

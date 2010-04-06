@@ -123,7 +123,7 @@
               { gchar texte[80];
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
-                g_snprintf( texte, sizeof(texte), "%s", msg->libelle );
+                g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
                 execlp( "espeak", "espeak", "-s", "150", "-v", "mb/mb-fr4", texte, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
