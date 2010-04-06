@@ -26,7 +26,14 @@
  */
 
  #include <gnome.h>
- 
+ #include <sys/time.h>
+ #include <sys/prctl.h>
+ #include <unistd.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/wait.h>
+ #include <fcntl.h>
+
  #include "Reseaux.h"
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
@@ -50,6 +57,61 @@
  static struct CMD_TYPE_MESSAGE Edit_msg;                                   /* Message en cours d'édition */
 
 /**********************************************************************************************************/
+/* Jouer_message_audio : Joue le message audio en paramètre                                               */
+/* Entrée : un texte à jouer                                                                              */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Jouer_message_audio ( const char *texte )
+  { gchar nom_fichier[128], cible[128];
+    gint fd_cible, pid;
+
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "test.pho" );
+    g_snprintf( cible,       sizeof(cible),       "test.au" );
+    unlink( nom_fichier );
+    unlink( cible );
+
+/***************************************** Création du PHO ************************************************/
+    printf("AUDIO : Lancement de ESPEAK %s\n", texte );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                 /* Création du .au en passant par .pho */
+     { fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       dup2( fd_cible, 1 );
+       execlp( "espeak", "espeak", "-s", "150", "-v", "mb/mb-fr4", texte, NULL );
+       printf("AUDIO: Lancement espeak failed\n");
+       _exit(0);
+     }
+    printf("AUDIO: waiting for espeak to finish pid\n");
+    wait4(pid, NULL, 0, NULL );
+    printf("AUDIO: espeak finished pid\n");
+
+/****************************************** Création du AU ************************************************/
+    printf("AUDIO : Lancement de MBROLA\n" );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                 /* Création du .au en passant par .pho */
+     { execlp( "mbrola-linux-i386", "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
+       printf("AUDIO: Lancement mbrola failed\n");
+       _exit(0);
+     }
+    printf("AUDIO: waiting for mbrola to finish pid\n");
+    wait4(pid, NULL, 0, NULL );
+    printf("AUDIO: mbrola finished pid\n");
+
+/****************************************** Lancement de l'audio ******************************************/
+    printf("AUDIO : Lancement de APLAY\n");
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)
+     { execlp( "aplay", "aplay", "-R", "1", cible, NULL );
+       printf("AUDIO: Lancement APLAY failed\n");
+       _exit(0);
+     }
+/*    printf("AUDIO: waiting for APLAY to finish pid\n");
+    wait4(pid, NULL, 0, NULL );
+    printf("AUDIO: APLAY finished pid\n");*/
+  }
+/**********************************************************************************************************/
 /* CB_ajouter_editer_message: Fonction appelée qd on appuie sur un des boutons de l'interface             */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
@@ -57,7 +119,11 @@
  static gboolean CB_ajouter_editer_message ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index;
     switch(reponse)
-     { case GTK_RESPONSE_OK:
+     { case GTK_RESPONSE_APPLY:
+             { Jouer_message_audio ( gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
+               return(TRUE);
+             }
+       case GTK_RESPONSE_OK:
              { if (edition)
                 { g_snprintf( Edit_msg.libelle, sizeof(Edit_msg.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
@@ -164,6 +230,7 @@
     F_ajout = gtk_dialog_new_with_buttons( (edit_msg ? _("Edit a message") : _("Add a message")),
                                            GTK_WINDOW(F_client),
                                            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                           GTK_STOCK_MEDIA_PLAY, GTK_RESPONSE_APPLY,
                                            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                            GTK_STOCK_OK, GTK_RESPONSE_OK,
                                            NULL);

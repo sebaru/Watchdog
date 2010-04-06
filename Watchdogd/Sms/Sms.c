@@ -75,7 +75,7 @@
     static gn_sms sms;
     static gint sms_index;
 
-    prctl(PR_SET_NAME, "Watchdogd-SMS", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     Info ( Config.log, DEBUG_INFO, "SMS: Run_sms: Demarrage" );
 
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                  /* Read config file */
