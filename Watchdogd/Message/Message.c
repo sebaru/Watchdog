@@ -56,28 +56,47 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_messageDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
-  { gchar requete[200];
-    gchar *libelle, *objet;
+  { gchar *libelle, *objet, *libelle_audio, *libelle_sms;
+    gchar requete[200];
 
     libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation impossible" );
+     { Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation libelle impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, msg->objet );                       /* Formatage correct des chaines */
     if (!objet)
      { g_free(libelle);
-       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation impossible" );
+       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation objet impossible" );
+       return(-1);
+     }
+    libelle_audio = Normaliser_chaine ( log, msg->libelle_audio );       /* Formatage correct des chaines */
+    if (!libelle_audio)
+     { g_free(libelle);
+       g_free(objet);
+       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation libelle_audio impossible" );
+       return(-1);
+     }
+    libelle_sms = Normaliser_chaine ( log, msg->libelle_sms );           /* Formatage correct des chaines */
+    if (!libelle_sms)
+     { g_free(libelle);
+       g_free(objet);
+       g_free(libelle_audio);
+       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation libelle_sms impossible" );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms) VALUES "
-                "(%d,'%s',%d,%d,%d,%s,'%s',%s)", NOM_TABLE_MSG, msg->num, libelle, msg->type,
+                "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
+                "type,num_syn,num_voc,not_inhibe,objet,sms) VALUES "
+                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s)", NOM_TABLE_MSG, msg->num,
+                libelle, libelle_audio, libelle_sms, msg->type,
                 msg->num_syn, msg->num_voc, (msg->not_inhibe ? "true" : "false"), objet,
                 (msg->sms ? "true" : "false") );
     g_free(libelle);
     g_free(objet);
+    g_free(libelle_audio);
+    g_free(libelle_sms);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -92,7 +111,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms"
+                "SELECT id,num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms,libelle_audio,libelle_sms"
                 " FROM %s ORDER BY objet,num", NOM_TABLE_MSG );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -114,8 +133,10 @@
     msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) Info( log, DEBUG_MEM, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( msg->libelle, db->row[2], sizeof(msg->libelle) );                /* Recopie dans la structure */
-       memcpy( msg->objet,   db->row[7], sizeof(msg->objet  ) );
+     { memcpy( msg->libelle,       db->row[2],  sizeof(msg->libelle) );      /* Recopie dans la structure */
+       memcpy( msg->objet,         db->row[7],  sizeof(msg->objet  ) );
+       memcpy( msg->libelle_audio, db->row[9],  sizeof(msg->libelle_audio) );
+       memcpy( msg->libelle_sms,   db->row[10], sizeof(msg->libelle_sms) );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
@@ -136,7 +157,8 @@
     struct CMD_TYPE_MESSAGE *msg;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,type,num_syn,num_voc,not_inhibe,objet,sms FROM %s WHERE num=%d",
+                "SELECT id,libelle,type,num_syn,num_voc,not_inhibe,objet,sms,libelle_audio,libelle_sms"
+                " FROM %s WHERE num=%d",
                 NOM_TABLE_MSG, num );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -153,8 +175,10 @@
     if (!msg)
      { Info( log, DEBUG_MEM, "Rechercher_msgDB: Mem error" ); }
     else
-     { memcpy( msg->libelle, db->row[1], sizeof(msg->libelle) );                /* Recopie dans la structure */
-       memcpy( msg->objet,   db->row[6], sizeof(msg->objet  ) );
+     { memcpy( msg->libelle,       db->row[1], sizeof(msg->libelle) );       /* Recopie dans la structure */
+       memcpy( msg->objet,         db->row[6], sizeof(msg->objet  ) );
+       memcpy( msg->libelle_audio, db->row[8], sizeof(msg->libelle_audio) );
+       memcpy( msg->libelle_sms,   db->row[9], sizeof(msg->libelle_sms) );
        msg->id          = atoi(db->row[0]);
        msg->num         = num;
        msg->type        = atoi(db->row[2]);
@@ -176,7 +200,8 @@
     struct CMD_TYPE_MESSAGE *msg;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms FROM %s WHERE id=%d",
+                "SELECT num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms,libelle_audio,libelle_sms"
+                " FROM %s WHERE id=%d",
                 NOM_TABLE_MSG, id );
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -192,8 +217,10 @@
     if (!msg)
      { Info( log, DEBUG_MEM, "Rechercher_msgDB_par_id: Mem error" ); }
     else
-     { memcpy( msg->libelle, db->row[1], sizeof(msg->libelle) );                /* Recopie dans la structure */
-       memcpy( msg->objet,   db->row[6], sizeof(msg->objet  ) );
+     { memcpy( msg->libelle,       db->row[1], sizeof(msg->libelle) );       /* Recopie dans la structure */
+       memcpy( msg->objet,         db->row[6], sizeof(msg->objet  ) );
+       memcpy( msg->libelle_audio, db->row[8], sizeof(msg->libelle_audio) );
+       memcpy( msg->libelle_sms,   db->row[9], sizeof(msg->libelle_sms) );
        msg->id          = id;
        msg->num         = atoi(db->row[0]);
        msg->type        = atoi(db->row[2]);
@@ -212,30 +239,49 @@
 /**********************************************************************************************************/
  gboolean Modifier_messageDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
   { gchar requete[1024];
-    gchar *libelle, *objet;
+    gchar *libelle, *objet, *libelle_audio, *libelle_sms;
 
-    libelle = Normaliser_chaine ( log, msg->libelle );
+    libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation impossible" );
-       return(FALSE);
+     { Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation libelle impossible" );
+       return(-1);
      }
-
-    objet = Normaliser_chaine ( log, msg->objet );
+    objet = Normaliser_chaine ( log, msg->objet );                       /* Formatage correct des chaines */
     if (!objet)
      { g_free(libelle);
-       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation impossible" );
-       return(FALSE);
+       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation objet impossible" );
+       return(-1);
+     }
+    libelle_audio = Normaliser_chaine ( log, msg->libelle_audio );       /* Formatage correct des chaines */
+    if (!libelle_audio)
+     { g_free(libelle);
+       g_free(objet);
+       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation libelle_audio impossible" );
+       return(-1);
+     }
+    libelle_sms = Normaliser_chaine ( log, msg->libelle_sms );           /* Formatage correct des chaines */
+    if (!libelle_sms)
+     { g_free(libelle);
+       g_free(objet);
+       g_free(libelle_audio);
+       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation libelle_sms impossible" );
+       return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,libelle='%s',type=%d,num_syn=%d,num_voc=%d,not_inhibe=%s,objet='%s',sms=%s "
+                "num=%d,libelle='%s',type=%d,num_syn=%d,num_voc=%d,not_inhibe=%s,objet='%s',sms=%s,"
+                "libelle_audio='%s',libelle_sms='%s' "
                 "WHERE id=%d",
                 NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->num_voc,
                                (msg->not_inhibe ? "true" : "false"),
-                               objet, (msg->sms ? "true" : "false"), msg->id );
+                               objet, (msg->sms ? "true" : "false"), 
+                               libelle_audio, libelle_sms,
+                msg->id );
     g_free(libelle);
     g_free(objet);
+    g_free(libelle_audio);
+    g_free(libelle_sms);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

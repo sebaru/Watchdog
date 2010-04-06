@@ -196,8 +196,11 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
      }
 
     nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d gateways", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d gateways", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
 
     for( ; ; )
      { pass = Recuperer_passerelleDB_suite( Config.log, db );

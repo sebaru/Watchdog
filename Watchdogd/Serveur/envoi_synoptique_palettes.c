@@ -202,9 +202,11 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_palette_atelier" );
      }
 
     nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d palettes", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                   (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d palettes", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
 
     for( ; ; )
      { palette = Recuperer_paletteDB_suite( Config.log, db );

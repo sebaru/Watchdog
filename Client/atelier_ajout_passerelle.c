@@ -135,7 +135,7 @@
     GtkListStore *store;
     if (F_ajout_pass) return;
 
-    F_ajout_pass = gtk_dialog_new_with_buttons( _("Add a pass"),
+    F_ajout_pass = gtk_dialog_new_with_buttons( _("Add a gateway"),
                                              GTK_WINDOW(F_client),
                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                              GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,

@@ -13,6 +13,8 @@
   { guint  id;
     guint  num;                                                    /* Numero du message dans la structure */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean not_inhibe;                          /* Flag pour la gestion par exemple de l'inhibition ... */
