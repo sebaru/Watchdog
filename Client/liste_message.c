@@ -46,6 +46,8 @@
      COLONNE_TYPE_STRING,
      COLONNE_OBJET,
      COLONNE_LIBELLE,
+     COLONNE_LIBELLE_AUDIO,
+     COLONNE_LIBELLE_SMS,
      COLONNE_COULEUR_FOND,
      COLONNE_COULEUR_TEXTE,
      NBR_COLONNE
@@ -373,6 +375,8 @@
                                               G_TYPE_STRING,                            /* String du Type */
                                               G_TYPE_STRING,                                     /* Objet */
                                               G_TYPE_STRING,                                   /* Libelle */
+                                              G_TYPE_STRING,                             /* Libelle_audio */
+                                              G_TYPE_STRING,                               /* Libelle_sms */
                                               GDK_TYPE_COLOR,      /* Couleur de fond de l'enregistrement */
                                               GDK_TYPE_COLOR      /* Couleur du texte de l'enregistrement */
                                );
@@ -432,6 +436,20 @@
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Message Audio"), renderer,
+                                                         "text", COLONNE_LIBELLE_AUDIO,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE_AUDIO);          /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Message SMS"), renderer,
+                                                         "text", COLONNE_LIBELLE_SMS,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE_SMS);            /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_message), TRUE );*/
@@ -506,6 +524,8 @@
                          COLONNE_TYPE_STRING, Type_vers_string(message->type),
                          COLONNE_OBJET, message->objet,
                          COLONNE_LIBELLE, message->libelle,
+                         COLONNE_LIBELLE_AUDIO, message->libelle_audio,
+                         COLONNE_LIBELLE_SMS, message->libelle_sms,
                          COLONNE_COULEUR_FOND, &COULEUR_FOND[message->type],
                          COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[message->type],
                          -1

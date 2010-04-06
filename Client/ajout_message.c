@@ -37,6 +37,8 @@
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Spin_num;                                /* Numéro du message en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                       /* Libelle du message */
+ static GtkWidget *Entry_lib_audio;                                           /* Libelle audio du message */
+ static GtkWidget *Entry_lib_sms;                                               /* Libelle sms du message */
  static GtkWidget *Entry_objet;                                                       /* Objet du message */
  static GtkWidget *Combo_type;                                                  /* Type actuel du message */
  static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
@@ -59,6 +61,10 @@
              { if (edition)
                 { g_snprintf( Edit_msg.libelle, sizeof(Edit_msg.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+                  g_snprintf( Edit_msg.libelle_audio, sizeof(Edit_msg.libelle_audio),
+                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
+                  g_snprintf( Edit_msg.libelle_sms, sizeof(Edit_msg.libelle_sms),
+                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
                   g_snprintf( Edit_msg.objet, sizeof(Edit_msg.objet),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
                   Edit_msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
@@ -75,6 +81,10 @@
                 { struct CMD_TYPE_MESSAGE new_msg;
                   g_snprintf( new_msg.libelle, sizeof(new_msg.libelle),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+                  g_snprintf( new_msg.libelle_audio, sizeof(new_msg.libelle_audio),
+                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
+                  g_snprintf( new_msg.libelle_sms, sizeof(new_msg.libelle_sms),
+                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
                   g_snprintf( new_msg.objet, sizeof(new_msg.objet),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
                   new_msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
@@ -170,7 +180,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 6, 4, TRUE );
+    table = gtk_table_new( 8, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -224,12 +234,26 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 5, 6 );
 
+    texte = gtk_label_new( _("Message Audio") );                                /* Le message en lui-meme */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 6, 7 );
+    Entry_lib_audio = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_audio), NBR_CARAC_LIBELLE_MSG );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, 6, 7 );
+
+    texte = gtk_label_new( _("Message SMS") );                                  /* Le message en lui-meme */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 7, 8 );
+    Entry_lib_sms = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_sms), NBR_CARAC_LIBELLE_MSG );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, 7, 8 );
+
     if (edit_msg)                                                              /* Si edition d'un message */
      { /*syn = Rechercher_syn_par_num( Nom_syn, msg->num_synoptique );*/
        Edit_msg.id = edit_msg->id;
        Edit_msg.num_syn = edit_msg->num_syn;
        Edit_msg.num_voc = edit_msg->num_voc;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
+       gtk_entry_set_text( GTK_ENTRY(Entry_lib_audio), edit_msg->libelle_audio );
+       gtk_entry_set_text( GTK_ENTRY(Entry_lib_sms), edit_msg->libelle_sms );
        gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_msg->objet );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_msg->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_not_inhibe), edit_msg->not_inhibe );
