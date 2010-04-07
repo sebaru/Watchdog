@@ -73,7 +73,7 @@
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_FORK, "Donnees importées... Checking size", FICHIER_EXPORT );
+                Info_c( Config.log, DEBUG_FORK, "Import : Donnees importées... Checking size", FICHIER_EXPORT );
                 if (Partage->taille_partage != sizeof(struct PARTAGE) )
                  { memset( Partage, 0, sizeof(struct PARTAGE) );
                    Info( Config.log, DEBUG_FORK, "Import: Wrong size .. zeroing ..." );
