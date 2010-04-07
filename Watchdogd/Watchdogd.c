@@ -83,7 +83,10 @@
                 close (fd);
                 return(1);
               }
-    return(0);
+    else      { memset( Partage, 0, sizeof(struct PARTAGE) );
+                Info( Config.log, DEBUG_FORK, "Import: no file .. zeroing ..." );
+              }
+   return(0);
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
@@ -528,7 +531,7 @@ encore:
 
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );
-          Stopper_fils(TRUE);                                              /* Arret de tous les fils watchdog */
+          Stopper_fils(TRUE);                                          /* Arret de tous les fils watchdog */
           SSL_CTX_free( Ssl_ctx );                                                  /* Libération mémoire */
         }
       }
