@@ -100,7 +100,6 @@ CommunClient/Makefile \
 Commun/Makefile \
 Commun/Reseaux/Makefile \
 Client/Include/Makefile \
-Client/Config_cli/Makefile \
 Client/Makefile \
 Conf/Include/Makefile \
 Conf/Config_cli/Makefile \

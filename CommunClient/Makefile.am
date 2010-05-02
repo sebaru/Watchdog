@@ -7,12 +7,13 @@
 SUBDIRS = 
 
 lib_LTLIBRARIES = libwatchdogclient.la
-libwatchdogclient_la_SOURCES = trame.c mnemonique.c
+libwatchdogclient_la_SOURCES = trame.c mnemonique.c Config_cli_lignes.y Config_cli_mots.l Config_cli.c
 
-#libwatchdog_la_LIBADD  = Reseaux/librezo.la
+libwatchdogclient_la_LIBADD  = @LEXLIB@
 
 libwatchdogclient_la_LDFLAGS = -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
 
 INCLUDES=$(GNOME_INCLUDEDIR) $(GNOME2_CFLAGS) -I$(top_srcdir)/IncludeClient -I$(top_srcdir)/Include
 
 MAINTAINERCLEANFILES = Makefile.in
+CLEANFILES = Config_cli_lignes.h Config_cli_lignes.c Config_cli_mots.c

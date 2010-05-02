@@ -34,8 +34,7 @@
  #include <gtksourceview/gtksourceprintcompositor.h>
 
  #include "Reseaux.h"
- #include "trame.h"
- #include "motifs.h"
+ #include "protocommunclient.h"
 
  #define TEMPS_MAX_PULSE   10                        /* 10 secondes de battements maximum pour le serveur */
  #define NBR_BIT_DLS       10000

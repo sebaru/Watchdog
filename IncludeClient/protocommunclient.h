@@ -11,12 +11,14 @@
 
  #include "trame.h"
  #include "motifs.h"
+ #include "Config_cli.h"
 
 /******************************************** Déclaration des prototypes **********************************/
 
  extern GdkColor *Couleur_bit_interne ( gint num );
  extern gchar *Type_bit_interne ( gint num );
  extern gint Type_bit_interne_int ( gchar *type );
+ extern gchar *Type_bit_interne_court ( gint num );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

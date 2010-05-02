@@ -3,7 +3,7 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                       sam 13 mar 2004 17:53:37 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config_cli
+SUBDIRS = Include
 
 bin_PROGRAMS = Watchdog-client
 Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
@@ -24,7 +24,6 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 
 Watchdog_client_LDADD  = $(top_srcdir)/Commun/libwatchdog.la \
 			 $(top_srcdir)/CommunClient/libwatchdogclient.la \
-                         Config_cli/libconfig_cli.la \
                          $(GNOME2_LIBS) \
 			 -lgtkdatabox \
 			 -lvlc-gtk
