@@ -34,8 +34,10 @@
 
  #include "sysconfig.h"
  #include "Erreur.h"
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ #include "Config_cli.h"
+ #include "client.h"
+
+ #define TITRE_F_CONFIG     N_("Client Watchdog ver" VERSION)
 
  GtkWidget *F_client;                                                            /* Widget Fenetre Client */
 
@@ -52,6 +54,11 @@
  extern gint Nbr_message;                                                /* Nombre de message de Watchdog */
 
  struct CLIENT Client_en_cours;                                  /* Identifiant de l'utilisateur en cours */
+ struct CONFIG_CLI Config_cli;                                 /* Configuration generale cliente watchdog */
+ struct CONNEXION *Connexion = NULL;                                              /* Connexion au serveur */
+ SSL_CTX *Ssl_ctx;                                                                        /* Contexte SSL */
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  time_t Pulse = -TEMPS_MAX_PULSE;                                    /* Dernier temps de pulse du serveur */
  static void Fermer_client ( void );
@@ -75,6 +82,35 @@
     GNOMEUIINFO_END
   };
 
+ GnomeUIInfo Menu_lowlevel[]=
+  { GNOMEUIINFO_ITEM_STOCK( N_("_Entree ANA"), N_("Edit IANA"),
+                            Menu_want_entreeANA, GNOME_STOCK_PIXMAP_BOOK_RED ),
+    GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
+                            Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
+    GNOMEUIINFO_END
+  };
+ GnomeUIInfo Menu_synoptique[]=
+  { GNOMEUIINFO_ITEM_STOCK( N_("Caisse a outils"), N_("Edit icons"),
+                            Menu_want_icone, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
+    GNOMEUIINFO_ITEM_STOCK( N_("Atelier"), N_("Edit syns"),
+                            Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
+    GNOMEUIINFO_END
+  };
+ GnomeUIInfo Menu_superuser[]=
+  { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
+                            Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
+    GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
+                            Menu_want_mnemonique, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
+    GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
+                            Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
+    GNOMEUIINFO_ITEM_STOCK( N_("Scenario"), N_("Edit Scenario"),
+                            Menu_want_scenario, GNOME_STOCK_PIXMAP_SCORES ),
+    GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
+    GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
+    GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
+    GNOMEUIINFO_END
+  };
  GnomeUIInfo Menu_view[]=
   { GNOMEUIINFO_ITEM_STOCK( N_("_Histo hard"), N_("histo_hard"),
                             Menu_want_histo_hard, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
@@ -94,7 +130,7 @@
     GNOMEUIINFO_ITEM_STOCK( N_("Change Password"), N_("Change the password"),
                             Changer_password, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
+    GNOMEUIINFO_SUBTREE(N_("_Super User"), Menu_superuser),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
@@ -155,10 +191,10 @@
      { case SIGINT :
        case SIGTERM: Fermer_client(); break;
        case SIGPIPE: Deconnecter(); break;
-       case SIGIO  : Info_n( Client_en_cours.config.log, DEBUG_SIGNAUX, "Signal IO !", num );
+       case SIGIO  : Info_n( Config_cli.log, DEBUG_SIGNAUX, "Signal IO !", num );
                      Ecouter_serveur();
                      break;
-       default: Info_n( Client_en_cours.config.log, DEBUG_SIGNAUX, "Signal non gere", num );
+       default: Info_n( Config_cli.log, DEBUG_SIGNAUX, "Signal non gere", num );
      }
     printf("Fin traitement signaux\n");
   }
@@ -231,18 +267,19 @@
        chdir ( REPERTOIR_CONF );
      }
 
-    Lire_config_cli( &Client_en_cours.config, file );               /* Lecture sur le fichier ~/.watchdog */
-    if (port!=-1)        Client_en_cours.config.port        = port;    /* Priorite à la ligne de commande */
-    if (debug_level!=-1) Client_en_cours.config.debug_level = debug_level;
+    Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
+    if (port!=-1)        Config_cli.port        = port;                /* Priorite à la ligne de commande */
+    if (debug_level!=-1) Config_cli.debug_level = debug_level;
 
-                                                                                   /* Init msgs d'erreurs */
-    Client_en_cours.config.log = Info_init( "Watchdog_client", Client_en_cours.config.debug_level );
+    Config_cli.log = Info_init( "Watchdog_client", Config_cli.debug_level );       /* Init msgs d'erreurs */
 
-    Info( Client_en_cours.config.log, DEBUG_INFO, _("Start") );
-    Print_config_cli( &Client_en_cours.config );
+    Info( Config_cli.log, DEBUG_INFO, _("Start") );
+    Print_config_cli( &Config_cli );
 
-    if (Init_ssl( &Client_en_cours ) == FALSE)
-     { Info( Client_en_cours.config.log, DEBUG_CRYPTO, _("Can't initialise SSL") ); }
+    Ssl_ctx = Init_ssl();
+    if (!Ssl_ctx)
+     { Info( Config_cli.log, DEBUG_CRYPTO, _("Can't initialise SSL") );
+     }
     
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
@@ -263,8 +300,8 @@
      }
 
     if (Client_en_cours.gids) g_list_free(Client_en_cours.gids);
-    Close_ssl(&Client_en_cours);
-    Info( Client_en_cours.config.log, DEBUG_INFO, _("Stopped") );
+    SSL_CTX_free(Ssl_ctx);
+    Info( Config_cli.log, DEBUG_INFO, _("Stopped") );
     exit(0);
   }
 /*--------------------------------------------------------------------------------------------------------*/

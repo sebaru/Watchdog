@@ -21,7 +21,7 @@ AC_ISC_POSIX
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
-GNOME2_CFLAGS="`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0` -I/usr/local/include/libvlc-gtk"
+GNOME2_CFLAGS="`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0`"
 AC_SUBST(GNOME2_CFLAGS)
 
 BONOBO_CFLAGS=`pkg-config --cflags libbonobo-2.0`
@@ -95,15 +95,11 @@ ALL_LINGUAS=""
 AC_OUTPUT( \
 Makefile \
 Include/Makefile \
-IncludeClient/Makefile \
-CommunClient/Makefile \
 Commun/Makefile \
-Commun/Reseaux/Makefile \
 Client/Include/Makefile \
+Commun/Reseaux/Makefile \
+Client/Config_cli/Makefile \
 Client/Makefile \
-Conf/Include/Makefile \
-Conf/Config_cli/Makefile \
-Conf/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \

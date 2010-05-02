@@ -3,37 +3,22 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 28 nov 2004 13:05:11 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-/*
- * supervision_comment.c
- * This file is part of Watchdog
- *
- * Copyright (C) 2010 - 
- *
- * Watchdog is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Watchdog is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
- * Boston, MA  02110-1301  USA
- */
- 
+
  #include <gnome.h>
  #include <sys/time.h>
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ 
+ #include "Reseaux.h"
+ #include "Config_cli.h"
+ #include "trame.h"
+ #include "motifs.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
@@ -50,7 +35,7 @@ printf("yo\n");
     if (!(infos && infos->Trame)) { printf("test\n"); return; }
     comment = (struct COMMENTAIRE *)g_malloc0( sizeof(struct COMMENTAIRE) );
     if (!comment)
-     { Info( Client_en_cours.config.log, DEBUG_MEM, "Afficher_comment_supervision: not enought memory" );
+     { Info( Config_cli.log, DEBUG_MEM, "Afficher_comment_supervision: not enought memory" );
        return;
      }
 

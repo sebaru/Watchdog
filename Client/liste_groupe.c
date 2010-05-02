@@ -24,8 +24,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+
+ #include <gnome.h>
+ 
+ #include "Reseaux.h"
 
  static GtkWidget *Liste_groupe;                      /* GtkTreeView pour la gestion des groupes Watchdog */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
@@ -39,6 +41,8 @@
      COLONNE_COMMENTAIRE,
      NBR_COLONNE
   };
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  static void Menu_effacer_groupe ( void );
  static void Menu_editer_groupe ( void );
