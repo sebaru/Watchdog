@@ -12,7 +12,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole_connexion.c protocole_histo_courbe.c \
                           protocole_supervision.c protocole_histo.c \
                           protocole_courbe.c protocole_fichier.c \
-			  ssl.c menu.c ident.c timer.c \
+			  menu.c timer.c \
 			  liste_groupe.c ajout_groupe.c \
 			  liste_util.c ajout_util.c \
 			  liste_histo.c liste_histo_hard.c \

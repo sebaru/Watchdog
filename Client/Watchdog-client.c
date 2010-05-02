@@ -52,9 +52,6 @@
  extern gint Nbr_message;                                                /* Nombre de message de Watchdog */
 
  struct CLIENT Client_en_cours;                                  /* Identifiant de l'utilisateur en cours */
- struct CONFIG_CLI Config_cli;                                 /* Configuration generale cliente watchdog */
- struct CONNEXION *Connexion = NULL;                                              /* Connexion au serveur */
- SSL_CTX *Ssl_ctx;                                                                        /* Contexte SSL */
 
  time_t Pulse = -TEMPS_MAX_PULSE;                                    /* Dernier temps de pulse du serveur */
  static void Fermer_client ( void );
@@ -158,10 +155,10 @@
      { case SIGINT :
        case SIGTERM: Fermer_client(); break;
        case SIGPIPE: Deconnecter(); break;
-       case SIGIO  : Info_n( Config_cli.log, DEBUG_SIGNAUX, "Signal IO !", num );
+       case SIGIO  : Info_n( Client_en_cours.config.log, DEBUG_SIGNAUX, "Signal IO !", num );
                      Ecouter_serveur();
                      break;
-       default: Info_n( Config_cli.log, DEBUG_SIGNAUX, "Signal non gere", num );
+       default: Info_n( Client_en_cours.config.log, DEBUG_SIGNAUX, "Signal non gere", num );
      }
     printf("Fin traitement signaux\n");
   }
@@ -234,19 +231,18 @@
        chdir ( REPERTOIR_CONF );
      }
 
-    Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
-    if (port!=-1)        Config_cli.port        = port;                /* Priorite à la ligne de commande */
-    if (debug_level!=-1) Config_cli.debug_level = debug_level;
+    Lire_config_cli( &Client_en_cours.config, file );               /* Lecture sur le fichier ~/.watchdog */
+    if (port!=-1)        Client_en_cours.config.port        = port;    /* Priorite à la ligne de commande */
+    if (debug_level!=-1) Client_en_cours.config.debug_level = debug_level;
 
-    Config_cli.log = Info_init( "Watchdog_client", Config_cli.debug_level );       /* Init msgs d'erreurs */
+                                                                                   /* Init msgs d'erreurs */
+    Client_en_cours.config.log = Info_init( "Watchdog_client", Client_en_cours.config.debug_level );
 
-    Info( Config_cli.log, DEBUG_INFO, _("Start") );
-    Print_config_cli( &Config_cli );
+    Info( Client_en_cours.config.log, DEBUG_INFO, _("Start") );
+    Print_config_cli( &Client_en_cours.config );
 
-    Ssl_ctx = Init_ssl();
-    if (!Ssl_ctx)
-     { Info( Config_cli.log, DEBUG_CRYPTO, _("Can't initialise SSL") );
-     }
+    if (Init_ssl( &Client_en_cours ) == FALSE)
+     { Info( Client_en_cours.config.log, DEBUG_CRYPTO, _("Can't initialise SSL") ); }
     
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
@@ -267,8 +263,8 @@
      }
 
     if (Client_en_cours.gids) g_list_free(Client_en_cours.gids);
-    SSL_CTX_free(Ssl_ctx);
-    Info( Config_cli.log, DEBUG_INFO, _("Stopped") );
+    Close_ssl(&Client_en_cours);
+    Info( Client_en_cours.config.log, DEBUG_INFO, _("Stopped") );
     exit(0);
   }
 /*--------------------------------------------------------------------------------------------------------*/

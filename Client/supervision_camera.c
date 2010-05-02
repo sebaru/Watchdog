@@ -30,11 +30,10 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
 /**********************************************************************************************************/
 /* Proto_afficher_un_camera_sup_supervision: Ajoute un camera_sup sur la trame de supervision             */
@@ -50,7 +49,7 @@
     if (!(infos && infos->Trame)) return;
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_camera_sup_supervision: not enought memory" );
+     { Info( Client_en_cours.config.log, DEBUG_MEM, "Afficher_camera_sup_supervision: not enought memory" );
        return;
      }
 

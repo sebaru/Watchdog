@@ -34,7 +34,7 @@
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
@@ -68,8 +68,8 @@
        case SSTAG_SERVEUR_VERSION:
              { struct CMD_VERSION *cmd_version;
                cmd_version = (struct CMD_VERSION *)connexion->donnees;
-               Changer_version_donnees( Config_cli.log, cmd_version->version );
-               Info_n( Config_cli.log, DEBUG_CONNEXION, "Nouvelle version données", cmd_version->version );
+               Changer_version_donnees( Client_en_cours.config.log, cmd_version->version );
+               Info_n( Client_en_cours.config.log, DEBUG_CONNEXION, "Nouvelle version données", cmd_version->version );
              }
             break;
      }

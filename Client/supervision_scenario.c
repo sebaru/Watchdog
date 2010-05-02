@@ -31,7 +31,7 @@
 
  #include "Reseaux.h"
 
- GtkWidget *Liste_on;                         /* GtkTreeView pour la gestion des scenarios Watchdog */
+ GtkWidget *Liste_on;                               /* GtkTreeView pour la gestion des scenarios Watchdog */
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static gboolean En_cours_M;

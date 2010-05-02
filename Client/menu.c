@@ -32,7 +32,7 @@
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 /**********************************************************************************************************/
 /* Menu_want_util: l'utilisateur desire editer les bases users                                            */
 /* Entrée/Sortie: rien                                                                                    */

@@ -7,7 +7,8 @@
 SUBDIRS = 
 
 lib_LTLIBRARIES = libwatchdogclient.la
-libwatchdogclient_la_SOURCES = trame.c mnemonique.c Config_cli_lignes.y Config_cli_mots.l Config_cli.c
+libwatchdogclient_la_SOURCES = trame.c mnemonique.c Config_cli_lignes.y Config_cli_mots.l Config_cli.c \
+			       ident.c ssl.c
 
 libwatchdogclient_la_LIBADD  = @LEXLIB@
 

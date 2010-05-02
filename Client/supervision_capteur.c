@@ -34,7 +34,7 @@
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
 /**********************************************************************************************************/
 /* Proto_afficher_un_capteur_supervision: Ajoute un capteur sur la trame de supervision                   */
@@ -50,7 +50,7 @@
     if (!(infos && infos->Trame)) return;
     capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
     if (!capteur)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_capteur_supervision: not enought memory" );
+     { Info( Client_en_cours.config.log, DEBUG_MEM, "Afficher_capteur_supervision: not enought memory" );
        return;
      }
 

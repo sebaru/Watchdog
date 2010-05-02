@@ -26,20 +26,12 @@
  */
  
  #include <gnome.h>
- #include <openssl/err.h>
- #include <stdio.h>
-
- #include <unistd.h>
- #include <libgen.h>                                                                      /* Pour dirname */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
-
- extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */
@@ -89,7 +81,7 @@
        switch ( Reseau_tag(connexion) )
         { case TAG_HISTO    : Gerer_protocole_histo_connecte ( connexion ); break;
           case TAG_CONNEXION: if (Reseau_ss_tag(connexion) == SSTAG_SERVEUR_CLI_VALIDE)
-                               { Info( Config_cli.log, DEBUG_CONNEXION, "Client en VALIDE" );
+                               { Info( Client_en_cours.config.log, DEBUG_CONNEXION, "Client en VALIDE" );
                                  Client_en_cours.mode = VALIDE;
                                }
                               break;
@@ -110,15 +102,15 @@
   { gint recu;
 
     do
-     { recu = Recevoir_reseau( Config_cli.log, Connexion );
+     { recu = Recevoir_reseau( Client_en_cours.config.log, Client_en_cours.connexion );
        if (recu==RECU_OK)
-        { Gerer_protocole( Connexion ); }
+        { Gerer_protocole( Client_en_cours.connexion ); }
      } while ( recu == RECU_EN_COURS || recu == RECU_OK );
 
     if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
      { printf("Recu erreur\n");
        switch( recu )
-        { case RECU_ERREUR_CONNRESET: Info( Config_cli.log, DEBUG_NETWORK,
+        { case RECU_ERREUR_CONNRESET: Info( Client_en_cours.config.log, DEBUG_NETWORK,
                                             "Ecouter_serveur: Reset connexion" );
                                       break;
         }

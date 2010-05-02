@@ -32,7 +32,6 @@
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */
@@ -86,11 +85,11 @@
 
                ident = (struct REZO_SRV_IDENT *)connexion->donnees;
                g_snprintf( chaine, sizeof(chaine), _("Connected to %s@%s:%d  %s"),
-                           Client_en_cours.user, Client_en_cours.serveur, Config_cli.port, ident->comment );
+                           Client_en_cours.user, Client_en_cours.serveur, Client_en_cours.config.port, ident->comment );
                gnome_appbar_push( GNOME_APPBAR(Barre_status), chaine );
                Log( _("Connected") );
                Client_en_cours.mode = CONNECTE;
-               Info( Config_cli.log, DEBUG_CONNEXION, "Client en mode CONNECTE" );
+               Info( Client_en_cours.config.log, DEBUG_CONNEXION, "Client en mode CONNECTE" );
              }
             break;
      }

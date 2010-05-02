@@ -28,12 +28,9 @@
  #ifndef _PROTOCLI_H_
  #define _PROTOCLI_H_
 
- #include <openssl/ssl.h>
  #include <gtkdatabox.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
- #include <openssl/ssl.h>
- #include <openssl/err.h>
- #include <openssl/rand.h>
+
 
  #include "protocommunclient.h"
 
@@ -150,8 +147,6 @@
  extern gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille );
  extern gboolean Changer_password ( void );
 
- extern void Envoyer_identification ( void );                                             /* Dans ident.c */
-
  extern void Ecouter_serveur ( void );                                                /* Dans protocole.c */
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_utilisateur ( struct CONNEXION *connexion );
@@ -163,10 +158,6 @@
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
-
-
- extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
- extern SSL_CTX *Init_ssl ( void );
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */
 
