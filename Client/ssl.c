@@ -27,21 +27,14 @@
  
  
  #include <stdio.h>
- #include <openssl/ssl.h>
- #include <openssl/err.h>
- #include <openssl/rand.h>
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
- #include "Erreur.h"
- #include "Reseaux.h"
- #include "Config_cli.h"
- #include "client.h"
 
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
  extern SSL_CTX *Ssl_ctx;                                                                 /* Contexte SSL */
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
 /**********************************************************************************************************/
 /* Init_SSL: Initialisation de l'environnement SSL                                                        */

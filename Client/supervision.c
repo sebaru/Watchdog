@@ -27,19 +27,13 @@
  
  #include <gnome.h>
  #include <sys/time.h>
- 
- #include "Reseaux.h"
- #include "Config_cli.h"
- #include "trame.h"
- #include "motifs.h"
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
 /**********************************************************************************************************/
 /* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                  */

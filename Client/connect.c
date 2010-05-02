@@ -26,22 +26,16 @@
  */
  
  
- #include <gnome.h>
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <netinet/in.h>
  #include <netdb.h>
  #include <fcntl.h>
- #include <openssl/err.h>
  
- #include "Reseaux.h"
- #include "client.h"
- #include "Config_cli.h"
- #include "Cst_utilisateur.h"
- 
- static GtkWidget *F_ident;                                  /* Fenetre d'identification de l'utilisateur */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
+
+ static GtkWidget *F_ident;                                  /* Fenetre d'identification de l'utilisateur */
 
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */

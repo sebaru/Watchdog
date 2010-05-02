@@ -26,12 +26,7 @@
  */
 
  #include <gnome.h>
- #include "Erreur.h"
- #include "Reseaux.h"
-
 /********************************* Définitions des prototypes programme ***********************************/
- #include "Config_cli.h"
- #include "client.h"
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */

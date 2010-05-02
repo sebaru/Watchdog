@@ -24,19 +24,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
- #include <gnome.h>
- 
- #include "Reseaux.h"
- 
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
+
  enum
   {  COLONNE_ID,
      COLONNE_NOM,
      COLONNE_COMMENTAIRE,
      NBR_COLONNE
   };
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */

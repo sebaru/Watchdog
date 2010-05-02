@@ -31,12 +31,6 @@
 
  #include <unistd.h>
  #include <libgen.h>                                                                      /* Pour dirname */
-
- #include "Erreur.h"
- #include "Config_cli.h"
- #include "Reseaux.h"
- #include "client.h"
-
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 

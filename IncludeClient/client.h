@@ -6,13 +6,9 @@
 
  #ifndef _CLIENT_H_
  #define _CLIENT_H_
- #include <glib.h>
 
  #include "Cst_utilisateur.h"
- #include "Reseaux.h"
  #include "Config_cli.h"
-
- #define PROGRAMME          "Watchdog-client"
 
  #define EXIT_ERREUR       -1                                               /* Sortie sur erreur inconnue */
  #define EXIT_OK           0                                                            /* Sortie normale */
@@ -23,6 +19,11 @@
  #define FICHIER_CERTIF_CLIENT       "clientsigne.pem"
  #define FICHIER_CERTIF_CLEF_CLIENT  "clientkey.pem"
  
+ #define TEMPS_MAX_PULSE   10                        /* 10 secondes de battements maximum pour le serveur */
+ #define NBR_BIT_DLS       10000
+ #define SIGNATURE_PRINT   "Watchdog 2_1.ABLS 2010"
+ #define PRINT_FONT_SIZE   10.0
+
  enum
   { INERTE,
     ATTENTE_CONNEXION_SSL,

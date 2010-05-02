@@ -24,9 +24,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
- 
+
  #include <gnome.h>
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  #include "Reseaux.h"
 
@@ -58,9 +59,6 @@
  static GtkWidget *Check_mois[13];                                                 /* valide quels mois ? */
  static GtkWidget *Check_actif;                                  /* Le scenario est-il actif ou inhibe ?? */
  static struct CMD_TYPE_SCENARIO Edit_sce;                                  /* Message en cours d'édition */
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
  static void Menu_supervision_effacer_scenario ( void );
  static void Menu_supervision_editer_scenario ( void );

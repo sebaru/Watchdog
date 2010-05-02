@@ -24,18 +24,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
- 
- #include <glib.h>
+  
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  
  #include "sysconfig.h"
- #include "Reseaux.h"
- #include "client.h"
- #include "Config_cli.h"
- #include "Cst_utilisateur.h"
- 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 

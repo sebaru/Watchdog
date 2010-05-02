@@ -9,9 +9,12 @@
 
  #include <gnome.h>
 
+ #include "Reseaux.h"
+ #include "Erreur.h"
  #include "trame.h"
  #include "motifs.h"
  #include "Config_cli.h"
+ #include "client.h"
 
 /******************************************** Déclaration des prototypes **********************************/
 

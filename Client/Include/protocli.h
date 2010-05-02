@@ -28,37 +28,26 @@
  #ifndef _PROTOCLI_H_
  #define _PROTOCLI_H_
 
- #include <gnome.h>
  #include <openssl/ssl.h>
  #include <gtkdatabox.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
+ #include <openssl/ssl.h>
+ #include <openssl/err.h>
+ #include <openssl/rand.h>
 
- #include "Reseaux.h"
  #include "protocommunclient.h"
 
- #define TEMPS_MAX_PULSE   10                        /* 10 secondes de battements maximum pour le serveur */
- #define NBR_BIT_DLS       10000
- #define SIGNATURE_PRINT   "Watchdog 2_1.ABLS 2008"
- #define PRINT_FONT_SIZE   10.0
+ #define PROGRAMME          "Watchdog-client"
+ #define TITRE_F_CONFIG     N_("Client Watchdog ver" VERSION)
 
  enum
-  { TYPE_PAGE_PLUGIN_DLS,                                                     /* Listes des plugins D.L.S */
-    TYPE_PAGE_HISTO,                                           /* Page de garde: messages au fil de l'eau */
+  { TYPE_PAGE_HISTO,                                           /* Page de garde: messages au fil de l'eau */
     TYPE_PAGE_GROUPE,                                                  /* Edition des groupes de Watchdog */
     TYPE_PAGE_UTIL,                                                    /* Liste des utilisateurs Watchdog */
-    TYPE_PAGE_MESSAGE,                                                   /* Edition des messages Watchdog */
-    TYPE_PAGE_ENTREEANA,                                             /* Il s'agit d'un atelier synoptique */
-    TYPE_PAGE_SYNOPTIQUE,                                 /* Edition des noms/mnémoniques des synoptiques */
-    TYPE_PAGE_MNEMONIQUE,                                        /* Page de visualisation des mnemoniques */
-    TYPE_PAGE_ICONE,                                /* Ajout/retrait/modif des icones et classes d'icones */
-    TYPE_PAGE_SOURCE_DLS,                                                   /* Edition d'une source D.L.S */
     TYPE_PAGE_HISTO_HARD,                                                     /* Parcours de l'historique */
-    TYPE_PAGE_ATELIER,                                               /* Il s'agit d'un atelier synoptique */
     TYPE_PAGE_SUPERVISION,                                            /* Supervision graphique synoptique */
     TYPE_PAGE_COURBE,                                              /* Affichage des courbes en temps reel */
     TYPE_PAGE_HISTO_COURBE,
-    TYPE_PAGE_SCENARIO,                                                           /* Gestion des scenario */
-    TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
     TYPE_PAGE_SUPERVISION_CAMERA,                                          /* Page affichant une camera ! */
   };
 

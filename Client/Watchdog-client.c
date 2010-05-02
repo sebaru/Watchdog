@@ -34,10 +34,8 @@
 
  #include "sysconfig.h"
  #include "Erreur.h"
- #include "Config_cli.h"
- #include "client.h"
-
- #define TITRE_F_CONFIG     N_("Client Watchdog ver" VERSION)
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  GtkWidget *F_client;                                                            /* Widget Fenetre Client */
 
@@ -57,8 +55,6 @@
  struct CONFIG_CLI Config_cli;                                 /* Configuration generale cliente watchdog */
  struct CONNEXION *Connexion = NULL;                                              /* Connexion au serveur */
  SSL_CTX *Ssl_ctx;                                                                        /* Contexte SSL */
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
  time_t Pulse = -TEMPS_MAX_PULSE;                                    /* Dernier temps de pulse du serveur */
  static void Fermer_client ( void );

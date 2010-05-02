@@ -3,22 +3,38 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                   sam. 19 sept. 2009 15:54:36 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * supervision_camera.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <gnome.h>
  #include <sys/time.h>
- 
- #include "Reseaux.h"
- #include "Config_cli.h"
- #include "trame.h"
- #include "motifs.h"
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
+
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
 /**********************************************************************************************************/
 /* Proto_afficher_un_camera_sup_supervision: Ajoute un camera_sup sur la trame de supervision             */
