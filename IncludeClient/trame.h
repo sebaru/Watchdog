@@ -1,0 +1,183 @@
+/**********************************************************************************************************/
+/* Client/Include/trame.h:   Gestion des objets sur une trame synoptique                                  */
+/* Projet WatchDog version 2.0     Gestion d'habitat                        sam 27 sep 2003 15:05:09 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+
+ #ifndef _TRAME_H_
+ #define _TRAME_H_
+
+ #include <gnome.h>
+ #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
+ #include <gtk-libvlc-media-player.h>                                                       /* Player VLC */
+ #include <goocanvas.h>                                                            /* Interface GooCanvas */
+ #include "Reseaux.h"
+
+ #define TAILLE_SYNOPTIQUE_X        900               /* Généralités sur la taille de la Trame synoptique */
+ #define TAILLE_SYNOPTIQUE_Y        600
+ 
+ #define TAILLE_ICONE_X             100
+ #define TAILLE_ICONE_Y             100
+
+ enum { TYPE_RIEN,
+        TYPE_PASSERELLE,
+        TYPE_COMMENTAIRE,
+        TYPE_MOTIF,
+        TYPE_CAPTEUR,
+        TYPE_CAMERA_SUP
+      };
+
+ struct TRAME_ITEM_MOTIF
+  { gint type;                                                                          /* Type de l'item */
+    GooCanvasItem *item;
+    cairo_matrix_t transform;
+    cairo_matrix_t transform_hg;
+    cairo_matrix_t transform_hd;
+    cairo_matrix_t transform_bg;
+    cairo_matrix_t transform_bd;
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *select_hg;
+    GooCanvasItem *select_hd;
+    GooCanvasItem *select_bg;
+    GooCanvasItem *select_bd;
+    GList *images;                                     /* Toutes les images présentes dans le fichier GIF */
+    GList *image;                                                 /* Image en cours d'affichage à l'écran */
+    GdkPixbuf *pixbuf;                                           /* Pixbuf colorié et visualisé à l'écran */
+    guchar num_image;                                         /* Numero de l'image actuellement présentée */
+    guchar nbr_images;                                               /* Nombre total d'image dans le .gif */
+    
+    guchar rouge;                                                            /* Couleur attendue du motif */
+    guchar vert;
+    guchar bleu;
+
+    guchar en_cours_rouge;                                                   /* Couleur actuelle du motif */
+    guchar en_cours_vert;
+    guchar en_cours_bleu;
+
+    guchar etat;                                                                 /* Etat attendu du motif */
+    gint   cligno;                                                                /* Etat cligno du motif */
+
+    struct MOTIF *motif;
+    gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+    gint selection;                                                                  /* Encore utilisé ?? */
+  };
+
+ struct TRAME_ITEM_PASS
+  { gint type;                                                                          /* Type de l'item */
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *item_texte;
+    GooCanvasItem *item_rectangle_1;
+    GooCanvasItem *item_rectangle_2;
+    GooCanvasItem *item_fond;
+    GooCanvasItem *select_mi;
+    cairo_matrix_t transform;
+    struct PASSERELLE *pass;
+    gint   cligno1;                                                               /* Etat cligno du motif */
+    guchar rouge1;                                                            /* Couleur attendue du motif */
+    guchar vert1;
+    guchar bleu1;
+    guchar en_cours_rouge1;                                                  /* Couleur actuelle du motif */
+    guchar en_cours_vert1;
+    guchar en_cours_bleu1;
+    gint   cligno2;                                                                /* Etat cligno du motif */
+    guchar rouge2;                                                            /* Couleur attendue du motif */
+    guchar vert2;
+    guchar bleu2;
+    guchar en_cours_rouge2;                                                  /* Couleur actuelle du motif */
+    guchar en_cours_vert2;
+    guchar en_cours_bleu2;
+    gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+    gint selection;
+  };
+
+ struct TRAME_ITEM_COMMENT
+  { gint type;                                                                          /* Type de l'item */
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *item;
+    GooCanvasItem *select_mi;
+    cairo_matrix_t transform;
+    struct COMMENTAIRE *comment;
+    gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+    gint selection;
+  };
+
+ struct TRAME_ITEM_CAPTEUR
+  { gint type;                                                                          /* Type de l'item */
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *item_carre;
+    GooCanvasItem *item_entry;
+    GooCanvasItem *select_mi;
+    cairo_matrix_t transform;
+    struct CAPTEUR *capteur;
+    gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+    gint selection;
+  };
+
+ struct TRAME_ITEM_CAMERA_SUP
+  { gint type;                                                                          /* Type de l'item */
+    GooCanvasItem *item;
+    cairo_matrix_t transform;
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *select_mi;
+    GtkLibVLCInstance* instance;
+    GtkWidget *vlc;
+
+    struct CMD_TYPE_CAMERA_SUP *camera_sup;
+    gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
+    gint selection;
+  };
+
+
+ struct TRAME_ITEM
+  { union { struct TRAME_ITEM_MOTIF motif;
+            struct TRAME_ITEM_PASS pass;
+            struct TRAME_ITEM_COMMENT comment;
+            struct TRAME_ITEM_CAPTEUR capteur;
+            struct TRAME_ITEM_CAMERA_SUP camera_sup;
+          };
+  };
+
+ struct TRAME
+  { GooCanvasItem *canvas_root;
+    GtkWidget *trame_widget;
+    GooCanvasItem *fond;
+    GList *trame_items;
+  };
+
+/************************************* Déclaration des prototypes******************************************/
+ extern void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif );
+ extern void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment );
+ extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
+ extern void Trame_rafraichir_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
+                                   guchar r, guchar v, guchar b );
+ extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b );
+ extern void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b );
+ extern void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b );
+ extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
+ extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
+ extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
+                                                     struct MOTIF *motif );
+ extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
+                                                            struct COMMENTAIRE *comm );
+ extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
+                                                         struct PASSERELLE *pass );
+ extern struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame,
+                                                     struct CAPTEUR *capteur );
+ extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
+                                          struct TRAME_ITEM_MOTIF *trame_motif );
+ extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
+ extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
+                                                               struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern void Trame_del_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
+ extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
+ extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
+ extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille );
+ extern void Trame_effacer_trame ( struct TRAME *trame );
+ extern void Trame_detruire_trame ( struct TRAME *trame );
+
+ #endif
+/*--------------------------------------------------------------------------------------------------------*/
