@@ -236,7 +236,7 @@
     motif->type_gestion = rezo_motif->type_gestion;                        /* Statique/dynamique/cyclique */
 
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
-    trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
+    trame_motif->groupe_dpl = 0;                                  /* Numéro de groupe pour le deplacement */
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
     trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
     trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */

@@ -4,6 +4,6 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_HEADERS =  trame.h motifs.h
+noinst_HEADERS =  trame.h motifs.h protocommunclient.h
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -82,35 +82,6 @@
     GNOMEUIINFO_END
   };
 
- GnomeUIInfo Menu_lowlevel[]=
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Entree ANA"), N_("Edit IANA"),
-                            Menu_want_entreeANA, GNOME_STOCK_PIXMAP_BOOK_RED ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
-                            Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
-    GNOMEUIINFO_END
-  };
- GnomeUIInfo Menu_synoptique[]=
-  { GNOMEUIINFO_ITEM_STOCK( N_("Caisse a outils"), N_("Edit icons"),
-                            Menu_want_icone, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Atelier"), N_("Edit syns"),
-                            Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
-    GNOMEUIINFO_END
-  };
- GnomeUIInfo Menu_superuser[]=
-  { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
-                            Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
-    GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
-                            Menu_want_mnemonique, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
-                            Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Scenario"), N_("Edit Scenario"),
-                            Menu_want_scenario, GNOME_STOCK_PIXMAP_SCORES ),
-    GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
-    GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
-    GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
-    GNOMEUIINFO_END
-  };
  GnomeUIInfo Menu_view[]=
   { GNOMEUIINFO_ITEM_STOCK( N_("_Histo hard"), N_("histo_hard"),
                             Menu_want_histo_hard, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
@@ -130,7 +101,7 @@
     GNOMEUIINFO_ITEM_STOCK( N_("Change Password"), N_("Change the password"),
                             Changer_password, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Super User"), Menu_superuser),
+    GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END

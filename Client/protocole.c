@@ -79,20 +79,11 @@
     if ( Client_en_cours.mode >= VALIDE )                                       /* Le client valide  */
      {
        switch ( Reseau_tag(connexion) )
-        { case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
-          case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
-          case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( connexion ); break;
-          case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
-          case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
-          case TAG_ENTREEANA   : Gerer_protocole_entreeana    ( connexion ); break;
-          case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
+        { case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( connexion ); break;
           case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
           case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
-          case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
           case TAG_COURBE      : Gerer_protocole_courbe       ( connexion ); break;
           case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
-          case TAG_SCENARIO    : Gerer_protocole_scenario     ( connexion ); break;
-          case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
           case TAG_CONNEXION   : if ( Reseau_ss_tag( connexion ) == SSTAG_SERVEUR_PULSE ) 
                                   { Set_progress_pulse(); }
                                  break;

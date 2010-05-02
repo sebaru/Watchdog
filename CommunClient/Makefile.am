@@ -7,7 +7,7 @@
 SUBDIRS = 
 
 lib_LTLIBRARIES = libwatchdogclient.la
-libwatchdogclient_la_SOURCES = trame.c
+libwatchdogclient_la_SOURCES = trame.c mnemonique.c
 
 #libwatchdog_la_LIBADD  = Reseaux/librezo.la
 

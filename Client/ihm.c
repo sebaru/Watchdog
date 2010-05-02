@@ -74,10 +74,7 @@
     num = gtk_notebook_page_num( GTK_NOTEBOOK(Notebook), GTK_WIDGET(page_a_virer->child) );
     if (num>=0)
      { switch(page_a_virer->type)
-        { case TYPE_PAGE_ATELIER:
-               Detruire_page_atelier( page_a_virer );
-               break;
-          case TYPE_PAGE_SUPERVISION:
+        { case TYPE_PAGE_SUPERVISION:
                Detruire_page_supervision( page_a_virer );
                break;
           case TYPE_PAGE_COURBE:
@@ -232,11 +229,7 @@
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type == type)                                    /* Si la page existe deja, on l'affiche */
         { switch( type )
-           { case TYPE_PAGE_ATELIER:
-                  if ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn.id != id )
-                   { liste = liste->next; continue; }
-                  break;
-             case TYPE_PAGE_COURBE:
+           { case TYPE_PAGE_COURBE:
                   break;
              case TYPE_PAGE_HISTO_COURBE:
                   break;
@@ -250,10 +243,6 @@
                   break;
              case TYPE_PAGE_SUPERVISION_CAMERA:
                   if ( ((struct TYPE_INFO_CAMERA *)page->infos)->camera.camera_src_id != id )
-                   { liste = liste->next; continue; }
-                  break;
-             case TYPE_PAGE_SOURCE_DLS:
-                  if ( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id != id )
                    { liste = liste->next; continue; }
                   break;
              default: break;

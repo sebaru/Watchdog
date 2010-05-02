@@ -47,7 +47,7 @@
     capteur->position_y = rezo_capteur->position_y;
 
     trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
-    trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
+    trame_capteur->groupe_dpl = 0;                                /* Numéro de groupe pour le deplacement */
 /*    g_signal_connect( G_OBJECT(trame_capteur->item_entry), "event",
                       G_CALLBACK(Clic_sur_capteur_supervision), trame_capteur );*/
   }
