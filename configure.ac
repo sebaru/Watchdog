@@ -102,6 +102,9 @@ Commun/Reseaux/Makefile \
 Client/Include/Makefile \
 Client/Config_cli/Makefile \
 Client/Makefile \
+Conf/Include/Makefile \
+Conf/Config_cli/Makefile \
+Conf/Makefile \
 Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \

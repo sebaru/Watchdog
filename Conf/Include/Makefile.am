@@ -1,9 +1,9 @@
 #**********************************************************************************************************/
-#* Makefile.am          Profil de compilation du projet Watchdog                                          */
-#* Projet WatchDog version 2.0       Gestion d'habitat                      sam 05 avr 2003 19:38:16 CEST */
+#* Client/Include/Makefile.am          Profil de compilation des headers Watchdog                         */
+#* Projet WatchDog version 2.0       Gestion d'habitat                      sam 05 avr 2003 21:42:30 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-SUBDIRS=Include IncludeClient Commun CommunClient Client Conf Watchdogd WatchdogdAdmin
+noinst_HEADERS = Config_cli.h client.h protocli.h
 
 MAINTAINERCLEANFILES = Makefile.in
