@@ -26,9 +26,11 @@
  */
  
  #include <glib.h>
+ #include "Erreur.h"
+ #include "Reseaux.h"
+
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
-
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 

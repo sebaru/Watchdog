@@ -3,38 +3,22 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mer 01 fév 2006 18:41:37 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-/*
- * supervision_capteur.c
- * This file is part of Watchdog
- *
- * Copyright (C) 2010 - 
- *
- * Watchdog is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Watchdog is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
- * Boston, MA  02110-1301  USA
- */
- 
- 
+
  #include <gnome.h>
  #include <sys/time.h>
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ 
+ #include "Reseaux.h"
+ #include "Config_cli.h"
+ #include "trame.h"
+ #include "motifs.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
 /**********************************************************************************************************/
 /* Proto_afficher_un_capteur_supervision: Ajoute un capteur sur la trame de supervision                   */
@@ -50,7 +34,7 @@
     if (!(infos && infos->Trame)) return;
     capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
     if (!capteur)
-     { Info( Client_en_cours.config.log, DEBUG_MEM, "Afficher_capteur_supervision: not enought memory" );
+     { Info( Config_cli.log, DEBUG_MEM, "Afficher_capteur_supervision: not enought memory" );
        return;
      }
 
@@ -63,7 +47,7 @@
     capteur->position_y = rezo_capteur->position_y;
 
     trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
-    trame_capteur->groupe_dpl = 0;                                /* Numéro de groupe pour le deplacement */
+    trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
 /*    g_signal_connect( G_OBJECT(trame_capteur->item_entry), "event",
                       G_CALLBACK(Clic_sur_capteur_supervision), trame_capteur );*/
   }

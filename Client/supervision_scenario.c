@@ -24,14 +24,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
-
+ 
+ 
  #include <gnome.h>
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
  #include "Reseaux.h"
 
- GtkWidget *Liste_on;                               /* GtkTreeView pour la gestion des scenarios Watchdog */
+ GtkWidget *Liste_on;                         /* GtkTreeView pour la gestion des scenarios Watchdog */
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static gboolean En_cours_M;
@@ -59,6 +58,9 @@
  static GtkWidget *Check_mois[13];                                                 /* valide quels mois ? */
  static GtkWidget *Check_actif;                                  /* Le scenario est-il actif ou inhibe ?? */
  static struct CMD_TYPE_SCENARIO Edit_sce;                                  /* Message en cours d'édition */
+
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  static void Menu_supervision_effacer_scenario ( void );
  static void Menu_supervision_editer_scenario ( void );

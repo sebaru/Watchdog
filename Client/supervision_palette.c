@@ -3,37 +3,22 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 29 jan 2006 14:23:01 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-/*
- * supervision_palette.c
- * This file is part of Watchdog
- *
- * Copyright (C) 2010 - 
- *
- * <program name> is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * <program name> is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with <program name>; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
- * Boston, MA  02110-1301  USA
- */
 
  #include <gnome.h>
  #include <sys/time.h>
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ 
+ #include "Reseaux.h"
+ #include "Config_cli.h"
+ #include "trame.h"
+ #include "motifs.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
 /**********************************************************************************************************/
 /* Changer_vue: Demande au serveur une nouvelle vue                                                       */

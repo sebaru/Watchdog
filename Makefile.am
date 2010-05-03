@@ -4,6 +4,6 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-SUBDIRS=Include IncludeClient Commun CommunClient Client Conf Watchdogd WatchdogdAdmin
+SUBDIRS=Include Commun Watchdogd Client WatchdogdAdmin
 
 MAINTAINERCLEANFILES = Makefile.in

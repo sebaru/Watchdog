@@ -3,30 +3,7 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 21 aoû 2003 18:47:38 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-/*
- * ihm.c
- * This file is part of Watchdog
- *
- * Copyright (C) 2010 - 
- *
- * Watchdog is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Watchdog is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
- * Boston, MA  02110-1301  USA
- */
- 
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ #include <gnome.h>
 
  GtkWidget *Label_msg_total;                  /* Nombre total de message dans l'historique RAM du serveur */
  GtkWidget *Label_msg_def;                    /* Nombre total de message dans l'historique RAM du serveur */
@@ -45,6 +22,8 @@
 
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
 /****************************** Inclusion des images XPM pour les menus ***********************************/
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
@@ -95,7 +74,10 @@
     num = gtk_notebook_page_num( GTK_NOTEBOOK(Notebook), GTK_WIDGET(page_a_virer->child) );
     if (num>=0)
      { switch(page_a_virer->type)
-        { case TYPE_PAGE_SUPERVISION:
+        { case TYPE_PAGE_ATELIER:
+               Detruire_page_atelier( page_a_virer );
+               break;
+          case TYPE_PAGE_SUPERVISION:
                Detruire_page_supervision( page_a_virer );
                break;
           case TYPE_PAGE_COURBE:
@@ -250,7 +232,11 @@
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type == type)                                    /* Si la page existe deja, on l'affiche */
         { switch( type )
-           { case TYPE_PAGE_COURBE:
+           { case TYPE_PAGE_ATELIER:
+                  if ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn.id != id )
+                   { liste = liste->next; continue; }
+                  break;
+             case TYPE_PAGE_COURBE:
                   break;
              case TYPE_PAGE_HISTO_COURBE:
                   break;
@@ -264,6 +250,10 @@
                   break;
              case TYPE_PAGE_SUPERVISION_CAMERA:
                   if ( ((struct TYPE_INFO_CAMERA *)page->infos)->camera.camera_src_id != id )
+                   { liste = liste->next; continue; }
+                  break;
+             case TYPE_PAGE_SOURCE_DLS:
+                  if ( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id != id )
                    { liste = liste->next; continue; }
                   break;
              default: break;

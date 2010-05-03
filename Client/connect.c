@@ -24,21 +24,30 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
-
+ 
+ 
+ #include <gnome.h>
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <netinet/in.h>
  #include <netdb.h>
  #include <fcntl.h>
+ #include <openssl/err.h>
  
+ #include "Reseaux.h"
+ #include "client.h"
+ #include "Config_cli.h"
+ #include "Cst_utilisateur.h"
+ 
+ static GtkWidget *F_ident;                                  /* Fenetre d'identification de l'utilisateur */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
- static GtkWidget *F_ident;                                  /* Fenetre d'identification de l'utilisateur */
-
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+ extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
  extern SSL_CTX *Ssl_ctx;                                                                 /* Contexte SSL */
 /**********************************************************************************************************/
 /* Changer_password: procedure de changement de password de l'utilisateur                                 */
@@ -123,11 +132,11 @@ one_again:
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Deconnecter_sale ( void )
-  { Fermer_connexion(Client_en_cours.connexion);
-    Client_en_cours.connexion = NULL;
+  { Fermer_connexion(Connexion);
+    Connexion = NULL;
     Log ( _("Disconnected") );
     Client_en_cours.mode = INERTE;
-    Info( Client_en_cours.config.log, DEBUG_CONNEXION, "client en mode INERTE" );
+    Info( Config_cli.log, DEBUG_CONNEXION, "client en mode INERTE" );
     gnome_appbar_clear_stack( GNOME_APPBAR(Barre_status) );
     Effacer_pages();                                                      /* Efface les pages du notebook */
     Raz_progress();
@@ -137,9 +146,8 @@ one_again:
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Deconnecter ( void )
-  { if (!Client_en_cours.connexion) return;
-    Envoyer_reseau( Client_en_cours.config.log, Client_en_cours.connexion,
-                    W_SERVEUR, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );
+  { if (!Connexion) return;
+    Envoyer_reseau( Config_cli.log, Connexion, W_SERVEUR, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );
     Deconnecter_sale();
   }
 /**********************************************************************************************************/
@@ -148,11 +156,63 @@ one_again:
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille )
-  { if ( Envoi_serveur_reel( &Client_en_cours, tag, ss_tag, buffer, taille ) == FALSE )
-     { Deconnecter_sale();
+  { if ( Envoyer_reseau( Config_cli.log, Connexion, W_SERVEUR, tag, ss_tag, buffer, taille ) )
+     { Info( Config_cli.log, DEBUG_CONNEXION, "Deconnexion sur erreur envoi au serveur" );
+       Deconnecter_sale();
        Log ( _("Disconnected (server offline ?)") );
        return(FALSE);
      }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Connecter: Tentative de connexion au serveur                                                           */
+/* Entrée: une nom et un password                                                                         */
+/* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
+/**********************************************************************************************************/
+ static gboolean Connecter_au_serveur ( void )
+  { struct sockaddr_in src;                                            /* Données locales: pas le serveur */
+    struct hostent *host;
+    int connexion;
+
+    if ( !(host = gethostbyname( Client_en_cours.serveur )) )                          /* On veut l'adresse IP */
+     { Log( _("DNS failed") );
+       Info_c( Config_cli.log, DEBUG_CONNEXION,
+               _("Connecter_au_serveur: DNS failed"), Client_en_cours.serveur );
+       return(FALSE);
+     }
+
+    src.sin_family = host->h_addrtype;
+    memcpy( (char*)&src.sin_addr, host->h_addr, host->h_length );                 /* On recopie les infos */
+    src.sin_port = htons( Config_cli.port );
+
+    if ( (connexion = socket( AF_INET, SOCK_STREAM, 0)) == -1)                          /* Protocol = TCP */
+     { Log( _("Socket creation failed") );
+       Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: Socket creation failed") );
+       return(FALSE);
+     }
+
+    if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
+     { Info_c( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: connexion refused by server"),
+               Config_cli.serveur );
+       Log(_("connexion refused by server"));
+       close(connexion);
+       return(FALSE);
+     }
+
+    Connexion = Nouvelle_connexion( Config_cli.log, connexion,
+                                    W_CLIENT, Config_cli.taille_bloc_reseau );
+    if (!Connexion)
+     { Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: cannot create new connexion") );
+       Deconnecter();
+       return(FALSE);       
+     }
+
+    Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
+    Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
+
+    if ( ! Connecter_ssl() ) return(FALSE);                                    /* Gere les parametres SSL */
+    Envoyer_identification();                                        /* Envoi l'identification au serveur */
+
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -165,7 +225,7 @@ one_again:
     GtkWidget *Entry_serveur, *Entry_nom, *Entry_code;
     gint retour;
 
-    if (Client_en_cours.connexion) return;
+    if (Connexion) return;
     F_ident = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
                                        GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
                                        _("Identification required") );
@@ -187,14 +247,14 @@ one_again:
     texte = gtk_label_new( _("Serveur") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
     Entry_serveur = gtk_entry_new();
-    gtk_entry_set_text( GTK_ENTRY(Entry_serveur), Client_en_cours.config.serveur );
+    gtk_entry_set_text( GTK_ENTRY(Entry_serveur), Config_cli.serveur );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_serveur, 1, 3, 0, 1 );
 
     texte = gtk_label_new( _("Name") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_LOGIN );
-    gtk_entry_set_text( GTK_ENTRY(Entry_nom), Client_en_cours.config.user );
+    gtk_entry_set_text( GTK_ENTRY(Entry_nom), Config_cli.user );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, 1, 2 );
 
     texte = gtk_label_new( _("Password") );
@@ -217,8 +277,7 @@ one_again:
          { gtk_widget_destroy( F_ident );
            return;
          }
-    else { gint retour;
-           memcpy( Client_en_cours.user,    gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
+    else { memcpy( Client_en_cours.user,    gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
                    sizeof(Client_en_cours.user) );
            memcpy( Client_en_cours.password,gtk_entry_get_text( GTK_ENTRY(Entry_code) ),
                    sizeof(Client_en_cours.password) );
@@ -226,24 +285,8 @@ one_again:
                    sizeof(Client_en_cours.serveur) );
 
            gtk_widget_destroy( F_ident );                                      /* Fermeture de la fenetre */
-           retour = Connecter_au_serveur( &Client_en_cours );   /* Essai de connexion au serveur Watchdog */
-           switch ( retour )                       
-            { case -1: Log( _("DNS failed") );
-                       break;
-              case -2: Log( _("Socket creation failed") );
-                       break;
-              case -3: Log( _("connexion refused by server"));
-                       break;
-              case -4: Log( _("memory problem"));
-                       break;
-              case -5: Log( _("Impossible de creer le contexte SSL") );
-                       break;
-              case 0:  Log( _("Waiting for authorization") );
-                       break;
-              default: Log( _("Unknown error") );
-                       break;
-            }
-           if (retour) Deconnecter_sale();
+           if (Connecter_au_serveur())                          /* Essai de connexion au serveur Watchdog */
+            { Log( _("Waiting for SSL handshake") ); }
          }
   }
 /*--------------------------------------------------------------------------------------------------------*/

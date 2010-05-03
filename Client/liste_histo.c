@@ -25,10 +25,12 @@
  * Boston, MA  02110-1301  USA
  */
  
+ #include <gnome.h>
  #include <time.h>
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
+ #include "Config_cli.h"
+ #include "Reseaux.h"
+ 
  GtkWidget *Liste_histo;                             /* GtkTreeView pour la gestion des messages Watchdog */
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
@@ -65,6 +67,8 @@
     { 0x0, 0x0,    0x0,    0x0    },
     { 0x0, 0x0,    0x0,    0x0    }
   };
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
  
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
  extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
