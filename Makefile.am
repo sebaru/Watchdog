@@ -5,5 +5,5 @@
 #**********************************************************************************************************/
 
 SUBDIRS=Include Commun Watchdogd Client WatchdogdAdmin
-
+ACLOCAL_AMFLAGS = -I m4
 MAINTAINERCLEANFILES = Makefile.in

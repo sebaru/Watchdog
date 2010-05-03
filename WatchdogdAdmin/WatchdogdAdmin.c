@@ -35,7 +35,7 @@
  #include <string.h>
  #include <stdio.h>
 
- #include "sysconfig.h"
+ #include "config.h"
 
  static gint Socket;                                                           /* Socket d'administration */
  static gchar Socket_file[128];

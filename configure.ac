@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Watchdogd/Watchdogd.c)
-AC_CONFIG_HEADER(sysconfig.h)
+AC_CONFIG_HEADER(config.h)
 AC_CANONICAL_SYSTEM
 
 AM_INIT_AUTOMAKE( Watchdog, 2.5.`svnversion -n` )
@@ -15,7 +15,7 @@ AM_PROG_LEX
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+AC_CONFIG_MACRO_DIR([m4])
 AC_ISC_POSIX
 
 AM_DISABLE_STATIC

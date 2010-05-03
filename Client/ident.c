@@ -30,7 +30,7 @@
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  
- #include "sysconfig.h"
+ #include "config.h"
  #include "Reseaux.h"
  #include "client.h"
  #include "Config_cli.h"

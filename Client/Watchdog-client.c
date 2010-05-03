@@ -32,7 +32,7 @@
  #include <unistd.h>
  #include <time.h>
 
- #include "sysconfig.h"
+ #include "config.h"
  #include "Erreur.h"
  #include "Config_cli.h"
  #include "client.h"
