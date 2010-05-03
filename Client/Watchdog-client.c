@@ -96,7 +96,7 @@
                             Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_superuser[]=
+ GnomeUIInfo Menu_admin[]=
   { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
                             Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
@@ -130,13 +130,8 @@
     GNOMEUIINFO_ITEM_STOCK( N_("Change Password"), N_("Change the password"),
                             Changer_password, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Super User"), Menu_superuser),
-    GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
-  };
- GnomeUIInfo Menu_option[]=
-  { GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_aide[]=
   { GNOMEUIINFO_ITEM_STOCK( N_("A propos.."), N_("Signatures"), A_propos, GNOME_STOCK_PIXMAP_ABOUT ),
@@ -144,8 +139,8 @@
   };
  GnomeUIInfo Menu_principal[]=
   { GNOMEUIINFO_SUBTREE(N_("_Serveur"), Menu_serveur),
-    GNOMEUIINFO_SUBTREE(N_("_Options"), Menu_option),
-    GNOMEUIINFO_SUBTREE(N_("_Aide"), Menu_aide),
+    GNOMEUIINFO_SUBTREE(N_("_Admin"), Menu_admin),
+    GNOMEUIINFO_SUBTREE(N_("A_ide"), Menu_aide),
     GNOMEUIINFO_END
   };
 
