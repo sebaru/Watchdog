@@ -3,20 +3,38 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 14:07:22 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
-
+/*
+ * protocole_fichier.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ 
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <fcntl.h>
- #include "Erreur.h"
- #include "Reseaux.h"
- #include "Config_cli.h"
- 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
@@ -50,8 +68,8 @@
        case SSTAG_SERVEUR_VERSION:
              { struct CMD_VERSION *cmd_version;
                cmd_version = (struct CMD_VERSION *)connexion->donnees;
-               Changer_version_donnees( Config_cli.log, cmd_version->version );
-               Info_n( Config_cli.log, DEBUG_CONNEXION, "Nouvelle version données", cmd_version->version );
+               Changer_version_donnees( Client_en_cours.config.log, cmd_version->version );
+               Info_n( Client_en_cours.config.log, DEBUG_CONNEXION, "Nouvelle version données", cmd_version->version );
              }
             break;
      }

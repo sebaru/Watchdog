@@ -26,9 +26,6 @@
  */
  
  #include <glib.h>
- #include "Erreur.h"
- #include "Reseaux.h"
-
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 

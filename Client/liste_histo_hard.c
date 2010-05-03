@@ -3,11 +3,31 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mer 24 mar 2004 10:06:06 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
- #include <gnome.h>
+/*
+ * liste_histo_hard.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010 - 
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
  #include <time.h>
-
- #include "Config_cli.h"
- #include "Reseaux.h"
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
  
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern gint Nbr_message;                                                /* Nombre de message de Watchdog */
@@ -33,9 +53,6 @@
 
  extern GdkColor COULEUR_FOND[];
  extern GdkColor COULEUR_TEXTE[];
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
  
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
  extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;

@@ -24,15 +24,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
-
- #include <gnome.h>
- 
- #include "Reseaux.h"
- 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+ 
+ extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  static GtkWidget *F_ajout;             /* Widget de reference sur la fenetre d'ajout/edition des groupes */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du groupe en cours d'edition */
  static GtkWidget *Entry_comment;                                   /* Le commentaire associé à ce groupe */

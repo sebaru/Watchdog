@@ -27,20 +27,13 @@
 
  #include <gnome.h>
  #include <sys/time.h>
- 
- #include "Reseaux.h"
- #include "Config_cli.h"
- #include "trame.h"
- #include "motifs.h"
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
-
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
 /**********************************************************************************************************/
 /* Changer_vue_directe: Demande au serveur une nouvelle vue                                               */
@@ -84,7 +77,7 @@
     if (!(infos && infos->Trame)) return;
     pass = (struct PASSERELLE *)g_malloc0( sizeof(struct PASSERELLE) );
     if (!pass)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_pass_supervision: not enought memory" );
+     { Info( Client_en_cours.config.log, DEBUG_MEM, "Afficher_pass_supervision: not enought memory" );
        return;
      }
 

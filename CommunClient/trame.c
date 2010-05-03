@@ -44,7 +44,6 @@
 
 #define DEBUG_TRAME
 /********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
 /****************************** Inclusion des images XPM pour les menus ***********************************/
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;

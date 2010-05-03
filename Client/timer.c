@@ -26,15 +26,12 @@
   */
   
  #include <gnome.h>
- #include "Config_cli.h"
- #include "client.h"
-
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+
+ extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 /**********************************************************************************************************/
 /* Timer_motif: gestion des échéances temporelles des motifs.                                             */
 /* Entree: trame_motif                                                                                    */

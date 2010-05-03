@@ -25,23 +25,18 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <gnome.h>
  #include <sys/time.h>
  #include <gtkdatabox.h>
  #include <gtkdatabox_points.h>
  #include <gtkdatabox_lines.h>
  #include <gtkdatabox_grid.h>
- 
- #include "Reseaux.h"
- #include "Config_cli.h"
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
  static GtkWidget *F_source = NULL;
  static GtkWidget *Liste_source = NULL;

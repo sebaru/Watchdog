@@ -27,19 +27,13 @@
  
  #include <gnome.h>
  #include <sys/time.h>
- 
- #include "Reseaux.h"
- #include "Config_cli.h"
- #include "trame.h"
- #include "motifs.h"
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
 
 /**********************************************************************************************************/
 /* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                  */
@@ -209,7 +203,7 @@
     if (!(infos && infos->Trame)) return;
     motif = (struct MOTIF *)g_malloc0( sizeof(struct MOTIF) );
     if (!motif)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_motif_supervision: not enought memory" );
+     { Info( Client_en_cours.config.log, DEBUG_MEM, "Afficher_motif_supervision: not enought memory" );
        return;
      }
 
@@ -236,7 +230,7 @@
     motif->type_gestion = rezo_motif->type_gestion;                        /* Statique/dynamique/cyclique */
 
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
-    trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
+    trame_motif->groupe_dpl = 0;                                  /* Numéro de groupe pour le deplacement */
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
     trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */
     trame_motif->bleu   = motif->bleu0;                                          /* Sauvegarde etat motif */
