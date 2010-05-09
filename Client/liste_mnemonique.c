@@ -25,6 +25,7 @@
      COLONNE_ACRONYME,
      COLONNE_LIBELLE,
      COLONNE_COULEUR,
+     COLONNE_COULEUR_TEXTE,
      NBR_COLONNE
   };
  static GdkColor COULEUR[NBR_TYPE_MNEMO]=
@@ -38,6 +39,18 @@
     { 0x0, 0x0,    0x7FFF, 0xCFFF },
     { 0x0, 0x0,    0x7FFF, 0x0    },
     { 0x0, 0xFFFF, 0xFFFF, 0x0    },
+  };
+ static GdkColor COULEUR_TEXTE[NBR_TYPE_MNEMO]=
+  { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
   };
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
   { "Bistable      B",
@@ -91,6 +104,16 @@
   { if (num >= NBR_TYPE_MNEMO)
      return( &COULEUR[0] );
     return( &COULEUR[num] );
+  }
+/**********************************************************************************************************/
+/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
+/* Entrée: le numero du type                                                                              */
+/* Sortie: le type                                                                                        */
+/**********************************************************************************************************/
+ static GdkColor *Couleur_texte_bit_interne ( gint num )
+  { if (num >= NBR_TYPE_MNEMO)
+     return( &COULEUR_TEXTE[0] );
+    return( &COULEUR_TEXTE[num] );
   }
 /**********************************************************************************************************/
 /* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
@@ -398,7 +421,8 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
                                               G_TYPE_STRING,                                     /* Objet */
                                               G_TYPE_STRING,                                  /* Acronyme */
                                               G_TYPE_STRING,                                   /* libellé */
-                                              GDK_TYPE_COLOR                                   /* libellé */
+                                              GDK_TYPE_COLOR,                             /* couleur fond */
+                                              GDK_TYPE_COLOR                             /* couleur texte */
                                );
 
     Liste_mnemonique = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );      /* Creation de la vue */
@@ -410,6 +434,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Type/Num"), renderer,
                                                          "text", COLONNE_TYPE,
                                                          "background-gdk", COLONNE_COULEUR,
+                                                         "foreground-gdk", COLONNE_COULEUR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
@@ -500,6 +525,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
                          COLONNE_ACRONYME, mnemonique->acronyme,
                          COLONNE_LIBELLE,  mnemonique->libelle,
                          COLONNE_COULEUR,  Couleur_bit_interne( mnemonique->type ),
+                         COLONNE_COULEUR_TEXTE, Couleur_texte_bit_interne( mnemonique->type ),
                          -1
                        );
   }
