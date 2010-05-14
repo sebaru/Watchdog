@@ -113,6 +113,7 @@
           nbr = g_list_length(Partage->com_sms.liste_sms);
           pthread_mutex_unlock( &Partage->com_sms.synchro );
           Info_n( Config.log, DEBUG_INFO, "SMS: Nbr SMS a envoyer", nbr );
+          Info_n( Config.log, DEBUG_INFO, "SMS: Test en réception", sms_index );
         }
 
 /********************************************** Lecture de SMS ********************************************/
@@ -122,30 +123,31 @@
 
        memset ( &sms, 0, sizeof(gn_sms) );
        sms.memory_type = gn_str2memory_type("ME");    /* On recupere les SMS du Mobile equipment (pas SM) */
-       sms.number = sms_index;
        data.sms = &sms;
 
-       if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                      /* On recupere le SMS */
-        { 
-          if ( ! strncmp( (gchar *)sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )/* Commence par CDE ? */
-           { guint num_bit;
-             num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
-             Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Recu SMS", (gchar *)sms.user_data[0].u.text );
-             Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:       de", sms.remote.number );
-             Envoyer_commande_dls ( num_bit );                                /* Activation du monostable */
-             gn_sms_delete (&data, state);                           /* On l'a traité, on peut l'effacer */
-           }
-          else
-           { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Wrong CDE", (gchar *)sms.user_data[0].u.text );
-             Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:        de", sms.remote.number );
-             gn_sms_delete (&data, state);                           /* On l'a traité, on peut l'effacer */
-           }
-        }
-       else if (error == GN_ERR_INVALIDLOCATION) sms_index=1;      /* On regarde toutes les places de stockage */
-       else if (error != GN_ERR_UNKNOWN)
-             { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: erreor", gn_error_print(error) ); }
+       for (sms_index=1; ;sms_index++)
+        { sms.number = sms_index;
 
-       sms_index++;                                        /* Le prochain coup, on regarde la zone sms +1 */
+          if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                   /* On recupere le SMS */
+           {                                                                        /* Commence par CDE ? */
+             if ( ! strncmp( (gchar *)sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )
+              { guint num_bit;
+                num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
+                Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Recu SMS", (gchar *)sms.user_data[0].u.text );
+                Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:       de", sms.remote.number );
+                gn_sms_delete (&data, state);                         /* On l'a traité, on peut l'effacer */
+                Envoyer_commande_dls ( num_bit );                             /* Activation du monostable */
+              }
+             else
+              { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Wrong CDE", (gchar *)sms.user_data[0].u.text );
+                Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:        de", sms.remote.number );
+                gn_sms_delete (&data, state);                         /* On l'a traité, on peut l'effacer */
+              }
+           }
+          else if (error == GN_ERR_INVALIDLOCATION) break;    /* On regarde toutes les places de stockage */
+          else if (error != GN_ERR_UNKNOWN)
+                { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: erreor", gn_error_print(error) ); }
+        }
 /************************************************ Envoi de SMS ********************************************/
        if ( !Partage->com_sms.liste_sms )                               /* Attente de demande d'envoi SMS */
         { sleep(30);
