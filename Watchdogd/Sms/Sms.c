@@ -113,7 +113,6 @@
           nbr = g_list_length(Partage->com_sms.liste_sms);
           pthread_mutex_unlock( &Partage->com_sms.synchro );
           Info_n( Config.log, DEBUG_INFO, "SMS: Nbr SMS a envoyer", nbr );
-          Info_n( Config.log, DEBUG_INFO, "SMS: Test en réception", sms_index );
         }
 
 /********************************************** Lecture de SMS ********************************************/
@@ -150,7 +149,7 @@
         }
 /************************************************ Envoi de SMS ********************************************/
        if ( !Partage->com_sms.liste_sms )                               /* Attente de demande d'envoi SMS */
-        { sleep(30);
+        { sleep(10);
           sched_yield();
           continue;
         }
