@@ -149,5 +149,5 @@ blanc         [\t ]+
 {digitf}                   { Dls_lval.valf = atof(Dls_text);
                              return VALF;
                            }
-.                          { return 0; }
+.                          { }
 %%

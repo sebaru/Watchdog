@@ -30,6 +30,7 @@
  #define _PROTO_TRADDLS_H_
  
  #include <glib.h>
+ #include "Erreur.h"
  struct ACTION
   { gchar *alors;                                      /* Chaine pointant sur le nom du tableau (B/M/E..) */
     gchar *sinon;
