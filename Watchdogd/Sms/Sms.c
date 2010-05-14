@@ -125,23 +125,30 @@
        sms.number = sms_index;
        data.sms = &sms;
 
-       if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                     /* On recupere le SMS */
+       if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                      /* On recupere le SMS */
         { 
-          if ( ! strncmp( sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )       /* Commence par CDE ? */
+          if ( ! strncmp( (gchar *)sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )/* Commence par CDE ? */
            { guint num_bit;
-             num_bit = atoi(sms.user_data[0].u.text + strlen(PRESMS));
-             Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Recu SMS", sms.user_data[0].u.text );
+             num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
+             Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Recu SMS", (gchar *)sms.user_data[0].u.text );
              Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:       de", sms.remote.number );
              Envoyer_commande_dls ( num_bit );                                /* Activation du monostable */
              gn_sms_delete (&data, state);                           /* On l'a traité, on peut l'effacer */
            }
+          else
+           { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Wrong CDE", (gchar *)sms.user_data[0].u.text );
+             Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:        de", sms.remote.number );
+           }
         }
-       sms_index++;
-       if (error == GN_ERR_INVALIDLOCATION) sms_index=1;      /* On regarde toutes les places de stockage */
+       else if (error == GN_ERR_INVALIDLOCATION) sms_index=1;      /* On regarde toutes les places de stockage */
+       else { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: erreor", gn_error_print(error) );
+            }
 
+       sms_index++;                                        /* Le prochain coup, on regarde la zone sms +1 */
 /************************************************ Envoi de SMS ********************************************/
-       if ( !Partage->com_sms.liste_sms )                          /* Attente de demande d'envoi SMS */
-        { sched_yield();
+       if ( !Partage->com_sms.liste_sms )                               /* Attente de demande d'envoi SMS */
+        { sleep(5);
+          sched_yield();
           continue;
         }
 
