@@ -138,16 +138,17 @@
           else
            { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Wrong CDE", (gchar *)sms.user_data[0].u.text );
              Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:        de", sms.remote.number );
+             gn_sms_delete (&data, state);                           /* On l'a traité, on peut l'effacer */
            }
         }
        else if (error == GN_ERR_INVALIDLOCATION) sms_index=1;      /* On regarde toutes les places de stockage */
-       else { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: erreor", gn_error_print(error) );
-            }
+       else if (error != GN_ERR_UNKNOWN)
+             { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: erreor", gn_error_print(error) ); }
 
        sms_index++;                                        /* Le prochain coup, on regarde la zone sms +1 */
 /************************************************ Envoi de SMS ********************************************/
        if ( !Partage->com_sms.liste_sms )                               /* Attente de demande d'envoi SMS */
-        { sleep(5);
+        { sleep(30);
           sched_yield();
           continue;
         }
