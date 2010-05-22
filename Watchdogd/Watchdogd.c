@@ -456,7 +456,16 @@
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
        pthread_mutex_init( &Partage->com_onduleur.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
-             
+ 
+       for (i=0; i<NBR_MESSAGE_ECRITS; i++)                                 /* RAZ des last_send MESSAGES */
+        { Partage->g[i].last_send = 0; }
+
+       for (i=0; i<NBR_BIT_CONTROLE; i++)                                      /* RAZ des last_send MOTIF */
+        { Partage->i[i].last_send = 0; }
+            
+       for (i=0; i<NBR_SORTIE_TOR; i++)                                      /* RAZ des last_send MOTIF */
+        { Partage->a[i].last_arch = 0; }
+
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)
         { Partage->Sous_serveur[i].pid = -1;
