@@ -330,7 +330,8 @@
                                                            GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].last_send = Partage->top;
-        }
+        } else if (Partage->top % 60) 
+        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_send trop tôt !", num ); }
        Partage->audit_bit_interne_per_sec++;
      }
     else if ( Partage->g[num].etat==0 && etat==1 )
@@ -342,7 +343,8 @@
                                                           GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].last_send = Partage->top;
-        }
+        } else if (Partage->top % 60) 
+        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_send trop tôt !", num ); }
        Partage->audit_bit_interne_per_sec++;
      }
   }

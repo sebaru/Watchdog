@@ -61,6 +61,8 @@
        Write_admin ( client->connexion, "  setb xxx i           - Set Bxxx = i\n" );
        Write_admin ( client->connexion, "  geta xxx i           - Get Axxx\n" );
        Write_admin ( client->connexion, "  seta xxx i           - Set Axxx = i\n" );
+       Write_admin ( client->connexion, "  getg xxx             - Get MSGxxx\n" );
+       Write_admin ( client->connexion, "  setg xxx i           - Set MSGxxx = i\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
@@ -131,6 +133,20 @@
      } else
     if ( ! strcmp ( commande, "dls" ) )
      { Admin_dls_list ( client );
+     } else
+    if ( ! strcmp ( commande, "getg" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d ... last_send = %d top=%d\n",
+                   Partage->g[num].etat, Partage->g[num].last_send );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "setg" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
+       MSG ( num, val );
+       g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d\n", num, val );
+       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getm" ) )
      { int num;
