@@ -7,7 +7,7 @@
  * Watchdog-client.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2008 - sebastien
+ * Copyright (C) 2010 - sebastien
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@
  #include <unistd.h>
  #include <time.h>
 
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
  #include "config.h"
  #include "Erreur.h"
  #include "Config_cli.h"
@@ -57,10 +59,7 @@
  struct CONFIG_CLI Config_cli;                                 /* Configuration generale cliente watchdog */
  struct CONNEXION *Connexion = NULL;                                              /* Connexion au serveur */
  SSL_CTX *Ssl_ctx;                                                                        /* Contexte SSL */
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
 
- time_t Pulse = -TEMPS_MAX_PULSE;                                    /* Dernier temps de pulse du serveur */
  static void Fermer_client ( void );
  static void A_propos ( GtkWidget *widget, gpointer data );
 /****************************** Inclusion des images XPM pour les menus ***********************************/
@@ -74,7 +73,7 @@
 
  static gboolean Arret = FALSE;
 /**************************************** Définition du menu **********************************************/
- GnomeUIInfo Menu_habilitation[]=
+ GnomeUIInfo Menu_habilitation[]=                               /*!< Définition du menu des habilitations */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Users"), N_("Edit users"),
                             Menu_want_util, GNOME_STOCK_TEXT_BULLETED_LIST ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Groups"), N_("Edit groups"),
@@ -82,21 +81,21 @@
     GNOMEUIINFO_END
   };
 
- GnomeUIInfo Menu_lowlevel[]=
+ GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Entree ANA"), N_("Edit IANA"),
                             Menu_want_entreeANA, GNOME_STOCK_PIXMAP_BOOK_RED ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_synoptique[]=
+ GnomeUIInfo Menu_synoptique[]=                                        /*!< Définition du menu synoptique */
   { GNOMEUIINFO_ITEM_STOCK( N_("Caisse a outils"), N_("Edit icons"),
                             Menu_want_icone, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
     GNOMEUIINFO_ITEM_STOCK( N_("Atelier"), N_("Edit syns"),
                             Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_admin[]=
+ GnomeUIInfo Menu_admin[]=                                       /*!< Définition du menu d'administration */
   { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
                             Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
@@ -111,7 +110,7 @@
     GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_view[]=
+ GnomeUIInfo Menu_view[]=                                                    /*!< Définition du menu view */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Histo hard"), N_("histo_hard"),
                             Menu_want_histo_hard, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Courbes"), N_("Show Curves"),
@@ -120,7 +119,7 @@
                             Menu_want_histo_courbe, GNOME_STOCK_PIXMAP_BOOK_YELLOW ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_serveur[]=
+ GnomeUIInfo Menu_serveur[]=                              /*!< Définition du menu de connexion au serveur */
   { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
                             Connecter, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
@@ -133,18 +132,18 @@
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_aide[]=
+ GnomeUIInfo Menu_aide[]=                                                    /*!< Définition du menu aide */
   { GNOMEUIINFO_ITEM_STOCK( N_("A propos.."), N_("Signatures"), A_propos, GNOME_STOCK_PIXMAP_ABOUT ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_principal[]=
+ GnomeUIInfo Menu_principal[]=                             /*!< Définition de la barre de menu principale */
   { GNOMEUIINFO_SUBTREE(N_("_Serveur"), Menu_serveur),
     GNOMEUIINFO_SUBTREE(N_("_Admin"), Menu_admin),
     GNOMEUIINFO_SUBTREE(N_("A_ide"), Menu_aide),
     GNOMEUIINFO_END
   };
 
- GnomeUIInfo Barre_outils[]=
+ GnomeUIInfo Barre_outils[]=                                         /*!< Définition de la barre d'outils */
   { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
                             Connecter, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
@@ -162,26 +161,42 @@
   };
   
 /**********************************************************************************************************/
-/* A_propos: Presentation du programme                                                                    */
-/* Entrée: widgte, data  (callback inutilisées)                                                           */
-/**********************************************************************************************************/
- static void A_propos ( GtkWidget *widget, gpointer data )
-  { GtkWidget *F_a_propos;
-    const gchar *auteurs[]=
-     { "Sébastien Lefevre",
-       "Bruno Lefevre", NULL };
-    F_a_propos = gnome_about_new ( PROGRAMME, VERSION, "Sous licence GPL",
-                                   _("Client side of project Watchdog"),
-                                   auteurs, NULL, NULL, NULL );
-    gtk_widget_show( F_a_propos );
+/*!A_propos: Presentation du programme et des authors
+ **********************************************************************************************************/
+ static void A_propos ( GtkWidget *widget,                              /*!< widget source de l'évènement */
+                        gpointer data                                               /*!< data du callback */
+                      )
+  { const gchar *auteurs[]=
+     { "Sebastien Lefevre <lefevre.seb@gmail.com>",
+       "Bruno Lefevre <bruno.lefevre1953@gmail.com>",
+       NULL
+     };
+
+    gtk_show_about_dialog( NULL, "program-name", "Watchdog-client",
+                           "version", VERSION, "copyright", "Copyright 2010 © Sebastien Lefevre",
+                           "authors", auteurs,
+                           "license", "Watchdog is free software; you can redistribute it and/or modify\n"
+                                      "it under the terms of the GNU General Public License as published by\n"
+                                      "the Free Software Foundation; either version 2 of the License, or\n"
+                                      "(at your option) any later version.\n"
+                                      "\n"
+                                      "Watchdog is distributed in the hope that it will be useful,\n"
+                                      "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+                                      "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+                                      "GNU General Public License for more details.\n"
+                                      "\n"
+                                      "You should have received a copy of the GNU General Public License\n"
+                                      "along with Watchdog; if not, write to the Free Software\n"
+                                      "Foundation, Inc., 51 Franklin St, Fifth Floor, \n"
+                                      "Boston, MA  02110-1301  USA\n", 
+                           NULL );
   }
 
 /**********************************************************************************************************/
-/* Traitement_signaux: Gestion principale des signaux de Watchdog config                                  */
-/* Entrée: Numero du signal attrapé                                                                       */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Traitement_signaux ( int num )
+/*!Traitement_signaux: Gestion principale des signaux de Watchdog-client
+ **********************************************************************************************************/
+ static void Traitement_signaux ( int num                                       /*! numéro du signal recu */
+                                )
   { switch (num)
      { case SIGINT :
        case SIGTERM: Fermer_client(); break;
@@ -194,20 +209,19 @@
     printf("Fin traitement signaux\n");
   }
 /**********************************************************************************************************/
-/* Fermer_client: Arreter le client et sortie du programme                                                */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
+/*!Fermer_client: Deconnexion du client avant sortir du programme
+ **********************************************************************************************************/
  static void Fermer_client ( void )
   { printf("Fermer_client ! \n");
     Deconnecter();
     Arret = TRUE;
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du programme du client Watchdog                                              */
-/* Entrée: argc, argv pour gnome/gtk                                                                      */
-/* Sortie: 0                                                                                              */
-/**********************************************************************************************************/
- int main ( int argc, char *argv[] )
+/*!Main: Fonction principale du programme du client Watchdog
+ **********************************************************************************************************/
+ int main ( int argc,                                   /*!< nombre d'argument dans la ligne de commande, */
+            char *argv[]                                           /*!< Arguments de la ligne de commande */
+          )
   { gint help, port, debug_level;
     struct sigaction sig;
     GnomeClient *client;

@@ -7,7 +7,7 @@
  * protocole_message.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2008 - sebastien
+ * Copyright (C) 2010 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
- 
+
  #include <glib.h>
  #include "Erreur.h"
  #include "Reseaux.h"

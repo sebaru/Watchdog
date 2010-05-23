@@ -45,7 +45,6 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */

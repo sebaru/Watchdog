@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/protocli.h     Définition des prototypes de fonctions                                           */
+/* Client/Include/protocli.h     Définition des prototypes de fonctions                                   */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 29 mar 2009 09:57:11 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * protocli.h.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2007 - Sébastien Lefevre
+ * Copyright (C) 2010 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
  #include "Reseaux.h"
  #include "trame.h"
  #include "motifs.h"
+
 
  #define TEMPS_MAX_PULSE   10                        /* 10 secondes de battements maximum pour le serveur */
  #define NBR_BIT_DLS       10000

@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/atelier_propriete.c         gestion des selections synoptique                                   */
+/* Client/atelier_propriete_motif.c         gestion des selections synoptique                             */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 13:43:20 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/

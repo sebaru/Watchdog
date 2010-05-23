@@ -4,10 +4,10 @@
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * 
+ * menu.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - 
+ * Copyright (C) 2010 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <gnome.h>
  #include "Reseaux.h"
  #include "Config_cli.h"

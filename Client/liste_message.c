@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- 
  #include <gnome.h>
 
  #include "Reseaux.h"

@@ -1,20 +1,31 @@
 -- phpMyAdmin SQL Dump
--- version 3.1.3.2
+-- version 3.2.2.1
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Lun 13 Juillet 2009 à 16:51
--- Version du serveur: 5.1.34
--- Version de PHP: 5.2.9
+-- Généré le : Dim 23 Mai 2010 à 21:45
+-- Version du serveur: 5.1.42
+-- Version de PHP: 5.3.1
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
 -- Base de données: `WatchdogDB`
 --
-DROP DATABASE `WatchdogDB`;
-CREATE DATABASE `WatchdogDB` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `WatchdogDB`;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `cameras`
+--
+
+DROP TABLE IF EXISTS `cameras`;
+CREATE TABLE IF NOT EXISTS `cameras` (
+  `id_mnemo` int(11) NOT NULL,
+  `location` varchar(600) NOT NULL,
+  `type` int(11) NOT NULL,
+  PRIMARY KEY (`id_mnemo`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -27,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `class` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `libelle` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=28 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -42,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `actif` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=70 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -93,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `dls_scenario` (
   `ts_mois` tinyint(1) NOT NULL,
   `actif` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -103,13 +114,13 @@ CREATE TABLE IF NOT EXISTS `dls_scenario` (
 
 DROP TABLE IF EXISTS `eana`;
 CREATE TABLE IF NOT EXISTS `eana` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `num` int(11) NOT NULL DEFAULT '0',
+  `id_mnemo` int(11) NOT NULL,
+  `type` int(11) NOT NULL,
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
   `unite` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10 ;
+  PRIMARY KEY (`id_mnemo`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -136,7 +147,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
   `comment` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=12 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -209,7 +220,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=414 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -223,10 +234,10 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
   `objet` varchar(181) COLLATE utf8_unicode_ci NOT NULL,
-  `acronyme` varchar(73) COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` varchar(85) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=753 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -243,7 +254,7 @@ CREATE TABLE IF NOT EXISTS `modbus_bornes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `module` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -260,7 +271,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `bit` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip` (`ip`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -273,6 +284,8 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
+  `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `num_voc` int(11) DEFAULT NULL,
@@ -280,7 +293,27 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `objet` varchar(181) COLLATE utf8_unicode_ci NOT NULL,
   `sms` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=448 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `onduleurs`
+--
+
+DROP TABLE IF EXISTS `onduleurs`;
+CREATE TABLE IF NOT EXISTS `onduleurs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `actif` tinyint(1) NOT NULL,
+  `host` varchar(32) NOT NULL,
+  `ups` varchar(32) NOT NULL,
+  `bit_comm` int(11) NOT NULL,
+  `ea_ups_load` int(11) NOT NULL,
+  `ea_ups_realpower` int(11) NOT NULL,
+  `ea_battery_charge` int(11) NOT NULL,
+  `ea_input_voltage` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -302,6 +335,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
   `s_max` int(11) NOT NULL DEFAULT '-1',
   `sa_min` int(11) NOT NULL DEFAULT '-1',
   `sa_max` int(11) NOT NULL DEFAULT '-1',
+  `bit` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
@@ -319,7 +353,23 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `groupe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `mnemo` (`mnemo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_camerasup`
+--
+
+DROP TABLE IF EXISTS `syns_camerasup`;
+CREATE TABLE IF NOT EXISTS `syns_camerasup` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL,
+  `camera_src_id` int(11) NOT NULL,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -338,7 +388,7 @@ CREATE TABLE IF NOT EXISTS `syns_capteurs` (
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -359,7 +409,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=113 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -388,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=816 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -403,7 +453,7 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `pos` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -423,7 +473,7 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `bitctrl2` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=19 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -447,7 +497,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `date_modif` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -468,4 +518,13 @@ CREATE TABLE IF NOT EXISTS `utilisation_histo_bit` (
 DROP TABLE IF EXISTS `utilisation_histo_bit`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `utilisation_histo_bit` AS select count(0) AS `cpt`,`histo_bit`.`type` AS `type`,`histo_bit`.`num` AS `num` from `histo_bit` group by `histo_bit`.`type`,`histo_bit`.`num` order by count(0) desc;
+
+DELIMITER $$
+--
+-- Événements
+--
+DROP EVENT `AUTODELETE`$$
+CREATE EVENT `AUTODELETE` ON SCHEDULE EVERY 1 DAY STARTS '2010-02-22 06:00:00' ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM histo_bit WHERE date_sec < UNIX_TIMESTAMP(NOW() - INTERVAL 400 DAY)$$
+
+DELIMITER ;
 
