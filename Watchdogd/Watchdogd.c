@@ -7,7 +7,7 @@
  * Watchdogd.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2008 - sebastien
+ * Copyright (C) 2010 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <openssl/ssl.h>
  #include <openssl/err.h>
