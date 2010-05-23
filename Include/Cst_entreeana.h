@@ -3,6 +3,27 @@
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 25 jun 2004 13:42:31 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
+/*
+ * Cst_entreeana.h
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010 - Sebastien LEFEVRE
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
 
 #ifndef _CST_ENTREEANA_H_
  #define _CST_ENTREEANA_H_
@@ -43,7 +64,6 @@
 /*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/
 
  extern gchar *Unite_vers_string ( guint type );
- extern gint String_vers_unite ( guchar *unite );
  extern gchar *Type_ea_vers_string ( guint type );
 
 #endif
