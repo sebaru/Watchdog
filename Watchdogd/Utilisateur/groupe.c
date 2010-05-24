@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Utilisateur/groupe.c    Gestion de l'interface SQL pour les groupes                       */
+/* Watchdogd/Utilisateur/groupe.c    Gestion de l'interface SQL pour les groupes                          */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 03 avr 2009 20:32:27 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * groupe.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - sebastien
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

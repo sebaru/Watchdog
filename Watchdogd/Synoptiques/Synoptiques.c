@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Synoptiques/Synoptiques.c       Déclaration des fonctions pour la gestion des synoptiques */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     sam 04 avr 2009 11:28:56 CEST */
+/* Watchdogd/Synoptiques/Synoptiques.c       Déclaration des fonctions pour la gestion des synoptiques    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     sam 04 avr 2009 11:28:56 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Synoptiques.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - sebastien
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

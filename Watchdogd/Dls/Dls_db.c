@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Dls/Dls_db       Database DLS (gestion des noms de prgs, ...)                             */
+/* Watchdogd/Dls/Dls_db       Database DLS (gestion des noms de prgs, ...)                                */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      sam 18 avr 2009 12:52:09 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Dls_db.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - 
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
-
+ 
  #include <glib.h>
  #include <unistd.h>
  #include <stdio.h>

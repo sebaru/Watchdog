@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Message/Message.c        Déclaration des fonctions pour la gestion des message            */
+/* Watchdogd/Histo/Histo_hard.c        Déclaration des fonctions pour la gestion des message              */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 15 aoû 2003 13:02:48 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Histo_hard.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - 
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

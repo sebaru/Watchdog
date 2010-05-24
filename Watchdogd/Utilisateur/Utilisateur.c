@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Utilisateur/Utilisateur.c    Interface DB mots de passe pour watchdog2.0                  */
+/* Watchdogd/Utilisateur/Utilisateur.c    Interface DB mots de passe pour watchdog2.0                     */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 03 avr 2009 20:35:37 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Utilisateur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - sebastien
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

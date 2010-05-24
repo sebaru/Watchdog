@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Scenario/Scenario.c        Déclaration des fonctions pour la gestion des scenario         */
+/* Watchdogd/Scenario/Scenario.c        Déclaration des fonctions pour la gestion des scenario            */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      dim 03 aoû 2008 13:12:35 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Scenario.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2008 - sebastien
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

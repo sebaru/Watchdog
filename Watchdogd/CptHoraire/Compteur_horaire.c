@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/CptHoraire/Compteur_horaire.c        Déclaration des fonctions pour la gestion des cpt_h  */
+/* Watchdogd/CptHoraire/Compteur_horaire.c      Déclaration des fonctions pour la gestion des cpt_h       */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mar 14 fév 2006 15:03:51 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Compteur_horaire.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - 
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

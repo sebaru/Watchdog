@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Db/Histo/Histo.c        Déclaration des fonctions pour la gestion de l'historique            */
+/* Watchdogd/Histo/Histo.c        Déclaration des fonctions pour la gestion de l'historique               */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      sam 18 avr 2009 16:19:55 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Histo.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - 
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

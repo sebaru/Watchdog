@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/TraductionDLS/Proto_traductionDLS.h     Interpretation du langage DLS                        */
+/* Watchdogd/Include/Proto_traductionDLS.h     Interpretation du langage DLS                              */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:33:19 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * Proto_traductionDLS.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2007 - Sébastien Lefevre
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
  
  #ifndef _PROTO_TRADDLS_H_
  #define _PROTO_TRADDLS_H_
