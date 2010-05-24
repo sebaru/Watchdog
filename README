@@ -43,4 +43,6 @@
        mysql> source init_db.sql
        mysql> exit
 
+       [watchdog@host Watchdog]$ Watchdogd --initrsa
+
 
