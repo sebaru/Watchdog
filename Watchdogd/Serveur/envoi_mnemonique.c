@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_mnemoniquenique.c        Configuration des mnemoniques DLS de Watchdog v2.0    */
+/* Watchdogd/Serveur/envoi_mnemonique.c        Configuration des mnemoniques DLS de Watchdog v2.0         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       dim 05 déc 2004 14:50:01 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -7,7 +7,7 @@
  * envoi_mnemonique.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2007 - Sébastien Lefevre
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

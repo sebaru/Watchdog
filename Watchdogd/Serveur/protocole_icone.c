@@ -7,7 +7,7 @@
  * protocole_icone.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2009 - sebastien
+ * Copyright (C) 2010 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
