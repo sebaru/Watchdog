@@ -1,13 +1,48 @@
 
- To install before compiling :
+ - To prepare installation :
+       [root@host Watchdog]# useradd watchdog -d /var/WatchdogHome
+       [root@host Watchdog]# passwd watchdog
 
- 1015  urpmi gcc-c++
- 1016  urpmi libtool
- 1020  urpmi libgnomeui2-devel
- 1025  urpmi glib2-devel
- 1026  urpmi bison flex
- 1027  urpmi unixODBC-devel
- 1029  urpmi libmyodbc1
-       urpmi gtkdatabox
-       urpmi gtksourceview-devel
-       urpmi libungif4-devel
+       [watchdog@host Watchdog]# urpmi automake make libtool
+       [watchdog@host Watchdog]# urpmi bison flex
+
+       [watchdog@host Watchdog]# urpmi gcc-c++
+       [watchdog@host Watchdog]# urpmi glib2-devel libgnomeui2-devel gtksourceview-devel
+       [watchdog@host Watchdog]# urpmi goocanvas-devel libvlc-devel nut-devel mysql-devel
+       [watchdog@host Watchdog]# urpmi gnokii-devel gtkdatabox-devel ungif4-devel
+
+ - To Compile libvlc-gtk :
+
+       [watchdog@host directory]$ svn checkout http://libvlc-gtk.googlecode.com/svn/trunk/ .
+       [watchdog@host directory]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing
+       [watchdog@host directory]$ ./configure; make
+       [watchdog@host directory]$ su
+       Password:
+       [watchdog@host directory]# make install
+       [watchdog@host directory]# exit
+
+ - To compile and install Watchdog :
+
+       [watchdog@host Watchdog]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing
+       [watchdog@host Watchdog]$ ./configure
+       [watchdog@host Watchdog]$ su
+       Password:
+       [watchdog@host Watchdog]# make install
+       [watchdog@host Watchdog]# exit
+
+ - Before running :
+       [watchdog@host Watchdog]# urpmi MySQL-server
+       [watchdog@host Watchdog]# /usr/bin/mysqladmin -u root password test   ! Change "test" by a reel password
+       [watchdog@host Watchdog]# /usr/bin/mysqladmin -u root -p create WatchdogDB
+       [watchdog@host Watchdog]# mysql -u root -p WatchdogDB
+       Enter password: 
+       Welcome to the MySQL monitor.  Commands end with ; or \g.
+       mysql> CREATE USER watchdog IDENTIFIED BY 'watchdogpassword';
+       Query OK, 0 rows affected (0.00 sec)
+       mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EVENT ON WatchdogDB.* TO watchdog;
+       mysql> source init_db.sql
+       mysql> exit
+
+       [watchdog@host Watchdog]# mkdir /var/WatchdogHome
+       [watchdog@host Watchdog]# chown watchdog.watchdog /var/WatchdogHome
+

@@ -70,6 +70,18 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gettimeofday select socket strdup strerror)
 
+AC_CHECK_PROGS(BISON,bison,none)
+if test "$BISON" = "none"
+then
+  AC_MSG_ERROR([no suitable bison found. Please install the 'bison' package.])
+fi
+
+AC_CHECK_PROGS(FLEX,flex,none)
+if test "$BISON" = "none"
+then
+  AC_MSG_ERROR([no suitable flex found. Please install the 'flex' package.])
+fi
+
 dnl parametres par defaut
 CFLAGS="-Wall -pipe -O2 -ggdb"
 YACC="$YACC -d"
