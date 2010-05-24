@@ -62,6 +62,7 @@
         }
        else
         { Partage->ch[cpth->id].cpthdb.valeur = 0;
+          Partage->ch[cpth->id].cpthdb.id     = i;
         }
      }
     Libere_DB_SQL( Config.log, &db );
