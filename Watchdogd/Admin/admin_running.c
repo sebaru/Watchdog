@@ -138,7 +138,7 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d ... last_send = %d top=%d\n",
-                   Partage->g[num].etat, Partage->g[num].last_send );
+                   num, Partage->g[num].etat, Partage->g[num].last_send, Partage->top );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setg" ) )

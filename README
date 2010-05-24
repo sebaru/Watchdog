@@ -3,13 +3,13 @@
        [root@host Watchdog]# useradd watchdog -d /var/WatchdogHome
        [root@host Watchdog]# passwd watchdog
 
-       [watchdog@host Watchdog]# urpmi automake make libtool
-       [watchdog@host Watchdog]# urpmi bison flex
+       [root@host Watchdog]# urpmi automake make libtool
+       [root@host Watchdog]# urpmi bison flex
 
-       [watchdog@host Watchdog]# urpmi gcc-c++
-       [watchdog@host Watchdog]# urpmi glib2-devel libgnomeui2-devel gtksourceview-devel
-       [watchdog@host Watchdog]# urpmi goocanvas-devel libvlc-devel nut-devel mysql-devel
-       [watchdog@host Watchdog]# urpmi gnokii-devel gtkdatabox-devel ungif4-devel
+       [root@host Watchdog]# urpmi gcc-c++
+       [root@host Watchdog]# urpmi glib2-devel libgnomeui2-devel gtksourceview-devel
+       [root@host Watchdog]# urpmi goocanvas-devel libvlc-devel nut-devel mysql-devel
+       [root@host Watchdog]# urpmi gnokii-devel gtkdatabox-devel ungif4-devel
 
  - To Compile libvlc-gtk :
 
@@ -18,8 +18,8 @@
        [watchdog@host directory]$ ./configure; make
        [watchdog@host directory]$ su
        Password:
-       [watchdog@host directory]# make install
-       [watchdog@host directory]# exit
+       [root@host directory]# make install
+       [root@host directory]# exit
 
  - To compile and install Watchdog :
 
@@ -27,14 +27,14 @@
        [watchdog@host Watchdog]$ ./configure
        [watchdog@host Watchdog]$ su
        Password:
-       [watchdog@host Watchdog]# make install
-       [watchdog@host Watchdog]# exit
+       [root@host Watchdog]# make install
+       [root@host Watchdog]# exit
 
  - Before running :
-       [watchdog@host Watchdog]# urpmi MySQL-server
-       [watchdog@host Watchdog]# /usr/bin/mysqladmin -u root password test   ! Change "test" by a reel password
-       [watchdog@host Watchdog]# /usr/bin/mysqladmin -u root -p create WatchdogDB
-       [watchdog@host Watchdog]# mysql -u root -p WatchdogDB
+       [root@host Watchdog]# urpmi MySQL-server
+       [root@host Watchdog]# /usr/bin/mysqladmin -u root password test   ! Change "test" by a reel password
+       [root@host Watchdog]# /usr/bin/mysqladmin -u root -p create WatchdogDB
+       [root@host Watchdog]# mysql -u root -p WatchdogDB
        Enter password: 
        Welcome to the MySQL monitor.  Commands end with ; or \g.
        mysql> CREATE USER watchdog IDENTIFIED BY 'watchdogpassword';
@@ -43,6 +43,4 @@
        mysql> source init_db.sql
        mysql> exit
 
-       [watchdog@host Watchdog]# mkdir /var/WatchdogHome
-       [watchdog@host Watchdog]# chown watchdog.watchdog /var/WatchdogHome
 

@@ -86,7 +86,7 @@
  #define DEFAUT_DEBUG_LEVEL             0
  #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
- #define DEFAUT_HOME                    "/home/WatchdogHome"    /* Ne pas depasser TAILLE_HOME caracteres */
+ #define DEFAUT_HOME                    g_get_home_dir()        /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_MAX_LOGIN_FAILED        3
  #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
 
