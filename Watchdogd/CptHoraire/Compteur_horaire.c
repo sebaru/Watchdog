@@ -61,8 +61,8 @@
           g_free(cpth);
         }
        else
-        { Partage->ch[cpth->id].cpthdb.valeur = 0;
-          Partage->ch[cpth->id].cpthdb.id     = i;
+        { Partage->ch[i].cpthdb.valeur = 0;
+          Partage->ch[i].cpthdb.id     = i;
         }
      }
     Libere_DB_SQL( Config.log, &db );
