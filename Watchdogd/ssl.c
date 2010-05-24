@@ -72,7 +72,9 @@
     SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                /* Mode non bloquant */
     retour = SSL_CTX_load_verify_locations( ssl_ctx, FICHIER_CERTIF_CA, NULL );
     if (retour != 1)
-     { Info_c( Config.log, DEBUG_CRYPTO, "load verify locations", ERR_error_string( ERR_get_error(), NULL ) );
+     { Info_c( Config.log, DEBUG_CRYPTO, "MSRV: load verify locations",
+                                         ERR_error_string( ERR_get_error(), NULL ) );
+       Info_c( Config.log, DEBUG_CRYPTO, "MSRV: failed open file certif ca", FICHIER_CERTIF_CA );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
@@ -83,7 +85,7 @@
 
     fd = fopen( FICHIER_CERTIF_SERVEUR, "r" );
     if (!fd)
-     { Info_c( Config.log, DEBUG_CRYPTO, "MSRV: failed open file certif", FICHIER_CERTIF_SERVEUR );
+     { Info_c( Config.log, DEBUG_CRYPTO, "MSRV: failed open file certif serveur", FICHIER_CERTIF_SERVEUR );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
