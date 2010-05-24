@@ -34,12 +34,13 @@
        [root@host Watchdog]# urpmi MySQL-server
        [root@host Watchdog]# /usr/bin/mysqladmin -u root password test   ! Change "test" by a reel password
        [root@host Watchdog]# /usr/bin/mysqladmin -u root -p create WatchdogDB
+       [root@test SQL]$ /usr/bin/mysql_secure_installation
        [root@host Watchdog]# mysql -u root -p WatchdogDB
        Enter password: 
        Welcome to the MySQL monitor.  Commands end with ; or \g.
-       mysql> CREATE USER watchdog IDENTIFIED BY 'watchdogpassword';
+       mysql> CREATE USER 'watchdog' IDENTIFIED BY 'seb';
        Query OK, 0 rows affected (0.00 sec)
-       mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EVENT ON WatchdogDB.* TO watchdog;
+       mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EVENT ON WatchdogDB.* TO 'watchdog';
        mysql> source init_db.sql
        mysql> exit
 
