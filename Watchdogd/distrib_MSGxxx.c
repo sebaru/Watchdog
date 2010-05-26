@@ -49,8 +49,11 @@
                "MSRV: Gerer_arrive_message_dls_on: Message non trouvé", num );
        return(FALSE);                                 /* On n'a pas trouvé le message, alors on s'en va ! */
      }
-    else if (msg->not_inhibe)                                /* Distribution du message aux sous serveurs */
-     { return(FALSE); }
+    else if (!msg->not_inhibe)                               /* Distribution du message aux sous serveurs */
+     { Info_n( Config.log, DEBUG_INFO,
+               "MSRV: Gerer_arrive_message_dls_on: Message inhibe", num );
+       return(FALSE);
+     }
 
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
     if (msg->sms) Envoyer_sms ( msg->libelle_sms );
