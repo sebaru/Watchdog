@@ -42,6 +42,7 @@
  static gboolean Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
   { struct timeval tv;
     struct CMD_TYPE_MESSAGE *msg;
+    struct HISTODB histo;
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
      { Info_n( Config.log, DEBUG_INFO,
@@ -49,30 +50,29 @@
        return(FALSE);                                 /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     else if (msg->not_inhibe)                                /* Distribution du message aux sous serveurs */
-     { struct HISTODB histo;
+     { return(FALSE); }
 
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
-       if (msg->sms) Envoyer_sms ( msg->libelle_sms );
-       if (msg->num_voc) Ajouter_audio ( msg->num );
+    if (msg->sms) Envoyer_sms ( msg->libelle_sms );
+    if (msg->num_voc) Ajouter_audio ( msg->num );
 
 /***************************** Création de la structure interne de stockage *******************************/   
-       gettimeofday( &tv, NULL );
-       Partage->new_histo.date_create_sec  = tv.tv_sec;
-       Partage->new_histo.date_create_usec = tv.tv_usec;
-       Partage->new_histo.type    = msg->type;
-       Partage->new_histo.num_syn = msg->num_syn;
-       Partage->new_histo.id = msg->num;
-       memcpy( &Partage->new_histo.libelle, msg->libelle, sizeof(msg->libelle) );
-       memcpy( &Partage->new_histo.objet, msg->objet, sizeof(msg->objet) );
+    gettimeofday( &tv, NULL );
+    Partage->new_histo.date_create_sec  = tv.tv_sec;
+    Partage->new_histo.date_create_usec = tv.tv_usec;
+    Partage->new_histo.type    = msg->type;
+    Partage->new_histo.num_syn = msg->num_syn;
+    Partage->new_histo.id = msg->num;
+    memcpy( &Partage->new_histo.libelle, msg->libelle, sizeof(msg->libelle) );
+    memcpy( &Partage->new_histo.objet, msg->objet, sizeof(msg->objet) );
 
-       memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
-       memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
-       histo.date_create_sec  = Partage->new_histo.date_create_sec;
-       histo.date_create_usec = Partage->new_histo.date_create_usec;
-       histo.date_fixe = 0;
+    memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
+    memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
+    histo.date_create_sec  = Partage->new_histo.date_create_sec;
+    histo.date_create_usec = Partage->new_histo.date_create_usec;
+    histo.date_fixe = 0;
 
-       Ajouter_histoDB( Config.log, Db_watchdog, &histo );                         /* Si ajout dans DB OK */
-     }
+    Ajouter_histoDB( Config.log, Db_watchdog, &histo );                            /* Si ajout dans DB OK */
     g_free( msg );                                                 /* On a plus besoin de cette reference */
     return(TRUE);
   }
