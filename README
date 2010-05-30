@@ -67,7 +67,7 @@
        [watchdoguser@Client .watchdog]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout clientkey.pem -out clientcert.req
 
        [watchdog@Server ~]$ openssl ca -config openssl.cnf -in clientcert.req -out clientsigne.pem
-       [watchdog@Server ~]$ mv clientcertsigne.pem watchdog@client:.watchdog/
+       [watchdog@Server ~]$ scp clientcertsigne.pem watchdog@client:.watchdog/
 
 
 
