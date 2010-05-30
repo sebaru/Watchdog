@@ -310,10 +310,10 @@
                      if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
                      break;
                 case ENVOI_HISTO        :
+                     Client_mode( client, VALIDE_NON_ROOT );
                      Ref_client( client );                       /* Indique que la structure est utilisée */
                      pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
                      pthread_detach( tid );
-                     Client_mode( client, VALIDE_NON_ROOT );
                      break;
 
                 case VALIDE_NON_ROOT    : /*Client_mode(client, VALIDE); */           /* Etat transitoire */

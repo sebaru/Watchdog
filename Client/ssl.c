@@ -71,6 +71,7 @@
     retour = SSL_CTX_load_verify_locations( ssl_ctx, FICHIER_CERTIF_CA, NULL );
     if (retour != 1)
      { Info_c( Config_cli.log, DEBUG_CRYPTO, "load verify locations", ERR_error_string( ERR_get_error(), NULL ) );
+       Info_c( Config_cli.log, DEBUG_CRYPTO, "failed open file certif ca", FICHIER_CERTIF_CA );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }

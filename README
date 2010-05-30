@@ -1,55 +1,75 @@
 
  - To prepare installation :
-       [root@host Watchdog]# useradd watchdog -d /var/WatchdogHome
-       [root@host Watchdog]# passwd watchdog
+       [root@Server ]# useradd watchdog -d /var/~Home
+       [root@Server ~]# passwd watchdog
 
-       [root@host Watchdog]# urpmi automake make libtool
-       [root@host Watchdog]# urpmi bison flex
+       [root@Server ~]# urpmi automake make libtool
+       [root@Server ~]# urpmi bison flex
 
-       [root@host Watchdog]# urpmi gcc-c++
-       [root@host Watchdog]# urpmi glib2-devel libgnomeui2-devel gtksourceview-devel
-       [root@host Watchdog]# urpmi goocanvas-devel libvlc-devel nut-devel mysql-devel
-       [root@host Watchdog]# urpmi gnokii-devel gtkdatabox-devel ungif4-devel
+       [root@Server ~]# urpmi gcc-c++
+       [root@Server ~]# urpmi glib2-devel libgnomeui2-devel gtksourceview-devel
+       [root@Server ~]# urpmi goocanvas-devel libvlc-devel nut-devel mysql-devel
+       [root@Server ~]# urpmi gnokii-devel gtkdatabox-devel ungif4-devel
 
  - To Compile libvlc-gtk :
 
-       [watchdog@host directory]$ svn checkout http://libvlc-gtk.googlecode.com/svn/trunk/ .
-       [watchdog@host directory]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing
-       [watchdog@host directory]$ ./configure; make
-       [watchdog@host directory]$ su
-       Password:
-       [root@host directory]# make install
-       [root@host directory]# exit
 
- - To compile and install Watchdog :
-
-       [watchdog@host Watchdog]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing
-       [watchdog@host Watchdog]$ ./configure
-       [watchdog@host Watchdog]$ su
+       [watchdog@Server ~]$ mkdir directory; cd directory
+       [watchdog@Server directory]$ svn checkout http://libvlc-gtk.googlecode.com/svn/trunk/ .
+       [watchdog@Server directory]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing
+       [watchdog@Server directory]$ ./configure; make
+       [watchdog@Server directory]$ su
        Password:
-       [root@host Watchdog]# make install
-       [root@host Watchdog]# exit
+       [root@Server directory]# make install
+       [root@Server directory]# exit
+       [watchdog@Server directory]$ cd ..
+       [watchdog@Server ~]$ rm -rf directory
+
+
+ - To compile and install ~ :
+
+       [watchdog@Server ~]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing
+       [watchdog@Server ~]$ ./configure
+       [watchdog@Server ~]$ su
+       Password:
+       [root@Server WatchdogHome]# make install
+       [root@Server WatchdogHome]# exit
 
  - Before running :
-       [root@host Watchdog]# urpmi MySQL-server
-       [root@host Watchdog]# /usr/bin/mysqladmin -u root password test   ! Change "test" by a reel password
-       [root@host Watchdog]# /usr/bin/mysqladmin -u root -p create WatchdogDB
+       [root@Server ~]# urpmi MySQL-server
+       [root@Server ~]# /usr/bin/mysqladmin -u root password test   ! Change "test" by a reel password
+       [root@Server ~]# /usr/bin/mysqladmin -u root -p create ~DB
        [root@test SQL]$ /usr/bin/mysql_secure_installation
-       [root@host Watchdog]# mysql -u root -p WatchdogDB
+       [root@Server ~]# mysql -u root -p ~DB
        Enter password: 
        Welcome to the MySQL monitor.  Commands end with ; or \g.
        mysql> CREATE USER 'watchdog' IDENTIFIED BY 'seb';
        Query OK, 0 rows affected (0.00 sec)
-       mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EVENT ON WatchdogDB.* TO 'watchdog';
+       mysql> GRANT SELECT, INSERT, UPDATE, DELETE, EVENT ON ~DB.* TO 'watchdog';
        mysql> source init_db.sql
        mysql> exit
 
  - SSL and Certificate Initialisation
-       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -x509 -days 3650 -keyout cakey.pem -out cacert.pem
-       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout serveurkey.pem -out serveurcert.req
-       [watchdog@host Watchdog]$ mkdir newcerts
-       [watchdog@host Watchdog]$ touch index.txt
-       [watchdog@host Watchdog]$ echo "01" > serial
-       [watchdog@host Watchdog]$ openssl ca -config openssl.cnf -in serveurcert.req -out serveursigne.pem
+       [watchdog@Server ~]$ openssl req -newkey rsa:2048 -nodes -x509 -days 3650 -keyout cakey.pem -out cacert.pem
+       [watchdog@Server ~]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout serveurkey.pem -out serveurcert.req
+       [watchdog@Server ~]$ mkdir newcerts
+       [watchdog@Server ~]$ touch index.txt
+       [watchdog@Server ~]$ echo "01" > serial
+       [watchdog@Server ~]$ openssl ca -config openssl.cnf -in serveurcert.req -out serveursigne.pem
 
-       [watchdog@host Watchdog]$ Watchdogd --initrsa
+       [watchdog@Server ~]$ Watchdogd --initrsa
+       [watchdog@Server ~]$ Watchdogd
+
+ - Preparation of Client Side
+       [root@Client root]# useradd watchdoguser
+       [root@Client root]# passwd watchdoguser
+
+       [watchdoguser@Client ~]$ mkdir .watchdog; cd .watchdog
+       [watchdoguser@Client .watchdog]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout clientkey.pem -out clientcert.req
+
+       [watchdog@Server ~]$ openssl ca -config openssl.cnf -in clientcert.req -out clientsigne.pem
+       [watchdog@Server ~]$ mv clientcertsigne.pem watchdog@client:.watchdog/
+
+
+
+
