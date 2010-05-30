@@ -78,7 +78,7 @@
     if (pid<0) return;
     else if (!pid)                                                 /* Création du .au en passant par .pho */
      { gchar chaine[30], chaine2[30];
-       g_snprintf( chaine,  sizeof(chaine),  "mb/mb-fr%d", voix );
+       g_snprintf( chaine,  sizeof(chaine),  "mb/mb-fr%d", voix + 1 );           /* Commence à 1, pas 0 ! */
        g_snprintf( chaine2, sizeof(chaine2), "%d", vitesse );
        fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
        dup2( fd_cible, 1 );
@@ -291,22 +291,18 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, 2, 3 );
 
-    Entry_bit_voc = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_voc), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_voc, 2, 4, 3, 4 );
-
-    texte = gtk_label_new( _("Synopt.") );                       /* Choix du synoptique cible du messages */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
-    Combo_syn = gtk_combo_box_new_text();
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, 3, 4 );
-    Liste_index_syn = NULL;
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
-
     texte = gtk_label_new( _("Message") );                                      /* Le message en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
     Entry_lib = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 3, 4 );
+
+    texte = gtk_label_new( _("Synopt.") );                       /* Choix du synoptique cible du messages */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
+    Combo_syn = gtk_combo_box_new_text();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, 4, 5 );
+    Liste_index_syn = NULL;
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
 
 /****************************************** Paragraphe Voix ***********************************************/
     texte = gtk_label_new( _("Profil Audio") );                          /* Numéro du bit M a positionner */
@@ -315,6 +311,10 @@
     g_signal_connect( G_OBJECT(Spin_bit_voc), "changed",
                       G_CALLBACK(Afficher_mnemo_voc), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_voc, 1, 2, 5, 6 );
+
+    Entry_bit_voc = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_voc), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_voc, 2, 4, 5, 6 );
 
     texte = gtk_label_new( _("Type Voix") );   /* Création de l'option menu pour le choix du type de voix */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 6, 7 );
@@ -330,7 +330,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 6, 7 );
 
     Spin_vitesse_voc = gtk_spin_button_new_with_range( 50, 500, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 3, 4, 6, 7 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_vitesse_voc, 3, 4, 6, 7 );
 
     texte = gtk_label_new( _("Message Audio") );                                /* Le message en lui-meme */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 7, 8 );
