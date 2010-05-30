@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Message/Message.c        Déclaration des fonctions pour la gestion des message               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 19 avr 2009 13:38:18 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 30 mai 2010 11:44:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -160,7 +160,7 @@
     struct CMD_TYPE_MESSAGE *msg;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms"
+                "SELECT id,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc"
                 " FROM %s WHERE num=%d",
                 NOM_TABLE_MSG, num );
@@ -206,7 +206,7 @@
     struct CMD_TYPE_MESSAGE *msg;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms"
+                "SELECT num,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MSG, id );
