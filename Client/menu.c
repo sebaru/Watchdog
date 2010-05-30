@@ -41,6 +41,7 @@
 /**********************************************************************************************************/
  void Menu_want_plugin_dls ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_PLUGIN_DLS, 0, TRUE )) return;
+    Creer_page_plugin_dls();
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_PAGE_DLS, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -49,6 +50,7 @@
 /**********************************************************************************************************/
  void Menu_want_util ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_UTIL, 0, TRUE )) return;
+    Creer_page_utilisateur();
     Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_WANT_PAGE_UTIL, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -57,6 +59,7 @@
 /**********************************************************************************************************/
  void Menu_want_groupe ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_GROUPE, 0, TRUE )) return;
+    Creer_page_groupe();
     Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_WANT_PAGE_GROUPE, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -65,6 +68,7 @@
 /**********************************************************************************************************/
  void Menu_want_message ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE )) return;
+    Creer_page_message();
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_PAGE_MESSAGE, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -73,8 +77,8 @@
 /**********************************************************************************************************/
  void Menu_want_camera ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE )) return;
+    Creer_page_camera();
     Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_WANT_PAGE_CAMERA, NULL, 0 );
-    Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE );
   }
 /**********************************************************************************************************/
 /* Menu_want_icone: l'utilisateur desire editer la base icons                                             */
@@ -82,6 +86,7 @@
 /**********************************************************************************************************/
  void Menu_want_icone ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_ICONE, 0, TRUE )) return;
+    Creer_page_icone();
     Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_WANT_PAGE_CLASSE, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -90,6 +95,7 @@
 /**********************************************************************************************************/
  void Menu_want_synoptique ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE )) return;
+    Creer_page_synoptique();
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -98,6 +104,7 @@
 /**********************************************************************************************************/
  void Menu_want_mnemonique ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, 0, TRUE )) return;
+    Creer_page_mnemonique();
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -106,6 +113,7 @@
 /**********************************************************************************************************/
  void Menu_want_entreeANA ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_ENTREEANA, 0, TRUE )) return;
+    Creer_page_entreeANA();
     Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_WANT_PAGE_ENTREEANA, NULL, 0 );
   }
 /**********************************************************************************************************/
@@ -139,8 +147,8 @@
 /**********************************************************************************************************/
  void Menu_want_scenario ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_SCENARIO, 0, TRUE )) return;
+    Creer_page_scenario();
     Envoi_serveur( TAG_SCENARIO, SSTAG_CLIENT_WANT_PAGE_SCENARIO, NULL, 0 );
-    Chercher_page_notebook( TYPE_PAGE_SCENARIO, 0, TRUE );                    /* Affichage de la page */
   }
 /**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
