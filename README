@@ -44,6 +44,12 @@
        mysql> source init_db.sql
        mysql> exit
 
+ - SSL and Certificate Initialisation
        [watchdog@host Watchdog]$ Watchdogd --initrsa
 
-
+       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -x509 -days 3650 -keyout ca.key -out cacert.pem
+       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout serveur.key -out serveur.req
+mkdir newcerts
+touch index.txt
+echo "01" > serial
+       [watchdog@host Watchdog]$ openssl ca -in server.req -out serversigne.pem
