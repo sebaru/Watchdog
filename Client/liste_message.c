@@ -508,13 +508,13 @@
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_message) );             /* Acquisition du modele */
 
     g_snprintf( chaine, sizeof(chaine), "%04d", message->num);
-    if (message->num_voc)
-     { g_snprintf( audio, sizeof(audio), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), message->num_voc ); }
+    if (message->bit_voc)
+     { g_snprintf( audio, sizeof(audio), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), message->bit_voc ); }
     else
      { g_snprintf( audio, sizeof(audio), "- no -"); }
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_NOTINHIB, message->not_inhibe,
+                         COLONNE_NOTINHIB, message->enable,
                          COLONNE_SMS, message->sms,
                          COLONNE_ID, message->id,
                          COLONNE_NUM, chaine,

@@ -38,10 +38,12 @@
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
-    gboolean not_inhibe;                          /* Flag pour la gestion par exemple de l'inhibition ... */
+    gboolean enable;                              /* Flag pour la gestion par exemple de l'inhibition ... */
     gboolean sms;                                                                       /* Envoi de sms ? */
     guint  num_syn;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
-    guint  num_voc;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
+    guint  bit_voc;                                       /* Numéro du Monostable associé au profil vocal */
+    guint  vitesse_voc;                                              /* Vitesse de restitution de la voix */
+    guint  type_voc;                                                          /* Type de voix a restituer */
   };
 
  enum 

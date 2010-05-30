@@ -88,11 +88,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,num_syn,num_voc,not_inhibe,objet,sms) VALUES "
-                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s)", NOM_TABLE_MSG, msg->num,
+                "type,num_syn,bit_voc,enable,objet,sms) VALUES "
+                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
-                msg->num_syn, msg->num_voc, (msg->not_inhibe ? "true" : "false"), objet,
-                (msg->sms ? "true" : "false") );
+                msg->num_syn, msg->bit_voc, (msg->enable ? "true" : "false"), objet,
+                (msg->sms ? "true" : "false"), msg->type_voc, msg->vitesse_voc );
     g_free(libelle);
     g_free(objet);
     g_free(libelle_audio);
@@ -111,7 +111,8 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms,libelle_audio,libelle_sms"
+                "SELECT id,num,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms,"
+                "type_voc,vitesse_voc"
                 " FROM %s ORDER BY objet,num", NOM_TABLE_MSG );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -141,9 +142,11 @@
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
        msg->num_syn     = atoi(db->row[4]);
-       msg->num_voc     = atoi(db->row[5]);
-       msg->not_inhibe  = atoi(db->row[6]);
+       msg->bit_voc     = atoi(db->row[5]);
+       msg->enable      = atoi(db->row[6]);
        msg->sms         = atoi(db->row[8]);
+       msg->type_voc    = atoi(db->row[11]);
+       msg->vitesse_voc = atoi(db->row[12]);
      }
     return(msg);
   }
@@ -157,7 +160,8 @@
     struct CMD_TYPE_MESSAGE *msg;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,type,num_syn,num_voc,not_inhibe,objet,sms,libelle_audio,libelle_sms"
+                "SELECT id,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms"
+                "type_voc,vitesse_voc"
                 " FROM %s WHERE num=%d",
                 NOM_TABLE_MSG, num );
 
@@ -183,9 +187,11 @@
        msg->num         = num;
        msg->type        = atoi(db->row[2]);
        msg->num_syn     = atoi(db->row[3]);
-       msg->num_voc     = atoi(db->row[4]);
-       msg->not_inhibe  = atoi(db->row[5]);
+       msg->bit_voc     = atoi(db->row[4]);
+       msg->enable  = atoi(db->row[5]);
        msg->sms         = atoi(db->row[7]);
+       msg->type_voc    = atoi(db->row[10]);
+       msg->vitesse_voc = atoi(db->row[11]);
      }
     Liberer_resultat_SQL ( log, db );
     return(msg);
@@ -200,7 +206,8 @@
     struct CMD_TYPE_MESSAGE *msg;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,libelle,type,num_syn,num_voc,not_inhibe,objet,sms,libelle_audio,libelle_sms"
+                "SELECT num,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms"
+                "type_voc,vitesse_voc"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MSG, id );
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -225,9 +232,11 @@
        msg->num         = atoi(db->row[0]);
        msg->type        = atoi(db->row[2]);
        msg->num_syn     = atoi(db->row[3]);
-       msg->num_voc     = atoi(db->row[4]);
-       msg->not_inhibe  = atoi(db->row[5]);
+       msg->bit_voc     = atoi(db->row[4]);
+       msg->enable  = atoi(db->row[5]);
        msg->sms         = atoi(db->row[7]);
+       msg->type_voc    = atoi(db->row[10]);
+       msg->vitesse_voc = atoi(db->row[11]);
      }
     Liberer_resultat_SQL ( log, db );
     return(msg);
@@ -270,13 +279,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,libelle='%s',type=%d,num_syn=%d,num_voc=%d,not_inhibe=%s,objet='%s',sms=%s,"
-                "libelle_audio='%s',libelle_sms='%s' "
+                "num=%d,libelle='%s',type=%d,num_syn=%d,bit_voc=%d,enable=%s,objet='%s',sms=%s,"
+                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d "
                 "WHERE id=%d",
-                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->num_voc,
-                               (msg->not_inhibe ? "true" : "false"),
+                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->bit_voc,
+                               (msg->enable ? "true" : "false"),
                                objet, (msg->sms ? "true" : "false"), 
-                               libelle_audio, libelle_sms,
+                               libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
                 msg->id );
     g_free(libelle);
     g_free(objet);

@@ -103,7 +103,7 @@
         { gchar nom_fichier[128], cible[128];
           gint fd_cible, pid;
 
-          Envoyer_commande_dls( msg->num_voc );          /* Positionnement du profil audio via monostable */
+          Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
 
           g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
           g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
@@ -120,11 +120,13 @@
              if (pid<0)
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .pho failed", num ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
-              { gchar texte[80];
+              { gchar texte[80], chaine[30], chaine2[30];
+                g_snprintf( chaine,  sizeof(chaine),  "mb/mb-fr%d", msg->type_voc );
+                g_snprintf( chaine2, sizeof(chaine2), "%d", msg->vitesse_voc );
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
                 g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
-                execlp( "espeak", "espeak", "-s", "150", "-v", "mb/mb-fr4", texte, NULL );
+                execlp( "espeak", "espeak", "-s", chaine2, "-v", chaine, texte, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement espeak failed", pid );
                 _exit(0);
               }
@@ -138,7 +140,9 @@
              if (pid<0)
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", num ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
-              { execlp( "mbrola-linux-i386", "mbrola-linux-i386", "fr4", nom_fichier, cible, NULL );
+              { gchar chaine[30];
+                g_snprintf( chaine, sizeof(chaine), "fr%d", msg->type_voc );
+                execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement mbrola failed", pid );
                 _exit(0);
               }
