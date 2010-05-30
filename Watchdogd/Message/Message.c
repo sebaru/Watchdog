@@ -88,7 +88,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,num_syn,bit_voc,enable,objet,sms) VALUES "
+                "type,num_syn,bit_voc,enable,objet,sms,type_voc,vitesse_voc) VALUES "
                 "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
                 msg->num_syn, msg->bit_voc, (msg->enable ? "true" : "false"), objet,

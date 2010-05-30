@@ -13,7 +13,6 @@
 
  - To Compile libvlc-gtk :
 
-
        [watchdog@Server ~]$ mkdir directory; cd directory
        [watchdog@Server directory]$ svn checkout http://libvlc-gtk.googlecode.com/svn/trunk/ .
        [watchdog@Server directory]$ aclocal; libtoolize; autoheader; autoconf; automake --add-missing

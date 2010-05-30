@@ -72,7 +72,7 @@
 
  static GnomeUIInfo Menu_popup_nonselect[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_message, GNOME_STOCK_PIXMAP_ADD ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_exporter_message, GNOME_STOCK_PIXMAP_PRINT ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_message, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_END
   };
 

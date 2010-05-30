@@ -132,13 +132,12 @@
     if (db->free==FALSE)
      { Info( log, DEBUG_DB, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
 
+    Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed", requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed",
                (char *)mysql_error(db->mysql) );
        return(FALSE);
      }
-    else 
-     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete OK", requete ); }
 
     if ( ! strncmp ( requete, "SELECT", 6 ) )
      { db->result = mysql_store_result ( db->mysql );
