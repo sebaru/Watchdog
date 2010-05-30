@@ -78,7 +78,13 @@
     if (pid<0) return;
     else if (!pid)                                                 /* Création du .au en passant par .pho */
      { gchar chaine[30], chaine2[30];
-       g_snprintf( chaine,  sizeof(chaine),  "mb/mb-fr%d", voix + 1 );           /* Commence à 1, pas 0 ! */
+       switch (voix)
+        { case 0: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
+          case 1: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
+          case 2: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
+          default:
+          case 3: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
+        }
        g_snprintf( chaine2, sizeof(chaine2), "%d", vitesse );
        fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
        dup2( fd_cible, 1 );
@@ -96,7 +102,13 @@
     if (pid<0) return;
     else if (!pid)                                                 /* Création du .au en passant par .pho */
      { gchar chaine[30];
-       g_snprintf( chaine, sizeof(chaine), "fr%d", voix );
+       switch (voix)
+        { case 0: g_snprintf( chaine, sizeof(chaine), "fr1" ); break;
+          case 1: g_snprintf( chaine, sizeof(chaine), "fr2" ); break;
+          case 2: g_snprintf( chaine, sizeof(chaine), "fr6" ); break;
+          default:
+          case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
+        }
        execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
        printf("AUDIO: Lancement mbrola failed\n");
        _exit(0);

@@ -121,7 +121,13 @@
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .pho failed", num ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar texte[80], chaine[30], chaine2[30];
-                g_snprintf( chaine,  sizeof(chaine),  "mb/mb-fr%d", msg->type_voc + 1 );   /* Start à 1 ! */
+                switch (msg->type_voc)
+                 { case 0: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
+                   case 1: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
+                   case 2: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
+                   default:
+                   case 3: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
+                 }
                 g_snprintf( chaine2, sizeof(chaine2), "%d", msg->vitesse_voc );
                 fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
                 dup2( fd_cible, 1 );
@@ -141,7 +147,13 @@
               { Info_n( Config.log, DEBUG_INFO, "AUDIO : Fabrication .au failed", num ); }
              else if (!pid)                                        /* Création du .au en passant par .pho */
               { gchar chaine[30];
-                g_snprintf( chaine, sizeof(chaine), "fr%d", msg->type_voc );
+                switch (msg->type_voc)
+                 { case 0: g_snprintf( chaine, sizeof(chaine), "fr1" ); break;
+                   case 1: g_snprintf( chaine, sizeof(chaine), "fr2" ); break;
+                   case 2: g_snprintf( chaine, sizeof(chaine), "fr6" ); break;
+                   default:
+                   case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
+                 }
                 execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
                 Info_n( Config.log, DEBUG_FORK, "AUDIO: Lancement mbrola failed", pid );
                 _exit(0);
