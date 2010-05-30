@@ -56,17 +56,121 @@ CREATE TABLE IF NOT EXISTS `dls` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=72 ;
 
 -- --------------------------------------------------------
-
 --
 -- Structure de la table `dls_cpth`
 --
 
-DROP TABLE IF EXISTS `dls_cpth`;
 CREATE TABLE IF NOT EXISTS `dls_cpth` (
   `id` int(11) NOT NULL DEFAULT '0',
   `val` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Contenu de la table `dls_cpth`
+--
+
+INSERT INTO `dls_cpth` (`id`, `val`) VALUES
+(0, 0),
+(1, 0),
+(2, 0),
+(3, 0),
+(4, 0),
+(5, 0),
+(6, 0),
+(7, 0),
+(8, 0),
+(9, 0),
+(10, 0),
+(11, 0),
+(12, 0),
+(13, 0),
+(14, 0),
+(15, 0),
+(16, 0),
+(17, 0),
+(18, 0),
+(19, 0),
+(20, 0),
+(21, 0),
+(22, 0),
+(23, 0),
+(24, 0),
+(25, 0),
+(26, 0),
+(27, 0),
+(28, 0),
+(29, 0),
+(30, 0),
+(31, 0),
+(32, 0),
+(33, 0),
+(34, 0),
+(35, 0),
+(36, 0),
+(37, 0),
+(38, 0),
+(39, 0),
+(40, 0),
+(41, 0),
+(42, 0),
+(43, 0),
+(44, 0),
+(45, 0),
+(46, 0),
+(47, 0),
+(48, 0),
+(49, 0),
+(50, 0),
+(51, 0),
+(52, 0),
+(53, 0),
+(54, 0),
+(55, 0),
+(56, 0),
+(57, 0),
+(58, 0),
+(59, 0),
+(60, 0),
+(61, 0),
+(62, 0),
+(63, 0),
+(64, 0),
+(65, 0),
+(66, 0),
+(67, 0),
+(68, 0),
+(69, 0),
+(70, 0),
+(71, 0),
+(72, 0),
+(73, 0),
+(74, 0),
+(75, 0),
+(76, 0),
+(77, 0),
+(78, 0),
+(79, 0),
+(80, 0),
+(81, 0),
+(82, 0),
+(83, 0),
+(84, 0),
+(85, 0),
+(86, 0),
+(87, 0),
+(88, 0),
+(89, 0),
+(90, 0),
+(91, 0),
+(92, 0),
+(93, 0),
+(94, 0),
+(95, 0),
+(96, 0),
+(97, 0),
+(98, 0),
+(99, 0);
 
 -- --------------------------------------------------------
 
@@ -140,7 +244,6 @@ CREATE TABLE IF NOT EXISTS `gids` (
 -- Structure de la table `groups`
 --
 
-DROP TABLE IF EXISTS `groups`;
 CREATE TABLE IF NOT EXISTS `groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(97) COLLATE utf8_unicode_ci NOT NULL,
@@ -149,6 +252,20 @@ CREATE TABLE IF NOT EXISTS `groups` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=12 ;
 
+--
+-- Contenu de la table `groups`
+--
+
+INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
+(0, 'Everybody', 'The default group'),
+(1, 'Admin-UserDB', 'Members can add/remove/edit users/groups'),
+(2, 'Admin-MsgDB', 'Members can add/remove/edit Msgs'),
+(3, 'Admin-iconDB', 'Members can add/remove/edit icons'),
+(4, 'Admin-synopDB', 'Members can add/remove/edit syn'),
+(5, 'Log', 'Members can see the log'),
+(6, 'Admin-dlsDB', 'Members can add/remove/edit DLS plugins'),
+(7, 'Admin-histoDB', 'Members can ack/query histo'),
+(8, 'Admin-scenarioDB', 'Members can add/remove Scenario');
 -- --------------------------------------------------------
 
 --
@@ -500,6 +617,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=5 ;
+
+--
+-- Contenu de la table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `changepass`, `cansetpass`, `crypt`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
+(0, 'root', 0, 1, 'Ü}½¼Ož42Ó8ûDªMzæ¤n<BÅ>', 'Watchdog administrator', 0, 1, 1135427729, 0, 0, 1135427729);
 
 -- --------------------------------------------------------
 
