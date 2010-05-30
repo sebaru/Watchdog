@@ -45,11 +45,11 @@
        mysql> exit
 
  - SSL and Certificate Initialisation
-       [watchdog@host Watchdog]$ Watchdogd --initrsa
+       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -x509 -days 3650 -keyout cakey.pem -out cacert.pem
+       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout serveurkey.pem -out serveurcert.req
+       [watchdog@host Watchdog]$ mkdir newcerts
+       [watchdog@host Watchdog]$ touch index.txt
+       [watchdog@host Watchdog]$ echo "01" > serial
+       [watchdog@host Watchdog]$ openssl ca -config openssl.cnf -in serveurcert.req -out serveursigne.pem
 
-       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -x509 -days 3650 -keyout ca.key -out cacert.pem
-       [watchdog@host Watchdog]$ openssl req -newkey rsa:2048 -nodes -days 3650 -keyout serveur.key -out serveur.req
-mkdir newcerts
-touch index.txt
-echo "01" > serial
-       [watchdog@host Watchdog]$ openssl ca -in server.req -out serversigne.pem
+       [watchdog@host Watchdog]$ Watchdogd --initrsa
