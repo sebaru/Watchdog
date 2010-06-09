@@ -139,11 +139,7 @@ printf("fin Detruire page atelier\n");
  static void Menu_enregistrer_synoptique ( struct TYPE_INFO_ATELIER *infos )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_COMMENT *trame_comment;
-    struct CMD_TYPE_COMMENT edit_comment;
-    struct COMMENTAIRE *comment;
     struct TRAME_ITEM_PASS *trame_pass;
-    struct CMD_TYPE_PASSERELLE edit_pass;
-    struct PASSERELLE *pass;
     struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct CMD_TYPE_CAPTEUR edit_capteur;
     struct CAPTEUR *capteur;
@@ -166,19 +162,8 @@ printf("fin Detruire page atelier\n");
 
           case TYPE_COMMENTAIRE:
                trame_comment = (struct TRAME_ITEM_COMMENT *)objet->data;
-               comment = trame_comment->comment;
-               memcpy( edit_comment.libelle, comment->libelle, sizeof(edit_comment.libelle) );
-               memcpy( edit_comment.font, comment->font, sizeof(edit_comment.font) );
-               edit_comment.id         = comment->id;                     /* Correspond a l'id du comment */
-               edit_comment.rouge      = comment->rouge;
-               edit_comment.vert       = comment->vert;
-               edit_comment.bleu       = comment->bleu;
-               edit_comment.position_x = comment->position_x;                /* en abscisses et ordonnées */
-               edit_comment.position_y = comment->position_y;                /* en abscisses et ordonnées */
-               edit_comment.angle      = comment->angle;
-               printf("Update comment id=%d, posx=%d, posy=%d\n", edit_comment.id, edit_comment.position_x, edit_comment.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_COMMENT,
-                              (gchar *)&edit_comment, sizeof(struct CMD_TYPE_COMMENT) );
+                              (gchar *)trame_comment, sizeof(struct CMD_TYPE_COMMENT) );
                break;
 
           case TYPE_PASSERELLE:

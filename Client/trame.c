@@ -686,7 +686,8 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
 /* Entrée: une structure commentaire, la trame de reference                                               */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
- struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame, struct COMMENTAIRE *comm )
+ struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire ( gint flag, struct TRAME *trame,
+                                                      struct CMD_TYPE_COMMENT *comm )
   { struct TRAME_ITEM_COMMENT *trame_comm;
     guint couleur;
 

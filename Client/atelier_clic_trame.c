@@ -153,7 +153,7 @@ printf("Afficher_propriete: debut\n");
                                        event->button.x, event->button.y,
                                        event->button.x_root, event->button.y_root );
                                 Appui = 1;
-                                /*if (event->button.button == 1)                 /* Bouton gauche souris ? */
+                                /*if (event->button.button == 1) */             /* Bouton gauche souris ? */
                                  { if ( event->button.state & 0x4 )                           /* CTRL ?? */
                                     { Selectionner ( infos, infos->Selection.groupe, TRUE ); }
                                    else

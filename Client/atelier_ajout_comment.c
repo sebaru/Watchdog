@@ -216,24 +216,13 @@
     struct COMMENTAIRE *comment;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_comment->syn_id );
-    comment = (struct COMMENTAIRE *)g_malloc0( sizeof(struct COMMENTAIRE) );
+    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_comment_atelier: not enought memory" );
        return;
      }
 
-    comment->id = rezo_comment->id;                               /* Numero du comment dans la DBWatchdog */
-#ifdef DEBUG_COMMENT
-    printf("Libelle comment=%s id %d\n", rezo_comment->libelle, rezo_comment->id );
-#endif
-    memcpy( comment->libelle, rezo_comment->libelle, sizeof(comment->libelle) );
-    memcpy( comment->font, rezo_comment->font, sizeof(comment->font) );
-    comment->position_x = rezo_comment->position_x;                          /* en abscisses et ordonnées */
-    comment->position_y = rezo_comment->position_y;
-    comment->rouge      = rezo_comment->rouge;
-    comment->vert       = rezo_comment->vert;
-    comment->bleu       = rezo_comment->bleu;
-    comment->angle      = rezo_comment->angle;
+    memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
 
     trame_comment = Trame_ajout_commentaire ( TRUE, infos->Trame_atelier, comment );
     trame_comment->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */

@@ -67,9 +67,8 @@
     gint  position_y;
     gfloat angle;
   };
-#endif
 /************************************** Qu'est-ce qu'un commentaire ?? ************************************/
- struct COMMENTAIRE
+ struct CMD_TYPE_COMMENTAIRE
   { gint   id;                                                /* Numero du commentaire dans la DBWatchdog */
     gchar  libelle [NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
     guchar font[TAILLE_FONT+1];
@@ -80,6 +79,7 @@
     gint   position_y;
     gfloat angle;
   };
+#endif
 /************************************** Qu'est-ce qu'une passerelle ?? ************************************/
  struct CAPTEUR
   { gint  id;

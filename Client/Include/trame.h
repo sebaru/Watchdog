@@ -120,7 +120,7 @@
     GooCanvasItem *item;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
-    struct COMMENTAIRE *comment;
+    struct CMD_TYPE_COMMENT *comment;
     gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
     gint selection;
   };
@@ -184,7 +184,7 @@
  extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
                                                      struct CMD_TYPE_MOTIF *motif );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
-                                                            struct COMMENTAIRE *comm );
+                                                            struct CMD_TYPE_COMMENT *comm );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
  extern struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame,
