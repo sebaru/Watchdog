@@ -95,7 +95,7 @@
     GooCanvasItem *item_fond;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
-    struct PASSERELLE *pass;
+    struct CMD_TYPE_PASSERELLE *pass;
     gint   cligno1;                                                               /* Etat cligno du motif */
     guchar rouge1;                                                            /* Couleur attendue du motif */
     guchar vert1;
@@ -186,7 +186,7 @@
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct COMMENTAIRE *comm );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
-                                                         struct PASSERELLE *pass );
+                                                         struct CMD_TYPE_PASSERELLE *pass );
  extern struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame,
                                                      struct CAPTEUR *capteur );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,

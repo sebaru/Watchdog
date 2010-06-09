@@ -199,20 +199,13 @@
     struct PASSERELLE *pass;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_pass->syn_id );
-    pass = (struct PASSERELLE *)g_malloc0( sizeof(struct PASSERELLE) );
+    pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!pass)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_pass_atelier: not enought memory" );
        return;
      }
 
-    pass->id = rezo_pass->id;                                        /* Numero du pass dans la DBWatchdog */
-    printf("Passerelle pass=%s id %d\n", rezo_pass->libelle, rezo_pass->id );
-    memcpy( pass->libelle, rezo_pass->libelle, sizeof(pass->libelle) );
-    pass->position_x = rezo_pass->position_x;                                /* en abscisses et ordonnées */
-    pass->position_y = rezo_pass->position_y;
-    pass->bit_controle_1 = rezo_pass->bit_controle_1;                                 /* Bits de controle */
-    pass->bit_controle_2 = rezo_pass->bit_controle_2;                                 /* Bits de controle */
-    pass->angle          = rezo_pass->angle;                                          /* Bits de controle */
+    memcpy( pass, rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
 
     trame_pass = Trame_ajout_passerelle ( TRUE, infos->Trame_atelier, pass );
     trame_pass->groupe_dpl = Nouveau_groupe();                    /* Numéro de groupe pour le deplacement */

@@ -725,7 +725,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Entrée: une structure passerelle, la trame de reference                                                */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
- struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct PASSERELLE *pass )
+ struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
+                                                  struct CMD_TYPE_PASSERELLE *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     gdouble taillex, tailley;
        

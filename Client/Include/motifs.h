@@ -55,6 +55,7 @@
   };
 
 /************************************** Qu'est-ce qu'une passerelle ?? ************************************/
+#ifdef bouh
  struct PASSERELLE
   { gint  id;
     gint  bit_controle;
@@ -66,6 +67,7 @@
     gint  position_y;
     gfloat angle;
   };
+#endif
 /************************************** Qu'est-ce qu'un commentaire ?? ************************************/
  struct COMMENTAIRE
   { gint   id;                                                /* Numero du commentaire dans la DBWatchdog */

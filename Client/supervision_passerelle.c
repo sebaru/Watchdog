@@ -61,7 +61,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static gboolean Changer_vue (GooCanvasItem *canvasitem, GooCanvasItem *target,
-                              GdkEvent          *event, struct PASSERELLE *pass )
+                              GdkEvent          *event, struct CMD_TYPE_PASSERELLE *pass )
   { if ( !(event->button.button == 1 &&                                                 /* clic gauche ?? */
            event->type == GDK_BUTTON_PRESS)
        )
@@ -82,21 +82,13 @@
         
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_pass->syn_id );
     if (!(infos && infos->Trame)) return;
-    pass = (struct PASSERELLE *)g_malloc0( sizeof(struct PASSERELLE) );
+    pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!pass)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_pass_supervision: not enought memory" );
        return;
      }
 
-    pass->id = rezo_pass->id;                               /* Numero du pass dans la DBWatchdog */
-    printf("Libelle pass=%s id %d id_cible %d bit_ctrl1 %d \n", rezo_pass->libelle, rezo_pass->id, rezo_pass->syn_cible_id, rezo_pass->bit_controle_1 );
-    memcpy( pass->libelle, rezo_pass->libelle, sizeof(pass->libelle) );
-    pass->syn_cible_id = rezo_pass->syn_cible_id;                            /* en abscisses et ordonnées */
-    pass->position_x   = rezo_pass->position_x;                              /* en abscisses et ordonnées */
-    pass->position_y   = rezo_pass->position_y;
-    pass->bit_controle = rezo_pass->bit_controle;
-    pass->bit_controle_1 = rezo_pass->bit_controle_1;
-    pass->bit_controle_2 = rezo_pass->bit_controle_2;
+    memcpy( pass, rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
 
     trame_pass = Trame_ajout_passerelle ( FALSE, infos->Trame, pass );
     g_signal_connect( G_OBJECT(trame_pass->item_groupe), "button-press-event",

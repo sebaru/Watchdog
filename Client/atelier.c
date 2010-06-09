@@ -182,19 +182,8 @@ printf("fin Detruire page atelier\n");
                break;
 
           case TYPE_PASSERELLE:
-               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-               pass = trame_pass->pass;
-               memcpy( edit_pass.libelle, pass->libelle, sizeof(edit_pass.libelle) );
-               edit_pass.id         = pass->id;                           /* Correspond a l'id du comment */
-               edit_pass.bit_controle = pass->bit_controle;
-               edit_pass.bit_controle_1 = pass->bit_controle_1;
-               edit_pass.bit_controle_2 = pass->bit_controle_2;
-               edit_pass.position_x = pass->position_x;                      /* en abscisses et ordonnées */
-               edit_pass.position_y = pass->position_y;                      /* en abscisses et ordonnées */
-               edit_pass.angle      = pass->angle;
-               printf("Update pass id=%d, posx=%d, posy=%d\n", edit_pass.id, edit_pass.position_x, edit_pass.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
-                              (gchar *)&edit_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+                              (gchar *)trame_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
                break;
           case TYPE_CAPTEUR:
                trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
