@@ -45,8 +45,8 @@
  static void Agrandir_general_motif ( struct TRAME_ITEM_MOTIF *trame_motif, gdouble dx, gdouble dy,
                                       gdouble dposx, gdouble dposy )
   {
-       if (   trame_motif->motif->largeur + dx > (trame_motif->motif->gif_largeur>>1)
-           && trame_motif->motif->hauteur + dy > (trame_motif->motif->gif_hauteur>>1)
+       if (   trame_motif->motif->largeur + dx > (trame_motif->gif_largeur>>1)
+           && trame_motif->motif->hauteur + dy > (trame_motif->gif_hauteur>>1)
            && trame_motif->motif->largeur + dx < (gdouble)TAILLE_SYNOPTIQUE_X
            && trame_motif->motif->hauteur + dy < (gdouble)TAILLE_SYNOPTIQUE_Y )
         {

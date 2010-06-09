@@ -33,7 +33,7 @@
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static gboolean En_cours_M;
- static struct MOTIF *Motif;                          /* Motif dont les scenarios sont en cours d'edition */
+ static struct CMD_TYPE_MOTIF *Motif;                 /* Motif dont les scenarios sont en cours d'edition */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
@@ -488,7 +488,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Creer_fenetre_scenario( struct MOTIF *motif )
+ void Creer_fenetre_scenario( struct CMD_TYPE_MOTIF *motif )
   { GtkWidget *scroll, *hboite, *frame, *boite, *bouton, *separateur;
     GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;

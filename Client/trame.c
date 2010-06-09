@@ -55,7 +55,7 @@
 /* Entrée: Le trame_motif souhaité                                                                        */
 /* Sortie: niet                                                                                           */
 /**********************************************************************************************************/
- void Reduire_en_vignette ( struct MOTIF *motif )
+ void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif )
   { if ( motif && (motif->largeur>TAILLE_ICONE_X || motif->hauteur>TAILLE_ICONE_Y ) )
      { double facteur;
        facteur = (gdouble)motif->hauteur/motif->largeur;
@@ -152,8 +152,8 @@
 
     cairo_matrix_rotate ( &trame_motif->transform, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
     cairo_matrix_scale  ( &trame_motif->transform,
-                           (gdouble)trame_motif->motif->largeur/trame_motif->motif->gif_largeur,
-                           (gdouble)trame_motif->motif->hauteur/trame_motif->motif->gif_hauteur
+                           (gdouble)trame_motif->motif->largeur/trame_motif->gif_largeur,
+                           (gdouble)trame_motif->motif->hauteur/trame_motif->gif_hauteur
                         );
 
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
@@ -327,10 +327,10 @@
     guchar *buffer;
 
     if (!(trame_motif && trame_motif->motif && trame_motif->image)) return;
-    max = trame_motif->motif->gif_largeur*trame_motif->motif->gif_hauteur;
+    max = trame_motif->gif_largeur*trame_motif->gif_hauteur;
 #ifdef DEBUG_TRAME
     printf("Trame_peindre_motif: gif_largeur=%d  gif_hauteur=%d  r=%d,v=%d,b=%d\n",
-            trame_motif->motif->gif_largeur, trame_motif->motif->gif_hauteur, r, v, b );
+            trame_motif->gif_largeur, trame_motif->gif_hauteur, r, v, b );
 #endif       
 
     if (trame_motif->pixbuf) gdk_pixbuf_unref(trame_motif->pixbuf);
@@ -410,8 +410,8 @@
 
 printf("Charger_pixbuf_file: %s\n", fichier );
 
-    trame_item->motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
-    trame_item->motif->gif_hauteur = gdk_pixbuf_get_height (pixbuf );
+    trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
+    trame_item->gif_hauteur = gdk_pixbuf_get_height (pixbuf );
 
     trame_item->images = g_list_append( trame_item->images, pixbuf );        /* Et ajout dans la liste */
     trame_item->image  = trame_item->images;                             /* Synchro sur image numero 1 */
@@ -441,8 +441,8 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     trame_item->images = NULL;
     trame_item->nbr_images = 0;
 
-    trame_item->motif->gif_largeur = 0;
-    trame_item->motif->gif_hauteur = 0;
+    trame_item->gif_largeur = 0;
+    trame_item->gif_hauteur = 0;
 
     for ( i=0; ; i++ )
      { char nom_fichier[80];
@@ -465,12 +465,12 @@ printf("Charger_pixbuf: %s -> pixbuf = %p\n", nom_fichier, pixbuf );
           else break;
         }
 
-       trame_item->motif->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
-       trame_item->motif->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
+       trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
+       trame_item->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
 
 #ifdef DEBUG_TRAME
-printf("Charger_pixbuf: w/h %d, %d alpha %d\n", trame_item->motif->gif_largeur,
-                                                trame_item->motif->gif_hauteur,
+printf("Charger_pixbuf: w/h %d, %d alpha %d\n", trame_item->gif_largeur,
+                                                trame_item->gif_hauteur,
                                                 gdk_pixbuf_get_has_alpha(pixbuf) );
 #endif
 
@@ -485,7 +485,7 @@ printf("Charger_pixbuf: w/h %d, %d alpha %d\n", trame_item->motif->gif_largeur,
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
-                                              struct MOTIF *motif )
+                                              struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
     if (!(trame && motif)) return(NULL);
@@ -509,12 +509,12 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
-                                               (-(gdouble)(motif->gif_largeur/2)),
-                                               (-(gdouble)(motif->gif_hauteur/2)),
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
                                                NULL );
 
-    if (!motif->largeur) motif->largeur = motif->gif_largeur;
-    if (!motif->hauteur) motif->hauteur = motif->gif_hauteur;
+    if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
+    if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
 
     if ( flag )
      { GdkPixbuf *pixbuf;
@@ -672,8 +672,8 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
 
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->motif->gif_hauteur/2)),
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
                                                NULL );
 
     trame_motif->type = TYPE_MOTIF;                                  /* Il s'agit d'un item de type motif */

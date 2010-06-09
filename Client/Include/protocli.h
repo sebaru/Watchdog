@@ -334,7 +334,7 @@
 
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );           /* Dans atelier.c */
  extern void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );
- extern void Reduire_en_vignette ( struct MOTIF *motif );
+ extern void Reduire_en_vignette ( struct CMD_TYPE_MOTIF *motif );
  extern void Creer_page_atelier( gint syn_id, gchar *libelle_syn );
  extern void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page );
  extern struct TYPE_INFO_ATELIER *Rechercher_infos_atelier_par_id_syn ( gint syn_id );
@@ -502,7 +502,7 @@
  extern void Proto_supervision_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
  extern void Proto_supervision_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
  extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce );
- extern void Creer_fenetre_scenario( struct MOTIF *motif );
+ extern void Creer_fenetre_scenario( struct CMD_TYPE_MOTIF *motif );
 
                                                                         /* Dans supervision_page_camera.c */
  extern void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA_SUP *camera );

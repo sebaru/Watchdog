@@ -203,38 +203,17 @@
  void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_SUPERVISION *infos;
-    struct MOTIF *motif;
+    struct CMD_TYPE_MOTIF *motif;
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_motif->syn_id );
     if (!(infos && infos->Trame)) return;
-    motif = (struct MOTIF *)g_malloc0( sizeof(struct MOTIF) );
+    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_motif_supervision: not enought memory" );
        return;
      }
 
-    motif->id = rezo_motif->id;                                     /* Numero du motif dans la DBWatchdog */
-    motif->icone_id = rezo_motif->icone_id;                                 /* Correspond au fichier .gif */
-    printf("Libelle motif=%s id %d coul %d %d %d\n", rezo_motif->libelle, rezo_motif->id,
-                                                     rezo_motif->rouge0,
-                                                     rezo_motif->vert0,
-                                                     rezo_motif->bleu0 );
-    memcpy( motif->libelle, rezo_motif->libelle, sizeof(motif->libelle) );
-    motif->gid = rezo_motif->gid;                                /* Nom du groupe d'appartenance du motif */
-    motif->bit_controle = rezo_motif->bit_controle;                                         /* Ixxx, Cxxx */
-    motif->bit_clic = rezo_motif->bit_clic;   /* Bit à activer quand on clic avec le bouton gauche souris */
-    motif->bit_clic2 = rezo_motif->bit_clic2; /* Bit à activer quand on clic avec le bouton gauche souris */
-    motif->position_x = rezo_motif->position_x;                              /* en abscisses et ordonnées */
-    motif->position_y = rezo_motif->position_y;
-    motif->largeur = rezo_motif->largeur;                          /* Taille de l'image sur le synoptique */
-    motif->hauteur = rezo_motif->hauteur;
-    motif->angle = rezo_motif->angle;
-    motif->type_dialog = rezo_motif->type_dialog;/* Type de la boite de dialogue pour le clic de commande */
-    motif->rouge0 = rezo_motif->rouge0;
-    motif->vert0 = rezo_motif->vert0;
-    motif->bleu0 = rezo_motif->bleu0;
-    motif->type_gestion = rezo_motif->type_gestion;                        /* Statique/dynamique/cyclique */
-
+    memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
     trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */

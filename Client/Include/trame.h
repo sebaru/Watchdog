@@ -75,10 +75,13 @@
     guchar en_cours_vert;
     guchar en_cours_bleu;
 
+    guint gif_largeur;
+    guint gif_hauteur;
+
     guchar etat;                                                                 /* Etat attendu du motif */
     gint   cligno;                                                                /* Etat cligno du motif */
 
-    struct MOTIF *motif;
+    struct CMD_TYPE_MOTIF *motif;
     gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
     gint selection;                                                                  /* Encore utilisé ?? */
   };
@@ -179,7 +182,7 @@
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
  extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
-                                                     struct MOTIF *motif );
+                                                     struct CMD_TYPE_MOTIF *motif );
  extern struct TRAME_ITEM_COMMENT *Trame_ajout_commentaire( gint flag, struct TRAME *trame,
                                                             struct COMMENTAIRE *comm );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,

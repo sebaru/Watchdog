@@ -53,30 +53,7 @@
     ACTION_PROGRAMME,
     ACTION_NBR_ACTION                                                         /* nombre d'action possible */
   };
-/**************************************** Qu'est-ce qu'un motif ?? ****************************************/
- struct MOTIF
-  { gint   id;                                                      /* Numero du motif dans la DBWatchdog */
-    gint   icone_id;       /* question: encore utilisé aujourdh'ui ??*/     /* Correspond au fichier .gif */
-    gchar  libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                              /* "Vanne gaz chaudière" */
-    guint  gid;                                                  /* Nom du groupe d'appartenance du motif */
-    gint   bit_controle;                                                                    /* Ixxx, Cxxx */
-    guint   bit_clic;                         /* Bit à activer quand on clic avec le bouton gauche souris */
-    guint   bit_clic2;                        /* Bit à activer quand on clic avec le bouton gauche souris */
-    guint   bit_slave;                             /* Bit de commande slave (pour la gestion comm reseau) */
-    gfloat position_x;                                                       /* en abscisses et ordonnées */
-    gfloat position_y;
-    gint   gif_largeur;                                                /* Taille de l'image à l'echelle 1 */
-    gint   gif_hauteur;
-    gfloat largeur;                                               /* Taille de l'image sur le synoptique */
-    gfloat hauteur;
-    gfloat angle;
-    gchar  type_dialog;                          /* Type de la boite de dialogue pour le clic de commande */
-    guchar  rouge0;
-    guchar  vert0;
-    guchar  bleu0;
-    gchar  type_gestion;                                                   /* Statique/dynamique/cyclique */
-    gint   rafraich;
-  };
+
 /************************************** Qu'est-ce qu'une passerelle ?? ************************************/
  struct PASSERELLE
   { gint  id;

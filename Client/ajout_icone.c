@@ -61,13 +61,7 @@
 /**********************************************************************************************************/
  static void Afficher_matrice ( gchar *nom_fichier )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    static struct MOTIF motif =
-        { 0, 1, "libelle", 0, 0, 0,
-          (TAILLE_ICONE_X/2), (TAILLE_ICONE_Y/2),                  /* Position de l'icone dans le previsu */
-          0, 0,                                             /* Gif largeur/hauteur rempli par Charger_gif */
-          100.0, 100.0,                                                     /* Tailles réelles de l'icone */
-          0.0, 0, 30, 255, 255, 0, 0
-        };
+    static struct CMD_TYPE_MOTIF motif;
     gchar frames[30];
     gint nbr;
          /* On "libere" l'ancien motif, mais vi qu'il est 'static', cela revient à mettre ce champ à NULL */
@@ -77,11 +71,15 @@
 
     trame_motif = Trame_new_item();
     if (!trame_motif) return;
+    memset( &motif, 0, sizeof(struct CMD_TYPE_MOTIF) );
+    motif.position_x = TAILLE_ICONE_X/2;
+    motif.position_y = TAILLE_ICONE_Y/2;
+    motif.angle   = 0.0;
     trame_motif->motif = &motif;                          /* On applique les paramètres du motif 'static' */
 
     Charger_pixbuf_file( trame_motif, nom_fichier );                         /* Chargement du fichier GIF */
-    trame_motif->motif->largeur = trame_motif->motif->gif_largeur;
-    trame_motif->motif->hauteur = trame_motif->motif->gif_hauteur;
+    trame_motif->motif->largeur = trame_motif->gif_largeur;
+    trame_motif->motif->hauteur = trame_motif->gif_hauteur;
 
     Reduire_en_vignette( &motif );
     Trame_ajout_motif_par_item( Trame, trame_motif );                                   /* Ajout du motif */

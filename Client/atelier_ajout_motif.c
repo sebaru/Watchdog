@@ -59,7 +59,7 @@
  static GtkWidget *Liste_icone;                        /* GtkTreeView pour la gestion des icones Watchdog */
  static struct TRAME *Trame_preview0;                             /* Previsualisation du motif par défaut */
  static struct TRAME_ITEM_MOTIF *Trame_motif_p0;                           /* Motif en cours de selection */
- static struct MOTIF Motif_preview0;
+ static struct CMD_TYPE_MOTIF Motif_preview0;
 
 /**********************************************************************************************************/
 /* Menu_editer_icone: Demande d'edition du icone selectionné                                              */
@@ -88,7 +88,7 @@
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
 
-    memset( &Motif_preview0, 0, sizeof(struct MOTIF) );
+    memset( &Motif_preview0, 0, sizeof(struct CMD_TYPE_MOTIF) );
     memcpy( &Motif_preview0.libelle, libelle, sizeof( Motif_preview0.libelle ) );
     g_free(libelle);
     Motif_preview0.icone_id = icone_id;
@@ -182,7 +182,6 @@
 /**********************************************************************************************************/
  static gboolean CB_ajout_motif ( GtkDialog *dialog, gint reponse )
   { struct CMD_TYPE_MOTIF add_motif;
-    struct MOTIF *motif;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
 
@@ -192,8 +191,7 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK:     if (!Trame_motif_p0) return(TRUE);
-                                 motif = Trame_motif_p0->motif;
-                                 add_motif.icone_id = motif->icone_id;      /* Correspond au fichier .gif */
+                                 add_motif.icone_id = Trame_motif_p0->motif->icone_id;/* Correspond au .gif*/
                                  g_snprintf( add_motif.libelle, sizeof(add_motif.libelle),
                                              "%s" , Motif_preview0.libelle );
                                  add_motif.syn_id = infos->syn.id;
@@ -206,8 +204,8 @@
                                  add_motif.type_gestion = 0;
                                  add_motif.position_x = TAILLE_SYNOPTIQUE_X/2;
                                  add_motif.position_y = TAILLE_SYNOPTIQUE_Y/2;
-                                 add_motif.largeur = motif->gif_largeur;
-                                 add_motif.hauteur = motif->gif_hauteur;
+                                 add_motif.largeur = Trame_motif_p0->gif_largeur;
+                                 add_motif.hauteur = Trame_motif_p0->gif_hauteur;
                                  add_motif.rouge0 = 255;
                                  add_motif.vert0 = 0;
                                  add_motif.bleu0 = 0;

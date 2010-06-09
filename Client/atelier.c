@@ -138,8 +138,6 @@ printf("fin Detruire page atelier\n");
 /**********************************************************************************************************/
  static void Menu_enregistrer_synoptique ( struct TYPE_INFO_ATELIER *infos )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct CMD_TYPE_MOTIF edit_motif;
-    struct MOTIF *motif;
     struct TRAME_ITEM_COMMENT *trame_comment;
     struct CMD_TYPE_COMMENT edit_comment;
     struct COMMENTAIRE *comment;
@@ -162,27 +160,8 @@ printf("fin Detruire page atelier\n");
        switch( *((gint *)objet->data) )
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
-               motif = trame_motif->motif;
-               edit_motif.id = motif->id;                                   /* Correspond a l'id du motif */
-               edit_motif.icone_id = motif->icone_id;                       /* Correspond au fichier .gif */
-               memcpy( edit_motif.libelle, motif->libelle, sizeof(edit_motif.libelle) );
-               edit_motif.gid = motif->gid;                      /* Nom du groupe d'appartenance du motif */
-               edit_motif.bit_controle = motif->bit_controle;                               /* Ixxx, Cxxx */
-               edit_motif.bit_clic = motif->bit_clic;    /* Bit à activer quand clic bouton gauche souris */
-               edit_motif.bit_clic2 = motif->bit_clic2;  /* Bit à activer quand clic bouton gauche souris */
-               edit_motif.position_x = motif->position_x;                    /* en abscisses et ordonnées */
-               edit_motif.position_y = motif->position_y;                    /* en abscisses et ordonnées */
-               edit_motif.largeur = motif->largeur;                /* Taille de l'image sur le synoptique */
-               edit_motif.hauteur = motif->hauteur;
-               edit_motif.angle = motif->angle;
-               edit_motif.type_dialog = motif->type_dialog;  /* Type de dialogue pour le clic de commande */
-               edit_motif.rouge0 = motif->rouge0;
-               edit_motif.vert0 = motif->vert0;
-               edit_motif.bleu0 = motif->bleu0;
-               edit_motif.type_gestion = motif->type_gestion;              /* Statique/dynamique/cyclique */
-               printf("Update motif id=%d, libelle=%s, posx=%d, posy=%d\n", edit_motif.id, edit_motif.libelle, edit_motif.position_x, edit_motif.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_MOTIF,
-                              (gchar *)&edit_motif, sizeof(struct CMD_TYPE_MOTIF) );
+                              (gchar *)&trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );
                break;
 
           case TYPE_COMMENTAIRE:
@@ -472,33 +451,17 @@ printf("fin Detruire page atelier\n");
  void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *rezo_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
-    struct MOTIF *motif;
+    struct CMD_TYPE_MOTIF *motif;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_motif->syn_id );
     if (!infos) return;
-    motif = (struct MOTIF *)g_malloc0( sizeof(struct MOTIF) );
+    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_motif_atelier: not enought memory" );
        return;
      }
 
-    motif->id = rezo_motif->id;                                     /* Numero du motif dans la DBWatchdog */
-    motif->icone_id = rezo_motif->icone_id;                                 /* Correspond au fichier .gif */
-    memcpy( motif->libelle, rezo_motif->libelle, sizeof(motif->libelle) );
-    motif->gid = rezo_motif->gid;                                /* Nom du groupe d'appartenance du motif */
-    motif->bit_controle = rezo_motif->bit_controle;                                         /* Ixxx, Cxxx */
-    motif->bit_clic = rezo_motif->bit_clic;   /* Bit à activer quand on clic avec le bouton gauche souris */
-    motif->bit_clic2 = rezo_motif->bit_clic2; /* Bit à activer quand on clic avec le bouton gauche souris */
-    motif->position_x = rezo_motif->position_x;                              /* en abscisses et ordonnées */
-    motif->position_y = rezo_motif->position_y;
-    motif->largeur = rezo_motif->largeur;                          /* Taille de l'image sur le synoptique */
-    motif->hauteur = rezo_motif->hauteur;
-    motif->angle = rezo_motif->angle;
-    motif->type_dialog = rezo_motif->type_dialog;/* Type de la boite de dialogue pour le clic de commande */
-    motif->rouge0 = rezo_motif->rouge0;
-    motif->vert0 = rezo_motif->vert0;
-    motif->bleu0 = rezo_motif->bleu0;
-    motif->type_gestion = rezo_motif->type_gestion;                        /* Statique/dynamique/cyclique */
+    memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
 
     trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
     trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */

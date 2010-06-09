@@ -90,8 +90,8 @@
  static struct TRAME_ITEM_MOTIF *Trame_motif;                              /* Motif en cours de selection */
  static struct TRAME_ITEM_MOTIF *Trame_motif_p0;                           /* Motif en cours de selection */
  static struct TRAME_ITEM_MOTIF *Trame_motif_p1;                           /* Motif en cours de selection */
- static struct MOTIF Motif_preview0;
- static struct MOTIF Motif_preview1;
+ static struct CMD_TYPE_MOTIF Motif_preview0;
+ static struct CMD_TYPE_MOTIF Motif_preview1;
  static gint Tag_timer, ok_timer;                             /* Gestion des motifs cycliques/indicateurs */
  static GList *Liste_index_groupe; /* Pour correspondance index de l'option menu/Id du groupe en question */
 /**********************************************************************************************************/
@@ -336,7 +336,7 @@ printf("Changer_couleur %p\n", data);
 /* Sortie: niet                                                                                           */
 /**********************************************************************************************************/
  static void Rafraichir_propriete ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { struct MOTIF *motif;
+  { struct CMD_TYPE_MOTIF *motif;
     GtkWidget *menu;
     GList *liste;
     gint choix,cpt;
@@ -349,8 +349,8 @@ printf("Changer_couleur %p\n", data);
     gnome_color_picker_set_i8 ( GNOME_COLOR_PICKER(Couleur_inactive),
                                 motif->rouge0, motif->vert0, motif->bleu0, 0 );
 
-    memcpy( &Motif_preview0, trame_motif->motif, sizeof(struct MOTIF) );         /* Recopie et ajustement */
-    memcpy( &Motif_preview1, trame_motif->motif, sizeof(struct MOTIF) );         /* Recopie et ajustement */
+    memcpy( &Motif_preview0, trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );/* Recopie et ajustement */
+    memcpy( &Motif_preview1, trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );/* Recopie et ajustement */
     Reduire_en_vignette( &Motif_preview0 );
     Reduire_en_vignette( &Motif_preview1 );
     Motif_preview0.position_x = Motif_preview1.position_x = TAILLE_ICONE_X/2;
