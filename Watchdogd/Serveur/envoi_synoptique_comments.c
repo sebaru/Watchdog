@@ -148,9 +148,11 @@ Info( Config.log, DEBUG_INFO, "Fin valider_editer_comment_atelier" );
      }
 
     nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d comments", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d comments", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
     for( ; ; )
      { comment = Recuperer_commentDB_suite( Config.log, db );
        if (!comment)

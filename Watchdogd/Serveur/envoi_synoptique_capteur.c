@@ -146,8 +146,11 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d capteurs", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d capteurs", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
 
     for( ; ; )
      { capteur = Recuperer_capteurDB_suite( Config.log, db );

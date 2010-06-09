@@ -181,9 +181,11 @@
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d synoptiques", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                   (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d synoptiques", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
 
     for( ; ; )
      { syn = Recuperer_synoptiqueDB_suite( Config.log, db );
