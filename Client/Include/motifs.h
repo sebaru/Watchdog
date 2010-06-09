@@ -62,6 +62,7 @@
     gint   bit_controle;                                                                    /* Ixxx, Cxxx */
     guint   bit_clic;                         /* Bit à activer quand on clic avec le bouton gauche souris */
     guint   bit_clic2;                        /* Bit à activer quand on clic avec le bouton gauche souris */
+    guint   bit_slave;                             /* Bit de commande slave (pour la gestion comm reseau) */
     gfloat position_x;                                                       /* en abscisses et ordonnées */
     gfloat position_y;
     gint   gif_largeur;                                                /* Taille de l'image à l'echelle 1 */

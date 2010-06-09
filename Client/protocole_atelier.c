@@ -75,6 +75,7 @@
 /**********************************************************************************************************/
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2:
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_SLAVE:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;

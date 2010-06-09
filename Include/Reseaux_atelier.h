@@ -39,6 +39,7 @@
     gint    bit_controle;                                                                   /* Ixxx, Cxxx */
     gint    bit_clic;                         /* Bit à activer quand on clic avec le bouton gauche souris */
     gint    bit_clic2;                        /* Bit à activer quand on clic avec le bouton gauche souris */
+    gint    bit_slave;                             /* Bit de commande slave (pour la gestion comm reseau) */
     guint   position_x;                                                      /* en abscisses et ordonnées */
     guint   position_y;
     gfloat  largeur;                                               /* Taille de l'image sur le synoptique */
@@ -199,6 +200,8 @@
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL,
     SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC2,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2,
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_SLAVE,
+    SSTAG_SERVEUR_TYPE_NUM_MNEMO_SLAVE,
   };
 
 #endif

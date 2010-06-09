@@ -83,6 +83,8 @@
  static GtkWidget *Entry_bit_clic2;                                          /* Mnemonique du bit de clic */
  static GtkWidget *Spin_bit_ctrl;                                      /* Bit de controle (Ixxx) du motif */
  static GtkWidget *Entry_bit_ctrl;                                       /* Mnemonique du bit de controle */
+ static GtkWidget *Spin_bit_slave;                                              /* Numero du bit de slave */
+ static GtkWidget *Entry_bit_slave;                                         /* Mnemonique du bit de slave */
  static struct TRAME *Trame_preview0;                             /* Previsualisation du motif par défaut */
  static struct TRAME *Trame_preview1;                                  /* Previsualisation du motif actif */
  static struct TRAME_ITEM_MOTIF *Trame_motif;                              /* Motif en cours de selection */
@@ -379,6 +381,7 @@ printf("Changer_couleur %p\n", data);
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_ctrl), motif->bit_controle );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_clic), motif->bit_clic );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_clic2), motif->bit_clic2 );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_slave), motif->bit_slave );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_rafraich), motif->rafraich );
     printf("Rafraichir_proprietes2:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
@@ -478,6 +481,9 @@ printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2:
             gtk_entry_set_text( GTK_ENTRY(Entry_bit_clic2), chaine );
             break;
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_SLAVE:
+            gtk_entry_set_text( GTK_ENTRY(Entry_bit_slave), chaine );
+            break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
             gtk_entry_set_text( GTK_ENTRY(Entry_bit_ctrl), chaine );
             break;
@@ -511,6 +517,21 @@ printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id
     Trame_motif->motif->bit_clic2 = mnemo.num;
 
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC2,
+                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
+  }
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Afficher_mnemo_slave ( void )
+  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
+
+    mnemo.type = MNEMO_BISTABLE;
+    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_slave) );
+    Trame_motif->motif->bit_slave = mnemo.num;
+
+    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMO_SLAVE,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /**********************************************************************************************************/
@@ -561,18 +582,13 @@ printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id
   {
     ok_timer = TIMER_OFF;
     gtk_timeout_remove( Tag_timer );                                  /* On le vire des fonctions actives */
-printf("Detruire_fenetre_propriete_TOR: 1\n");
     if (Trame_preview0) Trame_detruire_trame( Trame_preview0 );
-printf("Detruire_fenetre_propriete_TOR: 2\n");
     if (Trame_preview1) Trame_detruire_trame( Trame_preview1 );
-printf("Detruire_fenetre_propriete_TOR: 3\n");
     gtk_widget_destroy( F_propriete );
-printf("Detruire_fenetre_propriete_TOR: 4\n");
     g_list_free( Liste_index_groupe );
     Trame_motif_p0 = NULL;
     Trame_motif_p1 = NULL;
     F_propriete = NULL;
-printf("Detruire_fenetre_propriete_TOR: fin\n");
   }
 /**********************************************************************************************************/
 /* Creer_fenetre_propriete_TOR: Creation de la fenetre d'edition des proprietes TOR                       */
@@ -625,7 +641,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_box_pack_start( GTK_BOX(boite), separator, FALSE, FALSE, 0 );
 
 /********************************************** Proprietes DLS ********************************************/
-    table = gtk_table_new(9, 4, TRUE);
+    table = gtk_table_new(10, 4, TRUE);
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(boite), table, TRUE, TRUE, 0 );
@@ -706,20 +722,30 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_signal_connect( GTK_OBJECT(Spin_rafraich), "changed", GTK_SIGNAL_FUNC(Changer_rafraich), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_rafraich, 2, 4, 6, 7 );
 
+    texte = gtk_label_new( _("Slave bit (B)") );
+    Spin_bit_slave = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    g_signal_connect( G_OBJECT(Spin_bit_slave), "changed",
+                      G_CALLBACK(Afficher_mnemo_slave), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_slave, 1, 2, 7, 8 );
+
+    Entry_bit_slave = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_slave), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_slave, 2, 4, 7, 8 );
+
     texte = gtk_label_new( _("Default color") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 7, 8 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 8, 9 );
 
     Couleur_inactive = gnome_color_picker_new();
-    gtk_table_attach_defaults( GTK_TABLE(table), Couleur_inactive, 2, 4, 7, 8 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Couleur_inactive, 2, 4, 8, 9 );
     g_signal_connect( G_OBJECT(Couleur_inactive), "color_set",
                       G_CALLBACK(Changer_couleur), NULL );
 
     texte = gtk_label_new( _("Control group") );                                  /* Combo du type d'acces */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 8, 9 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 9, 10 );
     Combo_groupe = gtk_combo_box_new_text();
     g_signal_connect( G_OBJECT(Combo_groupe), "changed",
                       G_CALLBACK(Changer_groupe), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 2, 4, 8, 9 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 2, 4, 9, 10 );
     Liste_index_groupe = NULL;
 
     ok_timer = TIMER_OFF;                                                       /* Timer = OFF par défaut */
