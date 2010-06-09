@@ -67,13 +67,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(icone,syn,libelle,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,bitslave) VALUES "
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich) VALUES "
                 "(%d,%d,'%s',%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->gid,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
-                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->bit_slave );
+                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich );
     g_free(libelle);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -90,7 +90,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,bitslave"
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich"
                 " FROM %s WHERE syn=%d ORDER BY id", NOM_TABLE_MOTIF, id_syn );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -130,7 +130,7 @@
        motif->rouge0       = atoi(db->row[14]);
        motif->vert0        = atoi(db->row[15]);
        motif->bleu0        = atoi(db->row[16]);
-       motif->bit_slave    = atoi(db->row[18]);
+       motif->rafraich     = atoi(db->row[18]);
      }
     return(motif);
   }
@@ -146,7 +146,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,bitslave "
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich "
                 "FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -180,7 +180,7 @@
        motif->rouge0       = atoi(db->row[13]);
        motif->vert0        = atoi(db->row[14]);
        motif->bleu0        = atoi(db->row[15]);
-       motif->bit_slave    = atoi(db->row[17]);
+       motif->rafraich     = atoi(db->row[17]);
      }
     return(motif);
   }
@@ -203,13 +203,13 @@
                 "UPDATE %s SET "             
                 "icone=%d,libelle='%s',gid=%d,bitctrl=%d,bitclic=%d,posx=%d,posy=%d,larg=%f,"
                 "haut=%f,angle=%f,dialog=%d,gestion=%d,rouge=%d,vert=%d,bleu=%d,bitclic2=%d,"
-                "bitslave=%d"
+                "rafraich=%d"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
                 motif->icone_id, libelle, motif->gid,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
-                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->bit_slave,
+                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich,
                 motif->id );
     g_free(libelle);
 

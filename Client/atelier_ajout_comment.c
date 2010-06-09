@@ -213,7 +213,7 @@
  void Proto_afficher_un_comment_atelier( struct CMD_TYPE_COMMENT *rezo_comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_ATELIER *infos;
-    struct COMMENTAIRE *comment;
+    struct CMD_TYPE_COMMENT *comment;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_comment->syn_id );
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
