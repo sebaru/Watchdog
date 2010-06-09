@@ -161,7 +161,7 @@ printf("fin Detruire page atelier\n");
         { case TYPE_MOTIF:
                trame_motif = (struct TRAME_ITEM_MOTIF *)objet->data;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_MOTIF,
-                              (gchar *)&trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );
+                              (gchar *)trame_motif->motif, sizeof(struct CMD_TYPE_MOTIF) );
                break;
 
           case TYPE_COMMENTAIRE:
