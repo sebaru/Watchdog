@@ -132,7 +132,7 @@
     if (db->free==FALSE)
      { Info( log, DEBUG_DB, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
 
-    Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed", requete );
+    Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete", requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed",
                (char *)mysql_error(db->mysql) );

@@ -723,6 +723,8 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_rafraich, 2, 4, 6, 7 );
 
     texte = gtk_label_new( _("Slave bit (B)") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 7, 8 );
+
     Spin_bit_slave = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     g_signal_connect( G_OBJECT(Spin_bit_slave), "changed",
                       G_CALLBACK(Afficher_mnemo_slave), NULL );

@@ -114,6 +114,14 @@
                                                  client, mnemo );
              }
             break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_SLAVE:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_SLAVE,
+                                                 client, mnemo );
+             }
+            break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
