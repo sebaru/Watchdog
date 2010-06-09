@@ -230,22 +230,13 @@
     struct CAPTEUR *capteur;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_capteur->syn_id );
-    capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_capteur_atelier: not enought memory" );
        return;
      }
 
-    capteur->id = rezo_capteur->id;                               /* Numero du capteur dans la DBWatchdog */
-    memcpy( capteur->libelle, rezo_capteur->libelle, sizeof(capteur->libelle) );
-    capteur->type       = rezo_capteur->type;
-    capteur->bit_controle = rezo_capteur->bit_controle;
-    capteur->position_x = rezo_capteur->position_x;                          /* en abscisses et ordonnées */
-    capteur->position_y = rezo_capteur->position_y;
-    capteur->angle      = rezo_capteur->angle;
-
-    printf("Libelle capteur=%s id=%d bitctrl=%d/%d\n", rezo_capteur->libelle,
-           rezo_capteur->id, rezo_capteur->type, rezo_capteur->bit_controle );
+    memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
 
     trame_capteur = Trame_ajout_capteur ( TRUE, infos->Trame_atelier, capteur );
     trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */

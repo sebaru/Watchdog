@@ -53,19 +53,13 @@
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_capteur->syn_id );
     if (!(infos && infos->Trame)) return;
-    capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur)
      { Info( Config_cli.log, DEBUG_MEM, "Afficher_capteur_supervision: not enought memory" );
        return;
      }
 
-    capteur->id = rezo_capteur->id;                               /* Numero du capteur dans la DBWatchdog */
-    printf("Libelle capteur=%s id %d\n", rezo_capteur->libelle, rezo_capteur->id );
-    memcpy( capteur->libelle, rezo_capteur->libelle, sizeof(capteur->libelle) );
-    capteur->type       = rezo_capteur->type;
-    capteur->bit_controle = rezo_capteur->bit_controle;                                     /* Ixxx, Cxxx */
-    capteur->position_x = rezo_capteur->position_x;                          /* en abscisses et ordonnées */
-    capteur->position_y = rezo_capteur->position_y;
+    memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
 
     trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
     trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */

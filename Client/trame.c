@@ -793,7 +793,8 @@ printf(" dX = %d dY = %d \n", taillex, tailley );*/
 /* Entrée: une structure capteur, la trame de reference                                                     */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
- struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame, struct CAPTEUR *capteur )
+ struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame,
+                                                  struct CMD_TYPE_CAPTEUR *capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
        
     if (!(trame && capteur)) return(NULL);

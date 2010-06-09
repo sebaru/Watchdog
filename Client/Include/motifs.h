@@ -54,43 +54,6 @@
     ACTION_NBR_ACTION                                                         /* nombre d'action possible */
   };
 
-/************************************** Qu'est-ce qu'une passerelle ?? ************************************/
-#ifdef bouh
- struct PASSERELLE
-  { gint  id;
-    gint  bit_controle;
-    gint  bit_controle_1;
-    gint  bit_controle_2;
-    gchar libelle[NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8+1];                                          /* "ChSeb" */
-    gint  syn_cible_id;                                  /* Valeur autoritaire par rapport au mnemo_cible */
-    gint  position_x;
-    gint  position_y;
-    gfloat angle;
-  };
-/************************************** Qu'est-ce qu'un commentaire ?? ************************************/
- struct CMD_TYPE_COMMENTAIRE
-  { gint   id;                                                /* Numero du commentaire dans la DBWatchdog */
-    gchar  libelle [NBR_CARAC_LIBELLE_MOTIF_UTF8+1];
-    guchar font[TAILLE_FONT+1];
-    guchar rouge;
-    guchar vert;
-    guchar bleu;
-    gint   position_x;
-    gint   position_y;
-    gfloat angle;
-  };
-#endif
-/************************************** Qu'est-ce qu'une passerelle ?? ************************************/
- struct CAPTEUR
-  { gint  id;
-    gint  bit_controle;
-    gint  type;
-    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
-    gint  position_x;
-    gint  position_y;
-    gfloat angle;
-  };
-
 /**********************************************************************************************************/
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

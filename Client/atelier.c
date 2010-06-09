@@ -141,10 +141,7 @@ printf("fin Detruire page atelier\n");
     struct TRAME_ITEM_COMMENT *trame_comment;
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CAPTEUR *trame_capteur;
-    struct CMD_TYPE_CAPTEUR edit_capteur;
-    struct CAPTEUR *capteur;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    struct CMD_TYPE_CAMERA_SUP *camera_sup, edit_camera_sup;
 
     GList *objet;
     if ( !(infos && infos->Trame_atelier && infos->Trame_atelier->trame_items) )
@@ -163,36 +160,22 @@ printf("fin Detruire page atelier\n");
           case TYPE_COMMENTAIRE:
                trame_comment = (struct TRAME_ITEM_COMMENT *)objet->data;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_COMMENT,
-                              (gchar *)trame_comment, sizeof(struct CMD_TYPE_COMMENT) );
+                              (gchar *)trame_comment->comment, sizeof(struct CMD_TYPE_COMMENT) );
                break;
 
           case TYPE_PASSERELLE:
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
-                              (gchar *)trame_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+                              (gchar *)trame_pass->pass, sizeof(struct CMD_TYPE_PASSERELLE) );
                break;
           case TYPE_CAPTEUR:
                trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-               capteur = trame_capteur->capteur;
-               memcpy( edit_capteur.libelle, capteur->libelle, sizeof(edit_capteur.libelle) );
-               edit_capteur.id           = capteur->id;                   /* Correspond a l'id du comment */
-               edit_capteur.type         = capteur->type;
-               edit_capteur.bit_controle = capteur->bit_controle;
-               edit_capteur.position_x   = capteur->position_x;              /* en abscisses et ordonnées */
-               edit_capteur.position_y   = capteur->position_y;              /* en abscisses et ordonnées */
-               edit_capteur.angle        = capteur->angle;
-               printf("Update capteur id=%d, bitctrl=%d%d, posx=%d, posy=%d\n", edit_capteur.id, edit_capteur.type, edit_capteur.bit_controle, edit_capteur.position_x, edit_capteur.position_y );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR,
-                              (gchar *)&edit_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
+                              (gchar *)trame_capteur->capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-               camera_sup = trame_camera_sup->camera_sup;
-               edit_camera_sup.id           = camera_sup->id;           /* ID de la camera_sup a modifier */
-               edit_camera_sup.position_x   = camera_sup->position_x;        /* en abscisses et ordonnées */
-               edit_camera_sup.position_y   = camera_sup->position_y;        /* en abscisses et ordonnées */
-
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
-                              (gchar *)&edit_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
                break;
 
           default: printf("Enregistrer_synoptique: type inconnu\n" );
