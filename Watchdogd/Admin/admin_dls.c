@@ -67,6 +67,32 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
+ void Admin_dls_gcc ( struct CLIENT_ADMIN *client, gint id )
+  { GList *liste_dls;
+    gchar chaine[128];
+
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    liste_dls = Partage->com_dls.Plugins;
+    while ( liste_dls )
+     { struct PLUGIN_DLS *dls;
+       dls = (struct PLUGIN_DLS *)liste_dls->data;
+
+       if ( id == -1 || id == dls->id)
+        { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->id );
+          Write_admin ( client->connexion, chaine );
+          Compiler_source_dls ( NULL, id );
+          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->id );
+          Write_admin ( client->connexion, chaine );
+        }
+       liste_dls = liste_dls->next;
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
  static void Admin_dls_start ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
@@ -143,13 +169,18 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_dls_start ( client, num );
      }
-    else if ( ! strcmp ( commande, "dls" ) )
-     { Admin_dls_list ( client );
+    else if ( ! strcmp ( commande, "gcc" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_dls_gcc ( client, num );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_dls_stop ( client, num );
+     }
+    else if ( ! strcmp ( commande, "dls" ) )
+     { Admin_dls_list ( client );
      }
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_dls_reload(client);
@@ -163,6 +194,8 @@
                      "  stop id                                - Demarre le module id\n" );
        Write_admin ( client->connexion,
                      "  dls                                    - D.L.S. Status\n" );
+       Write_admin ( client->connexion,
+                     "  gcc id                                 - Compile le plugin id\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }

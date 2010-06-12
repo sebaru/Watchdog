@@ -114,6 +114,7 @@
  extern gboolean Envoyer_source_dls ( struct CLIENT *client );
  extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
                                        gchar *buffer );
+ extern void Compiler_source_dls( struct CLIENT *client, gint id );
  extern void *Proto_compiler_source_dls( struct CLIENT *client );
  extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, gint id );
  extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );

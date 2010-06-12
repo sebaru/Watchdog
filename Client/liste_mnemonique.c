@@ -100,6 +100,14 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+ GnomeUIInfo Menu_test[]=                               /*!< Définition du menu des habilitations */
+  { GNOMEUIINFO_ITEM_STOCK( N_("_Add 1"), N_("Add 1"),
+                            NULL, GNOME_STOCK_TEXT_BULLETED_LIST ),
+    GNOMEUIINFO_ITEM_STOCK( N_("_Add_2"), N_("Add 2"),
+                            NULL, GNOME_STOCK_PIXMAP_ATTACH ),
+    GNOMEUIINFO_END
+  };
+
  static void Menu_effacer_mnemonique ( void );
  static void Menu_editer_mnemonique ( void );
  static void Menu_ajouter_mnemonique ( void );
@@ -523,6 +531,42 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_effacer_mnemonique), NULL );
 
+
+{ GtkWidget *menu_bar, *menu, *choix1, *choix2, *choix3, *choix4, *choix5;
+
+    menu_bar= gtk_menu_bar_new();
+    gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(menu_bar), GTK_PACK_DIRECTION_TTB );
+
+    bouton = gtk_image_menu_item_new_from_stock  (GTK_STOCK_CLOSE, NULL);
+    g_signal_connect_swapped( G_OBJECT(bouton), "activate",
+                              G_CALLBACK(Detruire_page), page );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), bouton );
+
+  choix2 = gtk_menu_item_new_with_label        ("choix2");
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), choix2 );
+  choix3 = gtk_image_menu_item_new_from_stock     (GTK_STOCK_NEW, NULL);
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), choix3 );
+
+  menu = gtk_menu_new();
+  choix4 = gtk_image_menu_item_new_from_stock     (GTK_STOCK_OPEN, NULL);
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu), choix4 );
+  choix4 = gtk_separator_menu_item_new         ();
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu), choix4 );
+  choix4 = gtk_image_menu_item_new_from_stock     (GTK_STOCK_DELETE, NULL);
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu), choix4 );
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM(choix3), menu );
+
+  menu = gtk_menu_new();
+  choix5 = gtk_image_menu_item_new_from_stock     (GTK_STOCK_JUMP_TO, NULL);
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu), choix5 );
+  choix5 = gtk_separator_menu_item_new         ();
+  gtk_menu_shell_append ( GTK_MENU_SHELL(menu), choix5 );
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM(choix4), menu );
+
+printf("8\n");
+
+    gtk_box_pack_start( GTK_BOX(boite), menu_bar, TRUE, TRUE, 0 );
+}
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Mnemoniques") ) );
   }

@@ -243,57 +243,62 @@
 /* Entrée: le client demandeur et le groupe en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void *Proto_compiler_source_dls( struct CLIENT *client )
-  { struct CMD_TYPE_SOURCE_DLS dls;
-    gboolean retour;
-    memcpy( &dls, &client->dls, sizeof(dls) );
+ void Compiler_source_dls( struct CLIENT *client, gint id )
+  { gboolean retour;
 
-    close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
-    client->id_creation_plugin_dls = 0;
-
-    Info_n( Config.log, DEBUG_DLS, "THRCompil: Proto_compiler_source_dls: Compilation module DLS", dls.id );
-    retour = Traduire_DLS( Config.log, dls.id );
-    Info_n( Config.log, DEBUG_FORK, "THRCompil: Proto_compiler_source_dls (fils1): fin traduction", retour );
-    if (retour == FALSE)
+    Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: Compilation module DLS", id );
+    retour = Traduire_DLS( Config.log, id );
+    Info_n( Config.log, DEBUG_FORK, "THRCompil: Compiler_source_dls: fin traduction", retour );
+    if (retour == FALSE)                                          /* Retour de la traduction D.L.S vers C */
      { struct CMD_GTK_MESSAGE erreur;
        gint id_fichier;
        gchar log[20];
-       g_snprintf( log, sizeof(log), "%d.log", dls.id );
 
-       id_fichier = open( log, O_RDONLY, 0 );
-       if (id_fichier<0)
-        { g_snprintf( erreur.message, sizeof(erreur.message), "Et non....\nTraduction Down" );
-        }
-       else
-        { int nbr_car;
-          nbr_car = read (id_fichier, erreur.message, sizeof(erreur.message) );
-          erreur.message[nbr_car] = 0;                                       /* Caractere NULL d'arret */
-          close(id_fichier);
-        }
        Info_n( Config.log, DEBUG_FORK,
-               "THRCompil: Proto_compiler_source_dls (fils1): envoi erreur client", dls.id );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
+               "THRCompil: Compiler_source_dls: envoi erreur Traduction D.L.S", id );
+       if (client)
+        { g_snprintf( log, sizeof(log), "%d.log", id );
+
+          id_fichier = open( log, O_RDONLY, 0 );
+          if (id_fichier<0)
+           { g_snprintf( erreur.message, sizeof(erreur.message), "Et non....\nTraduction Down" );
+           }
+          else
+           { int nbr_car;
+             nbr_car = read (id_fichier, erreur.message, sizeof(erreur.message) );
+             erreur.message[nbr_car] = 0;                                       /* Caractere NULL d'arret */
+             close(id_fichier);
+           }
+          Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
+        }
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
        gint pidgcc;
-       Info_n( Config.log, DEBUG_DLS, "THRCompil: Proto_compiler_source_dls: Traduction OK", dls.id );
        pidgcc = fork();
        if (pidgcc<0)
         { struct CMD_GTK_MESSAGE erreur;
-          g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
-          Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
+          Info_n( Config.log, DEBUG_FORK,
+                  "THRCompilFils: Compiler_source_dls: envoi erreur Fork GCC", id );
+          if (client)
+           { g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
+             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(erreur) );
+           }
         }
        else if (!pidgcc)
         { gchar source[80], cible[80];
-          g_snprintf( source, sizeof(source), "%d.c", dls.id );
-          g_snprintf( cible,  sizeof(cible),  "libdls%d.so", dls.id );
+          g_snprintf( source, sizeof(source), "%d.c", id );
+          g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
           Info( Config.log, DEBUG_DLS, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
           execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
                   "-Wall", "-ldls", source, "-fPIC", "-o", cible, NULL );
           Info( Config.log, DEBUG_FORK, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
-          g_snprintf( erreur.message, sizeof(erreur.message), "Lancement compilateur failed !" );
-          Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
+          if (client)
+           { g_snprintf( erreur.message, sizeof(erreur.message), "Lancement compilateur failed !" );
+             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(erreur) );
+           }
           _exit(0);
         }
 
@@ -306,15 +311,30 @@
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                                                  GINT_TO_POINTER(dls.id) );
+                                                             GINT_TO_POINTER(id) );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
 
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Compilation OK, Reset plugin OK" );
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       if (client)
+        { g_snprintf( erreur.message, sizeof(erreur.message),
+                      "Compilation OK, Reset plugin OK" );
+          Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
+                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+        }
      }
-    Info_n( Config.log, DEBUG_FORK, "THRCompil: Proto_compiler_source_dls (pere): terminé", dls.id );
+    Info_n( Config.log, DEBUG_FORK, "THRCompil: Proto_compiler_source_dls: terminé", id );
+  }
+/**********************************************************************************************************/
+/* Proto_compiler_source_dls: Compilation de la source DLS                                                */
+/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void *Proto_compiler_source_dls( struct CLIENT *client )
+  { gboolean retour;
+
+    close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
+    client->id_creation_plugin_dls = 0;
+
+    Compiler_source_dls ( client, client->dls.id );
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/
