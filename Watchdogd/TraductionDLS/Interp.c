@@ -254,11 +254,12 @@ printf("Gte_option_entier: --> pas trouvé\n" );
 /**********************************************************************************************************/
  struct ACTION *New_action_icone( int num, GList *options )
   { struct ACTION *action;
-    int taille, rouge, vert, bleu, val, coul, cligno;
+    int taille, rouge, vert, bleu, val, coul, cligno, slave;
 
-    val    = Get_option_entier ( options, "mode" );   if (val    == -1) val = 0;
-    coul   = Get_option_entier ( options, "color" );  if (coul   == -1) coul = 0;
+    val    = Get_option_entier ( options, "mode"   ); if (val    == -1) val = 0;
+    coul   = Get_option_entier ( options, "color"  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, "cligno" ); if (cligno == -1) cligno = 0;
+    slave  = Get_option_entier ( options, "slave"  );
     taille = 40;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -272,7 +273,8 @@ printf("Gte_option_entier: --> pas trouvé\n" );
        case GRIS    : rouge = 127; vert = 127; bleu = 127; break;
        default      : rouge = vert = bleu = 0;
      }
-    g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d);", num, val, rouge, vert, bleu, cligno );
+    g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d,%d);",
+                num, val, rouge, vert, bleu, cligno, slave );
     return(action);
   }
 

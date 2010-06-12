@@ -228,9 +228,13 @@
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
- void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
+ void SI( int num, int etat, int rouge, int vert, int bleu, int cligno, int slave )
   { gint nbr;
     if ( num>=NBR_BIT_CONTROLE ) return;
+
+    if ( slave != -1 && B(slave) == 0 )  /* Si pas de communication avec le modules, alors couleur kaki ! */
+     { cligno = 0; rouge = 0; vert = 100; bleu = 0; }
+
     if (Partage->i[num].etat   != etat || Partage->i[num].rouge!=rouge || 
         Partage->i[num].vert   != vert || Partage->i[num].bleu!=bleu ||
         Partage->i[num].cligno != cligno
@@ -437,7 +441,7 @@
        SB(0, !B(0));                                            /* Change d'etat tous les tours programme */
        SB(1, 0);                                                                   /* B1 est toujours à 0 */
        SB(2, 1);                                                                   /* B2 est toujours à 1 */
-       SI(1, 1, 255, 0, 0, 0 );                                               /* Icone toujours à 1:rouge */
+       SI(1, 1, 255, 0, 0, 0, -1 );                                           /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        plugins = Partage->com_dls.Plugins;

@@ -37,7 +37,7 @@
  extern int EA_ech_sup( double val, int num );
  extern int EA_ech_inf_egal( double val, int num );
  extern int EA_ech_sup_egal( double val, int num );
- extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
+ extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno, int slave );
  extern void SB( int num, int etat );
  extern void STR( int num, int etat );
  extern void SCH( int num, int etat );

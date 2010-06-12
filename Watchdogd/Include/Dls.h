@@ -31,6 +31,7 @@
  #include "Reseaux.h"
  #include "Db.h"
  #include "Cst_dls.h"
+ #include "Module_dls.h"
 
  #define NOM_TABLE_DLS         "dls"
 
@@ -72,28 +73,12 @@
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
 
  extern void Run_dls ( void );                                                          /* Dans The_dls.c */
- extern int E( int num );
  extern int EA_inrange( int num );
  extern double EA_ech( int num );
- extern int EA_ech_inf( double val, int num );
- extern int EA_ech_inf_egal( double val, int num );
- extern int EA_ech_sup( double val, int num );
- extern int EA_ech_sup_egal( double val, int num );
  extern int A( int num );
- extern int B( int num );
- extern int M( int num );
- extern int TR( int num );
  extern char *TRdetail( int num );
- extern int TRbarre( int num );
  extern void SE( int num, int etat );
  extern void SEA( int num, int val_int, int inrange );
- extern void SB( int num, int etat );
- extern void SM( int num, int etat );
- extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
- extern void STR( int num, int cons );
- extern void SA( int num, int etat );
- extern void SCH( int num, int etat );
- extern void MSG( int num, int etat );
  
  extern void Prendre_heure ( void );                                                      /* Dans heure.c */ 
  #endif
