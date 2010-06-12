@@ -57,8 +57,8 @@
              }
             break;
        case SSTAG_CLIENT_ACK_HISTO:
-             { struct CMD_ID_HISTO *histo;
-               histo = (struct CMD_ID_HISTO *)connexion->donnees;
+             { struct CMD_TYPE_HISTO *histo;
+               histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
                Proto_acquitter_histo( client, histo );
              }
             break;

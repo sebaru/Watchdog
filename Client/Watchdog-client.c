@@ -51,7 +51,7 @@
  extern GtkWidget *Label_msg_inhib;           /* Nombre total de message dans l'historique RAM du serveur */
  extern GtkWidget *Label_heure;                                       /* pour afficher l'heure du serveur */
 
- extern struct CMD_EDIT_UTILISATEUR *Edit_util;                       /* L'utilisateur en cours d'edition */
+ extern struct CMD_TYPE_UTILISATEUR *Edit_util;                       /* L'utilisateur en cours d'edition */
 
  extern gint Nbr_message;                                                /* Nombre de message de Watchdog */
 

@@ -46,7 +46,6 @@
 /**********************************************************************************************************/
  static void Gerer_protocole ( gint Id_serveur, struct CLIENT *client )
   { struct CONNEXION *connexion;
-    pthread_t tid;
     connexion = client->connexion;
 
     if ( Reseau_tag(connexion) == TAG_CONNEXION && Reseau_ss_tag(connexion) == SSTAG_CLIENT_OFF )

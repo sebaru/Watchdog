@@ -56,14 +56,14 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_ENTREEANA:
-             { struct CMD_ID_ENTREEANA *entree;
-               entree = (struct CMD_ID_ENTREEANA *)connexion->donnees;
+             { struct CMD_TYPE_ENTREEANA *entree;
+               entree = (struct CMD_TYPE_ENTREEANA *)connexion->donnees;
                Proto_editer_entreeANA( client, entree );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA:
-             { struct CMD_EDIT_ENTREEANA *entree;
-               entree = (struct CMD_EDIT_ENTREEANA *)connexion->donnees;
+             { struct CMD_TYPE_ENTREEANA *entree;
+               entree = (struct CMD_TYPE_ENTREEANA *)connexion->donnees;
                Proto_valider_editer_entreeANA( client, entree );
              }
             break;
