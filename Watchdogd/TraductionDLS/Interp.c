@@ -407,7 +407,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
 /* Entrée: le nom du fichier, et l'identifiant cible (pour write)                                         */
 /* Sortie: le nombre d'erreur de traduction                                                               */
 /**********************************************************************************************************/
- gboolean Traduire_DLS( struct LOG *log_erreur, gint id )
+ gboolean Traduire_DLS( struct LOG *log_erreur, gboolean new, gint id )
   { gchar source[80], source_ok[80], cible[80], log[80];
     gboolean retour;
 
@@ -419,7 +419,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
     unlink ( cible );
     unlink ( log );
     Log = log_erreur;                                               /* Sauvegarde pour utilisation future */
-    printf("Traduire: source = %s, cible = %s, log = %s\n", source, cible, log );
+    Info_c( log_erreur, DEBUG_DLS, "Traduire_DLS: source =", source );
 
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
@@ -435,14 +435,17 @@ printf("Gte_option_entier: --> pas trouvé\n" );
      }
 
     Alias = NULL;                                                              /* Par défaut, pas d'alias */
-    retour = Interpreter_source_dls( source );
+    if (new) retour = Interpreter_source_dls( source );
+        else retour = Interpreter_source_dls( source_ok );
 
     close(Id_cible);
     close(Id_log);
     Liberer_memoire();
 
-    unlink ( source_ok );                                  /* Recopie sur le fichier "officiel" du plugin */
-    rename( source, source_ok );
+    if (new)
+     { unlink ( source_ok );                               /* Recopie sur le fichier "officiel" du plugin */
+       rename( source, source_ok );
+     }
     return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

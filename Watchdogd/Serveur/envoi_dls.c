@@ -247,14 +247,14 @@
   { gboolean retour;
 
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: Compilation module DLS", id );
-    retour = Traduire_DLS( Config.log, id );
-    Info_n( Config.log, DEBUG_FORK, "THRCompil: Compiler_source_dls: fin traduction", retour );
+    retour = Traduire_DLS( Config.log, (client ? TRUE : FALSE), id );
+    Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: fin traduction", retour );
     if (retour == FALSE)                                          /* Retour de la traduction D.L.S vers C */
      { struct CMD_GTK_MESSAGE erreur;
        gint id_fichier;
        gchar log[20];
 
-       Info_n( Config.log, DEBUG_FORK,
+       Info_n( Config.log, DEBUG_DLS,
                "THRCompil: Compiler_source_dls: envoi erreur Traduction D.L.S", id );
        if (client)
         { g_snprintf( log, sizeof(log), "%d.log", id );
@@ -278,7 +278,7 @@
        pidgcc = fork();
        if (pidgcc<0)
         { struct CMD_GTK_MESSAGE erreur;
-          Info_n( Config.log, DEBUG_FORK,
+          Info_n( Config.log, DEBUG_DLS,
                   "THRCompilFils: Compiler_source_dls: envoi erreur Fork GCC", id );
           if (client)
            { g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
@@ -321,7 +321,7 @@
                         (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
         }
      }
-    Info_n( Config.log, DEBUG_FORK, "THRCompil: Proto_compiler_source_dls: terminé", id );
+    Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: terminé", id );
   }
 /**********************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                */
