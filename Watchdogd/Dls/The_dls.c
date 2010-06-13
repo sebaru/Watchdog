@@ -233,7 +233,8 @@
     if ( num>=NBR_BIT_CONTROLE ) return;
 
     if ( slave != -1 && B(slave) == 0 )  /* Si pas de communication avec le modules, alors couleur kaki ! */
-     { cligno = 0; rouge = 0; vert = 100; bleu = 0; }
+     { printf( "i%d slave %d B(slave)=%d\n", num, slave, B(slave) );
+       etat = 0; cligno = 0; rouge = 0; vert = 100; bleu = 0; }
 
     if (Partage->i[num].etat   != etat || Partage->i[num].rouge!=rouge || 
         Partage->i[num].vert   != vert || Partage->i[num].bleu!=bleu ||
