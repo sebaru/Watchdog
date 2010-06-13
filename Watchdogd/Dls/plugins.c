@@ -44,6 +44,7 @@
     void (*Go)(int);
     void *handle;
 
+    Compiler_source_dls ( NULL, dls->id );
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
