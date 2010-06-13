@@ -179,9 +179,11 @@
           return;
         }
 
+       if (Config.compil == 1) Compiler_source_dls( NULL, dls->id );  /* Si option "compil" au demarrage" */
        if (Charger_un_plugin( dls )==TRUE)
         { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->nom ); }
      } while ( TRUE );
+    Config.compil = 0;
  }
 /**********************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                    */

@@ -66,6 +66,7 @@
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */
     gint single;                                                                /* Demarrage des thread ? */
+    gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
