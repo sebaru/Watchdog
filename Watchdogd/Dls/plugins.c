@@ -44,16 +44,15 @@
     void (*Go)(int);
     void *handle;
 
-    Compiler_source_dls ( NULL, dls->id );
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
-    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Candidat rejeté ", dls->id );
-                   Info_c( Config.log, DEBUG_DLS, "DLS: -- sur ouverture", dlerror() );
+    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté ", dls->id );
+                   Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: -- sur ouverture", dlerror() );
                    return(FALSE);
                  }
     Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Candidat rejeté sur absence GO", dls->id ); 
+    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté sur absence GO", dls->id ); 
                dlclose( handle );
                return(FALSE);
              }
