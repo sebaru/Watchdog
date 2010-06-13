@@ -233,7 +233,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, port, debug_level, max_client, fg, initrsa, single;
+  { gint help, port, debug_level, max_client, fg, initrsa, single, compil;
     gchar *home, *file;
     gint nbr_bytes;
     gchar *chaine;
@@ -253,6 +253,8 @@
          &home,             0, "Home directory", "HOME" },
        { "conffile",   'c', POPT_ARG_STRING,
          &file,             0, "Configuration file", "FILE" },
+       { "compil",     'C', POPT_ARG_NONE,
+         &compil,           0, "Compilation D.L.S", NULL },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
        { "single",     's', POPT_ARG_NONE,
@@ -270,6 +272,7 @@
     initrsa        = 0;
     fg             = 0;
     help           = 0;
+    compil         = 0;
     single         = 0;
 
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
@@ -287,6 +290,11 @@
        exit(EXIT_OK);
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
+
+    if (compil)
+     { Compiler_source_dls( NULL, -1 );
+       exit(EXIT_OK);
+     }
 
     if (single) Config.single = 1;                                      /* Demarrage en mode single ?? */
            else Config.single = 0;
