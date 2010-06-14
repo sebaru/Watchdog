@@ -49,10 +49,9 @@
  void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment )
   { struct TRAME_ITEM_COMMENT *trame_comment;
     struct TYPE_INFO_SUPERVISION *infos;
-    struct COMMENTAIRE *comment;
-printf("bouh\n");
+    struct CMD_TYPE_COMMENT *comment;
+
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_comment->syn_id );
-printf("yo\n");
     if (!(infos && infos->Trame)) { printf("test\n"); return; }
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
@@ -60,7 +59,7 @@ printf("yo\n");
        return;
      }
 
-    memset( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
+    memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
     trame_comment = Trame_ajout_commentaire ( TRUE, infos->Trame, comment );
   }
 /*--------------------------------------------------------------------------------------------------------*/

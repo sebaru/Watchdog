@@ -49,7 +49,7 @@
  void Proto_afficher_un_capteur_supervision( struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_SUPERVISION *infos;
-    struct CAPTEUR *capteur;
+    struct CMD_TYPE_CAPTEUR *capteur;
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_capteur->syn_id );
     if (!(infos && infos->Trame)) return;

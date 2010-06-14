@@ -78,7 +78,7 @@
  void Proto_afficher_une_passerelle_supervision( struct CMD_TYPE_PASSERELLE *rezo_pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_SUPERVISION *infos;
-    struct PASSERELLE *pass;
+    struct CMD_TYPE_PASSERELLE *pass;
         
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_pass->syn_id );
     if (!(infos && infos->Trame)) return;
