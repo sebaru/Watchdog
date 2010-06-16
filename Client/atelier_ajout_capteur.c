@@ -227,7 +227,7 @@
  void Proto_afficher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_ATELIER *infos;
-    struct CAPTEUR *capteur;
+    struct CMD_TYPE_CAPTEUR *capteur;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_capteur->syn_id );
     capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );

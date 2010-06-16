@@ -29,7 +29,6 @@
  
  #include "Reseaux.h"
  #include "trame.h"
- #include "motifs.h"
  #include "liste_icone.h"
  
 /********************************* Définitions des prototypes programme ***********************************/

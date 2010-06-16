@@ -31,7 +31,6 @@
  #include "Reseaux.h"
  #include "Config_cli.h"
  #include "trame.h"
- #include "motifs.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
@@ -164,6 +163,7 @@ printf("fin Detruire page atelier\n");
                break;
 
           case TYPE_PASSERELLE:
+               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
                               (gchar *)trame_pass->pass, sizeof(struct CMD_TYPE_PASSERELLE) );
                break;

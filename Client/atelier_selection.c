@@ -31,7 +31,6 @@
 
  #include "Reseaux.h"
  #include "trame.h"
- #include "motifs.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 /********************************* Définitions des prototypes programme ***********************************/

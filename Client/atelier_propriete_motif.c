@@ -31,7 +31,6 @@
 
  #include "Reseaux.h"
  #include "trame.h"
- #include "motifs.h"
  #include "Cst_mnemoniques.h"
 
  static gchar *TYPE_GESTION_MOTIF[]=                      /* Type de gestion d'un motif sur un synoptique */

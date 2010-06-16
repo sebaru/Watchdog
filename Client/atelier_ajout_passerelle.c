@@ -196,7 +196,7 @@
  void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass )
   { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_ATELIER *infos;
-    struct PASSERELLE *pass;
+    struct CMD_TYPE_PASSERELLE *pass;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_pass->syn_id );
     pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );

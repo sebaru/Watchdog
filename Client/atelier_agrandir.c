@@ -29,7 +29,6 @@
  #include <math.h>
  
  #include "trame.h"
- #include "motifs.h"
 
  #define PI 3.141592654
 

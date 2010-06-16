@@ -36,9 +36,31 @@
 
  #define TAILLE_SYNOPTIQUE_X        900               /* Généralités sur la taille de la Trame synoptique */
  #define TAILLE_SYNOPTIQUE_Y        600
+ #define TAILLE_FONT                60                  /* Nombre de caractere pour la police d'affichage */
+ #define COULEUR_FOND_SYN           "MidnightBlue"
+ #define COULEUR_ACTIVE             200
  
  #define TAILLE_ICONE_X             100
  #define TAILLE_ICONE_Y             100
+
+ enum                                                            /* Différents types de gestion de motifs */
+  { TYPE_INERTE,
+    TYPE_STATIQUE,
+    TYPE_DYNAMIQUE,
+    TYPE_CYCLIQUE,
+    TYPE_PROGRESSIF,
+    TYPE_INDICATEUR,
+    TYPE_ANALOGIQUE,
+    TYPE_BOUTON,
+    TYPE_FOND
+  };
+
+ enum                                                             /* Différente action associée à un item */
+  { ACTION_SANS,
+    ACTION_IMMEDIATE,
+    ACTION_PROGRAMME,
+    ACTION_NBR_ACTION                                                         /* nombre d'action possible */
+  };
 
  enum { TYPE_RIEN,
         TYPE_PASSERELLE,

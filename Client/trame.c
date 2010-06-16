@@ -40,7 +40,6 @@
  #include <fcntl.h>
 
  #include "trame.h"
- #include "motifs.h"
 
 #define DEBUG_TRAME
 /********************************* Définitions des prototypes programme ***********************************/

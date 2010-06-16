@@ -33,7 +33,6 @@
  #include "Reseaux.h"
  #include "Config_cli.h"
  #include "trame.h"
- #include "motifs.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */

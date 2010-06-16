@@ -35,7 +35,6 @@
 
  #include "Reseaux.h"
  #include "trame.h"
- #include "motifs.h"
 
 
  #define TEMPS_MAX_PULSE   10                        /* 10 secondes de battements maximum pour le serveur */

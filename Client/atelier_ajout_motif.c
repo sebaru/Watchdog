@@ -31,7 +31,6 @@
 
  #include "Reseaux.h"
  #include "trame.h"
- #include "motifs.h"
 
  enum
   {  COLONNE_CLASSE_ID,
