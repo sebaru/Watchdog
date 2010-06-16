@@ -443,6 +443,7 @@
                      pthread_detach( tid );
                      break;
                 case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE:
+                     Client_mode( client, VALIDE );                             /* Si pas de comments ... */
                      Ref_client( client );                       /* Indique que la structure est utilisée */
                      pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
                      pthread_detach( tid );
