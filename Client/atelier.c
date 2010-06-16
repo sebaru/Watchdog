@@ -201,6 +201,7 @@ printf("fin Detruire page atelier\n");
  void Creer_page_atelier( gint syn_id, gchar *libelle_syn )
   { GtkWidget *separateur, *frame, *bouton, *boite, *hboite, *table;
     GtkWidget *vboite, *capteur, *spin, *boite1, *scroll;
+    GtkWidget *menu_bar, *menu_main, *menu_bouton, *ssmenu;
     GtkAdjustment *adj;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
@@ -308,90 +309,50 @@ printf("fin Detruire page atelier\n");
     Menu_grille_magnetique( infos );
 
 /******************************************* Ajout de motifs **********************************************/
-    frame = gtk_frame_new( _("Motifs") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
+    menu_bar= gtk_menu_bar_new();
+    gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(menu_bar), GTK_PACK_DIRECTION_TTB );
+    gtk_box_pack_start( GTK_BOX(boite), menu_bar, FALSE, FALSE, 0 );
 
-    vboite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
+    menu_main = gtk_image_menu_item_new_from_stock ( GTK_STOCK_ADD, NULL );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+    ssmenu = gtk_menu_new();
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Motifs") );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
                               G_CALLBACK(Menu_ajouter_motif), infos );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_DELETE );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_effacer_motif), infos );
-
-/******************************************* Ajout de comments ********************************************/
-    frame = gtk_frame_new( _("Comments") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
-
-    vboite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Comments") );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
                               G_CALLBACK(Menu_ajouter_commentaire), infos );
-/******************************************* Ajout de passerelles *****************************************/
-    frame = gtk_frame_new( _("Gateways") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
-    vboite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Passerelles") );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
                               G_CALLBACK(Creer_fenetre_ajout_passerelle), infos );
-/******************************************* Ajout de palettes ********************************************/
-    frame = gtk_frame_new( _("Palettes") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
-    vboite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Capteurs") );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
+                              G_CALLBACK(Menu_ajouter_editer_capteur), infos );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
-    bouton = gtk_button_new_with_label( _("Manage") );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
+                              G_CALLBACK(Menu_ajouter_camera_sup), infos );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
+
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
+
+    menu_main = gtk_image_menu_item_new_from_stock ( GTK_STOCK_REMOVE, NULL );
+    g_signal_connect_swapped( G_OBJECT(menu_main), "activate",
+                              G_CALLBACK(Menu_effacer_motif), infos );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
+
+    menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );
+    g_signal_connect_swapped( G_OBJECT(menu_main), "activate",
                               G_CALLBACK(Creer_fenetre_ajout_palette), infos );
-/******************************************* Ajout de capteurs **********************************************/
-    frame = gtk_frame_new( _("Capteur") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
-
-    vboite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_editer_capteur), NULL );
-
-/******************************************** Camera de supervision ***************************************/
-    frame = gtk_frame_new( _("Camera") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
-
-    vboite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_add( GTK_CONTAINER(frame), vboite );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(vboite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_camera_sup), NULL );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
 
 /************************************************* fin ****************************************************/
     gtk_widget_show_all( page->child );

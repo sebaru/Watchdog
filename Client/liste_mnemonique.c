@@ -531,7 +531,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_effacer_mnemonique), NULL );
 
-
+#ifdef bouh
 { GtkWidget *menu_bar, *menu, *choix1, *choix2, *choix3, *choix4, *choix5;
 
     menu_bar= gtk_menu_bar_new();
@@ -567,6 +567,7 @@ printf("8\n");
 
     gtk_box_pack_start( GTK_BOX(boite), menu_bar, TRUE, TRUE, 0 );
 }
+#endif
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Mnemoniques") ) );
   }

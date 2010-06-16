@@ -448,6 +448,7 @@
                      pthread_detach( tid );
                      break;
                 case ENVOI_PALETTE_FOR_ATELIER_PALETTE:
+                     Client_mode( client, VALIDE );                             /* Si pas de comments ... */
                      Ref_client( client );                       /* Indique que la structure est utilisée */
                      pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
                      pthread_detach( tid );
