@@ -311,9 +311,10 @@ printf("fin Detruire page atelier\n");
 /******************************************* Ajout de motifs **********************************************/
     menu_bar= gtk_menu_bar_new();
     gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(menu_bar), GTK_PACK_DIRECTION_TTB );
-    gtk_box_pack_start( GTK_BOX(boite), menu_bar, FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX(boite), menu_bar, TRUE, TRUE, 0 );
 
-    menu_main = gtk_image_menu_item_new_from_stock ( GTK_STOCK_ADD, NULL );
+/******************************************** Sous menu motif *********************************************/
+    menu_main = gtk_image_menu_item_new_with_label ( _("Ajouter un item") );
     gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
 
     ssmenu = gtk_menu_new();
@@ -343,15 +344,20 @@ printf("fin Detruire page atelier\n");
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
+/******************************************** Sous menu palette *******************************************/
+    menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
+    ssmenu = gtk_menu_new();
+    menu_bouton = gtk_image_menu_item_new_from_stock ( GTK_STOCK_JUMP_TO, NULL );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
+                              G_CALLBACK(Creer_fenetre_ajout_palette), infos );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
 
-    menu_main = gtk_image_menu_item_new_from_stock ( GTK_STOCK_REMOVE, NULL );
+/******************************************** Menu remove *************************************************/
+    menu_main = gtk_image_menu_item_new_with_label ( _("Retirer les items") );
     g_signal_connect_swapped( G_OBJECT(menu_main), "activate",
                               G_CALLBACK(Menu_effacer_motif), infos );
-    gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
-
-    menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );
-    g_signal_connect_swapped( G_OBJECT(menu_main), "activate",
-                              G_CALLBACK(Creer_fenetre_ajout_palette), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
 
 /************************************************* fin ****************************************************/
