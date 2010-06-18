@@ -254,6 +254,7 @@
                                                         GINT_TO_POINTER(num) );
            }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          Partage->i[num].last_send = Partage->top;                                 /* Date de la photo ! */
         }
        Partage->audit_bit_interne_per_sec++;
      }
