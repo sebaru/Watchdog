@@ -179,7 +179,7 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_dls_stop ( client, num );
      }
-    else if ( ! strcmp ( commande, "dls" ) )
+    else if ( ! strcmp ( commande, "list" ) )
      { Admin_dls_list ( client );
      }
     else if ( ! strcmp ( commande, "reload" ) )
@@ -193,7 +193,7 @@
        Write_admin ( client->connexion,
                      "  stop id                                - Demarre le module id\n" );
        Write_admin ( client->connexion,
-                     "  dls                                    - D.L.S. Status\n" );
+                     "  list                                   - D.L.S. Status\n" );
        Write_admin ( client->connexion,
                      "  gcc id                                 - Compile le plugin id\n" );
        Write_admin ( client->connexion,
