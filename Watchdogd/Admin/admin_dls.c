@@ -187,7 +187,7 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
+                     "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
@@ -195,7 +195,7 @@
        Write_admin ( client->connexion,
                      "  list                                   - D.L.S. Status\n" );
        Write_admin ( client->connexion,
-                     "  gcc id                                 - Compile le plugin id\n" );
+                     "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }
