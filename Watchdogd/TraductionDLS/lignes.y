@@ -46,7 +46,6 @@ int erreur;                                                             /* Compt
 %}
 
 %union { int val;
-         int couleur;
          double valf;
          char *chaine;
          GList *gliste;
@@ -54,18 +53,26 @@ int erreur;                                                             /* Compt
          struct ACTION *action;
        };
 
-%token <val>         PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL
-%token <val>         BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA START
-%token <val>         INF SUP INF_OU_EGAL SUP_OU_EGAL
-%token <val>         ENTIER
-%token <valf>        VALF
-%token <couleur>     ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
-%token <chaine>      ID
-%token HEURE APRES AVANT
-%token OU ET BARRE
+%token PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
+%token MODE CONSIGNE COLOR CLIGNO SLAVE
 
-%type  <val>     barre alias_bit modulateur ordre
-%type  <couleur> couleur
+%token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
+%type  <val>    ordre
+
+%token HEURE APRES AVANT
+%type  <val>    modulateur
+
+%token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA START
+%type  <val>    alias_bit
+
+%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
+%type  <val>    couleur
+
+%token <val>    ENTIER
+%token <valf>   VALF
+%token <chaine> ID
+
+%type  <val>     barre
 %type  <gliste>  liste_options options
 %type  <option>  une_option
 %type  <chaine>  unite facteur expr suite_id
@@ -440,8 +447,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                 ;
 
 suite_id:       ordre VALF
-                {{ char *chaine;
-                   int taille;
+                {{ int taille;
                    taille = 30;
                    $$ = New_chaine( taille ); /* 10 caractères max */
                    switch( $1 )
@@ -457,24 +463,11 @@ suite_id:       ordre VALF
 barre:          BARRE {{ $$=1; }}
                 |     {{ $$=0; }}
                 ;
-
-couleur:        ROUGE        {{ $$=ROUGE;  }}
-                | VERT       {{ $$=VERT;   }}
-                | BLEU       {{ $$=BLEU;   }}
-                | JAUNE      {{ $$=JAUNE;  }}
-                | NOIR       {{ $$=NOIR;   }}
-                | BLANC      {{ $$=BLANC;  }}
-                | GRIS       {{ $$=GRIS;   }}
-                | ORANGE     {{ $$=ORANGE; }}
-                ;
 modulateur:     APRES        {{ $$=APRES;  }}
                 | AVANT      {{ $$=AVANT;  }}
                 |            {{ $$=0;      }}
                 ;
-ordre:          INF           {{ $$=INF;         }}
-                | SUP         {{ $$=SUP;         }}
-                | INF_OU_EGAL {{ $$=INF_OU_EGAL; }}
-                | SUP_OU_EGAL {{ $$=SUP_OU_EGAL; }}
+ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL
                 ;
 /********************************************* Gestion des options ****************************************/
 liste_options:  POUV options PFERM   {{ $$ = $2; printf("une liste d'option\n");   }}
@@ -487,20 +480,65 @@ options:        options VIRGULE une_option
                 | une_option    {{ $$ = g_list_append( NULL, $1 ); printf("une option\n"); }}
                 ;
 
-une_option:     ID EGAL ENTIER
+une_option:     MODE EGAL ENTIER
                 {{ $$=New_option();
-                   $$->type = OPTION_ENTIER;
-                   g_snprintf( $$->id, sizeof($$->id), "%s", $1 );
+                   $$->type = MODE;
                    $$->entier = $3;
-                   g_free($1);
                 }}
-                | ID EGAL couleur
+                | COLOR EGAL couleur
                 {{ $$=New_option();
-                   $$->type = OPTION_ENTIER;
-                   g_snprintf( $$->id, sizeof($$->id), "%s", $1 );
+                   $$->type = COLOR;
                    $$->entier = $3;
-                   g_free($1);
                 }}
+                | CLIGNO EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = CLIGNO;
+                   $$->entier = $3;
+                }}
+                | CONSIGNE EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = CONSIGNE;
+                   $$->entier = $3;
+                }}
+                | SLAVE EGAL BI ENTIER
+                {{ $$=New_option();
+                   $$->type = SLAVE;
+                   $$->entier = $4;
+                }}
+                | SLAVE EGAL ID
+                {{ struct ALIAS *alias;                               /* Definition des actions via alias */
+                   $$=New_option();
+                   $$->type = SLAVE;
+                   int taille;
+                   alias = Get_alias_par_nom( $3 );
+                   if (!alias)
+                    { char *chaine;
+                      taille = strlen($3) + strlen(NON_DEFINI) + 1;
+                      chaine = New_chaine(taille);
+                      g_snprintf( chaine, taille, NON_DEFINI, ligne_source_dls, $3 );
+                      Emettre_erreur(chaine); g_free(chaine);
+                      erreur++;
+                      $$->entier = 0;
+                    }
+                   else
+                    { switch(alias->bit)
+                       { case BI  : $$->entier = alias->num; break;
+                         default: { char *chaine;
+                                    taille = strlen(alias->nom) + strlen(INTERDIT_DROITE) + 1;
+                                    chaine = New_chaine(taille);
+                                    g_snprintf( chaine, taille, INTERDIT_DROITE, ligne_source_dls, alias->nom );
+                                    Emettre_erreur(chaine); g_free(chaine);
+                                    erreur++;
+                                    $$->entier = 0;
+                                  } 
+                       }
+                    }
+                   g_free($3);
+                }}
+                ;
+
+
+couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
                 ;
 %%
 /**********************************************************************************************************/

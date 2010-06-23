@@ -126,41 +126,18 @@
 /* Entrées: rien                                                                                          */
 /* Sortie: NULL si probleme                                                                               */
 /**********************************************************************************************************/
- int Get_option_entier( GList *liste_options, gchar *id )
+ int Get_option_entier( GList *liste_options, gint type )
   { struct OPTION *option;
     GList *liste;
-printf("Gte_option_entier: recherche %s\n", id );
     liste = liste_options;
     while (liste)
      { option=(struct OPTION *)liste->data;
-printf("Gte_option_entier: --> test %s\n", option->id );
-       if ( option->type == OPTION_ENTIER && !strcmp( option->id, id ) )
+       if ( option->type == type )
         { return (option->entier); }
        liste = liste->next;
      }
-printf("Gte_option_entier: --> pas trouvé\n" );
     return(-1);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Get_option_entier: Cherche une option et renvoie sa valeur                                             */
-/* Entrées: rien                                                                                          */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
- gchar *Get_option_chaine( GList *liste_options, gchar *id )
-  { struct OPTION *option;
-    GList *liste;
-
-    liste = liste_options;
-    while (liste)
-     { option=(struct OPTION *)liste->data;
-       if ( option->type == OPTION_CHAINE && !strcmp( option->id, id ) )
-        { return (option->entier); }
-       liste = liste->next;
-     }
-    return(0);
-  }
-#endif
 /**********************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                               */
 /* Entrées: rien                                                                                          */
@@ -256,10 +233,10 @@ printf("Gte_option_entier: --> pas trouvé\n" );
   { struct ACTION *action;
     int taille, rouge, vert, bleu, val, coul, cligno, slave;
 
-    val    = Get_option_entier ( options, "mode"   ); if (val    == -1) val = 0;
-    coul   = Get_option_entier ( options, "color"  ); if (coul   == -1) coul = 0;
-    cligno = Get_option_entier ( options, "cligno" ); if (cligno == -1) cligno = 0;
-    slave  = Get_option_entier ( options, "slave"  );
+    val    = Get_option_entier ( options, MODE   ); if (val    == -1) val = 0;
+    coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
+    cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
+    slave  = Get_option_entier ( options, SLAVE  );
     taille = 40;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -287,7 +264,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
   { struct ACTION *action;
     int taille, consigne;
 
-    consigne = Get_option_entier( options, "consigne" );
+    consigne = Get_option_entier( options, CONSIGNE );
     if (consigne == -1) consigne = 10;
     taille = 24;
     action = New_action();

@@ -51,82 +51,51 @@ blanc         [\t ]+
 "\n"                       { ligne_source_dls++; }
 
  /******************************************** Methodes ***************************************************/
-"_E"                       { Dls_lval.val = ENTREE;
-                             return ENTREE;
-                           }
-"_EA"                      { Dls_lval.val = EANA;
-                             return EANA;
-                           }
-"_A"                       { Dls_lval.val = SORTIE;
-                             return SORTIE;
-                           }
-"_I"                       { Dls_lval.val = ICONE;
-                             return ICONE;
-                           }
-"_B"                       { Dls_lval.val = BI;
-                             return BI;
-                           }
-"_M"                       { Dls_lval.val = MONO;
-                             return MONO;
-                           }
-"_TR"                      { Dls_lval.val = TEMPO;
-                             return TEMPO;
-                           }
-"_CH"                      { Dls_lval.val = CPT_H;
-                             return CPT_H;
-                           }
-"_MSG"                     { Dls_lval.val = MSG;
-                             return MSG;
-                           }
-"_START"                   { Dls_lval.val = START;
-                             return START;
-                           }
+"_E"                       { return ENTREE;      }
+"_EA"                      { return EANA;        }
+"_A"                       { return SORTIE;      }
+"_I"                       { return ICONE;       }
+"_B"                       { return BI;          }
+"_M"                       { return MONO;        }
+"_TR"                      { return TEMPO;       }
+"_CH"                      { return CPT_H;       }
+"_MSG"                     { return MSG;         }
+"_START"                   { return START;       }
 
  /***************************************** Methodes speciales ********************************************/
-"HEURE"                    { return HEURE;      }
-"APRES"                    { return APRES;      }
-"AVANT"                    { return AVANT;      }
+"HEURE"                    { return HEURE;       }
+"APRES"                    { return APRES;       }
+"AVANT"                    { return AVANT;       }
 
  /************************************************ Couleurs ***********************************************/
-"rouge"                    { Dls_lval.couleur = ROUGE;
-                             return ROUGE;
-                           }
-"vert"                     { Dls_lval.couleur = VERT;
-                             return VERT;
-                           }
-"bleu"                     { Dls_lval.couleur = BLEU;
-                             return BLEU;
-                           }
-"jaune"                    { Dls_lval.couleur = JAUNE;
-                             return JAUNE;
-                           }
-"noir"                     { Dls_lval.couleur = NOIR;
-                             return NOIR;
-                           }
-"orange"                   { Dls_lval.couleur = ORANGE;
-                             return ORANGE;
-                           }
-"gris"                     { Dls_lval.couleur = GRIS;
-                             return GRIS;
-                           }
-"blanc"                    { Dls_lval.couleur = BLANC;
-                             return BLANC;
-                           }
-
+"rouge"                    { return ROUGE;       }
+"vert"                     { return VERT;        }
+"bleu"                     { return BLEU;        }
+"jaune"                    { return JAUNE;       }
+"noir"                     { return NOIR;        }
+"orange"                   { return ORANGE;      }
+"gris"                     { return GRIS;        }
+"blanc"                    { return BLANC;       }
+ /************************************************* Options ************************************************/
+"mode"                     { return MODE;        }
+"consigne"                 { return CONSIGNE;    }
+"color"                    { return COLOR;       }
+"cligno"                   { return CLIGNO;      }
+"slave"                    { return SLAVE;       }
  /*********************************************** Le reste ************************************************/
-"."                        { return ET; }
-"+"                        { return OU; }
-"/"                        { return BARRE; }
-"-"                        { return MOINS; }
-";"                        { return PVIRGULE; }
-","                        { return VIRGULE; }
-"("                        { return POUV; }
-")"                        { return PFERM; }
-"="                        { return EGAL; }
-"<->"                      { return EQUIV; }
-"->"                       { return DONNE; }
-"<"                        { return INF; }
-">"                        { return SUP; }
+"."                        { return ET;          }
+"+"                        { return OU;          }
+"/"                        { return BARRE;       }
+"-"                        { return MOINS;       }
+";"                        { return PVIRGULE;    }
+","                        { return VIRGULE;     }
+"("                        { return POUV;        }
+")"                        { return PFERM;       }
+"="                        { return EGAL;        }
+"<->"                      { return EQUIV;       }
+"->"                       { return DONNE;       }
+"<"                        { return INF;         }
+">"                        { return SUP;         }
 "<="                       { return INF_OU_EGAL; }
 ">="                       { return SUP_OU_EGAL; }
 

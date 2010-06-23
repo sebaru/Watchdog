@@ -35,9 +35,9 @@
     gchar *sinon;
   };
  
+
  struct OPTION
-  { gchar id[20];
-    gint type;
+  { gint type;
     union { int entier;
           };
   };
@@ -49,10 +49,6 @@
     int barre;                                                           /* Represente la negation ou pas */
     GList *options;
     gint used;
-  };
-
- enum
-  { OPTION_ENTIER
   };
 
 /*********************************************** Prototypes ***********************************************/
@@ -73,7 +69,9 @@
  extern struct ALIAS *Get_alias_par_nom( char *nom );
  extern struct ALIAS *Get_alias_par_bit( int bit, int num );
  extern struct OPTION *New_option( void );
- extern int Get_option_entier( GList *liste_options, gchar *id );
+ extern int Get_option_entier( GList *liste_options, gint type );
  extern void Liberer_options ( GList *options );
+
+ extern void Dls_restart ( FILE *input_file );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
