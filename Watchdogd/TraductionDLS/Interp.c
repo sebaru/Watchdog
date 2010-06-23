@@ -448,10 +448,10 @@ printf("Gte_option_entier: --> pas trouvé\n" );
         { gchar chaine[128];
           g_snprintf(chaine, sizeof(chaine), "%s not used\n", alias->nom );
           Emettre_erreur( chaine ); 
+          retour = FALSE;
         }
        liste = liste->next;
      }
-    return(NULL);
 
     close(Id_cible);
     close(Id_log);
