@@ -48,6 +48,7 @@
     gint num;                                                              /* Numero du bit interne ciblé */
     int barre;                                                           /* Represente la negation ou pas */
     GList *options;
+    gint used;
   };
 
  enum

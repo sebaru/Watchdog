@@ -538,7 +538,7 @@ une_option:     ID EGAL ENTIER
 
        fclose(rc);
        if (erreur)
-        { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (retour>1 ? 'c' : ' ') );
+        { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (retour>1 ? 's' : ' ') );
           Emettre_erreur( chaine );
           return(FALSE);
         }

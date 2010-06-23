@@ -337,6 +337,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
     alias->num = num;
     alias->barre = barre;
     alias->options = options;
+    alias->used = 0;
     Alias = g_list_append( Alias, alias );
     return(TRUE);
   }
@@ -351,7 +352,7 @@ printf("Gte_option_entier: --> pas trouvé\n" );
     liste = Alias;
     while(liste)
      { alias = (struct ALIAS *)liste->data;
-       if (!strcmp(alias->nom, nom)) return(alias);                     /* Si deja present, on renvoie un */
+       if (!strcmp(alias->nom, nom)) { alias->used++; return(alias); }  /* Si deja present, on renvoie un */
        liste = liste->next;
      }
     return(NULL);
@@ -409,7 +410,9 @@ printf("Gte_option_entier: --> pas trouvé\n" );
 /**********************************************************************************************************/
  gboolean Traduire_DLS( struct LOG *log_erreur, gboolean new, gint id )
   { gchar source[80], source_ok[80], cible[80], log[80];
+    struct ALIAS *alias;
     gboolean retour;
+    GList *liste;
 
     prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
     g_snprintf( source,    sizeof(source),    "%d.dls.new", id );
@@ -437,6 +440,18 @@ printf("Gte_option_entier: --> pas trouvé\n" );
     Alias = NULL;                                                              /* Par défaut, pas d'alias */
     if (new) retour = Interpreter_source_dls( source );
         else retour = Interpreter_source_dls( source_ok );
+
+    liste = Alias;
+    while(liste)
+     { alias = (struct ALIAS *)liste->data;
+       if (!alias->used)
+        { gchar chaine[128];
+          g_snprintf(chaine, sizeof(chaine), "%s not used\n", alias->nom );
+          Emettre_erreur( chaine ); 
+        }
+       liste = liste->next;
+     }
+    return(NULL);
 
     close(Id_cible);
     close(Id_log);
