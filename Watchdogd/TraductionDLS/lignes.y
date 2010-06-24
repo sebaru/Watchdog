@@ -92,7 +92,7 @@ listeAlias:     un_alias listeAlias
                 | un_alias          {{ Emettre_init_alias(); }}
                 ;
                 
-un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
+un_alias:       ID EQUIV barre BI ENTIER PVIRGULE
                 {{ char *chaine;
                    int taille;
                    switch($4)
