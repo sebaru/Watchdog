@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 29 nov 2009 20:32:59 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 24 juin 2010 19:37:44 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -571,7 +571,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
     rc = fopen(source, "r");
     if (rc)
      { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
-       Dls_debug = 1;
+       Dls_debug = 1;                                                        /* Debug de la traduction ?? */
        Dls_restart(rc);
        retour = Dls_parse();
        Emettre(" }\n");

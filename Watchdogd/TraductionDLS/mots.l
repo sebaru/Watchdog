@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/TraductionDLS/mots.l        Définitions des mots DLS                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 19:53:34 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 24 juin 2010 19:37:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
