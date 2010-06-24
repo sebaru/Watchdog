@@ -68,9 +68,9 @@ int erreur;                                                             /* Compt
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
 %type  <val>    couleur
 
+%token <chaine> ID
 %token <val>    ENTIER
 %token <valf>   VALF
-%token <chaine> ID
 
 %type  <val>     barre
 %type  <gliste>  liste_options options
