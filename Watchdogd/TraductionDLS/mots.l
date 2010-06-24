@@ -51,78 +51,53 @@ blanc         [\t ]+
 "\n"                       { ligne_source_dls++; }
 
  /******************************************** Methodes ***************************************************/
-"_E"                       { printf("digit %s\n", Dls_text);
-                             return ENTREE;      }
-"_EA"                      { printf("digit %s\n", Dls_text);
-                             return EANA;        }
-"_A"                       { printf("digit %s\n", Dls_text);
-                             return SORTIE;      }
-"_I"                       { printf("digit %s\n", Dls_text);
-                             return ICONE;       }
-"_B"                       { printf("digit %s\n", Dls_text);
-                             return BI;          }
-"_M"                       { printf("digit %s\n", Dls_text);
-                             return MONO;        }
-"_TR"                      { printf("digit %s\n", Dls_text);
-                             return TEMPO;       }
-"_CH"                      { printf("digit %s\n", Dls_text);
-                             return CPT_H;       }
-"_MSG"                     { printf("digit %s\n", Dls_text);
-                             return MSG;         }
-"_START"                   { printf("digit %s\n", Dls_text);
-                             return START;       }
+"_E"                       { Dls_lval.val = ENTREE;      return ENTREE;      }
+"_EA"                      { Dls_lval.val = EANA;        return EANA;        }
+"_A"                       { Dls_lval.val = SORTIE;      return SORTIE;      }
+"_I"                       { Dls_lval.val = ICONE;       return ICONE;       }
+"_B"                       { Dls_lval.val = BI;          return BI;          }
+"_M"                       { Dls_lval.val = MONO;        return MONO;        }
+"_TR"                      { Dls_lval.val = TEMPO;       return TEMPO;       }
+"_CH"                      { Dls_lval.val = CPT_H;       return CPT_H;       }
+"_MSG"                     { Dls_lval.val = MSG;         return MSG;         }
+"_START"                   { Dls_lval.val = START;       return START;       }
 
  /***************************************** Methodes speciales ********************************************/
-"HEURE"                    { return HEURE;       }
-"APRES"                    { return APRES;       }
-"AVANT"                    { return AVANT;       }
+"HEURE"                    { Dls_lval.val = HEURE;       return HEURE;       }
+"APRES"                    { Dls_lval.val = APRES;       return APRES;       }
+"AVANT"                    { Dls_lval.val = AVANT;       return AVANT;       }
 
  /************************************************ Couleurs ***********************************************/
-"rouge"                    { return ROUGE;       }
-"vert"                     { return VERT;        }
-"bleu"                     { return BLEU;        }
-"jaune"                    { return JAUNE;       }
-"noir"                     { return NOIR;        }
-"orange"                   { return ORANGE;      }
-"gris"                     { return GRIS;        }
-"blanc"                    { return BLANC;       }
+"rouge"                    { Dls_lval.val = ROUGE;       return ROUGE;       }
+"vert"                     { Dls_lval.val = VERT;        return VERT;        }
+"bleu"                     { Dls_lval.val = BLEU;        return BLEU;        }
+"jaune"                    { Dls_lval.val = JAUNE;       return JAUNE;       }
+"noir"                     { Dls_lval.val = NOIR;        return NOIR;        }
+"orange"                   { Dls_lval.val = ORANGE;      return ORANGE;      }
+"gris"                     { Dls_lval.val = GRIS;        return GRIS;        }
+"blanc"                    { Dls_lval.val = BLANC;       return BLANC;       }
  /************************************************* Options ************************************************/
-"mode"                     { return MODE;        }
-"consigne"                 { return CONSIGNE;    }
-"color"                    { return COLOR;       }
-"cligno"                   { return CLIGNO;      }
-"slave"                    { return SLAVE;       }
+"mode"                     { Dls_lval.val = MODE;        return MODE;        }
+"consigne"                 { Dls_lval.val = CONSIGNE;    return CONSIGNE;    }
+"color"                    { Dls_lval.val = COLOR;       return COLOR;       }
+"cligno"                   { Dls_lval.val = CLIGNO;      return CLIGNO;      }
+"slave"                    { Dls_lval.val = SLAVE;       return SLAVE;       }
  /*********************************************** Le reste ************************************************/
-"."                        { printf("digit %s\n", Dls_text);
-                             return ET;          }
-"+"                        { printf("digit %s\n", Dls_text);
-                             return OU;          }
-"/"                        { printf("digit %s\n", Dls_text);
-                             return BARRE;       }
-"-"                        { printf("digit %s\n", Dls_text);
-                             return MOINS;       }
-";"                        { printf("digit %s\n", Dls_text);
-                             return PVIRGULE;    }
-","                        { printf("digit %s\n", Dls_text);
-                             return VIRGULE;     }
-"("                        { printf("digit %s\n", Dls_text);
-                             return POUV;        }
-")"                        { printf("digit %s\n", Dls_text);
-                             return PFERM;       }
-"="                        { printf("digit %s\n", Dls_text);
-                             return EGAL;        }
-"<->"                      { printf("digit %s\n", Dls_text);
-                             return EQUIV;       }
-"->"                       { printf("digit %s\n", Dls_text);
-                             return DONNE;       }
-"<"                        { printf("digit %s\n", Dls_text);
-                             return INF;         }
-">"                        { printf("digit %s\n", Dls_text);
-                             return SUP;         }
-"<="                       { printf("digit %s\n", Dls_text);
-                             return INF_OU_EGAL; }
-">="                       { printf("digit %s\n", Dls_text);
-                             return SUP_OU_EGAL; }
+"."                        { Dls_lval.val = ET;          return ET;          }
+"+"                        { Dls_lval.val = OU;          return OU;          }
+"/"                        { Dls_lval.val = BARRE;       return BARRE;       }
+"-"                        { Dls_lval.val = MOINS;       return MOINS;       }
+";"                        { Dls_lval.val = PVIRGULE;    return PVIRGULE;    }
+","                        { Dls_lval.val = VIRGULE;     return VIRGULE;     }
+"("                        { Dls_lval.val = POUV;        return POUV;        }
+")"                        { Dls_lval.val = PFERM;       return PFERM;       }
+"="                        { Dls_lval.val = EGAL;        return EGAL;        }
+"<->"                      { Dls_lval.val = EQUIV;       return EQUIV;       }
+"->"                       { Dls_lval.val = DONNE;       return DONNE;       }
+"<"                        { Dls_lval.val = INF;         return INF;         }
+">"                        { Dls_lval.val = SUP;         return SUP;         }
+"<="                       { Dls_lval.val = INF_OU_EGAL; return INF_OU_EGAL; }
+">="                       { Dls_lval.val = SUP_OU_EGAL; return SUP_OU_EGAL; }
 
 "CodeC"                    { BEGIN(code_en_c); }
 <code_en_c>\n              { BEGIN(INITIAL); Emettre(Dls_text); ligne_source_dls++; }
@@ -133,18 +108,8 @@ blanc         [\t ]+
 <comment>\n                { ligne_source_dls++; }
 <comment>.                 ;
 
-{id}                       { printf("ID %s\n", Dls_text);
-                             Dls_lval.chaine = (char *)strdup(Dls_text);
-                             return ID;
-                           }
-{digit}                    { printf("digit %s\n", Dls_text);
-                             Dls_lval.val = atoi(Dls_text);
-                             return ENTIER;
-                           }
-{digitf}                   { printf("digitf %s\n", Dls_text);
-                             Dls_lval.valf = atof(Dls_text);
-                             return VALF;
-                           }
-.                          { printf(". %s\n", Dls_text);
-                              }
+{id}                       { Dls_lval.chaine = (char *)strdup(Dls_text); return ID;     }
+{digit}                    { Dls_lval.val = atoi(Dls_text);              return ENTIER; }
+{digitf}                   { Dls_lval.valf = atof(Dls_text);             return VALF;   }
+.                          {  }
 %%
