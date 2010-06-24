@@ -180,7 +180,7 @@ une_instr:      MOINS START DONNE action PVIRGULE
                    g_free($4->alors); g_free($4);
                    g_free($2);
                 }}
-
+                ;
 expr:           expr OU facteur
                 {{ int taille;
                    taille = strlen($1)+strlen($3)+7;

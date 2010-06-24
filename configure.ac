@@ -84,7 +84,7 @@ fi
 
 dnl parametres par defaut
 CFLAGS="-Wall -pipe -O2 -ggdb"
-YACC="$YACC -d"
+YACC="$YACC -d -t -v"
 
 LIBW_MAJOR_VERSION=2
 LIBW_MINOR_VERSION=5
