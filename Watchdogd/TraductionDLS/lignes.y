@@ -570,6 +570,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
     rc = fopen(source, "r");
     if (rc)
      { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
+       Dls_debug = 1;
        Dls_restart(rc);
        retour = Dls_parse();
        Emettre(" }\n");
