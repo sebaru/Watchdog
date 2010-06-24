@@ -53,13 +53,13 @@ int erreur;                                                             /* Compt
          struct ACTION *action;
        };
 
-%token PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
-%token MODE CONSIGNE COLOR CLIGNO SLAVE
+%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
+%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
 %type  <val>    ordre
 
-%token HEURE APRES AVANT
+%token <val>    HEURE APRES AVANT
 %type  <val>    modulateur
 
 %token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA START
