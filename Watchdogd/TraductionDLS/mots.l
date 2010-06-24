@@ -51,16 +51,26 @@ blanc         [\t ]+
 "\n"                       { ligne_source_dls++; }
 
  /******************************************** Methodes ***************************************************/
-"_E"                       { return ENTREE;      }
-"_EA"                      { return EANA;        }
-"_A"                       { return SORTIE;      }
-"_I"                       { return ICONE;       }
-"_B"                       { return BI;          }
-"_M"                       { return MONO;        }
-"_TR"                      { return TEMPO;       }
-"_CH"                      { return CPT_H;       }
-"_MSG"                     { return MSG;         }
-"_START"                   { return START;       }
+"_E"                       { printf("digit %s\n", Dls_text);
+                             return ENTREE;      }
+"_EA"                      { printf("digit %s\n", Dls_text);
+                             return EANA;        }
+"_A"                       { printf("digit %s\n", Dls_text);
+                             return SORTIE;      }
+"_I"                       { printf("digit %s\n", Dls_text);
+                             return ICONE;       }
+"_B"                       { printf("digit %s\n", Dls_text);
+                             return BI;          }
+"_M"                       { printf("digit %s\n", Dls_text);
+                             return MONO;        }
+"_TR"                      { printf("digit %s\n", Dls_text);
+                             return TEMPO;       }
+"_CH"                      { printf("digit %s\n", Dls_text);
+                             return CPT_H;       }
+"_MSG"                     { printf("digit %s\n", Dls_text);
+                             return MSG;         }
+"_START"                   { printf("digit %s\n", Dls_text);
+                             return START;       }
 
  /***************************************** Methodes speciales ********************************************/
 "HEURE"                    { return HEURE;       }
@@ -83,21 +93,36 @@ blanc         [\t ]+
 "cligno"                   { return CLIGNO;      }
 "slave"                    { return SLAVE;       }
  /*********************************************** Le reste ************************************************/
-"."                        { return ET;          }
-"+"                        { return OU;          }
-"/"                        { return BARRE;       }
-"-"                        { return MOINS;       }
-";"                        { return PVIRGULE;    }
-","                        { return VIRGULE;     }
-"("                        { return POUV;        }
-")"                        { return PFERM;       }
-"="                        { return EGAL;        }
-"<->"                      { return EQUIV;       }
-"->"                       { return DONNE;       }
-"<"                        { return INF;         }
-">"                        { return SUP;         }
-"<="                       { return INF_OU_EGAL; }
-">="                       { return SUP_OU_EGAL; }
+"."                        { printf("digit %s\n", Dls_text);
+                             return ET;          }
+"+"                        { printf("digit %s\n", Dls_text);
+                             return OU;          }
+"/"                        { printf("digit %s\n", Dls_text);
+                             return BARRE;       }
+"-"                        { printf("digit %s\n", Dls_text);
+                             return MOINS;       }
+";"                        { printf("digit %s\n", Dls_text);
+                             return PVIRGULE;    }
+","                        { printf("digit %s\n", Dls_text);
+                             return VIRGULE;     }
+"("                        { printf("digit %s\n", Dls_text);
+                             return POUV;        }
+")"                        { printf("digit %s\n", Dls_text);
+                             return PFERM;       }
+"="                        { printf("digit %s\n", Dls_text);
+                             return EGAL;        }
+"<->"                      { printf("digit %s\n", Dls_text);
+                             return EQUIV;       }
+"->"                       { printf("digit %s\n", Dls_text);
+                             return DONNE;       }
+"<"                        { printf("digit %s\n", Dls_text);
+                             return INF;         }
+">"                        { printf("digit %s\n", Dls_text);
+                             return SUP;         }
+"<="                       { printf("digit %s\n", Dls_text);
+                             return INF_OU_EGAL; }
+">="                       { printf("digit %s\n", Dls_text);
+                             return SUP_OU_EGAL; }
 
 "CodeC"                    { BEGIN(code_en_c); }
 <code_en_c>\n              { BEGIN(INITIAL); Emettre(Dls_text); ligne_source_dls++; }
@@ -108,14 +133,18 @@ blanc         [\t ]+
 <comment>\n                { ligne_source_dls++; }
 <comment>.                 ;
 
-{id}                       { Dls_lval.chaine = (char *)strdup(Dls_text);
+{id}                       { printf("ID %s\n", Dls_text);
+                             Dls_lval.chaine = (char *)strdup(Dls_text);
                              return ID;
                            }
-{digit}                    { Dls_lval.val = atoi(Dls_text);
+{digit}                    { printf("digit %s\n", Dls_text);
+                             Dls_lval.val = atoi(Dls_text);
                              return ENTIER;
                            }
-{digitf}                   { Dls_lval.valf = atof(Dls_text);
+{digitf}                   { printf("digitf %s\n", Dls_text);
+                             Dls_lval.valf = atof(Dls_text);
                              return VALF;
                            }
-.                          { }
+.                          { printf(". %s\n", Dls_text);
+                              }
 %%
