@@ -57,7 +57,7 @@
 /**********************************************************************************************************/
  gint Ajouter_messageDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
   { gchar *libelle, *objet, *libelle_audio, *libelle_sms;
-    gchar requete[200];
+    gchar requete[2048];
 
     libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
@@ -247,7 +247,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gboolean Modifier_messageDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg )
-  { gchar requete[1024];
+  { gchar requete[2048];
     gchar *libelle, *objet, *libelle_audio, *libelle_sms;
 
     libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */

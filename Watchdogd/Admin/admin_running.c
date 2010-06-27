@@ -50,6 +50,7 @@
        Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
        Write_admin ( client->connexion, "  dls                  - D.L.S. Status\n" );
+       Write_admin ( client->connexion, "  debug debug_id       - Toggle debug status\n" );
        Write_admin ( client->connexion, "  ssrv                 - SousServers Status\n" );
        Write_admin ( client->connexion, "  client               - Client Status\n" );
        Write_admin ( client->connexion, "  kick nom machine     - Kick client nom@machine\n" );
@@ -99,8 +100,7 @@
         }
      } else
     if ( ! strcmp ( commande, "client" ) )
-     { char chaine[128];
-       GList *liste;
+     { GList *liste;
        gint i;
         
        for (i=0; i<Config.max_serveur; i++)
@@ -207,8 +207,7 @@
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
-     { char chaine[128];
-       GList *liste;
+     { GList *liste;
        gint i;
 
        for (i=0; i<Config.max_serveur; i++)
@@ -259,6 +258,13 @@
        g_snprintf( chaine, sizeof(chaine), " Distribution des Msg ON : reste %d\n", num );
        Write_admin ( client->connexion, chaine );
        
+     } else
+    if ( ! strcmp ( commande, "debug" ) )
+     { int debug;
+       sscanf ( ligne, "%s %d", commande, &debug );                  /* Découpage de la ligne de commande */
+       Config.debug_level = debug;
+       g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", debug );
+       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ping" ) )
      { Write_admin ( client->connexion, " Pong !\n" );
