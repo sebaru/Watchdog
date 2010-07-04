@@ -109,7 +109,7 @@
 
            pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
            liste = Partage->Sous_serveur[i].Clients;
-           while(liste)                                            /* Parcours de la liste des clients */
+           while(liste)                                               /* Parcours de la liste des clients */
             { struct CLIENT *client_srv;
               client_srv = (struct CLIENT *)liste->data;
 
@@ -137,79 +137,80 @@
      } else
     if ( ! strcmp ( commande, "gettr" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " TR%03d = %d consigne %d, top=%d\n",
                    num, TR(num), Partage->Tempo_R[num].consigne, Partage->top );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getg" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d ... last_send = %d top=%d\n",
                    num, Partage->g[num].etat, Partage->g[num].last_send, Partage->top );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setg" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
        MSG ( num, val );
        g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d\n", num, val );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getm" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, M(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "gete" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getea" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " EA%03d = %f, inrange=%d\n", num, EA_ech(num), EA_inrange(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setm" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
-       SM ( num, val );
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       if (val) Envoyer_commande_dls( num );
+           else SM ( num, 0 );
        g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, val );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getb" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, B(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "geta" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, A(num) );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setb" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
        SB ( num, val );
        g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, val );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "seta" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );        /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
        SA ( num, val );
        g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "tell" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Ajouter_audio ( num );
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
        Write_admin ( client->connexion, chaine );
@@ -221,7 +222,7 @@
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].pid == -1) continue;
            liste = Partage->Sous_serveur[i].Clients;
-           while(liste)                                            /* Parcours de la liste des clients */
+           while(liste)                                               /* Parcours de la liste des clients */
             { struct CMD_GTK_MESSAGE erreur;
               struct CLIENT *client_wat;
               client_wat = (struct CLIENT *)liste->data;
