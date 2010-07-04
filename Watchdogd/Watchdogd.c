@@ -446,8 +446,10 @@
 
        Partage->Arret            = TOURNE;
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
+#ifdef bouh
        Partage->top              = 0;
        Partage->top_cdg_plugin_dls = 0;
+#endif
        
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -460,6 +462,7 @@
        pthread_mutex_init( &Partage->com_onduleur.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
  
+#ifdef bouh
        for (i=0; i<NBR_MESSAGE_ECRITS; i++)                                 /* RAZ des last_send MESSAGES */
         { Partage->g[i].last_send = 0; }
 
@@ -468,6 +471,10 @@
             
        for (i=0; i<NBR_SORTIE_TOR; i++)                                      /* RAZ des last_send MOTIF */
         { Partage->a[i].last_arch = 0; }
+
+       for (i=0; i<NBR_TEMPO; i++)                                      /* RAZ des consigne TEMPO */
+        { Partage->Tempo_R[i].consigne = 0; }
+#endif
 
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)
