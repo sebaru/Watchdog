@@ -50,7 +50,7 @@
        Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
        Write_admin ( client->connexion, "  dls                  - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  debug debug_id       - Toggle debug status\n" );
+       Write_admin ( client->connexion, "  debug debug_level    - Set debug level\n" );
        Write_admin ( client->connexion, "  ssrv                 - SousServers Status\n" );
        Write_admin ( client->connexion, "  client               - Client Status\n" );
        Write_admin ( client->connexion, "  kick nom machine     - Kick client nom@machine\n" );
@@ -64,6 +64,7 @@
        Write_admin ( client->connexion, "  seta xxx i           - Set Axxx = i\n" );
        Write_admin ( client->connexion, "  getg xxx             - Get MSGxxx\n" );
        Write_admin ( client->connexion, "  setg xxx i           - Set MSGxxx = i\n" );
+       Write_admin ( client->connexion, "  gettr xxx            - Get TRxxx\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
@@ -133,6 +134,13 @@
      } else
     if ( ! strcmp ( commande, "dls" ) )
      { Admin_dls_list ( client );
+     } else
+    if ( ! strcmp ( commande, "gettr" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                 /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), " TR%03d = %d consigne %d, top=%d\n",
+                   num, TR(num), Partage->Tempo_R[num].consigne, Partage->top );
+       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getg" ) )
      { int num;
