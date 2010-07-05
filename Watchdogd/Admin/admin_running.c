@@ -65,6 +65,7 @@
        Write_admin ( client->connexion, "  getg xxx             - Get MSGxxx\n" );
        Write_admin ( client->connexion, "  setg xxx i           - Set MSGxxx = i\n" );
        Write_admin ( client->connexion, "  gettr xxx            - Get TRxxx\n" );
+       Write_admin ( client->connexion, "  geti xxx             - Get Ixxx\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
@@ -140,6 +141,17 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " TR%03d = %d consigne %d, top=%d\n",
                    num, TR(num), Partage->Tempo_R[num].consigne, Partage->top );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "geti" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
+                                           "change_per_sec=%d, last_send=%d, top=%d\n",
+                   num, Partage->i[num].etat,
+                   Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
+                   Partage->i[num].cligno, Partage->i[num].change_per_sec, Partage->i[num].last_send,
+                   Partage->top );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getg" ) )

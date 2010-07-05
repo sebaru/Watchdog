@@ -245,7 +245,10 @@
        Partage->i[num].bleu   = bleu;
        Partage->i[num].cligno = cligno;
 
-       if ( Partage->i[num].last_send + 10 <= Partage->top ) 
+       if ( Partage->i[num].last_send + 10 <= Partage->top )    /* Si pas de change depuis plus d'une sec */
+        { Partage->i[num].change_per_sec = 0; }
+
+       if ( Partage->i[num].change_per_sec <= 5 )                    /* Si moins de 5 changes par seconde */
         { pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
           nbr = g_list_length( Partage->com_msrv.liste_i );
           if ( nbr < 200 && (! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) )) )
@@ -254,6 +257,7 @@
            }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->i[num].last_send = Partage->top;                                 /* Date de la photo ! */
+          Partage->i[num].change_per_sec++;                          /* Un change de plus dans la seconde */
         }
        Partage->audit_bit_interne_per_sec++;
      }
