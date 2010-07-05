@@ -123,8 +123,8 @@
     gint vert;
     gint bleu;
     gint cligno;
-    gint last_send;
-    gint change_per_sec;
+    gint last_change;
+    gint changes;
   };
 
  struct TEMPO

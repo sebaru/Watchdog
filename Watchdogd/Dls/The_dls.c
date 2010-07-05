@@ -245,20 +245,29 @@
        Partage->i[num].bleu   = bleu;
        Partage->i[num].cligno = cligno;
 
-       if ( Partage->i[num].last_send + 10 <= Partage->top )    /* Si pas de change depuis plus d'une sec */
-        { Partage->i[num].change_per_sec = 0; }
+       if ( Partage->i[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+        { Partage->i[num].changes = 0; }
 
-       if ( Partage->i[num].change_per_sec <= 5 )                    /* Si moins de 5 changes par seconde */
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
+       if ( Partage->i[num].changes <= 5 )                           /* Si moins de 5 changes par seconde */
+        {
+          if ( Partage->i[num].changes == 5 )                   /* Est-ce le dernier change avant blocage */
+           { Partage->i[num].etat   = 0;                     /* Si oui, on passe le visuel en kaki cligno */
+             Partage->i[num].rouge  = 0;
+             Partage->i[num].vert   = 100;
+             Partage->i[num].bleu   = 0;
+             Partage->i[num].cligno = 1;
+           }
+
+          pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
           nbr = g_list_length( Partage->com_msrv.liste_i );
           if ( nbr < 200 && (! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) )) )
            { Partage->com_msrv.liste_i = g_list_append( Partage->com_msrv.liste_i,
                                                         GINT_TO_POINTER(num) );
            }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->i[num].last_send = Partage->top;                                 /* Date de la photo ! */
-          Partage->i[num].change_per_sec++;                          /* Un change de plus dans la seconde */
+          Partage->i[num].changes++;                             /* Un change de plus ! */
         }
+       Partage->i[num].last_change = Partage->top;                                    /* Date de la photo ! */
        Partage->audit_bit_interne_per_sec++;
      }
   }
@@ -286,7 +295,8 @@
        if ( Partage->a[num].last_arch + 10 <= Partage->top ) 
         { Ajouter_arch( MNEMO_SORTIE, num, 0 );
           Partage->a[num].last_arch = Partage->top;
-        }
+        } else if (Partage->top % 60) 
+        { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_arch trop tôt !", num ); }
        Partage->audit_bit_interne_per_sec++;
      }
     else if ( Partage->a[num].etat==0 && etat==1 )
@@ -294,7 +304,8 @@
        if ( Partage->a[num].last_arch + 10 <= Partage->top )
         { Ajouter_arch( MNEMO_SORTIE, num, 1 );
           Partage->a[num].last_arch = Partage->top;
-        }
+        } else if (Partage->top % 60) 
+        { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_arch trop tôt !", num ); }
        Partage->audit_bit_interne_per_sec++;
      }
   }

@@ -147,10 +147,10 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
-                                           "change_per_sec=%d, last_send=%d, top=%d\n",
+                                           "changes=%d, last_change=%d, top=%d\n",
                    num, Partage->i[num].etat,
                    Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
-                   Partage->i[num].cligno, Partage->i[num].change_per_sec, Partage->i[num].last_send,
+                   Partage->i[num].cligno, Partage->i[num].changes, Partage->i[num].last_change,
                    Partage->top );
        Write_admin ( client->connexion, chaine );
      } else
