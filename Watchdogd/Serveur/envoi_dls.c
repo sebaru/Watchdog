@@ -329,9 +329,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void *Proto_compiler_source_dls( struct CLIENT *client )
-  { gboolean retour;
-
-    close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
+  { close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
     client->id_creation_plugin_dls = 0;
 
     Compiler_source_dls ( client, client->dls.id );

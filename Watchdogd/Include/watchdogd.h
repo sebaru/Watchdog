@@ -103,12 +103,14 @@
 
  struct SORTIE_TOR
   { gchar etat;
-    gint last_arch;
+    gint last_change;
+    gint changes;
   };
 
  struct MESSAGES
   { gchar etat;
-    gint last_send;
+    gint last_change;
+    gint changes;
   };
  struct COURBE
   { guint id;

@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 22 mars 2010 20:25:46 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                  lmar. 06 juil. 2010 18:31:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -290,22 +290,18 @@
  void SA( int num, int etat )
   { if (num>=NBR_SORTIE_TOR) return;
 
-    if ( Partage->a[num].etat==1 && etat==0 )
-     { Partage->a[num].etat = 0;
-       if ( Partage->a[num].last_arch + 10 <= Partage->top ) 
-        { Ajouter_arch( MNEMO_SORTIE, num, 0 );
-          Partage->a[num].last_arch = Partage->top;
+    if ( Partage->a[num].etat != etat )
+     { Partage->a[num].etat = etat;
+
+       if ( Partage->a[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+        { Partage->a[num].changes = 0; }
+
+       if ( Partage->a[num].changes <= 5 ) 
+        { Ajouter_arch( MNEMO_SORTIE, num, etat );
+          Partage->a[num].changes++;
         } else if (Partage->top % 60) 
-        { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_arch trop tôt !", num ); }
-       Partage->audit_bit_interne_per_sec++;
-     }
-    else if ( Partage->a[num].etat==0 && etat==1 )
-     { Partage->a[num].etat = 1;
-       if ( Partage->a[num].last_arch + 10 <= Partage->top )
-        { Ajouter_arch( MNEMO_SORTIE, num, 1 );
-          Partage->a[num].last_arch = Partage->top;
-        } else if (Partage->top % 60) 
-        { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_arch trop tôt !", num ); }
+        { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_change trop tôt !", num ); }
+       Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
   }
@@ -341,30 +337,27 @@
  void MSG( int num, int etat )
   { if ( num>=NBR_MESSAGE_ECRITS ) return;
 
-    if ( Partage->g[num].etat==1 && etat==0 )
-     { Partage->g[num].etat = 0;
+    if ( Partage->g[num].etat != etat )
+     { Partage->g[num].etat = etat;
 
-       if ( Partage->g[num].last_send + 5 <= Partage->top ) 
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
-                                                           GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->g[num].last_send = Partage->top;
-        } else if (Partage->top % 60) 
-        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_send trop tôt !", num ); }
-       Partage->audit_bit_interne_per_sec++;
-     }
-    else if ( Partage->g[num].etat==0 && etat==1 )
-     { Partage->g[num].etat = 1;
+       if ( Partage->g[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+        { Partage->g[num].changes = 0; }
 
-       if ( Partage->g[num].last_send + 5 <= Partage->top ) 
+       if ( Partage->a[num].changes <= 5 ) 
         { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg_on = g_list_append( Partage->com_msrv.liste_msg_on,
-                                                          GINT_TO_POINTER(num) );
+          if (etat) 
+           { Partage->com_msrv.liste_msg_on  = g_list_append( Partage->com_msrv.liste_msg_on,
+                                                              GINT_TO_POINTER(num) );
+           }
+          else
+           { Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
+                                                              GINT_TO_POINTER(num) );
+           }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->g[num].last_send = Partage->top;
+          Partage->g[num].changes++;
         } else if (Partage->top % 60) 
-        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_send trop tôt !", num ); }
+        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_change trop tôt !", num ); }
+       Partage->g[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
   }
