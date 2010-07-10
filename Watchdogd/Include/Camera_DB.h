@@ -31,7 +31,8 @@
  #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_CAMERA       "cameras"
+ #define NOM_TABLE_CAMERA              "cameras"
+ #define NOM_TABLE_CAMERA_MOTION       "cameras_motion"
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint num );

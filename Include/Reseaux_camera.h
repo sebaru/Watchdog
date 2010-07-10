@@ -38,6 +38,7 @@
     gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                            /* Location de la camera */
     gchar   objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
     gint    type;                                                            /* petite, moyenne, grande ? */
+    gint    bit;                      /* Numéro du bistable a positioner en cas de detection de mouvement */
   };
 
 /************************************************* Tag de communication ***********************************/

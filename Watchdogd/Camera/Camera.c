@@ -46,7 +46,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,%s.num,libelle,objet,id_mnemo"
+                "SELECT location,%s.type,%s.num,libelle,objet,id_mnemo,bit"
                 " FROM %s,%s WHERE id_mnemo=%s.id ORDER BY libelle",
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
@@ -78,6 +78,7 @@
        camera->id_mnemo   = atoi(db->row[5]);
        camera->num        = atoi(db->row[2]);
        camera->type       = atoi(db->row[1]);
+       camera->bit        = atoi(db->row[6]);
      }
     return(camera);
   }
@@ -91,7 +92,7 @@
     struct CMD_TYPE_CAMERA *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,libelle,objet,num"
+                "SELECT location,%s.type,libelle,objet,num,bit"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%d",
                 NOM_TABLE_CAMERA,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
@@ -118,6 +119,7 @@
        memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
        camera->type     = atoi(db->row[1]);
        camera->num      = atoi(db->row[4]);
+       camera->bit      = atoi(db->row[5]);
        camera->id_mnemo = id;
      }
     Liberer_resultat_SQL ( log, db );
@@ -140,11 +142,61 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "location='%s',type=%d "
+                "location='%s',type=%d,bit=%d "
                 "WHERE id_mnemo=%d",
-                NOM_TABLE_CAMERA, location, camera->type, camera->id_mnemo );
+                NOM_TABLE_CAMERA, location, camera->type, camera->bit, camera->id_mnemo );
     g_free(location);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_CAMERA *Rechercher_cameraDB_motion ( struct LOG *log, struct DB *db )
+  { gchar requete[256];
+    struct CMD_TYPE_CAMERA *camera;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT location,%s.type,libelle,objet,num,bit,%s.id_mnemo"
+                " FROM %s,%s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%s.id.mnemo",
+                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
+                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA_MOTION,                       /* FROM */
+                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,                                               /* Where */
+                NOM_TABLE_CAMERA, NOM_TABLE_CAMERA_MOTION
+              );
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       return(NULL);
+     }
+
+    camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
+    if (!camera)
+     { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" );
+       return(NULL);
+     }
+    else
+     { memcpy( camera->libelle,  db->row[2], sizeof(camera->libelle  ) );    /* Recopie dans la structure */
+       memcpy( camera->location, db->row[0], sizeof(camera->location ) );
+       memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
+       camera->type     = atoi(db->row[1]);
+       camera->num      = atoi(db->row[4]);
+       camera->bit      = atoi(db->row[5]);
+       camera->id_mnemo = atoi(db->row[6]);
+       Liberer_resultat_SQL ( log, db );
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id_mnemo = %d",
+                NOM_TABLE_CAMERA_MOTION, camera->id_mnemo );
+
+    Lancer_requete_SQL ( log, db, requete );
+    return(camera);
   }
 /*--------------------------------------------------------------------------------------------------------*/
