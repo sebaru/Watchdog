@@ -66,6 +66,13 @@
                Proto_valider_editer_camera( client, syn );
              }
             break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_CAMERA, SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION,
+                                                 client, mnemo );
+             }
+            break;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -73,6 +73,12 @@
                Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE );
              }
             break;
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION:
+             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+               Proto_afficher_mnemo_atelier( Reseau_ss_tag ( connexion ), mnemo );
+             }
+            break;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

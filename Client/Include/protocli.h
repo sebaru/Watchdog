@@ -517,6 +517,7 @@
 
                                                                                    /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
+ extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

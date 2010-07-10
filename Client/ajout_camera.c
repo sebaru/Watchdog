@@ -58,6 +58,21 @@
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo )
+  { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
+    snprintf( chaine, sizeof(chaine), "%s%04d  %s",
+              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
+    switch (tag)
+     { case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION:
+            gtk_entry_set_text( GTK_ENTRY(Entry_bit_motion), chaine );
+            break;
+     }
+  }
+/**********************************************************************************************************/
 /* CB_ajouter_editer_camera: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
