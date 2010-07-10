@@ -207,10 +207,12 @@
  void Camera_check_motion ( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_CAMERA *camera;
 
-    camera = Rechercher_cameraDB_motion ( log, db );
-    if (camera)
-     { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
-       g_free(camera);
-     }
+    do { camera = Rechercher_cameraDB_motion ( log, db );
+         if (camera)
+          { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
+            g_free(camera);
+          }
+       }
+    while (camera);
   }
 /*--------------------------------------------------------------------------------------------------------*/
