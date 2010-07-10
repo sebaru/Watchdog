@@ -172,6 +172,7 @@
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes;
     gint cpt_1_minute;
+    gint cpt_1_seconde;
     sigset_t sigset;
     struct DB *db;
     gint cpt;
@@ -185,7 +186,8 @@
      { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
 
     cpt_5_minutes = Partage->top + 3000;
-    cpt_1_minute = Partage->top + 600;
+    cpt_1_minute  = Partage->top + 600;
+    cpt_1_seconde = Partage->top + 10;
 
     sigfillset (&sigset);                                     /* Par défaut tous les signaux sont bloqués */
     sigdelset (&sigset, SIGALRM);
@@ -218,8 +220,9 @@
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
-       if ( ! (Partage->top % 10) )                /* Toutes les secondes vérification des motion cameras */
+       if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
         { Camera_check_motion( Config.log, db );
+          cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
 
        usleep(1000);
