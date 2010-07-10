@@ -218,6 +218,10 @@
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
+       if (Partage->top % 10)                      /* Toutes les secondes vérification des motion cameras */
+        { Camera_check_motion( Config.log, db );
+        }
+
        usleep(1000);
        sched_yield();
      }

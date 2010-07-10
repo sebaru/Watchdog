@@ -40,6 +40,7 @@
  extern gboolean Recuperer_cameraDB ( struct LOG *log, struct DB *db );
  extern struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Modifier_cameraDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *msg );
+ extern void Camera_check_motion ( struct LOG *log, struct DB *db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

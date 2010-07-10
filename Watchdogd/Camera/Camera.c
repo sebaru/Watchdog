@@ -154,7 +154,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_CAMERA *Rechercher_cameraDB_motion ( struct LOG *log, struct DB *db )
+ static struct CMD_TYPE_CAMERA *Rechercher_cameraDB_motion ( struct LOG *log, struct DB *db )
   { gchar requete[256];
     struct CMD_TYPE_CAMERA *camera;
 
@@ -198,5 +198,19 @@
 
     Lancer_requete_SQL ( log, db, requete );
     return(camera);
+  }
+/**********************************************************************************************************/
+/* Camera_check_motion : Vérifie si l'outil motion a donner un bit a activer                              */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: néant. Les bits DLS sont positionnés                                                           */
+/**********************************************************************************************************/
+ void Camera_check_motion ( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_CAMERA *camera;
+
+    camera = Rechercher_cameraDB_motion ( log, db );
+    if (camera)
+     { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
+       g_free(camera);
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/
