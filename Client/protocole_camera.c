@@ -76,7 +76,7 @@
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
-               Proto_afficher_mnemo_atelier( Reseau_ss_tag ( connexion ), mnemo );
+               Proto_afficher_mnemo_camera( Reseau_ss_tag ( connexion ), mnemo );
              }
             break;
      }

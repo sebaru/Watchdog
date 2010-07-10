@@ -86,7 +86,8 @@
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
                   g_snprintf( Edit_camera.location, sizeof(Edit_camera.location),
                               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_location) ) );
-                  
+                  Edit_camera.bit = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_motion) );
+                                    
                   Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_VALIDE_EDIT_CAMERA,
                                 (gchar *)&Edit_camera, sizeof( struct CMD_TYPE_CAMERA ) );
                 }
@@ -172,7 +173,8 @@
     gtk_entry_set_editable( GTK_ENTRY(Entry_bit_motion), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_motion, 2, 4, 3, 4 );
 
-    if (edit_camera)                                                       /* Si edition d'un camera */
+    Afficher_mnemo_bit_motion();                    /* Demande l'affichage du mnemo associé au bit motion */
+    if (edit_camera)                                                            /* Si edition d'un camera */
      { gchar chaine[32];
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), edit_camera->num );
        Edit_camera.id_mnemo = edit_camera->id_mnemo;

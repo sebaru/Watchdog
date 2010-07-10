@@ -399,7 +399,7 @@
   { gchar chaine[24], bit[24];
 
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->num );
-    g_snprintf( bit, sizeof(bit), "%s%04d", Type_bit_interne_court(MNEMO_BISTABLE), camera->bit );
+    g_snprintf( bit, sizeof(bit), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), camera->bit );
     gtk_list_store_set ( store, iter,
                          COL_CAMERA_ID, camera->id_mnemo,
                          COL_CAMERA_NUM, camera->num,
