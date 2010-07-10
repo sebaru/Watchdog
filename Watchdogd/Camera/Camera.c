@@ -159,8 +159,8 @@
     struct CMD_TYPE_CAMERA *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,libelle,objet,num,bit,%s.id_mnemo"
-                " FROM %s,%s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%s.id.mnemo",
+                "SELECT location,%s.type,libelle,objet,num,bit,%s.id"
+                " FROM %s,%s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%s.id_mnemo",
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
                 NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA_MOTION,                       /* FROM */
                 NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,                                               /* Where */
