@@ -51,6 +51,8 @@
     SSTAG_SERVEUR_EDIT_CAMERA_OK,              /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_CAMERA,                             /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,                       /* Le serveur valide les nouvelles données */      
+
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION,                    /* Le client souhaite le mnemonique bit_motion */
   };
 
 #endif

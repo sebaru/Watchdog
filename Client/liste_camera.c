@@ -282,7 +282,8 @@
                                               G_TYPE_STRING,                                  /* location */
                                               G_TYPE_UINT,                                        /* type */
                                               G_TYPE_STRING,                               /* type_string */
-                                              G_TYPE_STRING                                 /* Num string */
+                                              G_TYPE_STRING,                                /* Num string */
+                                              G_TYPE_STRING                                 /* bit string */
                                );
 
     liste = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                 /* Creation de la vue */
@@ -304,6 +305,13 @@
                                                          "text", COL_CAMERA_TYPE_STRING,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_TYPE_STRING);         /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Motion bit"), renderer,
+                                                         "text", COL_CAMERA_BIT_STRING,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_BIT_STRING);          /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
@@ -388,9 +396,10 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera )
-  { gchar chaine[24];
+  { gchar chaine[24], bit[24];
 
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->num );
+    g_snprintf( bit, sizeof(bit), "%s%04d", Type_bit_interne_court(MNEMO_BISTABLE), camera->bit );
     gtk_list_store_set ( store, iter,
                          COL_CAMERA_ID, camera->id_mnemo,
                          COL_CAMERA_NUM, camera->num,
@@ -400,6 +409,7 @@
                          COL_CAMERA_TYPE_INT, camera->type,
                          COL_CAMERA_NUM_STRING, chaine,
                          COL_CAMERA_TYPE_STRING, Type_camera_vers_string(camera->type),
+                         COL_CAMERA_BIT_STRING, bit,
                          -1
                        );
   }

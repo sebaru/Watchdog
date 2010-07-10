@@ -36,12 +36,27 @@
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
- static GtkWidget *Entry_num;                              /* Numéro du entreeANA en cours d'édition/ajout */
+ static GtkWidget *Spin_bit_motion;              /* Numéro du bit bistable pour la detection de mouvement */
+ static GtkWidget *Entry_bit_motion;                                          /* mnemonique du bit motion */
+ static GtkWidget *Entry_num;                                                      /* Numéro de la camera */
  static GtkWidget *Entry_lib;                                                        /* Libelle du camera */
  static GtkWidget *Entry_location;                                               /* Location de la camera */
  static GtkWidget *Combo_type;                                                             /* Type camera */
  static struct CMD_TYPE_CAMERA Edit_camera;                                  /* Camera en cours d'édition */
 
+/**********************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Entre: widget, data.                                                                                   */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Afficher_mnemo_bit_motion ( void )
+  { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
+    mnemo.type = MNEMO_MONOSTABLE;
+    mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_motion) );
+    
+    Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION,
+                   (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
+  }
 /**********************************************************************************************************/
 /* CB_ajouter_editer_camera: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -102,7 +117,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 3, 4, TRUE );
+    table = gtk_table_new( 4, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -132,6 +147,16 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_location), NBR_CARAC_LOCATION_CAMERA );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_location, 1, 4, 2, 3 );
 
+    texte = gtk_label_new( _("Motion bit") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
+    Spin_bit_motion = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    g_signal_connect( G_OBJECT(Spin_bit_motion), "changed",
+                      G_CALLBACK(Afficher_mnemo_bit_motion), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_motion, 1, 2, 3, 4 );
+    Entry_bit_motion = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_motion), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_motion, 2, 4, 3, 4 );
+
     if (edit_camera)                                                       /* Si edition d'un camera */
      { gchar chaine[32];
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), edit_camera->num );
@@ -139,6 +164,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine);
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_camera->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_location), edit_camera->location );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_motion), edit_camera->bit );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), edit_camera->type );
      }
     else gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 );
