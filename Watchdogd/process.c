@@ -134,6 +134,7 @@
        write(id_camera, chaine, strlen(chaine));
 
        close(id_camera);
+       g_free(camera);
      }
     close(id);
           
