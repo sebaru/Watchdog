@@ -89,7 +89,7 @@
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "process_id_file /var/run/motion/motion.pid\n");
     write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "daemon off\n");
+    g_snprintf(chaine, sizeof(chaine), "daemon on\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
     write(id, chaine, strlen(chaine));

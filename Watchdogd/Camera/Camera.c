@@ -146,7 +146,7 @@
                 "WHERE id_mnemo=%d",
                 NOM_TABLE_CAMERA, location, camera->type, camera->bit, camera->id_mnemo );
     g_free(location);
-
+    Partage->com_msrv.reset_motion_detect = TRUE;                  /* Modification -> Reset motion_detect */
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/

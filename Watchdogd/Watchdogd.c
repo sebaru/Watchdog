@@ -224,7 +224,11 @@
         { Camera_check_motion( Config.log, db );
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
-
+       if (Partage->com_msrv.reset_motion_detect)
+        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Reset_motion_detect" );
+          Demarrer_motion_detect();
+          Partage->com_msrv.reset_motion_detect = FALSE;
+        }
        usleep(1000);
        sched_yield();
      }

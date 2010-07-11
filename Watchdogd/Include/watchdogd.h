@@ -88,6 +88,7 @@
     GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
+    gboolean reset_motion_detect;
   };
 
  struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
