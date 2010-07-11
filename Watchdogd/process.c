@@ -78,8 +78,12 @@
     unlink("motion.conf");                                      /* Création des fichiers de configuration */
     unlink("camera*.conf");
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    if (id<0) { Info_n( Config.log, DEBUG_FORK,
+                        "MSRV: Creer_config_file_motion: creation motion.conf pid file failed", id );
+                return(FALSE);
+              }
     Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation motion.conf", id );
-    g_snprintf(chaine, sizeof(chaine), "control_port 8080\n");
+    g_snprintf(chaine, sizeof(chaine), "process_id_file /var/run/motion/motion.pid\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "daemon off\n");
     write(id, chaine, strlen(chaine));
@@ -123,6 +127,12 @@
        write(id, chaine, strlen(chaine));
        
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       if (id<0) { Info_n( Config.log, DEBUG_FORK,
+                           "MSRV: Creer_config_file_motion: creation camera.conf failed", id );
+                   g_free(camera);
+                   close(id);
+                   return(FALSE);
+                 }
        Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation thread camera", camera->num );
        g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
        write(id_camera, chaine, strlen(chaine));
@@ -146,21 +156,27 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_motion_detect ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
+  { gchar chaine[80];
+    gint id;
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
 
     if (!Creer_config_file_motion()) return(FALSE);
-    PID_motion = fork();
-    if (PID_motion<0)
-     { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: fork failed", PID_motion );
-       return(FALSE);
-     }
-    else if (!PID_motion)                                                        /* Demarrage du "motion" */
-     { execlp( "motion", "motion", "-n", "-d", "5", "-c", "motion.conf", NULL );
-       Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: Lancement motion failed", PID_motion );
-       _exit(0);
-     }
-    Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: process motion seems to be running",
-            PID_motion );
+
+    id = open ( "/var/run/motion/motion.pid", O_RDONLY, 0 );
+    if (id<0) { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
+                return(FALSE);
+              }
+
+    if (read ( id, chaine, sizeof(chaine) )<0)
+              { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: erreur lecture pid file", id );
+                close(id);
+                return(FALSE);
+              }
+    close(id);
+    PID_motion = atoi (chaine);
+    kill( PID_motion, SIGHUP );                                                   /* Envoie reload conf a motion */
+    Info_n( Config.log, DEBUG_FORK,
+           "MSRV: Demarrer_motion_detect: process motion seems to be running", PID_motion );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -463,11 +479,7 @@
     if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for MOTION to finish"), PID_motion );
-    if (PID_motion) { kill( PID_motion, SIGTERM );                                  /* Attente fin MOTION */
-                      wait4 (PID_motion, NULL, 0, NULL );
-                    }
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, MOTION is down"), PID_motion );
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
 
     if (flag)
      { Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
