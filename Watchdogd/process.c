@@ -79,6 +79,8 @@
     unlink("camera*.conf");
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation motion.conf", id );
+    g_snprintf(chaine, sizeof(chaine), "control_port 8080\n");
+    write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "daemon off\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
