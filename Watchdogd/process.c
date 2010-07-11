@@ -127,7 +127,7 @@
         }
        g_snprintf(nom_fichier, sizeof(nom_fichier), "camera%04d.conf", camera->id_mnemo);
 
-       g_snprintf(chaine, sizeof(chaine), "thread %s\n", nom_fichier);
+       g_snprintf(chaine, sizeof(chaine), "thread %s/%s\n", Config.home, nom_fichier);
        write(id, chaine, strlen(chaine));
        
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
