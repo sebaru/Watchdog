@@ -79,7 +79,7 @@
     unlink("camera*.conf");
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation motion.conf", id );
-    g_snprintf(chaine, sizeof(chaine), "daemon off\n");
+    g_snprintf(chaine, sizeof(chaine), "daemon on\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
     write(id, chaine, strlen(chaine));
@@ -153,7 +153,7 @@
        return(FALSE);
      }
     else if (!PID_motion)                                                        /* Demarrage du "motion" */
-     { execlp( "motion", "motion", "-n", "-d", "10", "-c", "motion.conf", NULL );
+     { execlp( "motion", "motion", "-c", "motion.conf", NULL );
        Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: Lancement motion failed", PID_motion );
        _exit(0);
      }
