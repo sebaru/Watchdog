@@ -80,6 +80,8 @@
     unlink("camera*.conf");
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: creation motion.conf", id );
+    g_snprintf(chaine, sizeof(chaine), "daemon off\n");
+    write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "netcam_http 1.1\n");
@@ -121,7 +123,7 @@
        
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
        Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: creation thread camera", camera->num );
-       g_snprintf(chaine, sizeof(chaine), "net_url %s\n", camera->location);
+       g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id_mnemo) values (%d)\n",
                   camera->id_mnemo);
@@ -141,7 +143,7 @@
        return(FALSE);
      }
     else if (!PID_motion)                                                        /* Demarrage du "motion" */
-     { execlp( "motion", "motion", "-n", "-c", "motion.conf", NULL );
+     { execlp( "motion", "motion", "-c", "motion.conf", NULL );
        Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: Lancement motion failed", PID_motion );
        _exit(0);
      }
