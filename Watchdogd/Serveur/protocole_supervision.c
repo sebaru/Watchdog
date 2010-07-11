@@ -59,8 +59,7 @@
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
-               else { struct CMD_TYPE_SYNOPTIQUE *cmd;
-                      struct SYNOPTIQUEDB *syndb;
+               else { struct CMD_TYPE_SYNOPTIQUE *syndb;
                       syndb = Rechercher_synoptiqueDB ( Config.log, client->Db_watchdog, syn->id );
                       if ( ! syndb )
                        { struct CMD_GTK_MESSAGE gtkmessage;

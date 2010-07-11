@@ -87,7 +87,7 @@
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "control_localhost off\n");
     write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "process_id_file /var/run/motion/motion.pid\n");
+    g_snprintf(chaine, sizeof(chaine), "process_id_file /var/run/motion.pid\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "daemon on\n");
     write(id, chaine, strlen(chaine));
@@ -166,7 +166,7 @@
 
     if (!Creer_config_file_motion()) return(FALSE);
 
-    id = open ( "/var/run/motion/motion.pid", O_RDONLY, 0 );
+    id = open ( "/var/run/motion.pid", O_RDONLY, 0 );
     if (id<0) { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
                 return(FALSE);
               }
