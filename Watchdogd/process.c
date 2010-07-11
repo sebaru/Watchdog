@@ -29,7 +29,9 @@
  #include <bonobo/bonobo-i18n.h>
  #include <sys/wait.h>
  #include <sys/types.h>
+ #include <sys/stat.h>
  #include <unistd.h>
+ #include <fcntl.h>
  #include <errno.h>
  #include <openssl/ssl.h>
  #include <string.h>
@@ -46,10 +48,107 @@
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
+ static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
 
+/**********************************************************************************************************/
+/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_motion_detect ( void )
+  { gchar chaine[80];
+    struct DB *db;
+    gint id;
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: Connexion DB failed" );
+       return(FALSE);
+     }                                                                                  /* Si pas d'accès */
+
+    if ( !Recuperer_cameraDB( Config.log, db ) )                      /* Préparation du chargement camera */
+     { Libere_DB_SQL( Config.log, &db );
+       return(FALSE);
+     }                                                                         /* Si pas d'enregistrement */
+
+    unlink("motion.conf");                                      /* Création des fichiers de configuration */
+    unlink("camera*.conf");
+    id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: creation motion.conf", id );
+    g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "netcam_http 1.1\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "output_normal off\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "ffmpeg_cap_new on\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "ffmpeg_bps 500000\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "ffmpeg_video_codec mpeg4\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "text_right %%Y-%%m-%%d\\n%%T-%%q\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "target_dir %s\n", Config.home);
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "mysql_db %s\n", Config.db_database);
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "mysql_host %s\n", Config.db_host);
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "mysql_user %s\n", Config.db_username);
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "mysql_password %s\n", Config.db_password);
+    write(id, chaine, strlen(chaine));
+
+    for ( ; ; )
+     { struct CMD_TYPE_CAMERA *camera;
+       gchar nom_fichier[80];
+       gint id_camera;
+       camera = Recuperer_cameraDB_suite( Config.log, db );
+       if (!camera)
+        { Libere_DB_SQL( Config.log, &db );
+          break;
+        }
+       g_snprintf(nom_fichier, sizeof(nom_fichier), "camera%04d.conf", camera->id_mnemo);
+
+       g_snprintf(chaine, sizeof(chaine), "thread %s\n", nom_fichier);
+       write(id, chaine, strlen(chaine));
+       
+       id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: creation thread camera", camera->num );
+       g_snprintf(chaine, sizeof(chaine), "net_url %s\n", camera->location);
+       write(id_camera, chaine, strlen(chaine));
+       g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id_mnemo) values (%d)\n",
+                  camera->id_mnemo);
+       write(id_camera, chaine, strlen(chaine));
+       g_snprintf(chaine, sizeof(chaine), "text_left CAM%04d %s\n", camera->num, camera->objet);
+       write(id_camera, chaine, strlen(chaine));
+       g_snprintf(chaine, sizeof(chaine), "movie_filename CAM%04d-%%Y%%m%%d%%H%%M%%S\n", camera->num);
+       write(id_camera, chaine, strlen(chaine));
+
+       close(id_camera);
+     }
+    close(id);
+          
+    PID_motion = fork();
+    if (PID_motion<0)
+     { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: fork failed", PID_motion );
+       return(FALSE);
+     }
+    else if (!PID_motion)                                                        /* Demarrage du "motion" */
+     { execlp( "motion", "motion", "-n", "-c", "motion.conf", NULL );
+       Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: Lancement motion failed", PID_motion );
+       _exit(0);
+     }
+    Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: process motion seems to be running",
+            PID_motion );
+    return(TRUE);
+  }
 /**********************************************************************************************************/
 /* Demarrer_sous_serveur: Fork un sous_serveur                                                            */
 /* Entrée: l'id du fils                                                                                   */
@@ -349,6 +448,12 @@
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
     if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
     Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
+
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for MOTION to finish"), PID_motion );
+    if (PID_motion) { kill( PID_motion, SIGTERM );                                  /* Attente fin MOTION */
+                      wait4 (PID_motion, NULL, 0, NULL );
+                    }
+    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, MOTION is down"), PID_motion );
 
     if (flag)
      { Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );

@@ -550,6 +550,9 @@ encore:
 
              if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR -> Arret" ); }
+
+             if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MOTION_DETECT -> Arret" ); }
            }
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
