@@ -588,8 +588,10 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
         }
        else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
         { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -DEFAULT_CAMERA_LARGEUR/2, -DEFAULT_CAMERA_HAUTEUR/2,
-                                                        DEFAULT_CAMERA_LARGEUR, DEFAULT_CAMERA_HAUTEUR,
+                                                        -DEFAULT_CAMERA_LARGEUR/2.0,
+                                                        -DEFAULT_CAMERA_HAUTEUR/2.0,
+                                                        DEFAULT_CAMERA_LARGEUR*1.0,
+                                                        DEFAULT_CAMERA_HAUTEUR*1.0,
                                                         "fill-color", "blue",
                                                         "stroke-color", "yellow",
                                                         NULL);
