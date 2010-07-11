@@ -153,7 +153,7 @@
        return(FALSE);
      }
     else if (!PID_motion)                                                        /* Demarrage du "motion" */
-     { execlp( "motion", "motion", "-c", "motion.conf", NULL );
+     { execlp( "motion", "motion", "-d", "1", "-c", "motion.conf", NULL );
        Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: Lancement motion failed", PID_motion );
        _exit(0);
      }
