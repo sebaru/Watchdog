@@ -83,6 +83,10 @@
                 return(FALSE);
               }
     Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation motion.conf", id );
+    g_snprintf(chaine, sizeof(chaine), "control_port 8080\n");
+    write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "control_localhost off\n");
+    write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "process_id_file /var/run/motion/motion.pid\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "daemon off\n");
