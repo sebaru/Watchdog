@@ -58,16 +58,15 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Demarrer_motion_detect ( void )
+ static gboolean Creer_config_file_motion ( void )
   { gchar chaine[80];
     struct DB *db;
     gint id;
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: Connexion DB failed" );
+     { Info( Config.log, DEBUG_INFO, "MSRV: Creer_config_file_motion: Connexion DB failed" );
        return(FALSE);
      }                                                                                  /* Si pas d'accès */
 
@@ -79,7 +78,7 @@
     unlink("motion.conf");                                      /* Création des fichiers de configuration */
     unlink("camera*.conf");
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: creation motion.conf", id );
+    Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation motion.conf", id );
     g_snprintf(chaine, sizeof(chaine), "daemon off\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
@@ -122,7 +121,7 @@
        write(id, chaine, strlen(chaine));
        
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-       Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: creation thread camera", camera->num );
+       Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation thread camera", camera->num );
        g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id_mnemo) values (%d)\n",
@@ -137,14 +136,24 @@
        g_free(camera);
      }
     close(id);
-          
+    return(TRUE);          
+  }
+/**********************************************************************************************************/
+/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_motion_detect ( void )
+  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
+
+    if (!Creer_config_file_motion()) return(FALSE);
     PID_motion = fork();
     if (PID_motion<0)
      { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: fork failed", PID_motion );
        return(FALSE);
      }
     else if (!PID_motion)                                                        /* Demarrage du "motion" */
-     { execlp( "motion", "motion", "-c", "motion.conf", NULL );
+     { execlp( "motion", "motion", "-n", "-c", "motion.conf", NULL );
        Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: Lancement motion failed", PID_motion );
        _exit(0);
      }
