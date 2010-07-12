@@ -409,6 +409,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
+    g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Audio"), renderer,
                                                          "text", COLONNE_AUDIO,
                                                          NULL);
@@ -416,6 +417,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
+    g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Repeat"), renderer,
                                                          "text", COLONNE_REPEAT,
                                                          NULL);
