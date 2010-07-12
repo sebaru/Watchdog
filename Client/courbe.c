@@ -248,7 +248,6 @@
                g_free(libelle);
                break;
         }
-       new_courbe->nbr_points=0;
 
        gtk_tree_selection_unselect_iter( selection, &iter );
        g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
@@ -715,20 +714,23 @@
 
        switch(courbe->type)
         { case MNEMO_ENTREE_ANA:
+#ifdef bouh
                if (courbe->nbr_points < TAILLEBUF_HISTO_EANA)
                 { courbe->Y[courbe->nbr_points] = append_courbe->val;
                   courbe->X_date[courbe->nbr_points] = append_courbe->date;
                   courbe->nbr_points++;
                 }
                else
+#endif
                 { memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
-                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = append_courbe->val;
                   memmove( courbe->X_date, courbe->X_date+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(time_t));
                   courbe->X_date[TAILLEBUF_HISTO_EANA-1] = append_courbe->date;
+                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = append_courbe->val;
                 }
                return(TRUE);                                             /* Nous avons fait quelque chose */
                break;
           case MNEMO_ENTREE:
+#ifdef bouh
                if (courbe->nbr_points < TAILLEBUF_HISTO_EANA)
                 { courbe->Y[courbe->nbr_points] = (append_courbe->slot_id*ENTREAXE_Y_TOR +
                                                           (append_courbe->val ? HAUTEUR_Y_TOR : 0.0));
@@ -736,6 +738,7 @@
                   courbe->nbr_points++;
                 }
                else
+#endif
                 {
                   memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
                   courbe->Y[TAILLEBUF_HISTO_EANA-1] = (append_courbe->slot_id*ENTREAXE_Y_TOR +
@@ -794,7 +797,6 @@ printf("ajouter courbe 2\n" );
 
     /* La nouvelle courbe va dans l'id courbe->slot_id */
     new_courbe = &infos->Courbes[courbe->slot_id];
-    new_courbe->nbr_points = 0;
 
     for (cpt=0; cpt<TAILLEBUF_HISTO_EANA; cpt++)                    /* Initialisation des buffers courbes */
      { infos->X[cpt] = 1.0*cpt;

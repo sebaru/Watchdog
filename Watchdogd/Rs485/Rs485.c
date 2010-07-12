@@ -390,13 +390,15 @@
                   val_int += ajout5;
                   num_ea = module->ea_min + cpt;
 
+                  SEA( num_ea, val_int, 0 );
+#ifdef bouh
                   if (val_int<=10)
                    { SEA( num_ea, 0, 0 ); }
                   else if (val_int<200)
                    { SEA( num_ea, 0, 1 ); }
                   else
                    { SEA( num_ea, (gint)( ((gdouble)val_int-200.0)*4096.0 / 824.0 ), 1 ); }
-
+#endif
  /*                 Partage->ea[ num_ea ].val_ech =                                   /* Valeur à l'echelle */
    /*                ((((gdouble)val_int - 1023.0 ) * (Partage->ea[num_ea].max - Partage->ea[num_ea].min)) / 824)
                    + Partage->ea[num_ea].max;*/

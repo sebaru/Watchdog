@@ -167,23 +167,50 @@
   { if (num>=NBR_ENTRE_ANA) return;
 
     if (Partage->ea[ num ].val != val_int)
-     { Partage->ea[ num ].val     = val_int;
+     { Partage->ea[ num ].val   = val_int;
        Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
+       switch ( Partage->ea[num].type )
+        { case ENTREEANA_NON_INTERP:
+               Partage->ea[ num ].val_ech = Partage->ea[ num ].val;               /* Pas d'interprétation !! */
+               Partage->ea[ num ].inrange = 1;
+               break;
+          case ENTREEANA_4_20_MA_10BITS:
+               if (val_int <= 180)
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 0;
+                }
+               else if (val_int <= 204)
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 1;
+                }
+               else
+                { Partage->ea[ num ].val_ech = 
+                     (gdouble)(val_int-204) * (Partage->ea[num].max - Partage->ea[num].min)/820.0
+                     + Partage->ea[num].min;                                        /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 1;
+                }
+               break;
+          case ENTREEANA_4_20_MA_12BITS:
+               if (val_int <= 720)
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 0;
+                }
+               else if (val_int <= 816)
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 1;
+                }
+               else
+                { Partage->ea[ num ].val_ech = 
+                     (gdouble)(val_int-816) * (Partage->ea[num].max - Partage->ea[num].min)/3280.0
+                     + Partage->ea[num].min;                                        /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 1;
+                }
+               break;
+          default:
+               Partage->ea[num].val_ech = 0.0;
+        }
+       Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
      }
-    switch ( Partage->ea[num].type )
-     { case ENTREEANA_NON_INTERP:
-            Partage->ea[ num ].val_ech = Partage->ea[ num ].val;               /* Pas d'interprétation !! */
-            break;
-       case ENTREEANA_4_20_MA_12BITS:
-            Partage->ea[ num ].val_ech =                                            /* Valeur à l'echelle */
-                                 (((gdouble)val_int * (Partage->ea[num].max - Partage->ea[num].min)) / 4095)
-                                 + Partage->ea[num].min;
-            break;
-       default:
-            Partage->ea[num].val_ech = 0.0;
-     }
-    Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
-    Partage->ea[ num ].inrange = inrange;
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */

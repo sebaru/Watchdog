@@ -100,7 +100,7 @@
   { guint actif;
     GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
     GdkColor couleur;                                                             /* Couleur de la courbe */
-    guint nbr_points;                          /* Pour l'ajout initial des données dans la zone graphique */
+    guint nbr_points;   /* Seb : a virer. 12/07/2010*//* Pour l'ajout initial des données dans la zone graphique */
     gfloat Y[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées Y de la courbe */
     time_t X_date[TAILLEBUF_HISTO_EANA];                                  /* Coordonnées date des courbes */
     guint type;
