@@ -41,7 +41,7 @@
   { guint  slot_id;                                           /* Pour affichage sur le bon slot du client */
     guint  id;                                                         /* Numéro de la courbe en question */
     guint  type;
-    guchar libelle [ NBR_CARAC_LIBELLE_ENTREEANA_UTF8+1 ];
+    guchar libelle [ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
   };
 
  enum 

@@ -38,7 +38,8 @@
     guint  type;                                                               /* Type de gestion de l'EA */
                                                                                         /* Vient du mnemo */
     guint  num;                                                                         /* Numero de l'EA */
-    gchar libelle[ NBR_CARAC_LIBELLE_ENTREEANA_UTF8+1 ];
+    gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
+    gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
   };
 
  enum 

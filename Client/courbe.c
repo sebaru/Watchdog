@@ -461,8 +461,7 @@
     GtkWidget *bouton, *boite, *hboite, *vboite, *table, *table2, *separateur, *ruler;
     struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
-    /*GtkDataboxValue min;
-    GtkDataboxValue max;*/
+
     GdkColor fond   = { 0x0, 0x0, 0x0, 0x0 };
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
@@ -573,7 +572,6 @@
     gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, FALSE, FALSE, FALSE, TRUE );
     gtk_box_pack_start( GTK_BOX(vboite), table2, TRUE, TRUE, 0 );
 
-/*    infos->Databox = gtk_databox_new();*/
     gtk_databox_set_scale_type_x ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_databox_set_scale_type_y ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_widget_modify_bg (infos->Databox, GTK_STATE_NORMAL, &fond);
@@ -585,7 +583,6 @@
     ruler = (GtkWidget *)gtk_databox_get_ruler_y ( GTK_DATABOX (infos->Databox) );
     gtk_databox_ruler_set_range ( GTK_DATABOX_RULER(ruler), 10.0, 0.0, 5.0 );
     gtk_databox_ruler_set_scale_type ( GTK_DATABOX_RULER(ruler), GTK_DATABOX_SCALE_LINEAR );
-/*    gtk_databox_ruler_set_max_length ( GTK_DATABOX_RULER(ruler), 4 );*/
 
     g_signal_connect_swapped( G_OBJECT(infos->Databox), "motion_notify_event",
                               G_CALLBACK(CB_deplacement_databox), infos );
@@ -607,11 +604,6 @@
 
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-/*    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_retirer_courbe), infos );*/
 
     bouton = gtk_button_new_with_label( _("Rescale") );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
@@ -642,7 +634,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, MNEMO_ENTREE_ANA,
-                         COLONNE_OBJET, "a venir",
+                         COLONNE_OBJET, source->objet,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, source->min,
                          COLONNE_MAX, source->max,

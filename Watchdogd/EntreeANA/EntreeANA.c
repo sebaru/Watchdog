@@ -88,10 +88,10 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo,%s.num,%s.type"
+                "SELECT %s.min,%s.max,%s.unite,%s.libelle,id_mnemo,%s.num,%s.type,%s.objet"
                 " FROM %s,%s WHERE %s.id_mnemo=%s.id ORDER BY %s.num",
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_ENTREEANA,
+                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* Where */
                 NOM_TABLE_MNEMO /* Order by */
@@ -123,6 +123,7 @@
        entreeana->unite    = atoi(db->row[2]);
        entreeana->type     = atoi(db->row[6]);
        memcpy( entreeana->libelle, db->row[3], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
+       memcpy( entreeana->objet,   db->row[7], sizeof(entreeana->objet  ) ); /* Recopie dans la structure */
      }
     return(entreeana);
   }
@@ -136,11 +137,11 @@
     gchar requete[512];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.num,%s.min,%s.max,%s.unite,%s.libelle,%s.type"
+                "SELECT %s.num,%s.min,%s.max,%s.unite,%s.libelle,%s.type,%s.objet"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%d",
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
-                NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA,
+                NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, id /* WHERE */
               );
@@ -166,6 +167,7 @@
        entreeana->unite    = atoi(db->row[3]);
        entreeana->type     = atoi(db->row[5]);
        memcpy( entreeana->libelle, db->row[4], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
+       memcpy( entreeana->objet,   db->row[6], sizeof(entreeana->objet  ) ); /* Recopie dans la structure */
      }
     Liberer_resultat_SQL ( log, db );
 

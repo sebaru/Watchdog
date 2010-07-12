@@ -120,6 +120,7 @@
 /**********************************************************************************************************/
  void Menu_want_courbe ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE )) return;
+    Creer_page_courbe ( "Courbes" );
     Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );                          /* Affichage de la page */
   }
 /**********************************************************************************************************/

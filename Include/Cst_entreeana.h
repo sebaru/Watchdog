@@ -31,9 +31,6 @@
  #define TAILLEBUF_HISTO_EANA         1600       /* 800 point de controle dans le client et buffer valana */
  #define NBR_VAL_INIT_COURBE          100                   /* Envoyé via 100 points à chaque paquet rezo */
 
- #define NBR_CARAC_LIBELLE_ENTREEANA  50
- #define NBR_CARAC_LIBELLE_ENTREEANA_UTF8  (6*NBR_CARAC_LIBELLE_ENTREEANA)
-
  #define COURBE_TEMPS_TOP             5  /* 1 point = 5 secondes sur la grille courbes */
 
  enum
