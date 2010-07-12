@@ -175,7 +175,6 @@
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
-val_int=502;
                if (val_int <= 180)
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
@@ -191,7 +190,6 @@ val_int=502;
 
                   Partage->ea[ num ].inrange = 1;
                 }
-printf("10 bits EA%d, val_int=%d, val_ech =%f\n", num, val_int, Partage->ea[ num ].val_ech );
                break;
           case ENTREEANA_4_20_MA_12BITS:
                if (val_int <= 720)
@@ -208,7 +206,6 @@ printf("10 bits EA%d, val_int=%d, val_ech =%f\n", num, val_int, Partage->ea[ num
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
-printf("12 bits EA%d, val_int=%d, val_ech =%f\n", num, val_int, Partage->ea[ num ].val_ech );
                break;
           default:
                Partage->ea[num].val_ech = 0.0;
