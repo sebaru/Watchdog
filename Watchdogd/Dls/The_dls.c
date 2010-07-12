@@ -169,7 +169,7 @@
     if (Partage->ea[ num ].val != val_int)
      { Partage->ea[ num ].val   = val_int;
        Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
-       switch ( Partage->ea[num].type )
+       switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = Partage->ea[ num ].val;               /* Pas d'interprétation !! */
                Partage->ea[ num ].inrange = 1;
@@ -185,8 +185,9 @@
                 }
                else
                 { Partage->ea[ num ].val_ech = 
-                     (gdouble)(val_int-204) * (Partage->ea[num].max - Partage->ea[num].min)/820.0
-                     + Partage->ea[num].min;                                        /* Valeur à l'echelle */ 
+                     (gdouble)(val_int-204)
+                     * (Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min)/820.0
+                     + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
@@ -201,8 +202,9 @@
                 }
                else
                 { Partage->ea[ num ].val_ech = 
-                     (gdouble)(val_int-816) * (Partage->ea[num].max - Partage->ea[num].min)/3280.0
-                     + Partage->ea[num].min;                                        /* Valeur à l'echelle */ 
+                     (gdouble)(val_int-816)
+                     * (Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min)/3280.0
+                     + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;

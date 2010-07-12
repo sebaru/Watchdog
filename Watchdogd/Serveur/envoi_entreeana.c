@@ -79,10 +79,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { Partage->ea[rezo_entree->num].min = rezo_entree->min;        /* Mise à jour min et max de l'ea */
-           Partage->ea[rezo_entree->num].max = rezo_entree->max;
-           
-           result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
+    else { result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
            if (result) 
             { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_ENTREEANA) );

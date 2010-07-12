@@ -44,13 +44,6 @@
 /**********************************************************************************************************/
  void Charger_eana ( void )
   { struct DB *db;
-    gint i;
-
-    for (i = 0; i<NBR_ENTRE_ANA; i++)                                                   /* RAZ du tableau */
-     { Partage->ea[i].min = 0.0;
-       Partage->ea[i].max = 100.0;
-       Partage->ea[i].unite = 0;
-     }
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -72,10 +65,7 @@
           return;
         }
 
-       Partage->ea[entree->num].min   = entree->min;                            /* Mise a jour du tableau */
-       Partage->ea[entree->num].max   = entree->max;
-       Partage->ea[entree->num].unite = entree->unite;
-       Partage->ea[entree->num].type  = entree->type;
+       memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_ENTREEANA) );
        g_free(entree);
      }
   }

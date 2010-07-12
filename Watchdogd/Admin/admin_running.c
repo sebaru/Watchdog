@@ -186,7 +186,7 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " EA%03d = %f, val_int=%d, inrange=%d, mode=%s\n",
                    num, EA_ech(num), Partage->ea[num].val, EA_inrange(num),
-                   Type_ea_vers_string(Partage->ea[num].type) 
+                   Type_ea_vers_string(Partage->ea[num].cmd_type_eana.type) 
                  );
        Write_admin ( client->connexion, chaine );
      } else

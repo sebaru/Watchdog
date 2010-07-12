@@ -92,12 +92,9 @@
   };
 
  struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
-  { gdouble min;
-    gdouble max;
+  { struct CMD_TYPE_ENTREEANA cmd_type_eana;
     gdouble val_ech;
-    guint    type;
     gint    val;
-    gint    unite;
     time_t  date;
     guint   inrange;
   };

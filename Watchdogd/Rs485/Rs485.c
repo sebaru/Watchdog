@@ -390,25 +390,7 @@
                   val_int += ajout5;
                   num_ea = module->ea_min + cpt;
 
-                  SEA( num_ea, val_int, 0 );
-#ifdef bouh
-                  if (val_int<=10)
-                   { SEA( num_ea, 0, 0 ); }
-                  else if (val_int<200)
-                   { SEA( num_ea, 0, 1 ); }
-                  else
-                   { SEA( num_ea, (gint)( ((gdouble)val_int-200.0)*4096.0 / 824.0 ), 1 ); }
-#endif
- /*                 Partage->ea[ num_ea ].val_ech =                                   /* Valeur à l'echelle */
-   /*                ((((gdouble)val_int - 1023.0 ) * (Partage->ea[num_ea].max - Partage->ea[num_ea].min)) / 824)
-                   + Partage->ea[num_ea].max;*/
-
-                  /*printf("EA[%d] = %d %f (min %f, max %f) ajout %d %d %d %d %d %d\n",
-                         num_ea, val_int, Partage->ea[ num_ea ].val_ech, Partage->ea[num_ea].min,
-                         Partage->ea[num_ea].max, trame->donnees[cpt], ajout1, ajout2, ajout4, ajout4, ajout5 );*/
-
-                 /*  Ajouter_arch( MNEMO_ENTREE_ANA, num_ea, val_int ); A deplacer dans archive.c */
-
+                  SEA( num_ea, val_int, 0);
                                                                      /* Gestion historique interne Valana */
                   memmove( Partage->ea_histo[ num_ea ], Partage->ea_histo[ num_ea ]+1,
                            TAILLEBUF_HISTO_EANA * sizeof( Partage->ea_histo[ num_ea ][0] ) );

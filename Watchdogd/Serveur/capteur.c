@@ -84,7 +84,7 @@
             if (EA_inrange(capteur->bit_controle))
              { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
                            "%8.2f %s", EA_ech(capteur->bit_controle),
-                           Unite_vers_string(Partage->ea[capteur->bit_controle].unite)
+                           Unite_vers_string(Partage->ea[capteur->bit_controle].cmd_type_eana.unite)
                          );
              }
             else
