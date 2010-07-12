@@ -173,7 +173,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "min=%f,max=%f,unite=%d,type=%d WHERE id_mnemo=%d",
+                "min='%f',max='%f',unite=%d,type=%d WHERE id_mnemo=%d",
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max,
                 entreeana->unite, entreeana->type, entreeana->id_mnemo );
 

@@ -121,8 +121,11 @@
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d entrees", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d entrees", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
 
     for( ; ; )
      { entree = Recuperer_entreeANADB_suite( Config.log, db );
