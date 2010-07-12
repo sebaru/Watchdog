@@ -284,7 +284,7 @@
     if ( ! strcmp ( commande, "debug" ) )
      { int debug;
        sscanf ( ligne, "%s %d", commande, &debug );                  /* Découpage de la ligne de commande */
-       Config.debug_level = debug;
+       Info_change_debug ( Config.log, debug );
        g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", debug );
        Write_admin ( client->connexion, chaine );
      } else
