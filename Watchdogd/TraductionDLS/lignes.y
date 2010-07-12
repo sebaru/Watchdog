@@ -54,7 +54,7 @@ int erreur;                                                             /* Compt
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
-%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE REPEAT
+%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
 %type  <val>    ordre
@@ -378,10 +378,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                      Liberer_options($3);
                   }}
                 | CPT_H ENTIER                {{ $$=New_action_cpt_h($2);          }}
-                | MSG ENTIER liste_options
-                  {{ $$=New_action_msg($2, $3);
-                     Liberer_options($3);
-                  }}
+                | MSG ENTIER                  {{ $$=New_action_msg($2);            }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                               /* Definition des actions via alias */
                    int taille;
@@ -422,7 +419,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                                          g_snprintf( $$->alors, taille, " " ); 
                                          $$->sinon = NULL;
                                        }
-                                      else $$=New_action_msg( alias->num, options );
+                                      else $$=New_action_msg( alias->num );
                                       break;
                          case SORTIE: $$=New_action_sortie( alias->num, $1 );      break;
                          case BI    : $$=New_action_bi( alias->num, $1 );          break;

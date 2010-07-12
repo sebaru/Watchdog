@@ -156,18 +156,16 @@
 /* Entrées: numero du message                                                                             */
 /* Sortie: la structure action                                                                            */
 /**********************************************************************************************************/
- struct ACTION *New_action_msg( int num, GList *options )
+ struct ACTION *New_action_msg( int num )
   { struct ACTION *action;
-    int taille, repeat;
-
-    repeat = Get_option_entier ( options, REPEAT  ); if (repeat == -1) repeat = 0;
+    int taille;
 
     taille = 15;
     action = New_action();
     action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "MSG(%d,1,%d);", num, repeat );
+    g_snprintf( action->alors, taille, "MSG(%d,1);", num );
     action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "MSG(%d,0,%d);", num, repeat );
+    g_snprintf( action->sinon, taille, "MSG(%d,0);", num );
     return(action);
   }
 /**********************************************************************************************************/

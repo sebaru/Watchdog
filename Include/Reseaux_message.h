@@ -44,6 +44,7 @@
     guint  bit_voc;                                       /* Numéro du Monostable associé au profil vocal */
     guint  vitesse_voc;                                              /* Vitesse de restitution de la voix */
     guint  type_voc;                                                          /* Type de voix a restituer */
+    guint  time_repeat;                                       /* Temps entre deux répétitions (si non nul */
   };
 
  enum 

@@ -85,6 +85,7 @@
 
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *liste_msg_repeat;                                       /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
@@ -109,6 +110,7 @@
   { gchar etat;
     gint last_change;
     gint changes;
+    gint next_repeat;
   };
  struct COURBE
   { guint id;

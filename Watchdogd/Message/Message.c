@@ -88,11 +88,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,num_syn,bit_voc,enable,objet,sms,type_voc,vitesse_voc) VALUES "
-                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s,%d,%d)", NOM_TABLE_MSG, msg->num,
+                "type,num_syn,bit_voc,enable,objet,sms,type_voc,vitesse_voc,time_repeat) VALUES "
+                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
                 msg->num_syn, msg->bit_voc, (msg->enable ? "true" : "false"), objet,
-                (msg->sms ? "true" : "false"), msg->type_voc, msg->vitesse_voc );
+                (msg->sms ? "true" : "false"), msg->type_voc, msg->vitesse_voc,
+                msg->time_repeat
+              );
     g_free(libelle);
     g_free(objet);
     g_free(libelle_audio);
@@ -108,11 +110,11 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  gboolean Recuperer_messageDB ( struct LOG *log, struct DB *db )
-  { gchar requete[200];
+  { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,num,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc"
+                "type_voc,vitesse_voc,time_repeat"
                 " FROM %s ORDER BY objet,num", NOM_TABLE_MSG );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -147,6 +149,7 @@
        msg->sms         = atoi(db->row[8]);
        msg->type_voc    = atoi(db->row[11]);
        msg->vitesse_voc = atoi(db->row[12]);
+       msg->time_repeat = atoi(db->row[13]);
      }
     return(msg);
   }
@@ -156,12 +159,12 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( struct LOG *log, struct DB *db, guint num )
-  { gchar requete[200];
+  { gchar requete[256];
     struct CMD_TYPE_MESSAGE *msg;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc"
+                "type_voc,vitesse_voc,time_repeat"
                 " FROM %s WHERE num=%d",
                 NOM_TABLE_MSG, num );
 
@@ -192,6 +195,7 @@
        msg->sms         = atoi(db->row[7]);
        msg->type_voc    = atoi(db->row[10]);
        msg->vitesse_voc = atoi(db->row[11]);
+       msg->time_repeat = atoi(db->row[12]);
      }
     Liberer_resultat_SQL ( log, db );
     return(msg);
@@ -207,7 +211,7 @@
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT num,libelle,type,num_syn,bit_voc,enable,objet,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc"
+                "type_voc,vitesse_voc,time_repeat"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MSG, id );
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -237,6 +241,7 @@
        msg->sms         = atoi(db->row[7]);
        msg->type_voc    = atoi(db->row[10]);
        msg->vitesse_voc = atoi(db->row[11]);
+       msg->time_repeat = atoi(db->row[12]);
      }
     Liberer_resultat_SQL ( log, db );
     return(msg);
@@ -280,12 +285,13 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "num=%d,libelle='%s',type=%d,num_syn=%d,bit_voc=%d,enable=%s,objet='%s',sms=%s,"
-                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d "
+                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d "
                 "WHERE id=%d",
                 NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->bit_voc,
                                (msg->enable ? "true" : "false"),
                                objet, (msg->sms ? "true" : "false"), 
                                libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
+                               msg->time_repeat,
                 msg->id );
     g_free(libelle);
     g_free(objet);

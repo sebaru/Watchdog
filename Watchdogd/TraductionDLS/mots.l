@@ -82,7 +82,6 @@ blanc         [\t ]+
 "color"                    { Dls_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { Dls_lval.val = CLIGNO;      return CLIGNO;      }
 "slave"                    { Dls_lval.val = SLAVE;       return SLAVE;       }
-"repeat"                   { Dls_lval.val = REPEAT;      return REPEAT;      }
  /*********************************************** Le reste ************************************************/
 "."                        { Dls_lval.val = ET;          return ET;          }
 "+"                        { Dls_lval.val = OU;          return OU;          }

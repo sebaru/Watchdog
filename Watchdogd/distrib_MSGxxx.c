@@ -36,6 +36,31 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
+/* Gerer_message_repeat: Gestion de la répétition des messages                                            */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Gerer_message_repeat ( struct DB *Db_watchdog )
+  { struct CMD_TYPE_MESSAGE *msg;
+    GList *liste;
+    gint num;
+
+    pthread_mutex_lock( &Partage->com_msrv.synchro );
+    liste = Partage->com_msrv.liste_msg_repeat;
+    while (liste)
+     { num = GPOINTER_TO_INT(liste->data);                               /* Recuperation du numero de msg */
+
+       if (Partage->g[num].next_repeat < Partage->top)
+        { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
+          /*if (msg->sms) Envoyer_sms ( msg->libelle_sms );*/
+          if (msg->bit_voc) Ajouter_audio ( msg->num );
+          g_free(msg);
+          Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
@@ -43,6 +68,7 @@
   { struct timeval tv;
     struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
+
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
      { Info_n( Config.log, DEBUG_INFO,
@@ -58,7 +84,13 @@
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
     if (msg->sms) Envoyer_sms ( msg->libelle_sms );
     if (msg->bit_voc) Ajouter_audio ( msg->num );
-
+    if (msg->time_repeat) 
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );
+       Partage->com_msrv.liste_msg_repeat = g_list_append ( Partage->com_msrv.liste_msg_repeat,
+                                                            GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                   /* En minutes */
+     }
 /***************************** Création de la structure interne de stockage *******************************/   
     gettimeofday( &tv, NULL );
     Partage->new_histo.date_create_sec  = tv.tv_sec;
@@ -96,6 +128,10 @@
        Ajouter_histo_hardDB( Config.log, Db_watchdog, &histo_hard );
        g_free(histo);
      }
+    pthread_mutex_lock( &Partage->com_msrv.synchro );
+    Partage->com_msrv.liste_msg_repeat = g_list_remove ( Partage->com_msrv.liste_msg_repeat,
+                                                         GINT_TO_POINTER(num) );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
     return(TRUE);
   }
 
@@ -129,7 +165,7 @@
 
     if (Partage->com_msrv.liste_msg_off)                        /* Priorité à la disparition des messages */
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data); /* Recuperation du numero de msg */
+       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data);     /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_off = g_list_remove ( Partage->com_msrv.liste_msg_off,
                                                          GINT_TO_POINTER(num) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter OFF",
@@ -140,7 +176,7 @@
      }
     else if (Partage->com_msrv.liste_msg_on)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);  /* Recuperation du numero de msg */
+       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);      /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_on = g_list_remove ( Partage->com_msrv.liste_msg_on,
                                                             GINT_TO_POINTER(num) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter ON",
