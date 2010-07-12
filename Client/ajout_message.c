@@ -54,6 +54,7 @@
  static GtkWidget *Spin_bit_voc;                                                   /* Numéro du bit vocal */
  static GtkWidget *Entry_bit_voc;                                /* Mnémonique correspondant au bit vocal */
  static GtkWidget *Spin_vitesse_voc;                                 /* Vitesse de restitution de la voix */
+ static GtkWidget *Spin_time_repeat;                                          /* Intervalle de repetition */
  static GtkWidget *Combo_type_voc;                               /* Type actuel de la voix de restitution */
  static GList *Liste_index_syn;
  static struct CMD_TYPE_MESSAGE Edit_msg;                                   /* Message en cours d'édition */
@@ -164,6 +165,7 @@
                   Edit_msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
                   Edit_msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
                   Edit_msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
+                  Edit_msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
                                 (gchar *)&Edit_msg, sizeof( struct CMD_TYPE_MESSAGE ) );
                 }
@@ -186,6 +188,7 @@
                   new_msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
                   new_msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
                   new_msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
+                  new_msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
 
                   Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
                                 (gchar *)&new_msg, sizeof( struct CMD_TYPE_MESSAGE ) );
@@ -289,6 +292,11 @@
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 1, 2 );
 
+    texte = gtk_label_new( _("Repeat") );                                     /* Répétition du message ?? */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 1, 2 );
+    Spin_time_repeat = gtk_spin_button_new_with_range( 0, 60, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_time_repeat, 3, 4, 1, 2 );
+
     texte = gtk_label_new( _("Type") );     /* Création de l'option menu pour le choix du type de message */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
 
@@ -369,10 +377,10 @@
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type_voc), edit_msg->type_voc );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_msg->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_sms), edit_msg->sms );
-
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_msg->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_voc), edit_msg->bit_voc );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_vitesse_voc), edit_msg->vitesse_voc );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_time_repeat), edit_msg->time_repeat );
        gtk_widget_grab_focus( Entry_lib );
      }
     else { gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), TRUE );

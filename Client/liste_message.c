@@ -40,6 +40,7 @@
      COLONNE_SMS,
      COLONNE_ID,
      COLONNE_AUDIO,
+     COLONNE_REPEAT,
      COLONNE_NUM,
      COLONNE_TYPE_INT,
      COLONNE_TYPE_STRING,
@@ -369,6 +370,7 @@
                                               G_TYPE_BOOLEAN,                                      /* SMS */
                                               G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_STRING,                                     /* Audio */
+                                              G_TYPE_UINT,                                      /* Repeat */
                                               G_TYPE_STRING,                                       /* Num */
                                               G_TYPE_UINT,                                 /* Int du type */
                                               G_TYPE_STRING,                            /* String du Type */
@@ -411,6 +413,13 @@
                                                          "text", COLONNE_AUDIO,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_AUDIO);                  /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Repeat"), renderer,
+                                                         "text", COLONNE_REPEAT,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_REPEAT);                 /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
@@ -518,6 +527,7 @@
                          COLONNE_SMS, message->sms,
                          COLONNE_ID, message->id,
                          COLONNE_NUM, chaine,
+                         COLONNE_REPEAT, message->time_repeat,
                          COLONNE_AUDIO, audio,
                          COLONNE_TYPE_INT, message->type,
                          COLONNE_TYPE_STRING, Type_vers_string(message->type),
