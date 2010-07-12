@@ -144,12 +144,16 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
             for( i=0; i<TAILLEBUF_HISTO_EANA; )
              { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend un enreg. */
 
-               if (!arch) break;
+               if (!arch && i!=0) break;
 
                if (i==0)
-                { envoi_courbe.date = arch->date_sec;
-                  envoi_courbe.val  = arch->valeur;
-                  g_free(arch);
+                { if (arch) { envoi_courbe.date = arch->date_sec;               /* Si enreg, on le pousse */
+                              envoi_courbe.val  = arch->valeur;
+                              g_free(arch);
+                            }                        /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
+                       else { envoi_courbe.date = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
+                              envoi_courbe.val  = Partage->ea[courbe->id].val;
+                            }                              
                   Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                 (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                   i++;                                     /* nous avons envoyé un enregistrement de plus */
