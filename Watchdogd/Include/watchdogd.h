@@ -193,6 +193,7 @@
  extern gboolean Demarrer_audio ( void );
  extern gboolean Demarrer_onduleur ( void );
  extern gboolean Demarrer_admin ( void );
+ extern gboolean Demarrer_motion_detect ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
 

@@ -204,11 +204,7 @@
         }
        Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
      }
-                                                                     /* Gestion historique interne Valana */
-    memmove( Partage->ea_histo[ num ], Partage->ea_histo[ num ]+1,
-             TAILLEBUF_HISTO_EANA * sizeof( Partage->ea_histo[ num ][0] ) );
-             Partage->ea_histo[ num ][TAILLEBUF_HISTO_EANA-1] = val_int;
-  }
+                                                                     /* Gestion historique interne Valana */  }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
 /* Entrée: numero, etat                                                                                   */
