@@ -170,7 +170,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
-  { gint cpt_5_minutes, cpt_1_minute, cpt_1_seconde, cpt_update_EA;
+  { gint cpt_5_minutes, cpt_1_minute, cpt_1_seconde;
     sigset_t sigset;
     struct DB *db;
     gint cpt;
@@ -186,7 +186,6 @@
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
     cpt_1_seconde = Partage->top + 10;
-    cpt_update_EA = Partage->top + COURBE_TEMPS_TOP*10;
 
     sigfillset (&sigset);                                     /* Par défaut tous les signaux sont bloqués */
     sigdelset (&sigset, SIGALRM);
@@ -223,14 +222,7 @@
         { Camera_check_motion( Config.log, db );
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
-       if (cpt_update_EA < Partage->top)                         /* Toutes les COURBE_TEMPS_TOP update EA */
-        { for (cpt=0; cpt<NBR_ENTRE_ANA; cpt++)
-           { memmove( Partage->ea_histo[ cpt ], Partage->ea_histo[ cpt ]+1,
-                      TAILLEBUF_HISTO_EANA * sizeof( Partage->ea_histo[ cpt ][0] ) );
-             Partage->ea_histo[ cpt ][TAILLEBUF_HISTO_EANA-1] = Partage->ea [cpt].val;
-           }
-          cpt_update_EA = Partage->top + COURBE_TEMPS_TOP*10;
-        }
+
        if (Partage->com_msrv.reset_motion_detect)
         { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Reset_motion_detect" );
           Demarrer_motion_detect();

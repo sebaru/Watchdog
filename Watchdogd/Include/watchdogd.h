@@ -157,7 +157,6 @@
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
     struct SCENARIO_DB scenario [ NBR_SCENARIO ];
-    guint  ea_histo [ NBR_ENTRE_ANA ][TAILLEBUF_HISTO_EANA];                        /* Stockage EA en int */
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                  /* Monostables du DLS (DLS=rw, Sserveur=r) */
     guchar e [ NBR_ENTRE_TOR>>3 ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
