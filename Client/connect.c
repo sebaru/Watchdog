@@ -276,12 +276,17 @@ one_again:
          { gtk_widget_destroy( F_ident );
            return;
          }
-    else { memcpy( Client_en_cours.user,    gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
+    else { memcpy( Client_en_cours.user,     gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
                    sizeof(Client_en_cours.user) );
-           memcpy( Client_en_cours.password,gtk_entry_get_text( GTK_ENTRY(Entry_code) ),
-                   sizeof(Client_en_cours.password) );
-           memcpy( Client_en_cours.serveur ,gtk_entry_get_text( GTK_ENTRY(Entry_serveur) ),
+           memcpy( Config_cli.user,          gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
+                   sizeof(Config_cli.user) );
+           memcpy( Client_en_cours.serveur,  gtk_entry_get_text( GTK_ENTRY(Entry_serveur) ),
                    sizeof(Client_en_cours.serveur) );
+           memcpy( Config_cli.serveur,       gtk_entry_get_text( GTK_ENTRY(Entry_serveur) ),
+                   sizeof(Config_cli.serveur) );
+           memcpy( Client_en_cours.password, gtk_entry_get_text( GTK_ENTRY(Entry_code) ),
+                   sizeof(Client_en_cours.password) );
+
 
            gtk_widget_destroy( F_ident );                                      /* Fermeture de la fenetre */
            if (Connecter_au_serveur())                          /* Essai de connexion au serveur Watchdog */
