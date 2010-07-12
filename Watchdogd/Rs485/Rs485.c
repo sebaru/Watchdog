@@ -391,10 +391,6 @@
                   num_ea = module->ea_min + cpt;
 
                   SEA( num_ea, val_int, 0);
-                                                                     /* Gestion historique interne Valana */
-                  memmove( Partage->ea_histo[ num_ea ], Partage->ea_histo[ num_ea ]+1,
-                           TAILLEBUF_HISTO_EANA * sizeof( Partage->ea_histo[ num_ea ][0] ) );
-                  Partage->ea_histo[ num_ea ][TAILLEBUF_HISTO_EANA-1] = val_int;
                 }
              }
 	    break;

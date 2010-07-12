@@ -48,6 +48,7 @@
  enum
   {  COLONNE_ID,
      COLONNE_TYPE,
+     COLONNE_TYPE_EA,
      COLONNE_OBJET,
      COLONNE_NUM,
      COLONNE_MIN,
@@ -110,7 +111,7 @@
           val_int = infos->Courbes[cpt].Y[infos->posx_select];
           switch(infos->Courbes[cpt].type)
            { case MNEMO_ENTREE:
-             g_snprintf( description, sizeof(description),
+                  g_snprintf( description, sizeof(description),
                               "%s%d = %d - %s",
                               Type_bit_interne_court(infos->Courbes[cpt].type),
                               infos->Courbes[cpt].mnemo.num,
@@ -118,9 +119,8 @@
                               infos->Courbes[cpt].mnemo.libelle );
                   break;
              case MNEMO_ENTREE_ANA:
-                  valeur = ((gdouble)val_int * 
-                            (infos->Courbes[cpt].eana.max - infos->Courbes[cpt].eana.min)) / (MAX_RESOLUTION-1)
-                           + infos->Courbes[cpt].eana.min;
+                  valeur = (gdouble)(val_int*(infos->Courbes[cpt].eana.max - infos->Courbes[cpt].eana.min))/4095.0
+                            + infos->Courbes[cpt].eana.min;                         /* Valeur à l'echelle */ 
 
                   g_snprintf( description, sizeof(description),
                               "EA%d = %8.2f %s - %s (%8.2f/%8.2f)",
@@ -232,6 +232,7 @@
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
                new_courbe->eana.num = rezo_courbe.id;
+               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.type, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE, &new_courbe->eana.unite, -1 );
@@ -312,6 +313,7 @@
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                    /* Id (num) */
                                               G_TYPE_UINT,                                        /* Type */
+                                              G_TYPE_UINT,                                     /* Type EA */
                                               G_TYPE_STRING,                                     /* Objet */
                                               G_TYPE_STRING,                 /* Num (id en string "EAxxx" */
                                               G_TYPE_FLOAT,                                       /* min */
@@ -629,10 +631,13 @@
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
+printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
+        source->num, source->type, source->objet, source->min, source->max, source->unite );
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, MNEMO_ENTREE_ANA,
+                         COLONNE_TYPE_EA, source->type,
                          COLONNE_OBJET, source->objet,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, source->min,
@@ -664,6 +669,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, source->type,
+                         COLONNE_TYPE_EA, 0,
                          COLONNE_OBJET, source->objet,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, 0.0,
@@ -725,6 +731,20 @@
                 { memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
                   memmove( courbe->X_date, courbe->X_date+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(time_t));
                   courbe->X_date[TAILLEBUF_HISTO_EANA-1] = append_courbe->date;
+
+                  switch ( courbe->eana.type )
+                   { case ENTREEANA_NON_INTERP:
+                     append_courbe->val = (gdouble)
+                      ((append_courbe->val-courbe->eana.min)*4095.0
+                      /(courbe->eana.max - courbe->eana.min));
+                     break;
+                     case ENTREEANA_4_20_MA_10BITS:
+                          append_courbe->val = ((append_courbe->val<<2)-816.0) * 4095.0 / 3280.0;
+                          break;
+                     case ENTREEANA_4_20_MA_12BITS:
+                          append_courbe->val = (append_courbe->val-816.0) * 4095.0 / 3280.0;
+                          break;
+                   }
                   courbe->Y[TAILLEBUF_HISTO_EANA-1] = append_courbe->val;
                 }
                return(TRUE);                                             /* Nous avons fait quelque chose */

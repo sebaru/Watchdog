@@ -175,13 +175,9 @@
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
-               if (val_int <= 180)
+               if (val_int < 204)
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
-                }
-               else if (val_int <= 204)
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
-                  Partage->ea[ num ].inrange = 1;
                 }
                else
                 { Partage->ea[ num ].val_ech = (gdouble)
@@ -192,13 +188,9 @@
                 }
                break;
           case ENTREEANA_4_20_MA_12BITS:
-               if (val_int <= 720)
+               if (val_int < 816)
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
-                }
-               else if (val_int <= 816)
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
-                  Partage->ea[ num ].inrange = 1;
                 }
                else
                 { Partage->ea[ num ].val_ech = (gdouble)
@@ -212,6 +204,10 @@
         }
        Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
      }
+                                                                     /* Gestion historique interne Valana */
+    memmove( Partage->ea_histo[ num ], Partage->ea_histo[ num ]+1,
+             TAILLEBUF_HISTO_EANA * sizeof( Partage->ea_histo[ num ][0] ) );
+             Partage->ea_histo[ num ][TAILLEBUF_HISTO_EANA-1] = val_int;
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
