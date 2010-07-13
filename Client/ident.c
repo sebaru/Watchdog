@@ -51,7 +51,6 @@
     memcpy( &ident.nom, &Client_en_cours.user, sizeof(ident.nom) );
     memcpy( &ident.password, &Client_en_cours.password, sizeof(ident.password) );
     snprintf( ident.version, sizeof(ident.version), "%s", VERSION );
-    
     ident.version_d = Lire_version_donnees( Config_cli.log );
 
     if ( !Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_IDENT, (gchar *)&ident, sizeof(struct REZO_CLI_IDENT) ) )

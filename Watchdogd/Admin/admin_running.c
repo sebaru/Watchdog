@@ -28,7 +28,6 @@
  #include <glib.h>
  #include <unistd.h>
 
- #include "config.h"
  #include "Admin.h"
  #include "Modbus.h"
  #include "watchdogd.h"

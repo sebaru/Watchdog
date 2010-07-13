@@ -29,7 +29,6 @@
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  
- #include "config.h"
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"

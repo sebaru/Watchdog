@@ -80,7 +80,10 @@
 /************************************** Client en attente identification **********************************/
     else if ( client->mode == ATTENTE_IDENT && Reseau_tag(connexion)    == TAG_CONNEXION
                                             && Reseau_ss_tag(connexion) == SSTAG_CLIENT_IDENT )
-          { struct REZO_CLI_IDENT *ident;
+          { int client_major, client_minor, client_micro;
+            int server_major, server_minor, server_micro;
+            struct REZO_CLI_IDENT *ident;
+
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
             Info_n( Config.log, DEBUG_CONNEXION, "Identification du client", connexion->socket );
             Info_c( Config.log, DEBUG_CONNEXION, "Nom de l'utilisateur", ident->nom );
@@ -88,7 +91,15 @@
             Info_n( Config.log, DEBUG_CONNEXION, "Version donnees     ", ident->version_d );
             memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );  /* Recopie pour sauvegarde */
             
-            Client_mode ( client, ENVOI_AUTORISATION );
+            sscanf ( ident->version, "%d.%d.%d", client_major, client_minor, client_micro ); /* Découpage */
+            sscanf ( VERSION,        "%d.%d.%d", server_major, server_minor, server_micro ); /* Découpage */
+
+            if ( client_major == server_major && client_minor == server_minor )
+             { Client_mode ( client, ENVOI_AUTORISATION ); }
+            else 
+             { Info( Config.log, DEBUG_CONNEXION, "Wrong version number" );
+               Client_mode ( client, DECONNECTE );
+             }
           }
 /************************************** Client en attente nouveau password ********************************/
     else if ( client->mode == ATTENTE_NEW_PASSWORD && Reseau_tag(connexion)    == TAG_CONNEXION

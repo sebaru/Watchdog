@@ -31,6 +31,7 @@
  #include <pthread.h>
  #include "Reseaux.h"
 
+ #include "config.h"
  #include "Db.h"
  #include "Archive.h"
  #include "Audio.h"
