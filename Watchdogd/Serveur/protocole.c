@@ -91,8 +91,9 @@
             Info_n( Config.log, DEBUG_CONNEXION, "Version donnees     ", ident->version_d );
             memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );  /* Recopie pour sauvegarde */
             
-            sscanf ( ident->version, "%d.%d.%d", client_major, client_minor, client_micro ); /* Découpage */
-            sscanf ( VERSION,        "%d.%d.%d", server_major, server_minor, server_micro ); /* Découpage */
+                                                                        /* Vérification du MAJOR et MINOR */
+            sscanf ( ident->version, "%d.%d.%d", &client_major, &client_minor, &client_micro );
+            sscanf ( VERSION,        "%d.%d.%d", &server_major, &server_minor, &server_micro );
 
             if ( client_major == server_major && client_minor == server_minor )
              { Client_mode ( client, ENVOI_AUTORISATION ); }
