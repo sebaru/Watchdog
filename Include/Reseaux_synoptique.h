@@ -28,7 +28,11 @@
 #ifndef _RESEAUX_SYNOPTIQUE_H_
  #define _RESEAUX_SYNOPTIQUE_H_
 
- #include "Cst_synoptiques.h"
+ #define NBR_CARAC_LIBELLE_SYNOPTIQUE       50
+ #define NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8  (6*NBR_CARAC_LIBELLE_SYNOPTIQUE)
+
+ #define NBR_CARAC_MNEMO_SYNOPTIQUE         12
+ #define NBR_CARAC_MNEMO_SYNOPTIQUE_UTF8    (6*NBR_CARAC_MNEMO_SYNOPTIQUE)
 
  struct CMD_TYPE_SYNOPTIQUE
   { guint id;                                                      /* Numero du message dans la structure */

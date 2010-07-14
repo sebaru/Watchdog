@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_synoptiques.h"
  #include "Utilisateur_DB.h"
 
  #define NOM_TABLE_SYNOPTIQUE     "syns"
