@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_scenario.h"
 
  #define NOM_TABLE_SCENARIO    "dls_scenario"
 

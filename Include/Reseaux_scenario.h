@@ -28,7 +28,8 @@
 #ifndef _RESEAUX_SCENARIO_H_
  #define _RESEAUX_SCENARIO_H_
 
- #include "Cst_scenario.h"
+ #define NBR_CARAC_LIBELLE_SCENARIO  30
+ #define NBR_CARAC_LIBELLE_SCENARIO_UTF8  (6*NBR_CARAC_LIBELLE_SCENARIO)
 
  struct CMD_TYPE_SCENARIO
   { guint  id;                                                                      /* Numero du compteur */

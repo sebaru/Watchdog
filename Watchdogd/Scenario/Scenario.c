@@ -34,9 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Cst_scenario.h"
- #include "Scenario_DB.h"
 
 /**********************************************************************************************************/
 /* Charger_scenario: Applique un scenario si celui-ci est dans la période requise                         */
