@@ -38,6 +38,232 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
 /**********************************************************************************************************/
+/* Retirer_onduleurDB: Elimination d'un onduleur                                                          */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Retirer_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
+  { gchar requete[200];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_ONDULEUR, onduleur->id );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Ajouter_onduleurDB: Ajout ou edition d'un onduleur                                                     */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure onduleur                      */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Ajouter_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
+  { gchar requete[2048];
+    gchar *host, *ups;
+
+    host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
+    if (!host)
+     { Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation host impossible" );
+       return(-1);
+     }
+    ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
+    if (!ups)
+     { g_free(host);
+       Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation ups impossible" );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+                "INSERT INTO %s"
+                "(host,ups,bit_comm,actif,ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage) "
+                "VALUES ('%s','%s',%d,%d,%d,%d,%d,%d)",
+                NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
+                onduleur->ea_ups_load, onduleur->ea_ups_real_power,
+                onduleur->ea_battery_charge, onduleur->ea_input_voltage
+              );
+    g_free(host);
+    g_free(ups);
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(-1); }
+    return( Recuperer_last_ID_SQL( log, db ) );
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_onduleurDB: Recupération de la liste des ids des onduleurs                          */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ gboolean Recuperer_onduleurDB ( struct LOG *log, struct DB *db )
+  { gchar requete[256];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,host,ups,bit_comm,actif,ea_ups_load,"
+                "ea_ups_real_power,ea_battery_charge,ea_input_voltage "
+                " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_onduleurDB: Recupération de la liste des ids des onduleurs                          */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_ONDULEUR *Recuperer_onduleurDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_ONDULEUR *onduleur;
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       return(NULL);
+     }
+
+    onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
+    if (!onduleur) Info( log, DEBUG_MEM, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
+    else
+     { memcpy( onduleur->host, db->row[1], sizeof(onduleur->host ) );        /* Recopie dans la structure */
+       memcpy( onduleur->ups,  db->row[2], sizeof(onduleur->ups  ) );
+       onduleur->id                = atoi(db->row[0]);
+       onduleur->bit_comm          = atoi(db->row[3]);
+       onduleur->actif             = atoi(db->row[4]);
+       onduleur->ea_ups_load       = atoi(db->row[5]);
+       onduleur->ea_ups_real_power  = atoi(db->row[6]);
+       onduleur->ea_battery_charge = atoi(db->row[7]);
+       onduleur->ea_input_voltage  = atoi(db->row[8]);
+     }
+    return(onduleur);
+  }
+/**********************************************************************************************************/
+/* Rechercher_onduleurDB: Recupération du onduleur dont le num est en parametre                           */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint num )
+  { gchar requete[256];
+    struct CMD_TYPE_ONDULEUR *onduleur;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT host,ups,bit_comm,actif,ea_ups_load,"
+                "ea_ups_real_power,ea_battery_charge,ea_input_voltage "
+                " FROM %s WHERE num=%d",
+                NOM_TABLE_ONDULEUR, num );
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: MSG non trouvé dans la BDD", num );
+       return(NULL);
+     }
+
+    onduleur = g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
+    if (!onduleur)
+     { Info( log, DEBUG_MEM, "Rechercher_onduleurDB: Mem error" ); }
+    else
+     { memcpy( onduleur->host, db->row[0], sizeof(onduleur->host ) );        /* Recopie dans la structure */
+       memcpy( onduleur->ups,  db->row[1], sizeof(onduleur->ups  ) );
+       onduleur->bit_comm          = atoi(db->row[2]);
+       onduleur->actif             = atoi(db->row[3]);
+       onduleur->ea_ups_load       = atoi(db->row[4]);
+       onduleur->ea_ups_real_power  = atoi(db->row[5]);
+       onduleur->ea_battery_charge = atoi(db->row[6]);
+       onduleur->ea_input_voltage  = atoi(db->row[7]);
+       onduleur->id                = num;
+     }
+    Liberer_resultat_SQL ( log, db );
+    return(onduleur);
+  }
+/**********************************************************************************************************/
+/* Rechercher_onduleurDB_par_id: Recupération du onduleur dont l'id est en parametre                      */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB_par_id ( struct LOG *log, struct DB *db, guint id )
+  { gchar requete[200];
+    struct CMD_TYPE_ONDULEUR *onduleur;
+    
+    g_snprintf( requete, sizeof(requete), "SELECT host,ups,bit_comm,actif,"
+                                          "ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage"
+                                          " FROM %s WHERE id=%d",
+                NOM_TABLE_ONDULEUR, id
+              );
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: MSG non trouvé dans la BDD", id );
+       return(NULL);
+     }
+
+    onduleur = g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
+    if (!onduleur)
+     { Info( log, DEBUG_MEM, "Rechercher_onduleurDB_par_id: Mem error" ); }
+    else
+     { g_snprintf( onduleur->host, sizeof(onduleur->host), "%s", db->row[0] );
+       g_snprintf( onduleur->ups,  sizeof(onduleur->ups),  "%s", db->row[1] );
+       onduleur->id                = id;
+       onduleur->bit_comm          = atoi(db->row[2] );
+       onduleur->actif             = atoi(db->row[3] );
+       onduleur->ea_ups_load       = atoi(db->row[4] );
+       onduleur->ea_ups_real_power = atoi(db->row[5] );
+       onduleur->ea_battery_charge = atoi(db->row[6] );
+       onduleur->ea_input_voltage  = atoi(db->row[7] );
+     }
+    Liberer_resultat_SQL ( log, db );
+    return(onduleur);
+  }
+/**********************************************************************************************************/
+/* Modifier_onduleurDB: Modification d'un onduleur Watchdog                                               */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gboolean Modifier_onduleurDB_set_start( struct LOG *log, struct DB *db, gint id, gint start )
+
+  { gchar requete[128];
+
+    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=%d WHERE id=%d",
+                NOM_TABLE_ONDULEUR, start, id
+              );
+
+    return ( Lancer_requete_SQL ( Config.log, db, requete ) );
+  }
+/**********************************************************************************************************/
+/* Modifier_onduleurDB: Modification d'un onduleur Watchdog                                               */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gboolean Modifier_onduleurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
+  { gchar requete[2048];
+    gchar *host, *ups;
+
+    host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
+    if (!host)
+     { Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation host impossible" );
+       return(-1);
+     }
+    ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
+    if (!ups)
+     { g_free(host);
+       Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation ups impossible" );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET "             
+                "host='%s',ups='%s',bit_comm=%d,actif=%d,"
+                "ea_ups_load=%d,ea_ups_real_power=%d,ea_battery_charge=%d,ea_input_voltage=%d "
+                "WHERE id=%d",
+                NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
+                                    onduleur->ea_ups_load, onduleur->ea_ups_real_power,
+                                    onduleur->ea_battery_charge, onduleur->ea_input_voltage,
+                onduleur->id );
+    g_free(host);
+    g_free(ups);
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
 /* Charger_tous_ONDULEUR: Requete la DB pour charger les modules onduleur                                 */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
@@ -48,52 +274,10 @@
     while ( liste )
      { struct MODULE_ONDULEUR *module;
        module = ((struct MODULE_ONDULEUR *)liste->data);
-       if (module->id == id) return(module);
+       if (module->onduleur.id == id) return(module);
        liste = liste->next;
      }
     return(NULL);
-  }
-/**********************************************************************************************************/
-/* Charger_tous_ONDULEUR: Requete la DB pour charger les modules onduleur                                 */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
-/**********************************************************************************************************/
- static gboolean Charger_un_ONDULEUR_DB ( struct MODULE_ONDULEUR *module, gint id  )
-  { gchar requete[128];
-    struct DB *db;
-
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db) return(FALSE);
-
-/********************************************** Chargement des modules ************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT host,ups,bit_comm,actif,"
-                                          "ea_ups_load,ea_ups_realpower,ea_battery_charge,ea_input_voltage"
-                                          " FROM %s WHERE id=%d",
-                NOM_TABLE_MODULE_ONDULEUR, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return(FALSE);
-     }
-
-    while ( Recuperer_ligne_SQL (Config.log, db) )
-     { g_snprintf( module->host, sizeof(module->host), "%s", db->row[0] );
-       g_snprintf( module->ups,  sizeof(module->ups),  "%s", db->row[1] );
-       module->id                = id;
-       module->bit_comm          = atoi(db->row[2] );
-       module->actif             = atoi(db->row[3] );
-       module->ea_ups_load       = atoi(db->row[4] );
-       module->ea_ups_real_power = atoi(db->row[5] );
-       module->ea_battery_charge = atoi(db->row[6] );
-       module->ea_input_voltage  = atoi(db->row[7] );
-                                                                        /* Ajout dans la liste de travail */
-       Info_n( Config.log, DEBUG_ONDULEUR, "Charger_modules_ONDULEUR:  id    = ", module->id   );
-       Info_c( Config.log, DEBUG_ONDULEUR, "                        -  host  = ", module->host );
-     }
-    Liberer_resultat_SQL ( Config.log, db );
-    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_tous_ONDULEUR: Requete la DB pour charger les modules onduleur                                 */
@@ -111,7 +295,7 @@
 
 /********************************************** Chargement des modules ************************************/
     g_snprintf( requete, sizeof(requete), "SELECT id FROM %s",
-                NOM_TABLE_MODULE_ONDULEUR
+                NOM_TABLE_ONDULEUR
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -123,6 +307,7 @@
     cpt = 0;
     while ( Recuperer_ligne_SQL (Config.log, db) )
      { struct MODULE_ONDULEUR *module;
+       struct CMD_TYPE_ONDULEUR *onduleur;
 
        module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
@@ -130,14 +315,23 @@
                 "Charger_tous_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
           continue;
         }
-       if (Charger_un_ONDULEUR_DB( module, atoi (db->row[0]) ))
-        { cpt++;                                           /* Nous avons ajouté un module dans la liste ! */
-                                                                        /* Ajout dans la liste de travail */
-          pthread_mutex_lock( &Partage->com_onduleur.synchro );
-          Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
-          pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+
+       onduleur = Rechercher_onduleurDB_par_id( Config.log, db, atoi (db->row[0]) );
+       if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
+        { Info( Config.log, DEBUG_MEM,
+                "Charger_tous_ONDULEUR: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
+          g_free(module);
+          continue;
         }
-       else g_free(module);
+       memcpy( &module->onduleur, onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
+       g_free(onduleur);
+       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+                                                                        /* Ajout dans la liste de travail */
+       pthread_mutex_lock( &Partage->com_onduleur.synchro );
+       Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
+       pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+       Info_n( Config.log, DEBUG_ONDULEUR, "Charger_modules_ONDULEUR:  id    = ", module->onduleur.id   );
+       Info_c( Config.log, DEBUG_ONDULEUR, "                        -  host  = ", module->onduleur.host );
      }
     Liberer_resultat_SQL ( Config.log, db );
     Info_n( Config.log, DEBUG_INFO, "Charger_tous_ONDULEUR: module ONDULEUR found  !", cpt );
@@ -146,32 +340,44 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Rechercher_onduleurDB: Recupération du onduleur dont le num est en parametre                           */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  static void Charger_un_ONDULEUR ( gint id )
   { struct MODULE_ONDULEUR *module;
-    
+    struct CMD_TYPE_ONDULEUR *onduleur;
+    struct DB *db;
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db) return;
+
     module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
-    if (!module)                                                   /* Si probleme d'allocation mémoire */
+    if (!module)                                                      /* Si probleme d'allocation mémoire */
      { Info( Config.log, DEBUG_MEM,
              "Charger_un_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
+       Libere_DB_SQL( Config.log, &db );
        return;
      }
-    if ( Charger_un_ONDULEUR_DB ( module, id ) )                              /* Chargement de l'onduleur */
-     { pthread_mutex_lock( &Partage->com_onduleur.synchro );
-       Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
-       pthread_mutex_unlock( &Partage->com_onduleur.synchro );
-     }
-    else 
+
+    onduleur = Rechercher_onduleurDB_par_id( Config.log, db, id );
+    Libere_DB_SQL( Config.log, &db );
+    if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
      { Info( Config.log, DEBUG_MEM,
-             "Charger_un_ONDULEUR: Erreur chargement module ONDULEUR" );
-       g_free(module);                                                          /* Probleme de chargement */
+             "Charger_un_ONDULEUR: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
+       g_free(module);
+       return;
      }
+    memcpy( &module->onduleur, onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
+    g_free(onduleur);
+
+    pthread_mutex_lock( &Partage->com_onduleur.synchro );
+    Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
+    pthread_mutex_unlock( &Partage->com_onduleur.synchro );
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Rechercher_onduleurDB: Recupération du onduleur dont le num est en parametre                           */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -207,12 +413,12 @@
     module->started = FALSE;
     module->nbr_deconnect++;
     module->date_retente = 0;
-    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->id );
-    SB( module->bit_comm, 0 );                                /* Mise a zero du bit interne lié au module */
-    SEA( module->ea_ups_load, 0, 0);                                       /* Numéro de l'EA pour le load */
-    SEA( module->ea_ups_real_power, 0, 0);                           /* Numéro de l'EA pour le real power */
-    SEA( module->ea_battery_charge, 0, 0);                      /* Numéro de l'EA pour la charge batterie */
-    SEA( module->ea_input_voltage, 0, 0);
+    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->onduleur.id );
+    SB( module->onduleur.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
+    SEA( module->onduleur.ea_ups_load, 0, 0);                              /* Numéro de l'EA pour le load */
+    SEA( module->onduleur.ea_ups_real_power, 0, 0);                  /* Numéro de l'EA pour le real power */
+    SEA( module->onduleur.ea_battery_charge, 0, 0);             /* Numéro de l'EA pour la charge batterie */
+    SEA( module->onduleur.ea_input_voltage, 0, 0);                                    /* Tension d'entrée */
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
@@ -222,14 +428,15 @@
  static gboolean Connecter_module ( struct MODULE_ONDULEUR *module )
   { int connexion;
 
-    if ( (connexion = upscli_connect( &module->upsconn, module->host, ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
+    if ( (connexion = upscli_connect( &module->upsconn, module->onduleur.host,
+                                      ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: connexion refused by module",
                (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->host );
-    SB( module->bit_comm, 1 );                                   /* Mise a 1 du bit interne lié au module */
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->onduleur.host );
+    SB( module->onduleur.bit_comm, 1 );                          /* Mise a 1 du bit interne lié au module */
 
     return(TRUE);
   }
@@ -245,7 +452,7 @@
      { struct MODULE_ONDULEUR *module;
        module = ((struct MODULE_ONDULEUR *)liste->data);
 
-       if (module->actif) return(TRUE);
+       if (module->onduleur.actif) return(TRUE);
        liste = liste->next;
      }
     return(FALSE);
@@ -264,7 +471,7 @@
     module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
 
     query[0] = "VAR";
-    query[1] = module->ups;
+    query[1] = module->onduleur.ups;
 
     query[2] = "ups.load";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
@@ -278,10 +485,10 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->ea_ups_load, valeur, 1);                           /* Numéro de l'EA pour le load */
+           SEA( module->onduleur.ea_ups_load, valeur, 1);                  /* Numéro de l'EA pour le load */
          }
 
-    query[2] = "ups.realpower";
+    query[2] = "ups.real_power";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
      { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
@@ -293,7 +500,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->ea_ups_real_power, valeur, 1);               /* Numéro de l'EA pour le real power */
+           SEA( module->onduleur.ea_ups_real_power, valeur, 1);      /* Numéro de l'EA pour le real power */
          }
 
     query[2] = "battery.charge";
@@ -308,7 +515,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->ea_battery_charge, valeur, 1);          /* Numéro de l'EA pour la charge batterie */
+           SEA( module->onduleur.ea_battery_charge, valeur, 1); /* Numéro de l'EA pour la charge batterie */
          }
 
     query[2] = "input.voltage";
@@ -323,7 +530,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->ea_input_voltage, valeur, 1);
+           SEA( module->onduleur.ea_input_voltage, valeur, 1);
          }
   }
 /**********************************************************************************************************/
@@ -374,7 +581,7 @@
         { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Starting module",
                   Partage->com_onduleur.admin_start );
           module = Chercher_module_by_id ( Partage->com_onduleur.admin_start );
-          if (module) module->actif = 1;
+          if (module) module->onduleur.actif = 1;
           Partage->com_onduleur.admin_start = 0;
         }
 
@@ -382,7 +589,7 @@
         { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Stoping module",
                   Partage->com_onduleur.admin_stop );
           module = Chercher_module_by_id ( Partage->com_onduleur.admin_stop );
-          if (module) module->actif = 0;
+          if (module) module->onduleur.actif = 0;
           Deconnecter_module  ( module );
           Partage->com_onduleur.admin_stop = 0;
         }
@@ -394,7 +601,7 @@
        liste = Partage->com_onduleur.Modules_ONDULEUR;
        while (liste)
         { module = (struct MODULE_ONDULEUR *)liste->data;
-          if ( module->actif != TRUE || 
+          if ( module->onduleur.actif != TRUE || 
                Partage->top < module->date_retente )           /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
@@ -407,7 +614,8 @@
                 module->started = TRUE;
               }
              else
-              { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Module DOWN", module->id );
+              { Info_n( Config.log, DEBUG_ONDULEUR,
+                        "ONDULEUR: Run_onduleur: Module DOWN", module->onduleur.id );
                 module->date_retente = Partage->top + ONDULEUR_RETRY;
               }
            }

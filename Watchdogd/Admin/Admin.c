@@ -200,9 +200,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Run_admin ( void )
-  { 
-
-    prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
+  { prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
     Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
 

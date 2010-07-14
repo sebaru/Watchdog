@@ -61,10 +61,11 @@
                    " ONDULEUR[%02d] -> Host=%s, UPS=%s, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
                    "                   bit_comm=%d, ea_ups_load=%d, ea_ups_real_power=%d\n"
                    "                   ea_battery_charge=%d, ea_input_voltage=%d\n",
-                   module->id, module->host, module->ups, module->actif, module->started,
-                   module->nbr_deconnect, (int)module->date_retente, module->bit_comm,
-                   module->ea_ups_load, module->ea_ups_real_power,
-                   module->ea_battery_charge, module->ea_input_voltage 
+                   module->onduleur.id, module->onduleur.host, module->onduleur.ups,
+                   module->onduleur.actif, module->started,
+                   module->nbr_deconnect, (int)module->date_retente, module->onduleur.bit_comm,
+                   module->onduleur.ea_ups_load, module->onduleur.ea_ups_real_power,
+                   module->onduleur.ea_battery_charge, module->onduleur.ea_input_voltage 
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
@@ -76,32 +77,16 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_onduleur_start ( struct CLIENT_ADMIN *client, gint id )
-  { gchar chaine[128], requete[128];
-    struct DB *db;
+ static void Admin_onduleur_start ( struct CLIENT_ADMIN *client, struct DB *db, gint id )
+  { gchar chaine[128];
 
     while (Partage->com_onduleur.admin_start) sched_yield();
     Partage->com_onduleur.admin_start = id;
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_onduleur_start: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=1 WHERE id=%d",
-                NOM_TABLE_MODULE_ONDULEUR, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-    Libere_DB_SQL( Config.log, &db );
-
-    g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d started\n", id );
+    if (Modifier_onduleurDB_set_start( Config.log, db, id, TRUE))
+     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d started\n", id ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " -- error -- Module ONDULEUR NOT %d started\n", id ); }
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -109,32 +94,16 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_onduleur_stop ( struct CLIENT_ADMIN *client, gint id )
-  { gchar chaine[128], requete[128];
-    struct DB *db;
+ static void Admin_onduleur_stop ( struct CLIENT_ADMIN *client, struct DB *db, gint id )
+  { gchar chaine[128];
 
     while (Partage->com_onduleur.admin_stop) sched_yield();
     Partage->com_onduleur.admin_stop = id;
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_onduleur_stop: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=0 WHERE id=%d",
-                NOM_TABLE_MODULE_ONDULEUR, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-    Libere_DB_SQL( Config.log, &db );
-
-    g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d stopped\n", id );
+    if (Modifier_onduleurDB_set_start( Config.log, db, id, FALSE))
+     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d stopped\n", id ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " -- error -- Module ONDULEUR NOT %d stopped\n", id ); }
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -142,87 +111,37 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static gint Admin_onduleur_add ( struct CLIENT_ADMIN *client, gchar *host_orig, gchar *ups_orig,
-                                  guint bit_comm, guint ea_ups_load, guint ea_ups_realpower,
-                                  guint ea_battery_charge, guint ea_input_voltage )
-  { gchar requete[256], *host, *ups;
-    struct DB *db;
+ static void Admin_onduleur_add ( struct CLIENT_ADMIN *client, struct DB *db,
+                                  struct CMD_TYPE_ONDULEUR *onduleur )
+  { gchar chaine[128];
     gint id;
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_onduleur_add: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return(-1);
-     }
+    id = Ajouter_onduleurDB ( Config.log, db, onduleur );
 
-    host = Normaliser_chaine ( Config.log, host_orig );                  /* Formatage correct des chaines */
-    if (!host)
-     { Info( Config.log, DEBUG_ADMIN, "Admin_onduleur_add: Normalisation impossible" );
-       Libere_DB_SQL( Config.log, &db );
-       return(-1);
-     }
-
-    ups = Normaliser_chaine ( Config.log, ups_orig );                    /* Formatage correct des chaines */
-    if (!host)
-     { Info( Config.log, DEBUG_ADMIN, "Admin_onduleur_add: Normalisation impossible" );
-       g_free(host);
-       Libere_DB_SQL( Config.log, &db );
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(host,ups,bit_comm,actif,ea_ups_load,ea_ups_realpower,ea_battery_charge,ea_input_voltage) "
-                "VALUES ('%s','%s',%d,%d,%d,%d,%d,%d)",
-                NOM_TABLE_MODULE_ONDULEUR, host, ups, bit_comm, 0,
-                ea_ups_load,ea_ups_realpower,ea_battery_charge,ea_input_voltage
-              );
-    g_free(host);
-    g_free(ups);
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return(-1);
-     }
-    id = Recuperer_last_ID_SQL ( Config.log, db );
-    Libere_DB_SQL( Config.log, &db );
-
-    while (Partage->com_onduleur.admin_add) sched_yield();
-    Partage->com_onduleur.admin_add = id;
-    return(id);
+    if (id != -1)
+     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d added\n", id ); 
+       while (Partage->com_onduleur.admin_add) sched_yield();
+       Partage->com_onduleur.admin_add = id;                            /* Envoi au thread onduleur */
+      }
+    else
+     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR NOT added\n" ); }
+    Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_onduleur_del ( struct CLIENT_ADMIN *client, gint id )
-  { gchar requete[128], chaine[128];
-    struct DB *db;
-
-    while (Partage->com_onduleur.admin_del) sched_yield();
-    Partage->com_onduleur.admin_del = id;
-
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_onduleur_del: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return;
+ static void Admin_onduleur_del ( struct CLIENT_ADMIN *client, struct DB *db,
+                                  struct CMD_TYPE_ONDULEUR *onduleur )
+  { gchar chaine[128];
+    if (Retirer_onduleurDB ( Config.log, db, onduleur ))
+     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d deleted\n", onduleur->id );
+       while (Partage->com_onduleur.admin_del) sched_yield();
+       Partage->com_onduleur.admin_del = onduleur->id;                        /* Envoi au thread onduleur */
      }
-
-    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE id = %d",
-                NOM_TABLE_MODULE_ONDULEUR, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d deleted\n", id );
+    else
+     { g_snprintf( chaine, sizeof(chaine), " -- error -- Module ONDULEUR %d NOT deleted\n", onduleur->id ); }
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -232,48 +151,51 @@
 /**********************************************************************************************************/
  void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
+    struct DB*db;
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Info_c( Config.log, DEBUG_ADMIN, "Admin_onduleur: impossible d'ouvrir la Base de données",
+               Config.db_database );
+       return;
+     }
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_onduleur_start ( client, num );
-     }
-    else if ( ! strcmp ( commande, "list" ) )
-     { Admin_onduleur_list ( client );
+       Admin_onduleur_start ( client, db, num );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_onduleur_stop ( client, num );
+       Admin_onduleur_stop ( client, db, num );
+     }
+    else if ( ! strcmp ( commande, "list" ) )
+     { Admin_onduleur_list ( client );
      }
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_onduleur_reload(client);
      }
     else if ( ! strcmp ( commande, "add" ) )
-     { guint bit_comm, ea_ups_load, ea_ups_realpower, ea_battery_charge, ea_input_voltage;
-       gchar host[128], ups[128], chaine[128];
-       sscanf ( ligne, "%s %s %s %d %d %d %d %d", commande, host, ups, 
-                &bit_comm, &ea_ups_load, &ea_ups_realpower, &ea_battery_charge, &ea_input_voltage
+     { gchar chaine[128];
+       struct CMD_TYPE_ONDULEUR onduleur;
+       sscanf ( ligne, "%s %s %s %d %d %d %d %d", commande, onduleur.host, onduleur.ups, 
+                &onduleur.bit_comm, &onduleur.ea_ups_load,
+                &onduleur.ea_ups_real_power, &onduleur.ea_battery_charge, &onduleur.ea_input_voltage
               );                                                     /* Découpage de la ligne de commande */
 
-       if ( bit_comm >= NBR_BIT_DLS )
+       if ( onduleur.bit_comm >= NBR_BIT_DLS )
         { Write_admin ( client->connexion, " bit_comm should be < NBR_BIT_DLS\n" ); }
-       else
-        { int id;
-          id = Admin_onduleur_add ( client, host, ups, bit_comm,
-                                    ea_ups_load, ea_ups_realpower, ea_battery_charge, ea_input_voltage
-                                  );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d added\n", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR NOT added\n" ); }
-          Write_admin ( client->connexion, chaine );
-        }
+       else Admin_onduleur_add( client, db, &onduleur );
      }
     else if ( ! strcmp ( commande, "delete" ) )
-     { guint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_onduleur_del ( client, num );
+     { struct CMD_TYPE_ONDULEUR onduleur;
+       guint num;
+       sscanf ( ligne, "%s %d", commande, &onduleur.id );            /* Découpage de la ligne de commande */
+       Admin_onduleur_del(client, db, &onduleur );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
@@ -292,5 +214,6 @@
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }
+    Libere_DB_SQL( Config.log, &db );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -28,11 +28,12 @@
 #ifndef _ONDULEUR_H_
  #define _ONDULEUR_H_
  #include <upsclient.h>
+ #include "Reseaux.h"
 
  #define ONDULEUR_PORT_TCP    3493                        /* Port de connexion TCP pour accès aux modules */
  #define ONDULEUR_RETRY       1800                     /* 3 minutes entre chaque retry si pb de connexion */
 
- #define NOM_TABLE_MODULE_ONDULEUR   "onduleurs"
+ #define NOM_TABLE_ONDULEUR   "onduleurs"
 
  struct COM_ONDULEUR                                               /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
@@ -45,15 +46,7 @@
   };
 
  struct MODULE_ONDULEUR
-  { guint id;                                                 /* Numéro du module dans la base de données */
-    gboolean actif;                                                        /* Le module doit-il tourner ? */
-    gchar host[32];                                                     /* Adresses IP du module ONDULEUR */
-    gchar ups[32];                                                      /* Adresses IP du module ONDULEUR */
-    guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
-    guint ea_ups_load;                                                     /* Numéro de l'EA pour le load */
-    guint ea_ups_real_power;                                         /* Numéro de l'EA pour le real power */
-    guint ea_battery_charge;                                    /* Numéro de l'EA pour la charge batterie */
-    guint ea_input_voltage;                                        /* Numéro de l'EA pour l'input voltage */
+  { struct CMD_TYPE_ONDULEUR onduleur;
 
     UPSCONN_t upsconn;                                                      /* Connexion UPS à l'onduleur */
     gboolean started;                                                                  /* Est-il actif ?? */
@@ -63,6 +56,14 @@
 
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_onduleur ( void );                                                    /* Dans Onduleur.c */
+ extern gboolean Retirer_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur );
+ extern gint Ajouter_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur );
+ extern gboolean Recuperer_onduleurDB ( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_ONDULEUR *Recuperer_onduleurDB_suite( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint num );
+ extern struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB_par_id ( struct LOG *log, struct DB *db, guint id );
+ extern gboolean Modifier_onduleurDB_set_start( struct LOG *log, struct DB *db, gint id, gint start );
+ extern gboolean Modifier_onduleurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 
