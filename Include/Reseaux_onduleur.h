@@ -28,7 +28,14 @@
 #ifndef _RESEAUX_ONDULEUR_H_
  #define _RESEAUX_ONDULEUR_H_
 
- #include "Cst_onduleur.h"
+ #define NBR_CARAC_HOST_ONDULEUR           32
+ #define NBR_CARAC_HOST_ONDULEUR_UTF8      (6*NBR_CARAC_HOST_ONDULEUR)
+
+ #define NBR_CARAC_UPS_ONDULEUR            32
+ #define NBR_CARAC_UPS_ONDULEUR_UTF8       (6*NBR_CARAC_UPS_ONDULEUR)
+
+ #define NBR_CARAC_LIBELLE_ONDULEUR        60
+ #define NBR_CARAC_LIBELLE_ONDULEUR_UTF8   (6*NBR_CARAC_LIBELLE_ONDULEUR)
 
  struct CMD_TYPE_ONDULEUR
   { gint id;                                                  /* Numéro du module dans la base de données */

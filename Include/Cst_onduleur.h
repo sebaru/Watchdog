@@ -28,13 +28,5 @@
 #ifndef _CST_ONDULEUR_H_
  #define _CST_ONDULEUR_H_
 
- #define NBR_CARAC_HOST_ONDULEUR           32
- #define NBR_CARAC_HOST_ONDULEUR_UTF8      (6*NBR_CARAC_HOST_ONDULEUR)
-
- #define NBR_CARAC_UPS_ONDULEUR            32
- #define NBR_CARAC_UPS_ONDULEUR_UTF8       (6*NBR_CARAC_UPS_ONDULEUR)
-
- #define NBR_CARAC_LIBELLE_ONDULEUR        60
- #define NBR_CARAC_LIBELLE_ONDULEUR_UTF8   (6*NBR_CARAC_LIBELLE_ONDULEUR)
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

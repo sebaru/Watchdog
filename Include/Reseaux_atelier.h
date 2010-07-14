@@ -28,7 +28,15 @@
 #ifndef _RESEAUX_ATELIER_H_
  #define _RESEAUX_ATELIER_H_
 
- #include "Cst_atelier.h"
+ #define NBR_CARAC_LIBELLE_MOTIF       50                               /* taille max du libelle du motif */
+ #define NBR_CARAC_LIBELLE_MOTIF_UTF8  (6*NBR_CARAC_LIBELLE_MOTIF)
+
+ #define NBR_CARAC_LIBELLE_COMMENT     50                               /* taille max du libelle du motif */
+ #define NBR_CARAC_LIBELLE_COMMENT_UTF8  (6*NBR_CARAC_LIBELLE_COMMENT)
+
+/************************************** Qu'est-ce qu'une camera de supervision ?? *************************/
+ #define DEFAULT_CAMERA_LARGEUR        160
+ #define DEFAULT_CAMERA_HAUTEUR        120
 
  struct CMD_TYPE_MOTIF
   { gint    id;                                                               /* Id du motif dans la base */
