@@ -70,6 +70,7 @@
     GID_DLS,
     GID_HISTO,
     GID_SCENARIO,
+    GID_LOWLEVEL_IO,
     NBR_GROUPE_RESERVE
   };
 

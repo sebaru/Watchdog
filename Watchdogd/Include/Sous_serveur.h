@@ -71,6 +71,7 @@
  extern void Gerer_protocole_histo_courbe( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_synoptique( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_camera( gint Id_serveur, struct CLIENT *client );
+ extern void Gerer_protocole_onduleur( gint Id_serveur, struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
  extern void Envoi_clients( gint ss_id, gint tag, gint sstag, gchar *buffer, gint taille );
@@ -254,5 +255,9 @@
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
  extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
+                                                                                   /* Dans envoi_camera.c */
+ extern void Proto_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
+ extern void Proto_valider_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
+ extern void *Envoyer_onduleurs_thread ( struct CLIENT *client );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

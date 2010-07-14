@@ -31,16 +31,16 @@
  #include "Cst_onduleur.h"
 
  struct CMD_TYPE_ONDULEUR
-  { gint id;                                                 /* Numéro du module dans la base de données */
+  { gint id;                                                  /* Numéro du module dans la base de données */
     gboolean actif;                                                        /* Le module doit-il tourner ? */
-    gchar host[32];                                                     /* Adresses IP du module ONDULEUR */
-    gchar ups[32];                                                      /* Adresses IP du module ONDULEUR */
+    gchar host[NBR_CARAC_HOST_ONDULEUR_UTF8+1];                         /* Adresses IP du module ONDULEUR */
+    gchar ups[NBR_CARAC_UPS_ONDULEUR_UTF8+1];                                 /* Nom de l'UPS sur le HOST */
+    gchar libelle[NBR_CARAC_LIBELLE_ONDULEUR_UTF8+1];                                  /* Libelle associé */
     guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
     guint ea_ups_load;                                                     /* Numéro de l'EA pour le load */
     guint ea_ups_real_power;                                         /* Numéro de l'EA pour le real power */
     guint ea_battery_charge;                                    /* Numéro de l'EA pour la charge batterie */
     guint ea_input_voltage;                                        /* Numéro de l'EA pour l'input voltage */
-
   };
 
  enum 

@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_camera.c        Configuration des cameras de Watchdog v2.0                     */
+/* Watchdogd/Serveur/envoi_onduleur.c        Configuration des onduleurs de Watchdog v2.0                 */
 /* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 11:24:00 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * envoi_camera.c
+ * envoi_onduleur.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -37,75 +37,75 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Proto_editer_camera: Le client desire editer un camera                                                 */
-/* Entrée: le client demandeur et le camera en question                                                   */
+/* Proto_editer_onduleur: Le client desire editer un onduleur                                             */
+/* Entrée: le client demandeur et le onduleur en question                                                 */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { struct CMD_TYPE_CAMERA *camera;
+ void Proto_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur )
+  { struct CMD_TYPE_ONDULEUR *onduleur;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id_mnemo );
+    onduleur = Rechercher_onduleurDB( Config.log, Db_watchdog, rezo_onduleur->id );
 
-    if (camera)
-     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
-                     (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-       g_free(camera);                                                              /* liberation mémoire */
+    if (onduleur)
+     { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_EDIT_ONDULEUR_OK,
+                     (gchar *)onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
+       g_free(onduleur);                                                            /* liberation mémoire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate camera %s", rezo_camera->libelle);
+                   "Unable to locate onduleur %s", rezo_onduleur->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
 /**********************************************************************************************************/
-/* Proto_valider_editer_camera: Le client valide l'edition d'un camera                                    */
-/* Entrée: le client demandeur et le camera en question                                                   */
+/* Proto_valider_editer_onduleur: Le client valide l'edition d'un onduleur                                */
+/* Entrée: le client demandeur et le onduleur en question                                                 */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { struct CMD_TYPE_CAMERA *result;
+ void Proto_valider_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur )
+  { struct CMD_TYPE_ONDULEUR *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_cameraDB ( Config.log, Db_watchdog, rezo_camera );
+    retour = Modifier_onduleurDB ( Config.log, Db_watchdog, rezo_onduleur );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit camera %s", rezo_camera->libelle);
+                   "Unable to edit onduleur %s", rezo_onduleur->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id_mnemo );
+    else { result = Rechercher_onduleurDB( Config.log, Db_watchdog, rezo_onduleur->id );
          { if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate camera %s", rezo_camera->libelle);
+                          "Unable to locate onduleur %s", rezo_onduleur->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
-           else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
-                                (gchar *)result, sizeof(struct CMD_TYPE_CAMERA) );
+           else { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_VALIDE_EDIT_ONDULEUR_OK,
+                                (gchar *)result, sizeof(struct CMD_TYPE_ONDULEUR) );
                   g_free(result);
                 }
             }
          }
   }
 /**********************************************************************************************************/
-/* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
+/* Envoyer_onduleurs: Envoi des onduleurs au client GID_ONDULEUR                                          */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void *Envoyer_cameras_thread_tag ( struct CLIENT *client, guint tag, guint sstag, guint sstag_fin )
-  { struct CMD_TYPE_CAMERA *camera;
+ static void *Envoyer_onduleurs_thread_tag ( struct CLIENT *client, guint tag, guint sstag, guint sstag_fin )
+  { struct CMD_TYPE_ONDULEUR *onduleur;
     struct CMD_ENREG nbr;
     struct DB *db;
 
-    prctl(PR_SET_NAME, "W-EnvoiCAMERA", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-EnvoiOND.", 0, 0, 0 );
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -114,7 +114,7 @@
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
-    if ( ! Recuperer_cameraDB( Config.log, db ) )
+    if ( ! Recuperer_onduleurDB( Config.log, db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        Libere_DB_SQL( Config.log, &db );
        pthread_exit( NULL );
@@ -122,14 +122,14 @@
 
     nbr.num = db->nbr_result;
     if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d cameras", nbr.num );
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d onduleurs", nbr.num );
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
     for( ; ; )
-     { camera = Recuperer_cameraDB_suite( Config.log, db );
-       if (!camera)
+     { onduleur = Recuperer_onduleurDB_suite( Config.log, db );
+       if (!onduleur)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -138,28 +138,18 @@
 
        while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-       Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-       g_free(camera);
+       Envoi_client ( client, tag, sstag, (gchar *)onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
+       g_free(onduleur);
      }
   }
 /**********************************************************************************************************/
-/* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
+/* Envoyer_onduleurs: Envoi des onduleurs au client GID_ONDULEUR                                          */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_cameras_thread ( struct CLIENT *client )
-  { Envoyer_cameras_thread_tag( client, TAG_CAMERA, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
-                                                    SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN );
-    return(NULL);
-  }
-/**********************************************************************************************************/
-/* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client )
-  { Envoyer_cameras_thread_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER,
-                                                     SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER_FIN );
+ void *Envoyer_onduleurs_thread ( struct CLIENT *client )
+  { Envoyer_onduleurs_thread_tag( client, TAG_ONDULEUR, SSTAG_SERVEUR_ADDPROGRESS_ONDULEUR,
+                                                    SSTAG_SERVEUR_ADDPROGRESS_ONDULEUR_FIN );
     return(NULL);
   }
 /*--------------------------------------------------------------------------------------------------------*/
