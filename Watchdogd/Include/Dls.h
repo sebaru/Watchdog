@@ -27,10 +27,8 @@
  #ifndef _DLS_H_
   #define _DLS_H_
 
- #include <glib.h>
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_dls.h"
  #include "Module_dls.h"
 
  #define NOM_TABLE_DLS         "dls"
