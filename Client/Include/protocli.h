@@ -61,6 +61,7 @@
     TYPE_PAGE_SCENARIO,                                                           /* Gestion des scenario */
     TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
     TYPE_PAGE_SUPERVISION_CAMERA,                                          /* Page affichant une camera ! */
+    TYPE_PAGE_ONDULEUR,                                        /* Page affichant la liste des onduleurs ! */
   };
 
  struct PAGE_NOTEBOOK
@@ -518,6 +519,15 @@
                                                                                    /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
  extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
+
+ extern void Proto_afficher_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur );   /* Dans liste_onduleur.c */
+ extern void Proto_cacher_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur );
+ extern void Proto_rafraichir_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur );
+ extern void Proto_afficher_un_syn_for_onduleur ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern void Creer_page_onduleur( void );
+
+ extern void Menu_ajouter_editer_onduleur ( struct CMD_TYPE_ONDULEUR *edit_onduleur );/* Dans ajout_onduleur.c */
+ extern void Proto_afficher_mnemo_onduleur ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

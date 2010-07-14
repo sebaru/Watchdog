@@ -66,10 +66,38 @@
                Proto_valider_editer_onduleur( client, syn );
              }
             break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_ONDULEUR:
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_BIT_COMM:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_ONDULEUR,
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM,
+                                                 client, mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_LOAD:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_LOAD,
+                                                 client, mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER,
+                                                 client, mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE,
+                                                 client, mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE,
                                                  client, mnemo );
              }
             break;
