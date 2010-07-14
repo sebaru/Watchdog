@@ -36,7 +36,6 @@
  #include <sys/prctl.h>
  #include <semaphore.h>
 
- #include "Cst_mnemoniques.h"
  #include "watchdogd.h"
  #include "Cst_dls.h"
  #include "Dls.h"

@@ -28,7 +28,28 @@
 #ifndef _RESEAUX_MNEMONIQUE_H_
  #define _RESEAUX_MNEMONIQUE_H_
 
- #include "Cst_mnemoniques.h"
+ #define NBR_CARAC_LIBELLE_MNEMONIQUE       70
+ #define NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8  (6*NBR_CARAC_LIBELLE_MNEMONIQUE)
+
+ #define NBR_CARAC_OBJET_MNEMONIQUE       30
+ #define NBR_CARAC_OBJET_MNEMONIQUE_UTF8  (6*NBR_CARAC_OBJET_MNEMONIQUE)
+ 
+ #define NBR_CARAC_ACRONYME_MNEMONIQUE       14
+ #define NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8  (6*NBR_CARAC_ACRONYME_MNEMONIQUE)
+
+ enum
+  { MNEMO_BISTABLE,                                               /* Definitions des types de mnemoniques */
+    MNEMO_MONOSTABLE,
+    MNEMO_TEMPO,
+    MNEMO_ENTREE,
+    MNEMO_SORTIE,
+    MNEMO_ENTREE_ANA,
+    MNEMO_SORTIE_ANA,
+    MNEMO_MOTIF,
+    MNEMO_CPTH,
+    MNEMO_CAMERA,
+    NBR_TYPE_MNEMO
+  };
 
  struct CMD_TYPE_MNEMONIQUE
   { guint id;                                                      /* Numero du message dans la structure */

@@ -31,7 +31,6 @@
  #include <glib.h>
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_mnemoniques.h"
 
  #define NOM_TABLE_MNEMO    "mnemos"
 

@@ -28,7 +28,6 @@
  #include <gnome.h>
  
  #include "Reseaux.h"
- #include "Cst_mnemoniques.h"
  
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
