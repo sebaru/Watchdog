@@ -54,7 +54,7 @@
     SSTAG_SERVEUR_CLI_VALIDE,                       /* Le client est passé valide du point de vue serveur */
     SSTAG_CLIENT_OFF,                                                          /* Le client se deconnecte */
     SSTAG_SERVEUR_OFF,                                                             /* Le serveur se coupe */
-    SSTAG_SERVEUR_PULSE
+    SSTAG_SERVEUR_PULSE,                                                            /* Keep alive serveur */
   };
 
 #endif

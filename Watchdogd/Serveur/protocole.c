@@ -98,7 +98,11 @@
             if ( client_major == server_major && client_minor == server_minor )
              { Client_mode ( client, ENVOI_AUTORISATION ); }
             else 
-             { Info( Config.log, DEBUG_CONNEXION, "Wrong version number" );
+             { struct CMD_GTK_MESSAGE gtkmessage;
+               g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong version number" );
+               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                             (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+               Info( Config.log, DEBUG_CONNEXION, "Wrong version number" );
                Client_mode ( client, DECONNECTE );
              }
           }
