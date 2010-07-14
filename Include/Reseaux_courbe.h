@@ -28,8 +28,6 @@
 #ifndef _RESEAUX_COURBE_H_
  #define _RESEAUX_COURBE_H_
 
- #include "Cst_entreeana.h"
-
  struct CMD_APPEND_COURBE
   { guint  slot_id;                                                                          /* Numero de l'ea */
     guint  type;

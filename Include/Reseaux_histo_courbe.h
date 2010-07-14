@@ -28,7 +28,6 @@
 #ifndef _RESEAUX_HISTO_COURBE_H_
  #define _RESEAUX_HISTO_COURBE_H_
 
- #include "Cst_entreeana.h"
  #include "Reseaux_courbe.h"
 
  struct CMD_HISTO_COURBE                         /* Structure pour travailler sur les historiques courbes */

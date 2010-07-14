@@ -28,7 +28,38 @@
 #ifndef _RESEAUX_ENTREEANA_H_
  #define _RESEAUX_ENTREEANA_H_
 
- #include "Cst_entreeana.h"
+ #include "Reseaux_mnemonique.h"
+
+ #define TAILLEBUF_HISTO_EANA         1600       /* 800 point de controle dans le client et buffer valana */
+ #define NBR_VAL_INIT_COURBE          100                   /* Envoyé via 100 points à chaque paquet rezo */
+
+ #define COURBE_TEMPS_TOP             5  /* 1 point = 5 secondes sur la grille courbes */
+
+ enum
+  { ENTREEANA_NON_INTERP,
+    ENTREEANA_4_20_MA_12BITS,
+    ENTREEANA_4_20_MA_10BITS,
+    NBR_TYPE_ENTREEANA
+  };
+
+ enum
+  { UNITE_DEGRE_C,                                                   /* Definitions des types de messages */
+    UNITE_DEGRE_K,
+    UNITE_MILLIBAR,
+    UNITE_BAR,
+    UNITE_METRE,
+    UNITE_KILOMETRE,
+    UNITE_LITRE,
+    UNITE_METRE_PAR_SECONDE,
+    UNITE_KILOMETRE_PAR_HEURE,
+    UNITE_POURCENT,
+    UNITE_POURCENT_HR,
+    UNITE_SECONDE,
+    UNITE_HEURE,
+    UNITE_DATE,
+    UNITE_VOLTS,
+    NBR_TYPE_UNITE
+  };
 
  struct CMD_TYPE_ENTREEANA
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
@@ -53,6 +84,10 @@
     SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,                          /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,                    /* Le serveur valide les nouvelles données */
   };
+
+
+ extern gchar *Unite_vers_string ( guint type );
+ extern gint String_vers_unite ( guchar *unite );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_entreeana.h"
 
  #define NOM_TABLE_ENTREEANA    "eana"
 

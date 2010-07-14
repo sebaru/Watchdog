@@ -34,7 +34,6 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
- #include "Cst_entreeana.h"
 /**********************************************************************************************************/
 /* Proto_editer_entree: Le client desire editer un entree                                                 */
 /* Entrée: le client demandeur et le entree en question                                                   */
