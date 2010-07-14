@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_icone.h"
 
  #define NOM_TABLE_CLASSE     "class"
  #define NOM_TABLE_ICONE      "icons"

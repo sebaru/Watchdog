@@ -28,7 +28,11 @@
 #ifndef _RESEAUX_ICONE_H_
  #define _RESEAUX_ICONE_H_
 
- #include "Cst_icone.h"
+ #define NBR_CARAC_LIBELLE_ICONE       50
+ #define NBR_CARAC_LIBELLE_ICONE_UTF8  (6*NBR_CARAC_LIBELLE_ICONE)
+
+ #define NBR_CARAC_CLASSE_ICONE         40
+ #define NBR_CARAC_CLASSE_ICONE_UTF8    (6*NBR_CARAC_CLASSE_ICONE)
 
  struct CMD_TYPE_CLASSE
   { guint id;                                                      /* Numero du message dans la structure */
