@@ -28,8 +28,14 @@
 #ifndef _RESEAUX_CAMERA_H_
  #define _RESEAUX_CAMERA_H_
 
- #include "Cst_camera.h"
+ #define NBR_CARAC_LOCATION_CAMERA      100
+ #define NBR_CARAC_LOCATION_CAMERA_UTF8 (6*NBR_CARAC_LOCATION_CAMERA)
 
+ enum
+  { CAMERA_MODE_INCRUSTATION,                                         /* Definitions des types de cameras */
+    CAMERA_MODE_ICONE,
+    NBR_TYPE_CAMERA
+  };
 /******************************************** Gestion des camera ******************************************/
  struct CMD_TYPE_CAMERA
   { guint   id_mnemo;                                             /* ID unique du mnemonique de la camera */
