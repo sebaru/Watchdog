@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_HEADERS =  Cst_message.h Cst_utilisateur.h Erreur.h Reseaux.h \
+noinst_HEADERS =  Cst_utilisateur.h Erreur.h Reseaux.h \
                   Version.h Cst_dls.h Cst_icone.h \
 		  Cst_entreeana.h  \
                   Reseaux_gtk_message.h Reseaux_connexion.h Reseaux_icone.h \

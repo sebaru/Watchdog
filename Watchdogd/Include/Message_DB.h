@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
  #include "Db.h"
- #include "Cst_message.h"
 
  #define NOM_TABLE_MSG       "msgs"
 

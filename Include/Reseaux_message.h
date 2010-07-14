@@ -28,7 +28,18 @@
 #ifndef _RESEAUX_MESSAGE_H_
  #define _RESEAUX_MESSAGE_H_
 
- #include "Cst_message.h"
+ #define NBR_CARAC_LIBELLE_MSG    100                                                 /* Attention au SMS */
+ #define NBR_CARAC_LIBELLE_MSG_UTF8  (6*NBR_CARAC_LIBELLE_MSG)
+ #define NBR_CARAC_OBJET_MSG      30
+ #define NBR_CARAC_OBJET_MSG_UTF8    (6*NBR_CARAC_OBJET_MSG)
+ enum
+  { MSG_ETAT,                                                        /* Definitions des types de messages */
+    MSG_ALERTE,
+    MSG_DEFAUT,
+    MSG_ALARME,
+    MSG_VEILLE,
+    NBR_TYPE_MSG
+  };
 
  struct CMD_TYPE_MESSAGE
   { guint  id;
