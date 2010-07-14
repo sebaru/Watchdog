@@ -33,7 +33,6 @@
  #include "Reseaux.h"
  #include "client.h"
  #include "Config_cli.h"
- #include "Cst_utilisateur.h"
  
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"

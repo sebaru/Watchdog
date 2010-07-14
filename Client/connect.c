@@ -36,7 +36,6 @@
  #include "Reseaux.h"
  #include "client.h"
  #include "Config_cli.h"
- #include "Cst_utilisateur.h"
  
  static GtkWidget *F_ident;                                  /* Fenetre d'identification de l'utilisateur */
 /********************************* Définitions des prototypes programme ***********************************/

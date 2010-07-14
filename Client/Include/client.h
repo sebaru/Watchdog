@@ -29,7 +29,6 @@
  #define _CLIENT_H_
  #include <glib.h>
 
- #include "Cst_utilisateur.h"
  #include "Reseaux.h"
  #include "Config_cli.h"
 

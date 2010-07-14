@@ -31,7 +31,6 @@
  #include "Reseaux.h"
  #include "Db.h"
  #include "Config.h"
- #include "Cst_utilisateur.h"
 
  #define NOM_TABLE_UTIL      "users"
  #define NOM_TABLE_GROUPE    "groups"

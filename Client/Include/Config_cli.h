@@ -28,7 +28,7 @@
  #ifndef _CONFIG_CLI_H_
  #define _CONFIG_CLI_H_
 
- #include "Cst_utilisateur.h"
+ #include "Reseaux.h"
  #include "Erreur.h"
 
  #define TAILLE_NOM_SERVEUR        40

@@ -28,7 +28,7 @@
 #ifndef _RESEAUX_CONNEXION_H_
  #define _RESEAUX_CONNEXION_H_
 
- #include "Cst_utilisateur.h"
+ #include "Reseaux_utilisateur.h"
  #include "Version.h"
 
  struct REZO_CLI_IDENT
