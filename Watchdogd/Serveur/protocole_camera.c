@@ -49,21 +49,34 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_CAMERA:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK, NULL, 0 );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_cameras_thread, client );
                pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_CAMERA:
-             { struct CMD_TYPE_CAMERA *syn;
-               syn = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_editer_camera( client, syn );
+             { struct CMD_TYPE_CAMERA *camera;
+               camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
+               Proto_editer_camera( client, camera );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_CAMERA:
-             { struct CMD_TYPE_CAMERA *syn;
-               syn = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_valider_editer_camera( client, syn );
+             { struct CMD_TYPE_CAMERA *camera;
+               camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
+               Proto_valider_editer_camera( client, camera );
+             }
+            break;
+       case SSTAG_CLIENT_ADD_CAMERA:
+             { struct CMD_TYPE_CAMERA *camera;
+               camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
+               Proto_ajouter_camera( client, camera );
+             }
+            break;
+       case SSTAG_CLIENT_DEL_CAMERA:
+             { struct CMD_TYPE_CAMERA *camera;
+               camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
+               Proto_effacer_camera( client, camera );
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION:

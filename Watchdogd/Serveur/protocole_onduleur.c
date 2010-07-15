@@ -56,15 +56,15 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_ONDULEUR:
-             { struct CMD_TYPE_ONDULEUR *syn;
-               syn = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
-               Proto_editer_onduleur( client, syn );
+             { struct CMD_TYPE_ONDULEUR *onduleur;
+               onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
+               Proto_editer_onduleur( client, onduleur );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_ONDULEUR:
-             { struct CMD_TYPE_ONDULEUR *syn;
-               syn = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
-               Proto_valider_editer_onduleur( client, syn );
+             { struct CMD_TYPE_ONDULEUR *onduleur;
+               onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
+               Proto_valider_editer_onduleur( client, onduleur );
              }
             break;
        case SSTAG_CLIENT_ADD_ONDULEUR:
