@@ -206,9 +206,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "location='%s',objet='%s',libelle='%s',type=%d,bit=%d "
+                "location='%s',objet='%s',libelle='%s',type=%d,bit=%d,num=%d "
                 "WHERE id=%d",
-                NOM_TABLE_CAMERA, location, objet,libelle, camera->type, camera->bit, camera->id );
+                NOM_TABLE_CAMERA, location, objet, libelle, camera->type,
+                camera->bit, camera->num,
+                camera->id
+              );
     g_free(location);
     g_free(objet);
     g_free(libelle);
