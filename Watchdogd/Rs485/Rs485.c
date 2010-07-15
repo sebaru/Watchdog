@@ -390,7 +390,7 @@
                   val_int += ajout5;
                   num_ea = module->ea_min + cpt;
 
-                  SEA( num_ea, val_int, 0);
+                  SEA( num_ea, val_int );
                 }
              }
 	    break;

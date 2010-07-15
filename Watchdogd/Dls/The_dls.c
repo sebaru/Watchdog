@@ -161,7 +161,7 @@
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_int sur 12 bits !!                                           */
 /**********************************************************************************************************/
- void SEA( int num, int val_int, int inrange )
+ void SEA( int num, int val_int )
   { if (num>=NBR_ENTRE_ANA) return;
 
     if (Partage->ea[ num ].val != val_int)

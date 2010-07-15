@@ -415,10 +415,10 @@
     module->date_retente = 0;
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->onduleur.id );
     SB( module->onduleur.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
-    SEA( module->onduleur.ea_ups_load, 0, 0);                              /* Numéro de l'EA pour le load */
-    SEA( module->onduleur.ea_ups_real_power, 0, 0);                  /* Numéro de l'EA pour le real power */
-    SEA( module->onduleur.ea_battery_charge, 0, 0);             /* Numéro de l'EA pour la charge batterie */
-    SEA( module->onduleur.ea_input_voltage, 0, 0);                                    /* Tension d'entrée */
+    SEA( module->onduleur.ea_ups_load, 0);                                 /* Numéro de l'EA pour le load */
+    SEA( module->onduleur.ea_ups_real_power, 0);                     /* Numéro de l'EA pour le real power */
+    SEA( module->onduleur.ea_battery_charge, 0);                /* Numéro de l'EA pour la charge batterie */
+    SEA( module->onduleur.ea_input_voltage, 0);                                       /* Tension d'entrée */
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
@@ -485,7 +485,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_ups_load, valeur, 1);                  /* Numéro de l'EA pour le load */
+           SEA( module->onduleur.ea_ups_load, valeur );                    /* Numéro de l'EA pour le load */
          }
 
     query[2] = "ups.real_power";
@@ -500,7 +500,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_ups_real_power, valeur, 1);      /* Numéro de l'EA pour le real power */
+           SEA( module->onduleur.ea_ups_real_power, valeur );        /* Numéro de l'EA pour le real power */
          }
 
     query[2] = "battery.charge";
@@ -515,7 +515,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_battery_charge, valeur, 1); /* Numéro de l'EA pour la charge batterie */
+           SEA( module->onduleur.ea_battery_charge, valeur );   /* Numéro de l'EA pour la charge batterie */
          }
 
     query[2] = "input.voltage";
@@ -530,7 +530,7 @@
         }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_input_voltage, valeur, 1);
+           SEA( module->onduleur.ea_input_voltage, valeur );  
          }
   }
 /**********************************************************************************************************/
