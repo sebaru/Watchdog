@@ -76,7 +76,6 @@
      }                                                                         /* Si pas d'enregistrement */
 
     unlink("motion.conf");                                      /* Création des fichiers de configuration */
-    unlink("camera*.conf");
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id<0) { Info_n( Config.log, DEBUG_FORK,
                         "MSRV: Creer_config_file_motion: creation motion.conf pid file failed", id );
@@ -106,7 +105,7 @@
     g_snprintf(chaine, sizeof(chaine), "ffmpeg_video_codec mpeg4\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "text_right %%Y-%%m-%%d\\n%%T-%%q\n");
-    write(id, chaine, strlen(chaine)-5);
+    write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "target_dir %s\n", Config.home);
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "mysql_db %s\n", Config.db_database);
@@ -132,6 +131,7 @@
        g_snprintf(chaine, sizeof(chaine), "thread %s/%s\n", Config.home, nom_fichier);
        write(id, chaine, strlen(chaine));
        
+       unlink(nom_fichier);
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
        if (id<0) { Info_n( Config.log, DEBUG_FORK,
                            "MSRV: Creer_config_file_motion: creation camera.conf failed", id );
@@ -148,7 +148,7 @@
        g_snprintf(chaine, sizeof(chaine), "text_left CAM%04d %s\n", camera->num, camera->objet);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "movie_filename CAM%04d-%%Y%%m%%d%%H%%M%%S\n", camera->num);
-       write(id_camera, chaine, strlen(chaine)-6);
+       write(id_camera, chaine, strlen(chaine));
 
        close(id_camera);
        g_free(camera);
