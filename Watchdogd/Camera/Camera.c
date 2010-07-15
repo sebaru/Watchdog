@@ -264,7 +264,7 @@
     do { camera = Rechercher_cameraDB_motion ( log, db );
          if (camera)
           { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
-            
+            Envoyer_commande_dls ( camera->bit ); 
             g_free(camera);
           }
        }
