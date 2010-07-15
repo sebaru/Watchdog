@@ -111,44 +111,6 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_onduleur_add ( struct CLIENT_ADMIN *client, struct DB *db,
-                                  struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar chaine[128];
-    gint id;
-
-    id = Ajouter_onduleurDB ( Config.log, db, onduleur );
-
-    if (id != -1)
-     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d added\n", id ); 
-       while (Partage->com_onduleur.admin_add) sched_yield();
-       Partage->com_onduleur.admin_add = id;                            /* Envoi au thread onduleur */
-      }
-    else
-     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR NOT added\n" ); }
-    Write_admin ( client->connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- static void Admin_onduleur_del ( struct CLIENT_ADMIN *client, struct DB *db,
-                                  struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar chaine[128];
-    if (Retirer_onduleurDB ( Config.log, db, onduleur ))
-     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d deleted\n", onduleur->id );
-       while (Partage->com_onduleur.admin_del) sched_yield();
-       Partage->com_onduleur.admin_del = onduleur->id;                        /* Envoi au thread onduleur */
-     }
-    else
-     { g_snprintf( chaine, sizeof(chaine), " -- error -- Module ONDULEUR %d NOT deleted\n", onduleur->id ); }
-    Write_admin ( client->connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
  void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
     struct DB*db;
@@ -179,32 +141,9 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_onduleur_reload(client);
      }
-    else if ( ! strcmp ( commande, "add" ) )
-     { gchar chaine[128];
-       struct CMD_TYPE_ONDULEUR onduleur;
-       sscanf ( ligne, "%s %s %s %d %d %d %d %d", commande, onduleur.host, onduleur.ups, 
-                &onduleur.bit_comm, &onduleur.ea_ups_load,
-                &onduleur.ea_ups_real_power, &onduleur.ea_battery_charge, &onduleur.ea_input_voltage
-              );                                                     /* Découpage de la ligne de commande */
-
-       if ( onduleur.bit_comm >= NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " bit_comm should be < NBR_BIT_DLS\n" ); }
-       else Admin_onduleur_add( client, db, &onduleur );
-     }
-    else if ( ! strcmp ( commande, "delete" ) )
-     { struct CMD_TYPE_ONDULEUR onduleur;
-       guint num;
-       sscanf ( ligne, "%s %d", commande, &onduleur.id );            /* Découpage de la ligne de commande */
-       Admin_onduleur_del(client, db, &onduleur );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'ONDULEUR'\n" );
-       Write_admin ( client->connexion,
-                     "  add host ups bit_com ea_ups_load ea_ups_realpower ea_battery_charge ea_input_voltage\n"
-                     "                                         - Ajoute un module ONDULEUR\n" );
-       Write_admin ( client->connexion,
-                     "  delete id                              - Supprime le module id\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
