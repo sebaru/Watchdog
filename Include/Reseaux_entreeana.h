@@ -87,7 +87,7 @@
 
 
  extern gchar *Unite_vers_string ( guint type );
- extern gint String_vers_unite ( guchar *unite );
+ extern gchar *Type_ea_vers_string ( guint type );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

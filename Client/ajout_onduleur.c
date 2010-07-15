@@ -60,6 +60,7 @@
  static void Afficher_mnemo ( GtkWidget *widget )
   { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
     gint sstag;
+printf("Afficher_mnemo\n");
     mnemo.num  = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(widget) );
     if ( widget == Spin_bit_comm )
      { mnemo.type = MNEMO_BISTABLE;
@@ -170,7 +171,7 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_onduleur ( struct CMD_TYPE_ONDULEUR *edit_onduleur )
   { GtkWidget *frame, *table, *texte, *hboite;
-
+printf("Ajouter_editer_onduleur\n");
     if (edit_onduleur)
      { memcpy( &Edit_onduleur, edit_onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
                                                                           /* Save pour utilisation future */

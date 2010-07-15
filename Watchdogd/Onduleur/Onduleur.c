@@ -131,19 +131,19 @@
     return(onduleur);
   }
 /**********************************************************************************************************/
-/* Rechercher_onduleurDB: Recupération du onduleur dont le num est en parametre                           */
+/* Rechercher_onduleurDB: Recupération du onduleur dont le id est en parametre                            */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint num )
+ struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint id )
   { gchar requete[256];
     struct CMD_TYPE_ONDULEUR *onduleur;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT host,ups,bit_comm,actif,ea_ups_load,"
                 "ea_ups_real_power,ea_battery_charge,ea_input_voltage "
-                " FROM %s WHERE num=%d",
-                NOM_TABLE_ONDULEUR, num );
+                " FROM %s WHERE id=%d",
+                NOM_TABLE_ONDULEUR, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -151,7 +151,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: MSG non trouvé dans la BDD", num );
+       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: MSG non trouvé dans la BDD", id );
        return(NULL);
      }
 
@@ -167,7 +167,7 @@
        onduleur->ea_ups_real_power  = atoi(db->row[5]);
        onduleur->ea_battery_charge = atoi(db->row[6]);
        onduleur->ea_input_voltage  = atoi(db->row[7]);
-       onduleur->id                = num;
+       onduleur->id                = id;
      }
     Liberer_resultat_SQL ( log, db );
     return(onduleur);

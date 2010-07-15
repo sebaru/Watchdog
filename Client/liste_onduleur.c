@@ -367,11 +367,11 @@
                                               G_TYPE_BOOLEAN,                                    /* actif */
                                               G_TYPE_STRING,                                      /* host */
                                               G_TYPE_STRING,                                       /* ups */
-                                              G_TYPE_UINT,                                    /* bit_comm */
-                                              G_TYPE_UINT,                                        /* load */
-                                              G_TYPE_UINT,                                   /* real powa */
-                                              G_TYPE_UINT,                              /* battery charge */
-                                              G_TYPE_UINT,                               /* input voltage */
+                                              G_TYPE_STRING,                                  /* bit_comm */
+                                              G_TYPE_STRING,                                      /* load */
+                                              G_TYPE_STRING,                                 /* real powa */
+                                              G_TYPE_STRING,                            /* battery charge */
+                                              G_TYPE_STRING,                             /* input voltage */
                                               G_TYPE_STRING                                    /* libelle */
                                );
 
@@ -530,6 +530,7 @@
                          COLONNE_EA_UPS_REAL_POWER, real_power,
                          COLONNE_EA_BATTERY_CHARGE, battery_charge,
                          COLONNE_EA_INPUT_VOLTAGE, input_voltage,
+                         COLONNE_LIBELLE, onduleur->libelle,
                          -1
                        );
   }
