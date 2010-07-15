@@ -71,7 +71,7 @@
        return(-1);
      }
     libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
-    if (!ups)
+    if (!libelle)
      { g_free(host);
        g_free(ups);
        Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation libelle impossible" );
@@ -247,8 +247,8 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gboolean Modifier_onduleurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar requete[2048];
-    gchar *host, *ups;
+  { gchar *host, *ups, *libelle;
+    gchar requete[2048];
 
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
     if (!host)
@@ -261,18 +261,28 @@
        Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation ups impossible" );
        return(-1);
      }
+    libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
+    if (!libelle)
+     { g_free(host);
+       g_free(ups);
+       Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation libelle impossible" );
+       return(-1);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "host='%s',ups='%s',bit_comm=%d,actif=%d,"
-                "ea_ups_load=%d,ea_ups_real_power=%d,ea_battery_charge=%d,ea_input_voltage=%d "
+                "ea_ups_load=%d,ea_ups_real_power=%d,ea_battery_charge=%d,ea_input_voltage=%d,"
+                "libelle='%s' "
                 "WHERE id=%d",
                 NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
                                     onduleur->ea_ups_load, onduleur->ea_ups_real_power,
                                     onduleur->ea_battery_charge, onduleur->ea_input_voltage,
+                                    libelle,
                 onduleur->id );
     g_free(host);
     g_free(ups);
+    g_free(libelle);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
