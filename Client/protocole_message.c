@@ -44,7 +44,10 @@
     static GList *Arrivee_syn     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADD_MESSAGE_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK:
+             { Creer_page_message();
+             }
+       case SSTAG_SERVEUR_ADD_MESSAGE_OK:
              { struct CMD_TYPE_MESSAGE *msg;
                msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
                Proto_afficher_un_message( msg );

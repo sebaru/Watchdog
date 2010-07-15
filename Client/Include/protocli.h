@@ -330,7 +330,7 @@
  extern void Menu_want_courbe ( void );
  extern void Menu_want_histo_courbe ( void );
  extern void Menu_want_scenario ( void );
-
+ extern void Menu_want_onduleur ( void );
 
 
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );           /* Dans atelier.c */

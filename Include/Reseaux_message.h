@@ -60,6 +60,7 @@
 
  enum 
   { SSTAG_CLIENT_WANT_PAGE_MESSAGE,
+    SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK,                                /* Affichage de la page onduleur */
     SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,                         /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN,                     /* Ajout d'un groupe dans la liste cliente */
 

@@ -52,6 +52,7 @@
 
  enum 
   { SSTAG_CLIENT_WANT_PAGE_ONDULEUR,
+    SSTAG_SERVEUR_CREATE_PAGE_ONDULEUR_OK,                                /* Affichage de la page onduleur */
     SSTAG_SERVEUR_ADDPROGRESS_ONDULEUR,                         /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_ONDULEUR_FIN,                     /* Ajout d'un groupe dans la liste cliente */
 

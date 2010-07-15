@@ -61,10 +61,10 @@
     guchar libelle[NBR_CARAC_LIBELLE_SCENARIO_UTF8+1];
   };
  enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_SCENARIO,                        /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_SERVEUR_ADDPROGRESS_SCENARIO_FIN,                    /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_CLIENT_WANT_PAGE_SCENARIO,
+  { SSTAG_CLIENT_WANT_PAGE_SCENARIO,
     SSTAG_SERVEUR_CREATE_PAGE_SCENARIO_OK,                               /* Affichage de la page scenario */
+    SSTAG_SERVEUR_ADDPROGRESS_SCENARIO,                        /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_SCENARIO_FIN,                    /* Ajout d'un groupe dans la liste cliente */
     SSTAG_CLIENT_ADD_SCENARIO,                             /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_SCENARIO_OK,                                     /* L'ajout du groupe est un succes */
 

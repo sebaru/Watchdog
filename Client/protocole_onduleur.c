@@ -43,7 +43,10 @@
   { static GList *Arrivee_onduleur = NULL;
            
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_EDIT_ONDULEUR_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_ONDULEUR_OK:
+             { Creer_page_onduleur();
+             }
+       case SSTAG_SERVEUR_EDIT_ONDULEUR_OK:
              { struct CMD_TYPE_ONDULEUR *onduleur;
                onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
                Menu_ajouter_editer_onduleur( onduleur );

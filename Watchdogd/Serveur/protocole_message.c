@@ -49,7 +49,8 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_MESSAGE:
-             { Ref_client( client );  /* Indique que la structure est utilisée */
+             { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK, NULL, 0 );
+               Ref_client( client );  /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_messages_thread, client );
                pthread_detach( tid );
              }

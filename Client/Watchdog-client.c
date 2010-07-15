@@ -86,6 +86,8 @@
                             Menu_want_entreeANA, GNOME_STOCK_PIXMAP_BOOK_RED ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
+    GNOMEUIINFO_ITEM_STOCK( N_("_UPS"), N_("Edit UPS"),
+                            Menu_want_onduleur, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_synoptique[]=                                        /*!< Définition du menu synoptique */
