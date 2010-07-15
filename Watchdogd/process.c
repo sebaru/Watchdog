@@ -106,7 +106,7 @@
     g_snprintf(chaine, sizeof(chaine), "ffmpeg_video_codec mpeg4\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "text_right %%Y-%%m-%%d\\n%%T-%%q\n");
-    write(id, chaine, strlen(chaine));
+    write(id, chaine, strlen(chaine)-5);
     g_snprintf(chaine, sizeof(chaine), "target_dir %s\n", Config.home);
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "mysql_db %s\n", Config.db_database);
@@ -148,7 +148,7 @@
        g_snprintf(chaine, sizeof(chaine), "text_left CAM%04d %s\n", camera->num, camera->objet);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "movie_filename CAM%04d-%%Y%%m%%d%%H%%M%%S\n", camera->num);
-       write(id_camera, chaine, strlen(chaine));
+       write(id_camera, chaine, strlen(chaine)-6);
 
        close(id_camera);
        g_free(camera);
