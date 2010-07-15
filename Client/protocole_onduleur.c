@@ -44,8 +44,9 @@
            
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_ONDULEUR_OK:
-             { Creer_page_onduleur();
+             { if (!Tester_page_notebook(TYPE_PAGE_ONDULEUR)) { Creer_page_onduleur(); }
              }
+            break;
        case SSTAG_SERVEUR_EDIT_ONDULEUR_OK:
              { struct CMD_TYPE_ONDULEUR *onduleur;
                onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;

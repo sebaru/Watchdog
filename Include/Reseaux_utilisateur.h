@@ -61,9 +61,10 @@
   };
 
  enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_UTIL,                       /* Ajout d'un utilisateur dans la liste cliente */
+  { SSTAG_CLIENT_WANT_PAGE_UTIL,
+    SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK,                                        /* Affichage de la page DLS */
+    SSTAG_SERVEUR_ADDPROGRESS_UTIL,                       /* Ajout d'un utilisateur dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_UTIL_FIN,
-    SSTAG_CLIENT_WANT_PAGE_UTIL,
     SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL,
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL,            /* Envoi des groupes pour l'edition utilisateur */
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL_FIN,                            /* Le transfert est terminé */

@@ -80,7 +80,8 @@
             break;
 
        case SSTAG_CLIENT_WANT_PAGE_UTIL:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK, NULL, 0 );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_utilisateurs_thread, client );
                pthread_detach( tid );
              }

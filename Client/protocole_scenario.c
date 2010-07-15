@@ -44,8 +44,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_SCENARIO_OK:
-             { Creer_page_scenario();
+             { if (!Tester_page_notebook(TYPE_PAGE_SCENARIO)) { Creer_page_scenario(); }
              }
+            break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;

@@ -44,7 +44,7 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK:
-             { Creer_page_mnemonique();
+             { if (!Tester_page_notebook(TYPE_PAGE_MNEMONIQUE)) { Creer_page_mnemonique(); }
              }
             break;
        case SSTAG_SERVEUR_ADD_MNEMONIQUE_OK:

@@ -43,7 +43,7 @@
   { static GList *Arrivee_eana = NULL;
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_ENTREEANA_OK:
-             { Creer_page_entreeANA();
+             { if (!Tester_page_notebook(TYPE_PAGE_ENTREEANA)) { Creer_page_entreeANA(); }
              }
             break;
        case SSTAG_SERVEUR_EDIT_ENTREEANA_OK:

@@ -45,7 +45,11 @@
     static GList *Arrivee_groupe_for_util = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADD_UTIL_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK:
+             { if (!Tester_page_notebook(TYPE_PAGE_UTIL)) { Creer_page_utilisateur(); }
+             }
+            break;
+       case SSTAG_SERVEUR_ADD_UTIL_OK:
              { struct CMD_TYPE_UTILISATEUR *util;
                util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Proto_afficher_un_utilisateur( util );

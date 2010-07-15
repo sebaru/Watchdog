@@ -58,9 +58,10 @@
   };
 
  enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,                                            /* Envoi des plugins */
+  { SSTAG_CLIENT_WANT_PAGE_DLS,
+    SSTAG_SERVEUR_CREATE_PAGE_DLS_OK,                                         /* Affichage de la page DLS */
+    SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,                                            /* Envoi des plugins */
     SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN,
-    SSTAG_CLIENT_WANT_PAGE_DLS,
     SSTAG_CLIENT_ADD_PLUGIN_DLS,                      /* Le client desire ajouter un utilisateur watchdog */
     SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,                              /* L'ajout du utilisateur est un succes */
 

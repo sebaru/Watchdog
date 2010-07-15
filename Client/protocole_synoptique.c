@@ -45,7 +45,7 @@
            
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_SYNOPTIQUE_OK:
-             { Creer_page_synoptique();
+             { if (!Tester_page_notebook(TYPE_PAGE_SYNOPTIQUE)) { Creer_page_synoptique(); }
              }
             break;
        case SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK:

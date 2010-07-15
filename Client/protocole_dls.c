@@ -43,7 +43,11 @@
   { static GList *Arrivee_dls = NULL;
                
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_DLS_OK:
+             { if (!Tester_page_notebook(TYPE_PAGE_PLUGIN_DLS)) { Creer_page_plugin_dls(); }
+             }
+            break;
+       case SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_afficher_un_plugin_dls( dls );
