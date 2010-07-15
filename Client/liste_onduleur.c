@@ -456,7 +456,7 @@
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
 
-    g_signal_connect( G_OBJECT(Liste_onduleur), "button_press_event",             /* Gestion du menu popup */
+    g_signal_connect( G_OBJECT(Liste_onduleur), "button_press_event",            /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_onduleur), NULL );
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
     
@@ -535,8 +535,8 @@
                        );
   }
 /**********************************************************************************************************/
-/* Afficher_un_onduleur: Ajoute un onduleur dans la liste des onduleurs                                      */
-/* Entrée: une reference sur le onduleur                                                                   */
+/* Afficher_un_onduleur: Ajoute un onduleur dans la liste des onduleurs                                   */
+/* Entrée: une reference sur le onduleur                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur )
@@ -550,8 +550,8 @@
     Rafraichir_visu_onduleur ( &iter, onduleur );
   }
 /**********************************************************************************************************/
-/* Cacher_un_onduleur: Enleve un onduleur de la liste des onduleurs                                          */
-/* Entrée: une reference sur le onduleur                                                                   */
+/* Cacher_un_onduleur: Enleve un onduleur de la liste des onduleurs                                       */
+/* Entrée: une reference sur le onduleur                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Proto_cacher_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur )

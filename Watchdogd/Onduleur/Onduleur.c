@@ -161,7 +161,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: MSG non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: ONDULEUR non trouvé dans la BDD", id );
        return(NULL);
      }
 
@@ -179,49 +179,6 @@
        onduleur->ea_battery_charge = atoi(db->row[6]);
        onduleur->ea_input_voltage  = atoi(db->row[7]);
        onduleur->id                = id;
-     }
-    Liberer_resultat_SQL ( log, db );
-    return(onduleur);
-  }
-/**********************************************************************************************************/
-/* Rechercher_onduleurDB_par_id: Recupération du onduleur dont l'id est en parametre                      */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB_par_id ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[200];
-    struct CMD_TYPE_ONDULEUR *onduleur;
-    
-    g_snprintf( requete, sizeof(requete),
-                "SELECT host,ups,bit_comm,actif,"
-                "ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage,libelle"
-                " FROM %s WHERE id=%d",
-                NOM_TABLE_ONDULEUR, id
-              );
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(NULL); }
-
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: MSG non trouvé dans la BDD", id );
-       return(NULL);
-     }
-
-    onduleur = g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
-    if (!onduleur)
-     { Info( log, DEBUG_MEM, "Rechercher_onduleurDB_par_id: Mem error" ); }
-    else
-     { memcpy( onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
-       memcpy( onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
-       memcpy( onduleur->libelle, db->row[8], sizeof(onduleur->libelle) );
-       onduleur->id                = id;
-       onduleur->bit_comm          = atoi(db->row[2] );
-       onduleur->actif             = atoi(db->row[3] );
-       onduleur->ea_ups_load       = atoi(db->row[4] );
-       onduleur->ea_ups_real_power = atoi(db->row[5] );
-       onduleur->ea_battery_charge = atoi(db->row[6] );
-       onduleur->ea_input_voltage  = atoi(db->row[7] );
      }
     Liberer_resultat_SQL ( log, db );
     return(onduleur);
@@ -375,7 +332,7 @@
        return;
      }
 
-    onduleur = Rechercher_onduleurDB_par_id( Config.log, db, id );
+    onduleur = Rechercher_onduleurDB( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
     if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
      { Info( Config.log, DEBUG_MEM,

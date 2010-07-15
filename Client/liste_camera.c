@@ -39,20 +39,96 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
+ static void Menu_effacer_camera ( void );
  static void Menu_editer_camera ( void );
+ static void Menu_ajouter_camera ( void );
  static void Menu_exporter_camera ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_camera, GNOME_STOCK_PIXMAP_OPEN ),
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_camera, GNOME_STOCK_PIXMAP_ADD ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_camera, GNOME_STOCK_PIXMAP_OPEN ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Export"), NULL, Menu_exporter_camera, GNOME_STOCK_PIXMAP_PRINT ),
+    GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_camera, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
   };
 
  static GnomeUIInfo Menu_popup_nonselect[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_camera, GNOME_STOCK_PIXMAP_PRINT ),
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_camera, GNOME_STOCK_PIXMAP_ADD ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_camera, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_END
   };
 
+/**********************************************************************************************************/
+/* CB_effacer_camera: Fonction appelée qd on appuie sur un des boutons de l'interface                     */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* sortie: TRUE                                                                                           */
+/**********************************************************************************************************/
+ static gboolean CB_effacer_camera ( GtkDialog *dialog, gint reponse, gboolean edition )
+  { struct CMD_TYPE_CAMERA rezo_camera;
+    GtkTreeSelection *selection;
+    GtkTreeModel *store;
+    GList *lignes;
+    GtkTreeIter iter;
+
+    switch(reponse)
+     { case GTK_RESPONSE_YES:
+            selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );
+            store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_camera) );
+            lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+            while ( lignes )
+             { gchar *libelle;
+               gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
+               gtk_tree_model_get( store, &iter, COL_CAM_ID, &rezo_camera.id, -1 );        /* Recup du id */
+               gtk_tree_model_get( store, &iter, COL_CAM_LIBELLE, &libelle, -1 );
+
+               memcpy( &rezo_camera.libelle, libelle, sizeof(rezo_camera.libelle) );
+               g_free( libelle );
+
+               Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_DEL_CAMERA,
+                             (gchar *)&rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
+               gtk_tree_selection_unselect_iter( selection, &iter );
+               lignes = lignes->next;
+             }
+            g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+            g_list_free (lignes);                                                   /* Liberation mémoire */
+            break;
+       default: break;
+     }
+    gtk_widget_destroy( GTK_WIDGET(dialog) );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Menu_ajouter_camera: Ajout d'un camera                                                                 */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_ajouter_camera ( void )
+  { Menu_ajouter_editer_camera(NULL); }
+/**********************************************************************************************************/
+/* Menu_effacer_camera: Retrait des cameras selectionnés                                                  */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_effacer_camera ( void )
+  { GtkTreeSelection *selection;
+    GtkWidget *dialog;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    printf("Menu effacer camera: nbr=%d\n", nbr );
+    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+
+    dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
+                                      GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                      GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
+                                      _("Do you want to delete %d camera%c ?"), nbr, (nbr>1 ? 's' : ' ') );
+    g_signal_connect( dialog, "response",
+                      G_CALLBACK(CB_effacer_camera), NULL );
+    gtk_widget_show_all( dialog );
+  }
 /**********************************************************************************************************/
 /* Type_vers_string: renvoie le type string associé                                                       */
 /* Entrée: rien                                                                                           */
@@ -66,7 +142,7 @@
     return( _("Unknown") );
   }
 /**********************************************************************************************************/
-/* Menu_editer_camera: Demande d'edition du camera selectionné                                          */
+/* Menu_editer_camera: Demande d'edition du camera selectionné                                            */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
@@ -87,8 +163,8 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &rezo_camera.id_mnemo, -1 );          /* Recup du id */
-    gtk_tree_model_get( store, &iter, COL_CAMERA_LIBELLE, &libelle, -1 );
+    gtk_tree_model_get( store, &iter, COL_CAM_ID, &rezo_camera.id, -1 );                   /* Recup du id */
+    gtk_tree_model_get( store, &iter, COL_CAM_LIBELLE, &libelle, -1 );
 
     memcpy( &rezo_camera.libelle, libelle, sizeof(rezo_camera.libelle) );
     g_free( libelle );
@@ -141,11 +217,11 @@
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_camera) );
     valide = TRUE;
     y = 2 * PRINT_FONT_SIZE;
-    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les objets du tableau */
-     { gtk_tree_model_get( store, iter, COL_CAMERA_NOTINHIB, &enable, COL_CAMERA_NUM, &num,
-                           COL_CAMERA_SMS, &sms,
-                           COL_CAMERA_TYPE_INT, &type_int, COL_CAMERA_TYPE_STRING, &type_string,
-                           COL_CAMERA_OBJET, &objet, COL_CAMERA_LIBELLE, &libelle, -1 );
+    while ( valide && y<gtk_print_context_get_height (context) )       /* Pour tous les objets du tableau */
+     { gtk_tree_model_get( store, iter, COL_CAM_NOTINHIB, &enable, COL_CAM_NUM, &num,
+                           COL_CAM_SMS, &sms,
+                           COL_CAM_TYPE_INT, &type_int, COL_CAM_TYPE_STRING, &type_string,
+                           COL_CAM_OBJET, &objet, COL_CAM_LIBELLE, &libelle, -1 );
 
        cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
        if (enable) { cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
@@ -195,7 +271,7 @@
 #endif
   }
 /**********************************************************************************************************/
-/* Menu_exporter_camera: Exportation de la base dans un fichier texte                                    */
+/* Menu_exporter_camera: Exportation de la base dans un fichier texte                                     */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -221,7 +297,7 @@
                                    GTK_WINDOW(F_client), &error);
   }
 /**********************************************************************************************************/
-/* Gerer_popup_camera: Gestion du menu popup quand on clique droite sur la liste des cameras            */
+/* Gerer_popup_camera: Gestion du menu popup quand on clique droite sur la liste des cameras              */
 /* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
@@ -238,7 +314,7 @@
        if (!Popup_nonselect) Popup_nonselect = gnome_popup_menu_new( Menu_popup_nonselect );
 
        ya_selection = FALSE;
-       selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );  /* On recupere selection */
+       selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_camera) );   /* On recupere selection */
        if (gtk_tree_selection_count_selected_rows(selection) == 0)
         { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_camera), event->x, event->y,
                                           &path, NULL, &cellx, &celly );
@@ -258,81 +334,77 @@
      { Menu_editer_camera(); }
     return(FALSE);
   }
-
 /**********************************************************************************************************/
-/* Creer_liste_camera: Creation de la liste des camera                                                    */
+/* Creer_liste_camera: Creation de la liste du notebook consacrée aux cameras watchdog                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Creer_liste_camera ( GtkWidget **Liste, GtkWidget **Scroll )
-  { GtkWidget *scroll, *liste;
-    GtkListStore *store;
-    GtkTreeSelection *selection;
+ void Creer_liste_camera( GtkWidget **Liste, GtkWidget **Scroll )
+  { GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
-    
+    GtkListStore *store;
+    GtkWidget *scroll, *liste;
+
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     *Scroll = scroll;
 
-    store = gtk_list_store_new ( NBR_COL_CAMERA, G_TYPE_UINT,                                       /* Id */
-                                              G_TYPE_UINT,                                         /* Num */
+    store = gtk_list_store_new ( NBR_COL_CAM, G_TYPE_UINT,                                          /* Id */
+                                              G_TYPE_STRING,                                    /* Numéro */
                                               G_TYPE_STRING,                                     /* objet */
                                               G_TYPE_STRING,                                   /* libelle */
                                               G_TYPE_STRING,                                  /* location */
-                                              G_TYPE_UINT,                                        /* type */
-                                              G_TYPE_STRING,                               /* type_string */
-                                              G_TYPE_STRING,                                /* Num string */
-                                              G_TYPE_STRING                                 /* bit string */
+                                              G_TYPE_UINT                                         /* type */
                                );
 
     liste = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                 /* Creation de la vue */
+    *Liste = liste;
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(liste) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), liste );
-    *Liste = liste;
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Numero"), renderer,
-                                                         "text", COL_CAMERA_NUM_STRING,
+                                                         "text", COL_CAM_NUM,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_NUM_STRING);          /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_NUM);                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
-                                                         "text", COL_CAMERA_TYPE_STRING,
+                                                         "text", COL_CAM_TYPE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_TYPE_STRING);         /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_TYPE);                   /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Motion bit"), renderer,
-                                                         "text", COL_CAMERA_BIT_STRING,
+                                                         "text", COL_CAM_BIT,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_BIT_STRING);          /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_BIT);                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Objet"), renderer,
-                                                         "text", COL_CAMERA_OBJET,
+                                                         "text", COL_CAM_OBJET,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_OBJET);               /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_OBJET);                  /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Libelle"), renderer,
-                                                         "text", COL_CAMERA_LIBELLE,
+                                                         "text", COL_CAM_LIBELLE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_LIBELLE);             /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_LIBELLE);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Location"), renderer,
-                                                         "text", COL_CAMERA_LOCATION,
+                                                         "text", COL_CAM_LOCATION,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAMERA_LOCATION);            /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_LOCATION);               /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_camera), TRUE );*/
@@ -340,7 +412,7 @@
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
   }
 /**********************************************************************************************************/
-/* Creer_page_camera: Creation de la page du notebook consacrée aux cameras watchdog                    */
+/* Creer_page_camera: Creation de la page du notebook consacrée aux cameras watchdog                      */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
@@ -358,13 +430,12 @@
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     
-/***************************************** La liste des cameras ******************************************/
-    Creer_liste_camera ( &Liste_camera, &scroll );
+/***************************************** La liste des cameras *******************************************/
+    Creer_liste_camera( &Liste_camera, &scroll );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     g_signal_connect( G_OBJECT(Liste_camera), "button_press_event",              /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_camera), NULL );
-    
 /************************************ Les boutons de controles ********************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
@@ -382,10 +453,23 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_editer_camera), NULL );
 
+    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_ajouter_editer_camera), NULL );
+
     bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_exporter_camera), NULL );
+
+    separateur = gtk_hseparator_new();
+    gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
+
+    bouton = gtk_button_new_from_stock( GTK_STOCK_REMOVE );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_effacer_camera), NULL );
 
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Edit Camera") ) );
@@ -401,15 +485,13 @@
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->num );
     g_snprintf( bit, sizeof(bit), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), camera->bit );
     gtk_list_store_set ( store, iter,
-                         COL_CAMERA_ID, camera->id_mnemo,
-                         COL_CAMERA_NUM, camera->num,
-                         COL_CAMERA_OBJET, camera->objet,
-                         COL_CAMERA_LIBELLE, camera->libelle,
-                         COL_CAMERA_LOCATION, camera->location,
-                         COL_CAMERA_TYPE_INT, camera->type,
-                         COL_CAMERA_NUM_STRING, chaine,
-                         COL_CAMERA_TYPE_STRING, Type_camera_vers_string(camera->type),
-                         COL_CAMERA_BIT_STRING, bit,
+                         COL_CAM_ID, camera->id,
+                         COL_CAM_NUM, chaine,
+                         COL_CAM_OBJET, camera->objet,
+                         COL_CAM_LIBELLE, camera->libelle,
+                         COL_CAM_LOCATION, camera->location,
+                         COL_CAM_TYPE, Type_camera_vers_string(camera->type),
+                         COL_CAM_BIT, bit,
                          -1
                        );
   }
@@ -443,8 +525,8 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &id, -1 );
-       if ( id == camera->id_mnemo )
+     { gtk_tree_model_get( store, &iter, COL_CAM_ID, &id, -1 );
+       if ( id == camera->id )
         { printf("elimination camera %s\n", camera->libelle );
           break;
         }
@@ -469,8 +551,8 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COL_CAMERA_ID, &id, -1 );
-       if ( id == camera->id_mnemo )
+     { gtk_tree_model_get( store, &iter, COL_CAM_ID, &id, -1 );
+       if ( id == camera->id )
         { printf("maj camera %s\n", camera->libelle );
           break;
         }

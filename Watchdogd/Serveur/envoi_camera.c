@@ -46,7 +46,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id_mnemo );
+    camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
 
     if (camera)
      { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
@@ -80,7 +80,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id_mnemo );
+    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
          { if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -90,8 +90,69 @@
             }
            else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_CAMERA) );
+                  Partage->com_msrv.reset_motion_detect = TRUE;    /* Modification -> Reset motion_detect */
                   g_free(result);
                 }
+            }
+         }
+  }
+/**********************************************************************************************************/
+/* Proto_effacer_camera: Retrait du camera en parametre                                                   */
+/* Entrée: le client demandeur et le camera en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
+  { gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Retirer_cameraDB( Config.log, Db_watchdog, rezo_camera );
+
+    if (retour)
+     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_DEL_CAMERA_OK,
+                     (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
+       Partage->com_msrv.reset_motion_detect = TRUE;               /* Modification -> Reset motion_detect */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to delete camera %s", rezo_camera->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_ajouter_camera: Un client nous demande d'ajouter un camera Watchdog                              */
+/* Entrée: le camera à créer                                                                              */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
+  { struct CMD_TYPE_CAMERA *camera;
+    struct DB *Db_watchdog;
+    gint id;
+    Db_watchdog = client->Db_watchdog;
+
+    id = Ajouter_cameraDB ( Config.log, Db_watchdog, rezo_camera );
+    if (id == -1)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to add camera %s", rezo_camera->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { camera = Rechercher_cameraDB( Config.log, Db_watchdog, id );
+           if (!camera) 
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate camera %s", rezo_camera->libelle);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+           else
+            { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_ADD_CAMERA_OK,
+                            (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
+              Partage->com_msrv.reset_motion_detect = TRUE;        /* Modification -> Reset motion_detect */
+              g_free(camera);
             }
          }
   }

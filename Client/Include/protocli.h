@@ -78,19 +78,16 @@
     struct TRAME *Trame;                                               /* La trame de fond de supervision */
   };
 
- enum
-  {  COL_CAMERA_ID,
-     COL_CAMERA_NUM,
-     COL_CAMERA_OBJET,
-     COL_CAMERA_LIBELLE,
-     COL_CAMERA_LOCATION,
-     COL_CAMERA_TYPE_INT,
-     COL_CAMERA_TYPE_STRING,
-     COL_CAMERA_NUM_STRING,
-     COL_CAMERA_BIT_STRING,
-     NBR_COL_CAMERA
+ enum                   /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
+  {  COL_CAM_ID,
+     COL_CAM_NUM,
+     COL_CAM_TYPE,
+     COL_CAM_BIT,
+     COL_CAM_OBJET,
+     COL_CAM_LIBELLE,
+     COL_CAM_LOCATION,
+     NBR_COL_CAM
   };
- #define CAMERA_DELAI_START 4
  struct TYPE_INFO_CAMERA
   { struct CMD_TYPE_CAMERA_SUP camera;                                          /* Structure de la camera */
     GtkLibVLCInstance* instance;

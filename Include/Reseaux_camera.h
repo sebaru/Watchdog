@@ -38,7 +38,7 @@
   };
 /******************************************** Gestion des camera ******************************************/
  struct CMD_TYPE_CAMERA
-  { guint   id_mnemo;                                             /* ID unique du mnemonique de la camera */
+  { guint   id;                                                                 /* ID unique de la camera */
     guint   num;                                                                   /* Numéro de la camera */
     gchar   libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                           /* Libelle de la camera */
     gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                            /* Location de la camera */
@@ -49,14 +49,21 @@
 
 /************************************************* Tag de communication ***********************************/
  enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_CAMERA,                          /* Ajout d'un groupe dans la liste cliente */
+  { SSTAG_CLIENT_WANT_PAGE_CAMERA,
+    SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK,                                   /* Affichage de la page camera */
+    SSTAG_SERVEUR_ADDPROGRESS_CAMERA,                          /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN,                      /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_CLIENT_WANT_PAGE_CAMERA,
 
-    SSTAG_CLIENT_EDIT_CAMERA,                                 /* Le client demande l'edition d'une camera */
+    SSTAG_CLIENT_ADD_CAMERA,                               /* Le client desire ajouter un groupe watchdog */
+    SSTAG_SERVEUR_ADD_CAMERA_OK,                                       /* L'ajout du groupe est un succes */
+
+    SSTAG_CLIENT_DEL_CAMERA,                                        /* Le client desire retirer un groupe */
+    SSTAG_SERVEUR_DEL_CAMERA_OK,                                       /* L'ajout du groupe est un succes */
+
+    SSTAG_CLIENT_EDIT_CAMERA,                                  /* Le client demande l'edition d'un groupe */
     SSTAG_SERVEUR_EDIT_CAMERA_OK,              /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_CAMERA,                             /* Le client renvoie les données editées */
-    SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,                       /* Le serveur valide les nouvelles données */      
+    SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,                       /* Le serveur valide les nouvelles données */
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION,                    /* Le client souhaite le mnemonique bit_motion */
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION,                          /* Le serveur répond avec le mnemonique */

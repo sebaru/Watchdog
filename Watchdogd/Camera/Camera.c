@@ -38,6 +38,61 @@
  #include "Camera_DB.h"
 
 /**********************************************************************************************************/
+/* Retirer_cameraDB: Elimination d'un camera                                                              */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Retirer_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
+  { gchar requete[200];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, camera->id );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Ajouter_cameraDB: Ajout ou edition d'un camera                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure camera                        */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Ajouter_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
+  { gchar *location, *objet, *libelle;
+    gchar requete[2048];
+    
+    location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
+    if (!location)
+     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation location impossible" );
+       return(-1);
+     }
+    objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
+    if (!objet)
+     { g_free(location);
+       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation objet impossible" );
+       return(-1);
+     }
+    libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
+    if (!libelle)
+     { g_free(location);
+       g_free(objet);
+       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+                "INSERT INTO %s"
+                "(num,type,bit,objet,location,libelle)"
+                "VALUES (%d,%d,%d,'%s','%s','%s')",
+                NOM_TABLE_CAMERA, camera->num, camera->type, camera->bit, objet, location, libelle
+              );
+    g_free(location);
+    g_free(objet);
+    g_free(libelle);
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(-1); }
+    return( Recuperer_last_ID_SQL( log, db ) );
+  }
+/**********************************************************************************************************/
 /* Recuperer_liste_id_cameraDB: Recupération de la liste des ids des cameras                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
@@ -46,11 +101,9 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,%s.num,libelle,objet,id_mnemo,bit"
-                " FROM %s,%s WHERE id_mnemo=%s.id ORDER BY libelle",
-                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
-                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
-                NOM_TABLE_MNEMO                                                                  /* Where */
+                "SELECT id,num,type,bit,objet,location,libelle"
+                " FROM %s ORDER BY objet, libelle",
+                NOM_TABLE_CAMERA                                                                  /* FROM */
               );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -72,13 +125,13 @@
     camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera) Info( log, DEBUG_MEM, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( camera->location, db->row[0], sizeof(camera->location  ) );
-       memcpy( camera->libelle,  db->row[3], sizeof(camera->libelle ) );
-       memcpy( camera->objet,    db->row[4], sizeof(camera->objet    ) );
-       camera->id_mnemo   = atoi(db->row[5]);
-       camera->num        = atoi(db->row[2]);
-       camera->type       = atoi(db->row[1]);
-       camera->bit        = atoi(db->row[6]);
+     { memcpy( camera->objet,    db->row[4], sizeof(camera->objet    ) );
+       memcpy( camera->location, db->row[5], sizeof(camera->location  ) );
+       memcpy( camera->libelle,  db->row[6], sizeof(camera->libelle ) );
+       camera->id         = atoi(db->row[0]);
+       camera->num        = atoi(db->row[1]);
+       camera->type       = atoi(db->row[2]);
+       camera->bit        = atoi(db->row[3]);
      }
     return(camera);
   }
@@ -92,12 +145,10 @@
     struct CMD_TYPE_CAMERA *camera;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT location,%s.type,libelle,objet,num,bit"
-                " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id_mnemo=%d",
-                NOM_TABLE_CAMERA,
-                NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,                                                /* FROM */
-                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,                                               /* Where */
-                NOM_TABLE_CAMERA, id
+                "SELECT num,type,bit,objet,location,libelle"
+                " FROM %s WHERE id=%d",
+                NOM_TABLE_CAMERA,                                                                 /* FROM */
+                id                                                                               /* Where */
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -114,13 +165,13 @@
     if (!camera)
      { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" ); }
     else
-     { memcpy( camera->libelle,  db->row[2], sizeof(camera->libelle  ) );    /* Recopie dans la structure */
-       memcpy( camera->location, db->row[0], sizeof(camera->location ) );
-       memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
-       camera->type     = atoi(db->row[1]);
-       camera->num      = atoi(db->row[4]);
-       camera->bit      = atoi(db->row[5]);
-       camera->id_mnemo = id;
+     { memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
+       memcpy( camera->location, db->row[4], sizeof(camera->location  ) );
+       memcpy( camera->libelle,  db->row[5], sizeof(camera->libelle ) );
+       camera->num        = atoi(db->row[0]);
+       camera->type       = atoi(db->row[1]);
+       camera->bit        = atoi(db->row[2]);
+       camera->id         = id;
      }
     Liberer_resultat_SQL ( log, db );
     return(camera);
@@ -131,22 +182,36 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gboolean Modifier_cameraDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
-  { gchar requete[1024];
-    gchar *location;
+  { gchar *location, *libelle, *objet;
+    gchar requete[1024];
 
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_DB, "Modifier_cameraDB: Normalisation impossible" );
-       return(FALSE);
+     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation location impossible" );
+       return(-1);
+     }
+    objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
+    if (!objet)
+     { g_free(location);
+       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation objet impossible" );
+       return(-1);
+     }
+    libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
+    if (!libelle)
+     { g_free(location);
+       g_free(objet);
+       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "location='%s',type=%d,bit=%d "
-                "WHERE id_mnemo=%d",
-                NOM_TABLE_CAMERA, location, camera->type, camera->bit, camera->id_mnemo );
+                "location='%s',objet='%s',libelle='%s',type=%d,bit=%d "
+                "WHERE id=%d",
+                NOM_TABLE_CAMERA, location, objet,libelle, camera->type, camera->bit, camera->id );
     g_free(location);
-    Partage->com_msrv.reset_motion_detect = TRUE;                  /* Modification -> Reset motion_detect */
+    g_free(objet);
+    g_free(libelle);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
@@ -176,27 +241,17 @@
        return(NULL);
      }
 
-    camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
+    camera = Rechercher_cameraDB( log, db, atoi(db->row[0]) );
     if (!camera)
-     { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" );
+     { Info( log, DEBUG_MEM, "Rechercher_cameraDB_motion: Mem error" );
        return(NULL);
-     }
-    else
-     { memcpy( camera->libelle,  db->row[2], sizeof(camera->libelle  ) );    /* Recopie dans la structure */
-       memcpy( camera->location, db->row[0], sizeof(camera->location ) );
-       memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
-       camera->type     = atoi(db->row[1]);
-       camera->num      = atoi(db->row[4]);
-       camera->bit      = atoi(db->row[5]);
-       camera->id_mnemo = atoi(db->row[6]);
-       Liberer_resultat_SQL ( log, db );
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id_mnemo = %d",
-                NOM_TABLE_CAMERA_MOTION, camera->id_mnemo );
-
+                "DELETE FROM %s WHERE id = %d",
+                NOM_TABLE_CAMERA_MOTION, camera->id );
     Lancer_requete_SQL ( log, db, requete );
+
     return(camera);
   }
 /**********************************************************************************************************/
@@ -210,6 +265,7 @@
     do { camera = Rechercher_cameraDB_motion ( log, db );
          if (camera)
           { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
+            
             g_free(camera);
           }
        }

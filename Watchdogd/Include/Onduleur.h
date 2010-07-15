@@ -60,8 +60,7 @@
  extern gint Ajouter_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur );
  extern gboolean Recuperer_onduleurDB ( struct LOG *log, struct DB *db );
  extern struct CMD_TYPE_ONDULEUR *Recuperer_onduleurDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint num );
- extern struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB_par_id ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_onduleurDB_set_start( struct LOG *log, struct DB *db, gint id, gint start );
  extern gboolean Modifier_onduleurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur );
 #endif

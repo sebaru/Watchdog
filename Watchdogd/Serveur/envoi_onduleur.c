@@ -141,7 +141,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { onduleur = Rechercher_onduleurDB_par_id( Config.log, Db_watchdog, id );
+    else { onduleur = Rechercher_onduleurDB( Config.log, Db_watchdog, id );
            if (!onduleur) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),

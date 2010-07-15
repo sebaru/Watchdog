@@ -43,7 +43,23 @@
   { static GList *Arrivee_camera = NULL;
            
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_EDIT_CAMERA_OK:
+     { case SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK:
+             { if (!Tester_page_notebook(TYPE_PAGE_CAMERA)) { Creer_page_camera(); }
+             }
+            break;
+       case SSTAG_SERVEUR_ADD_CAMERA_OK:
+             { struct CMD_TYPE_CAMERA *camera;
+               camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
+               Proto_afficher_un_camera( camera );
+             }
+            break;
+       case SSTAG_SERVEUR_DEL_CAMERA_OK:
+             { struct CMD_TYPE_CAMERA *camera;
+               camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
+               Proto_cacher_un_camera( camera );
+             }
+            break;
+       case SSTAG_SERVEUR_EDIT_CAMERA_OK:
              { struct CMD_TYPE_CAMERA *camera;
                camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
                Menu_ajouter_editer_camera( camera );

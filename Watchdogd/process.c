@@ -127,7 +127,7 @@
         { Libere_DB_SQL( Config.log, &db );
           break;
         }
-       g_snprintf(nom_fichier, sizeof(nom_fichier), "camera%04d.conf", camera->id_mnemo);
+       g_snprintf(nom_fichier, sizeof(nom_fichier), "camera%04d.conf", camera->id);
 
        g_snprintf(chaine, sizeof(chaine), "thread %s/%s\n", Config.home, nom_fichier);
        write(id, chaine, strlen(chaine));
@@ -142,8 +142,8 @@
        Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation thread camera", camera->num );
        g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
        write(id_camera, chaine, strlen(chaine));
-       g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id_mnemo) values (%d)\n",
-                  camera->id_mnemo);
+       g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id) values (%d)\n",
+                  camera->id);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "text_left CAM%04d %s\n", camera->num, camera->objet);
        write(id_camera, chaine, strlen(chaine));
