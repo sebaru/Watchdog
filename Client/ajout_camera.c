@@ -191,9 +191,10 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_motion, 2, 4, ligne, ligne+1 );
 
     if (edit_camera)                                                            /* Si edition d'un camera */
-     { gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_camera->num );
-       gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_camera->libelle );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_camera->libelle );
+       gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_camera->objet );
        gtk_entry_set_text( GTK_ENTRY(Entry_location), edit_camera->location );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_camera->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_motion), edit_camera->bit );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), edit_camera->type );
      }
