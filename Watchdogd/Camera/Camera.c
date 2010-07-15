@@ -225,7 +225,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id FROM %s",
-                NOM_TABLE_CAMERA                                                                  /* FROM */
+                NOM_TABLE_CAMERA_MOTION                                                                  /* FROM */
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
