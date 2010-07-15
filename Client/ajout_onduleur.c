@@ -60,7 +60,6 @@
  static void Afficher_mnemo ( GtkWidget *widget )
   { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
     gint sstag;
-printf("Afficher_mnemo\n");
     mnemo.num  = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(widget) );
     if ( widget == Spin_bit_comm )
      { mnemo.type = MNEMO_BISTABLE;
@@ -87,7 +86,7 @@ printf("Afficher_mnemo\n");
     Envoi_serveur( TAG_ONDULEUR, sstag, (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
+/* Proto_afficher_mnemo_onduleur: Changement du mnemonique et affichage                                   */
 /* Entre: widget, data.                                                                                   */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
@@ -171,7 +170,8 @@ printf("Afficher_mnemo\n");
 /**********************************************************************************************************/
  void Menu_ajouter_editer_onduleur ( struct CMD_TYPE_ONDULEUR *edit_onduleur )
   { GtkWidget *frame, *table, *texte, *hboite;
-printf("Ajouter_editer_onduleur\n");
+    gint ligne;
+
     if (edit_onduleur)
      { memcpy( &Edit_onduleur, edit_onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
                                                                           /* Save pour utilisation future */
@@ -197,64 +197,90 @@ printf("Ajouter_editer_onduleur\n");
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 6, 4, TRUE );
+    table = gtk_table_new( 9, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
+    ligne = 0;
     Check_actif = gtk_check_button_new_with_label( _("Enable") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, 0, 1 );
 
+    ligne ++;
+    texte = gtk_label_new( _("Libelle") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
+    Entry_lib = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_ONDULEUR );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, ligne, ligne+1 );
+
+    ligne ++;
+    texte = gtk_label_new( _("Host") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
+    Entry_host = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_host), NBR_CARAC_HOST_ONDULEUR );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_host, 1, 4, ligne, ligne+1 );
+
+    ligne ++;
+    texte = gtk_label_new( _("Name") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
+    Entry_ups = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ups), NBR_CARAC_UPS_ONDULEUR );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ups, 1, 4, ligne, ligne+1 );
+
+    ligne ++;
     texte = gtk_label_new( _("Bit comm") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
     Spin_bit_comm = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     g_signal_connect( G_OBJECT(Spin_bit_comm), "changed",
                       G_CALLBACK(Afficher_mnemo), Spin_bit_comm );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_comm, 1, 2, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_comm, 1, 2, ligne, ligne+1 );
     Entry_bit_comm = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_bit_comm), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_comm, 2, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_comm, 2, 4, ligne, ligne+1 );
 
+    ligne ++;
     texte = gtk_label_new( _("EA Load") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
     Spin_load = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
     g_signal_connect( G_OBJECT(Spin_load), "changed",
                       G_CALLBACK(Afficher_mnemo), Spin_load );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_load, 1, 2, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_load, 1, 2, ligne, ligne+1 );
     Entry_load = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_load), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_load, 2, 4, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_load, 2, 4, ligne, ligne+1 );
 
+    ligne ++;
     texte = gtk_label_new( _("EA Real Power") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
     Spin_real_power = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
     g_signal_connect( G_OBJECT(Spin_real_power), "changed",
                       G_CALLBACK(Afficher_mnemo), Spin_real_power );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_real_power, 1, 2, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_real_power, 1, 2, ligne, ligne+1 );
     Entry_real_power = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_real_power), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_real_power, 2, 4, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_real_power, 2, 4, ligne, ligne+1 );
 
+    ligne ++;
     texte = gtk_label_new( _("EA Battery Charge") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
     Spin_battery_charge = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
     g_signal_connect( G_OBJECT(Spin_battery_charge), "changed",
                       G_CALLBACK(Afficher_mnemo), Spin_battery_charge );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_battery_charge, 1, 2, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_battery_charge, 1, 2, ligne, ligne+1 );
     Entry_battery_charge = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_battery_charge), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_battery_charge, 2, 4, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_battery_charge, 2, 4, ligne, ligne+1 );
 
+    ligne ++;
     texte = gtk_label_new( _("EA Input Voltage") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
     Spin_input_voltage = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
     g_signal_connect( G_OBJECT(Spin_input_voltage), "changed",
                       G_CALLBACK(Afficher_mnemo), Spin_input_voltage );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_input_voltage, 1, 2, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_input_voltage, 1, 2, ligne, ligne+1 );
     Entry_input_voltage = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_input_voltage), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_input_voltage, 2, 4, 5, 6 );
-    Afficher_mnemo(Spin_input_voltage);                        /* Demande l'affichage du mnemo associé */
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_input_voltage, 2, 4, ligne, ligne+1 );
 
     if (edit_onduleur)                                                        /* Si edition d'un onduleur */
      { Edit_onduleur.id = edit_onduleur->id;
@@ -268,6 +294,12 @@ printf("Ajouter_editer_onduleur\n");
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_input_voltage), edit_onduleur->ea_input_voltage );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_onduleur->actif );
      }
+
+    Afficher_mnemo(Spin_bit_comm);                                /* Demande l'affichage du mnemo associé */
+    Afficher_mnemo(Spin_load);                                    /* Demande l'affichage du mnemo associé */
+    Afficher_mnemo(Spin_real_power);                              /* Demande l'affichage du mnemo associé */
+    Afficher_mnemo(Spin_battery_charge);                          /* Demande l'affichage du mnemo associé */
+    Afficher_mnemo(Spin_input_voltage);                           /* Demande l'affichage du mnemo associé */
 
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
