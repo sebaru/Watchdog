@@ -109,7 +109,7 @@
     retour = Retirer_onduleurDB( Config.log, Db_watchdog, rezo_onduleur );
 
     if (retour)
-     { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_DEL_MESSAGE_OK,
+     { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_DEL_ONDULEUR_OK,
                      (gchar *)rezo_onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
        while (Partage->com_onduleur.admin_del) sched_yield();
        Partage->com_onduleur.admin_del = rezo_onduleur->id;                   /* Envoi au thread onduleur */
@@ -150,7 +150,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_ADD_MESSAGE_OK,
+            { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_ADD_ONDULEUR_OK,
                             (gchar *)onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
               while (Partage->com_onduleur.admin_add) sched_yield();
               Partage->com_onduleur.admin_add = rezo_onduleur->id;            /* Envoi au thread onduleur */
