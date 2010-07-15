@@ -61,6 +61,12 @@
                Proto_editer_message( client, msg );
              }
             break;
+       case SSTAG_CLIENT_VALIDE_EDIT_MESSAGE:
+             { struct CMD_TYPE_MESSAGE *msg;
+               msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
+               Proto_valider_editer_message( client, msg );
+             }
+            break;
        case SSTAG_CLIENT_ADD_MESSAGE:
              { struct CMD_TYPE_MESSAGE *msg;
                msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
@@ -71,12 +77,6 @@
              { struct CMD_TYPE_MESSAGE *msg;
                msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
                Proto_effacer_message( client, msg );
-             }
-            break;
-       case SSTAG_CLIENT_VALIDE_EDIT_MESSAGE:
-             { struct CMD_TYPE_MESSAGE *msg;
-               msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;
-               Proto_valider_editer_message( client, msg );
              }
             break;
        case SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE:

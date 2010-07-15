@@ -91,7 +91,70 @@
            else { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_VALIDE_EDIT_ONDULEUR_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_ONDULEUR) );
                   g_free(result);
+                  Partage->com_onduleur.reload = TRUE;
                 }
+            }
+         }
+  }
+/**********************************************************************************************************/
+/* Proto_effacer_onduleur: Retrait du onduleur en parametre                                               */
+/* Entrée: le client demandeur et le onduleur en question                                                 */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_effacer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur )
+  { gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Retirer_onduleurDB( Config.log, Db_watchdog, rezo_onduleur );
+
+    if (retour)
+     { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_DEL_MESSAGE_OK,
+                     (gchar *)rezo_onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
+       while (Partage->com_onduleur.admin_del) sched_yield();
+       Partage->com_onduleur.admin_del = rezo_onduleur->id;                   /* Envoi au thread onduleur */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to delete onduleur %s", rezo_onduleur->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_ajouter_onduleur: Un client nous demande d'ajouter un onduleur Watchdog                          */
+/* Entrée: le onduleur à créer                                                                            */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_ajouter_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur )
+  { struct CMD_TYPE_ONDULEUR *onduleur;
+    struct DB *Db_watchdog;
+    gint id;
+    Db_watchdog = client->Db_watchdog;
+
+    id = Ajouter_onduleurDB ( Config.log, Db_watchdog, rezo_onduleur );
+    if (id == -1)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to add onduleur %s", rezo_onduleur->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { onduleur = Rechercher_onduleurDB_par_id( Config.log, Db_watchdog, id );
+           if (!onduleur) 
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate onduleur %s", rezo_onduleur->libelle);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+           else
+            { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_ADD_MESSAGE_OK,
+                            (gchar *)onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
+              while (Partage->com_onduleur.admin_add) sched_yield();
+              Partage->com_onduleur.admin_add = rezo_onduleur->id;            /* Envoi au thread onduleur */
+              g_free(onduleur);
             }
          }
   }

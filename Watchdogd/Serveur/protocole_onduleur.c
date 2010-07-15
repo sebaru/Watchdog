@@ -40,10 +40,10 @@
     connexion = client->connexion;
 
     if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_LOWLEVEL_IO) )
-     { struct CMD_GTK_MESSAGE gtkmessage;
-       g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied" );
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message), "Permission denied" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        return;
      }
 
@@ -65,6 +65,18 @@
              { struct CMD_TYPE_ONDULEUR *syn;
                syn = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
                Proto_valider_editer_onduleur( client, syn );
+             }
+            break;
+       case SSTAG_CLIENT_ADD_ONDULEUR:
+             { struct CMD_TYPE_ONDULEUR *onduleur;
+               onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
+               Proto_ajouter_onduleur( client, onduleur );
+             }
+            break;
+       case SSTAG_CLIENT_DEL_ONDULEUR:
+             { struct CMD_TYPE_ONDULEUR *onduleur;
+               onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
+               Proto_effacer_onduleur( client, onduleur );
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_BIT_COMM:
