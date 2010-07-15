@@ -153,7 +153,7 @@
             { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_ADD_ONDULEUR_OK,
                             (gchar *)onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
               while (Partage->com_onduleur.admin_add) sched_yield();
-              Partage->com_onduleur.admin_add = rezo_onduleur->id;            /* Envoi au thread onduleur */
+              Partage->com_onduleur.admin_add = onduleur->id;                 /* Envoi au thread onduleur */
               g_free(onduleur);
             }
          }

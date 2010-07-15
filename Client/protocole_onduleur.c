@@ -47,6 +47,18 @@
              { if (!Tester_page_notebook(TYPE_PAGE_ONDULEUR)) { Creer_page_onduleur(); }
              }
             break;
+       case SSTAG_SERVEUR_ADD_ONDULEUR_OK:
+             { struct CMD_TYPE_ONDULEUR *onduleur;
+               onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
+               Proto_afficher_un_message( onduleur );
+             }
+            break;
+       case SSTAG_SERVEUR_DEL_ONDULEUR_OK:
+             { struct CMD_TYPE_ONDULEUR *onduleur;
+               onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
+               Proto_cacher_un_message( onduleur );
+             }
+            break;
        case SSTAG_SERVEUR_EDIT_ONDULEUR_OK:
              { struct CMD_TYPE_ONDULEUR *onduleur;
                onduleur = (struct CMD_TYPE_ONDULEUR *)connexion->donnees;
