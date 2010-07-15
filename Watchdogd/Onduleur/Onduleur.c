@@ -285,8 +285,7 @@
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
  static gboolean Charger_tous_ONDULEUR ( void  )
-  { gchar requete[128];
-    struct DB *db;
+  { struct DB *db;
     gint cpt;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
@@ -294,34 +293,27 @@
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT id FROM %s",
-                NOM_TABLE_ONDULEUR
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+    if ( ! Recuperer_onduleurDB( Config.log, db ) )
      { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
 
     Partage->com_onduleur.Modules_ONDULEUR = NULL;
     cpt = 0;
-    while ( Recuperer_ligne_SQL (Config.log, db) )
+    for ( ; ; )
      { struct MODULE_ONDULEUR *module;
        struct CMD_TYPE_ONDULEUR *onduleur;
+
+       onduleur = Recuperer_onduleurDB_suite( Config.log, db );
+       if (!onduleur) break;
 
        module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info( Config.log, DEBUG_MEM,
                 "Charger_tous_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
-          continue;
-        }
-
-       onduleur = Rechercher_onduleurDB_par_id( Config.log, db, atoi (db->row[0]) );
-       if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MEM,
-                "Charger_tous_ONDULEUR: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
-          g_free(module);
-          continue;
+          g_free(onduleur);
+          Libere_DB_SQL( Config.log, &db );
+          return(FALSE);
         }
        memcpy( &module->onduleur, onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
        g_free(onduleur);
@@ -333,7 +325,6 @@
        Info_n( Config.log, DEBUG_ONDULEUR, "Charger_modules_ONDULEUR:  id    = ", module->onduleur.id   );
        Info_c( Config.log, DEBUG_ONDULEUR, "                        -  host  = ", module->onduleur.host );
      }
-    Liberer_resultat_SQL ( Config.log, db );
     Info_n( Config.log, DEBUG_INFO, "Charger_tous_ONDULEUR: module ONDULEUR found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
