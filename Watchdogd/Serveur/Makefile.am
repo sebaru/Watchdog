@@ -22,7 +22,7 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
 			envoi_entreeana.c envoi_courbe.c envoi_histo_courbe.c \
 			envoi_onduleur.c \
                         accept.c liste.c envoi_histo_hard.c \
-                        distrib_cde_dls.c capteur.c
+                        capteur.c
 
 
 INCLUDES= -I$(top_srcdir) -I$(includedir) \

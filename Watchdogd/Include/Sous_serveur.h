@@ -52,8 +52,6 @@
  extern void Ref_client ( struct CLIENT *client );
  extern void Run_serveur ( gint id );                                                   /* Dans serveur.c */
 
- extern void Envoyer_commande_dls ( int num );                                  /* Dans distrib_cde_dls.c */
-
  extern void Ecouter_client ( gint Id_serveur, struct CLIENT *client );               /* Dans protocole.c */
 
                                                                                   /* Dans protocole_***.c */

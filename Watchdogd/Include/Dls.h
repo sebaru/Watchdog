@@ -77,7 +77,8 @@
  extern char *TRdetail( int num );
  extern void SE( int num, int etat );
  extern void SEA( int num, int val_int );
- 
+ extern void Envoyer_commande_dls ( int num );
+
  extern void Prendre_heure ( void );                                                      /* Dans heure.c */ 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -380,6 +380,15 @@
      }
   }
 /**********************************************************************************************************/
+/* Envoyer_commande_dls: Gestion des envois de commande DLS                                               */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Envoyer_commande_dls ( int num )
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.liste_m = g_list_append ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/**********************************************************************************************************/
 /* Raz_cde_exterieure: Mise à zero des monostables de commande exterieure                                 */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -434,7 +443,7 @@
           Update_heure=Partage->top;
         }
 
-       if (Partage->com_dls.liste_m)                            /* A-t-on un monostable a allumer ?? */
+       if (Partage->com_dls.liste_m)                                 /* A-t-on un monostable a allumer ?? */
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
