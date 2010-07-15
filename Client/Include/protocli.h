@@ -508,6 +508,7 @@
  extern void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page );
 
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
+ extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_rafraichir_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Creer_page_camera( void );                               
  extern gchar *Type_camera_vers_string ( guint type );

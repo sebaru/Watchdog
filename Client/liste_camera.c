@@ -483,7 +483,7 @@
  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera )
   { gchar chaine[24], bit[24];
 
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CAMERA), camera->num );
+    g_snprintf( chaine, sizeof(chaine), "%04d", camera->num );
     g_snprintf( bit, sizeof(bit), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), camera->bit );
     gtk_list_store_set ( store, iter,
                          COL_CAM_ID, camera->id,

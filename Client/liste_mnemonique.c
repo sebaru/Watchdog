@@ -59,7 +59,7 @@
     { 0x0, 0x0,    0x0,    0xFFFF },
     { 0x0, 0x0,    0x7FFF, 0xCFFF },
     { 0x0, 0x0,    0x7FFF, 0x0    },
-    { 0x0, 0xFFFF, 0xFFFF, 0x0    },
+/*    { 0x0, 0xFFFF, 0xFFFF, 0x0    },*/
   };
  static GdkColor COULEUR_TEXTE[NBR_TYPE_MNEMO]=
   { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
@@ -71,7 +71,7 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
-    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+/*    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },*/
   };
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
   { "Bistable      B",
@@ -83,7 +83,6 @@
     "Sortie ANA    AA",
     "Icone         I",
     "Compteur H    CH",
-    "Camera        CAM",
   };
  static gchar *TYPE_BIT_INTERNE_COURT[ NBR_TYPE_MNEMO ]=    /* Type des différents bits internes utilisés */
   { "B",
@@ -95,18 +94,9 @@
     "AA",
     "I",
     "CH",
-    "CAM",
   };
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
-
- GnomeUIInfo Menu_test[]=                               /*!< Définition du menu des habilitations */
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Add 1"), N_("Add 1"),
-                            NULL, GNOME_STOCK_TEXT_BULLETED_LIST ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_Add_2"), N_("Add 2"),
-                            NULL, GNOME_STOCK_PIXMAP_ATTACH ),
-    GNOMEUIINFO_END
-  };
 
  static void Menu_effacer_mnemonique ( void );
  static void Menu_editer_mnemonique ( void );
