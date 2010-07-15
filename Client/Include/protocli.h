@@ -235,6 +235,7 @@
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_scenario ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_onduleur ( struct CONNEXION *connexion );
 
 
  extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */

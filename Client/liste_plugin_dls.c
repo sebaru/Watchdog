@@ -448,7 +448,7 @@
   { GtkListStore *store;
     GtkTreeIter iter;
     if (!Tester_page_notebook(TYPE_PAGE_PLUGIN_DLS)) Creer_page_plugin_dls();
-printf("Recu un plugin DLS\n");
+
     store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) ));
     gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
     Rafraichir_visu_plugin_dls ( &iter, plugin_dls );
