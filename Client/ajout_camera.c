@@ -151,7 +151,6 @@
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_CAMERA, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, ligne, ligne+1 );
 
-    ligne++;
     texte = gtk_label_new( _("Type") );                                           /* Le type de la camera */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, ligne, ligne+1 );
     Combo_type = gtk_combo_box_new_text();

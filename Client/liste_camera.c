@@ -352,10 +352,11 @@
 
     store = gtk_list_store_new ( NBR_COL_CAM, G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_STRING,                                    /* Numéro */
+                                              G_TYPE_STRING,                                      /* type */
+                                              G_TYPE_STRING,                                       /* bit */
                                               G_TYPE_STRING,                                     /* objet */
                                               G_TYPE_STRING,                                   /* libelle */
-                                              G_TYPE_STRING,                                  /* location */
-                                              G_TYPE_UINT                                         /* type */
+                                              G_TYPE_STRING                                   /* location */
                                );
 
     liste = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                 /* Creation de la vue */
