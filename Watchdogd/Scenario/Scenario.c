@@ -269,7 +269,7 @@
        sc->octobre   = atoi(db->row[23]);
        sc->novembre  = atoi(db->row[24]);
        sc->decembre  = atoi(db->row[25]);
-       g_snprintf( sc->libelle, sizeof(sc->libelle), "%s", db->row[5] );
+       memcpy( sc->libelle, db->row[5], sizeof(sc->libelle) );
      }
     return(sc);
   }
@@ -327,7 +327,7 @@
        sc->octobre   = atoi(db->row[23]);
        sc->novembre  = atoi(db->row[24]);
        sc->decembre  = atoi(db->row[25]);
-       g_snprintf( sc->libelle, sizeof(sc->libelle), "%s", db->row[5] );
+       memcpy( sc->libelle, db->row[5], sizeof(sc->libelle) );
      }
     Liberer_resultat_SQL ( log, db );
     return(sc);

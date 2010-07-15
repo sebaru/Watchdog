@@ -56,9 +56,9 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar requete[2048];
-    gchar *host, *ups;
-
+  { gchar *host, *ups, *libelle;
+    gchar requete[2048];
+    
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
     if (!host)
      { Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation host impossible" );
@@ -70,17 +70,26 @@
        Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation ups impossible" );
        return(-1);
      }
+    libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
+    if (!ups)
+     { g_free(host);
+       g_free(ups);
+       Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation libelle impossible" );
+       return(-1);
+     }
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s"
-                "(host,ups,bit_comm,actif,ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage) "
-                "VALUES ('%s','%s',%d,%d,%d,%d,%d,%d)",
-                NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
+                "(host,ups,libelle,bit_comm,actif,ea_ups_load,"
+                "ea_ups_real_power,ea_battery_charge,ea_input_voltage) "
+                "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,%d)",
+                NOM_TABLE_ONDULEUR, host, ups, libelle, onduleur->bit_comm, onduleur->actif,
                 onduleur->ea_ups_load, onduleur->ea_ups_real_power,
                 onduleur->ea_battery_charge, onduleur->ea_input_voltage
               );
     g_free(host);
     g_free(ups);
+    g_free(libelle);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -96,7 +105,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,host,ups,bit_comm,actif,ea_ups_load,"
-                "ea_ups_real_power,ea_battery_charge,ea_input_voltage "
+                "ea_ups_real_power,ea_battery_charge,ea_input_voltage,libelle "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -118,8 +127,9 @@
     onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur) Info( log, DEBUG_MEM, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( onduleur->host, db->row[1], sizeof(onduleur->host ) );        /* Recopie dans la structure */
-       memcpy( onduleur->ups,  db->row[2], sizeof(onduleur->ups  ) );
+     { memcpy( onduleur->host,    db->row[1], sizeof(onduleur->host   ) );
+       memcpy( onduleur->ups,     db->row[2], sizeof(onduleur->ups    ) );
+       memcpy( onduleur->libelle, db->row[9], sizeof(onduleur->libelle) );
        onduleur->id                = atoi(db->row[0]);
        onduleur->bit_comm          = atoi(db->row[3]);
        onduleur->actif             = atoi(db->row[4]);
@@ -141,7 +151,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT host,ups,bit_comm,actif,ea_ups_load,"
-                "ea_ups_real_power,ea_battery_charge,ea_input_voltage "
+                "ea_ups_real_power,ea_battery_charge,ea_input_voltage,libelle "
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_ONDULEUR, id );
 
@@ -159,12 +169,13 @@
     if (!onduleur)
      { Info( log, DEBUG_MEM, "Rechercher_onduleurDB: Mem error" ); }
     else
-     { memcpy( onduleur->host, db->row[0], sizeof(onduleur->host ) );        /* Recopie dans la structure */
-       memcpy( onduleur->ups,  db->row[1], sizeof(onduleur->ups  ) );
+     { memcpy( onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
+       memcpy( onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
+       memcpy( onduleur->libelle, db->row[8], sizeof(onduleur->libelle) );
        onduleur->bit_comm          = atoi(db->row[2]);
        onduleur->actif             = atoi(db->row[3]);
        onduleur->ea_ups_load       = atoi(db->row[4]);
-       onduleur->ea_ups_real_power  = atoi(db->row[5]);
+       onduleur->ea_ups_real_power = atoi(db->row[5]);
        onduleur->ea_battery_charge = atoi(db->row[6]);
        onduleur->ea_input_voltage  = atoi(db->row[7]);
        onduleur->id                = id;
@@ -181,9 +192,10 @@
   { gchar requete[200];
     struct CMD_TYPE_ONDULEUR *onduleur;
     
-    g_snprintf( requete, sizeof(requete), "SELECT host,ups,bit_comm,actif,"
-                                          "ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage"
-                                          " FROM %s WHERE id=%d",
+    g_snprintf( requete, sizeof(requete),
+                "SELECT host,ups,bit_comm,actif,"
+                "ea_ups_load,ea_ups_real_power,ea_battery_charge,ea_input_voltage,libelle"
+                " FROM %s WHERE id=%d",
                 NOM_TABLE_ONDULEUR, id
               );
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -200,8 +212,9 @@
     if (!onduleur)
      { Info( log, DEBUG_MEM, "Rechercher_onduleurDB_par_id: Mem error" ); }
     else
-     { g_snprintf( onduleur->host, sizeof(onduleur->host), "%s", db->row[0] );
-       g_snprintf( onduleur->ups,  sizeof(onduleur->ups),  "%s", db->row[1] );
+     { memcpy( onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
+       memcpy( onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
+       memcpy( onduleur->libelle, db->row[8], sizeof(onduleur->libelle) );
        onduleur->id                = id;
        onduleur->bit_comm          = atoi(db->row[2] );
        onduleur->actif             = atoi(db->row[3] );

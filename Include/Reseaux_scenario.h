@@ -58,7 +58,7 @@
     gboolean decembre;                                                              /* Valeur du compteur */
     guint  heure;                                                                   /* Valeur du compteur */
     guint  minute;                                                                  /* Valeur du compteur */
-    guchar libelle[NBR_CARAC_LIBELLE_SCENARIO_UTF8+1];
+    gchar libelle[NBR_CARAC_LIBELLE_SCENARIO_UTF8+1];
   };
  enum 
   { SSTAG_CLIENT_WANT_PAGE_SCENARIO,
