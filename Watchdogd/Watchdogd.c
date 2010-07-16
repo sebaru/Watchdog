@@ -534,28 +534,28 @@ encore:
         { pthread_t TID;
           if (Config.single == FALSE)                                          /* Si demarrage des thread */
            { if (!Demarrer_arch())                                         /* Demarrage gestion Archivage */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH" ); }
 
              if (!Demarrer_rs485())                                     /* Demarrage gestion module RS485 */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485 -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485" ); }
 
              if (!Demarrer_modbus())                                   /* Demarrage gestion module MODBUS */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS" ); }
 
              if (!Demarrer_sms())                                                     /* Démarrage S.M.S. */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS" ); }
 
              if (!Demarrer_audio())                                                /* Démarrage A.U.D.I.O */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO" ); }
 
              if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS" ); }
 
              if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR" ); }
 
              if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MOTION_DETECT -> Arret" ); }
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MOTION_DETECT" ); }
            }
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
