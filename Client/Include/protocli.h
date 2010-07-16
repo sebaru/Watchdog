@@ -271,13 +271,14 @@
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Creer_page_histo( void );                               
- extern gchar *Type_vers_string ( guint type );
 
  extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );       /* Dans liste_message.c */
  extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
  extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
  extern void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Creer_page_message( void );
+ extern gchar *Type_vers_string ( guint type );
+ extern gchar *Type_sms_vers_string ( guint type );
 
  extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );   /* Dans ajout_message.c */
  extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo );

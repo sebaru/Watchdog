@@ -89,11 +89,10 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
                 "type,num_syn,bit_voc,enable,objet,sms,type_voc,vitesse_voc,time_repeat) VALUES "
-                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%s,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
+                "(%d,'%s','%s','%s', %d,%d,%d,%s,'%s',%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
                 msg->num_syn, msg->bit_voc, (msg->enable ? "true" : "false"), objet,
-                (msg->sms ? "true" : "false"), msg->type_voc, msg->vitesse_voc,
-                msg->time_repeat
+                msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat
               );
     g_free(libelle);
     g_free(objet);
@@ -191,7 +190,7 @@
        msg->type        = atoi(db->row[2]);
        msg->num_syn     = atoi(db->row[3]);
        msg->bit_voc     = atoi(db->row[4]);
-       msg->enable  = atoi(db->row[5]);
+       msg->enable      = atoi(db->row[5]);
        msg->sms         = atoi(db->row[7]);
        msg->type_voc    = atoi(db->row[10]);
        msg->vitesse_voc = atoi(db->row[11]);
@@ -237,7 +236,7 @@
        msg->type        = atoi(db->row[2]);
        msg->num_syn     = atoi(db->row[3]);
        msg->bit_voc     = atoi(db->row[4]);
-       msg->enable  = atoi(db->row[5]);
+       msg->enable      = atoi(db->row[5]);
        msg->sms         = atoi(db->row[7]);
        msg->type_voc    = atoi(db->row[10]);
        msg->vitesse_voc = atoi(db->row[11]);
@@ -284,12 +283,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,libelle='%s',type=%d,num_syn=%d,bit_voc=%d,enable=%s,objet='%s',sms=%s,"
+                "num=%d,libelle='%s',type=%d,num_syn=%d,bit_voc=%d,enable=%s,objet='%s',sms=%d,"
                 "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d "
                 "WHERE id=%d",
                 NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->bit_voc,
-                               (msg->enable ? "true" : "false"),
-                               objet, (msg->sms ? "true" : "false"), 
+                               (msg->enable ? "true" : "false"), objet, msg->sms,
                                libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
                                msg->time_repeat,
                 msg->id );

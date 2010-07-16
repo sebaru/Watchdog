@@ -78,6 +78,34 @@
   };
 
 /**********************************************************************************************************/
+/* Type_vers_string: renvoie le type string associé                                                       */
+/* Entrée: le type numérique                                                                              */
+/* Sortie: la chaine de caractère                                                                         */
+/**********************************************************************************************************/
+ gchar *Type_vers_string ( guint32 type )
+  { switch (type)
+     { case MSG_ETAT     : return( _("Info") );
+       case MSG_ALERTE   : return( _("Alerte") );
+       case MSG_ALARME   : return( _("Alarme") );
+       case MSG_DEFAUT   : return( _("Trouble") );
+       case MSG_VEILLE   : return( _("Veille") );
+     }
+    return( _("Unknown") );
+  }
+/**********************************************************************************************************/
+/* Type_sms_vers_string: renvoie le type de sms associé                                                   */
+/* Entrée: le type numérique                                                                              */
+/* Sortie: la chaine de caractère                                                                         */
+/**********************************************************************************************************/
+ gchar *Type_sms_vers_string ( guint32 type )
+  { switch (type)
+     { case MSG_SMS_NONE  : return( _("-- Aucun SMS --") );
+       case MSG_SMS_GSM   : return( _("- SMS via GSM- ") );
+       case MSG_SMS_SMSBOX: return( _("SMS via SMSBOX ") );
+     }
+    return( _("Unknown") );
+  }
+/**********************************************************************************************************/
 /* CB_effacer_message: Fonction appelée qd on appuie sur un des boutons de l'interface                    */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
@@ -394,9 +422,9 @@
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NOTINHIB);               /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
-    renderer = gtk_cell_renderer_toggle_new();                              /* Colonne de l'id du message */
+    renderer = gtk_cell_renderer_text_new();                                /* Colonne de l'id du message */
     colonne = gtk_tree_view_column_new_with_attributes ( _("SMS"), renderer,
-                                                         "active", COLONNE_SMS,
+                                                         "text", COLONNE_SMS,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SMS);                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
@@ -526,7 +554,7 @@
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NOTINHIB, message->enable,
-                         COLONNE_SMS, message->sms,
+                         COLONNE_SMS, Type_sms_vers_string(message->sms),
                          COLONNE_ID, message->id,
                          COLONNE_NUM, chaine,
                          COLONNE_REPEAT, message->time_repeat,

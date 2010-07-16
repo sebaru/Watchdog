@@ -49,15 +49,15 @@
  static GtkWidget *Entry_objet;                                                       /* Objet du message */
  static GtkWidget *Combo_type;                                                  /* Type actuel du message */
  static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
- static GtkWidget *Check_enable;                              /* Le message est-il actif ou inhibe ?? */
- static GtkWidget *Check_sms;                                 /* Le message doit-il etre envoyé par sms ? */
+ static GtkWidget *Check_enable;                                  /* Le message est-il actif ou inhibe ?? */
+ static GtkWidget *Combo_sms;                                 /* Le message doit-il etre envoyé par sms ? */
  static GtkWidget *Spin_bit_voc;                                                   /* Numéro du bit vocal */
  static GtkWidget *Entry_bit_voc;                                /* Mnémonique correspondant au bit vocal */
  static GtkWidget *Spin_vitesse_voc;                                 /* Vitesse de restitution de la voix */
  static GtkWidget *Spin_time_repeat;                                          /* Intervalle de repetition */
  static GtkWidget *Combo_type_voc;                               /* Type actuel de la voix de restitution */
  static GList *Liste_index_syn;
- static struct CMD_TYPE_MESSAGE Edit_msg;                                   /* Message en cours d'édition */
+ static struct CMD_TYPE_MESSAGE Msg;                                        /* Message en cours d'édition */
 
 /**********************************************************************************************************/
 /* Jouer_message_audio : Joue le message audio en paramètre                                               */
@@ -138,6 +138,26 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_message ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index;
+
+    g_snprintf( Msg.libelle, sizeof(Msg.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    g_snprintf( Msg.libelle_audio, sizeof(Msg.libelle_audio),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
+    g_snprintf( Msg.libelle_sms, sizeof(Msg.libelle_sms),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
+    g_snprintf( Msg.objet, sizeof(Msg.objet),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
+    Msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
+    Msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
+    Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
+    Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+    index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
+    Msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
+    Msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
+    Msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
+    Msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
+    Msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
+
     switch(reponse)
      { case GTK_RESPONSE_APPLY:
              { Jouer_message_audio ( gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ),
@@ -147,52 +167,9 @@
                return(TRUE);
              }
        case GTK_RESPONSE_OK:
-             { if (edition)
-                { g_snprintf( Edit_msg.libelle, sizeof(Edit_msg.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-                  g_snprintf( Edit_msg.libelle_audio, sizeof(Edit_msg.libelle_audio),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
-                  g_snprintf( Edit_msg.libelle_sms, sizeof(Edit_msg.libelle_sms),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
-                  g_snprintf( Edit_msg.objet, sizeof(Edit_msg.objet),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
-                  Edit_msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
-                  Edit_msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
-                  Edit_msg.sms        = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_sms) );
-                  Edit_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-                  index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-                  Edit_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-                  Edit_msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
-                  Edit_msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
-                  Edit_msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
-                  Edit_msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
-                  Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
-                                (gchar *)&Edit_msg, sizeof( struct CMD_TYPE_MESSAGE ) );
-                }
-               else
-                { struct CMD_TYPE_MESSAGE new_msg;
-                  g_snprintf( new_msg.libelle, sizeof(new_msg.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-                  g_snprintf( new_msg.libelle_audio, sizeof(new_msg.libelle_audio),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
-                  g_snprintf( new_msg.libelle_sms, sizeof(new_msg.libelle_sms),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
-                  g_snprintf( new_msg.objet, sizeof(new_msg.objet),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
-                  new_msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
-                  new_msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
-                  new_msg.sms        = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_sms) );
-                  new_msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-                  index              = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-                  new_msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-                  new_msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
-                  new_msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
-                  new_msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
-                  new_msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
-
-                  Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
-                                (gchar *)&new_msg, sizeof( struct CMD_TYPE_MESSAGE ) );
-                }
+             { Envoi_serveur( TAG_MESSAGE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MESSAGE
+                                                    : SSTAG_CLIENT_ADD_MESSAGE),
+                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
              }
             break;
        case GTK_RESPONSE_CANCEL:
@@ -212,7 +189,7 @@
     g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->mnemo, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-    if (Edit_msg.num_syn == syn->id)
+    if (Msg.num_syn == syn->id)
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
                                   g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
                                 );
@@ -252,9 +229,9 @@
     gint cpt;
 
     if (edit_msg)
-     { memcpy( &Edit_msg, edit_msg, sizeof(struct CMD_TYPE_MESSAGE) );    /* Save pour utilisation future */
+     { memcpy( &Msg, edit_msg, sizeof(struct CMD_TYPE_MESSAGE) );    /* Save pour utilisation future */
      }
-    else memset (&Edit_msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );                  /* Sinon RAZ structure */
+    else memset (&Msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );                  /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_msg ? _("Edit a message") : _("Add a message")),
                                            GTK_WINDOW(F_client),
@@ -284,8 +261,10 @@
     Check_enable = gtk_check_button_new_with_label( _("Enable") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, 0, 1 );
 
-    Check_sms = gtk_check_button_new_with_label( _("Sms") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_sms, 1, 2, 0, 1 );
+    Combo_sms = gtk_combo_box_new_text();
+    for ( cpt=0; cpt<NBR_TYPE_MSG_SMS; cpt++ )
+     { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_sms), Type_sms_vers_string(cpt) ); }
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_sms, 1, 2, 0, 1 );
 
     texte = gtk_label_new( _("MsgID") );                 /* Id unique du message en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
@@ -365,18 +344,18 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, 8, 9 );
 
     if (edit_msg)                                                              /* Si edition d'un message */
-     { Edit_msg.id = edit_msg->id;
-       Edit_msg.num_syn = edit_msg->num_syn;
-       Edit_msg.bit_voc = edit_msg->bit_voc;
-       Edit_msg.vitesse_voc = edit_msg->vitesse_voc;
+     { Msg.id = edit_msg->id;
+       Msg.num_syn = edit_msg->num_syn;
+       Msg.bit_voc = edit_msg->bit_voc;
+       Msg.vitesse_voc = edit_msg->vitesse_voc;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib_audio), edit_msg->libelle_audio );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib_sms), edit_msg->libelle_sms );
        gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_msg->objet );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_msg->type );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type_voc), edit_msg->type_voc );
+       gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_sms), edit_msg->sms );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_msg->enable );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_sms), edit_msg->sms );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_msg->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_voc), edit_msg->bit_voc );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_vitesse_voc), edit_msg->vitesse_voc );

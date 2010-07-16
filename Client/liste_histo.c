@@ -81,21 +81,7 @@
     GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
     GNOMEUIINFO_END
   };
-/**********************************************************************************************************/
-/* Type_vers_string: renvoie le type string associé                                                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- gchar *Type_vers_string ( guint32 type )
-  { switch (type)
-     { case MSG_ETAT     : return( _("Info") );
-       case MSG_ALERTE   : return( _("Alerte") );
-       case MSG_ALARME   : return( _("Alarme") );
-       case MSG_DEFAUT   : return( _("Trouble") );
-       case MSG_VEILLE   : return( _("Veille") );
-     }
-    return( _("Unknown") );
-  }
+
 /**********************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
 /* Entrée: rien                                                                                           */

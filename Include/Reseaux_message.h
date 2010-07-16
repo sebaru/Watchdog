@@ -41,6 +41,13 @@
     NBR_TYPE_MSG
   };
 
+ enum
+  { MSG_SMS_NONE,
+    MSG_SMS_GSM,
+    MSG_SMS_SMSBOX,
+    NBR_TYPE_MSG_SMS
+  };
+
  struct CMD_TYPE_MESSAGE
   { guint  id;
     guint  num;                                                    /* Numero du message dans la structure */
@@ -50,7 +57,7 @@
     gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean enable;                              /* Flag pour la gestion par exemple de l'inhibition ... */
-    gboolean sms;                                                                       /* Envoi de sms ? */
+    guint  sms;                                                                         /* Envoi de sms ? */
     guint  num_syn;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint  bit_voc;                                       /* Numéro du Monostable associé au profil vocal */
     guint  vitesse_voc;                                              /* Vitesse de restitution de la voix */
