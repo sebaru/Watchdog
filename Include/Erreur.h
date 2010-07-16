@@ -54,6 +54,7 @@
  #define  DEBUG_ADMIN               (1<<13) /* Debug connexion ADMIN */
  #define  DEBUG_RS485               (1<<14) /* Debug modules RS485 */
  #define  DEBUG_ONDULEUR            (1<<15) /* Debug modules ONDULEUR */
+ #define  DEBUG_SMS                 (1<<16) /* Debug envoi SMS */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

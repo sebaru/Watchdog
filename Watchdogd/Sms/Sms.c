@@ -32,6 +32,7 @@
  #include <string.h>
  #include <unistd.h>
  #include <gnokii.h>
+ #include <curl/curl.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
@@ -42,8 +43,8 @@
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Envoyer_sms ( gchar *libelle )
-  { gchar *copie;
+ void Envoyer_sms ( struct CMD_TYPE_MESSAGE *msg )
+  { struct CMD_TYPE_MESSAGE *copie;
     gint nbr;
 
     pthread_mutex_lock( &Partage->com_sms.synchro );      /* On recupere le nombre de sms en attente */
@@ -51,10 +52,11 @@
     pthread_mutex_unlock( &Partage->com_sms.synchro );
 
     if (nbr > 50)
-     { Info( Config.log, DEBUG_INFO, "Envoyer_sms: liste d'attente pleine" ); return; }
+     { Info( Config.log, DEBUG_SMS, "Envoyer_sms: liste d'attente pleine" ); return; }
 
-    copie = g_strdup ( libelle );
-    if (!copie) { Info( Config.log, DEBUG_MEM, "Envoyer_sms: pas assez de mémoire" ); return; }
+    copie = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    if (!copie) { Info( Config.log, DEBUG_MEM, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
+    memcpy ( copie, msg, sizeof(struct CMD_TYPE_MESSAGE) );
 
     pthread_mutex_lock( &Partage->com_sms.synchro );
     Partage->com_sms.liste_sms = g_list_append ( Partage->com_sms.liste_sms, copie );
@@ -66,7 +68,8 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Run_sms ( void )
-  { static struct gn_statemachine *state;
+  { struct CMD_TYPE_MESSAGE *msg;
+    static struct gn_statemachine *state;
     static gn_sms_folder folder;
     static gn_sms_folder_list folderlist;
     static GList *liste_sms;
@@ -79,13 +82,13 @@
     Info ( Config.log, DEBUG_INFO, "SMS: Run_sms: Demarrage" );
 
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                  /* Read config file */
-     { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Read Phone profile NOK", gn_error_print(error) );
+     { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Read Phone profile NOK", gn_error_print(error) );
        Info_n( Config.log, DEBUG_FORK, "SMS: Run_sms: Down", pthread_self() );
        pthread_exit(GINT_TO_POINTER(0));
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
-     { Info_c( Config.log, DEBUG_INFO, "SMS: Run_sms: Open Phone NOK", gn_error_print(error) );
+     { Info_c( Config.log, DEBUG_SMS, "SMS: Run_sms: Open Phone NOK", gn_error_print(error) );
        Info_n( Config.log, DEBUG_FORK, "SMS: Run_sms: Down", pthread_self() );
        pthread_exit(GINT_TO_POINTER(0));
      }
@@ -93,7 +96,7 @@
 #ifdef bouh
 
     if ((error = gn_gsm_initialise(&state)) != GN_ERR_NONE)                           /* Connect to phone */
-     { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: INIT NOK", gn_error_print(error) );
+     { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: INIT NOK", gn_error_print(error) );
        Info_n( Config.log, DEBUG_FORK, "SMS: Run_sms: Down", pthread_self() );
        pthread_exit(GINT_TO_POINTER(0));
      }
@@ -132,20 +135,20 @@
              if ( ! strncmp( (gchar *)sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )
               { guint num_bit;
                 num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
-                Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Recu SMS", (gchar *)sms.user_data[0].u.text );
-                Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:       de", sms.remote.number );
+                Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Recu SMS", (gchar *)sms.user_data[0].u.text );
+                Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms:       de", sms.remote.number );
                 gn_sms_delete (&data, state);                         /* On l'a traité, on peut l'effacer */
                 Envoyer_commande_dls ( num_bit );                             /* Activation du monostable */
               }
              else
-              { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Wrong CDE", (gchar *)sms.user_data[0].u.text );
-                Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms:        de", sms.remote.number );
+              { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Wrong CDE", (gchar *)sms.user_data[0].u.text );
+                Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms:        de", sms.remote.number );
                 gn_sms_delete (&data, state);                         /* On l'a traité, on peut l'effacer */
               }
            }
           else if (error == GN_ERR_INVALIDLOCATION) break;    /* On regarde toutes les places de stockage */
           else if (error != GN_ERR_UNKNOWN)
-                { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: erreor", gn_error_print(error) ); }
+                { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: error", gn_error_print(error) ); }
         }
 /************************************************ Envoi de SMS ********************************************/
        if ( !Partage->com_sms.liste_sms )                               /* Attente de demande d'envoi SMS */
@@ -154,58 +157,88 @@
           continue;
         }
 
-       Info( Config.log, DEBUG_DLS, "SMS: Run_sms send: debut" );
+       Info( Config.log, DEBUG_SMS, "SMS: Run_sms send: debut" );
        pthread_mutex_lock( &Partage->com_sms.synchro );
        liste_sms = Partage->com_sms.liste_sms;                         /* Sauvegarde du ptr sms a envoyer */
        pthread_mutex_unlock( &Partage->com_sms.synchro );
 
-       gn_sms_default_submit(&sms);                                          /* The memory is zeroed here */
+       msg = liste_sms->data;
+/**************************************** Envoi en mode GSM ***********************************************/
+       if (msg->sms == MSG_SMS_GSM)
+        { gn_sms_default_submit(&sms);                                       /* The memory is zeroed here */
 
-       memset(&sms.remote.number, 0, sizeof(sms.remote.number));
-       strncpy(sms.remote.number, "0683426100", sizeof(sms.remote.number) - 1);         /* Number a m'man */
-       if (sms.remote.number[0] == '+') 
-            { sms.remote.type = GN_GSM_NUMBER_International; }
-       else { sms.remote.type = GN_GSM_NUMBER_Unknown; }
+          memset(&sms.remote.number, 0, sizeof(sms.remote.number));
+          strncpy(sms.remote.number, "0683426100", sizeof(sms.remote.number) - 1);      /* Number a m'man */
+          if (sms.remote.number[0] == '+') 
+               { sms.remote.type = GN_GSM_NUMBER_International; }
+          else { sms.remote.type = GN_GSM_NUMBER_Unknown; }
 
-       if (!sms.smsc.number[0])                                                   /* Récupération du SMSC */
-        { data.message_center = calloc(1, sizeof(gn_sms_message_center));
-          data.message_center->id = 1;
-          if (gn_sm_functions(GN_OP_GetSMSCenter, &data, state) == GN_ERR_NONE)
-           { strcpy(sms.smsc.number, data.message_center->smsc.number);
-             sms.smsc.type = data.message_center->smsc.type;
+          if (!sms.smsc.number[0])                                                /* Récupération du SMSC */
+           { data.message_center = calloc(1, sizeof(gn_sms_message_center));
+             data.message_center->id = 1;
+             if (gn_sm_functions(GN_OP_GetSMSCenter, &data, state) == GN_ERR_NONE)
+              { strcpy(sms.smsc.number, data.message_center->smsc.number);
+                sms.smsc.type = data.message_center->smsc.type;
+              }
+             else
+              { Info ( Config.log, DEBUG_SMS, "SMS: Run_sms: Pb avec le SMSC" ); }
+             free(data.message_center);
+           }
+
+          if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
+
+          sms.user_data[0].length = g_snprintf( sms.user_data[0].u.text, sizeof (sms.user_data[0].u.text),
+                                                "%s", msg->libelle_sms );
+        
+          sms.user_data[0].type = GN_SMS_DATA_Text;
+          if (!gn_char_def_alphabet(sms.user_data[0].u.text))
+           { sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2; }
+
+          sms.user_data[1].type = GN_SMS_DATA_None;
+/*	sms.delivery_report = true; */
+          data.sms = &sms;                                                                /* Envoi du SMS */
+          error = gn_sms_send(&data, state);
+          if (error == GN_ERR_NONE)
+           { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Ok", msg->libelle_sms ); }
+          else
+           { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok", gn_error_print(error)); }
+        }
+/**************************************** Envoi en mode SMSBOX ********************************************/
+       else if (msg->sms == MSG_SMS_SMSBOX)
+        { gchar chaine[256], erreur[CURL_ERROR_SIZE+1];
+          CURLcode res;
+          CURL *curl;
+
+          g_snprintf( chaine, sizeof(chaine), 
+                      "https://api.smsbox.fr/api.php?login=lefevreseb&pass=mais0nSMS"
+                      "&msg=%s&dest=0683426100&origine=debugvar&mode=Economique",
+                      msg->libelle_sms
+                    );
+
+          curl = curl_easy_init();
+          if (curl)
+           { Info_c( Config.log, DEBUG_INFO, "Envoi SMSBOX", chaine );
+             curl_easy_setopt(curl, CURLOPT_URL, chaine );
+             curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+             curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
+             res = curl_easy_perform(curl);
+             if (!res)
+              { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS OK", msg->libelle_sms ); }
+             else
+              { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL", erreur); }
            }
           else
-           { Info ( Config.log, DEBUG_INFO, "SMS: Run_sms: Pb avec le SMSC" ); }
-          free(data.message_center);
+           { Info ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL"); }
+          curl_easy_cleanup(curl);
         }
-
-       if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
-
-       sms.user_data[0].length = g_snprintf( sms.user_data[0].u.text, sizeof (sms.user_data[0].u.text),
-                                             "%s", (gchar *)liste_sms->data );
-        
-       sms.user_data[0].type = GN_SMS_DATA_Text;
-       if (!gn_char_def_alphabet(sms.user_data[0].u.text))
-        { sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2; }
-
-       sms.user_data[1].type = GN_SMS_DATA_None;
-/*	sms.delivery_report = true; */
-       data.sms = &sms;                                                                   /* Envoi du SMS */
-       error = gn_sms_send(&data, state);
-       if (error == GN_ERR_NONE)
-        { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Envoi SMS Ok", 
-                   liste_sms->data ); }
-       else
-        { Info_c ( Config.log, DEBUG_INFO, "SMS: Run_sms: Envoi SMS Nok", gn_error_print(error)); }
-
        pthread_mutex_lock( &Partage->com_sms.synchro );
-       g_free( liste_sms->data );
-       Partage->com_sms.liste_sms = g_list_remove ( Partage->com_sms.liste_sms, liste_sms->data );
+       Partage->com_sms.liste_sms = g_list_remove ( Partage->com_sms.liste_sms, msg );
        Info_n ( Config.log, DEBUG_INFO, "SMS: Run_sms: Reste a envoyer",
                 g_list_length(Partage->com_sms.liste_sms) );
        pthread_mutex_unlock( &Partage->com_sms.synchro );
+       g_free( msg );
 
-       Info( Config.log, DEBUG_DLS, "SMS: Run_sms send: fin" );
+       Info( Config.log, DEBUG_SMS, "SMS: Run_sms send: fin" );
      }
 
     gn_lib_phone_close(state);

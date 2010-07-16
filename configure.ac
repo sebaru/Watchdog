@@ -21,14 +21,20 @@ AC_ISC_POSIX
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
-GNOME2_CFLAGS="`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0`"
+GNOME2_CFLAGS=`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0`
 AC_SUBST(GNOME2_CFLAGS)
+
+CURL_CFLAGS=`pkg-config --cflags libcurl`
+AC_SUBST(CURL_CFLAGS)
 
 BONOBO_CFLAGS=`pkg-config --cflags libbonobo-2.0`
 AC_SUBST(BONOBO_CFLAGS)
 
-GNOME2_LIBS="`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0`"
+GNOME2_LIBS=`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0`
 AC_SUBST(GNOME2_LIBS)
+
+CURL_LIBS=`pkg-config --libs libcurl`
+AC_SUBST(CURL_LIBS)
 
 MYSQL_CFLAGS=`mysql_config --cflags`
 AC_SUBST(MYSQL_CFLAGS)
@@ -39,14 +45,14 @@ AC_SUBST(MYSQL_LIBS)
 BONOBO_LIBS=`pkg-config --libs libbonobo-2.0`
 AC_SUBST(BONOBO_LIBS)
 
-GNOKII_LIBS="-lgnokii" 
+GNOKII_LIBS=`pkg-config --libs gnokii`
 dnl `pkg-config --libs gnokii`
 AC_SUBST(GNOKII_LIBS)
 
-UPS_CFLAGS="`pkg-config --cflags libupsclient`"
+UPS_CFLAGS=`pkg-config --cflags libupsclient`
 AC_SUBST(UPS_CFLAGS)
 
-UPS_LIBS="`pkg-config --libs libupsclient`"
+UPS_LIBS=`pkg-config --libs libupsclient`
 AC_SUBST(UPS_LIBS)
 
 

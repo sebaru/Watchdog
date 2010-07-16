@@ -5,11 +5,12 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-noinst_LTLIBRARIES     = libsms.la
+noinst_LTLIBRARIES   = libsms.la
 libsms_la_SOURCES    = Sms.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
 	  $(MYSQL_CFLAGS) \
+	  $(CURL_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \

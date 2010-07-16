@@ -51,8 +51,8 @@
 
        if (Partage->g[num].next_repeat < Partage->top)
         { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
-          if (msg->sms)     Envoyer_sms   ( msg->libelle_sms );
-          if (msg->bit_voc) Ajouter_audio ( msg->num         );
+          if (msg->sms)     Envoyer_sms   ( msg      );
+          if (msg->bit_voc) Ajouter_audio ( msg->num );
           g_free(msg);
           Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
         }
@@ -82,7 +82,7 @@
      }
 
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
-    if (msg->sms) Envoyer_sms ( msg->libelle_sms );
+    if (msg->sms)     Envoyer_sms   ( msg      );
     if (msg->bit_voc) Ajouter_audio ( msg->num );
     if (msg->time_repeat) 
      { pthread_mutex_lock( &Partage->com_msrv.synchro );

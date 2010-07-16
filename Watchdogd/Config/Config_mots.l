@@ -164,6 +164,9 @@ blanc         [\t ]+
 "CONNEXION"                { Config_lval.val = D_CONNEXION;
                              return(D_CONNEXION);
                            }
+"SMS"                      { Config_lval.val = D_SMS;
+                             return(D_SMS);
+                           }
 "="                        { Config_lval.val = EGAL;
                              return EGAL;
                            }                        

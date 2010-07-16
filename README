@@ -10,6 +10,7 @@
        [root@Server ~]# urpmi glib2-devel libgnomeui2-devel gtksourceview-devel
        [root@Server ~]# urpmi goocanvas-devel libvlc-devel nut-devel mysql-devel
        [root@Server ~]# urpmi gnokii-devel gtkdatabox-devel ungif4-devel libvlc-devel
+       [root@Server ~]# urpmi libcurl-devel
 
  - To Compile libvlc-gtk :
 
