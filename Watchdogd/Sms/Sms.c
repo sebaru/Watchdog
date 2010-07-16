@@ -226,7 +226,7 @@
     curl = curl_easy_init();
     if (curl)
      { Info_c( Config.log, DEBUG_INFO, "Envoi SMSBOX", chaine );
-       curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/" );
+       curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/api.php" );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
