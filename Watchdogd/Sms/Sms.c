@@ -168,7 +168,7 @@
 
     if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
-    sms.user_data[0].length = g_snprintf( sms.user_data[0].u.text, sizeof (sms.user_data[0].u.text),
+    sms.user_data[0].length = g_snprintf( (gchar *)sms.user_data[0].u.text, sizeof (sms.user_data[0].u.text),
                                           "%s", msg->libelle_sms );
         
     sms.user_data[0].type = GN_SMS_DATA_Text;
@@ -194,15 +194,19 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Envoi_sms_smsbox ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar chaine[256], erreur[CURL_ERROR_SIZE+1];
+  { gchar chaine[256], erreur[CURL_ERROR_SIZE+1], *sms;
     CURLcode res;
     CURL *curl;
 
+    sms = Normaliser_chaine( Config.log, msg->libelle_sms );
+    if (!sms) return;
+
     g_snprintf( chaine, sizeof(chaine), 
                 "https://api.smsbox.fr/api.php?login=lefevreseb&pass=mais0nSMS"
-                "&msg=%s&dest=0683426100&origine=debugvar&mode=Economique",
-                msg->libelle_sms
+                "&msg='%s'&dest=0683426100&origine=debugvar&mode=Economique",
+                sms
               );
+    g_free(sms);
 
     curl = curl_easy_init();
     if (curl)
