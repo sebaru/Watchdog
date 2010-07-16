@@ -200,43 +200,31 @@
     struct curl_httppost *formpost;
     struct curl_httppost *lastptr;
   
-/*    g_snprintf( chaine, sizeof(chaine), 
-                "https://api.smsbox.fr/api.php?login=lefevreseb&pass=mais0nSMS"
-                "&msg='%s'&dest=0683426100&origine=debugvar&mode=Economique",
-                sms
-              );*/
-
     formpost = lastptr = NULL;
-    curl_formadd(&formpost,
-                 &lastptr,
-                 CURLFORM_COPYNAME, "login",
-                 CURLFORM_COPYCONTENTS, "lefevreseb",
-                 CURLFORM_END); 
-    curl_formadd(&formpost,
-                 &lastptr,
-                 CURLFORM_COPYNAME, "pass",
-                 CURLFORM_COPYCONTENTS, "mais0nSMS",
-                 CURLFORM_END); 
-    curl_formadd(&formpost,
-                 &lastptr,
-                 CURLFORM_COPYNAME, "msg",
-                 CURLFORM_COPYCONTENTS, "testlibelle",
-                 CURLFORM_END); 
-    curl_formadd(&formpost,
-                 &lastptr,
-                 CURLFORM_COPYNAME, "dest",
-                 CURLFORM_COPYCONTENTS, "0683426100",
-                 CURLFORM_END); 
-    curl_formadd(&formpost,
-                 &lastptr,
-                 CURLFORM_COPYNAME, "origine",
-                 CURLFORM_COPYCONTENTS, "debugvar",
-                 CURLFORM_END); 
-    curl_formadd(&formpost,
-                 &lastptr,
-                 CURLFORM_COPYNAME, "mode",
-                 CURLFORM_COPYCONTENTS, "Economique",
-                 CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "login",
+                  CURLFORM_COPYCONTENTS, "lefevreseb",
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "pass",
+                  CURLFORM_COPYCONTENTS, "mais0nSMS",
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "msg",
+                  CURLFORM_COPYCONTENTS, msg->libelle_sms,
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "dest",
+                  CURLFORM_COPYCONTENTS, "0683426100",
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "origine",
+                  CURLFORM_COPYCONTENTS, "debugvar",
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "mode",
+                  CURLFORM_COPYCONTENTS, "Economique",
+                  CURLFORM_END);
 
     curl = curl_easy_init();
     if (curl)
