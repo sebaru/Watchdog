@@ -214,7 +214,7 @@
                  CURLFORM_COPYNAME, "pass",
                  CURLFORM_COPYCONTENTS, "mais0nSMS",
                  CURLFORM_COPYNAME, "msg",
-                 CURLFORM_COPYCONTENTS, "msg->libelle_sms",
+                 CURLFORM_COPYCONTENTS, "testlibelle",
                  CURLFORM_COPYNAME, "dest",
                  CURLFORM_COPYCONTENTS, "0683426100",
                  CURLFORM_COPYNAME, "origine",
