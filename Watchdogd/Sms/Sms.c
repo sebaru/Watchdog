@@ -194,24 +194,40 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Envoi_sms_smsbox ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar chaine[256], erreur[CURL_ERROR_SIZE+1], *sms;
+  { gchar chaine[256], erreur[CURL_ERROR_SIZE+1];
     CURLcode res;
     CURL *curl;
-
-    sms = Normaliser_chaine( Config.log, msg->libelle_sms );
-    if (!sms) return;
-
-    g_snprintf( chaine, sizeof(chaine), 
+    struct curl_httppost *formpost;
+    struct curl_httppost *lastptr;
+  
+/*    g_snprintf( chaine, sizeof(chaine), 
                 "https://api.smsbox.fr/api.php?login=lefevreseb&pass=mais0nSMS"
                 "&msg='%s'&dest=0683426100&origine=debugvar&mode=Economique",
                 sms
-              );
-    g_free(sms);
+              );*/
+
+    formpost = lastptr = NULL;
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "login",
+                 CURLFORM_COPYCONTENTS, "lefevreseb",
+                 CURLFORM_COPYNAME, "pass",
+                 CURLFORM_COPYCONTENTS, "mais0nSMS",
+                 CURLFORM_COPYNAME, "msg",
+                 CURLFORM_COPYCONTENTS, "msg->libelle_sms",
+                 CURLFORM_COPYNAME, "dest",
+                 CURLFORM_COPYCONTENTS, "0683426100",
+                 CURLFORM_COPYNAME, "origine",
+                 CURLFORM_COPYCONTENTS, "debugvar",
+                 CURLFORM_COPYNAME, "mode",
+                 CURLFORM_COPYCONTENTS, "Economique",
+                 CURLFORM_END); 
 
     curl = curl_easy_init();
     if (curl)
      { Info_c( Config.log, DEBUG_INFO, "Envoi SMSBOX", chaine );
-       curl_easy_setopt(curl, CURLOPT_URL, chaine );
+       curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/" );
+       curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
        res = curl_easy_perform(curl);
@@ -221,8 +237,9 @@
         { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL", erreur); }
      }
     else
-     { Info ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL"); }
+     { Info ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL Init"); }
     curl_easy_cleanup(curl);
+    curl_formfree(formpost);
   }
 /**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */
