@@ -28,7 +28,9 @@
 #ifndef _SMS_H_
  #define _SMS_H_
 
- struct COM_SMS                                                   /* Communication entre MSRV et SMS */
+ #define TOP_MIN_ENVOI_SMS     1200                           /* 2 minutes sans envoi de SMS au démarrage */
+
+ struct COM_SMS                                                        /* Communication entre MSRV et SMS */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_sms;                                              /* liste de struct MSGDB msg a envoyer */
     gboolean sigusr1;

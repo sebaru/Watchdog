@@ -162,7 +162,7 @@
           sms.smsc.type = data.message_center->smsc.type;
         }
        else
-        { Info ( Config.log, DEBUG_SMS, "SMS: Run_sms: Pb avec le SMSC" ); }
+        { Info ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Pb avec le SMSC" ); }
        free(data.message_center);
      }
 
@@ -178,11 +178,15 @@
     sms.user_data[1].type = GN_SMS_DATA_None;
 /*	sms.delivery_report = true; */
     data.sms = &sms;                                                                      /* Envoi du SMS */
-    error = gn_sms_send(&data, state);
-    if (error == GN_ERR_NONE)
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Ok", msg->libelle_sms ); }
-    else
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok", gn_error_print(error)); }
+    if (Partage->top < TOP_MIN_ENVOI_SMS)
+     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi trop tot !!", msg->libelle_sms ); }
+    else 
+     { error = gn_sms_send(&data, state);
+       if (error == GN_ERR_NONE)
+        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Ok", msg->libelle_sms ); }
+       else
+        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Nok", gn_error_print(error)); }
+     }
 
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
@@ -217,10 +221,21 @@
                   CURLFORM_COPYNAME,     "dest",
                   CURLFORM_COPYCONTENTS, "0683426100",
                   CURLFORM_END); 
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "origine",             /* 'debugvar' pour lancer en mode semonce */
-                  CURLFORM_COPYCONTENTS, VERSION,
-                  CURLFORM_END); 
+    if (Partage->top < TOP_MIN_ENVOI_SMS)
+     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi trop tot !!", msg->libelle_sms );
+       curl_formadd( &formpost, &lastptr,       /* Pas de SMS les 2 premières minutes de vie du processus */
+                     CURLFORM_COPYNAME,     "origine",          /* 'debugvar' pour lancer en mode semonce */
+                     CURLFORM_COPYCONTENTS, "debugvar",
+                     CURLFORM_END);
+     }
+    else
+     { curl_formadd( &formpost, &lastptr,       /* Pas de SMS les 2 premières minutes de vie du processus */
+                     CURLFORM_COPYNAME,     "origine",          /* 'debugvar' pour lancer en mode semonce */
+                     CURLFORM_COPYCONTENTS, VERSION,
+                     CURLFORM_END);
+     }
+
+
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "mode",
                   CURLFORM_COPYCONTENTS, "Economique",
@@ -234,12 +249,12 @@
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
        res = curl_easy_perform(curl);
        if (!res)
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS OK", msg->libelle_sms ); }
+        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS OK", msg->libelle_sms ); }
        else
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL", erreur); }
+        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL", erreur); }
      }
     else
-     { Info ( Config.log, DEBUG_SMS, "SMS: Run_sms: Envoi SMS Nok - Pb cURL Init"); }
+     { Info ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL Init"); }
     curl_easy_cleanup(curl);
     curl_formfree(formpost);
   }
