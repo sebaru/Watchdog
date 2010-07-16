@@ -194,12 +194,12 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Envoi_sms_smsbox ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar chaine[256], erreur[CURL_ERROR_SIZE+1];
-    CURLcode res;
-    CURL *curl;
+  { gchar erreur[CURL_ERROR_SIZE+1];
     struct curl_httppost *formpost;
     struct curl_httppost *lastptr;
-  
+    CURLcode res;
+    CURL *curl;
+    
     formpost = lastptr = NULL;
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "login",
@@ -218,8 +218,8 @@
                   CURLFORM_COPYCONTENTS, "0683426100",
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "origine",
-                  CURLFORM_COPYCONTENTS, "debugvar",
+                  CURLFORM_COPYNAME,     "origine",             /* 'debugvar' pour lancer en mode semonce */
+                  CURLFORM_COPYCONTENTS, VERSION,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "mode",
@@ -228,8 +228,7 @@
 
     curl = curl_easy_init();
     if (curl)
-     { Info_c( Config.log, DEBUG_INFO, "Envoi SMSBOX", chaine );
-       curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/api.php" );
+     { curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/api.php" );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
