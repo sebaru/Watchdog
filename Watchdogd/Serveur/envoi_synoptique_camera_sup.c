@@ -140,7 +140,7 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
-    if ( (! Recuperer_camera_supDB( Config.log, db, client->syn.id )) || db->nbr_result == 0 )
+    if ( ! Recuperer_camera_supDB( Config.log, db, client->syn.id ) )
      { Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
@@ -190,7 +190,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_camera_supDB( Config.log, db, client->num_supervision ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Client_mode( client, ENVOI_IXXX_SUPERVISION );
+       Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -205,8 +206,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
     for( ; ; )
      { camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
        if (!camera_sup)                                                                     /* Terminé ?? */
-        { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_IXXX_SUPERVISION );
+        { Client_mode( client, ENVOI_IXXX_SUPERVISION );
+          Libere_DB_SQL( Config.log, &db );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

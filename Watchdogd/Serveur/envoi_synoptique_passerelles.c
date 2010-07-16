@@ -108,8 +108,6 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-Info( Config.log, DEBUG_INFO, "Debut valider_editer_passerelle_atelier" );
-
     retour = Modifier_passerelleDB ( Config.log, Db_watchdog, rezo_pass );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
@@ -118,7 +116,6 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_passerelle_atelier" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-Info( Config.log, DEBUG_INFO, "fin valider_editer_passerelle_atelier" );
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */

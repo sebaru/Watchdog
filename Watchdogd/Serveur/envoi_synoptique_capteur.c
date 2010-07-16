@@ -191,7 +191,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_capteurDB( Config.log, db, client->num_supervision ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
+       Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -207,8 +208,8 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
      { struct CAPTEUR *capteur_new;;
        capteur = Recuperer_capteurDB_suite( Config.log, db );
        if (!capteur)                                                                        /* Terminé ?? */
-        { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
+        { Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
+          Libere_DB_SQL( Config.log, &db );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
