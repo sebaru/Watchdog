@@ -56,6 +56,7 @@
                Creer_page_supervision( syn->libelle, syn->id );         /* Creation de la page synoptique */
                Chercher_page_notebook( TYPE_PAGE_SUPERVISION, syn->id, TRUE );    /* Affichage de la page */
              }
+            break;
        case SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF:
              { struct CMD_ETAT_BIT_CTRL *change_motif;
                change_motif = (struct CMD_ETAT_BIT_CTRL *)connexion->donnees;

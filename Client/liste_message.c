@@ -552,7 +552,6 @@
     else
      { g_snprintf( audio, sizeof(audio), "- no -"); }
 
-printf("Visu message id %d %s %s\n", message->id, chaine, message->libelle );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NOTINHIB, message->enable,
                          COLONNE_SMS, Type_sms_vers_string(message->sms),

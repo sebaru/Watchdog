@@ -195,7 +195,6 @@
         }
        while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-printf("Envoi message %d %d %s\n", msg->id, msg->num, msg->libelle );
        Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,
                       (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
        g_free(msg);

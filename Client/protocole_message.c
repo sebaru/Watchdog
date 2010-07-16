@@ -47,6 +47,7 @@
      { case SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK:
              { if (!Tester_page_notebook(TYPE_PAGE_MESSAGE)) { Creer_page_message(); }
              }
+            break;
        case SSTAG_SERVEUR_ADD_MESSAGE_OK:
              { struct CMD_TYPE_MESSAGE *msg;
                msg = (struct CMD_TYPE_MESSAGE *)connexion->donnees;

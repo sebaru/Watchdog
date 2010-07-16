@@ -72,6 +72,7 @@
                g_list_free( Arrivee_groupe_propriete_syn );
                Arrivee_groupe_propriete_syn = NULL;
              }
+            break;
 /**********************************************************************************************************/
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2:
