@@ -395,7 +395,7 @@
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_BOOLEAN,                               /* Not_inhibe */
-                                              G_TYPE_BOOLEAN,                                      /* SMS */
+                                              G_TYPE_STRING,                                       /* SMS */
                                               G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_STRING,                                     /* Audio */
                                               G_TYPE_UINT,                                      /* Repeat */
