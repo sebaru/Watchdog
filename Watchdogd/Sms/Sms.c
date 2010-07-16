@@ -211,14 +211,29 @@
                  &lastptr,
                  CURLFORM_COPYNAME, "login",
                  CURLFORM_COPYCONTENTS, "lefevreseb",
+                 CURLFORM_END); 
+    curl_formadd(&formpost,
+                 &lastptr,
                  CURLFORM_COPYNAME, "pass",
                  CURLFORM_COPYCONTENTS, "mais0nSMS",
+                 CURLFORM_END); 
+    curl_formadd(&formpost,
+                 &lastptr,
                  CURLFORM_COPYNAME, "msg",
                  CURLFORM_COPYCONTENTS, "testlibelle",
+                 CURLFORM_END); 
+    curl_formadd(&formpost,
+                 &lastptr,
                  CURLFORM_COPYNAME, "dest",
                  CURLFORM_COPYCONTENTS, "0683426100",
+                 CURLFORM_END); 
+    curl_formadd(&formpost,
+                 &lastptr,
                  CURLFORM_COPYNAME, "origine",
                  CURLFORM_COPYCONTENTS, "debugvar",
+                 CURLFORM_END); 
+    curl_formadd(&formpost,
+                 &lastptr,
                  CURLFORM_COPYNAME, "mode",
                  CURLFORM_COPYCONTENTS, "Economique",
                  CURLFORM_END); 
