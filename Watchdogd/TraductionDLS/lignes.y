@@ -264,7 +264,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
                | EANA ENTIER ordre VALF
                 {{ int taille;
-                   taille = 35;
+                   taille = 40;
                    $$ = New_chaine( taille );
                    switch( $3 )
                     { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%8.2f,%d)", $4, $2 ); break;

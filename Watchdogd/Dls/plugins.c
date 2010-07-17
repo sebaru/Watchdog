@@ -57,7 +57,7 @@
                return(FALSE);
              }
 
-    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: handle", GPOINTER_TO_INT(handle) );
+    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: id", dls->id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
     dls->handle   = handle;
     dls->go       = Go;
