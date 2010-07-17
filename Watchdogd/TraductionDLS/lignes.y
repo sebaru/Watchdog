@@ -267,10 +267,10 @@ unite:          modulateur ENTIER HEURE ENTIER
                    taille = 40;
                    $$ = New_chaine( taille );
                    switch( $3 )
-                    { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%8.2f,%d)", $4, $2 ); break;
-                      case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%8.2f,%d)", $4, $2 ); break;
-                      case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%8.2f,%d)", $4, $2 ); break;
-                      case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%8.2f,%d)", $4, $2 ); break;
+                    { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
+                      case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
+                      case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
+                      case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
                     }
                 }}
                 | barre POUV expr PFERM
