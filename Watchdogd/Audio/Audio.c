@@ -58,6 +58,25 @@
 /**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
+ static void Jouer_wav ( gchar *fichier )
+  { gint pid;
+
+    Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: Envoi d'un wav", fichier );
+    pid = fork();
+    if (pid<0)
+     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: Lancement APLAY failed", pid ); }
+    else if (!pid)
+     { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
+       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: Lancement APLAY failed", pid );
+       _exit(0);
+     }
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: waiting for APLAY to finish pid", pid );
+    wait4(pid, NULL, 0, NULL );
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: APLAY finished pid", pid );
+  }
+/**********************************************************************************************************/
+/* Main: Fonction principale du RS485                                                                     */
+/**********************************************************************************************************/
  void Run_audio ( void )
   { struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
@@ -78,22 +97,27 @@
      { if (Partage->com_audio.sigusr1)                                            /* On a recu sigusr1 ?? */
         { Partage->com_audio.sigusr1 = FALSE;
           Info( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: SIGUSR1" );
+          pthread_mutex_lock( &Partage->com_audio.synchro );                             /* lockage futex */
+          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: Reste a traiter",
+                                           g_list_length(Partage->com_audio.liste_audio) );
+          pthread_mutex_unlock( &Partage->com_audio.synchro );
         }
 
        if (!Partage->com_audio.liste_audio)                               /* Si pas de message, on tourne */
         { sched_yield();
-          usleep(10000);
+          sleep(1);
           continue;
+        }
+
+       if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top)       /* Pas de message depuis xx */
+        { Jouer_wav("jingle.wav");                                              /* On balance le jingle ! */
+          Partage->com_audio.last_audio = Partage->top;
         }
 
        pthread_mutex_lock( &Partage->com_audio.synchro );                                /* lockage futex */
        num = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
        Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio,
                                                         GINT_TO_POINTER(num) );
-#ifdef DEBUG
-       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: Reste a traiter",
-                                       g_list_length(Partage->com_audio.liste_audio) );
-#endif
        pthread_mutex_unlock( &Partage->com_audio.synchro );
 
        Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Préparation du message id", num );

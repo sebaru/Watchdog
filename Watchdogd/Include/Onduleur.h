@@ -32,7 +32,7 @@
 
  #define ONDULEUR_PORT_TCP    3493                        /* Port de connexion TCP pour accès aux modules */
  #define ONDULEUR_RETRY       1800                     /* 3 minutes entre chaque retry si pb de connexion */
- #define ONDULEUR_POLLING       50              /* Si tout va bien, on s'y connecte toutes les 5 secondes */
+ #define ONDULEUR_POLLING      100             /* Si tout va bien, on s'y connecte toutes les 10 secondes */
 
  #define NOM_TABLE_ONDULEUR   "onduleurs"
 

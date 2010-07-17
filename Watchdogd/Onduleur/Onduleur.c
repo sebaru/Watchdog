@@ -575,7 +575,9 @@
               }
            }
           else
-           { if ( Interroger_onduleur ( module ) )
+           { Info_n( Config.log, DEBUG_ONDULEUR,
+                     "ONDULEUR: Run_onduleur: Interrogation onduleur ID", module->onduleur.id );
+             if ( Interroger_onduleur ( module ) )
               { module->date_retente = Partage->top + ONDULEUR_POLLING; }/* Update toutes les xx secondes */
              else
               { Deconnecter_module ( module );

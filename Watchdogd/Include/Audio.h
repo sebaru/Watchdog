@@ -28,10 +28,13 @@
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
+ #define AUDIO_JINGLE                3000                /* Jingle si pas de message au bout de 5 minutes */
+
  struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_audio;                                                   /* liste de message a prononcer */
     gboolean sigusr1;
+    gint last_audio;
   };
 
 /*************************************** Définitions des prototypes ***************************************/
