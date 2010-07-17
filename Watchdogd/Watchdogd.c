@@ -215,6 +215,7 @@
         { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
            { Checker_scenario( cpt ); }
           Gerer_manque_process();                            /* Detection du manque de serveurs en ecoute */
+          Gerer_message_repeat(db);
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 

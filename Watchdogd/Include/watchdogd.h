@@ -198,6 +198,7 @@
  extern gboolean Demarrer_motion_detect ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
+ extern void Gerer_message_repeat ( struct DB *Db_watchdog );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                       /* Dans distrib_Ixxx.c */
 

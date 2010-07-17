@@ -49,7 +49,7 @@
     while (liste)
      { num = GPOINTER_TO_INT(liste->data);                               /* Recuperation du numero de msg */
 
-       if (Partage->g[num].next_repeat < Partage->top)
+       if (Partage->g[num].next_repeat <= Partage->top)
         { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
           if (msg->sms)     Envoyer_sms   ( msg      );
           if (msg->bit_voc) Ajouter_audio ( msg->num );
