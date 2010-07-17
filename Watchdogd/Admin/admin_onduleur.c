@@ -51,6 +51,9 @@
   { GList *liste_modules;
     gchar chaine[512];
 
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+       
     pthread_mutex_lock( &Partage->com_onduleur.synchro );
     liste_modules = Partage->com_onduleur.Modules_ONDULEUR;
     while ( liste_modules )

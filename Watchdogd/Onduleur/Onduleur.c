@@ -459,7 +459,7 @@
            SEA( module->onduleur.ea_ups_load, valeur );                    /* Numéro de l'EA pour le load */
          }
 
-    query[2] = "ups.real_power";
+    query[2] = "ups.realpower";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
      { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
