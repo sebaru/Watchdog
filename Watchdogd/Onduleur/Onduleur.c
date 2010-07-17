@@ -433,13 +433,12 @@
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Interroger_onduleur( struct MODULE_ONDULEUR *module )
+ static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
   { const char *query[3];
     guint numa, valeur;
     char **answer;
     int retour;
 
-    module->date_retente = Partage->top + ONDULEUR_RETRY / 3;               /* Ce n'est pas du temps réel */
 
     query[0] = "VAR";
     query[1] = module->onduleur.ups;
@@ -449,11 +448,7 @@
     if (retour == -1)
      { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER load",
                upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
-        { Deconnecter_module ( module );
-          module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
-          return;
-        }
+       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
     else { valeur = atoi (answer[3]);
            SEA( module->onduleur.ea_ups_load, valeur );                    /* Numéro de l'EA pour le load */
@@ -464,11 +459,7 @@
     if (retour == -1)
      { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
                upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
-        { Deconnecter_module ( module );
-          module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
-          return;
-        }
+       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
     else { valeur = atoi (answer[3]);
            SEA( module->onduleur.ea_ups_real_power, valeur );        /* Numéro de l'EA pour le real power */
@@ -479,11 +470,7 @@
     if (retour == -1)
      { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER battery_charge",
                upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
-        { Deconnecter_module ( module );
-          module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
-          return;
-        }
+       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
     else { valeur = atoi (answer[3]);
            SEA( module->onduleur.ea_battery_charge, valeur );   /* Numéro de l'EA pour la charge batterie */
@@ -494,15 +481,12 @@
     if (retour == -1)
      { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER input_voltage",
                upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)
-        { Deconnecter_module ( module );
-          module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On ne retentera que dans longtemps */
-          return;
-        }
+       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
     else { valeur = atoi (answer[3]);
            SEA( module->onduleur.ea_input_voltage, valeur );  
          }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du ONDULEUR                                                                  */
@@ -591,7 +575,13 @@
               }
            }
           else
-           { Interroger_onduleur ( module ); }
+           { if ( Interroger_onduleur ( module ) )
+              { module->date_retente = Partage->top + ONDULEUR_POLLING; }/* Update toutes les xx secondes */
+             else
+              { Deconnecter_module ( module );
+                module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On retente dans longtemps */
+              }
+           }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
      }

@@ -167,6 +167,9 @@ blanc         [\t ]+
 "SMS"                      { Config_lval.val = D_SMS;
                              return(D_SMS);
                            }
+"AUDIO"                    { Config_lval.val = D_AUDIO;
+                             return(D_AUDIO);
+                           }
 "="                        { Config_lval.val = EGAL;
                              return EGAL;
                            }                        
