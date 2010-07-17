@@ -130,7 +130,9 @@
           Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
 
           g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
+          unlink( nom_fichier );                                      /* Destruction des anciens fichiers */
           g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
+          unlink( cible );                                            /* Destruction des anciens fichiers */
 /***************************************** Création du PHO ************************************************/
           Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de ESPEAK", num );
           pid = fork();
