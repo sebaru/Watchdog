@@ -1,9 +1,0 @@
-\chapter{Connexion}
-Premier contact entre le client et le serveur, cette connexion doit être authentifiée et sécurisée correctement.
-
-\section{Pré-requis} 
-Nous connaissons à chaque instant l'état d'avancement de la connexion grâce au champ {\bf mode} de la structure {\it CLIENT} associée à chaque client. \\
-Le client entre donc dans le mode {\bf ATTENTE\_CONNEXION\_SSL}
-/************************* Connexion ******************/
-\section{Connexion du client}
-L'authentification et la securité des transmissions sont garanties via la couche securisée SSL. Apres le hand-shake ssl, le serveur se met en attente d'un id et d'un mot de passe de la part du client. Un système de timeout permet de deconnecter un client si celui-ci depasse le temps de reponse imparti.
