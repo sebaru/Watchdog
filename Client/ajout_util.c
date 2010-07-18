@@ -288,7 +288,24 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_utilisateur ( GtkDialog *dialog, gint reponse,
                                                  gboolean edition )
-  { switch(reponse)
+  { guint *gids;
+
+    g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
+                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
+    g_snprintf( Edit_util.code_en_clair, sizeof(Edit_util.code_en_clair),
+                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ) );
+
+    Edit_util.date_expire = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
+    Edit_util.expire      = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
+    Edit_util.changepass  = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_changepass));
+    Edit_util.actif       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_actif));
+    Edit_util.cansetpass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpass));
+    Edit_util.setpassnow = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow));
+
+    gids = Recuperer_groupes_util();
+    memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
+
+    switch(reponse)
      { case GTK_RESPONSE_OK:
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow)) &&
                 g_utf8_collate( gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ),
@@ -304,50 +321,11 @@
                                          G_CALLBACK(gtk_widget_destroy), dialog );
                return(TRUE);
              }
-            if (edition)                                                             /* Si mode edition */
-             { guint *gids;
-
-               Edit_util.cansetpass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpass));
-               Edit_util.setpassnow = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow));
-               g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
-                           "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
-               g_snprintf( Edit_util.code_en_clair, sizeof(Edit_util.code_en_clair),
-                           "%s", gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ) );
-
-               Edit_util.date_expire = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
-               Edit_util.expire      = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
-               Edit_util.changepass  = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_changepass));
-               Edit_util.actif       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_actif));
-
-               gids = Recuperer_groupes_util();
-               memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
-               Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_VALIDE_EDIT_UTIL,
+           Envoi_serveur( TAG_UTILISATEUR, (edition ? SSTAG_CLIENT_VALIDE_EDIT_UTIL
+                                                    : SSTAG_CLIENT_ADD_UTIL),
                               (gchar *)&Edit_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-             }
-            else                                                             /* Si ajout d'un utilisateur */
-             { struct CMD_TYPE_UTILISATEUR new_util;
-               guint *gids;
-
-               g_snprintf( new_util.nom, sizeof(new_util.nom),
-                           "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
-               g_snprintf( new_util.commentaire, sizeof(new_util.commentaire),
-                           "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
-               g_snprintf( new_util.code_en_clair, sizeof(new_util.code_en_clair),
-                           "%s", gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ) );
-               new_util.date_expire = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
-               new_util.expire      = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
-               new_util.changepass  = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_changepass));
-               new_util.actif       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_actif));
-               new_util.cansetpass  = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpass));
-
-               gids = Recuperer_groupes_util();
-               memcpy( new_util.gids, gids, sizeof(new_util.gids) );
-               Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_ADD_UTIL,
-                              (gchar *)&new_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-              }
-            break;
-
-       case GTK_RESPONSE_CANCEL:
+           break;
+      case GTK_RESPONSE_CANCEL :
        default                 : break;
      }
 

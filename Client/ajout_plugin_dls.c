@@ -45,29 +45,17 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_plugin_dls ( GtkDialog *dialog, gint reponse,
                                                 gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
+                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+    Edit_dls.on = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
+
+    switch(reponse)
      { case GTK_RESPONSE_OK:
-             { if (edition)
-                { g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
-                              "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-                  Edit_dls.on = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
-
-                  printf("Edit_dlsON = %d\n", Edit_dls.on );
-                  Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_PLUGIN_DLS,
+             { Envoi_serveur( TAG_DLS, (edition ? SSTAG_CLIENT_VALIDE_EDIT_PLUGIN_DLS
+                                                : SSTAG_CLIENT_ADD_PLUGIN_DLS),
                                 (gchar *)&Edit_dls, sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
-                }
-               else
-                { struct CMD_TYPE_PLUGIN_DLS plugin_dls;
-
-                  g_snprintf( plugin_dls.nom, sizeof(plugin_dls.nom),
-                              "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-                  plugin_dls.on = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON(Check_actif) );
-                  printf("Plugin ON = %d\n", plugin_dls.on );
-                  Envoi_serveur( TAG_DLS, SSTAG_CLIENT_ADD_PLUGIN_DLS,
-                                 (gchar *)&plugin_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-                }
+               break;
              }
-            break;
        case GTK_RESPONSE_CANCEL:
        default:                  break;
      }

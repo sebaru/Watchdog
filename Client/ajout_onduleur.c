@@ -118,43 +118,24 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_onduleur ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Edit_onduleur.libelle, sizeof(Edit_onduleur.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    g_snprintf( Edit_onduleur.host, sizeof(Edit_onduleur.host),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
+    g_snprintf( Edit_onduleur.ups, sizeof(Edit_onduleur.ups),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ups) ) );
+    Edit_onduleur.actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
+    Edit_onduleur.bit_comm = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_comm) );
+    Edit_onduleur.ea_input_voltage  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_input_voltage) );
+    Edit_onduleur.ea_ups_load       = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_load) );
+    Edit_onduleur.ea_ups_real_power = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_real_power) );
+    Edit_onduleur.ea_battery_charge = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_battery_charge) );
+
+    switch(reponse)
      { case GTK_RESPONSE_OK:
-        { if (edition)
-           { g_snprintf( Edit_onduleur.libelle, sizeof(Edit_onduleur.libelle),
-                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-             g_snprintf( Edit_onduleur.host, sizeof(Edit_onduleur.host),
-                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
-             g_snprintf( Edit_onduleur.ups, sizeof(Edit_onduleur.ups),
-                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ups) ) );
-             Edit_onduleur.actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
-             Edit_onduleur.bit_comm = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_comm) );
-             Edit_onduleur.ea_input_voltage  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_input_voltage) );
-             Edit_onduleur.ea_ups_load       = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_load) );
-             Edit_onduleur.ea_ups_real_power = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_real_power) );
-             Edit_onduleur.ea_battery_charge = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_battery_charge) );
-
-             Envoi_serveur( TAG_ONDULEUR, SSTAG_CLIENT_VALIDE_EDIT_ONDULEUR,
-                           (gchar *)&Edit_onduleur, sizeof( struct CMD_TYPE_ONDULEUR ) );
-           }
-          else
-           { struct CMD_TYPE_ONDULEUR new_onduleur;
-             g_snprintf( new_onduleur.libelle, sizeof(new_onduleur.libelle),
-                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-             g_snprintf( new_onduleur.host, sizeof(new_onduleur.host),
-                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
-             g_snprintf( new_onduleur.ups, sizeof(new_onduleur.ups),
-                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ups) ) );
-             new_onduleur.actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
-             new_onduleur.bit_comm = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_comm) );
-             new_onduleur.ea_input_voltage  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_input_voltage) );
-             new_onduleur.ea_ups_load       = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_load) );
-             new_onduleur.ea_ups_real_power = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_real_power) );
-             new_onduleur.ea_battery_charge = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_battery_charge) );
-
-             Envoi_serveur( TAG_ONDULEUR, SSTAG_CLIENT_ADD_ONDULEUR,
-                           (gchar *)&new_onduleur, sizeof( struct CMD_TYPE_ONDULEUR ) );
-           }
+        { Envoi_serveur( TAG_ONDULEUR, (edition ? SSTAG_CLIENT_VALIDE_EDIT_ONDULEUR
+                                                : SSTAG_CLIENT_ADD_ONDULEUR),
+                        (gchar *)&Edit_onduleur, sizeof( struct CMD_TYPE_ONDULEUR ) );
           break;
         }
        case GTK_RESPONSE_CANCEL:

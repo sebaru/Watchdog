@@ -36,7 +36,7 @@
  static GtkWidget *F_ajout;             /* Widget de reference sur la fenetre d'ajout/edition des groupes */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du groupe en cours d'edition */
  static GtkWidget *Entry_comment;                                   /* Le commentaire associé à ce groupe */
- static struct CMD_TYPE_GROUPE Edit_groupe;                                  /* Groupe en cours d'edition */
+ static struct CMD_TYPE_GROUPE Groupe;                                       /* Groupe en cours d'edition */
 /**********************************************************************************************************/
 /* CB_ajouter_editer_groupe: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -44,28 +44,17 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_groupe ( GtkDialog *dialog, gint reponse,
                                             gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Groupe.nom, sizeof(Groupe.nom),
+                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+    g_snprintf( Groupe.commentaire, sizeof(Groupe.commentaire),
+                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_comment) ) );
+    switch(reponse)
      { case GTK_RESPONSE_OK:
-             { if (!edition)
-                { struct CMD_TYPE_GROUPE groupe;
-
-                  g_snprintf( groupe.nom, sizeof(groupe.nom),
-                              "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-                  g_snprintf( groupe.commentaire, sizeof(groupe.commentaire),
-                              "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_comment) ) );
-
-                  Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_ADD_GROUPE,
-                                 (gchar *)&groupe, sizeof(struct CMD_TYPE_GROUPE) );
-                }
-               else
-                { g_snprintf( Edit_groupe.commentaire, sizeof(Edit_groupe.commentaire),
-                              "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_comment) ) );
-
-                  Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_VALIDE_EDIT_GROUPE,
-                                 (gchar *)&Edit_groupe, sizeof(struct CMD_TYPE_GROUPE) );
-                }
+             { Envoi_serveur( TAG_UTILISATEUR, (edition ? SSTAG_CLIENT_VALIDE_EDIT_GROUPE
+                                                        : SSTAG_CLIENT_ADD_GROUPE),
+                                 (gchar *)&Groupe, sizeof(struct CMD_TYPE_GROUPE) );
+               break;
              }
-            break;
        case GTK_RESPONSE_CANCEL:
        default:                  break;
      }
@@ -81,9 +70,9 @@
   { GtkWidget *frame, *vboite, *table, *texte;
 
     if (edit_groupe)
-     { memcpy( &Edit_groupe, edit_groupe, sizeof(struct CMD_TYPE_GROUPE) ); /*Save pour utilisation future*/
+     { memcpy( &Groupe, edit_groupe, sizeof(struct CMD_TYPE_GROUPE) ); /*Save pour utilisation future*/
      }
-    else memset (&Edit_groupe, 0, sizeof(struct CMD_TYPE_GROUPE) );                /* Sinon RAZ structure */
+    else memset (&Groupe, 0, sizeof(struct CMD_TYPE_GROUPE) );                /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_groupe ? _("Edit a group") : _("Add a group")),
                                            GTK_WINDOW(F_client),

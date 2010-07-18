@@ -49,37 +49,22 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Edit_mnemo.libelle, sizeof(Edit_mnemo.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    g_snprintf( Edit_mnemo.objet, sizeof(Edit_mnemo.objet),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
+    g_snprintf( Edit_mnemo.acronyme, sizeof(Edit_mnemo.acronyme),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
+    Edit_mnemo.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
+    Edit_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+
+    switch(reponse)
      { case GTK_RESPONSE_OK:
-             { if (edition)
-                { g_snprintf( Edit_mnemo.libelle, sizeof(Edit_mnemo.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-                  g_snprintf( Edit_mnemo.objet, sizeof(Edit_mnemo.objet),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
-                  g_snprintf( Edit_mnemo.acronyme, sizeof(Edit_mnemo.acronyme),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-                  Edit_mnemo.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-                  Edit_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-
-                  Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,
-                                (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
-                }
-               else
-                { struct CMD_TYPE_MNEMONIQUE new_mnemo;
-                  g_snprintf( new_mnemo.libelle, sizeof(new_mnemo.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-                  g_snprintf( new_mnemo.objet, sizeof(new_mnemo.objet),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
-                  g_snprintf( new_mnemo.acronyme, sizeof(new_mnemo.acronyme),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-                  new_mnemo.type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-                  new_mnemo.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-
-                  Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_ADD_MNEMONIQUE,
-                                (gchar *)&new_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
-                }
+             { Envoi_serveur( TAG_MNEMONIQUE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE
+                                                       : SSTAG_CLIENT_ADD_MNEMONIQUE),
+                              (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+               break;
              }
-            break;
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }

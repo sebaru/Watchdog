@@ -104,7 +104,12 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_icone ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Edit_icone.libelle, sizeof(Edit_icone.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
+    g_snprintf( Edit_icone.nom_fichier, sizeof(Edit_icone.nom_fichier),
+                "%s", gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_file), TRUE ) );
+                  
+    switch(reponse)
      { case GTK_RESPONSE_OK:
              { guint classe_icone;
                gchar *classe_choisie;
@@ -130,25 +135,10 @@
                    }
                 }
                else classe_icone = 0;
-
-               if (edition)
-                { g_snprintf( Edit_icone.libelle, sizeof(Edit_icone.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
-                  Edit_icone.id_classe = classe_icone;
-                  Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_VALIDE_EDIT_ICONE,
+               Edit_icone.id_classe = classe_icone;
+               Envoi_serveur( TAG_ICONE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_ICONE
+                                                  : SSTAG_CLIENT_ADD_ICONE),
                                 (gchar *)&Edit_icone, sizeof( struct CMD_TYPE_ICONE ) );
-                }
-               else
-                { struct CMD_TYPE_ICONE new_syn;
-                  g_snprintf( new_syn.libelle, sizeof(new_syn.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
-                  g_snprintf( new_syn.nom_fichier, sizeof(new_syn.nom_fichier),
-                              "%s", gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_file), TRUE ) );
-                  new_syn.id_classe = classe_icone;
-                  
-                  Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE,
-                                 (gchar *)&new_syn, sizeof( struct CMD_TYPE_ICONE ) );
-                }
              }
             break;
        case GTK_RESPONSE_CANCEL:
@@ -313,23 +303,16 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_classe ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Edit_classe.libelle, sizeof(Edit_classe.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_classe_libelle) ) );
+                  
+    switch(reponse)
      { case GTK_RESPONSE_OK:
-             { if (edition)
-                { g_snprintf( Edit_classe.libelle, sizeof(Edit_classe.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_classe_libelle) ) );
-                  Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_VALIDE_EDIT_CLASSE,
+             { Envoi_serveur( TAG_ICONE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_CLASSE
+                                                  : SSTAG_CLIENT_ADD_CLASSE),
                                 (gchar *)&Edit_classe, sizeof( struct CMD_TYPE_CLASSE ) );
-                }
-               else
-                { struct CMD_TYPE_CLASSE new_classe;
-                  g_snprintf( new_classe.libelle, sizeof(new_classe.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_classe_libelle) ) );
-                  Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_CLASSE,
-                                (gchar *)&new_classe, sizeof( struct CMD_TYPE_CLASSE ) );
-                }
+               break;
              }
-            break;
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }

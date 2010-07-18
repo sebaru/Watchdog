@@ -87,75 +87,41 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_scenario ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { switch(reponse)
+  { g_snprintf( Edit_sce.libelle, sizeof(Edit_sce.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    Edit_sce.actif     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
+    Edit_sce.ts_jour   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[0]) );
+    Edit_sce.lundi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[1]) );
+    Edit_sce.mardi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[2]) );
+    Edit_sce.mercredi  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[3]) );
+    Edit_sce.jeudi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[4]) );
+    Edit_sce.vendredi  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[5]) );
+    Edit_sce.samedi    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[6]) );
+    Edit_sce.dimanche  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[7]) );
+    Edit_sce.ts_mois   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[0]) );
+    Edit_sce.janvier   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[1]) );
+    Edit_sce.fevrier   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[2]) );
+    Edit_sce.mars      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[3]) );
+    Edit_sce.avril     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[4]) );
+    Edit_sce.mai       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[5]) );
+    Edit_sce.juin      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[6]) );
+    Edit_sce.juillet   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[7]) );
+    Edit_sce.aout      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[8]) );
+    Edit_sce.septembre = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[9]) );
+    Edit_sce.octobre   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[10]) );
+    Edit_sce.novembre  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[11]) );
+    Edit_sce.decembre  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[12]) );
+    Edit_sce.heure     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_heure) );
+    Edit_sce.minute    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_minute) );
+    Edit_sce.bit_m     = (En_cours_M ? Motif->bit_clic : Motif->bit_clic2);
+
+    switch(reponse)
      { case GTK_RESPONSE_OK:
-             { if (edition)
-                { g_snprintf( Edit_sce.libelle, sizeof(Edit_sce.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-                  Edit_sce.actif     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
-                  Edit_sce.ts_jour   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[0]) );
-                  Edit_sce.lundi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[1]) );
-                  Edit_sce.mardi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[2]) );
-                  Edit_sce.mercredi  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[3]) );
-                  Edit_sce.jeudi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[4]) );
-                  Edit_sce.vendredi  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[5]) );
-                  Edit_sce.samedi    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[6]) );
-                  Edit_sce.dimanche  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[7]) );
-                  Edit_sce.ts_mois   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[0]) );
-                  Edit_sce.janvier   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[1]) );
-                  Edit_sce.fevrier   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[2]) );
-                  Edit_sce.mars      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[3]) );
-                  Edit_sce.avril     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[4]) );
-                  Edit_sce.mai       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[5]) );
-                  Edit_sce.juin      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[6]) );
-                  Edit_sce.juillet   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[7]) );
-                  Edit_sce.aout      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[8]) );
-                  Edit_sce.septembre = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[9]) );
-                  Edit_sce.octobre   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[10]) );
-                  Edit_sce.novembre  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[11]) );
-                  Edit_sce.decembre  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[12]) );
-                  Edit_sce.heure     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_heure) );
-                  Edit_sce.minute    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_minute) );
-                  Edit_sce.bit_m     = (En_cours_M ? Motif->bit_clic : Motif->bit_clic2);
-
-                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_VALIDE_EDIT_SCENARIO,
+             { Envoi_serveur( TAG_SUPERVISION, (edition ? SSTAG_CLIENT_SUP_VALIDE_EDIT_SCENARIO
+                                                        : SSTAG_CLIENT_SUP_ADD_SCENARIO),
                                 (gchar *)&Edit_sce, sizeof( struct CMD_TYPE_SCENARIO ) );
-                }
-               else
-                { struct CMD_TYPE_SCENARIO new_sce;
-                  g_snprintf( new_sce.libelle, sizeof(new_sce.libelle),
-                              "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-                  new_sce.actif     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
-                  new_sce.ts_jour   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[0]) );
-                  new_sce.lundi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[1]) );
-                  new_sce.mardi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[2]) );
-                  new_sce.mercredi  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[3]) );
-                  new_sce.jeudi     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[4]) );
-                  new_sce.vendredi  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[5]) );
-                  new_sce.samedi    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[6]) );
-                  new_sce.dimanche  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_jours[7]) );
-                  new_sce.ts_mois   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[0]) );
-                  new_sce.janvier   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[1]) );
-                  new_sce.fevrier   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[2]) );
-                  new_sce.mars      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[3]) );
-                  new_sce.avril     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[4]) );
-                  new_sce.mai       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[5]) );
-                  new_sce.juin      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[6]) );
-                  new_sce.juillet   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[7]) );
-                  new_sce.aout      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[8]) );
-                  new_sce.septembre = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[9]) );
-                  new_sce.octobre   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[10]) );
-                  new_sce.novembre  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[11]) );
-                  new_sce.decembre  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mois[12]) );
-                  new_sce.heure     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_heure) );
-                  new_sce.minute    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_minute) );
-                  new_sce.bit_m     = (En_cours_M ? Motif->bit_clic : Motif->bit_clic2);
-
-                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_ADD_SCENARIO,
-                                (gchar *)&new_sce, sizeof( struct CMD_TYPE_SCENARIO ) );
-                }
+               break;
              }
-            break;
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }

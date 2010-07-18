@@ -42,7 +42,7 @@
  static GtkWidget *Spin_max;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Option_unite;                                   /* Unite correspondante à l'entrée ana */
  static GtkWidget *Option_type;                                                /* Type de gestion de l'ea */
- static struct CMD_TYPE_ENTREEANA Edit_entree;                                   /* EA en cours d'édition */
+ static struct CMD_TYPE_ENTREEANA Entree;                                        /* EA en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_entreeANA: Fonction appelée qd on appuie sur un des boutons de l'interface           */
@@ -50,19 +50,17 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_entreeANA ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { switch(reponse)
-     { case GTK_RESPONSE_OK:
-             { if (edition)
-                { Edit_entree.min = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_min) );
-                  Edit_entree.max = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_max) );
-                  Edit_entree.type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-                  Edit_entree.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
+  { Entree.min = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_min) );
+    Entree.max = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_max) );
+    Entree.type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
+    Entree.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
 
-                  Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,
-                                (gchar *)&Edit_entree, sizeof( struct CMD_TYPE_ENTREEANA ) );
-                }
+    switch(reponse)
+     { case GTK_RESPONSE_OK:
+             { Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,
+                              (gchar *)&Entree, sizeof( struct CMD_TYPE_ENTREEANA ) );
+               break;
              }
-            break;
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }
@@ -79,10 +77,10 @@
     gint cpt;
 
     if (edit_entree)
-     { memcpy( &Edit_entree, edit_entree, sizeof(struct CMD_TYPE_ENTREEANA) );
+     { memcpy( &Entree, edit_entree, sizeof(struct CMD_TYPE_ENTREEANA) );
                                                                           /* Save pour utilisation future */
      }
-    else memset (&Edit_entree, 0, sizeof(struct CMD_TYPE_ENTREEANA) );             /* Sinon RAZ structure */
+    else memset (&Entree, 0, sizeof(struct CMD_TYPE_ENTREEANA) );                  /* Sinon RAZ structure */
 
     F_ajout = gtk_dialog_new_with_buttons( (edit_entree ? _("Edit a entreeANA") : _("Add a entreeANA")),
                                            GTK_WINDOW(F_client),
@@ -148,7 +146,7 @@
 
     if (edit_entree)                                                       /* Si edition d'un entreeANA */
      { gchar chaine[32];
-       Edit_entree.id_mnemo = edit_entree->id_mnemo;
+       Entree.id_mnemo = edit_entree->id_mnemo;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_entree->libelle );
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), edit_entree->num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
