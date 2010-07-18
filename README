@@ -1,6 +1,6 @@
 
  - To prepare installation :
-       [root@Server ]# useradd watchdog -d /var/~Home
+       [root@Server ~]# useradd watchdog -d /var/~Home
        [root@Server ~]# passwd watchdog
 
        [root@Server ~]# urpmi automake make libtool
