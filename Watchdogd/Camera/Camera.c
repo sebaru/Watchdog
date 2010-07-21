@@ -32,6 +32,7 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
+ #include <dirent.h>
 
  #include "watchdogd.h"
  #include "Erreur.h"
@@ -61,20 +62,20 @@
     
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation objet impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -123,7 +124,7 @@
      }
 
     camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
-    if (!camera) Info( log, DEBUG_MEM, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
+    if (!camera) Info( log, DEBUG_CAMERA, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( camera->objet,    db->row[4], sizeof(camera->objet    ) );
        memcpy( camera->location, db->row[5], sizeof(camera->location  ) );
@@ -157,13 +158,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_CAMERA, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", id );
        return(NULL);
      }
 
     camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera)
-     { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" ); }
+     { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB: Mem error" ); }
     else
      { memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
        memcpy( camera->location, db->row[4], sizeof(camera->location  ) );
@@ -172,6 +173,47 @@
        camera->type       = atoi(db->row[1]);
        camera->bit        = atoi(db->row[2]);
        camera->id         = id;
+     }
+    Liberer_resultat_SQL ( log, db );
+    return(camera);
+  }
+/**********************************************************************************************************/
+/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static struct CMD_TYPE_CAMERA *Rechercher_cameraDB_par_num ( struct LOG *log, struct DB *db, gint num )
+  { gchar requete[200];
+    struct CMD_TYPE_CAMERA *camera;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,type,bit,objet,location,libelle"
+                " FROM %s WHERE num=%d",
+                NOM_TABLE_CAMERA,                                                                 /* FROM */
+                num                                                                               /* Where */
+              );
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_n( log, DEBUG_CAMERA, "Rechercher_cameraDB_par_num: CAMERA non trouvé dans la BDD", num );
+       return(NULL);
+     }
+
+    camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
+    if (!camera)
+     { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB_paar_num: Mem error" ); }
+    else
+     { memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
+       memcpy( camera->location, db->row[4], sizeof(camera->location  ) );
+       memcpy( camera->libelle,  db->row[5], sizeof(camera->libelle ) );
+       camera->num        = num;
+       camera->type       = atoi(db->row[1]);
+       camera->bit        = atoi(db->row[2]);
+       camera->id         = atoi(db->row[0]);
      }
     Liberer_resultat_SQL ( log, db );
     return(camera);
@@ -187,20 +229,20 @@
 
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation objet impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -218,56 +260,40 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static struct CMD_TYPE_CAMERA *Rechercher_cameraDB_motion ( struct LOG *log, struct DB *db )
-  { gchar requete[256];
-    struct CMD_TYPE_CAMERA *camera;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id FROM %s",
-                NOM_TABLE_CAMERA_MOTION                                                                  /* FROM */
-              );
-
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(NULL); }
-
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       return(NULL);
-     }
-
-    camera = Rechercher_cameraDB( log, db, atoi(db->row[0]) );
-    if (!camera)
-     { Info( log, DEBUG_MEM, "Rechercher_cameraDB_motion: Mem error" );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id = %d",
-                NOM_TABLE_CAMERA_MOTION, camera->id );
-    Lancer_requete_SQL ( log, db, requete );
-
-    return(camera);
-  }
-/**********************************************************************************************************/
 /* Camera_check_motion : Vérifie si l'outil motion a donner un bit a activer                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: néant. Les bits DLS sont positionnés                                                           */
 /**********************************************************************************************************/
  void Camera_check_motion ( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_CAMERA *camera;
+    struct dirent *fichier;
+    DIR *repertoire;
+    int taille;
 
-    do { camera = Rechercher_cameraDB_motion ( log, db );
-         if (camera)
-          { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
-            Envoyer_commande_dls ( camera->bit ); 
-            g_free(camera);
-          }
+    taille = 0;
+    repertoire = opendir ( REPERTOIRE_CAMERA );
+    if (!repertoire)
+     { Info_c( Config.log, DEBUG_CAMERA, "Camera_check_motion: rep. inconnu", REPERTOIRE_CAMERA);
+       return;
+     }
+
+    while( (fichier = readdir( repertoire )) )
+     { gchar num[5];
+       if (!strncmp( fichier->d_name, ".", 1 )) continue;                            /* Si commence par . */
+       if ( strncmp( fichier->d_name, "CAM", 3 )) continue;                /* Si ne commance pas par CAMx */
+
+       g_snprintf(num, sizeof(num), "%s", &fichier->d_name[3] );
+       camera = Rechercher_cameraDB_par_num ( log, db, atoi(num) );
+       if (camera)
+       { gchar old_fichier[128], new_fichier[128];
+         Info_n( log, DEBUG_CAMERA, "Camera_check_motion: Mise a un du bit M", camera->bit );
+         Envoyer_commande_dls ( camera->bit ); 
+         g_snprintf(old_fichier, sizeof(old_fichier), "%s/%s",    REPERTOIRE_CAMERA, fichier->d_name );
+         g_snprintf(new_fichier, sizeof(new_fichier), "%s/OK-%s", REPERTOIRE_CAMERA, fichier->d_name );
+         rename ( old_fichier, new_fichier );
+         g_free(camera);
        }
-    while (camera);
+     }
+    closedir( repertoire );
   }
 /*--------------------------------------------------------------------------------------------------------*/

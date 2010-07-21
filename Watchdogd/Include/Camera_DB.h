@@ -27,12 +27,13 @@
  
 #ifndef _CAMERA_DB_H_
  #define _CAMERA_DB_H_
-
+ 
  #include "Reseaux.h"
  #include "Db.h"
 
+ #define REPERTOIRE_CAMERA             "Cameras"
+
  #define NOM_TABLE_CAMERA              "cameras"
- #define NOM_TABLE_CAMERA_MOTION       "cameras_motion"
 
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Retirer_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera );

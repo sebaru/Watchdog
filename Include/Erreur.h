@@ -56,6 +56,7 @@
  #define  DEBUG_ONDULEUR            (1<<15) /* Debug modules ONDULEUR */
  #define  DEBUG_SMS                 (1<<16) /* Debug envoi SMS */
  #define  DEBUG_AUDIO               (1<<17) /* Debug envoi AUDIO */
+ #define  DEBUG_CAMERA              (1<<18) /* Debug CAMERA */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

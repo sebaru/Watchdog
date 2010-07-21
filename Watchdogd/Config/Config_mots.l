@@ -170,6 +170,9 @@ blanc         [\t ]+
 "AUDIO"                    { Config_lval.val = D_AUDIO;
                              return(D_AUDIO);
                            }
+"CAMERA"                   { Config_lval.val = D_CAMERA;
+                             return(D_CAMERA);
+                           }
 "="                        { Config_lval.val = EGAL;
                              return EGAL;
                            }                        
