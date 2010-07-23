@@ -224,6 +224,11 @@
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
 
+       if (Partage->com_msrv.reset_motion_detect)
+        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Reset_motion_detect" );
+          Demarrer_motion_detect();
+          Partage->com_msrv.reset_motion_detect = FALSE;
+        }
        usleep(1000);
        sched_yield();
      }
@@ -549,6 +554,9 @@ encore:
 
              if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
               { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR" ); }
+
+             if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
+              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MOTION_DETECT" ); }
            }
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */

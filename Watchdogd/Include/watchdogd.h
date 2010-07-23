@@ -90,6 +90,7 @@
     GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
+    gboolean reset_motion_detect;
   };
 
  struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
@@ -194,6 +195,7 @@
  extern gboolean Demarrer_audio ( void );
  extern gboolean Demarrer_onduleur ( void );
  extern gboolean Demarrer_admin ( void );
+ extern gboolean Demarrer_motion_detect ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

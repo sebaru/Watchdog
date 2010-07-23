@@ -90,6 +90,7 @@
             }
            else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_CAMERA) );
+                  Partage->com_msrv.reset_motion_detect = TRUE;    /* Modification -> Reset motion_detect */
                   g_free(result);
                 }
             }
@@ -110,6 +111,7 @@
     if (retour)
      { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_DEL_CAMERA_OK,
                      (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
+       Partage->com_msrv.reset_motion_detect = TRUE;               /* Modification -> Reset motion_detect */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -149,6 +151,7 @@
            else
             { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_ADD_CAMERA_OK,
                             (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
+              Partage->com_msrv.reset_motion_detect = TRUE;        /* Modification -> Reset motion_detect */
               g_free(camera);
             }
          }
