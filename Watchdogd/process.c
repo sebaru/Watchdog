@@ -96,6 +96,8 @@
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "netcam_http 1.1\n");
     write(id, chaine, strlen(chaine));
+    g_snprintf(chaine, sizeof(chaine), "despeckle EedDl\n");
+    write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "output_normal off\n");
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "ffmpeg_cap_new on\n");

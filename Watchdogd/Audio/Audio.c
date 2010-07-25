@@ -110,9 +110,8 @@
         }
 
        if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top)       /* Pas de message depuis xx */
-        { Jouer_wav("jingle.wav");                                              /* On balance le jingle ! */
-          Partage->com_audio.last_audio = Partage->top;
-        }
+        { Jouer_wav("jingle.wav"); }                                            /* On balance le jingle ! */
+       Partage->com_audio.last_audio = Partage->top;
 
        pthread_mutex_lock( &Partage->com_audio.synchro );                                /* lockage futex */
        num = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
