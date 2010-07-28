@@ -109,10 +109,6 @@
           continue;
         }
 
-       if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top)       /* Pas de message depuis xx */
-        { Jouer_wav("jingle.wav"); }                                            /* On balance le jingle ! */
-       Partage->com_audio.last_audio = Partage->top;
-
        pthread_mutex_lock( &Partage->com_audio.synchro );                                /* lockage futex */
        num = GPOINTER_TO_INT(Partage->com_audio.liste_audio->data);              /* Recuperation du audio */
        Partage->com_audio.liste_audio = g_list_remove ( Partage->com_audio.liste_audio,
@@ -127,6 +123,10 @@
           gint fd_cible, pid;
 
           Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
+
+          if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top) /* Si Pas de message depuis xx */
+           { Jouer_wav("jingle.wav"); }                                         /* On balance le jingle ! */
+          Partage->com_audio.last_audio = Partage->top;
 
           g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
           unlink( nom_fichier );                                      /* Destruction des anciens fichiers */
