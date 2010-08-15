@@ -58,14 +58,7 @@
   };
 
  struct MODULE_RS485
-  { guint id;
-    guint bit;                              /* Bit bistable correspondant au bon fonctionnement du module */
-    gboolean actif;
-    gint ea_min, ea_max;
-    gint e_min, e_max;
-    gint ec_min, ec_max;
-    gint s_min, s_max;
-    gint sa_min, sa_max;
+  { struct CMD_TYPE_RS485 rs485;
 
     time_t date_requete;
     time_t date_retente;

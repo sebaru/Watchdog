@@ -27,8 +27,6 @@
  
  #include <glib.h>
 
- #include "Admin.h"
- #include "Rs485.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
@@ -59,9 +57,10 @@
        g_snprintf( chaine, sizeof(chaine),
                    " RS485[%02d] -> actif=%d,bit=%d,ea=%03d-%03d,e=%03d-%03d,ec=%03d-%03d,s=%03d-%03d,"
                    "sa=%03d-%03d,req=%d,ret=%d,ana=%d\n",
-                   module->id, module->actif, module->bit, module->ea_min, module->ea_max,
-                   module->e_min, module->e_max, module->ec_min, module->ec_max,
-                   module->s_min, module->s_max, module->sa_min, module->sa_max,
+                   module->rs485.id, module->rs485.actif, module->rs485.bit,
+                   module->rs485.ea_min, module->rs485.ea_max,
+                   module->rs485.e_min, module->rs485.e_max, module->rs485.ec_min, module->rs485.ec_max,
+                   module->rs485.s_min, module->rs485.s_max, module->rs485.sa_min, module->rs485.sa_max,
                    (gint)module->date_requete, (gint)module->date_retente, (gint)module->date_ana
                  );
        Write_admin ( client->connexion, chaine );
@@ -134,6 +133,7 @@
     g_snprintf( chaine, sizeof(chaine), "Module RS485 %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -204,6 +204,7 @@
     g_snprintf( chaine, sizeof(chaine), "Module RS485 %d deleted\n", id );
     Write_admin ( client->connexion, chaine );
   }
+#endif
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -230,53 +231,9 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_rs485_reload(client);
      }
-    else if ( ! strcmp ( commande, "add" ) )
-     { gint id, ea_min, ea_max, e_min, e_max, ec_min, ec_max, s_min, s_max, sa_min, sa_max;
-       gchar chaine[128];
-       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d", commande, &id,
-                &ea_min, &ea_max, &e_min, &e_max, &ec_min, &ec_max, &s_min, &s_max, &sa_min, &sa_max
-              );                                                     /* Découpage de la ligne de commande */
-       if ( ea_min < -1 || ea_min> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " ea_min should be < NBR_BIT_DLS\n" ); }
-       else if ( ea_max < -1 || ea_max> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " ea_min should be < NBR_BIT_DLS\n" ); }
-       else if ( e_min < -1 || e_min> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " e_min should be < NBR_BIT_DLS\n" ); }
-       else if ( e_max < -1 || e_max> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " e_max should be < NBR_BIT_DLS\n" ); }
-       else if ( ec_min < -1 || ec_min> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " ec_min should be < NBR_BIT_DLS\n" ); }
-       else if ( ea_max < -1 || ec_max> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " ec_max should be < NBR_BIT_DLS\n" ); }
-       else if ( s_min < -1 || s_min> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " s_min should be < NBR_BIT_DLS\n" ); }
-       else if ( s_max < -1 || s_max> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " s_max should be < NBR_BIT_DLS\n" ); }
-       else if ( sa_min < -1 || sa_min> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " sa_min should be < NBR_BIT_DLS\n" ); }
-       else if ( sa_max < -1 || sa_max> NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " sa_max should be < NBR_BIT_DLS\n" ); }
-       else
-        { int retour;
-          retour = Admin_rs485_add ( client, id, ea_min, ea_max, e_min, e_max, ec_min, ec_max,
-                                     s_min, s_max, sa_min, sa_max );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module RS485 %d added\n", retour ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module RS485 NOT added\n" ); }
-          Write_admin ( client->connexion, chaine );
-        }
-     }
-    else if ( ! strcmp ( commande, "delete" ) )
-     { guint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_rs485_del ( client, num );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
-       Write_admin ( client->connexion,
-                     "  add id ea_min ea_max e_min e_max ec_min ec_max s_min s_max sa_min sa_max - Ajoute un module RS485\n" );
-       Write_admin ( client->connexion,
-                     "  delete id                              - Supprime le module id\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,

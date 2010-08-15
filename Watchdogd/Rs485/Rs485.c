@@ -55,7 +55,7 @@
     while ( liste )
      { struct MODULE_RS485 *module;
        module = ((struct MODULE_RS485 *)liste->data);
-       if (module->id == id) return(module);
+       if (module->rs485.id == id) return(module);
        liste = liste->next;
      }
     return(NULL);
@@ -85,22 +85,22 @@
      }
 
     while ( Recuperer_ligne_SQL (Config.log, db) )
-     { module->id       = id;
-       module->ea_min   = atoi(db->row[0]);
-       module->ea_max   = atoi(db->row[1]);
-       module->e_min    = atoi(db->row[2]);
-       module->e_max    = atoi(db->row[3]);
-       module->ec_min   = atoi(db->row[4]);
-       module->ec_max   = atoi(db->row[5]);
-       module->s_min    = atoi(db->row[6]);
-       module->s_max    = atoi(db->row[7]);
-       module->sa_min   = atoi(db->row[8]);
-       module->sa_max   = atoi(db->row[9]);
-       module->actif    = atoi(db->row[10]);
-       module->bit      = atoi(db->row[11]);
+     { module->rs485.id       = id;
+       module->rs485.ea_min   = atoi(db->row[0]);
+       module->rs485.ea_max   = atoi(db->row[1]);
+       module->rs485.e_min    = atoi(db->row[2]);
+       module->rs485.e_max    = atoi(db->row[3]);
+       module->rs485.ec_min   = atoi(db->row[4]);
+       module->rs485.ec_max   = atoi(db->row[5]);
+       module->rs485.s_min    = atoi(db->row[6]);
+       module->rs485.s_max    = atoi(db->row[7]);
+       module->rs485.sa_min   = atoi(db->row[8]);
+       module->rs485.sa_max   = atoi(db->row[9]);
+       module->rs485.actif    = atoi(db->row[10]);
+       module->rs485.bit      = atoi(db->row[11]);
                                                                         /* Ajout dans la liste de travail */
-       Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id    = ", module->id    );
-       Info_n( Config.log, DEBUG_RS485, "                   -  actif = ", module->actif );
+       Info_n( Config.log, DEBUG_RS485, "Charger_un_RS485_DB:  id    = ", module->rs485.id    );
+       Info_n( Config.log, DEBUG_RS485, "                   -  actif = ", module->rs485.actif );
      }
     Liberer_resultat_SQL ( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
@@ -148,8 +148,8 @@
           Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
           pthread_mutex_unlock( &Partage->com_rs485.synchro );
           cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-          Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id      = ", module->id    );
-          Info_n( Config.log, DEBUG_RS485, "                  -  actif   = ", module->actif );
+          Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id      = ", module->rs485.id    );
+          Info_n( Config.log, DEBUG_RS485, "                  -  actif   = ", module->rs485.actif );
         }
        else g_free(module);
      }
@@ -214,7 +214,7 @@
      { struct MODULE_RS485 *module;
        module = ((struct MODULE_RS485 *)liste->data);
 
-       if (module->actif) return(TRUE);
+       if (module->rs485.actif) return(TRUE);
        liste = liste->next;
      }
     return(FALSE);
@@ -272,7 +272,7 @@
    	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
        0xFF, 0xFF
      };
-    Trame_want_entre_ana.dest = module->id;
+    Trame_want_entre_ana.dest = module->rs485.id;
     Envoyer_trame( fd, &Trame_want_entre_ana );
   }
 /**********************************************************************************************************/
@@ -285,15 +285,15 @@
    	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
        0xFF, 0xFF
      };
-    Trame_want_entre_tor.dest = module->id;
-    if (module->s_min != -1 )
+    Trame_want_entre_tor.dest = module->rs485.id;
+    if (module->rs485.s_min != -1 )
      { guchar poids, a, octet, taille;
        gint num_a;
        poids = 0x80;
        taille = 1;
        octet = 0;
-       for ( num_a =  module->s_min;
-             num_a <= module->s_max;
+       for ( num_a =  module->rs485.s_min;
+             num_a <= module->rs485.s_max;
              num_a ++ )
         { a = A(num_a);
           if (a) octet |= poids;
@@ -352,7 +352,7 @@
   { struct TRAME_RS485_IDENT *trame_ident;
     if (trame->dest != 0xFF) return(FALSE);                        /* Si c'est pas pour nous, on se casse */
 
-    if (module->id != trame->source)
+    if (module->rs485.id != trame->source)
      { Info_n( Config.log, DEBUG_INFO, "Processer_trame: Module RS485 unknown", trame->source);
        return(TRUE);
      }
@@ -367,17 +367,17 @@
                        break;
        case FCT_ENTRE_TOR:
              { int e, cpt, nbr_e;
-               nbr_e = module->e_max - module->e_min + 1;
+               nbr_e = module->rs485.e_max - module->rs485.e_min + 1;
                for( cpt = 0; cpt<nbr_e; cpt++)
                 { e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
-                  SE( module->e_min + cpt, e );
+                  SE( module->rs485.e_min + cpt, e );
                 }
              }
 	    break;
        case FCT_ENTRE_ANA:
              { int cpt, nbr_ea;
-               if (module->ea_min == -1) nbr_ea = 0;
-               else nbr_ea = module->ea_max - module->ea_min + 1;
+               if (module->rs485.ea_min == -1) nbr_ea = 0;
+               else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
                for( cpt = 0; cpt<nbr_ea; cpt++)
                 { gint num_ea, val_int, ajout1, ajout2, ajout3, ajout4, ajout5;
 
@@ -388,7 +388,7 @@
                   ajout4 = ajout1  & ajout2;
                   ajout5 = ajout4 >> ajout3;
                   val_int += ajout5;
-                  num_ea = module->ea_min + cpt;
+                  num_ea = module->rs485.ea_min + cpt;
 
                   SEA( num_ea, val_int );
                 }
@@ -458,14 +458,14 @@
        if (Partage->com_rs485.admin_start)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
-          if (module) { module->actif = 1; }
+          if (module) { module->rs485.actif = 1; }
           Partage->com_rs485.admin_start = 0;
         }
 
        if (Partage->com_rs485.admin_stop)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stopping module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
-          if (module) module->actif = 0;
+          if (module) module->rs485.actif = 0;
           Partage->com_rs485.admin_stop = 0;
         }
 
@@ -485,8 +485,8 @@
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
-          if (module->actif != TRUE)                 /* Le le module est administravely down, on le zappe */
-           { SB(module->bit, 0);
+          if (module->rs485.actif != TRUE)                 /* Le le module est administravely down, on le zappe */
+           { SB(module->rs485.bit, 0);
              liste = liste->next;
              continue;
            }
@@ -513,8 +513,8 @@
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
-                Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->id );
-                SB(module->bit, 0);
+                Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->rs485.id );
+                SB(module->rs485.bit, 0);
                 liste = liste->next;
                 continue;
               }
@@ -556,7 +556,7 @@
                       if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;
                          liste = liste->next;
-                         SB(module->bit, 1);
+                         SB(module->rs485.bit, 1);
                        }
                       pthread_mutex_unlock( &Partage->com_dls.synchro );
                     }

@@ -20,7 +20,7 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         envoi_bit_init.c envoi_scenario.c envoi_synoptique_scenario.c \
                         envoi_mnemonique.c envoi_classe.c envoi_icone.c \
 			envoi_entreeana.c envoi_courbe.c envoi_histo_courbe.c \
-			envoi_onduleur.c \
+			envoi_onduleur.c envoi_rs485.c \
                         accept.c liste.c envoi_histo_hard.c \
                         capteur.c
 
