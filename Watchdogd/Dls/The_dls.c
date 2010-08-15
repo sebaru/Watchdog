@@ -398,8 +398,6 @@
     liste = Cde_exterieure;
     while( liste )                                                               /* Reset des monostables */
      { SM( GPOINTER_TO_INT(liste->data), 0 );
-       Info_n( Config.log, DEBUG_INFO, "DLS: Raz_cde_exterieure: mise a 0 du bit M",
-               GPOINTER_TO_INT(liste->data) );
        liste = liste->next;
      }
     g_list_free( Cde_exterieure );

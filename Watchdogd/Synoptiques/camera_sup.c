@@ -77,11 +77,11 @@
   { gchar requete[2048];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,syn_id,%s.libelle,camera_src_id,location,posx,posy,%s.type,%s.num"
-                " FROM %s,%s,%s WHERE syn_id=%d AND camera_src_id=%s.id AND %s.id_mnemo=%s.id",
-                NOM_TABLE_CAMERASUP, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* From */
-                id_syn, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO /* Where */
+                "SELECT %s.id,camera_src_id,syn_id,posx,posy,type,num,bit,objet,location,libelle"
+                " FROM %s,%s WHERE syn_id=%d AND camera_src_id=%s.id",
+                NOM_TABLE_CAMERASUP,
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,                                            /* From */
+                id_syn, NOM_TABLE_CAMERA                                                         /* Where */
               );
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -102,15 +102,17 @@
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( camera_sup->libelle, db->row[2], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
-       memcpy( camera_sup->location, db->row[4], sizeof(camera_sup->location) );/* Recopie dans la structure */
-       camera_sup->id           = atoi(db->row[0]);
-       camera_sup->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée le camera_sup */
-       camera_sup->camera_src_id= atoi(db->row[3]);
-       camera_sup->position_x   = atoi(db->row[5]);                             /* en abscisses et ordonnées */
-       camera_sup->position_y   = atoi(db->row[6]);
-       camera_sup->type         = atoi(db->row[7]);
-       camera_sup->num          = atoi(db->row[8]);
+     { camera_sup->id           = atoi(db->row[0]);
+       camera_sup->camera_src_id= atoi(db->row[1]);
+       camera_sup->syn_id       = atoi(db->row[2]);                   /* Synoptique ou est placée le camera_sup */
+       camera_sup->position_x   = atoi(db->row[3]);                             /* en abscisses et ordonnées */
+       camera_sup->position_y   = atoi(db->row[4]);
+       camera_sup->type         = atoi(db->row[5]);
+       camera_sup->num          = atoi(db->row[6]);
+       camera_sup->bit          = atoi(db->row[7]);
+       memcpy( camera_sup->objet,    db->row[8],  sizeof(camera_sup->objet) );/* Recopie dans la structure */
+       memcpy( camera_sup->location, db->row[9],  sizeof(camera_sup->location) );/* Recopie dans la structure */
+       memcpy( camera_sup->libelle,  db->row[10], sizeof(camera_sup->libelle) );/* Recopie dans la structure */
      }
     return(camera_sup);
   }
@@ -124,11 +126,10 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT syn_id,%s.libelle,camera_src_id,location,posx,posy,%s.type,%s.num"
-                " FROM %s,%s,%s WHERE %s.id=%d AND camera_src_id=%s.id AND %s.id_mnemo=%s.id",
-                NOM_TABLE_MNEMO, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO,
-                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, NOM_TABLE_MNEMO, /* FROM */
-                NOM_TABLE_CAMERASUP, id, NOM_TABLE_MNEMO, NOM_TABLE_CAMERA,NOM_TABLE_MNEMO );
+                "SELECT camera_src_id,syn_id,posx,posy,type,num,bit,objet,location,libelle"
+                " FROM %s,%s WHERE %s.id=%d AND camera_src_id=%s.id",
+                NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,                                            /* FROM */
+                NOM_TABLE_CAMERASUP, id, NOM_TABLE_CAMERA );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { Info_c( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouve dans la BDD", requete );
@@ -145,15 +146,17 @@
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB: Erreur allocation mémoire" );
     else
-     { memcpy( camera_sup->libelle, db->row[1], sizeof(camera_sup->libelle) );  /* Recopie dans la structure */
-       memcpy( camera_sup->location, db->row[3], sizeof(camera_sup->location) );/* Recopie dans la structure */
-       camera_sup->id           = id;
-       camera_sup->syn_id       = atoi(db->row[0]);                   /* Synoptique ou est placée le camera_sup */
-       camera_sup->camera_src_id= atoi(db->row[2]);
-       camera_sup->position_x   = atoi(db->row[4]);                             /* en abscisses et ordonnées */
-       camera_sup->position_y   = atoi(db->row[5]);
-       camera_sup->type         = atoi(db->row[6]);
-       camera_sup->num          = atoi(db->row[7]);
+     { camera_sup->id           = id;
+       camera_sup->camera_src_id= atoi(db->row[0]);
+       camera_sup->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée le camera_sup */
+       camera_sup->position_x   = atoi(db->row[2]);                             /* en abscisses et ordonnées */
+       camera_sup->position_y   = atoi(db->row[3]);
+       camera_sup->type         = atoi(db->row[4]);
+       camera_sup->num          = atoi(db->row[5]);
+       camera_sup->bit          = atoi(db->row[6]);
+       memcpy( camera_sup->objet,    db->row[7], sizeof(camera_sup->objet) );/* Recopie dans la structure */
+       memcpy( camera_sup->location, db->row[8], sizeof(camera_sup->location) );/* Recopie dans la structure */
+       memcpy( camera_sup->libelle,  db->row[9], sizeof(camera_sup->libelle) );/* Recopie dans la structure */
      }
     return(camera_sup);
   }
