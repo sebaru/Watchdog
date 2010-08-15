@@ -29,6 +29,7 @@
  #define _AUDIO_H_
 
  #define AUDIO_JINGLE                3000                /* Jingle si pas de message au bout de 5 minutes */
+ #define NUM_BIT_M_AUDIO_END         5                       /* M5 positionné quand arret diffusion audio */
 
  struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */

@@ -449,9 +449,8 @@
           num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
           Partage->com_dls.liste_m = g_list_remove ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
-          Info_n( Config.log, DEBUG_INFO, "DLS: Run_dls: mise a un du bit M", num );
-          SM( num, 1 );
-          Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) );
+          SM( num, 1 );                                                    /* Mise a un du bit monostable */
+          Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) ); 
         }
 
        if (Partage->com_dls.admin_start)                                  /* A-t-on un plugin a allumer ? */

@@ -106,6 +106,7 @@
        if (!Partage->com_audio.liste_audio)                               /* Si pas de message, on tourne */
         { sched_yield();
           sleep(1);
+          Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );/* Positionné quand il n'y a plus de diffusion audio*/
           continue;
         }
 
