@@ -60,7 +60,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(syn_id,syn_cible_id,bitctrl,bitctrl1,bitctrl2,posx,posy,angle)"
-                " VALUES (%d,%d,%d,%d,%d,%d,%d,%f)", NOM_TABLE_PASSERELLE,
+                " VALUES (%d,%d,%d,%d,%d,%d,%d,'%f')", NOM_TABLE_PASSERELLE,
                 passerelle->syn_id, passerelle->syn_cible_id, passerelle->bit_controle,
                 passerelle->bit_controle_1, passerelle->bit_controle_2,
                 passerelle->position_x, passerelle->position_y, passerelle->angle );
@@ -175,7 +175,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "bitctrl=%d,bitctrl1=%d,bitctrl2=%d,posx=%d,posy=%d,angle=%f"
+                "bitctrl=%d,bitctrl1=%d,bitctrl2=%d,posx=%d,posy=%d,angle='%f'"
                 " WHERE id=%d;", NOM_TABLE_PASSERELLE,
                 passerelle->bit_controle, passerelle->bit_controle_1, passerelle->bit_controle_2,
                 passerelle->position_x, passerelle->position_y, passerelle->angle,
