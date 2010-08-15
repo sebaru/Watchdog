@@ -145,11 +145,19 @@ printf("release !\n");
      { appui_camera_sup = trame_camera_sup; }
     else if (event->type == GDK_BUTTON_RELEASE && appui_camera_sup)
      { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
-        { if (!Chercher_page_notebook ( TYPE_PAGE_SUPERVISION_CAMERA,
-                                        trame_camera_sup->camera_sup->camera_src_id,
-                                        TRUE )
-             )
-           { Creer_page_supervision_camera ( trame_camera_sup->camera_sup ); }
+        { gint pid;
+
+          printf( "Clic_sur_camera_sup_supervision : Lancement d'un Gst %s\n",
+                  trame_camera_sup->camera_sup->location );
+          pid = fork();
+          if (pid<0) return;
+          else if (!pid)                                             /* Lancement de la ligne de commande */
+           { gchar chaine[sizeof(trame_camera_sup->camera_sup->location)+6];
+             g_snprintf( chaine, sizeof(chaine), "uri=%s", trame_camera_sup->camera_sup->location );
+             execlp( "gst-launch-0.10", "gst-launch-0.10", "playbin", chaine, NULL );
+             printf("AUDIO: Lancement gst-launch failed\n");
+             _exit(0);
+           }
         }
        appui_camera_sup = NULL;               /* L'action est faite, on ne selectionne donc plus le motif */
      }

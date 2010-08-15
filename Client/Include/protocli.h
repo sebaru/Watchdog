@@ -60,7 +60,6 @@
     TYPE_PAGE_HISTO_COURBE,
     TYPE_PAGE_SCENARIO,                                                           /* Gestion des scenario */
     TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
-    TYPE_PAGE_SUPERVISION_CAMERA,                                          /* Page affichant une camera ! */
     TYPE_PAGE_ONDULEUR,                                        /* Page affichant la liste des onduleurs ! */
   };
 
@@ -87,11 +86,6 @@
      COL_CAM_LIBELLE,
      COL_CAM_LOCATION,
      NBR_COL_CAM
-  };
- struct TYPE_INFO_CAMERA
-  { struct CMD_TYPE_CAMERA_SUP camera;                                          /* Structure de la camera */
-    /*GtkLibVLCInstance* instance;
-    GtkWidget *vlc;*/
   };
 
  struct COURBE
@@ -503,10 +497,6 @@
  extern void Proto_supervision_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
  extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce );
  extern void Creer_fenetre_scenario( struct CMD_TYPE_MOTIF *motif );
-
-                                                                        /* Dans supervision_page_camera.c */
- extern void Creer_page_supervision_camera ( struct CMD_TYPE_CAMERA_SUP *camera );
- extern void Detruire_page_supervision_camera( struct PAGE_NOTEBOOK *page );
 
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
  extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );

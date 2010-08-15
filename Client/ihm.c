@@ -108,9 +108,6 @@
           case TYPE_PAGE_HISTO_COURBE:
                Detruire_page_histo_courbe( page_a_virer );
                break;
-          case TYPE_PAGE_SUPERVISION_CAMERA:
-               Detruire_page_supervision_camera( page_a_virer );
-               break;
         }
        gtk_notebook_remove_page( GTK_NOTEBOOK(Notebook), num );
        Liste_pages = g_list_remove( Liste_pages, page_a_virer );
@@ -268,10 +265,6 @@
                   break;
              case TYPE_PAGE_SUPERVISION:
                   if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn_id != id )
-                   { liste = liste->next; continue; }
-                  break;
-             case TYPE_PAGE_SUPERVISION_CAMERA:
-                  if ( ((struct TYPE_INFO_CAMERA *)page->infos)->camera.camera_src_id != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_SOURCE_DLS:

@@ -35,7 +35,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  supervision.c supervision_clic.c supervision_comment.c \
                           supervision_passerelle.c supervision_palette.c \
                           supervision_capteur.c supervision_scenario.c \
-			  supervision_camera_page.c supervision_camera.c \
+			  supervision_camera.c \
 			  trame.c \
 			  print.c \
                           courbe.c histo_courbe.c
