@@ -622,26 +622,6 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
                                                             "font", "arial bold 14",
                                                          NULL);
         }
-       /*else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
-        { GtkLibVLCMedia *media;
-          
-          trame_camera_sup->instance = gtk_libvlc_instance_new(NULL); 
-          trame_camera_sup->vlc = gtk_libvlc_media_player_new(trame_camera_sup->instance);
-          gtk_libvlc_media_player_set_volume (GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc), 0.0);
-
-          trame_camera_sup->item = goo_canvas_widget_new( trame_camera_sup->item_groupe,
-                                                          trame_camera_sup->vlc,
-                                                          -DEFAULT_CAMERA_LARGEUR/2.0,
-                                                          -DEFAULT_CAMERA_HAUTEUR/2.0,
-                                                           DEFAULT_CAMERA_LARGEUR*1.0,
-                                                           DEFAULT_CAMERA_HAUTEUR*1.0,
-                                                          NULL);
-
-          media = gtk_libvlc_media_new(trame_camera_sup->camera_sup->location);
-          gtk_libvlc_media_player_add_media(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc), media);
-          g_object_unref(media);         
-          gtk_libvlc_media_player_play(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc), NULL); 
-        }*/
      }
 
     Trame_rafraichir_camera_sup ( trame_camera_sup );
