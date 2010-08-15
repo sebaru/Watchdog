@@ -68,7 +68,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(icone,syn,libelle,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich) VALUES "
-                "(%d,%d,'%s',%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MOTIF,
+                "(%d,%d,'%s',%d,%d,%d,%d,%d,'%f','%f','%f',%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->gid,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
@@ -201,8 +201,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "icone=%d,libelle='%s',gid=%d,bitctrl=%d,bitclic=%d,posx=%d,posy=%d,larg=%f,"
-                "haut=%f,angle=%f,dialog=%d,gestion=%d,rouge=%d,vert=%d,bleu=%d,bitclic2=%d,"
+                "icone=%d,libelle='%s',gid=%d,bitctrl=%d,bitclic=%d,posx=%d,posy=%d,larg='%f',"
+                "haut='%f',angle='%f',dialog=%d,gestion=%d,rouge=%d,vert=%d,bleu=%d,bitclic2=%d,"
                 "rafraich=%d"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
                 motif->icone_id, libelle, motif->gid,

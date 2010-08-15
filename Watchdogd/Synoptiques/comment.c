@@ -74,7 +74,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(syn_id,libelle,font,rouge,vert,bleu,posx,posy,angle) "
-                "VALUES (%d,'%s','%s',%d,%d,%d,%d,%d,%f)", NOM_TABLE_COMMENT,
+                "VALUES (%d,'%s','%s',%d,%d,%d,%d,%d,'%f')", NOM_TABLE_COMMENT,
                 comment->syn_id, libelle, font,
                 comment->rouge, comment->vert, comment->bleu,
                 comment->position_x, comment->position_y, comment->angle );
@@ -193,7 +193,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',font='%s',rouge=%d,vert=%d,bleu=%d,posx=%d,posy=%d,angle=%f "
+                "libelle='%s',font='%s',rouge=%d,vert=%d,bleu=%d,posx=%d,posy=%d,angle='%f' "
                 " WHERE id=%d;", NOM_TABLE_COMMENT,
                 libelle, font,
                 comment->rouge, comment->vert, comment->bleu,

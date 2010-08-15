@@ -67,7 +67,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,libelle,angle)"
-                " VALUES (%d,%d,%d,%d,%d,'%s',%f)", NOM_TABLE_CAPTEUR,
+                " VALUES (%d,%d,%d,%d,%d,'%s','%f')", NOM_TABLE_CAPTEUR,
                 capteur->syn_id, capteur->type, capteur->bit_controle,
                 capteur->position_x, capteur->position_y, libelle, capteur->angle );
     g_free(libelle);
@@ -173,7 +173,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "type=%d,bitctrl=%d,libelle='%s',posx=%d,posy=%d,angle=%f"
+                "type=%d,bitctrl=%d,libelle='%s',posx=%d,posy=%d,angle='%f'"
                 " WHERE id=%d;", NOM_TABLE_CAPTEUR,
                 capteur->type, capteur->bit_controle, libelle,
                 capteur->position_x, capteur->position_y, capteur->angle,
