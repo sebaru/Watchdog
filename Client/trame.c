@@ -30,7 +30,6 @@
  #include <gnome.h>                                                             /* Bibliothèque graphique */
  #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
  #include <gdk-pixbuf/gdk-pixdata.h>                                         /* Gestion des images/motifs */
- #include <gtk-libvlc-media-player.h>                                                       /* Player VLC */
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
  #include <gif_lib.h>
  #include <string.h>
@@ -105,8 +104,8 @@
 /**********************************************************************************************************/
  void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   {
-    gtk_libvlc_media_player_stop(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc)); 
-    g_object_unref(G_OBJECT(trame_camera_sup->instance)); 
+/*    gtk_libvlc_media_player_stop(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc)); 
+    g_object_unref(G_OBJECT(trame_camera_sup->instance)); */
 
     if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
     if (trame_camera_sup->select_mi) goo_canvas_item_remove( trame_camera_sup->select_mi );
@@ -627,7 +626,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
                                                          NULL);
         }
        else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
-        { GtkLibVLCMedia *media;
+        { /*GtkLibVLCMedia *media;
           
           trame_camera_sup->instance = gtk_libvlc_instance_new(NULL); 
           trame_camera_sup->vlc = gtk_libvlc_media_player_new(trame_camera_sup->instance);
@@ -644,7 +643,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
           media = gtk_libvlc_media_new(trame_camera_sup->camera_sup->location);
           gtk_libvlc_media_player_add_media(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc), media);
           g_object_unref(media);         
-          gtk_libvlc_media_player_play(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc), NULL); 
+          gtk_libvlc_media_player_play(GTK_LIBVLC_MEDIA_PLAYER(trame_camera_sup->vlc), NULL); */
         }
      }
 

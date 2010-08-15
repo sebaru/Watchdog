@@ -90,8 +90,8 @@
   };
  struct TYPE_INFO_CAMERA
   { struct CMD_TYPE_CAMERA_SUP camera;                                          /* Structure de la camera */
-    GtkLibVLCInstance* instance;
-    GtkWidget *vlc;
+    /*GtkLibVLCInstance* instance;
+    GtkWidget *vlc;*/
   };
 
  struct COURBE

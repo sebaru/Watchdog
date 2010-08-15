@@ -30,7 +30,6 @@
 
  #include <gnome.h>
  #include <gdk-pixbuf/gdk-pixbuf.h>                                          /* Gestion des images/motifs */
- #include <gtk-libvlc-media-player.h>                                                       /* Player VLC */
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
  #include "Reseaux.h"
 
@@ -165,8 +164,8 @@
     cairo_matrix_t transform;
     GooCanvasItem *item_groupe;
     GooCanvasItem *select_mi;
-    GtkLibVLCInstance* instance;
-    GtkWidget *vlc;
+    /*GtkLibVLCInstance* instance;
+    GtkWidget *vlc;*/
 
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */

@@ -27,7 +27,6 @@
 
  #include <gnome.h>
  #include <gdk/gdkx.h>
- #include <gtk-libvlc-media-player.h>                                                       /* Player VLC */
  #include <sys/time.h>
  
  #include "Reseaux.h"
@@ -50,8 +49,8 @@
   { struct TYPE_INFO_CAMERA *infos;
     infos = (struct TYPE_INFO_CAMERA *)page->infos;
 
-    gtk_libvlc_media_player_stop(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc)); 
-    g_object_unref(G_OBJECT(infos->instance)); 
+    /*gtk_libvlc_media_player_stop(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc));
+    g_object_unref(G_OBJECT(infos->instance)); */
   }
 /**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
@@ -62,7 +61,6 @@
   { GtkWidget *bouton, *boite, *hboite;
     struct TYPE_INFO_CAMERA *infos;
     struct PAGE_NOTEBOOK *page;
-    GtkLibVLCMedia *media;
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -79,14 +77,14 @@
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
 
-    infos->instance = gtk_libvlc_instance_new(NULL); 
+/*    infos->instance = gtk_libvlc_instance_new(NULL); 
     infos->vlc = gtk_libvlc_media_player_new(infos->instance);
     gtk_box_pack_start( GTK_BOX(hboite), infos->vlc, TRUE, TRUE, 0 );
     gtk_libvlc_media_player_set_volume (GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), 0.0);
 
     media = gtk_libvlc_media_new(infos->camera.location);
     gtk_libvlc_media_player_add_media(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), media);
-    g_object_unref(media);         
+    g_object_unref(media);         */
 
 /************************************ Les boutons de controles ********************************************/
     boite = gtk_vbox_new( FALSE, 6 );
@@ -101,6 +99,6 @@
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( infos->camera.libelle ) );
     gtk_widget_show_all( page->child );
     Chercher_page_notebook ( TYPE_PAGE_SUPERVISION_CAMERA, camera->camera_src_id, TRUE );
-    gtk_libvlc_media_player_play(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), NULL); 
+/*    gtk_libvlc_media_player_play(GTK_LIBVLC_MEDIA_PLAYER(infos->vlc), NULL); */
  }
 /*--------------------------------------------------------------------------------------------------------*/
