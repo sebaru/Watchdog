@@ -88,6 +88,8 @@
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
     GNOMEUIINFO_ITEM_STOCK( N_("_UPS"), N_("Edit UPS"),
                             Menu_want_onduleur, GNOME_STOCK_PIXMAP_EXEC ),
+    GNOMEUIINFO_ITEM_STOCK( N_("_RS485"), N_("Edit RS485"),
+                            Menu_want_rs485, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_synoptique[]=                                        /*!< Définition du menu synoptique */

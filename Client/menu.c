@@ -149,6 +149,14 @@
     Envoi_serveur( TAG_ONDULEUR, SSTAG_CLIENT_WANT_PAGE_ONDULEUR, NULL, 0 );
   }
 /**********************************************************************************************************/
+/* Menu_want_rs485: l'utilisateur desire voir les modules rs485                                           */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Menu_want_rs485 ( void )
+  { if (Chercher_page_notebook( TYPE_PAGE_RS485, 0, TRUE )) return;
+    Envoi_serveur( TAG_RS485, SSTAG_CLIENT_WANT_PAGE_RS485, NULL, 0 );
+  }
+/**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
