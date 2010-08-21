@@ -91,7 +91,7 @@
                Chercher_page_notebook( TYPE_PAGE_RS485, 0, TRUE );
              }
             break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC:
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_RS485:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_afficher_mnemo_rs485( mnemo );

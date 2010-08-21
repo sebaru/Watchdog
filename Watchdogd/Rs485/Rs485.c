@@ -103,7 +103,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,"
                 "sa_min,sa_max,s_min,s_max"
-                " FROM %s ORDER BY host,ups", NOM_TABLE_MODULE_RS485 );
+                " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

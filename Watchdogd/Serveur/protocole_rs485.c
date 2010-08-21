@@ -79,38 +79,10 @@
                Proto_effacer_rs485( client, rs485 );
              }
             break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_BIT_COMM:
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_RS485:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
                Proto_envoyer_type_num_mnemo_tag( TAG_RS485, SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM,
-                                                 client, mnemo );
-             }
-            break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_LOAD:
-             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_RS485, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_LOAD,
-                                                 client, mnemo );
-             }
-            break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER:
-             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_RS485, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER,
-                                                 client, mnemo );
-             }
-            break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE:
-             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_RS485, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE,
-                                                 client, mnemo );
-             }
-            break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE:
-             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_RS485, SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE,
                                                  client, mnemo );
              }
             break;
