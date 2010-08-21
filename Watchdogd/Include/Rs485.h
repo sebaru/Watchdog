@@ -77,6 +77,11 @@
   };
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_rs485 ( void );                                                          /* Dans Rs485.c */
-
+ extern struct CMD_TYPE_RS485 *Rechercher_rs485DB ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_RS485 *Recuperer_rs485DB_suite( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_rs485DB ( struct LOG *log, struct DB *db );
+ extern gint Ajouter_rs485DB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 );
+ extern gboolean Retirer_rs485DB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 );
+ extern gboolean Modifier_rs485DB( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

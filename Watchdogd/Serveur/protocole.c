@@ -70,6 +70,7 @@
                case TAG_SCENARIO    : Gerer_protocole_scenario     ( Id_serveur, client ); break;
                case TAG_CAMERA      : Gerer_protocole_camera       ( Id_serveur, client ); break;
                case TAG_ONDULEUR    : Gerer_protocole_onduleur     ( Id_serveur, client ); break;
+               case TAG_RS485       : Gerer_protocole_rs485        ( Id_serveur, client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_UTIL_SETPASSWORD *util;
                                          util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;

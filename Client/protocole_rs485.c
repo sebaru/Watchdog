@@ -41,7 +41,6 @@
 /**********************************************************************************************************/
  void Gerer_protocole_rs485 ( struct CONNEXION *connexion )
   { static GList *Arrivee_rs485 = NULL;
-    static GList *Arrivee_syn     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_RS485_OK:
@@ -95,7 +94,7 @@
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
-               Proto_afficher_mnemo_voc_rs485( mnemo );
+               Proto_afficher_mnemo_rs485( mnemo );
              }
             break;
      }

@@ -53,13 +53,11 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_rs485 ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { gint index;
-
-    g_snprintf( Rs485.libelle, sizeof(Rs485.libelle),
+  { g_snprintf( Rs485.libelle, sizeof(Rs485.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
     Rs485.actif      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Rs485.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-    Rs485.bit        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit) );
+    Rs485.bit_comm   = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit) );
     Rs485.e_min      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_e_min) );
     Rs485.e_max      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_e_max) );
 
@@ -81,7 +79,7 @@
 /* Entre: widget, data.                                                                                   */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- void Proto_afficher_mnemo_voc_rs485 ( struct CMD_TYPE_MNEMONIQUE *mnemo )
+ void Proto_afficher_mnemo_rs485 ( struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
     snprintf( chaine, sizeof(chaine), "%s%04d  %s",
               Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
@@ -168,10 +166,10 @@
     if (edit_rs485)                                                              /* Si edition d'un rs485 */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_rs485->libelle );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_rs485->actif );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_rs485->num );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit), edit_rs485->bit );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_min), edit_rs485->e_max );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_max), edit_rs485->e_max );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_rs485->num      );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit), edit_rs485->bit_comm );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_min), edit_rs485->e_max  );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_max), edit_rs485->e_max  );
        gtk_widget_grab_focus( Entry_lib );
      }
     else { gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), TRUE );

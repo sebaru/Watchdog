@@ -28,11 +28,11 @@
 #ifndef _RESEAUX_RS485_H_
  #define _RESEAUX_RS485_H_
 
-/******************************************** Gestion des rs485 ******************************************/
+/********************************************* Gestion des rs485 ******************************************/
  struct CMD_TYPE_RS485
   { guint id;                                                                    /* ID unique de la rs485 */
     guint num;                                                                      /* Numéro de la rs485 */
-    guint bit;                              /* Bit bistable correspondant au bon fonctionnement du module */
+    guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
     gboolean actif;
     gint ea_min, ea_max;
     gint e_min, e_max;

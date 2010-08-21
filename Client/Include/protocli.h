@@ -526,7 +526,7 @@
  extern void Proto_rafraichir_un_rs485( struct CMD_TYPE_RS485 *rs485 );
  extern void Creer_page_rs485( void );
 
-                                                                                 /* Dans ajout_scenario.c */
+                                                                                 /* Dans ajout_rs485.c */
  extern void Menu_ajouter_editer_rs485 ( struct CMD_TYPE_RS485 *edit_rs485);
  extern void Proto_afficher_mnemo_rs485 ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 

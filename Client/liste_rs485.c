@@ -543,7 +543,7 @@
                          COLONNE_ACTIF, rs485->actif,
                          COLONNE_NUM, rs485->num,
                          COLONNE_LIBELLE, rs485->libelle,
-                         COLONNE_BIT, rs485->bit,
+                         COLONNE_BIT, rs485->bit_comm,
                          COLONNE_EA_MIN, rs485->ea_min,
                          COLONNE_EA_MAX, rs485->ea_max,
                          COLONNE_E_MIN, rs485->e_min,

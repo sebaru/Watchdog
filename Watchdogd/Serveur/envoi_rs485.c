@@ -111,7 +111,8 @@
     if (retour)
      { Envoi_client( client, TAG_RS485, SSTAG_SERVEUR_DEL_RS485_OK,
                      (gchar *)rezo_rs485, sizeof(struct CMD_TYPE_RS485) );
-       Partage->com_rs485.reload = TRUE;                           /* Modification -> Reload module rs485 */
+       while (Partage->com_rs485.admin_del) sched_yield();
+       Partage->com_rs485.admin_del = rezo_rs485->id;                            /* Envoi au thread rs485 */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -151,7 +152,8 @@
            else
             { Envoi_client( client, TAG_RS485, SSTAG_SERVEUR_ADD_RS485_OK,
                             (gchar *)rs485, sizeof(struct CMD_TYPE_RS485) );
-              Partage->com_rs485.reload = TRUE;                    /* Modification -> Reload module rs485 */
+              while (Partage->com_rs485.admin_add) sched_yield();
+              Partage->com_rs485.admin_add = rs485->id;                          /* Envoi au thread rs485 */
               g_free(rs485);
             }
          }
@@ -208,7 +210,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_rs485s_thread ( struct CLIENT *client )
+ void *Envoyer_rs485_thread ( struct CLIENT *client )
   { Envoyer_rs485_thread_tag( client, TAG_RS485, SSTAG_SERVEUR_ADDPROGRESS_RS485,
                                                  SSTAG_SERVEUR_ADDPROGRESS_RS485_FIN );
     return(NULL);
