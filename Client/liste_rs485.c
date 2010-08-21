@@ -38,9 +38,9 @@
 
  enum                   /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
   {  COLONNE_ID,
+     COLONNE_ACTIF,
      COLONNE_NUM,
      COLONNE_BIT,
-     COLONNE_ACTIF,
      COLONNE_EA_MIN, COLONNE_EA_MAX,
      COLONNE_E_MIN, COLONNE_E_MAX,
      COLONNE_EC_MIN, COLONNE_EC_MAX,
@@ -353,7 +353,7 @@
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_BOOLEAN,                                    /* actif */
-                                              G_TYPE_STRING,                                    /* Numéro */
+                                              G_TYPE_UINT,                                      /* Numéro */
                                               G_TYPE_UINT,                                         /* bit */
                                               G_TYPE_UINT,                                      /* EA_MIN */
                                               G_TYPE_UINT,                                      /* EA_MAX */
@@ -382,6 +382,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_rs485), colonne );
 
     renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Numero"), renderer,
                                                          "text", COLONNE_NUM,
                                                          NULL);
