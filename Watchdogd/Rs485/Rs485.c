@@ -153,17 +153,20 @@
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_RS485, id );
-
+printf("select 0\n");
+       
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
-
+printf("select 00\n");
+       
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_n( log, DEBUG_DB, "Rechercher_rs485DB: RS485 non trouvé dans la BDD", id );
        return(NULL);
      }
-
+printf("select 000\n");
+       
     rs485 = g_malloc0( sizeof(struct CMD_TYPE_RS485) );
     if (!rs485)
      { Info( log, DEBUG_MEM, "Rechercher_rs485DB: Mem error" ); }
