@@ -80,6 +80,7 @@
  #define DEFAUT_TAILLE_CLEF_DH          512
  #define DEFAUT_TAILLE_CLEF_RSA         2048
  #define DEFAUT_SSL_CRYPT               0
+ #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */
  #define DEFAUT_DB_DATABASE             "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */

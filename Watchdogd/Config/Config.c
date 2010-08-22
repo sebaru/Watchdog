@@ -60,6 +60,7 @@
     snprintf( Config.port_RS485,  sizeof(Config.port_RS485),  "%s", DEFAUT_PORT_RS485  );
     snprintf( Config.crypto_key,  sizeof(Config.crypto_key),  "%s", DEFAUT_CRYPTO_KEY  );
     snprintf( Config.home,        sizeof(Config.home),        "%s", DEFAUT_HOME        );
+    snprintf( Config.db_host,     sizeof(Config.db_host),     "%s", DEFAUT_DB_HOST     );
     snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE );
     snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD );
     snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME );
@@ -95,6 +96,7 @@
     Info_n( Config.log, DEBUG_CONFIG, "Config timeout connexion    ", Config.timeout_connexion );
     Info_n( Config.log, DEBUG_CONFIG, "Config max login failed     ", Config.max_login_failed );
     Info_c( Config.log, DEBUG_CONFIG, "Config home                 ", Config.home );
+    Info_c( Config.log, DEBUG_CONFIG, "Config db host              ", Config.db_host );
     Info_c( Config.log, DEBUG_CONFIG, "Config db database          ", Config.db_database );
     Info_c( Config.log, DEBUG_CONFIG, "Config db username          ", Config.db_username );
     Info_c( Config.log, DEBUG_CONFIG, "Config db password          ", Config.db_password );
