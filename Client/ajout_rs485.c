@@ -45,6 +45,12 @@
  static GtkWidget *Check_actif;                                         /* Le module doit-il etre actif ? */
  static GtkWidget *Spin_e_min;                                        /* numéro de l'entrée minimum gérée */
  static GtkWidget *Spin_e_max;                                        /* numéro de l'entrée minimum gérée */
+ static GtkWidget *Spin_ea_min;                                       /* numéro de l'entrée minimum gérée */
+ static GtkWidget *Spin_ea_max;                                       /* numéro de l'entrée minimum gérée */
+ static GtkWidget *Spin_s_min;                                        /* numéro de l'entrée minimum gérée */
+ static GtkWidget *Spin_s_max;                                        /* numéro de l'entrée minimum gérée */
+ static GtkWidget *Spin_sa_min;                                       /* numéro de l'entrée minimum gérée */
+ static GtkWidget *Spin_sa_max;                                       /* numéro de l'entrée minimum gérée */
  static struct CMD_TYPE_RS485 Rs485;                                        /* Message en cours d'édition */
 
 /**********************************************************************************************************/
@@ -60,6 +66,12 @@
     Rs485.bit_comm   = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit) );
     Rs485.e_min      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_e_min) );
     Rs485.e_max      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_e_max) );
+    Rs485.ea_min     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ea_min) );
+    Rs485.ea_max     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ea_max) );
+    Rs485.s_min      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_s_min) );
+    Rs485.s_max      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_s_max) );
+    Rs485.sa_min     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_sa_min) );
+    Rs485.sa_max     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_sa_max) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -105,7 +117,7 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_rs485 ( struct CMD_TYPE_RS485 *edit_rs485 )
   { GtkWidget *frame, *table, *texte, *hboite;
-    gint cpt;
+    gint i;
 
     if (edit_rs485)
      { memcpy( &Rs485, edit_rs485, sizeof(struct CMD_TYPE_RS485) );    /* Save pour utilisation future */
@@ -137,39 +149,91 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
+    i=0;
     Check_actif = gtk_check_button_new_with_label( _("Enable") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, i, i+1 );
 
     texte = gtk_label_new( _("Rs485 Num") );                       /* Numéro du module en cours d'edition */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, i, i+1 );
 
+    i++;
     texte = gtk_label_new( _("Libelle") );                                        /* Le rs485 en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_lib = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
-/****************************************** Paragraphe Voix ***********************************************/
+    i++;
     texte = gtk_label_new( _("Bit de comm") );                           /* Numéro du bit M a positionner */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Spin_bit = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     g_signal_connect( G_OBJECT(Spin_bit), "changed",
                       G_CALLBACK(Afficher_mnemo_voc), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit, 1, 2, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit, 1, 2, i, i+1 );
 
     Entry_bit = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_bit), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit, 2, 4, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit, 2, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("E min") );                                    /* Numéro de l'entrée minimum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_e_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_e_min, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("E max") );                                    /* Numéro de l'entrée maximum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_e_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_e_max, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("EA min") );                                   /* Numéro de l'entrée minimum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_ea_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ea_min, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("EA max") );                                   /* Numéro de l'entrée maximum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_ea_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ea_max, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("S min") );                                   /* Numéro de la sortie minimum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_s_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_s_min, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("S max") );                                   /* Numéro de la sortie maximum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_s_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_s_max, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("SA min") );                                  /* Numéro de la sortie minimum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_sa_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_sa_min, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("SA max") );                                  /* Numéro de la sortie maximum */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_sa_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_sa_max, 3, 4, i, i+1 );
 
     if (edit_rs485)                                                              /* Si edition d'un rs485 */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_rs485->libelle );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_rs485->actif );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_rs485->num      );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit), edit_rs485->bit_comm );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_min), edit_rs485->e_max  );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_max), edit_rs485->e_max  );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num),    edit_rs485->num      );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit),    edit_rs485->bit_comm );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_min),  edit_rs485->e_min    );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_max),  edit_rs485->e_max    );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ea_min), edit_rs485->ea_min   );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ea_max), edit_rs485->ea_max   );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_s_min),  edit_rs485->s_min    );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_s_max),  edit_rs485->s_max    );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_sa_min), edit_rs485->sa_min   );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_sa_max), edit_rs485->sa_max   );
        gtk_widget_grab_focus( Entry_lib );
      }
     else { gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), TRUE );
