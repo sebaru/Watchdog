@@ -142,7 +142,6 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { rs485 = Rechercher_rs485DB( Config.log, Db_watchdog, id );
-printf("Proto_ajouter_rs485 0\n");
            if (!rs485)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -153,13 +152,9 @@ printf("Proto_ajouter_rs485 0\n");
            else
             { Envoi_client( client, TAG_RS485, SSTAG_SERVEUR_ADD_RS485_OK,
                             (gchar *)rs485, sizeof(struct CMD_TYPE_RS485) );
-printf("Proto_ajouter_rs485 1\n");
               while (Partage->com_rs485.admin_add) sched_yield();
-printf("Proto_ajouter_rs485 2\n");
               Partage->com_rs485.admin_add = rs485->id;                          /* Envoi au thread rs485 */
-printf("Proto_ajouter_rs485 3\n");
               g_free(rs485);
-printf("Proto_ajouter_rs485 4\n");
             }
          }
   }

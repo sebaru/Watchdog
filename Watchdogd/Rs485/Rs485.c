@@ -148,11 +148,9 @@
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_RS485, id );
-printf("select 0\n");
        
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
-printf("select 00\n");
        
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -160,15 +158,12 @@ printf("select 00\n");
        Info_n( log, DEBUG_DB, "Rechercher_rs485DB: RS485 non trouvé dans la BDD", id );
        return(NULL);
      }
-printf("select 000\n");
        
     rs485 = g_malloc0( sizeof(struct CMD_TYPE_RS485) );
     if (!rs485)
      { Info( log, DEBUG_MEM, "Rechercher_rs485DB: Mem error" ); }
     else
-     { printf("select 1\n");
-       memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
-       printf("select 2\n");
+     { memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);
@@ -182,7 +177,6 @@ printf("select 000\n");
        rs485->s_min             = atoi(db->row[11]);
        rs485->s_max             = atoi(db->row[12]);
      }
-    printf("select 3\n");
 
     Liberer_resultat_SQL ( log, db );
     return(rs485);
@@ -242,7 +236,7 @@ printf("select 000\n");
   { struct MODULE_RS485 *module;
     struct CMD_TYPE_RS485 *rs485;
     struct DB *db;
-printf("Charger_un_rs 1 \n");
+
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db) return;
@@ -255,7 +249,6 @@ printf("Charger_un_rs 1 \n");
        return;
      }
 
-printf("Charger_un_rs 2 \n");
     rs485 = Rechercher_rs485DB ( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
     if (!rs485)                                                 /* Si probleme d'allocation mémoire */
@@ -265,14 +258,12 @@ printf("Charger_un_rs 2 \n");
        return;
      }
 
-printf("Charger_un_rs 3 \n");
     memcpy( &module->rs485, rs485, sizeof(struct CMD_TYPE_RS485) );
     g_free(rs485);
 
     pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
     pthread_mutex_unlock( &Partage->com_rs485.synchro );
-printf("Charger_un_rs 4 \n");
 
     Info_n( Config.log, DEBUG_RS485, "Charger_un_rs485:  id      = ", module->rs485.id    );
     Info_n( Config.log, DEBUG_RS485, "                -  actif   = ", module->rs485.actif );
@@ -382,15 +373,15 @@ printf("Charger_un_rs 4 \n");
 
     CRC16 = 0xFFFF;                                                              /* initialisation à FFFF */
 
-   for ( index_octets=0; index_octets<TAILLE_ENTETE-2+Trame->taille; index_octets++ )
-    {                                                                          /* CRC OUEX octet en cours */
-      CRC16 = CRC16 ^ (short)*((unsigned char *)Trame + index_octets);
-      for( index_bits = 0; index_bits<8; index_bits++ )
-       { retenue = CRC16 & 1;                              /* Récuperer la retenue avant traitement CRC16 */ 
-         CRC16 = CRC16 >> 1;                                       /* décalage d'un bit à droite du CRC16 */
-         if (retenue == 1)
-          { CRC16 = CRC16 ^ 0xA001; }                                          /* CRC16 OUEX A001 en hexa */
-       }
+    for ( index_octets=0; index_octets<TAILLE_ENTETE-2+Trame->taille; index_octets++ )
+     {                                                                         /* CRC OUEX octet en cours */
+       CRC16 = CRC16 ^ (short)*((unsigned char *)Trame + index_octets);
+       for( index_bits = 0; index_bits<8; index_bits++ )
+        { retenue = CRC16 & 1;                             /* Récuperer la retenue avant traitement CRC16 */ 
+          CRC16 = CRC16 >> 1;                                      /* décalage d'un bit à droite du CRC16 */
+          if (retenue == 1)
+           { CRC16 = CRC16 ^ 0xA001; }                                         /* CRC16 OUEX A001 en hexa */
+        }
      }
     return( (int)CRC16 );
   }
