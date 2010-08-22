@@ -140,22 +140,6 @@
     return(rs485);
   }
 /**********************************************************************************************************/
-/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
-/**********************************************************************************************************/
- static struct MODULE_RS485 *Chercher_module_by_id ( gint id )
-  { GList *liste;
-    liste = Partage->com_rs485.Modules_RS485;
-    while ( liste )
-     { struct MODULE_RS485 *module;
-       module = ((struct MODULE_RS485 *)liste->data);
-       if (module->rs485.id == id) return(module);
-       liste = liste->next;
-     }
-    return(NULL);
-  }
-/**********************************************************************************************************/
 /* Rechercher_rs485DB: Recupération du rs485 dont le id est en parametre                                  */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
@@ -230,6 +214,22 @@
     g_free(libelle);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static struct MODULE_RS485 *Chercher_module_by_id ( gint id )
+  { GList *liste;
+    liste = Partage->com_rs485.Modules_RS485;
+    while ( liste )
+     { struct MODULE_RS485 *module;
+       module = ((struct MODULE_RS485 *)liste->data);
+       if (module->rs485.id == id) return(module);
+       liste = liste->next;
+     }
+    return(NULL);
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
