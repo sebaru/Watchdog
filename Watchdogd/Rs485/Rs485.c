@@ -168,7 +168,9 @@
     if (!rs485)
      { Info( log, DEBUG_MEM, "Rechercher_rs485DB: Mem error" ); }
     else
-     { memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+     { printf("select 1\n");
+       memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+       printf("select 2\n");
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);
@@ -182,6 +184,8 @@
        rs485->s_min             = atoi(db->row[11]);
        rs485->s_max             = atoi(db->row[12]);
      }
+    printf("select 3\n");
+
     Liberer_resultat_SQL ( log, db );
     return(rs485);
   }
