@@ -36,7 +36,6 @@
     gboolean actif;
     gint ea_min, ea_max;
     gint e_min, e_max;
-    gint ec_min, ec_max;
     gint s_min, s_max;
     gint sa_min, sa_max;
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */

@@ -43,7 +43,6 @@
      COLONNE_BIT,
      COLONNE_EA_MIN, COLONNE_EA_MAX,
      COLONNE_E_MIN, COLONNE_E_MAX,
-     COLONNE_EC_MIN, COLONNE_EC_MAX,
      COLONNE_S_MIN, COLONNE_S_MAX,
      COLONNE_SA_MIN, COLONNE_SA_MAX,
      COLONNE_LIBELLE,
@@ -359,8 +358,6 @@
                                               G_TYPE_UINT,                                      /* EA_MAX */
                                               G_TYPE_UINT,                                       /* E_MIN */
                                               G_TYPE_UINT,                                       /* E_MAX */
-                                              G_TYPE_UINT,                                      /* EC_MIN */
-                                              G_TYPE_UINT,                                      /* EC_MAX */
                                               G_TYPE_UINT,                                       /* A_MIN */
                                               G_TYPE_UINT,                                       /* A_MAX */
                                               G_TYPE_UINT,                                      /* SA_MIN */
@@ -415,20 +412,6 @@
                                                          "text", COLONNE_E_MAX,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_E_MAX);                 /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EC min"), renderer,
-                                                         "text", COLONNE_EC_MIN,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EC_MIN);                 /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EC max"), renderer,
-                                                         "text", COLONNE_EC_MAX,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EC_MAX);                 /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
@@ -549,8 +532,6 @@
                          COLONNE_EA_MAX, rs485->ea_max,
                          COLONNE_E_MIN, rs485->e_min,
                          COLONNE_E_MAX, rs485->e_max,
-                         COLONNE_EC_MIN, rs485->ec_min,
-                         COLONNE_EC_MAX, rs485->ec_max,
                          COLONNE_S_MIN, rs485->s_min,
                          COLONNE_S_MAX, rs485->s_max,
                          COLONNE_SA_MIN, rs485->sa_min,

@@ -74,13 +74,12 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,"
+                "INSERT INTO %s(num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
                 " VALUES (%d,%d,'%s',%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
                 NOM_TABLE_MODULE_RS485, rs485->num, rs485->bit_comm, libelle, rs485->actif,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
-                rs485->ec_min, rs485->ec_max, rs485->s_min, rs485->s_max,
-                rs485->sa_min, rs485->sa_max
+                rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
               );
     g_free(libelle);
 
@@ -101,7 +100,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,"
+                "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
 
@@ -133,12 +132,10 @@
        rs485->ea_max            = atoi(db->row[6]);
        rs485->e_min             = atoi(db->row[7]);
        rs485->e_max             = atoi(db->row[8]);
-       rs485->ec_min            = atoi(db->row[9]);
-       rs485->ec_max            = atoi(db->row[10]);
-       rs485->sa_min            = atoi(db->row[11]);
-       rs485->sa_max            = atoi(db->row[12]);
-       rs485->s_min             = atoi(db->row[13]);
-       rs485->s_max             = atoi(db->row[14]);
+       rs485->sa_min            = atoi(db->row[9]);
+       rs485->sa_max            = atoi(db->row[10]);
+       rs485->s_min             = atoi(db->row[11]);
+       rs485->s_max             = atoi(db->row[12]);
      }
     return(rs485);
   }
@@ -168,7 +165,7 @@
     struct CMD_TYPE_RS485 *rs485;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,ec_min,ec_max,"
+                "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_RS485, id );
@@ -196,12 +193,10 @@
        rs485->ea_max            = atoi(db->row[6]);
        rs485->e_min             = atoi(db->row[7]);
        rs485->e_max             = atoi(db->row[8]);
-       rs485->ec_min            = atoi(db->row[9]);
-       rs485->ec_max            = atoi(db->row[10]);
-       rs485->sa_min            = atoi(db->row[11]);
-       rs485->sa_max            = atoi(db->row[12]);
-       rs485->s_min             = atoi(db->row[13]);
-       rs485->s_max             = atoi(db->row[14]);
+       rs485->sa_min            = atoi(db->row[9]);
+       rs485->sa_max            = atoi(db->row[10]);
+       rs485->s_min             = atoi(db->row[11]);
+       rs485->s_max             = atoi(db->row[12]);
      }
     Liberer_resultat_SQL ( log, db );
     return(rs485);
@@ -224,13 +219,13 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "num=%d,bit_comm=%d,libelle='%s',actif=%d,"
-                "ea_min=%d,ea_max=%d,e_min=%d,e_max=%d,ec_min=%d,ec_max=%d,"
+                "ea_min=%d,ea_max=%d,e_min=%d,e_max=%d,"
                 "sa_min=%d,sa_max=%d,s_min%d,s_max=%d"
                 " WHERE id=%d"
 
                 NOM_TABLE_MODULE_RS485,
                 rs485->num, rs485->bit_comm, libelle, rs485->actif,
-                rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max, rs485->ec_min, rs485->ec_max,
+                rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max,
                 rs485->id );
     g_free(libelle);
