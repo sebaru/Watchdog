@@ -102,12 +102,12 @@
 /* Entre: widget, data.                                                                                   */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- static void Afficher_mnemo_voc ( void )
+ static void Afficher_mnemo_rs485 ( void )
   { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
     mnemo.type = MNEMO_MONOSTABLE;
     mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit) );
     
-    Envoi_serveur( TAG_RS485, SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
+    Envoi_serveur( TAG_RS485, SSTAG_CLIENT_TYPE_NUM_MNEMO_RS485,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
 /**********************************************************************************************************/
@@ -143,7 +143,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 9, 4, TRUE );
+    table = gtk_table_new( 7, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -156,25 +156,6 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, i, i+1 );
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 2, 3, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Libelle") );                                        /* Le rs485 en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_lib = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Bit de comm") );                           /* Numéro du bit M a positionner */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_bit = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_bit), "changed",
-                      G_CALLBACK(Afficher_mnemo_voc), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit, 1, 2, i, i+1 );
-
-    Entry_bit = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_bit), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit, 2, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("E min") );                                    /* Numéro de l'entrée minimum */
@@ -219,6 +200,25 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     Spin_sa_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_sa_max, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Bit de comm") );                           /* Numéro du bit M a positionner */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_bit = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    g_signal_connect( G_OBJECT(Spin_bit), "changed",
+                      G_CALLBACK(Afficher_mnemo_rs485), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit, 1, 2, i, i+1 );
+
+    Entry_bit = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_bit), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit, 2, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Libelle") );                                        /* Le rs485 en lui-meme */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_lib = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
     if (edit_rs485)                                                              /* Si edition d'un rs485 */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_rs485->libelle );
