@@ -218,9 +218,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,bit_comm=%d,libelle='%s',actif=%d,"
-                "ea_min=%d,ea_max=%d,e_min=%d,e_max=%d,"
-                "sa_min=%d,sa_max=%d,s_min%d,s_max=%d"
+                "num='%d',bit_comm='%d',libelle='%s',actif='%d',"
+                "ea_min='%d',ea_max='%d',e_min='%d',e_max='%d',"
+                "sa_min='%d',sa_max='%d',s_min='%d',s_max='%d'"
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_RS485,
                 rs485->num, rs485->bit_comm, libelle, rs485->actif,
