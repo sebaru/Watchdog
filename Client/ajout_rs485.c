@@ -127,7 +127,6 @@
     F_ajout = gtk_dialog_new_with_buttons( (edit_rs485 ? _("Edit a rs485") : _("Add a rs485")),
                                            GTK_WINDOW(F_client),
                                            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                           GTK_STOCK_MEDIA_PLAY, GTK_RESPONSE_APPLY,
                                            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                            GTK_STOCK_OK, GTK_RESPONSE_OK,
                                            NULL);
@@ -154,9 +153,9 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, i, i+1 );
 
     texte = gtk_label_new( _("Rs485 Num") );                       /* Numéro du module en cours d'edition */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, i, i+1 );
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 2, 3, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Libelle") );                                        /* Le rs485 en lui-meme */

@@ -354,14 +354,14 @@
                                               G_TYPE_BOOLEAN,                                    /* actif */
                                               G_TYPE_UINT,                                      /* Numéro */
                                               G_TYPE_UINT,                                         /* bit */
-                                              G_TYPE_UINT,                                      /* EA_MIN */
-                                              G_TYPE_UINT,                                      /* EA_MAX */
-                                              G_TYPE_UINT,                                       /* E_MIN */
-                                              G_TYPE_UINT,                                       /* E_MAX */
-                                              G_TYPE_UINT,                                       /* A_MIN */
-                                              G_TYPE_UINT,                                       /* A_MAX */
-                                              G_TYPE_UINT,                                      /* SA_MIN */
-                                              G_TYPE_UINT,                                      /* SA_MAX */
+                                              G_TYPE_INT,                                       /* EA_MIN */
+                                              G_TYPE_INT,                                       /* EA_MAX */
+                                              G_TYPE_INT,                                        /* E_MIN */
+                                              G_TYPE_INT,                                        /* E_MAX */
+                                              G_TYPE_INT,                                        /* A_MIN */
+                                              G_TYPE_INT,                                        /* A_MAX */
+                                              G_TYPE_INT,                                       /* SA_MIN */
+                                              G_TYPE_INT,                                       /* SA_MAX */
                                               G_TYPE_STRING                                    /* libelle */
                                );
 
