@@ -65,7 +65,6 @@
  gint Ajouter_rs485DB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 )
   { gchar requete[2048];
     gchar *libelle;
-    gint retour;
 
     libelle = Normaliser_chaine ( log, rs485->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
@@ -83,13 +82,9 @@
               );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return(-1);
-     }
-    retour = Recuperer_last_ID_SQL ( Config.log, db );
-    Libere_DB_SQL( Config.log, &db );
-    return(retour);
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(-1); }
+    return( Recuperer_last_ID_SQL( log, db ) );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
