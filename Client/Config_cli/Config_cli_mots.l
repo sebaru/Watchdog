@@ -97,9 +97,6 @@ blanc         [\t ]+
 "NETWORK"                  { yylval.val = D_NETWORK;
                              return(D_NETWORK);
                            }
-"FORK"                     { yylval.val = D_FORK;
-                             return(D_FORK);
-                           }
 "CONNEXION"                { yylval.val = D_CONNEXION;
                              return(D_CONNEXION);
                            }

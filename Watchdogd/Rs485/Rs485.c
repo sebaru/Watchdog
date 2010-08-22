@@ -116,7 +116,7 @@
      }
 
     rs485 = (struct CMD_TYPE_RS485 *)g_malloc0( sizeof(struct CMD_TYPE_RS485) );
-    if (!rs485) Info( log, DEBUG_MEM, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
+    if (!rs485) Info( log, DEBUG_RS485, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
     else
      { memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
        rs485->id                = atoi(db->row[0]);
@@ -161,7 +161,7 @@
        
     rs485 = g_malloc0( sizeof(struct CMD_TYPE_RS485) );
     if (!rs485)
-     { Info( log, DEBUG_MEM, "Rechercher_rs485DB: Mem error" ); }
+     { Info( log, DEBUG_RS485, "Rechercher_rs485DB: Mem error" ); }
     else
      { memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
        rs485->id                = atoi(db->row[0]);
@@ -243,7 +243,7 @@
 
     module = (struct MODULE_RS485 *)g_malloc0(sizeof(struct MODULE_RS485));
     if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MEM,
+     { Info( Config.log, DEBUG_RS485,
              "Charger_un_rs485: Erreur allocation mémoire struct MODULE_RS485" );
        Libere_DB_SQL( Config.log, &db );
        return;
@@ -252,7 +252,7 @@
     rs485 = Rechercher_rs485DB ( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
     if (!rs485)                                                 /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MEM,
+     { Info( Config.log, DEBUG_RS485,
              "Charger_un_rs485: Erreur allocation mémoire struct CMD_TYPE_RS485" );
        g_free(module);
        return;
@@ -298,7 +298,7 @@
 
        module = (struct MODULE_RS485 *)g_malloc0( sizeof(struct MODULE_RS485) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MEM,
+        { Info( Config.log, DEBUG_RS485,
                 "Charger_tous_RS485: Erreur allocation mémoire struct MODULE_RS485" );
           g_free(rs485);
           Libere_DB_SQL( Config.log, &db );
@@ -314,7 +314,7 @@
        Info_n( Config.log, DEBUG_RS485, "Charger_modules_RS485:  id    = ", module->rs485.id    );
        Info_n( Config.log, DEBUG_RS485, "                     -  actif = ", module->rs485.actif );
      }
-    Info_n( Config.log, DEBUG_INFO, "Charger_tous_RS485: module RS485 found  !", cpt );
+    Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485: module RS485 found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -464,9 +464,9 @@
 
     fd = open( Config.port_RS485, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
-     { Info_c( Config.log, DEBUG_INFO,
+     { Info_c( Config.log, DEBUG_RS485,
                "RS485: Init_rs485: Impossible d'ouvrir le port rs485", Config.port_RS485 );
-       Info_n( Config.log, DEBUG_INFO,
+       Info_n( Config.log, DEBUG_RS485,
                "RS485: Init_rs485: Code retour                      ", fd );
      }
     else
@@ -479,7 +479,7 @@
        oldtio.c_cc[VMIN]     = 0;
        tcsetattr(fd, TCSANOW, &oldtio);
        tcflush(fd, TCIOFLUSH);
-       Info_c( Config.log, DEBUG_INFO,
+       Info_c( Config.log, DEBUG_RS485,
                "RS485: Init_rs485: Ouverture port rs485 okay", Config.port_RS485);
      }
     return(fd);
@@ -494,7 +494,7 @@
     if (trame->dest != 0xFF) return(FALSE);                        /* Si c'est pas pour nous, on se casse */
 
     if (module->rs485.id != trame->source)
-     { Info_n( Config.log, DEBUG_INFO, "Processer_trame: Module RS485 unknown", trame->source);
+     { Info_n( Config.log, DEBUG_RS485, "Processer_trame: Module RS485 unknown", trame->source);
        return(TRUE);
      }
 
@@ -551,14 +551,14 @@
     GList *liste;
 
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );
-    Info( Config.log, DEBUG_FORK, "RS485: demarrage" );
+    Info( Config.log, DEBUG_RS485, "RS485: demarrage" );
 
     fd_rs485 = Init_rs485();
     if (fd_rs485<0)                                                        /* On valide l'acces aux ports */
-     { Info( Config.log, DEBUG_INFO, "RS485: Acces RS485 impossible, terminé");
+     { Info( Config.log, DEBUG_RS485, "RS485: Acces RS485 impossible, terminé");
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else { Info_n( Config.log, DEBUG_INFO, "RS485: Acces RS485 FD", fd_rs485 ); }
+    else { Info_n( Config.log, DEBUG_RS485, "RS485: Acces RS485 FD", fd_rs485 ); }
 
     Partage->com_rs485.Modules_RS485 = NULL;                    /* Initialisation des variables du thread */
 
@@ -613,7 +613,7 @@
         { close(fd_rs485);
           fd_rs485 = Init_rs485();
           if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
-           { Info( Config.log, DEBUG_INFO, "RS485: Restart Acces RS485 impossible, terminé");
+           { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
              pthread_exit(GINT_TO_POINTER(-1));
            }
           continue;
@@ -650,7 +650,7 @@
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
-                Info_n( Config.log, DEBUG_INFO, "RS485: Run_rs485: module down", module->rs485.id );
+                Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: module down", module->rs485.id );
                 SB(module->rs485.bit_comm, 0);
                 liste = liste->next;
                 continue;
@@ -687,7 +687,7 @@
                    crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
                    crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
                    if (crc_recu != Calcul_crc16(&Trame))
-                    { Info(Config.log, DEBUG_INFO, "RS485: CRC16 failed !!"); }
+                    { Info(Config.log, DEBUG_RS485, "RS485: CRC16 failed !!"); }
                    else
                     { pthread_mutex_lock( &Partage->com_dls.synchro );
                       if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
@@ -705,7 +705,7 @@
       }                                                                    /* Fin du while partage->arret */
     close(fd_rs485);
     Decharger_tous_rs485();
-    Info_n( Config.log, DEBUG_FORK, "RS485: Run_rs485: Down", pthread_self() );
+    Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

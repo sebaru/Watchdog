@@ -146,8 +146,8 @@ blanc         [\t ]+
 "NETWORK"                  { Config_lval.val = D_NETWORK;
                              return(D_NETWORK);
                            }
-"FORK"                     { Config_lval.val = D_FORK;
-                             return(D_FORK);
+"ARCHIVE"                  { Config_lval.val = D_ARCHIVE;
+                             return(D_ARCHIVE);
                            }
 "MODBUS"                   { Config_lval.val = D_MODBUS;
                              return(D_MODBUS);

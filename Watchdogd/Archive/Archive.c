@@ -41,8 +41,8 @@
     struct ARCHDB *arch;
 
     if (Partage->com_arch.taille_arch > 150)
-     { Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150) type", type );
-       Info_n( Config.log, DEBUG_INFO, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
+     { Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: DROP arch (taille>150) type", type );
+       Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
        return;
      }
 
@@ -70,12 +70,12 @@
     guint top;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_FORK, "ARCH: demarrage" );
+    Info( Config.log, DEBUG_ARCHIVE, "ARCH: demarrage" );
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info_c( Config.log, DEBUG_DB, "ARCH: Run_arch: Unable to open database", Config.db_database );
+     { Info_c( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Unable to open database", Config.db_database );
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -86,7 +86,7 @@
 
        if (Partage->com_arch.sigusr1)                                             /* On a recu sigusr1 ?? */
         { Partage->com_arch.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_INFO, "ARCH: Run_arch: SIGUSR1" );
+          Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: SIGUSR1" );
         }
 
        if (!Partage->com_arch.liste_arch)                                 /* Si pas de message, on tourne */
@@ -99,7 +99,7 @@
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
        Partage->com_arch.liste_arch = g_list_remove ( Partage->com_arch.liste_arch, arch );
 #ifdef DEBUG
-       Info_n( Config.log, DEBUG_INFO, "ARCH: Run_arch: Reste a traiter",
+       Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
                                        g_list_length(Partage->com_arch.liste_arch) );
 #endif
        Partage->com_arch.taille_arch--;
@@ -108,7 +108,7 @@
        g_free(arch);
      }
     Libere_DB_SQL( Config.log, &db );
-    Info_n( Config.log, DEBUG_FORK, "ARCH: Run_arch: Down", pthread_self() );
+    Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

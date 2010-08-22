@@ -47,7 +47,7 @@
  #define  DEBUG_MEM                 (1<<6 ) /* Allocation memoire */
  #define  DEBUG_CDG                 (1<<7 ) /* Chiens de garde */
  #define  DEBUG_NETWORK             (1<<8 ) /* Debug reseau */
- #define  DEBUG_FORK                (1<<9 ) /* Debug fork process */
+ #define  DEBUG_ARCHIVE             (1<<9 ) /* Debug thread ARCHIVE */
  #define  DEBUG_CONNEXION           (1<<10) /* Debug connexions clientes */
  #define  DEBUG_DLS                 (1<<11) /* Debug modules DLS */
  #define  DEBUG_MODBUS              (1<<12) /* Debug modules MODBUS */

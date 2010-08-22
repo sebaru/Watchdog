@@ -419,7 +419,7 @@
 
     sleep(10);/* attente 10 secondes pour initialisation des bit internes et collection des infos modules */
 
-    Info( Config.log, DEBUG_FORK, "DLS: demarrage" );                                        /* Log Start */
+    Info( Config.log, DEBUG_DLS, "DLS: demarrage" );                                        /* Log Start */
              
     Partage->com_dls.Plugins            = NULL;            /* Initialisation des variables du thread */
     Partage->com_dls.liste_m            = NULL;            /* Initialisation des variables du thread */
@@ -502,7 +502,7 @@
        sched_yield();
      }
     Decharger_plugins();                                                  /* Dechargement des modules DLS */
-    Info_n( Config.log, DEBUG_FORK, "Run_dls: DLS Down", pthread_self() );
+    Info_n( Config.log, DEBUG_DLS, "Run_dls: DLS Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -315,7 +315,7 @@
        Info( Config.log, DEBUG_SMS, "SMS: Run_sms send: fin" );
      }
 
-    Info_n( Config.log, DEBUG_FORK, "SMS: Run_sms: Down", pthread_self() );
+    Info_n( Config.log, DEBUG_SMS, "SMS: Run_sms: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -53,31 +53,31 @@
 
        if ( ! strcmp ( thread, "arch" ) )
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb ARCH -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ARCH -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "rs" ) )
         { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb RS485 -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RS485 -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "mbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb MODBUS -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb MODBUS -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "sms" ) )
         { if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb SMS -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SMS -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "audio" ) )
         { if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb AUDIO -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb AUDIO -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb DLS -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb DLS -> Arret" ); }
         } 
        if ( ! strcmp ( thread, "onduleur" ) )
         { if (!Demarrer_onduleur())                                                 /* Démarrage ONDULEUR */
-           { Info( Config.log, DEBUG_FORK, "Admin: Pb ONDULEUR -> Arret" ); }
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ONDULEUR -> Arret" ); }
         } 
 
      } else

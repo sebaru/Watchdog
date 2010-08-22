@@ -120,7 +120,7 @@
      { Info_n( Config.log, DEBUG_ADMIN, "Accueillir_un_admin: Connexion wanted. ID", id );
 
        client = g_malloc0( sizeof(struct CLIENT_ADMIN) );/* On alloue donc une nouvelle structure cliente */
-       if (!client) { Info_n ( Config.log, DEBUG_MEM,
+       if (!client) { Info_n ( Config.log, DEBUG_ADMIN,
                                "SSRV: Accueillir_un_admin: Not enought memory to connect", id );
                       close(id);
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
@@ -202,13 +202,13 @@
  void Run_admin ( void )
   { prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_FORK, "Admin: demarrage" );
+    Info( Config.log, DEBUG_ADMIN, "Admin: demarrage" );
 
     Fd_ecoute = Activer_ecoute_admin ();
     if ( Fd_ecoute < 0 )
-     { Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
+     { Info( Config.log, DEBUG_ADMIN, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
        pthread_exit(GINT_TO_POINTER(-1));
-     } else Info( Config.log, DEBUG_FORK, "ADMIN: Run_admin: En ecoute !" );
+     } else Info( Config.log, DEBUG_ADMIN, "ADMIN: Run_admin: En ecoute !" );
 
     Clients = NULL;                                             /* Initialisation des variables du thread */
 
@@ -250,7 +250,7 @@
      }
 
     Desactiver_ecoute_admin ();
-    Info_n( Config.log, DEBUG_FORK, "Admin: Run_admin: Down", pthread_self() );
+    Info_n( Config.log, DEBUG_ADMIN, "Admin: Run_admin: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

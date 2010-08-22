@@ -59,9 +59,9 @@
     Partage->taille_partage = sizeof(struct PARTAGE);
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_FORK, "Donnees exportées", FICHIER_EXPORT );
+                Info_c( Config.log, DEBUG_CONFIG, "Donnees exportées", FICHIER_EXPORT );
               }
-    else      { Info_c( Config.log, DEBUG_FORK, "Could not export", strerror(errno) ); }
+    else      { Info_c( Config.log, DEBUG_CONFIG, "Could not export", strerror(errno) ); }
     close (fd);
   }
 /**********************************************************************************************************/
@@ -73,18 +73,18 @@
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_FORK, "Import : Donnees importées... Checking size", FICHIER_EXPORT );
+                Info_c( Config.log, DEBUG_CONFIG, "Import : Donnees importées... Checking size", FICHIER_EXPORT );
                 if (Partage->taille_partage != sizeof(struct PARTAGE) )
                  { memset( Partage, 0, sizeof(struct PARTAGE) );
-                   Info( Config.log, DEBUG_FORK, "Import: Wrong size .. zeroing ..." );
+                   Info( Config.log, DEBUG_CONFIG, "Import: Wrong size .. zeroing ..." );
                  }
                 else
-                 { Info( Config.log, DEBUG_FORK, "Import: Size OK" ); }
+                 { Info( Config.log, DEBUG_CONFIG, "Import: Size OK" ); }
                 close (fd);
                 return(1);
               }
     else      { memset( Partage, 0, sizeof(struct PARTAGE) );
-                Info( Config.log, DEBUG_FORK, "Import: no file .. zeroing ..." );
+                Info( Config.log, DEBUG_CONFIG, "Import: no file .. zeroing ..." );
               }
    return(0);
   }
@@ -535,32 +535,32 @@ encore:
         { pthread_t TID;
           if (Config.single == FALSE)                                          /* Si demarrage des thread */
            { if (!Demarrer_arch())                                         /* Demarrage gestion Archivage */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ARCH" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb ARCH" ); }
 
              if (!Demarrer_rs485())                                     /* Demarrage gestion module RS485 */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb RS485" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb RS485" ); }
 
              if (!Demarrer_modbus())                                   /* Demarrage gestion module MODBUS */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MODBUS" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb MODBUS" ); }
 
              if (!Demarrer_sms())                                                     /* Démarrage S.M.S. */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb SMS" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb SMS" ); }
 
              if (!Demarrer_audio())                                                /* Démarrage A.U.D.I.O */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb AUDIO" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb AUDIO" ); }
 
              if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb DLS" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb DLS" ); }
 
              if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb ONDULEUR" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb ONDULEUR" ); }
 
              if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
-              { Info( Config.log, DEBUG_FORK, "MSRV: Pb MOTION_DETECT" ); }
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
            }
 
           if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
-           { Info( Config.log, DEBUG_FORK, "MSRV: Pb Admin -> Arret" ); }
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb Admin -> Arret" ); }
 
           pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
           pthread_join( TID, NULL );

@@ -61,20 +61,20 @@
     
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation objet impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -157,7 +157,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_CAMERA, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", id );
        return(NULL);
      }
 
@@ -187,20 +187,20 @@
 
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation objet impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
-       Info( log, DEBUG_DB, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -263,7 +263,7 @@
 
     do { camera = Rechercher_cameraDB_motion ( log, db );
          if (camera)
-          { Info_n( log, DEBUG_INFO, "Camera_check_motion: Mise a un du bit M", camera->bit );
+          { Info_n( log, DEBUG_CAMERA, "Camera_check_motion: Mise a un du bit M", camera->bit );
             Envoyer_commande_dls ( camera->bit ); 
             g_free(camera);
           }

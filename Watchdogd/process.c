@@ -77,11 +77,11 @@
 
     unlink("motion.conf");                                      /* Création des fichiers de configuration */
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (id<0) { Info_n( Config.log, DEBUG_FORK,
+    if (id<0) { Info_n( Config.log, DEBUG_INFO,
                         "MSRV: Creer_config_file_motion: creation motion.conf pid file failed", id );
                 return(FALSE);
               }
-    Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation motion.conf", id );
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Creer_config_file_motion: creation motion.conf", id );
 #ifdef bouh
     g_snprintf(chaine, sizeof(chaine), "control_port 8080\n");
     write(id, chaine, strlen(chaine));
@@ -135,13 +135,13 @@
        
        unlink(nom_fichier);
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-       if (id<0) { Info_n( Config.log, DEBUG_FORK,
+       if (id<0) { Info_n( Config.log, DEBUG_INFO,
                            "MSRV: Creer_config_file_motion: creation camera.conf failed", id );
                    g_free(camera);
                    close(id);
                    return(FALSE);
                  }
-       Info_n( Config.log, DEBUG_FORK, "MSRV: Creer_config_file_motion: creation thread camera", camera->num );
+       Info_n( Config.log, DEBUG_INFO, "MSRV: Creer_config_file_motion: creation thread camera", camera->num );
        g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id) values (%d)\n",
@@ -166,25 +166,25 @@
  gboolean Demarrer_motion_detect ( void )
   { gchar chaine[80];
     gint id;
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
 
     if (!Creer_config_file_motion()) return(FALSE);
 
     g_snprintf(chaine, sizeof(chaine), "%s/motion.pid", Config.home);
     id = open ( chaine, O_RDONLY, 0 );
-    if (id<0) { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
+    if (id<0) { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
                 return(FALSE);
               }
 
     if (read ( id, chaine, sizeof(chaine) )<0)
-              { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_motion_detect: erreur lecture pid file", id );
+              { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: erreur lecture pid file", id );
                 close(id);
                 return(FALSE);
               }
     close(id);
     PID_motion = atoi (chaine);
     kill( PID_motion, SIGHUP );                                                   /* Envoie reload conf a motion */
-    Info_n( Config.log, DEBUG_FORK,
+    Info_n( Config.log, DEBUG_INFO,
            "MSRV: Demarrer_motion_detect: process motion seems to be running", PID_motion );
     return(TRUE);
   }
@@ -195,13 +195,13 @@
 /**********************************************************************************************************/
  static gboolean Demarrer_sous_serveur ( int id )
   { static int nbr_thread = 0;
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
     if ( pthread_create( &Partage->Sous_serveur[id].pid, NULL, (void *)Run_serveur, GINT_TO_POINTER(id) ) )
-     { Info_c( Config.log, DEBUG_FORK, _("MSRV: Demarrer_sous_serveur: pthread_create failed"), strerror(errno) );
+     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: pthread_create failed"), strerror(errno) );
        return(FALSE);
      }
     else nbr_thread++;
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_sous_serveur: nbr_thread"), nbr_thread );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: nbr_thread"), nbr_thread );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -210,12 +210,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_onduleur ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
     if ( pthread_create( &TID_onduleur, NULL, (void *)Run_onduleur, NULL ) )
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_onduleur: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
                    TID_onduleur );
          }
     return(TRUE);
@@ -226,12 +226,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
     if ( pthread_create( &TID_dls, NULL, (void *)Run_dls, NULL ) )
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_dls: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_dls: thread dls seems to be running", TID_dls ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", TID_dls ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -240,12 +240,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_rs485 ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_rs485: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Demande de demarrage"), getpid() );
     if (pthread_create( &TID_rs485, NULL, (void *)Run_rs485, NULL ))
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_rs485: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_rs485: thread rs485 seems to be running",
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rs485: thread rs485 seems to be running",
                    TID_rs485 ); }
     return(TRUE);
   }
@@ -255,12 +255,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_sms ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_sms: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: Demande de demarrage"), getpid() );
     if (pthread_create( &TID_sms, NULL, (void *)Run_sms, NULL ))
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_sms: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_sms: thread sms seems to be running", TID_sms ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_sms: thread sms seems to be running", TID_sms ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -269,12 +269,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_audio ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_audio: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: Demande de demarrage"), getpid() );
     if (pthread_create( &TID_audio, NULL, (void *)Run_audio, NULL ))
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_audio: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_audio: thread audio seems to be running",
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_audio: thread audio seems to be running",
                    TID_audio ); }
     return(TRUE);
   }
@@ -284,12 +284,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_admin ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_admin: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: Demande de demarrage"), getpid() );
     if (pthread_create( &TID_admin, NULL, (void *)Run_admin, NULL ))
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_admin: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_admin: thread admin seems to be running",
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_admin: thread admin seems to be running",
                    TID_admin ); }
     return(TRUE);
   }
@@ -299,12 +299,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_arch ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_arch: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: Demande de demarrage"), getpid() );
     if (pthread_create( &TID_arch, NULL, (void *)Run_arch, NULL ))
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_arch: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_arch: thread arch seems to be running", TID_arch ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_arch: thread arch seems to be running", TID_arch ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -313,12 +313,12 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_modbus ( void )
-  { Info_n( Config.log, DEBUG_FORK, _("MSRV: Demarrer_modbus: Demande de demarrage"), getpid() );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: Demande de demarrage"), getpid() );
     if (pthread_create( &TID_modbus, NULL, (void *)Run_modbus, NULL ))
-     { Info( Config.log, DEBUG_FORK, _("MSRV: Demarrer_modbus: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_FORK, "MSRV: Demarrer_modbus: thread modbus seems to be running",
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_modbus: thread modbus seems to be running",
                    TID_arch ); }
     return(TRUE);
   }
@@ -391,34 +391,34 @@
      { i = Rechercher_serveur_inactif();                           /* A la recherche d'un serveur inactif */
        if (i!=-1)                                             /* Si c'est le cas, on lui assigne le jeton */
         { Partage->jeton = i;
-          Info( Config.log, DEBUG_FORK, _("MSRV: Gerer_jeton: serveur sans client trouvé") );
+          Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: serveur sans client trouvé") );
         }
        else                  /* Tous nos serveurs sont utilisés, il faut donc soit créer un autre serveur */
         {                                            /* soit donner la connexion à un serveur deja occupé */
-          Info( Config.log, DEBUG_FORK, _("MSRV: Gerer_jeton: Recherche d'un emplacement libre") );
+          Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: Recherche d'un emplacement libre") );
           i = Rechercher_empl_libre();
           if (i != -1)
-           { Info_n( Config.log, DEBUG_FORK,
+           { Info_n( Config.log, DEBUG_INFO,
                      _("MSRV: Gerer_jeton: Creation d'un nouveau ssrv"), i );
              if (Demarrer_sous_serveur(i))
               { Partage->jeton = i;                                              /* On lui donne le jeton */
               }
              else
-              { Info( Config.log, DEBUG_FORK, _("MSRV: Gerer_jeton: creation nouveau ssrv failed") ); }
+              { Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: creation nouveau ssrv failed") ); }
            }
           else         /* On ne peut plus creer de sous serveur, on attribue la connexion au moins occupé */
-           { Info( Config.log, DEBUG_FORK, _("MSRV: Gerer_jeton: Recherche du ssrv le moins chargé") );
+           { Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: Recherche du ssrv le moins chargé") );
              i = Rechercher_moins_occupe();
              if (i != -1)
               { Partage->jeton = i;                                              /* On lui donne le jeton */
               }
              else
-              { Info( Config.log, DEBUG_FORK, _("MSRV: Gerer_jeton: rechercher_moins_occupe failed") );
+              { Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: rechercher_moins_occupe failed") );
               }
            }
         }
 
-       Info_n( Config.log, DEBUG_FORK, _("MSRV:     Gerer_jeton: jeton to server"), i );
+       Info_n( Config.log, DEBUG_INFO, _("MSRV:     Gerer_jeton: jeton to server"), i );
        
      }
   }
@@ -437,7 +437,7 @@
     while (nbr_ssrv < Config.min_serveur)                     /* Si nous avons trop peu de serveur online */
      { i = Rechercher_empl_libre();
        if (i==-1) break;
-       Info_n( Config.log, DEBUG_FORK, _("MSRV: Gerer_manque_process: Too few servers, we create a new one"), i );
+       Info_n( Config.log, DEBUG_INFO, _("MSRV: Gerer_manque_process: Too few servers, we create a new one"), i );
        if (!Demarrer_sous_serveur(i)) break;
        nbr_ssrv++;
      }
@@ -448,54 +448,54 @@
 /**********************************************************************************************************/
  void Stopper_fils ( gint flag )
   { gint i;
-    Info( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Debut stopper_fils") );
+    Info( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Debut stopper_fils") );
 
     for (i=0; i<Config.max_serveur; i++)                   /* Arret de tous les fils en cours d'execution */
      { if (Partage->Sous_serveur[i].pid != -1)                             /* Attente de la fin du fils i */
-        { Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for SSRV pid to finish"),
+        { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SSRV pid to finish"),
                                           Partage->Sous_serveur[i].pid );
           pthread_join( Partage->Sous_serveur[i].pid, NULL );
-          Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, SSRV pid down"),
+          Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SSRV pid down"),
                                           Partage->Sous_serveur[i].pid );
         }
      }
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for DLS to finish"), TID_dls );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), TID_dls );
     if (TID_dls) { pthread_join( TID_dls, NULL ); }                                    /* Attente fin DLS */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, DLS is down"), TID_dls );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), TID_dls );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), TID_onduleur );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), TID_onduleur );
     if (TID_onduleur) { pthread_join( TID_onduleur, NULL ); }                     /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), TID_onduleur );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), TID_onduleur );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
     if (TID_rs485) { pthread_join( TID_rs485, NULL ); }                              /* Attente fin RS485 */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
     if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_rs485 );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_rs485 );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for SMS to finish"), TID_sms );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), TID_sms );
     if (TID_sms) { pthread_join( TID_sms, NULL ); }                                    /* Attente fin SMS */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, SMS is down"), TID_sms );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), TID_sms );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), TID_arch );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), TID_arch );
     if (TID_arch) { pthread_join( TID_arch, NULL ); }                                 /* Attente fin ARCH */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ARCH is down"), TID_arch );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), TID_arch );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
     if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
 
-    Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
 
     if (flag)
-     { Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
        if (TID_admin) { pthread_join( TID_admin, NULL ); }                           /* Attente fin ADMIN */
-       Info_n( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: ok, ADMIN is down"), TID_admin );
+       Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), TID_admin );
      }
 
-    Info( Config.log, DEBUG_FORK, _("MSRV: Stopper_fils: Fin stopper_fils") );
+    Info( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Fin stopper_fils") );
   }
 /*--------------------------------------------------------------------------------------------------------*/

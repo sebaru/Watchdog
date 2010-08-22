@@ -101,7 +101,6 @@
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN:
              { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
                        sizeof( client->dls ) );
-               Info_n( Config.log, DEBUG_FORK, "SSRV: Protole: Creation pthread compilation DLS", client->dls.id );
                pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls, client );
                pthread_detach( tid );
              }
@@ -109,7 +108,6 @@
        case SSTAG_CLIENT_WANT_TYPE_NUM_MNEMO:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
                Proto_envoyer_type_num_mnemo_tag( TAG_DLS, SSTAG_SERVEUR_TYPE_NUM_MNEMO, client, mnemo );
              }
             break;

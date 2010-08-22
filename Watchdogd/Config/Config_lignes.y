@@ -54,7 +54,7 @@ int erreur;                                                             /* Compt
 %token   DB_HOST DB_DATABASE DB_PASSWORD DB_USERNAME DB_PORT
 %token   PORT_RS485
 %token   CRYPTO_KEY TAILLE_CLEF_DH TAILLE_CLEF_RSA
-%token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_FORK D_MODBUS
+%token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_ARCHIVE D_MODBUS
 %token   D_ADMIN D_CONNEXION D_DLS D_RS485 D_ONDULEUR D_SMS D_AUDIO D_CAMERA
 
 
@@ -144,7 +144,7 @@ one_debug:
                 | D_MEM       { $$ = DEBUG_MEM;       }
                 | D_CDG       { $$ = DEBUG_CDG;       }
                 | D_NETWORK   { $$ = DEBUG_NETWORK;   }
-                | D_FORK      { $$ = DEBUG_FORK;      }
+                | D_ARCHIVE   { $$ = DEBUG_ARCHIVE;   }
                 | D_CONNEXION { $$ = DEBUG_CONNEXION; }
                 | D_DLS       { $$ = DEBUG_DLS;       }
                 | D_MODBUS    { $$ = DEBUG_MODBUS;    }
