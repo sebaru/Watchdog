@@ -145,7 +145,7 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_RS485 *Rechercher_rs485DB ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[256];
+  { gchar requete[512];
     struct CMD_TYPE_RS485 *rs485;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
