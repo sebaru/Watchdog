@@ -240,7 +240,7 @@
   { struct MODULE_RS485 *module;
     struct CMD_TYPE_RS485 *rs485;
     struct DB *db;
-
+printf("Charger_un_rs 1 \n");
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db) return;
@@ -253,6 +253,7 @@
        return;
      }
 
+printf("Charger_un_rs 2 \n");
     rs485 = Rechercher_rs485DB ( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
     if (!rs485)                                                 /* Si probleme d'allocation mémoire */
@@ -262,12 +263,14 @@
        return;
      }
 
+printf("Charger_un_rs 3 \n");
     memcpy( &module->rs485, rs485, sizeof(struct CMD_TYPE_RS485) );
     g_free(rs485);
 
     pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
     pthread_mutex_unlock( &Partage->com_rs485.synchro );
+printf("Charger_un_rs 4 \n");
 
     Info_n( Config.log, DEBUG_RS485, "Charger_un_rs485:  id      = ", module->rs485.id    );
     Info_n( Config.log, DEBUG_RS485, "                -  actif   = ", module->rs485.actif );
