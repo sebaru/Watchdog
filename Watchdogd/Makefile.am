@@ -10,7 +10,7 @@ SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audi
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
                     ecoute.c shm.c \
-                    db.c ssl.c \
+                    db.c ssl.c lirc.c \
                     distrib_MSGxxx.c distrib_Ixxx.c
 
 Watchdogd_LDADD   = Config/libconfig.la \
@@ -37,13 +37,15 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Onduleur/libonduleur.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS)
+Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS) $(LIRC_LIBS)
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 $(GLIB_CFLAGS) \
 	 $(BONOBO_CFLAGS) \
 	 $(MYSQL_CFLAGS) \
+	 $(LIRC_CFLAGS) \
+	 $(CURL_CFLAGS) \
 	 $(UPS_CFLAGS)
 
 MAINTAINERCLEANFILES = Makefile.in

@@ -27,6 +27,9 @@ AC_SUBST(GNOME2_CFLAGS)
 CURL_CFLAGS=`pkg-config --cflags libcurl`
 AC_SUBST(CURL_CFLAGS)
 
+LIRC_CFLAGS=`pkg-config --cflags liblircclient0`
+AC_SUBST(LIRC_CFLAGS)
+
 BONOBO_CFLAGS=`pkg-config --cflags libbonobo-2.0`
 AC_SUBST(BONOBO_CFLAGS)
 
@@ -35,6 +38,9 @@ AC_SUBST(GNOME2_LIBS)
 
 CURL_LIBS=`pkg-config --libs libcurl`
 AC_SUBST(CURL_LIBS)
+
+LIRC_LIBS=`pkg-config --libs liblircclient0`
+AC_SUBST(LIRC_LIBS)
 
 MYSQL_CFLAGS=`mysql_config --cflags`
 AC_SUBST(MYSQL_CFLAGS)

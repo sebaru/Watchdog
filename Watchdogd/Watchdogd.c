@@ -222,6 +222,7 @@
 
        if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
         { Camera_check_motion( Config.log, db );
+          Lirc_check ( Config.log, db );
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
 
