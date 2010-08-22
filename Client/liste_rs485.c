@@ -387,20 +387,6 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EA min"), renderer,
-                                                         "text", COLONNE_EA_MIN,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_MIN);                 /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EA max"), renderer,
-                                                         "text", COLONNE_EA_MAX,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_MAX);                 /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
     colonne = gtk_tree_view_column_new_with_attributes ( _("E min"), renderer,
                                                          "text", COLONNE_E_MIN,
                                                          NULL);
@@ -412,6 +398,20 @@
                                                          "text", COLONNE_E_MAX,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_E_MAX);                 /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("EA min"), renderer,
+                                                         "text", COLONNE_EA_MIN,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_MIN);                 /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("EA max"), renderer,
+                                                         "text", COLONNE_EA_MAX,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_MAX);                 /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de rs485 */
