@@ -154,57 +154,57 @@
 
     texte = gtk_label_new( _("Rs485 Num") );                       /* Numéro du module en cours d'edition */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, i, i+1 );
-    Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 2, 3, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("E min") );                                    /* Numéro de l'entrée minimum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_e_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_e_min = gtk_spin_button_new_with_range( -1, NBR_ENTRE_TOR-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_e_min, 1, 2, i, i+1 );
 
     texte = gtk_label_new( _("E max") );                                    /* Numéro de l'entrée maximum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Spin_e_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_e_max = gtk_spin_button_new_with_range( -1, NBR_ENTRE_TOR-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_e_max, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("EA min") );                                   /* Numéro de l'entrée minimum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_ea_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_ea_min = gtk_spin_button_new_with_range( -1, NBR_ENTRE_ANA-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_ea_min, 1, 2, i, i+1 );
 
     texte = gtk_label_new( _("EA max") );                                   /* Numéro de l'entrée maximum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Spin_ea_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_ea_max = gtk_spin_button_new_with_range( -1, NBR_ENTRE_ANA-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_ea_max, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("S min") );                                   /* Numéro de la sortie minimum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_s_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_s_min = gtk_spin_button_new_with_range( -1, NBR_SORTIE_TOR-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_s_min, 1, 2, i, i+1 );
 
     texte = gtk_label_new( _("S max") );                                   /* Numéro de la sortie maximum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Spin_s_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_s_max = gtk_spin_button_new_with_range( -1, NBR_SORTIE_TOR-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_s_max, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("SA min") );                                  /* Numéro de la sortie minimum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_sa_min = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_sa_min = gtk_spin_button_new_with_range( -1, NBR_SORTIE_ANA-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_sa_min, 1, 2, i, i+1 );
 
     texte = gtk_label_new( _("SA max") );                                  /* Numéro de la sortie maximum */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Spin_sa_max = gtk_spin_button_new_with_range( -1, NBR_BIT_DLS, 1 );
+    Spin_sa_max = gtk_spin_button_new_with_range( -1, NBR_SORTIE_ANA-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_sa_max, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Bit de comm") );                           /* Numéro du bit M a positionner */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_bit = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    Spin_bit = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS-1, 1 );
     g_signal_connect( G_OBJECT(Spin_bit), "changed",
                       G_CALLBACK(Afficher_mnemo_rs485), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit, 1, 2, i, i+1 );

@@ -36,6 +36,7 @@
  #define NBR_ENTRE_TOR         256
  #define NBR_ENTRE_ANA         16
  #define NBR_SORTIE_TOR        256
+ #define NBR_SORTIE_ANA        16
  #define NBR_BIT_CONTROLE      NBR_BIT_DLS  /* Ixxx */
  #define NBR_BIT_BISTABLE      NBR_BIT_DLS  /* Bxxx */
  #define NBR_BIT_MONOSTABLE    NBR_BIT_DLS  /* Mxxx */
