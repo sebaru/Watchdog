@@ -76,7 +76,7 @@
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s(num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
-                " VALUES (%d,%d,'%s',%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)",
+                " VALUES ('%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
                 NOM_TABLE_MODULE_RS485, rs485->num, rs485->bit_comm, libelle, rs485->actif,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
@@ -221,8 +221,7 @@
                 "num=%d,bit_comm=%d,libelle='%s',actif=%d,"
                 "ea_min=%d,ea_max=%d,e_min=%d,e_max=%d,"
                 "sa_min=%d,sa_max=%d,s_min%d,s_max=%d"
-                " WHERE id=%d"
-
+                " WHERE id=%d",
                 NOM_TABLE_MODULE_RS485,
                 rs485->num, rs485->bit_comm, libelle, rs485->actif,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
@@ -272,7 +271,6 @@
 
     Info_n( Config.log, DEBUG_RS485, "Charger_un_rs485:  id      = ", module->rs485.id    );
     Info_n( Config.log, DEBUG_RS485, "                -  actif   = ", module->rs485.actif );
-    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
@@ -318,7 +316,7 @@
        Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
        pthread_mutex_unlock( &Partage->com_rs485.synchro );
        Info_n( Config.log, DEBUG_RS485, "Charger_modules_RS485:  id    = ", module->rs485.id    );
-       Info_c( Config.log, DEBUG_RS485, "                     -  actif = ", module->rs485.actif );
+       Info_n( Config.log, DEBUG_RS485, "                     -  actif = ", module->rs485.actif );
      }
     Info_n( Config.log, DEBUG_INFO, "Charger_tous_RS485: module RS485 found  !", cpt );
 
