@@ -150,6 +150,7 @@
                           if (Partage->Sous_serveur[i].pid) Partage->Sous_serveur[i].sigusr1 = TRUE;
                         }
                        Partage->com_dls.reload = TRUE;
+                       Partage->com_onduleur.reload   = TRUE;
                        Partage->com_rs485.reload   = TRUE;
                        Partage->com_sms.sigusr1 = TRUE;
                        Partage->com_modbus.reload = TRUE;
@@ -381,7 +382,7 @@
     gchar strpid[12];
     gint fd_lock, i;
     sigset_t sigset;
-    gint import;
+    gint import=0;
     gboolean fg;
 
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
@@ -437,7 +438,7 @@
 
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
-     { Info( Config.log, DEBUG_MEM, "Shared memory failed to allocate" ); }
+     { Info( Config.log, DEBUG_INFO, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */

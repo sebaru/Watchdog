@@ -86,13 +86,13 @@ one_again:
   { struct CONNEXION *connexion;
 
     connexion = g_malloc0( sizeof(struct CONNEXION) );
-    if (!connexion) { Info( Log, DEBUG_MEM, "Nouvelle_connexion: not enought memory" );
+    if (!connexion) { Info( Log, DEBUG_INFO, "Nouvelle_connexion: not enought memory" );
                       return(NULL);
                     }
 
     connexion->donnees = g_malloc0( taille_bloc );
     if (!connexion->donnees)
-     { Info( Log, DEBUG_MEM, "Nouvelle_connexion: not enought memory (buffer)" );
+     { Info( Log, DEBUG_INFO, "Nouvelle_connexion: not enought memory (buffer)" );
        g_free(connexion);
        return(NULL);
      }

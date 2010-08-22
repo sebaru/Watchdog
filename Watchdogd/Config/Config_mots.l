@@ -122,11 +122,11 @@ blanc         [\t ]+
 "DB"                       { Config_lval.val = D_DB;
                              return(D_DB);
                            }
-"MEM"                      { Config_lval.val = D_MEM;
-                             return(D_MEM);
-                           }
 "USER"                     { Config_lval.val = D_USER;
                              return(D_USER);
+                           }
+"SERVEUR"                  { Config_lval.val = D_SERVEUR;
+                             return(D_SERVEUR);
                            }
 "CRYPTO"                   { Config_lval.val = D_CRYPTO;
                              return(D_CRYPTO);
@@ -172,6 +172,9 @@ blanc         [\t ]+
                            }
 "CAMERA"                   { Config_lval.val = D_CAMERA;
                              return(D_CAMERA);
+                           }
+"COURBE"                   { Config_lval.val = D_COURBE;
+                             return(D_COURBE);
                            }
 "="                        { Config_lval.val = EGAL;
                              return EGAL;

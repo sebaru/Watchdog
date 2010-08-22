@@ -102,7 +102,7 @@
      }
 
     palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
-    if (!palette) Info( log, DEBUG_MEM, "Recuperer_paletteDB_suite: Erreur allocation mémoire" );
+    if (!palette) Info( log, DEBUG_SERVEUR, "Recuperer_paletteDB_suite: Erreur allocation mémoire" );
     else
      { palette->id           = atoi(db->row[0]);
        palette->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée la palette */
@@ -135,12 +135,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_paletteDB: Palette non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_paletteDB: Palette non trouvé dans la BDD", id );
        return(NULL);
      }
 
     palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
-    if (!palette) Info( log, DEBUG_MEM, "Rechercher_paletteDB: Erreur allocation mémoire" );
+    if (!palette) Info( log, DEBUG_SERVEUR, "Rechercher_paletteDB: Erreur allocation mémoire" );
     else
      { palette->id           = id;
        palette->syn_id       = atoi(db->row[0]);                   /* Synoptique ou est placée la palette */

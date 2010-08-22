@@ -208,7 +208,7 @@
     if (!(infos && infos->Trame)) return;
     motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_motif_supervision: not enought memory" );
+     { Info( Config_cli.log, DEBUG_INFO, "Afficher_motif_supervision: not enought memory" );
        return;
      }
 

@@ -381,7 +381,7 @@ printf("fin Detruire page atelier\n");
     if (!infos) return;
     motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_motif_atelier: not enought memory" );
+     { Info( Config_cli.log, DEBUG_INFO, "Afficher_motif_atelier: not enought memory" );
        return;
      }
 

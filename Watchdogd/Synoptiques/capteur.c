@@ -61,7 +61,7 @@
 
     libelle = Normaliser_chaine ( log, capteur->libelle );               /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_capteurDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_capteurDB: Normalisation impossible" );
        return(-1);
      }
 
@@ -105,7 +105,7 @@
      }
 
     capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
-    if (!capteur) Info( log, DEBUG_MEM, "Recuperer_capteurDB_suite: Erreur allocation mémoire" );
+    if (!capteur) Info( log, DEBUG_SERVEUR, "Recuperer_capteurDB_suite: Erreur allocation mémoire" );
     else
      { capteur->id           = atoi(db->row[0]);
        capteur->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée le capteur */
@@ -138,12 +138,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_capteurDB: Capteur non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_capteurDB: Capteur non trouvé dans la BDD", id );
        return(NULL);
      }
 
     capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
-    if (!capteur) Info( log, DEBUG_MEM, "Recuperer_capteurDB: Erreur allocation mémoire" );
+    if (!capteur) Info( log, DEBUG_SERVEUR, "Recuperer_capteurDB: Erreur allocation mémoire" );
     else
      { capteur->id           = id;
        capteur->syn_id       = atoi(db->row[0]);                   /* Synoptique ou est placée le capteur */
@@ -167,7 +167,7 @@
 
     libelle = Normaliser_chaine ( log, capteur->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_capteurDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_capteurDB: Normalisation impossible" );
        return(-1);
      }
 

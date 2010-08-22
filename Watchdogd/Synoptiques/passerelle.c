@@ -105,7 +105,7 @@
      }
 
     passerelle = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
-    if (!passerelle) Info( log, DEBUG_MEM, "Recuperer_passerelleDB_suite: Erreur allocation mémoire" );
+    if (!passerelle) Info( log, DEBUG_SERVEUR, "Recuperer_passerelleDB_suite: Erreur allocation mémoire" );
     else
      { passerelle->id             = atoi(db->row[0]);
        passerelle->syn_id         = atoi(db->row[1]);           /* Synoptique ou est placée la passerelle */
@@ -145,12 +145,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_paserelleDB: Passerelle non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_paserelleDB: Passerelle non trouvé dans la BDD", id );
        return(NULL);
      }
 
     passerelle = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
-    if (!passerelle) Info( log, DEBUG_MEM, "Rechercher_paserelleDB: Erreur allocation mémoire" );
+    if (!passerelle) Info( log, DEBUG_SERVEUR, "Rechercher_paserelleDB: Erreur allocation mémoire" );
     else
      { passerelle->id             = id;
        passerelle->syn_id         = atoi(db->row[0]);           /* Synoptique ou est placée la passerelle */

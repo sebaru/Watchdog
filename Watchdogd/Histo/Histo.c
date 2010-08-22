@@ -49,7 +49,7 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database,        /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "Charger_histoDB: Connexion DB failed" );
+     { Info( Config.log, DEBUG_SERVEUR, "Charger_histoDB: Connexion DB failed" );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -83,20 +83,20 @@
 
     libelle = Normaliser_chaine ( log, histo->msg.libelle );             /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_histoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_histoDB: Normalisation impossible" );
        return(FALSE);
      }
 
     objet = Normaliser_chaine ( log, histo->msg.objet );                 /* Formatage correct des chaines */
     if (!objet)
-     { Info( log, DEBUG_DB, "Ajouter_histoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_histoDB: Normalisation impossible" );
        g_free(libelle);
        return(FALSE);
      }
 
     nom_ack = Normaliser_chaine ( log, histo->nom_ack );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_histoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_histoDB: Normalisation impossible" );
        g_free(libelle);
        g_free(objet);
        return(FALSE);
@@ -127,7 +127,7 @@
 
     nom_ack = Normaliser_chaine ( log, histo->nom_ack );                 /* Formatage correct des chaines */
     if (!nom_ack)
-     { Info( log, DEBUG_DB, "Modifier_histoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_histoDB: Normalisation impossible" );
        return(FALSE);
      }
 
@@ -167,7 +167,7 @@
      }
 
     histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
-    if (!histo) Info( log, DEBUG_MEM, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
+    if (!histo) Info( log, DEBUG_SERVEUR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );    /* Recopie dans la structure */
        memcpy( histo->msg.objet,   db->row[2], sizeof(histo->msg.objet  ) ); /* Recopie dans la structure */
@@ -201,12 +201,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_histoDB: histo non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_histoDB: histo non trouvé dans la BDD", id );
        return(NULL);
      }
 
     histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
-    if (!histo) Info( log, DEBUG_MEM, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
+    if (!histo) Info( log, DEBUG_SERVEUR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( histo->msg.libelle, db->row[0], sizeof(histo->msg.libelle) ); /* Recopie dans la structure */
        memcpy( histo->msg.objet,   db->row[1], sizeof(histo->msg.objet  ) ); /* Recopie dans la structure */

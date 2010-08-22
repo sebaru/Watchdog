@@ -82,48 +82,48 @@ printf(" Groupe syn = %d\n", syn->groupe );
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
-         { Info_c( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination failed", requete ); }
-    else { Info( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination ok" ); }
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination ok" ); }
 
 /****************************************** Retrait des capteurs ******************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_id=%d", NOM_TABLE_CAPTEUR, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
-         { Info_c( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination capteur failed", requete ); }
-    else { Info( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination capteur ok" ); }
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination capteur failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination capteur ok" ); }
 
 /****************************************** Retrait des comment *******************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_id=%d", NOM_TABLE_COMMENT, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
-         { Info_c( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination comment failed", requete ); }
-    else { Info( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination comment ok" ); }
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination comment failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination comment ok" ); }
 
 /****************************************** Retrait des motif *********************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn=%d", NOM_TABLE_MOTIF, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
-         { Info_c( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination syn failed", requete ); }
-    else { Info( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination syn ok" ); }
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination syn failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination syn ok" ); }
 
 /****************************************** Retrait des palette *******************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_cible_id=%d", NOM_TABLE_PALETTE, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
-         { Info_c( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination palette failed", requete ); }
-    else { Info( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination palette ok" ); }
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination palette failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination palette ok" ); }
 
 /****************************************** Retrait des passerelle ****************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_cible_id=%d", NOM_TABLE_PASSERELLE, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
-         { Info_c( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination passerelle failed", requete ); }
-    else { Info( log, DEBUG_DB, "Retirer_synoptiqueDB: elimination passerelle ok" ); }
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination passerelle failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination passerelle ok" ); }
 
     return(TRUE);
   }
@@ -138,13 +138,13 @@ printf(" Groupe syn = %d\n", syn->groupe );
 
     libelle = Normaliser_chaine ( log, syn->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_synoptiqueDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible" );
        return(-1);
      }
 
     mnemo = Normaliser_chaine ( log, syn->mnemo );                       /* Formatage correct des chaines */
     if (!mnemo)
-     { Info( log, DEBUG_DB, "Ajouter_synoptiqueDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible" );
        g_free(libelle);
        return(-1);
      }
@@ -188,7 +188,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
      }
 
     syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-    if (!syn) Info( log, DEBUG_MEM, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
+    if (!syn) Info( log, DEBUG_SERVEUR, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( syn->libelle, db->row[1], sizeof(syn->libelle) );             /* Recopie dans la structure */
        memcpy( syn->mnemo,   db->row[2], sizeof(syn->mnemo  ) );             /* Recopie dans la structure */
@@ -215,13 +215,13 @@ printf(" Groupe syn = %d\n", syn->groupe );
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_synoptiqueDB: Synoptique non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_synoptiqueDB: Synoptique non trouvé dans la BDD", id );
        return(NULL);
      }
 
     syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!syn)
-     { Info( log, DEBUG_MEM, "Rechercher_synoptiqueDB: Mem error" ); }
+     { Info( log, DEBUG_SERVEUR, "Rechercher_synoptiqueDB: Mem error" ); }
     else
      { memcpy( syn->libelle, db->row[0], sizeof(syn->libelle) );             /* Recopie dans la structure */
        memcpy( syn->mnemo,   db->row[1], sizeof(syn->mnemo  ) );             /* Recopie dans la structure */
@@ -241,13 +241,13 @@ printf(" Groupe syn = %d\n", syn->groupe );
 
     libelle = Normaliser_chaine ( log, syn->libelle );
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_synoptiqueDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible" );
        return(FALSE);
      }
 
     mnemo = Normaliser_chaine ( log, syn->mnemo );
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_synoptiqueDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible" );
        g_free(libelle);
        return(FALSE);
      }

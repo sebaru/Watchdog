@@ -123,7 +123,7 @@
      }
 
     camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
-    if (!camera) Info( log, DEBUG_MEM, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
+    if (!camera) Info( log, DEBUG_CAMERA, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( camera->objet,    db->row[4], sizeof(camera->objet    ) );
        memcpy( camera->location, db->row[5], sizeof(camera->location  ) );
@@ -163,7 +163,7 @@
 
     camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera)
-     { Info( log, DEBUG_MEM, "Rechercher_cameraDB: Mem error" ); }
+     { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB: Mem error" ); }
     else
      { memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
        memcpy( camera->location, db->row[4], sizeof(camera->location  ) );
@@ -242,7 +242,7 @@
 
     camera = Rechercher_cameraDB( log, db, atoi(db->row[0]) );
     if (!camera)
-     { Info( log, DEBUG_MEM, "Rechercher_cameraDB_motion: Mem error" );
+     { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB_motion: Mem error" );
        return(NULL);
      }
 

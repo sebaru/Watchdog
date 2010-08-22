@@ -70,7 +70,7 @@
   { gchar requete[512];
 
     if (util->id < NBR_UTILISATEUR_RESERVE) 
-     { Info_c( log, DEBUG_DB, "Retirer_utilisateurDB: elimination failed: id reserve", util->nom );
+     { Info_c( log, DEBUG_USER, "Retirer_utilisateurDB: elimination failed: id reserve", util->nom );
        return(FALSE);
      }
 
@@ -107,7 +107,7 @@
        g_free(crypt);
 
        if (!(nom && comment && code_crypt))
-        { Info( log, DEBUG_DB, "Ajouter_utilisateurDB: Normalisation impossible" );
+        { Info( log, DEBUG_USER, "Ajouter_utilisateurDB: Normalisation impossible" );
           return(-1);
         }
 
@@ -131,7 +131,7 @@
        Groupe_set_groupe_utilDB ( log, db, id, (guint *)&util->gids );      /* Positionnement des groupes */ 
        return(id);
      }
-    Info_c( log, DEBUG_DB, "Ajouter_utilisateurDB: failed to encrypt password for", util->nom );
+    Info_c( log, DEBUG_USER, "Ajouter_utilisateurDB: failed to encrypt password for", util->nom );
     return(-1);
   }
 /**********************************************************************************************************/
@@ -150,7 +150,7 @@
 
     comment = Normaliser_chaine ( log, util->commentaire );
     if (!comment)
-     { Info( log, DEBUG_DB, "Modifier_utilisateurDB: Normalisation impossible" );
+     { Info( log, DEBUG_USER, "Modifier_utilisateurDB: Normalisation impossible" );
        return(FALSE);
      }
 
@@ -172,14 +172,14 @@
             { crypt = Crypter( log, clef, util->code_en_clair ); }
        else { crypt = Crypter( log, clef, "bouh" ); }
        if (!crypt)
-        { Info( log, DEBUG_DB, "Modifier_utilisateurDB: cryptage password impossible" );
+        { Info( log, DEBUG_USER, "Modifier_utilisateurDB: cryptage password impossible" );
           return(FALSE);
         }
 
        code_crypt = Normaliser_chaine ( log, crypt );
        g_free(crypt);
        if (!code_crypt)
-        { Info( log, DEBUG_DB, "Modifier_utilisateurDB: Normalisation code crypte impossible" );
+        { Info( log, DEBUG_USER, "Modifier_utilisateurDB: Normalisation code crypte impossible" );
           return(FALSE);
         }
        g_snprintf( chaine, sizeof(chaine), ",crypt='%s'", code_crypt );
@@ -224,7 +224,7 @@
      }
 
     util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
-    if (!util) Info( log, DEBUG_MEM, "Recuperer_utilsDB_suite: Erreur allocation mémoire" );
+    if (!util) Info( log, DEBUG_USER, "Recuperer_utilsDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( util->nom, db->row[0], sizeof(util->nom) );                   /* Recopie dans la structure */
        memcpy( util->commentaire, db->row[3], sizeof(util->commentaire) );
@@ -258,13 +258,13 @@
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Info_n( log, DEBUG_DB, "Rechercher_utilisateurDB: Utilisateur non trouvé dans la BDD", id );
+     { Info_n( log, DEBUG_USER, "Rechercher_utilisateurDB: Utilisateur non trouvé dans la BDD", id );
        Liberer_resultat_SQL ( log, db );
        return(NULL);
      }
 
     util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
-    if (!util) Info( log, DEBUG_MEM, "Rechercher_utilisateurDB: Erreur allocation mémoire" );
+    if (!util) Info( log, DEBUG_USER, "Rechercher_utilisateurDB: Erreur allocation mémoire" );
     else
      { memcpy( util->nom, db->row[0], sizeof(util->nom) );                   /* Recopie dans la structure */
        memcpy( util->commentaire, db->row[2], sizeof(util->commentaire) );

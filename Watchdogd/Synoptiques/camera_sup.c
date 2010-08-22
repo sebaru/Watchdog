@@ -100,7 +100,7 @@
      }
 
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
-    if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
+    if (!camera_sup) Info( log, DEBUG_SERVEUR, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
     else
      { camera_sup->id           = atoi(db->row[0]);
        camera_sup->camera_src_id= atoi(db->row[1]);
@@ -132,19 +132,19 @@
                 NOM_TABLE_CAMERASUP, id, NOM_TABLE_CAMERA );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { Info_c( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouve dans la BDD", requete );
+     { Info_c( log, DEBUG_SERVEUR, "Rechercher_camera_supDB: Camera non trouve dans la BDD", requete );
        return(NULL);
      }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_camera_supDB: Camera non trouve dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_camera_supDB: Camera non trouve dans la BDD", id );
        return(NULL);
      }
 
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
-    if (!camera_sup) Info( log, DEBUG_MEM, "Recuperer_camera_supDB: Erreur allocation mémoire" );
+    if (!camera_sup) Info( log, DEBUG_SERVEUR, "Recuperer_camera_supDB: Erreur allocation mémoire" );
     else
      { camera_sup->id           = id;
        camera_sup->camera_src_id= atoi(db->row[0]);

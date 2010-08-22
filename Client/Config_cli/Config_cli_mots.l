@@ -76,9 +76,6 @@ blanc         [\t ]+
 "DB"                       { yylval.val = D_DB;
                              return(D_DB);
                            }
-"MEM"                      { yylval.val = D_MEM;
-                             return(D_MEM);
-                           }
 "USER"                     { yylval.val = D_USER;
                              return(D_USER);
                            }

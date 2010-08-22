@@ -61,20 +61,20 @@
 
     libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation libelle impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_messageDB: Normalisation libelle impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, msg->objet );                       /* Formatage correct des chaines */
     if (!objet)
      { g_free(libelle);
-       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation objet impossible" );
+       Info( log, DEBUG_SERVEUR, "Ajouter_messageDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle_audio = Normaliser_chaine ( log, msg->libelle_audio );       /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
        g_free(objet);
-       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation libelle_audio impossible" );
+       Info( log, DEBUG_SERVEUR, "Ajouter_messageDB: Normalisation libelle_audio impossible" );
        return(-1);
      }
     libelle_sms = Normaliser_chaine ( log, msg->libelle_sms );           /* Formatage correct des chaines */
@@ -82,7 +82,7 @@
      { g_free(libelle);
        g_free(objet);
        g_free(libelle_audio);
-       Info( log, DEBUG_DB, "Ajouter_messageDB: Normalisation libelle_sms impossible" );
+       Info( log, DEBUG_SERVEUR, "Ajouter_messageDB: Normalisation libelle_sms impossible" );
        return(-1);
      }
 
@@ -133,7 +133,7 @@
      }
 
     msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) Info( log, DEBUG_MEM, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
+    if (!msg) Info( log, DEBUG_SERVEUR, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( msg->libelle,       db->row[2],  sizeof(msg->libelle) );      /* Recopie dans la structure */
        memcpy( msg->objet,         db->row[7],  sizeof(msg->objet  ) );
@@ -173,13 +173,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_msgDB: MSG non trouvé dans la BDD", num );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_msgDB: MSG non trouvé dans la BDD", num );
        return(NULL);
      }
 
     msg = g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
-     { Info( log, DEBUG_MEM, "Rechercher_msgDB: Mem error" ); }
+     { Info( log, DEBUG_SERVEUR, "Rechercher_msgDB: Mem error" ); }
     else
      { memcpy( msg->libelle,       db->row[1], sizeof(msg->libelle) );       /* Recopie dans la structure */
        memcpy( msg->objet,         db->row[6], sizeof(msg->objet  ) );
@@ -219,13 +219,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_msgDB: MSG non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_SERVEUR, "Rechercher_msgDB: MSG non trouvé dans la BDD", id );
        return(NULL);
      }
 
     msg = g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
-     { Info( log, DEBUG_MEM, "Rechercher_msgDB_par_id: Mem error" ); }
+     { Info( log, DEBUG_SERVEUR, "Rechercher_msgDB_par_id: Mem error" ); }
     else
      { memcpy( msg->libelle,       db->row[1], sizeof(msg->libelle) );       /* Recopie dans la structure */
        memcpy( msg->objet,         db->row[6], sizeof(msg->objet  ) );
@@ -256,20 +256,20 @@
 
     libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation libelle impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_messageDB: Normalisation libelle impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, msg->objet );                       /* Formatage correct des chaines */
     if (!objet)
      { g_free(libelle);
-       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation objet impossible" );
+       Info( log, DEBUG_SERVEUR, "Modifier_messageDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle_audio = Normaliser_chaine ( log, msg->libelle_audio );       /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
        g_free(objet);
-       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation libelle_audio impossible" );
+       Info( log, DEBUG_SERVEUR, "Modifier_messageDB: Normalisation libelle_audio impossible" );
        return(-1);
      }
     libelle_sms = Normaliser_chaine ( log, msg->libelle_sms );           /* Formatage correct des chaines */
@@ -277,7 +277,7 @@
      { g_free(libelle);
        g_free(objet);
        g_free(libelle_audio);
-       Info( log, DEBUG_DB, "Modifier_messageDB: Normalisation libelle_sms impossible" );
+       Info( log, DEBUG_SERVEUR, "Modifier_messageDB: Normalisation libelle_sms impossible" );
        return(-1);
      }
 

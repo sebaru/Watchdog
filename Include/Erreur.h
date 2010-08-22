@@ -44,7 +44,7 @@
  #define  DEBUG_CONFIG              (1<<3 ) /* Chargement du fichier de conf */
  #define  DEBUG_CRYPTO              (1<<4 ) /* Crytage des clefs */
  #define  DEBUG_INFO                (1<<5 ) /* Pour info */
- #define  DEBUG_MEM                 (1<<6 ) /* Allocation memoire */
+ #define  DEBUG_SERVEUR             (1<<6 ) /* Débug du thread SERVEUR */
  #define  DEBUG_CDG                 (1<<7 ) /* Chiens de garde */
  #define  DEBUG_NETWORK             (1<<8 ) /* Debug reseau */
  #define  DEBUG_ARCHIVE             (1<<9 ) /* Debug thread ARCHIVE */
@@ -57,6 +57,7 @@
  #define  DEBUG_SMS                 (1<<16) /* Debug envoi SMS */
  #define  DEBUG_AUDIO               (1<<17) /* Debug envoi AUDIO */
  #define  DEBUG_CAMERA              (1<<18) /* Debug CAMERA */
+ #define  DEBUG_COURBE              (1<<19) /* Debug des echanges COURBE */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

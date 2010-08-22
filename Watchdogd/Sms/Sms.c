@@ -55,7 +55,7 @@
      { Info( Config.log, DEBUG_SMS, "Envoyer_sms: liste d'attente pleine" ); return; }
 
     copie = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!copie) { Info( Config.log, DEBUG_MEM, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
+    if (!copie) { Info( Config.log, DEBUG_SMS, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
     memcpy ( copie, msg, sizeof(struct CMD_TYPE_MESSAGE) );
 
     pthread_mutex_lock( &Partage->com_sms.synchro );

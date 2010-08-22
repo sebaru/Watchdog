@@ -54,8 +54,8 @@ int erreur;                                                             /* Compt
 %token   DB_HOST DB_DATABASE DB_PASSWORD DB_USERNAME DB_PORT
 %token   PORT_RS485
 %token   CRYPTO_KEY TAILLE_CLEF_DH TAILLE_CLEF_RSA
-%token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK D_ARCHIVE D_MODBUS
-%token   D_ADMIN D_CONNEXION D_DLS D_RS485 D_ONDULEUR D_SMS D_AUDIO D_CAMERA
+%token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_SERVEUR D_CDG D_NETWORK D_ARCHIVE D_MODBUS
+%token   D_ADMIN D_CONNEXION D_DLS D_RS485 D_ONDULEUR D_SMS D_AUDIO D_CAMERA D_COURBE
 
 
 %%
@@ -141,7 +141,7 @@ one_debug:
                 | D_USER      { $$ = DEBUG_USER;      }
                 | D_CRYPTO    { $$ = DEBUG_CRYPTO;    }
                 | D_INFO      { $$ = DEBUG_INFO;      }
-                | D_MEM       { $$ = DEBUG_MEM;       }
+                | D_SERVEUR   { $$ = DEBUG_SERVEUR;   }
                 | D_CDG       { $$ = DEBUG_CDG;       }
                 | D_NETWORK   { $$ = DEBUG_NETWORK;   }
                 | D_ARCHIVE   { $$ = DEBUG_ARCHIVE;   }
@@ -154,6 +154,7 @@ one_debug:
                 | D_SMS       { $$ = DEBUG_SMS;       }
                 | D_AUDIO     { $$ = DEBUG_AUDIO;     }
                 | D_CAMERA    { $$ = DEBUG_CAMERA;    }
+                | D_COURBE    { $$ = DEBUG_COURBE;    }
                 | D_ALL       { $$ = ~0; }
 		;
 %%

@@ -49,7 +49,7 @@ static struct CONFIG_CLI *Config_cli;
 %token   EGAL VIRGULE
 %token   SERVEUR PORT SSL_CRYPT USER
 %token   TAILLE_BLOC_RESEAU
-%token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_MEM D_CDG D_NETWORK
+%token   DEBUG D_ALL D_SIGNAUX D_DB D_USER D_CONFIG D_CRYPTO D_INFO D_CDG D_NETWORK
 %token   D_CONNEXION
 
 
@@ -97,7 +97,6 @@ one_debug:
                 | D_USER      { $$ = DEBUG_USER;      }
                 | D_CRYPTO    { $$ = DEBUG_CRYPTO;    }
                 | D_INFO      { $$ = DEBUG_INFO;      }
-                | D_MEM       { $$ = DEBUG_MEM;       }
                 | D_CDG       { $$ = DEBUG_CDG;       }
                 | D_NETWORK   { $$ = DEBUG_NETWORK;   }
                 | D_CONNEXION { $$ = DEBUG_CONNEXION; }

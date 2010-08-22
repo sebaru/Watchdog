@@ -84,7 +84,7 @@
      }
 
     arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
-    if (!arch) Info( log, DEBUG_MEM, "Recuperer_archDB_suite: Erreur allocation mémoire" );
+    if (!arch) Info( log, DEBUG_ARCHIVE, "Recuperer_archDB_suite: Erreur allocation mémoire" );
     else
      { arch->date_sec  = atoi(db->row[2]);
        arch->date_usec = atoi(db->row[3]);

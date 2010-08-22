@@ -104,7 +104,7 @@
      }
 
     entreeana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
-    if (!entreeana) Info( log, DEBUG_MEM, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
+    if (!entreeana) Info( log, DEBUG_INFO, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
      { entreeana->id_mnemo = atoi(db->row[4]);
        entreeana->num      = atoi(db->row[5]);
@@ -148,7 +148,7 @@
 
     entreeana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
     if (!entreeana)
-     { Info( log, DEBUG_MEM, "Rechercher_entreeanaDB: Mem error" ); }
+     { Info( log, DEBUG_INFO, "Rechercher_entreeanaDB: Mem error" ); }
     else
      { entreeana->id_mnemo = id;;
        entreeana->num      = atoi(db->row[0]);

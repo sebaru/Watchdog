@@ -126,7 +126,7 @@
 
        borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
        if (!borne)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MEM,
+        { Info( Config.log, DEBUG_MODBUS,
                 "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
           continue;
         }
@@ -180,7 +180,7 @@
 
        module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MEM,
+        { Info( Config.log, DEBUG_MODBUS,
                 "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           continue;
         }
@@ -234,7 +234,7 @@
 
     borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
     if (!borne)                                                   /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MEM,
+     { Info( Config.log, DEBUG_MODBUS,
              "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
        Libere_DB_SQL( Config.log, &db );
        return;
@@ -265,7 +265,7 @@
     
     module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
     if (!module)                                                   /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MEM,
+     { Info( Config.log, DEBUG_MODBUS,
             "Charger_un_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
        return;
      }

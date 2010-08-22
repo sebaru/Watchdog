@@ -82,7 +82,7 @@
 		NOM_TABLE_GIDS, id_util );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ))
-     { Info_c( log, DEBUG_DB, "Groupe_set_groupe_utilDB: Delete failed", requete );
+     { Info_c( log, DEBUG_USER, "Groupe_set_groupe_utilDB: Delete failed", requete );
        return(FALSE);
      }
 				   
@@ -94,13 +94,13 @@
                    NOM_TABLE_GIDS, id_util, *(gids + cpt) );
 
        if ( ! Lancer_requete_SQL ( log, db, requete ))
-        { Info_c( log, DEBUG_DB, "Groupe_set_groupe_utilDB: set failed", requete );
+        { Info_c( log, DEBUG_USER, "Groupe_set_groupe_utilDB: set failed", requete );
           return(FALSE);
         }
        if ( *(gids + cpt) == 0 ) break;                             /* Le groupe "0" est le groupe de fin */
      }
 
-    Info_c( log, DEBUG_DB, "Groupe_set_groupe_utilDB: set groupe succes", requete );
+    Info_c( log, DEBUG_USER, "Groupe_set_groupe_utilDB: set groupe succes", requete );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -150,12 +150,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_groupeDB: Groupe non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_USER, "Rechercher_groupeDB: Groupe non trouvé dans la BDD", id );
        return(NULL);
      }
 
     groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
-    if (!groupe) Info( log, DEBUG_MEM, "Rechercher_groupeDB: Erreur allocation mémoire" );
+    if (!groupe) Info( log, DEBUG_USER, "Rechercher_groupeDB: Erreur allocation mémoire" );
     else
      { groupe->id = id;
        memcpy( groupe->nom, db->row[0], sizeof(groupe->nom) );               /* Recopie dans la structure */
@@ -191,7 +191,7 @@
      }
 
     groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
-    if (!groupe) Info( log, DEBUG_MEM, "Recuperer_groupeDB_suite: Erreur allocation mémoire" );
+    if (!groupe) Info( log, DEBUG_USER, "Recuperer_groupeDB_suite: Erreur allocation mémoire" );
     else
      { groupe->id = atoi(db->row[0]);
        memcpy( groupe->nom, db->row[1], sizeof(groupe->nom) );               /* Recopie dans la structure */
@@ -225,7 +225,7 @@
   { gchar requete[200];
 
     if (groupe->id < NBR_GROUPE_RESERVE)
-     { Info_c( log, DEBUG_DB, "Retirer_groupe: elimination failed: id reserve", groupe->nom );
+     { Info_c( log, DEBUG_USER, "Retirer_groupe: elimination failed: id reserve", groupe->nom );
        return(FALSE);
      }
        
@@ -246,12 +246,12 @@
   
     nom     = Normaliser_chaine ( log, groupe->nom );
     if (!nom)
-     { Info( log, DEBUG_DB, "Ajouter_groupeDB: Normalisation impossible" );
+     { Info( log, DEBUG_USER, "Ajouter_groupeDB: Normalisation impossible" );
        return(-1);
      }
     comment = Normaliser_chaine ( log, groupe->commentaire );
     if (!comment)
-     { Info( log, DEBUG_DB, "Ajouter_groupeDB: Normalisation impossible" );
+     { Info( log, DEBUG_USER, "Ajouter_groupeDB: Normalisation impossible" );
        g_free(nom);
        return(-1);
      }

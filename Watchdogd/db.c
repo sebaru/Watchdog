@@ -44,7 +44,7 @@
     comment = g_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );  /* Au pire, ts les car sont doublés */
                                                                                   /* *6 pour gerer l'utf8 */
     if (!comment)
-     { Info_c( log, DEBUG_MEM, "Normaliser_chaine: erreur mémoire", pre_comment );
+     { Info_c( log, DEBUG_DB, "Normaliser_chaine: erreur mémoire", pre_comment );
        return(NULL);
      }
     source = pre_comment;

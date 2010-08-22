@@ -104,7 +104,7 @@
      }
 
     cpth = (struct CPTH_DB *)g_malloc0( sizeof(struct CPTH_DB) );
-    if (!cpth) Info( log, DEBUG_MEM, "Rechercher_cpthDB: Erreur allocation mémoire" );
+    if (!cpth) Info( log, DEBUG_INFO, "Rechercher_cpthDB: Erreur allocation mémoire" );
     else
      { cpth->id     = id;
        cpth->valeur = atoi(db->row[0]);

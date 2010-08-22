@@ -103,7 +103,7 @@
     courbe = (struct COURBE *)g_malloc0( sizeof( struct COURBE ) );
     if (!courbe)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_MEM, "Proto_ajouter_courbe_thread: Pb d'allocation memoire" );
+       Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: Pb d'allocation memoire" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );

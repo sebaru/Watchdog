@@ -61,20 +61,20 @@
     
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
     if (!host)
-     { Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation host impossible" );
+     { Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation host impossible" );
        return(-1);
      }
     ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
     if (!ups)
      { g_free(host);
-       Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation ups impossible" );
+       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation ups impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(host);
        g_free(ups);
-       Info( log, DEBUG_DB, "Ajouter_onduleurDB: Normalisation libelle impossible" );
+       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -125,7 +125,7 @@
      }
 
     onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
-    if (!onduleur) Info( log, DEBUG_MEM, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
+    if (!onduleur) Info( log, DEBUG_ONDULEUR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( onduleur->host,    db->row[1], sizeof(onduleur->host   ) );
        memcpy( onduleur->ups,     db->row[2], sizeof(onduleur->ups    ) );
@@ -161,13 +161,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_onduleurDB: ONDULEUR non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_ONDULEUR, "Rechercher_onduleurDB: ONDULEUR non trouvé dans la BDD", id );
        return(NULL);
      }
 
     onduleur = g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur)
-     { Info( log, DEBUG_MEM, "Rechercher_onduleurDB: Mem error" ); }
+     { Info( log, DEBUG_ONDULEUR, "Rechercher_onduleurDB: Mem error" ); }
     else
      { memcpy( onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
        memcpy( onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
@@ -209,20 +209,20 @@
 
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
     if (!host)
-     { Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation host impossible" );
+     { Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation host impossible" );
        return(-1);
      }
     ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
     if (!ups)
      { g_free(host);
-       Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation ups impossible" );
+       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation ups impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(host);
        g_free(ups);
-       Info( log, DEBUG_DB, "Modifier_onduleurDB: Normalisation libelle impossible" );
+       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -289,7 +289,7 @@
 
        module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MEM,
+        { Info( Config.log, DEBUG_ONDULEUR,
                 "Charger_tous_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
           g_free(onduleur);
           Libere_DB_SQL( Config.log, &db );
@@ -305,7 +305,7 @@
        Info_n( Config.log, DEBUG_ONDULEUR, "Charger_modules_ONDULEUR:  id    = ", module->onduleur.id   );
        Info_c( Config.log, DEBUG_ONDULEUR, "                        -  host  = ", module->onduleur.host );
      }
-    Info_n( Config.log, DEBUG_INFO, "Charger_tous_ONDULEUR: module ONDULEUR found  !", cpt );
+    Info_n( Config.log, DEBUG_ONDULEUR, "Charger_tous_ONDULEUR: module ONDULEUR found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -326,7 +326,7 @@
 
     module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
     if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MEM,
+     { Info( Config.log, DEBUG_ONDULEUR,
              "Charger_un_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
        Libere_DB_SQL( Config.log, &db );
        return;
@@ -335,7 +335,7 @@
     onduleur = Rechercher_onduleurDB( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
     if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MEM,
+     { Info( Config.log, DEBUG_ONDULEUR,
              "Charger_un_ONDULEUR: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
        g_free(module);
        return;

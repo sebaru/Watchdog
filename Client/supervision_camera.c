@@ -54,7 +54,7 @@
     if (!(infos && infos->Trame)) return;
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup)
-     { Info( Config_cli.log, DEBUG_MEM, "Afficher_camera_sup_supervision: not enought memory" );
+     { Info( Config_cli.log, DEBUG_INFO, "Afficher_camera_sup_supervision: not enought memory" );
        return;
      }
 

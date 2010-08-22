@@ -46,7 +46,7 @@
 
     taille = sizeof( struct PARTAGE ) +                                     /* Le jeton, les comms, les I */
              sizeof( struct SOUS_SERVEUR ) * Config.max_serveur;         /* Nombre de connexions par fils */
-    Info_n( Config.log, DEBUG_MEM, "Shm_init: size required", taille );
+    Info_n( Config.log, DEBUG_INFO, "Shm_init: size required", taille );
 
     partage = g_malloc0( taille );
     return(partage);
@@ -57,7 +57,7 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Shm_stop ( struct PARTAGE *partage )
-  { Info(Config.log, DEBUG_MEM, "Shm_stop: freeing meme" );
+  { Info(Config.log, DEBUG_INFO, "Shm_stop: freeing memory" );
     g_free(Partage);
     return(TRUE);
   }

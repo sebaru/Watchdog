@@ -182,7 +182,7 @@
      { Info_n( Config.log, DEBUG_CONNEXION, "SSRV: Accueillir_nouveaux_client: Connexion wanted. ID", id );
 
        client = g_malloc0( sizeof(struct CLIENT) );      /* On alloue donc une nouvelle structure cliente */
-       if (!client) { Info_n ( Config.log, DEBUG_MEM,
+       if (!client) { Info_n ( Config.log, DEBUG_SERVEUR,
                                "SSRV: Accueillir_nouveaux_client: Not enought memory to connect", id );
                       close(id);
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
@@ -191,7 +191,7 @@
        client->connexion = Nouvelle_connexion( Config.log, id,
                                                W_SERVEUR, Config.taille_bloc_reseau );
        if (!client->connexion)
-        { Info_n( Config.log, DEBUG_MEM, "SSRV: Accueillir_nouveaux_client: Not enought memory", id );
+        { Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Accueillir_nouveaux_client: Not enought memory", id );
           close(id);
           g_free( client );
           return(FALSE);
@@ -257,19 +257,19 @@
     Partage->Sous_serveur[id].nb_client = 0;
    /* Partage->Sous_serveur[id].pid = getpid(); /*pthread_self(); /* Le fils est pret et en informe le pere */
 
-    Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: Enable", id );
+    Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: Enable", id );
          
     while( Partage->Arret < FIN && Arret != FIN )  /* On tourne tant que le pere est en vie et arret!=fin */
      { if (Partage->jeton == id)                                                /* Avons nous le jeton ?? */
         { if (Accueillir_un_client( id ) == TRUE)                         /* Un client vient d'arriver ?? */
            { Partage->jeton = -1;                                /* On signale que l'on accepte le client */
-             Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: jeton rendu", id );
+             Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: jeton rendu", id );
            }
         }
 
        if (Partage->Sous_serveur[id].sigusr1)                                 /* Gestion des signaux USR1 */
         { Partage->Sous_serveur[id].sigusr1 = FALSE;
-          Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: SIGUSR1", id );
+          Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: SIGUSR1", id );
         }
 
        if (Partage->Sous_serveur[id].Clients)                                    /* Si il y a des clients */
@@ -474,7 +474,7 @@
                                        (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
                          g_free(etat);                                            /* On libere la mémoire */
                        }
-                      else Info( Config.log, DEBUG_MEM, "SSRV: pb alloc mem envoi capteur" );
+                      else Info( Config.log, DEBUG_SERVEUR, "SSRV: pb alloc mem envoi capteur" );
                     }
                    liste_capteur = liste_capteur->next;                    /* On passe au capteur suivant */
                  }
@@ -533,7 +533,7 @@
         }
        else
        if ( Partage->Sous_serveur[id].inactivite + Config.max_inactivite < Partage->top ) /* Inactivite ? */
-        { Info( Config.log, DEBUG_INFO, "Inactivity time reached" );
+        { Info( Config.log, DEBUG_SERVEUR, "Inactivity time reached" );
           Arret = FIN;                      /* Arret "Local" du process: n'impacte pas les autres process */
         }
 /****************************************** Ecoute des paroles du superviseur *****************************/
@@ -541,7 +541,7 @@
         { GList *liste_clients;
           struct CLIENT *client;
 /* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
-          Info( Config.log, DEBUG_INFO, "SSRV: Run_serveur: type_info != vide" );
+          Info( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: type_info != vide" );
        
           switch( Partage->Sous_serveur[id].type_info )
            { case TYPE_INFO_NEW_HISTO:
@@ -564,7 +564,7 @@
                    }
                   break;
            }
-          Info( Config.log, DEBUG_INFO, "SSRV: Run_serveur: type_info traité" );
+          Info( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: type_info traité" );
           Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                    /* Information traitée */
         } 
 
@@ -574,7 +574,7 @@
     while(Partage->Sous_serveur[id].Clients)                          /* Parcours de la liste des clients */
      { struct CLIENT *client;                                         /* Deconnection de tous les clients */
        client = (struct CLIENT *)Partage->Sous_serveur[id].Clients->data;
-       Info_c( Config.log, DEBUG_INFO, "SSRV: Run_serveur: deconnexion client", client->machine );
+       Info_c( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: deconnexion client", client->machine );
        Deconnecter(client);
      }
     g_list_free(Partage->Sous_serveur[id].Clients);
@@ -585,9 +585,9 @@
     Partage->Sous_serveur[id].pid       = -1;
     if (Partage->jeton == id)
      { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
-       Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: jeton rendu", id );
+       Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: jeton rendu", id );
      }
-    Info_n( Config.log, DEBUG_INFO, "SSRV: Run_serveur: Down", id );
+    Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: Down", id );
     pthread_exit( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/
