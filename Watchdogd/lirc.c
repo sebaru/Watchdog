@@ -26,6 +26,8 @@
  */
 
  #include <glib.h>
+ #include <unistd.h>
+ #include <fcntl.h>
  #include <lirc/lirc_client.h>
 
  #include "watchdogd.h"
@@ -40,8 +42,10 @@
 /**********************************************************************************************************/
  void Lirc_check ( struct LOG *log, struct DB *db )
   { struct lirc_config *config;
+    gint fd;
 
-    if (lirc_init("Watchdogd",1)==-1) return;
+    if ( (fd=lirc_init("Watchdogd",1))==-1) return;
+    fcntl ( fd, F_SETFL, O_NONBLOCK );
 
     if (lirc_readconfig ( NULL, &config, NULL)==0)
      { gchar *code;
