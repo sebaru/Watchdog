@@ -383,10 +383,7 @@
 
        module->Bornes = g_list_append ( module->Bornes, borne );        /* Ajout dans la liste de travail */
        Info_n( Config.log, DEBUG_MODBUS, "Charger_borne_module_MODBUS:  borne id = ", borne->id      );
-       Info_n( Config.log, DEBUG_MODBUS, "                                  type = ", borne->type    );
-       Info_n( Config.log, DEBUG_MODBUS, "                               adresse = ", borne->adresse );
-       Info_n( Config.log, DEBUG_MODBUS, "                                   min = ", borne->min     );
-       Info_n( Config.log, DEBUG_MODBUS, "                                   nbr = ", borne->nbr     );
+       Info_n( Config.log, DEBUG_MODBUS, "                             module id = ", borne->module  );
      }
     return(TRUE);
   }
