@@ -157,6 +157,14 @@
     Envoi_serveur( TAG_RS485, SSTAG_CLIENT_WANT_PAGE_RS485, NULL, 0 );
   }
 /**********************************************************************************************************/
+/* Menu_want_modbus: l'utilisateur desire voir les modules modbus                                         */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Menu_want_modbus ( void )
+  { if (Chercher_page_notebook( TYPE_PAGE_MODBUS, 0, TRUE )) return;
+    Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_WANT_PAGE_MODBUS, NULL, 0 );
+  }
+/**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

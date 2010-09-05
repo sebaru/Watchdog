@@ -62,6 +62,7 @@
     TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
     TYPE_PAGE_ONDULEUR,                                        /* Page affichant la liste des onduleurs ! */
     TYPE_PAGE_RS485,                                                  /* Page affichant les modules RS485 */
+    TYPE_PAGE_MODBUS,                                                /* Page affichant les modules MODBUS */
   };
 
  struct PAGE_NOTEBOOK
@@ -228,6 +229,8 @@
  extern void Gerer_protocole_scenario ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
  extern void Gerer_protocole_onduleur ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_rs485 ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_modbus ( struct CONNEXION *connexion );
 
 
  extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
@@ -326,6 +329,7 @@
  extern void Menu_want_scenario ( void );
  extern void Menu_want_onduleur ( void );
  extern void Menu_want_rs485 ( void );
+ extern void Menu_want_modbus ( void );
 
 
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );           /* Dans atelier.c */
@@ -525,10 +529,17 @@
  extern void Proto_cacher_un_rs485( struct CMD_TYPE_RS485 *rs485 );
  extern void Proto_rafraichir_un_rs485( struct CMD_TYPE_RS485 *rs485 );
  extern void Creer_page_rs485( void );
-
-                                                                                 /* Dans ajout_rs485.c */
+                                                                                    /* Dans ajout_rs485.c */
  extern void Menu_ajouter_editer_rs485 ( struct CMD_TYPE_RS485 *edit_rs485);
  extern void Proto_afficher_mnemo_rs485 ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+
+ extern void Proto_afficher_un_modbus( struct CMD_TYPE_MODBUS *modbus );           /* Dans liste_modbus.c */
+ extern void Proto_cacher_un_modbus( struct CMD_TYPE_MODBUS *modbus );
+ extern void Proto_rafraichir_un_modbus( struct CMD_TYPE_MODBUS *modbus );
+ extern void Creer_page_modbus( void );
+                                                                                   /* Dans ajout_modbus.c */
+ extern void Menu_ajouter_editer_modbus ( struct CMD_TYPE_MODBUS *edit_modbus);
+ extern void Proto_afficher_mnemo_modbus ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
