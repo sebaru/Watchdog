@@ -249,19 +249,32 @@
  extern void *Envoyer_scenario_sup_thread ( struct CLIENT *client );
 
                                                                                    /* Dans envoi_camera.c */
+ extern void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );
+ extern void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );
  extern void Proto_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );
  extern void Proto_valider_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
  extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
                                                                                  /* Dans envoi_onduleur.c */
+ extern void Proto_ajouter_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
+ extern void Proto_effacer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
  extern void Proto_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
  extern void Proto_valider_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
  extern void *Envoyer_onduleurs_thread ( struct CLIENT *client );
 
-                                                                                   /* Dans envoi_rs485.c */
+                                                                                    /* Dans envoi_rs485.c */
+ extern void Proto_ajouter_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
+ extern void Proto_effacer_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
  extern void Proto_editer_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
  extern void Proto_valider_editer_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
  extern void *Envoyer_rs485_thread ( struct CLIENT *client );
+
+                                                                                   /* Dans envoi_modbus.c */
+ extern void Proto_ajouter_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
+ extern void Proto_effacer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
+ extern void Proto_editer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
+ extern void Proto_valider_editer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
+ extern void *Envoyer_modbus_thread ( struct CLIENT *client );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
