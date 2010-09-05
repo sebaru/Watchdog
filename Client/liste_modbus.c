@@ -363,7 +363,7 @@
 
     renderer = gtk_cell_renderer_toggle_new();                              /* Colonne de l'id du message */
     colonne = gtk_tree_view_column_new_with_attributes ( _("ON"), renderer,
-                                                         "enable", COLONNE_ACTIF,
+                                                         "active", COLONNE_ACTIF,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ACTIF);                  /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_modbus), colonne );
@@ -376,6 +376,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Bit Comm"), renderer,
                                                          "text", COLONNE_BIT,
                                                          NULL);
@@ -474,6 +475,7 @@
                          COLONNE_ACTIF, modbus->actif,
                          COLONNE_LIBELLE, modbus->libelle,
                          COLONNE_BIT, modbus->bit,
+                         COLONNE_IP, modbus->ip,
                          COLONNE_WATCHDOG, modbus->watchdog,
                          -1
                        );
