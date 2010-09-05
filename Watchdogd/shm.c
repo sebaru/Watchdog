@@ -29,12 +29,7 @@
  #include <sys/ipc.h>
  #include <sys/shm.h>
 
- #include "Erreur.h"
- #include "Config.h"
  #include "watchdogd.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /**********************************************************************************************************/
 /* Shm_init: initialisation de la mémoire partagée                                                        */
 /* Entrée: rien                                                                                           */

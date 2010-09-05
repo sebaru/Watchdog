@@ -37,11 +37,6 @@
  #include <stdio.h>
  #include <errno.h>
 
- #include "Erreur.h"
- #include "Config.h"
-
- extern struct CONFIG Config;
-
  #include "watchdogd.h"                                      /* Mise en place des prototypes de fonctions */
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */

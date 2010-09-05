@@ -26,13 +26,7 @@
  */
  
  #include <glib.h>
-
- #include "Admin.h"
- #include "Modbus.h"
  #include "watchdogd.h"
-
- extern struct CONFIG Config;
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */

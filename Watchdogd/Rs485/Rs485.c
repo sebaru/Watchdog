@@ -239,14 +239,14 @@
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
-    if (!db) return;
+    if (!db) return(FALSE);
 
     module = (struct MODULE_RS485 *)g_malloc0(sizeof(struct MODULE_RS485));
     if (!module)                                                      /* Si probleme d'allocation mémoire */
      { Info( Config.log, DEBUG_RS485,
              "Charger_un_rs485: Erreur allocation mémoire struct MODULE_RS485" );
        Libere_DB_SQL( Config.log, &db );
-       return;
+       return(FALSE);
      }
 
     rs485 = Rechercher_rs485DB ( Config.log, db, id );
@@ -255,18 +255,17 @@
      { Info( Config.log, DEBUG_RS485,
              "Charger_un_rs485: Erreur allocation mémoire struct CMD_TYPE_RS485" );
        g_free(module);
-       return;
+       return(FALSE);
      }
 
     memcpy( &module->rs485, rs485, sizeof(struct CMD_TYPE_RS485) );
     g_free(rs485);
 
-    pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
-    pthread_mutex_unlock( &Partage->com_rs485.synchro );
 
     Info_n( Config.log, DEBUG_RS485, "Charger_un_rs485:  id      = ", module->rs485.id    );
     Info_n( Config.log, DEBUG_RS485, "                -  actif   = ", module->rs485.actif );
+   return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
@@ -308,11 +307,9 @@
        g_free(rs485);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
-       pthread_mutex_lock( &Partage->com_rs485.synchro );
        Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
-       pthread_mutex_unlock( &Partage->com_rs485.synchro );
-       Info_n( Config.log, DEBUG_RS485, "Charger_modules_RS485:  id    = ", module->rs485.id    );
-       Info_n( Config.log, DEBUG_RS485, "                     -  actif = ", module->rs485.actif );
+       Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id    = ", module->rs485.id    );
+       Info_n( Config.log, DEBUG_RS485, "                  -  actif = ", module->rs485.actif );
      }
     Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485: module RS485 found  !", cpt );
 
@@ -326,9 +323,7 @@
 /**********************************************************************************************************/
  static void Decharger_un_rs485 ( struct MODULE_RS485 *module )
   { if (!module) return;
-    pthread_mutex_lock( &Partage->com_rs485.synchro );
     Partage->com_rs485.Modules_RS485 = g_list_remove ( Partage->com_rs485.Modules_RS485, module );
-    pthread_mutex_unlock( &Partage->com_rs485.synchro );
     g_free(module);
   }
 /**********************************************************************************************************/

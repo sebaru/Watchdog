@@ -30,8 +30,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "Erreur.h"
-#include "Config.h"
+#include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
 extern int ligne;
 int erreur;                                                             /* Compteur d'erreur du programme */

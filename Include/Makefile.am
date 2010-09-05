@@ -10,7 +10,7 @@ noinst_HEADERS =  Erreur.h Reseaux.h Version.h  \
                   Reseaux_message.h Reseaux_mnemonique.h Reseaux_scenario.h \
                   Reseaux_entreeana.h Reseaux_supervision.h Reseaux_histo.h Reseaux_atelier.h \
                   Reseaux_courbe.h Reseaux_histo_courbe.h Reseaux_fichier.h \
-		  Reseaux_onduleur.h Reseaux_rs485.h \
+		  Reseaux_onduleur.h Reseaux_rs485.h Reseaux_modbus.h \
                   boule_bleue.xpm boule_verte.xpm boule_rouge.xpm boule_jaune.xpm boule_orange.xpm
 
 pkginclude_HEADERS = Module_DLS.h

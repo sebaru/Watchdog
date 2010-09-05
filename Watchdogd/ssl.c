@@ -30,12 +30,7 @@
  #include <openssl/err.h>
  #include <openssl/rand.h>
 
- #include "Erreur.h"
- #include "Reseaux.h"
- #include "Config.h"
  #include "watchdogd.h"
-
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  SSL_CTX *Ssl_ctx;                                                 /* Contexte de cryptage des connexions */
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"

@@ -33,6 +33,7 @@
 
  #include "config.h"
  #include "Db.h"
+ #include "Config.h"
  #include "Archive.h"
  #include "Audio.h"
  #include "Admin.h"

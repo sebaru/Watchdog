@@ -43,6 +43,7 @@
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
+#ifdef bouh
  gchar *Mode_borne[NBR_MODE_BORNE+1] =
   { "input_TOR", "output_TOR", "input_ANA", "output_ANA", "unknown" };
 
@@ -58,6 +59,294 @@
      }
     return(i);
   }
+#endif
+/**********************************************************************************************************/
+/* Retirer_modbusDB: Elimination d'un module modbus                                                       */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Retirer_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus )
+  { gchar requete[200];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_MODBUS, modbus->id );
+
+    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+
+    g_snprintf( requete, sizeof(requete),
+                "DELETE FROM %s WHERE module = %d", NOM_TABLE_BORNE_MODBUS, modbus->id );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Retirer_borne_modbusDB: Elimination d'une borne modbus                                                 */
+/* Entrée: un log et une database et la borne a supprimer                                                 */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Retirer_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *borne_modbus )
+  { gchar requete[200];
+
+    g_snprintf( requete, sizeof(requete),
+                "DELETE FROM %s WHERE module = %d", NOM_TABLE_BORNE_MODBUS, borne_modbus->id );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                           */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Ajouter_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus )
+  { gchar requete[2048];
+    gchar *libelle, *ip;
+
+    libelle = Normaliser_chaine ( log, modbus->libelle );                 /* Formatage correct des chaines */
+    if (!libelle)
+     { Info( log, DEBUG_MODBUS, "Ajouter_modbusDB: Normalisation libelle impossible" );
+       return(-1);
+     }
+
+    ip = Normaliser_chaine ( Config.log, modbus->ip );                   /* Formatage correct des chaines */
+    if (!ip)
+     { Info( Config.log, DEBUG_ADMIN, "Ajouter_modbusDB: Normalisation ip impossible" );
+       Libere_DB_SQL( Config.log, &db );
+       g_free(libelle);
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+                "INSERT INTO %s(actif,ip,bit,watchdog,libelle) VALUES ('%d','%s',%d,%d,'%s')",
+                NOM_TABLE_MODULE_MODBUS, modbus->actif, ip, modbus->bit, modbus->watchdog, libelle
+              );
+    g_free(ip);
+    g_free(libelle);
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(-1); }
+    return( Recuperer_last_ID_SQL( log, db ) );
+  }
+/**********************************************************************************************************/
+/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                           */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Ajouter_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *borne )
+  { gchar requete[2048];
+
+    g_snprintf( requete, sizeof(requete),
+                "INSERT INTO %s(module,type,adresse,min,nbr) VALUES ('%d','%d','%d','%d','%d')",
+                NOM_TABLE_BORNE_MODBUS, borne->module, borne->type, borne->adresse, borne->min, borne->nbr
+              );
+
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(-1); }
+    return( Recuperer_last_ID_SQL( log, db ) );
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ gboolean Recuperer_modbusDB ( struct LOG *log, struct DB *db )
+  { gchar requete[256];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,actif,ip,bit,watchdog,libelle"
+                " FROM %s ORDER BY libelle", NOM_TABLE_MODULE_MODBUS );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_borne_modbusDB: Recupération de la liste des borne d'un module                               */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ gboolean Recuperer_borne_modbusDB ( struct LOG *log, struct DB *db, guint module )
+  { gchar requete[256];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,module,type,adresse,min,nbr"
+                " FROM %s WHERE module='%d' ORDER BY adresse", NOM_TABLE_BORNE_MODBUS, module );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_MODBUS *Recuperer_modbusDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_MODBUS *modbus;
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       return(NULL);
+     }
+
+    modbus = (struct CMD_TYPE_MODBUS *)g_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
+    if (!modbus) Info( log, DEBUG_MODBUS, "Recuperer_modbusDB_suite: Erreur allocation mémoire" );
+    else
+     { memcpy( modbus->libelle, db->row[5], sizeof(modbus->libelle) );
+       memcpy( modbus->ip,      db->row[2], sizeof(modbus->ip) );
+       modbus->id        = atoi(db->row[0]);
+       modbus->actif     = atoi(db->row[1]);
+       modbus->bit       = atoi(db->row[3]);
+       modbus->watchdog  = atoi(db->row[4]);
+     }
+    return(modbus);
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_BORNE_MODBUS *Recuperer_borne_modbusDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       return(NULL);
+     }
+
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)g_malloc0( sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+    if (!borne) Info( log, DEBUG_MODBUS, "Recuperer_borne_modbusDB_suite: Erreur allocation mémoire" );
+    else
+     { borne->id      = atoi(db->row[0]);
+       borne->module  = atoi(db->row[1]);
+       borne->type    = atoi(db->row[2]);
+       borne->adresse = atoi(db->row[3]);
+       borne->min     = atoi(db->row[4]);
+       borne->nbr     = atoi(db->row[5]);
+     }
+    return(borne);
+  }
+/**********************************************************************************************************/
+/* Rechercher_modbusDB: Recupération du modbus dont le id est en parametre                                  */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_MODBUS *Rechercher_modbusDB ( struct LOG *log, struct DB *db, guint id )
+  { gchar requete[512];
+    struct CMD_TYPE_MODBUS *modbus;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,actif,ip,bit,watchdog,libelle"
+                " FROM %s WHERE id=%d",
+                NOM_TABLE_MODULE_MODBUS, id );
+       
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+       
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_n( log, DEBUG_MODBUS, "Rechercher_modbusDB: MODBUS non trouvé dans la BDD", id );
+       return(NULL);
+     }
+       
+    modbus = g_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
+    if (!modbus)
+     { Info( log, DEBUG_MODBUS, "Rechercher_modbusDB: Mem error" ); }
+    else
+     { memcpy( modbus->libelle, db->row[5], sizeof(modbus->libelle) );
+       memcpy( modbus->ip,      db->row[2], sizeof(modbus->ip) );
+       modbus->id        = atoi(db->row[0]);
+       modbus->actif     = atoi(db->row[1]);
+       modbus->bit       = atoi(db->row[3]);
+       modbus->watchdog  = atoi(db->row[4]);
+     }
+    return(modbus);
+  }
+/**********************************************************************************************************/
+/* Rechercher_modbusDB: Recupération du modbus dont le id est en parametre                                  */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct CMD_TYPE_BORNE_MODBUS *Rechercher_borne_modbusDB ( struct LOG *log, struct DB *db, guint id )
+  { gchar requete[512];
+    struct CMD_TYPE_BORNE_MODBUS *borne;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,module,type,adresse,min,nbr"
+                " FROM %s WHERE id=%d",
+                NOM_TABLE_BORNE_MODBUS, id );
+       
+    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+     { return(NULL); }
+       
+    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( log, db );
+       Info_n( log, DEBUG_MODBUS, "Rechercher_borne_modbusDB: MODBUS non trouvé dans la BDD", id );
+       return(NULL);
+     }
+       
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)g_malloc0( sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+    if (!borne) Info( log, DEBUG_MODBUS, "Recuperer_borne_modbusDB_suite: Erreur allocation mémoire" );
+    else
+     { borne->id      = atoi(db->row[0]);
+       borne->module  = atoi(db->row[1]);
+       borne->type    = atoi(db->row[2]);
+       borne->adresse = atoi(db->row[3]);
+       borne->min     = atoi(db->row[4]);
+       borne->nbr     = atoi(db->row[5]);
+     }
+    return(borne);
+  }
+/**********************************************************************************************************/
+/* Modifier_modbusDB: Modification d'un modbus Watchdog                                                   */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gboolean Modifier_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus )
+  { gchar *libelle, *ip;
+    gchar requete[2048];
+
+    libelle = Normaliser_chaine ( log, modbus->libelle );                /* Formatage correct des chaines */
+    if (!libelle)
+     { Info( log, DEBUG_MODBUS, "Modifier_modbusDB: Normalisation libelle impossible" );
+       return(-1);
+     }
+
+    ip = Normaliser_chaine ( Config.log, modbus->ip );                   /* Formatage correct des chaines */
+    if (!ip)
+     { Info( Config.log, DEBUG_ADMIN, "Modifier_modbusDB: Normalisation ip impossible" );
+       Libere_DB_SQL( Config.log, &db );
+       g_free(libelle);
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET "             
+                "actif='%d',ip='%s',bit='%d',watchdog='%d',libelle='%s'"
+                " WHERE id=%d",
+                NOM_TABLE_MODULE_MODBUS,
+                modbus->actif, ip, modbus->bit, modbus->watchdog, libelle,
+                modbus->id );
+    g_free(libelle);
+    g_free(ip);
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Modifier_borne_modbusDB: Modification d'une borne modbus Watchdog                                      */
+/* Entrées: un log, une db, et une borne                                                                  */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Modifier_borne_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *borne )
+  { gchar requete[2048];
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET "             
+                "type='%d',adresse='%d',min='%d',nbr='%d'"
+                " WHERE id=%d",
+                NOM_TABLE_MODULE_MODBUS,
+                borne->type, borne->adresse, borne->min, borne->nbr,
+                borne->id );
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
 /**********************************************************************************************************/
 /* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
@@ -69,94 +358,98 @@
     while ( liste )
      { struct MODULE_MODBUS *module;
        module = ((struct MODULE_MODBUS *)liste->data);
-       if (module->id == id) return(module);
+       if (module->modbus.id == id) return(module);
        liste = liste->next;
      }
     return(NULL);
+  }
+/**********************************************************************************************************/
+/* Charger_borne_module_MODBUS: Requete la DB pour charger les bornes d'un module MODBUS                  */
+/* Entrée: la db, le module                                                                               */
+/* Sortie: TRUE/FALSE                                                                                     */
+/**********************************************************************************************************/
+ static gboolean Charger_borne_module_MODBUS ( struct DB *db, struct MODULE_MODBUS *module  )
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+
+    if ( ! Recuperer_borne_modbusDB( Config.log, db, module->modbus.id ) )
+     { Info( Config.log, DEBUG_MODBUS,
+             "Charger_borne_module_MODBUS: Erreur recuperation borne" );
+       return(FALSE);
+     }
+
+    for( ; ; )
+     { borne = Recuperer_borne_modbusDB_suite( Config.log, db );
+       if (!borne) break;
+
+       module->Bornes = g_list_append ( module->Bornes, borne );        /* Ajout dans la liste de travail */
+       Info_n( Config.log, DEBUG_MODBUS, "Charger_borne_module_MODBUS:  borne id = ", borne->id      );
+       Info_n( Config.log, DEBUG_MODBUS, "                                  type = ", borne->type    );
+       Info_n( Config.log, DEBUG_MODBUS, "                               adresse = ", borne->adresse );
+       Info_n( Config.log, DEBUG_MODBUS, "                                   min = ", borne->min     );
+       Info_n( Config.log, DEBUG_MODBUS, "                                   nbr = ", borne->nbr     );
+     }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static gboolean Charger_un_MODBUS_DB ( struct MODULE_MODBUS *module, gint id  )
-  { gchar requete[128];
+ static gboolean Charger_un_MODBUS ( gint id  )
+  { struct MODULE_MODBUS *module;
+    struct CMD_TYPE_MODBUS *modbus;
     struct DB *db;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db) return(FALSE);
 
-/********************************************** Chargement des modules ************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT actif,ip,bit,watchdog FROM %s WHERE id=%d",
-                NOM_TABLE_MODULE_MODBUS, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+    module = (struct MODULE_MODBUS *)g_malloc0(sizeof(struct MODULE_MODBUS));
+    if (!module)                                                      /* Si probleme d'allocation mémoire */
      { Libere_DB_SQL( Config.log, &db );
+       Info( Config.log, DEBUG_MODBUS,
+             "Charger_un_modbus: Erreur allocation mémoire struct MODULE_MODBUS" );
        return(FALSE);
      }
 
-    while ( Recuperer_ligne_SQL (Config.log, db) )
-     { module->id       = id;
-       module->actif    = atoi (db->row[0]);
-       g_snprintf( module->ip, sizeof(module->ip), "%s", db->row[1] );
-       module->bit      = atoi (db->row[2]);         /* Bit interne B d'etat communication avec le module */
-       module->watchdog = atoi (db->row[3]);
-                                                                        /* Ajout dans la liste de travail */
-       Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->id       );
-       Info_n( Config.log, DEBUG_MODBUS, "                      -  actif    = ", module->actif    );
-       Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->ip       );
-       Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->bit      );
-       Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->watchdog );
-     }
-    Liberer_resultat_SQL ( Config.log, db );
-/******************************************* Chargement des bornes ****************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr FROM %s WHERE module=%d",
-                NOM_TABLE_BORNE_MODBUS, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+    modbus = Rechercher_modbusDB ( Config.log, db, id );
+    if (!modbus)                                                      /* Si probleme d'allocation mémoire */
      { Libere_DB_SQL( Config.log, &db );
+       Info( Config.log, DEBUG_MODBUS,
+             "Charger_un_modbus: Erreur allocation mémoire struct CMD_TYPE_MODBUS" );
+       g_free(module);
        return(FALSE);
      }
 
-    while ( Recuperer_ligne_SQL (Config.log, db) )
-     { struct BORNE_MODBUS *borne;
+    memcpy( &module->modbus, modbus, sizeof(struct CMD_TYPE_MODBUS) );
+    g_free(modbus);
 
-       borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
-       if (!borne)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_MODBUS,
-                "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
-          continue;
-        }
+    Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->modbus.id       );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  actif    = ", module->modbus.actif    );
+    Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->modbus.ip       );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->modbus.bit      );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->modbus.watchdog );
 
-       borne->id       = atoi (db->row[0]);
-       borne->type     = atoi (db->row[1]);
-       borne->adresse  = atoi (db->row[2]);
-       borne->min      = atoi (db->row[3]);
-       borne->nbr      = atoi (db->row[4]);
-
-       module->Bornes = g_list_append ( module->Bornes, borne );        /* Ajout dans la liste de travail */
-       Info_n( Config.log, DEBUG_MODBUS, "Charger_un_MODBUS_DB:  borne id = ", borne->id      );
-       Info_n( Config.log, DEBUG_MODBUS, "                           type = ", borne->type    );
-       Info_n( Config.log, DEBUG_MODBUS, "                        adresse = ", borne->adresse );
-       Info_n( Config.log, DEBUG_MODBUS, "                            min = ", borne->min     );
-       Info_n( Config.log, DEBUG_MODBUS, "                            nbr = ", borne->nbr     );
+    if ( ! Charger_borne_module_MODBUS( db, module ) )
+     { Libere_DB_SQL( Config.log, &db );
+       Info( Config.log, DEBUG_MODBUS,
+             "Charger_un_modbus: Erreur chargement bornes" );
+       g_free(module);
+       return(FALSE);
      }
-    Liberer_resultat_SQL ( Config.log, db );
+
+    Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                            */
+/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
  static gboolean Charger_tous_MODBUS ( void  )
-  { gchar requete[128];
-    struct DB *db;
+  { struct DB *db;
     gint cpt;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
@@ -164,185 +457,46 @@
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
-    g_snprintf( requete, sizeof(requete), "SELECT id FROM %s",
-                NOM_TABLE_MODULE_MODBUS
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+    if ( ! Recuperer_modbusDB( Config.log, db ) )
      { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
 
     Partage->com_modbus.Modules_MODBUS = NULL;
     cpt = 0;
-    while ( Recuperer_ligne_SQL (Config.log, db) )
+    for ( ; ; )
      { struct MODULE_MODBUS *module;
+       struct CMD_TYPE_MODBUS *modbus;
+
+       modbus = Recuperer_modbusDB_suite( Config.log, db );
+       if (!modbus) break;
 
        module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info( Config.log, DEBUG_MODBUS,
                 "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
-          continue;
+          g_free(modbus);
+          Libere_DB_SQL( Config.log, &db );
+          return(FALSE);
         }
-       if (Charger_un_MODBUS_DB( module, atoi (db->row[0]) ))
-        {                                                               /* Ajout dans la liste de travail */
-          pthread_mutex_lock( &Partage->com_modbus.synchro );
-          Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
-          pthread_mutex_unlock( &Partage->com_modbus.synchro );
-          cpt++;                                           /* Nous avons ajouté un module dans la liste ! */
-          Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS:  id       = ", module->id       );
-          Info_n( Config.log, DEBUG_MODBUS, "                   -  actif    = ", module->actif    );
-          Info_c( Config.log, DEBUG_MODBUS, "                   -  ip       = ", module->ip       );
-          Info_n( Config.log, DEBUG_MODBUS, "                   -  bit      = ", module->bit      );
-          Info_n( Config.log, DEBUG_MODBUS, "                   -  watchdog = ", module->watchdog );
-        } else g_free(module);
+       memcpy( &module->modbus, modbus, sizeof(struct CMD_TYPE_MODBUS) );
+       g_free(modbus);
+       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
+                                                                        /* Ajout dans la liste de travail */
+       Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS:  id    = ", module->modbus.id    );
+       Info_n( Config.log, DEBUG_MODBUS, "                   -  actif = ", module->modbus.actif );
+
+       if ( ! Charger_borne_module_MODBUS( db, module ) )
+        { g_free(module);
+          return(FALSE);
+        }
+
+       Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
      }
-    Liberer_resultat_SQL ( Config.log, db );
-    Info_n( Config.log, DEBUG_INFO, "Charger_tous_MODBUS: module MODBUS found  !", cpt );
+    Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS: module MODBUS found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Charger_une_borne_MODBUS ( gint id )
-  { struct MODULE_MODBUS *module;
-    struct BORNE_MODBUS *borne;
-    gchar requete[128];
-    struct DB *db;
-    
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db) return;
-
-    g_snprintf( requete, sizeof(requete), "SELECT id,type,adresse,min,nbr,module FROM %s WHERE id=%d",
-                NOM_TABLE_BORNE_MODBUS, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    if ( Recuperer_ligne_SQL (Config.log, db) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    borne = (struct BORNE_MODBUS *)g_malloc0( sizeof(struct BORNE_MODBUS) );
-    if (!borne)                                                   /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MODBUS,
-             "Charger_modules_MODBUS: Erreur allocation mémoire struct BORNE_MODBUS" );
-       Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    borne->id       = atoi (db->row[0]);
-    borne->type     = atoi (db->row[1]);
-    borne->adresse  = atoi (db->row[2]);
-    borne->min      = atoi (db->row[3]);
-    borne->nbr      = atoi (db->row[4]);
-
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
-    module = Chercher_module_by_id ( atoi(db->row[5]) );
-    if (module)
-     { module->Bornes = g_list_append ( module->Bornes, borne ); }      /* Ajout dans la liste de travail */
-    else g_free(borne);                                                   /* Sinon, on oublie, tant pis ! */
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
-    Liberer_resultat_SQL ( Config.log, db );
-    Libere_DB_SQL( Config.log, &db );
-  }
-/**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Charger_un_MODBUS ( gint id )
-  { struct MODULE_MODBUS *module;
-    
-    module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
-    if (!module)                                                   /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_MODBUS,
-            "Charger_un_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
-       return;
-     }
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
-    Charger_un_MODBUS_DB ( module, id );
-    Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
-  }
-/**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Decharger_un_MODBUS ( struct MODULE_MODBUS *module )
-  { if (!module) return;
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
-    if (module->Bornes)
-     { g_list_foreach( module->Bornes, (GFunc) g_free, NULL );
-       g_list_free( module->Bornes );
-     }
-    Partage->com_modbus.Modules_MODBUS = g_list_remove ( Partage->com_modbus.Modules_MODBUS, module );
-    g_free(module);
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
-  }
-/**********************************************************************************************************/
-/* Decharcher_une_borne_MODBUS: Décharge une borne de la liste des bornes actives                         */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Decharger_une_borne_MODBUS ( gint id )
-  { GList *liste, *liste_borne;
-    pthread_mutex_lock( &Partage->com_modbus.synchro );
-    liste = Partage->com_modbus.Modules_MODBUS;
-    while ( liste )
-     { struct MODULE_MODBUS *module;
-       module = ((struct MODULE_MODBUS *)liste->data);
-
-       liste_borne = module->Bornes;
-       while ( liste_borne )
-        { struct BORNE_MODBUS *borne;
-          borne = ((struct BORNE_MODBUS *)liste->data);
-          if (borne->id == id)
-           { module->Bornes = g_list_remove ( module->Bornes, borne ); }
-          liste_borne = liste_borne->next;
-        }
-       liste = liste->next;
-     }
-    pthread_mutex_unlock( &Partage->com_modbus.synchro );
-  }
-/**********************************************************************************************************/
-/* Modbus_is_actif: Renvoi TRUE si au moins un des modules modbus est actif                               */
-/* Entrée: rien                                                                                           */
-/* Sortie: TRUE/FALSE                                                                                     */
-/**********************************************************************************************************/
- static gboolean Modbus_is_actif ( void )
-  { GList *liste;
-    liste = Partage->com_modbus.Modules_MODBUS;
-    while ( liste )
-     { struct MODULE_MODBUS *module;
-       module = ((struct MODULE_MODBUS *)liste->data);
-
-       if (module->actif) return(TRUE);
-       liste = liste->next;
-     }
-    return(FALSE);
-  }
-/**********************************************************************************************************/
-/* Decharger_tous_MODBUS: Decharge l'ensemble des modules MODBUS                                          */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Decharger_tous_MODBUS ( void  )
-  { struct MODULE_MODBUS *module;
-    while ( Partage->com_modbus.Modules_MODBUS )
-     { module = (struct MODULE_MODBUS *)Partage->com_modbus.Modules_MODBUS->data;
-       Decharger_un_MODBUS ( module );
-     }
   }
 /**********************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                     */
@@ -359,8 +513,8 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = 0;
-    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Deconnecter_module", module->id );
-    SB( module->bit, 0 );                                     /* Mise a zero du bit interne lié au module */
+    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Deconnecter_module", module->modbus.id );
+    SB( module->modbus.bit, 0 );                              /* Mise a zero du bit interne lié au module */
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
@@ -372,7 +526,7 @@
     struct hostent *host;
     int connexion;
 
-    if ( !(host = gethostbyname( module->ip )) )                                  /* On veut l'adresse IP */
+    if ( !(host = gethostbyname( module->modbus.ip )) )                           /* On veut l'adresse IP */
      { Info( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module: DNS_Failed" );
        return(FALSE);
      }
@@ -388,7 +542,7 @@
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
      { Info_c( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module: connexion refused by module",
-               module->ip );
+               module->modbus.ip );
        close(connexion);
        return(FALSE);
      }
@@ -397,10 +551,54 @@
     module->connexion = connexion;                                          /* Sauvegarde du fd */
     module->date_last_reponse = time(NULL);
     module->borne_en_cours = module->Bornes;
-    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module", module->id );
-    SB( module->bit, 1 );                                        /* Mise a 1 du bit interne lié au module */
+    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module", module->modbus.id );
+    SB( module->modbus.bit, 1 );                                 /* Mise a 1 du bit interne lié au module */
 
     return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_un_MODBUS ( struct MODULE_MODBUS *module )
+  { if (!module) return;
+    Deconnecter_module  ( module );                                  /* Deconnexion du module en question */
+    if (module->Bornes)
+     { g_list_foreach( module->Bornes, (GFunc) g_free, NULL );
+       g_list_free( module->Bornes );
+     }
+    Partage->com_modbus.Modules_MODBUS = g_list_remove ( Partage->com_modbus.Modules_MODBUS, module );
+    g_free(module);
+  }
+/**********************************************************************************************************/
+/* Decharger_tous_MODBUS: Decharge l'ensemble des modules MODBUS                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Decharger_tous_MODBUS ( void  )
+  { struct MODULE_MODBUS *module;
+    while ( Partage->com_modbus.Modules_MODBUS )
+     { module = (struct MODULE_MODBUS *)Partage->com_modbus.Modules_MODBUS->data;
+       Decharger_un_MODBUS ( module );
+     }
+  }
+/**********************************************************************************************************/
+/* Modbus_is_actif: Renvoi TRUE si au moins un des modules modbus est actif                               */
+/* Entrée: rien                                                                                           */
+/* Sortie: TRUE/FALSE                                                                                     */
+/**********************************************************************************************************/
+ static gboolean Modbus_is_actif ( void )
+  { GList *liste;
+    liste = Partage->com_modbus.Modules_MODBUS;
+    while ( liste )
+     { struct MODULE_MODBUS *module;
+       module = ((struct MODULE_MODBUS *)liste->data);
+
+       if (module->modbus.actif) return(TRUE);
+       liste = liste->next;
+     }
+    return(FALSE);
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -422,7 +620,8 @@
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->id );
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->modbus.id );
        Deconnecter_module( module );
      }
 
@@ -438,7 +637,7 @@
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
      { Info_n( Config.log, DEBUG_MODBUS,
-               "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->id );
+               "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->modbus.id );
        Deconnecter_module( module );
      }
 
@@ -449,11 +648,12 @@
     requete.adresse        = htons( 0x1000 );
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
     requete.fct            = MBUS_SORTIE_TOR;
-    requete.valeur         = htons( module->watchdog );                                 /* coupure sortie */
+    requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->id );
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->modbus.id );
        Deconnecter_module( module );
      }
 
@@ -467,7 +667,8 @@
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
-     { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: watchdog start failed", module->id );
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: watchdog start failed", module->modbus.id );
        Deconnecter_module( module );
      }
 
@@ -480,8 +681,8 @@
 /**********************************************************************************************************/
  static void Interroger_borne_input_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE_ETOR requete;                            /* Definition d'une trame MODBUS */
-    struct BORNE_MODBUS *borne;
-    borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
+    struct CMD_TYPE_BORNE_MODBUS *borne;
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_ETOR) );
 
     requete.transaction_id = htons(module->transaction_id);
@@ -503,8 +704,8 @@
 /**********************************************************************************************************/
  static void Interroger_borne_input_ana( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE_EANA requete;                            /* Definition d'une trame MODBUS */
-    struct BORNE_MODBUS *borne;
-    borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
+    struct CMD_TYPE_BORNE_MODBUS *borne;
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_EANA) );
 
     requete.transaction_id = htons(module->transaction_id);
@@ -526,9 +727,9 @@
 /**********************************************************************************************************/
  static void Interroger_borne_output_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
-    struct BORNE_MODBUS *borne;
+    struct CMD_TYPE_BORNE_MODBUS *borne;
     gint cpt_a, valeur;
-    borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
 
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_STOR) );
 
@@ -569,8 +770,8 @@
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static void Interroger_borne( struct MODULE_MODBUS *module )
-  { struct BORNE_MODBUS *borne;
-    borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
     switch (borne->type)
      { case BORNE_INPUT_TOR:  Interroger_borne_input_tor( module );
             break;
@@ -593,8 +794,8 @@
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static void Processer_trame( struct MODULE_MODBUS *module )
-  { struct BORNE_MODBUS *borne;
-    borne = (struct BORNE_MODBUS *)module->borne_en_cours->data;
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
 
     if (ntohs(module->response.transaction_id) != module->transaction_id)             /* Mauvaise reponse */
      { if (ntohs(module->response.transaction_id))              /* Reponse aux trames d'initialisation ?? */
@@ -604,7 +805,8 @@
                   ntohs(module->response.transaction_id) );
         }
        else
-        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: trame d'init recue", module->id );
+        { Info_n( Config.log, DEBUG_MODBUS,
+                  "MODBUS: Processer_trame: trame d'init recue", module->modbus.id );
         }
                                             /* On laisse tomber la trame recue, et on attends la suivante */
        memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
@@ -722,7 +924,7 @@
 
     if (module->date_last_reponse + 10 < time(NULL))                     /* Detection attente trop longue */
      { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
-               module->id );
+               module->modbus.id );
        Deconnecter_module( module );
        return;
      }
@@ -755,7 +957,7 @@
            }
          } 
         else
-         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: wrong trame", module->id );
+         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: wrong trame", module->modbus.id );
            Deconnecter_module ( module );
          }
       }
@@ -792,7 +994,6 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting module",
                   Partage->com_modbus.admin_del );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_del );
-          Deconnecter_module  ( module );
           Decharger_un_MODBUS ( module );
           Partage->com_modbus.admin_del = 0;
         }
@@ -800,7 +1001,9 @@
        if (Partage->com_modbus.admin_del_borne)
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting une borne",
                   Partage->com_modbus.admin_del_borne );
-          Decharger_une_borne_MODBUS ( Partage->com_modbus.admin_del_borne );
+          module = Chercher_module_by_id ( Partage->com_modbus.admin_del_borne );
+          Decharger_un_MODBUS ( module );
+          Charger_un_MODBUS ( Partage->com_modbus.admin_del_borne );
           Partage->com_modbus.admin_del_borne = 0;
         }
 
@@ -812,9 +1015,11 @@
         }
 
        if (Partage->com_modbus.admin_add_borne)
-        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding module une borne",
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding une borne",
                   Partage->com_modbus.admin_add_borne );
-          Charger_une_borne_MODBUS ( Partage->com_modbus.admin_add_borne );
+          module = Chercher_module_by_id ( Partage->com_modbus.admin_del_borne );
+          Decharger_un_MODBUS ( module );
+          Charger_un_MODBUS ( Partage->com_modbus.admin_add_borne );
           Partage->com_modbus.admin_add_borne = 0;
         }
 
@@ -822,7 +1027,7 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Starting module",
                   Partage->com_modbus.admin_start );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_start );
-          if (module) module->actif = 1;
+          if (module) module->modbus.actif = 1;
           Partage->com_modbus.admin_start = 0;
         }
 
@@ -830,7 +1035,7 @@
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Stoping module",
                   Partage->com_modbus.admin_stop );
           module = Chercher_module_by_id ( Partage->com_modbus.admin_stop );
-          if (module) module->actif = 0;
+          if (module) module->modbus.actif = 0;
           Deconnecter_module  ( module );
           Partage->com_modbus.admin_stop = 0;
         }
@@ -842,7 +1047,7 @@
        liste = Partage->com_modbus.Modules_MODBUS;
        while (liste)
         { module = (struct MODULE_MODBUS *)liste->data;
-          if ( module->actif != TRUE || 
+          if ( module->modbus.actif != TRUE || 
                Partage->top < module->date_retente )           /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
@@ -851,13 +1056,13 @@
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
            { if ( Connecter_module( module ) )
-              { if ( module->watchdog )
+              { if ( module->modbus.watchdog )
                  { Init_watchdog_modbus(module); }
                 module->date_retente = 0;;
                 module->started = TRUE;
               }
              else
-              { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->id );
+              { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->modbus.id );
                 module->date_retente = Partage->top + MODBUS_RETRY;
               }
            }

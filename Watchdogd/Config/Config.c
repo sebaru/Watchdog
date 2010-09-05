@@ -32,7 +32,7 @@
  #include <unistd.h>
  #include <string.h>
 
- #include "Config.h"
+ #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
  #include "Config_lignes.h"
 
 

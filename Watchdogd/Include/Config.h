@@ -35,10 +35,6 @@
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
  #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
 
- #include "Erreur.h"
- #include "Db.h"
- #include "Modbus.h"
-
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
   struct CONFIG

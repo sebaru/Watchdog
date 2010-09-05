@@ -39,7 +39,7 @@
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
  #define NOM_TABLE_BORNE_MODBUS    "modbus_bornes"
 
- struct COM_MODBUS                                                 /* Communication entre DLS et la RS485 */
+ struct COM_MODBUS                                                 /* Communication entre DLS et la MODBUS */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_MODBUS;
     gboolean reload;
@@ -59,8 +59,9 @@
     NBR_MODE_BORNE
   };
 
+#ifdef bouh
  extern gchar *Mode_borne[NBR_MODE_BORNE+1];
-
+#endif
 
  struct TRAME_MODBUS_REQUETE_ETOR                                        /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
@@ -94,20 +95,8 @@
     guint8 data[16]; /* max = 8*2octets ANA */
   };
 
- struct BORNE_MODBUS
-  { gint id;
-    gint type;
-    gint adresse;
-    gint min;
-    gint nbr;
-  };
-
  struct MODULE_MODBUS
-  { guint id;                                                 /* Numéro du module dans la base de données */
-    gboolean actif;                                                        /* Le module doit-il tourner ? */
-    guint watchdog;                       /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
-    guint bit;                                       /* Bit interne B d'etat communication avec le module */
-    gchar ip[32];                                                         /* Adresses IP du module MODBUS */
+  { struct CMD_TYPE_MODBUS modbus;
 
     gboolean started;                                                                  /* Est-il actif ?? */
     gint connexion;                                                                 /* FD de connexion IP */
@@ -124,7 +113,18 @@
 
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
- extern gint Mode_borne_vers_id ( gchar *mode );
+ extern struct CMD_TYPE_MODBUS *Rechercher_modbusDB ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_MODBUS *Recuperer_modbusDB_suite( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_modbusDB ( struct LOG *log, struct DB *db );
+ extern gint Ajouter_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
+ extern gboolean Retirer_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
+ extern gboolean Modifier_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
+ extern struct CMD_TYPE_BORNE_MODBUS *Rechercher_borne_modbusDB ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_BORNE_MODBUS *Recuperer_borne_modbusDB_suite( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_borne_modbusDB ( struct LOG *log, struct DB *db, guint module );
+ extern gint Ajouter_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *modbus );
+ extern gboolean Retirer_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *modbus );
+ extern gboolean Modifier_borne_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *modbus );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

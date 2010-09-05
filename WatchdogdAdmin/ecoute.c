@@ -38,9 +38,6 @@
  #include <errno.h>
 
  #include "Erreur.h"
- #include "Config.h"
-
- extern struct CONFIG Config;
 
  #include "prototype.h"                                      /* Mise en place des prototypes de fonctions */
 

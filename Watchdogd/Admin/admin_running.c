@@ -26,14 +26,8 @@
  */
  
  #include <glib.h>
- #include <unistd.h>
-
- #include "Admin.h"
- #include "Modbus.h"
  #include "watchdogd.h"
 
- extern struct CONFIG Config;
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 /**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */
 /* Entrée: le client                                                                                      */

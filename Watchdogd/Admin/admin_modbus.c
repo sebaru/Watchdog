@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Admin/admin_modbus.c        Gestion des connexions Admin MODBUS au serveur watchdog          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 18 jan 2009 14:43:27 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 05 sept. 2010 12:01:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -26,9 +26,6 @@
  */
  
  #include <glib.h>
-
- #include "Admin.h"
- #include "Modbus.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
@@ -60,19 +57,19 @@
        g_snprintf( chaine, sizeof(chaine),
                    "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, trans.=%d, "
                    "deco.=%d, request=%d, retente=%d \n",
-                   module->id, module->ip, module->bit, module->actif, module->started,
-                   module->transaction_id, module->nbr_deconnect, module->request,
+                   module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.actif,
+                   module->started, module->transaction_id, module->nbr_deconnect, module->request,
                    (int)module->date_retente
                  );
        Write_admin ( client->connexion, chaine );
 
        liste_bornes = module->Bornes;
        while ( liste_bornes )
-        { struct BORNE_MODBUS *borne;
-          borne = (struct BORNE_MODBUS *)liste_bornes->data;
+        { struct CMD_TYPE_BORNE_MODBUS *borne;
+          borne = (struct CMD_TYPE_BORNE_MODBUS *)liste_bornes->data;
           g_snprintf( chaine, sizeof(chaine),
-                      " - Borne %02d -> type='%s', adresse=%d, min=%d, nbr=%d\n",
-                      borne->id, Mode_borne[borne->type], borne->adresse, borne->min, borne->nbr
+                      " - Borne %02d -> type=%d, adresse=%d, min=%d, nbr=%d\n",
+                      borne->id, borne->type, borne->adresse, borne->min, borne->nbr
                     );
           Write_admin ( client->connexion, chaine );
           liste_bornes = liste_bornes->next;
@@ -147,6 +144,7 @@
     g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -210,7 +208,7 @@
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s(type,adresse,min,nbr,module) VALUES (%d,%d,%d,%d,%d)",
-                NOM_TABLE_BORNE_MODBUS, Mode_borne_vers_id(type), adresse, min, nbr, module
+                NOM_TABLE_CMD_TYPE_BORNE_MODBUS, Mode_borne_vers_id(type), adresse, min, nbr, module
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -254,7 +252,7 @@
      }
 
     g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE module = %d",
-                NOM_TABLE_BORNE_MODBUS, id
+                NOM_TABLE_CMD_TYPE_BORNE_MODBUS, id
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -287,7 +285,7 @@
      }
 
     g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE id = %d",
-                NOM_TABLE_BORNE_MODBUS, id
+                NOM_TABLE_CMD_TYPE_BORNE_MODBUS, id
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
@@ -299,6 +297,7 @@
     g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d deleted\n", id );
     Write_admin ( client->connexion, chaine );
   }
+#endif
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -325,60 +324,9 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_modbus_reload(client);
      }
-    else if ( ! strcmp ( commande, "add" ) )
-     { gchar ip[128], chaine[128];
-       guint bit, watchdog;
-       sscanf ( ligne, "%s %s %d %d", commande, ip, &bit, &watchdog );/* Découpage de la ligne de commande */
-       if ( bit >= NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " bit should be < NBR_BIT_DLS\n" ); }
-       else
-        { int id;
-          id = Admin_modbus_add ( client, ip, bit, watchdog );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added\n", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added\n" ); }
-          Write_admin ( client->connexion, chaine );
-        }
-     }
-    else if ( ! strcmp ( commande, "addborne" ) )
-     { gchar type[128], chaine[128];
-       guint adresse, min, nbr, module;
-       sscanf ( ligne, "%s %s %d %d %d %d", commande, type, &adresse, &min, &nbr, &module );
-
-       if ( min >= NBR_BIT_DLS )
-        { Write_admin ( client->connexion, " min should be < NBR_BIT_DLS\n" ); }
-       else if ( module > 255 )
-        { Write_admin ( client->connexion, " module should be < 255\n" ); }
-       else if ( nbr > 8 )
-        { Write_admin ( client->connexion, " nbr should be <= 8\n" ); }
-       else
-        { int id;
-          id = Admin_modbus_add_borne ( client, type, adresse, min, nbr, module );
-          if (id != -1) { g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d added\n", id ); }
-          else          { g_snprintf( chaine, sizeof(chaine), "Module MODBUS NOT added\n" ); }
-          Write_admin ( client->connexion, chaine );
-        }
-     }
-    else if ( ! strcmp ( commande, "deleteborne" ) )
-     { guint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_del_borne ( client, num );
-     }
-    else if ( ! strcmp ( commande, "delete" ) )
-     { guint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_del ( client, num );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Write_admin ( client->connexion,
-                     "  addborne type adresse min nbr moduleID - Ajoute une borne a un module\n" );
-       Write_admin ( client->connexion,
-                     "  deleteborne id                         - Supprime la borne id\n" );
-       Write_admin ( client->connexion,
-                     "  add ip bit watchdog                    - Ajoute un module MODBUS\n" );
-       Write_admin ( client->connexion,
-                     "  delete id                              - Supprime le module id\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
