@@ -133,66 +133,6 @@
     g_snprintf( chaine, sizeof(chaine), "Module RS485 %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- static gint Admin_rs485_add ( struct CLIENT_ADMIN *client, gint id, gint ea_min, gint ea_max,
-                               gint e_min, gint e_max, gint ec_min, gint ec_max,gint s_min, gint s_max,
-                               gint sa_min,gint sa_max )
-  { gchar requete[128];
-    struct DB *db;
-    gint retour;
-
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_add: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return(-1);
-     }
-
-
-    while (Partage->com_rs485.admin_add) sched_yield();
-    Partage->com_rs485.admin_add = id;
-    return(retour);
-  }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- static void Admin_rs485_del ( struct CLIENT_ADMIN *client, gint id )
-  { gchar requete[128], chaine[128];
-    struct DB *db;
-
-    while (Partage->com_rs485.admin_del) sched_yield();
-    Partage->com_rs485.admin_del = id;
-
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_del: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete), "DELETE FROM %s WHERE id = %d",
-                NOM_TABLE_MODULE_RS485, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    Libere_DB_SQL( Config.log, &db );
-    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d deleted\n", id );
-    Write_admin ( client->connexion, chaine );
-  }
-#endif
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
