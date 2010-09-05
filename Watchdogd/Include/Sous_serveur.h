@@ -71,6 +71,7 @@
  extern void Gerer_protocole_camera( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_onduleur( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_rs485( gint Id_serveur, struct CLIENT *client );
+ extern void Gerer_protocole_modbus( gint Id_serveur, struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
  extern void Envoi_clients( gint ss_id, gint tag, gint sstag, gchar *buffer, gint taille );
