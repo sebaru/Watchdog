@@ -92,15 +92,15 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                         */
+/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                        */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus )
   { gchar requete[2048];
     gchar *libelle, *ip;
 
-    libelle = Normaliser_chaine ( log, modbus->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( log, modbus->libelle );                /* Formatage correct des chaines */
     if (!libelle)
      { Info( log, DEBUG_MODBUS, "Ajouter_modbusDB: Normalisation libelle impossible" );
        return(-1);
@@ -126,8 +126,8 @@
     return( Recuperer_last_ID_SQL( log, db ) );
   }
 /**********************************************************************************************************/
-/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                         */
+/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                        */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *borne )
@@ -143,7 +143,7 @@
     return( Recuperer_last_ID_SQL( log, db ) );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                */
+/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -171,7 +171,7 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                */
+/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -197,7 +197,7 @@
     return(modbus);
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                */
+/* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -223,7 +223,7 @@
     return(borne);
   }
 /**********************************************************************************************************/
-/* Rechercher_modbusDB: Recupération du modbus dont le id est en parametre                                  */
+/* Rechercher_modbusDB: Recupération du modbus dont le id est en parametre                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -260,7 +260,7 @@
     return(modbus);
   }
 /**********************************************************************************************************/
-/* Rechercher_modbusDB: Recupération du modbus dont le id est en parametre                                  */
+/* Rechercher_modbusDB: Recupération du modbus dont le id est en parametre                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -348,9 +348,9 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
+/* Chercher_module_by_id : Recherche dans la liste de travail e module dont l'id est en paramètre         */
+/* Entrée: l'id du module a retrouver                                                                     */
+/* Sortie: le modules trouvé ou NULL si erreur                                                            */
 /**********************************************************************************************************/
  static struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
   { GList *liste;
@@ -391,9 +391,9 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
+/* Charger_un_MODBUS: Charge un module dont l'id est en paramètre                                         */
+/* Entrée: l'ID du module a charger                                                                       */
+/* Sortie: TRUE si pas de souci, FALSE si erreur                                                          */
 /**********************************************************************************************************/
  static gboolean Charger_un_MODBUS ( gint id  )
   { struct MODULE_MODBUS *module;
@@ -450,6 +450,7 @@
 /**********************************************************************************************************/
  static gboolean Charger_tous_MODBUS ( void  )
   { struct DB *db;
+    GList *liste;
     gint cpt;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
@@ -486,15 +487,18 @@
        Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS:  id    = ", module->modbus.id    );
        Info_n( Config.log, DEBUG_MODBUS, "                   -  actif = ", module->modbus.actif );
 
-       if ( ! Charger_borne_module_MODBUS( db, module ) )
-        { g_free(module);
-          return(FALSE);
-        }
-
        Partage->com_modbus.Modules_MODBUS = g_list_append ( Partage->com_modbus.Modules_MODBUS, module );
      }
-    Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS: module MODBUS found  !", cpt );
 
+    liste = Partage->com_modbus.Modules_MODBUS;            /* Chargement des bornes associées aux modules */
+    while(liste)
+     { struct MODULE_MODBUS *module;
+       module = (struct MODULE_MODBUS *)liste->data;
+       Charger_borne_module_MODBUS( db, module );
+       liste=liste->next;
+     }
+
+    Info_n( Config.log, DEBUG_MODBUS, "Charger_tous_MODBUS: module MODBUS found  !", cpt );
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
   }
