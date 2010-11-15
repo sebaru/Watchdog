@@ -50,8 +50,8 @@
     GtkTextIter iter;
     gchar chaine[256];
 
-    snprintf( chaine, sizeof(chaine), "  ???   <->  %s%04d;  /* %s */\n",
-              Type_bit_interne_court(mnemo->type), mnemo->num,
+    snprintf( chaine, sizeof(chaine), " %s <->_%s%04d;  /* %s */\n",
+              mnemo->acronyme, Type_bit_interne_court(mnemo->type), mnemo->num,
               mnemo->libelle );                                                              /* Formatage */
 
     page = Page_actuelle();

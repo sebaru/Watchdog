@@ -261,17 +261,12 @@
     Check_enable = gtk_check_button_new_with_label( _("Enable") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, 0, 1 );
 
-    Combo_sms = gtk_combo_box_new_text();
-    for ( cpt=0; cpt<NBR_TYPE_MSG_SMS; cpt++ )
-     { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_sms), Type_sms_vers_string(cpt) ); }
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_sms, 1, 2, 0, 1 );
-
     texte = gtk_label_new( _("MsgID") );                 /* Id unique du message en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 1, 2 );
 
-    texte = gtk_label_new( _("Repeat") );                                     /* Répétition du message ?? */
+    texte = gtk_label_new( _("Repeat (min)") );                               /* Répétition du message ?? */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 1, 2 );
     Spin_time_repeat = gtk_spin_button_new_with_range( 0, 60, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_time_repeat, 3, 4, 1, 2 );
@@ -337,8 +332,11 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_audio), NBR_CARAC_LIBELLE_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, 7, 8 );
 
-    texte = gtk_label_new( _("Message SMS") );                                  /* Le message en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 8, 9 );
+    Combo_sms = gtk_combo_box_new_text();
+    for ( cpt=0; cpt<NBR_TYPE_MSG_SMS; cpt++ )
+     { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_sms), Type_sms_vers_string(cpt) ); }
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_sms, 0, 1, 8, 9 );
+
     Entry_lib_sms = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_sms), NBR_CARAC_LIBELLE_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, 8, 9 );

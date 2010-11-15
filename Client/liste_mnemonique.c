@@ -330,7 +330,7 @@ printf("on veut editer le mnemonique %s\n", rezo_mnemonique.libelle );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
        cairo_show_text (cr, acronyme );
 
-       cairo_move_to( cr, 31.0*PRINT_FONT_SIZE, y );
+       cairo_move_to( cr, 35.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
        cairo_show_text (cr, libelle );
 

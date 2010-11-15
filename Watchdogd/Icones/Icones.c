@@ -90,7 +90,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,id_classe"
-                " FROM %s WHERE id_classe=%d ORDER BY id", NOM_TABLE_ICONE, classe );
+                " FROM %s WHERE id_classe=%d ORDER BY libelle", NOM_TABLE_ICONE, classe );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

@@ -309,9 +309,17 @@ printf("fin Detruire page atelier\n");
     Menu_grille_magnetique( infos );
 
 /******************************************* Ajout de motifs **********************************************/
+    frame = gtk_frame_new ( _("Menu") );
+    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
+    gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
+
+    vboite = gtk_vbox_new( FALSE, 6 );
+    gtk_container_add( GTK_CONTAINER(frame), vboite );
+    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
+
     menu_bar= gtk_menu_bar_new();
     gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(menu_bar), GTK_PACK_DIRECTION_TTB );
-    gtk_box_pack_start( GTK_BOX(boite), menu_bar, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX(vboite), menu_bar, TRUE, TRUE, 0 );
 
 /******************************************** Sous menu motif *********************************************/
     menu_main = gtk_image_menu_item_new_with_label ( _("Ajouter un item") );

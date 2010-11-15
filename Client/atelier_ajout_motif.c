@@ -206,8 +206,8 @@
                                  add_motif.largeur = Trame_motif_p0->gif_largeur;
                                  add_motif.hauteur = Trame_motif_p0->gif_hauteur;
                                  add_motif.rouge0 = 255;
-                                 add_motif.vert0 = 0;
-                                 add_motif.bleu0 = 0;
+                                 add_motif.vert0 = 255;
+                                 add_motif.bleu0 = 255;
                                  Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_MOTIF,
                                                 (gchar *)&add_motif, sizeof(struct CMD_TYPE_MOTIF) );
                                  printf("Requete envoyée au serveur....\n");
