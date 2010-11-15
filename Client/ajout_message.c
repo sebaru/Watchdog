@@ -360,7 +360,8 @@
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_time_repeat), edit_msg->time_repeat );
        gtk_widget_grab_focus( Entry_lib );
      }
-    else { gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), TRUE );
+    else { gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_vitesse_voc), 150 );
+           gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), TRUE );
            gtk_widget_grab_focus( Spin_num );
          }
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
