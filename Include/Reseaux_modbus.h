@@ -50,23 +50,34 @@
 /************************************************* Tag de communication ***********************************/
  enum 
   { SSTAG_CLIENT_WANT_PAGE_MODBUS,
-    SSTAG_SERVEUR_CREATE_PAGE_MODBUS_OK,                                     /* Affichage de la page modbus */
-    SSTAG_SERVEUR_ADDPROGRESS_MODBUS,                           /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_SERVEUR_ADDPROGRESS_MODBUS_FIN,                       /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_CREATE_PAGE_MODBUS_OK,                                   /* Affichage de la page modbus */
+    SSTAG_SERVEUR_ADDPROGRESS_MODBUS,                          /* Ajout d'un modbus dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_MODBUS_FIN,                /* Ajout du dernier modbus dans la liste cliente */
 
-    SSTAG_CLIENT_ADD_MODBUS,                                /* Le client desire ajouter un groupe watchdog */
-    SSTAG_SERVEUR_ADD_MODBUS_OK,                                        /* L'ajout du groupe est un succes */
+    SSTAG_CLIENT_ADD_MODBUS,                               /* Le client desire ajouter un modbus watchdog */
+    SSTAG_SERVEUR_ADD_MODBUS_OK,                                       /* L'ajout du modbus est un succes */
 
-    SSTAG_CLIENT_DEL_MODBUS,                                         /* Le client desire retirer un groupe */
-    SSTAG_SERVEUR_DEL_MODBUS_OK,                                        /* L'ajout du groupe est un succes */
+    SSTAG_CLIENT_DEL_MODBUS,                                        /* Le client desire retirer un modbus */
+    SSTAG_SERVEUR_DEL_MODBUS_OK,                                /* La suppression du modbus est un succes */
 
-    SSTAG_CLIENT_EDIT_MODBUS,                                   /* Le client demande l'edition d'un groupe */
-    SSTAG_SERVEUR_EDIT_MODBUS_OK,               /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_CLIENT_VALIDE_EDIT_MODBUS,                              /* Le client renvoie les données editées */
-    SSTAG_SERVEUR_VALIDE_EDIT_MODBUS_OK,                        /* Le serveur valide les nouvelles données */
+    SSTAG_CLIENT_EDIT_MODBUS,                                  /* Le client demande l'edition d'un modbus */
+    SSTAG_SERVEUR_EDIT_MODBUS_OK,              /* Le serveur accepte et envoi les données correspondantes */
+    SSTAG_CLIENT_VALIDE_EDIT_MODBUS,                             /* Le client renvoie les données editées */
+    SSTAG_SERVEUR_VALIDE_EDIT_MODBUS_OK,                       /* Le serveur valide les nouvelles données */
 
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_MODBUS,                     /* Le client souhaite le mnemonique bit_motion */
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_MODBUS,                           /* Le serveur répond avec le mnemonique */
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_MODBUS,                    /* Le client souhaite le mnemonique bit_motion */
+    SSTAG_SERVEUR_TYPE_NUM_MNEMO_MODBUS,                          /* Le serveur répond avec le mnemonique */
+
+    SSTAG_CLIENT_ADD_BORNE_MODBUS,                  /* Le client desire ajouter une borne modbus watchdog */
+    SSTAG_SERVEUR_ADD_BORNE_MODBUS_OK,                                /* L'ajout de l'objet est un succes */
+
+    SSTAG_CLIENT_DEL_BORNE_MODBUS,                           /* Le client desire retirer une borne modbus */
+    SSTAG_SERVEUR_DEL_BORNE_MODBUS_OK,                         /* La suppression de l'objet est un succes */
+
+    SSTAG_CLIENT_EDIT_BORNE_MODBUS,                            /* Le client demande l'edition d'une borne */
+    SSTAG_SERVEUR_EDIT_BORNE_MODBUS_OK,        /* Le serveur accepte et envoi les données correspondantes */
+    SSTAG_CLIENT_VALIDE_EDIT_BORNE_MODBUS,                       /* Le client renvoie les données editées */
+    SSTAG_SERVEUR_VALIDE_EDIT_BORNE_MODBUS_OK,                 /* Le serveur valide les nouvelles données */
   };
 
 #endif

@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Admin/admin_running.c        Gestion des connexions Admin RUNNING au serveur watchdog        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 18 jan 2009 14:43:27 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 17 nov. 2010 20:00:45 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -26,6 +26,7 @@
  */
  
  #include <glib.h>
+ #include <unistd.h>                                                                  /* Pour gethostname */
  #include "watchdogd.h"
 
 /**********************************************************************************************************/

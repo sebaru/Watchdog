@@ -50,13 +50,15 @@
 
  static void Menu_effacer_modbus ( void );
  static void Menu_editer_modbus ( void );
+ static void Menu_editer_borne_modbus ( void );
  static void Menu_ajouter_modbus ( void );
  static void Menu_exporter_modbus ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_modbus, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_modbus, GNOME_STOCK_PIXMAP_OPEN ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Export"), NULL, Menu_exporter_modbus, GNOME_STOCK_PIXMAP_PRINT ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Edit Borne"), NULL, Menu_editer_borne_modbus, GNOME_STOCK_PIXMAP_OPEN ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_modbus, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_modbus, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
@@ -166,6 +168,38 @@
     memcpy( &rezo_modbus.libelle, libelle, sizeof(rezo_modbus.libelle) );
     g_free( libelle );
     Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_EDIT_MODBUS,
+                  (gchar *)&rezo_modbus, sizeof(struct CMD_TYPE_MODBUS) );
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/**********************************************************************************************************/
+/* Menu_editer_modbus: Demande d'edition du modbus selectionné                                            */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_editer_borne_modbus ( void )
+  { GtkTreeSelection *selection;
+    struct CMD_TYPE_MODBUS rezo_modbus;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    gchar *libelle;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_modbus) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_modbus) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_modbus.id, -1 );                   /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
+
+    memcpy( &rezo_modbus.libelle, libelle, sizeof(rezo_modbus.libelle) );
+    g_free( libelle );
+    Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_EDIT_BORNE_MODBUS,
                   (gchar *)&rezo_modbus, sizeof(struct CMD_TYPE_MODBUS) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
@@ -369,7 +403,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_modbus), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("IP"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Name/IP"), renderer,
                                                          "text", COLONNE_IP,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_IP);                     /* On peut la trier */
