@@ -204,7 +204,6 @@
     gtk_entry_set_editable( GTK_ENTRY(Entry_bitctrl), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 2, 4, 2, 3 );
 
-
     if (trame_capteur)
      { gtk_entry_set_text( GTK_ENTRY(Entry_libelle), trame_capteur->capteur->libelle );
        switch(trame_capteur->capteur->type)

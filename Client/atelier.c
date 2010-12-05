@@ -41,7 +41,10 @@
  #include "protocli.h"
 
  static void Menu_effacer_motif ( void );
- static void Menu_ajouter_motif ( void );
+ static void Menu_ajouter_motif ( struct TYPE_INFO_ATELIER *infos );
+ static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos );
+ static void Menu_ajouter_passerelle ( struct TYPE_INFO_ATELIER *infos );
+ static void Menu_ajouter_capteur ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_enregistrer_synoptique( struct TYPE_INFO_ATELIER *infos );
   
 /**********************************************************************************************************/
@@ -110,19 +113,33 @@ printf("fin Detruire page atelier\n");
     gtk_widget_set_sensitive( infos->Spin_grid, GTK_TOGGLE_BUTTON(infos->Check_grid)->active );
   }
 /**********************************************************************************************************/
-/* Menu_ajouter_message: Ajout d'un message                                                               */
+/* Menu_ajouter_motif: Ajout d'un motif                                                                   */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static void Menu_ajouter_motif ( void )
+ static void Menu_ajouter_motif ( struct TYPE_INFO_ATELIER *infos )
   { Choisir_motif_a_ajouter (); }
 /**********************************************************************************************************/
-/* Menu_ajouter_message: Ajout d'un message                                                               */
+/* Menu_ajouter_commentaire: Ajout d'un commentaire                                                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static void Menu_ajouter_commentaire ( void )
+ static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos )
   { Creer_fenetre_ajout_commentaire (); }
+/**********************************************************************************************************/
+/* Menu_ajouter_capteur: Ajout d'un capteur                                                               */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_ajouter_capteur ( struct TYPE_INFO_ATELIER *infos )
+  { Menu_ajouter_editer_capteur ( NULL ); }
+/**********************************************************************************************************/
+/* Menu_ajouter_passerelle: Ajout d'une passerelle                                                        */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_ajouter_passerelle ( struct TYPE_INFO_ATELIER *infos )
+  { Creer_fenetre_ajout_passerelle (); }
 /**********************************************************************************************************/
 /* Menu_effacer_message: Retrait des messages selectionnés                                                */
 /* Entrée: rien                                                                                           */
@@ -338,12 +355,12 @@ printf("fin Detruire page atelier\n");
 
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Passerelles") );
     g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Creer_fenetre_ajout_passerelle), infos );
+                              G_CALLBACK(Menu_ajouter_passerelle), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Capteurs") );
     g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_editer_capteur), infos );
+                              G_CALLBACK(Menu_ajouter_capteur), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );

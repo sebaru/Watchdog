@@ -172,7 +172,9 @@ one_again:
     struct hostent *host;
     int connexion;
 
-    if ( !(host = gethostbyname( Client_en_cours.serveur )) )                          /* On veut l'adresse IP */
+    Log( _("Trying to connect") );
+       
+    if ( !(host = gethostbyname( Client_en_cours.serveur )) )                     /* On veut l'adresse IP */
      { Log( _("DNS failed") );
        Info_c( Config_cli.log, DEBUG_CONNEXION,
                _("Connecter_au_serveur: DNS failed"), Client_en_cours.serveur );
