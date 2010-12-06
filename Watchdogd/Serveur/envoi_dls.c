@@ -266,6 +266,7 @@
           else
            { int nbr_car;
              nbr_car = read (id_fichier, erreur.message, sizeof(erreur.message) );
+             if (nbr_car>=sizeof(erreur.message)) nbr_car = sizeof(erreur.message)-1;
              erreur.message[nbr_car] = 0;                                       /* Caractere NULL d'arret */
              close(id_fichier);
            }

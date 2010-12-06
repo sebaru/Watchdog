@@ -354,7 +354,7 @@
   }
 
 /**********************************************************************************************************/
-/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                       */
+/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                         */
 /* Entrées: kedal                                                                                         */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
@@ -363,7 +363,7 @@
     g_list_free( options );
   }
 /**********************************************************************************************************/
-/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                       */
+/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                         */
 /* Entrées: kedal                                                                                         */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/

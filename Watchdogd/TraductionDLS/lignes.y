@@ -547,12 +547,22 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
 /**********************************************************************************************************/
  int Dls_error ( char *s )
   { int taille;
-    char *chaine;
-    taille = strlen(ERR_SYNTAXE) + strlen(s) + 5;
-    chaine = New_chaine( taille );
-    g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, s );
-    Emettre_erreur( chaine );
-    g_free(chaine);
+    char *chaine, *too_many="too much errors...\n";
+    if (erreur<10)
+     { taille = strlen(ERR_SYNTAXE) + strlen(s) + 5;
+       chaine = New_chaine( taille );
+       g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, s );
+       Emettre_erreur( chaine );
+       g_free(chaine);
+     }
+    else if (erreur==10)
+     { taille = strlen(too_many)+1;
+       chaine = New_chaine( taille );
+       g_snprintf( chaine, taille, too_many );
+       Emettre_erreur( chaine );
+       g_free(chaine);
+     }
+
     erreur++;
     return(0);
   }
