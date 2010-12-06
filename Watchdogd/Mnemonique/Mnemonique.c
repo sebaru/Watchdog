@@ -110,7 +110,7 @@
      { case MNEMO_ENTREE_ANA:
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
-                        "(%f,%f,%d,%d)", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
+                        "('%f','%f','%d','%d')", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
             Lancer_requete_SQL ( log, db, requete );
             break;
        default:
