@@ -116,7 +116,10 @@
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
        else if (error != GN_ERR_UNKNOWN)
-             { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: error", gn_error_print(error) ); }
+             { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: error", gn_error_print(error) );
+               Info_n ( Config.log, DEBUG_SMS, "              sms.number", sms.number );
+               break;
+             }
      }
 
     gn_lib_phone_close(state);
@@ -178,15 +181,12 @@
     sms.user_data[1].type = GN_SMS_DATA_None;
 /*	sms.delivery_report = true; */
     data.sms = &sms;                                                                      /* Envoi du SMS */
-    if (Partage->top < TOP_MIN_ENVOI_SMS)
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi trop tot !!", msg->libelle_sms ); }
-    else 
-     { error = gn_sms_send(&data, state);
-       if (error == GN_ERR_NONE)
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Ok", msg->libelle_sms ); }
-       else
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Nok", gn_error_print(error)); }
-     }
+
+    error = gn_sms_send(&data, state);
+    if (error == GN_ERR_NONE)
+     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Ok", msg->libelle_sms ); }
+    else
+     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Nok", gn_error_print(error)); }
 
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
@@ -301,7 +301,10 @@
 
        msg = liste_sms->data;
 /**************************************** Envoi en mode GSM ***********************************************/
-       if (msg->sms == MSG_SMS_GSM) Envoi_sms_gsm ( msg );
+
+       if (Partage->top < TOP_MIN_ENVOI_SMS)
+        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi trop tot !!", msg->libelle_sms ); }
+       else if (msg->sms == MSG_SMS_GSM) Envoi_sms_gsm ( msg );
 /**************************************** Envoi en mode SMSBOX ********************************************/
        else if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox ( msg );
 

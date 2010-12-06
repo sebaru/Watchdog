@@ -898,18 +898,8 @@
                                SEA( cpt_e++, reponse );
                              }
                             else SEA( cpt_e++, 0 );
-
-                          /*SEA( cpt_e++, ( Comm_MODBUS[id_module].response.data[0] & 1  ) );*/
-/*{ int cpt;
-             printf("Entrée:\n");
-             for (cpt=Config.module_modbus[id_module].borne[id_borne].min; cpt<Config.module_modbus[id_module].borne[id_borne].min+8; cpt++)
- 		    { printf("E%d = %d ", cpt, E(cpt) );
- 		    }
-             printf("\n");
-}*/
-
                           }
-                          break;
+                         break;
                   default: Info_n( Config.log, DEBUG_MODBUS,
                                    "MODBUS: Processer_trame: borne InputANA non gérée", 
                                    borne->nbr

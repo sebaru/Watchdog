@@ -87,7 +87,7 @@
     if (msg->time_repeat) 
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
        Partage->com_msrv.liste_msg_repeat = g_list_append ( Partage->com_msrv.liste_msg_repeat,
-                                                            GINT_TO_POINTER(num) );
+                                                            GINT_TO_POINTER(msg->num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                   /* En minutes */
      }
