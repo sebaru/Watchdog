@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
-          CptHoraire EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
+          Compteur EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
 	  Synoptiques Camera Onduleur
 
 bin_PROGRAMS = Watchdogd
@@ -24,7 +24,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Modbus/libmodbus.la \
 		    Audio/libaudio.la \
 		    Admin/libadmin.la \
-		    CptHoraire/libcpth.la \
+		    Compteur/libcompteur.la \
 		    EntreeANA/libeana.la \
 		    Message/libmsg.la \
 		    Mnemonique/libmnemo.la \

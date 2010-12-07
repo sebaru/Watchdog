@@ -142,7 +142,7 @@ Watchdogd/Icones/Makefile \
 Watchdogd/Histo/Makefile \
 Watchdogd/Utilisateur/Makefile \
 Watchdogd/Synoptiques/Makefile \
-Watchdogd/CptHoraire/Makefile \
+Watchdogd/Compteur/Makefile \
 Watchdogd/Config/Makefile \
 Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \

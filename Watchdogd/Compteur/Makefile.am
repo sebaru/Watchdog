@@ -4,8 +4,8 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_LTLIBRARIES = libcpth.la
-libcpth_la_SOURCES = Compteur_horaire.c
+noinst_LTLIBRARIES = libcompteur.la
+libcompteur_la_SOURCES = Compteur_horaire.c Compteur_impulsion.c
 
 INCLUDES= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
