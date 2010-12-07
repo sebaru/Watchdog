@@ -348,6 +348,22 @@
      { Partage->ch[ num ].actif = FALSE; }
   }
 /**********************************************************************************************************/
+/* Met à jour le compteur impulsion                                                                       */
+/* Le compteur compte les impulsions !!                                                                   */
+/**********************************************************************************************************/
+ void SCI( int num, int etat, int reset )
+  { if (num>=NBR_COMPTEUR_IMP) return;
+    if (etat)
+     { if ( ! Partage->ci[ num ].actif )
+        { Partage->ci[num].actif = TRUE;
+          if (!reset) { Partage->ci[num].cpt_impdb.valeur++; }
+                 else { Partage->ci[num].cpt_impdb.valeur=0; }
+        }
+     }
+    else
+     { Partage->ci[ num ].actif = FALSE; }
+  }
+/**********************************************************************************************************/
 /* MSG: Positionnement des message DLS                                                                    */
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */

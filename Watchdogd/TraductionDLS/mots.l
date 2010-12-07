@@ -59,6 +59,7 @@ blanc         [\t ]+
 "_M"                       { Dls_lval.val = MONO;        return MONO;        }
 "_TR"                      { Dls_lval.val = TEMPO;       return TEMPO;       }
 "_CH"                      { Dls_lval.val = CPT_H;       return CPT_H;       }
+"_CI"                      { Dls_lval.val = CPT_IMP;     return CPT_IMP;     }
 "_MSG"                     { Dls_lval.val = MSG;         return MSG;         }
 "_START"                   { Dls_lval.val = START;       return START;       }
 
@@ -79,6 +80,7 @@ blanc         [\t ]+
  /************************************************* Options ************************************************/
 "mode"                     { Dls_lval.val = MODE;        return MODE;        }
 "consigne"                 { Dls_lval.val = CONSIGNE;    return CONSIGNE;    }
+"reset"                    { Dls_lval.val = RESET;       return RESET;       }
 "color"                    { Dls_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { Dls_lval.val = CLIGNO;      return CLIGNO;      }
 "slave"                    { Dls_lval.val = SLAVE;       return SLAVE;       }

@@ -41,6 +41,7 @@
  extern void SB( int num, int etat );
  extern void STR( int num, int etat );
  extern void SCH( int num, int etat );
+ extern void SCI( int num, int etat, int reset );
  extern void SM( int num, int etat );
  extern void SA( int num, int etat );
  extern void MSG( int num, int etat );

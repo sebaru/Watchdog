@@ -54,7 +54,7 @@ int erreur;                                                             /* Compt
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
-%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE
+%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE RESET
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
 %type  <val>    ordre
@@ -62,7 +62,7 @@ int erreur;                                                             /* Compt
 %token <val>    HEURE APRES AVANT
 %type  <val>    modulateur
 
-%token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H EANA START
+%token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H CPT_IMP EANA START
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
@@ -112,6 +112,7 @@ printf("un_alias : %d\n", $4 );
                                     }
                                    break;
                       case CPT_H:
+                      case CPT_IMP:
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
                                     { taille = strlen($1) + strlen(ERR_SYNTAXE) + 1;
                                       chaine = New_chaine(taille);
@@ -144,7 +145,7 @@ printf("un_alias : %d\n", $4 );
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | MSG | TEMPO | ICONE | CPT_H | EANA
+alias_bit:      BI | MONO | ENTREE | SORTIE | MSG | TEMPO | ICONE | CPT_H | CPT_IMP | EANA
                 ;
 /******************************************* Gestion des instructions *************************************/
 listeInstr:     une_instr listeInstr
@@ -378,6 +379,10 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                      Liberer_options($3);
                   }}
                 | CPT_H ENTIER                {{ $$=New_action_cpt_h($2);          }}
+                | CPT_IMP ENTIER liste_options
+                  {{ $$=New_action_cpt_imp($2, $3);
+                     Liberer_options($3);
+                  }}
                 | MSG ENTIER                  {{ $$=New_action_msg($2);            }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                               /* Definition des actions via alias */
@@ -403,29 +408,30 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                       options_d = g_list_copy( alias->options );
                       options = g_list_concat( options_g, options_d );/* Concaténation des listes d'options */
                       switch(alias->bit)
-                       { case TEMPO : $$=New_action_tempo( alias->num, options );  break;
-                         case MSG   : if ($1)
-                                       { char *chaine;
-                                         taille = strlen(alias->nom) + strlen(INTERDIT_MSG_BARRE) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf( chaine, taille, INTERDIT_MSG_BARRE,
-                                                     ligne_source_dls, alias->nom );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
+                       { case TEMPO  : $$=New_action_tempo( alias->num, options );  break;
+                         case MSG    : if ($1)
+                                        { char *chaine;
+                                          taille = strlen(alias->nom) + strlen(INTERDIT_MSG_BARRE) + 1;
+                                          chaine = New_chaine(taille);
+                                          g_snprintf( chaine, taille, INTERDIT_MSG_BARRE,
+                                                      ligne_source_dls, alias->nom );
+                                          Emettre_erreur(chaine); g_free(chaine);
+                                          erreur++; 
 
-                                         $$=New_action();
-                                         taille = 2;
-                                         $$->alors = New_chaine( taille );
-                                         g_snprintf( $$->alors, taille, " " ); 
-                                         $$->sinon = NULL;
-                                       }
-                                      else $$=New_action_msg( alias->num );
-                                      break;
-                         case SORTIE: $$=New_action_sortie( alias->num, $1 );      break;
-                         case BI    : $$=New_action_bi( alias->num, $1 );          break;
-                         case MONO  : $$=New_action_mono( alias->num );            break;
-                         case CPT_H : $$=New_action_cpt_h( alias->num );           break;
-                         case ICONE : $$=New_action_icone( alias->num, options );  break;
+                                          $$=New_action();
+                                          taille = 2;
+                                          $$->alors = New_chaine( taille );
+                                          g_snprintf( $$->alors, taille, " " ); 
+                                          $$->sinon = NULL;
+                                        }
+                                       else $$=New_action_msg( alias->num );
+                                       break;
+                         case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
+                         case BI     : $$=New_action_bi( alias->num, $1 );           break;
+                         case MONO   : $$=New_action_mono( alias->num );             break;
+                         case CPT_H  : $$=New_action_cpt_h( alias->num );            break;
+                         case CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
+                         case ICONE  : $$=New_action_icone( alias->num, options );   break;
                          default: { char *chaine;
                                     taille = strlen(alias->nom) + strlen(INTERDIT_DROITE) + 1;
                                     chaine = New_chaine(taille);
@@ -499,6 +505,11 @@ une_option:     MODE EGAL ENTIER
                 | CONSIGNE EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = CONSIGNE;
+                   $$->entier = $3;
+                }}
+                | RESET EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = RESET;
                    $$->entier = $3;
                 }}
                 | SLAVE EGAL BI ENTIER

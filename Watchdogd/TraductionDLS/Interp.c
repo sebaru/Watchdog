@@ -227,6 +227,26 @@
     return(action);
   }
 /**********************************************************************************************************/
+/* New_action_cpt_imp: Prepare une struct action avec une commande SCI                                    */
+/* Entrées: numero du compteur d'impulsion, sa logique, son reset                                         */
+/* Sortie: la structure action                                                                            */
+/**********************************************************************************************************/
+ struct ACTION *New_action_cpt_imp( int num, GList *options )
+  { struct ACTION *action;
+    int taille, reset;
+
+    reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
+
+    taille = 15;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "SCI(%d,1,%d);", num, reset );
+    g_snprintf( action->sinon, taille, "SCI(%d,0,0);", num );
+    return(action);
+  }
+/**********************************************************************************************************/
 /* New_action_icone: Prepare une struct action avec une commande SI                                       */
 /* Entrées: numero du motif                                                                               */
 /* Sortie: la structure action                                                                            */

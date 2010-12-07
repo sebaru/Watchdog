@@ -41,6 +41,7 @@
  struct CPT_IMP
   { struct CPT_IMP_DB cpt_impdb;
     gboolean actif;
+    gboolean reset;
   };
 
 /*************************************** Définitions des prototypes ***************************************/
