@@ -112,6 +112,9 @@
        case MNEMO_CPTH:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_COMPTEUR_H );
             break;
+       case MNEMO_CPT_IMP:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_COMPTEUR_IMP );
+            break;
        default: 
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, 1.0 );
             break;

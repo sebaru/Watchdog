@@ -47,6 +47,7 @@
     MNEMO_SORTIE_ANA,
     MNEMO_MOTIF,
     MNEMO_CPTH,
+    MNEMO_CPT_IMP,
     NBR_TYPE_MNEMO
   };
 
