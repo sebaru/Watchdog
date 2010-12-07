@@ -208,6 +208,8 @@
         { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPTH" );
           for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
            { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
+          for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++)
+           { Updater_cpt_impDB( Config.log, db, &Partage->ci[cpt].cpt_impdb); }     
           Exporter();
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
         }
@@ -529,6 +531,10 @@ encore:
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
        Charger_cpth();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
+
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion" );
+       Charger_cpt_imp();
+       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion fait" );
 
        Ssl_ctx = Init_ssl();                                                        /* Initialisation SSL */
        if (!Ssl_ctx)
