@@ -98,7 +98,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_cpt_impDB: Cpth non trouvé dans la BDD", id );
+       Info_n( log, DEBUG_DB, "Rechercher_cpt_impDB: Cpt_imp non trouvé dans la BDD", id );
        return(NULL);
      }
 
