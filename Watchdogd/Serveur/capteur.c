@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/capteur.c                Formatage des capteurs Watchdog                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       lun 20 fév 2006 18:07:44 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     ven. 10 déc. 2010 17:13:43 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -47,6 +47,8 @@
             return( capteur->val_ech != Partage->ea[capteur->bit_controle].val_ech );
        case MNEMO_CPTH:
             return( capteur->val_ech != Partage->ch[capteur->bit_controle].cpthdb.valeur );
+       case MNEMO_CPT_IMP:
+            return( capteur->val_ech != Partage->ci[capteur->bit_controle].cpt_impdb.valeur );
        default: return(FALSE);
      }
   }
@@ -100,6 +102,14 @@
                         "%05dh", (int)valeur
                       );
             capteur->val_ech = Partage->ch[capteur->bit_controle].cpthdb.valeur;
+            break;
+       case MNEMO_CPT_IMP:
+            valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
+            g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
+                        "%05d %s", (int)valeur,
+                        Unite_vers_string(Partage->ci[capteur->bit_controle].cpt_impdb.unite)
+                      );
+            capteur->val_ech = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
             break;
        default:
             g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),

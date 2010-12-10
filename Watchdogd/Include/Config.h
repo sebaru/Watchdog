@@ -71,7 +71,6 @@
  #define DEFAUT_MIN_SERVEUR             1
  #define DEFAUT_MAX_SERVEUR             3
  #define DEFAUT_MAX_INACTIVITE          600
- #define DEFAUT_MAX_MSG_VISU            150
  #define DEFAUT_TAILLE_CLEF_DH          512
  #define DEFAUT_TAILLE_CLEF_RSA         2048
  #define DEFAUT_SSL_CRYPT               0
