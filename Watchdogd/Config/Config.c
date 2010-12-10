@@ -35,44 +35,167 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
  #include "Config_lignes.h"
 
-
 /**********************************************************************************************************/
-/* Lire_config: lecture et prise en compte de la configuration serveur Watchdog                           */
-/* Entrée: La structure à remplir, le nom du fichier originel                                             */
+/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                    */
+/* Entrée: le nom de fichier à lire                                                                       */
+/* Sortie: La structure mémoire est à jour                                                                */
 /**********************************************************************************************************/
  void Lire_config ( char *fichier_config )
-  { char *fichier;
-    FILE *rc;
-
-    Config.port                  = DEFAUT_PORT;
-    Config.max_client            = DEFAUT_MAX_CLIENT;
-    Config.min_serveur           = DEFAUT_MIN_SERVEUR;
-    Config.max_serveur           = DEFAUT_MAX_SERVEUR;
-    Config.max_inactivite        = DEFAUT_MAX_INACTIVITE;
-    Config.taille_clef_dh        = DEFAUT_TAILLE_CLEF_DH;
-    Config.taille_clef_rsa       = DEFAUT_TAILLE_CLEF_RSA;
-    Config.ssl_crypt             = DEFAUT_SSL_CRYPT;
-    Config.max_msg_visu          = DEFAUT_MAX_MSG_VISU;
-    Config.taille_bloc_reseau    = DEFAUT_TAILLE_BLOC_RESEAU;
-    Config.debug_level           = DEFAUT_DEBUG_LEVEL;
-    Config.timeout_connexion     = DEFAUT_TIMEOUT_CONNEXION;
-    Config.max_login_failed      = DEFAUT_MAX_LOGIN_FAILED;
-    snprintf( Config.port_RS485,  sizeof(Config.port_RS485),  "%s", DEFAUT_PORT_RS485  );
-    snprintf( Config.crypto_key,  sizeof(Config.crypto_key),  "%s", DEFAUT_CRYPTO_KEY  );
-    snprintf( Config.home,        sizeof(Config.home),        "%s", DEFAUT_HOME        );
-    snprintf( Config.db_host,     sizeof(Config.db_host),     "%s", DEFAUT_DB_HOST     );
-    snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE );
-    snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD );
-    snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME );
-    Config.db_port               = DEFAUT_DB_PORT;
+  { gchar *chaine, *fichier;
+    gint debug;
+    GKeyFile *gkf;
 
     if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;
                     else fichier = fichier_config;
-    rc = fopen( fichier, "r");
-    if (rc)
-     { Interpreter_config(rc);
-       fclose(rc);
+
+    gkf = g_key_file_new();
+
+    if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, NULL))
+     {
+/********************************************** Partie GLOBAL *********************************************/
+       Config.db_port            = g_key_file_get_integer ( gkf, "GLOBAL", "db_port", NULL );
+       if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
+
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
+       if (chaine)
+        { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.home, sizeof(Config.home), "%s", DEFAUT_HOME  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_host", NULL );
+       if (chaine)
+        { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", DEFAUT_DB_HOST  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_database", NULL );
+       if (chaine)
+        { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_password", NULL );
+       if (chaine)
+        { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_username", NULL );
+       if (chaine)
+        { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "crypto_key", NULL );
+       if (chaine)
+        { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
+/********************************************* Partie SERVER **********************************************/
+       Config.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
+       if (!Config.port) Config.port = DEFAUT_PORT;
+
+       Config.max_client         = g_key_file_get_integer ( gkf, "SERVER", "max_client", NULL );
+       if (!Config.max_client) Config.max_client = DEFAUT_MAX_CLIENT;
+
+       Config.min_serveur        = g_key_file_get_integer ( gkf, "SERVER", "min_serveur", NULL );
+       if (!Config.min_serveur) Config.min_serveur = DEFAUT_MIN_SERVEUR;
+
+       Config.max_serveur        = g_key_file_get_integer ( gkf, "SERVER", "max_serveur", NULL );
+       if (!Config.max_serveur) Config.max_serveur = DEFAUT_MAX_SERVEUR;
+
+       Config.max_inactivite     = g_key_file_get_integer ( gkf, "SERVER", "max_inactivite", NULL );
+       if (!Config.max_inactivite) Config.max_inactivite = DEFAUT_MAX_INACTIVITE;
+
+       Config.max_login_failed   = g_key_file_get_integer ( gkf, "SERVER", "max_login_failed", NULL );
+       if (!Config.max_login_failed) Config.max_login_failed = DEFAUT_MAX_LOGIN_FAILED;
+
+       Config.timeout_connexion  = g_key_file_get_integer ( gkf, "SERVER", "timeout_connexion", NULL );
+       if (!Config.timeout_connexion) Config.timeout_connexion = DEFAUT_TIMEOUT_CONNEXION;
+
+       Config.taille_clef_dh     = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_dh", NULL );
+       if (!Config.taille_clef_dh) Config.taille_clef_dh = DEFAUT_TAILLE_CLEF_DH;
+
+       Config.taille_clef_rsa    = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_rsa", NULL );
+       if (!Config.taille_clef_rsa) Config.taille_clef_rsa = DEFAUT_TAILLE_CLEF_RSA;
+
+       Config.taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
+       if (!Config.taille_bloc_reseau) Config.taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
+
+       chaine = g_key_file_get_string ( gkf, "RS485", "port_rs485", NULL );
+       if (chaine)
+        { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", DEFAUT_PORT_RS485  ); }
+/********************************************* Partie DEBUG ***********************************************/
+       Config.debug_level = 0;
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SIGNAUX", NULL );
+       if (debug) Config.debug_level += DEBUG_SIGNAUX;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_DB", NULL );
+       if (debug) Config.debug_level += DEBUG_DB;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CONFIG", NULL );
+       if (debug) Config.debug_level += DEBUG_CONFIG;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_USER", NULL );
+       if (debug) Config.debug_level += DEBUG_USER;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CRYPTO", NULL );
+       if (debug) Config.debug_level += DEBUG_CRYPTO;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_INFO", NULL );
+       if (debug) Config.debug_level += DEBUG_INFO;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SERVEUR", NULL );
+       if (debug) Config.debug_level += DEBUG_SERVEUR;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CDG", NULL );
+       if (debug) Config.debug_level += DEBUG_CDG;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_NETWORK", NULL );
+       if (debug) Config.debug_level += DEBUG_NETWORK;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ARCHIVE", NULL );
+       if (debug) Config.debug_level += DEBUG_ARCHIVE;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CONNEXION", NULL );
+       if (debug) Config.debug_level += DEBUG_CONNEXION;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_DLS", NULL );
+       if (debug) Config.debug_level += DEBUG_DLS;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_MODBUS", NULL );
+       if (debug) Config.debug_level += DEBUG_MODBUS;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ADMIN", NULL );
+       if (debug) Config.debug_level += DEBUG_ADMIN;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_RS485", NULL );
+       if (debug) Config.debug_level += DEBUG_RS485;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ONDULEUR", NULL );
+       if (debug) Config.debug_level += DEBUG_ONDULEUR;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SMS", NULL );
+       if (debug) Config.debug_level += DEBUG_SMS;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_AUDIO", NULL );
+       if (debug) Config.debug_level += DEBUG_AUDIO;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CAMERA", NULL );
+       if (debug) Config.debug_level += DEBUG_CAMERA;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_COURBE", NULL );
+       if (debug) Config.debug_level += DEBUG_COURBE;
+
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ALL", NULL );
+       if (debug) Config.debug_level = ~0;
+
+       if (!Config.debug_level) Config.debug_level = DEFAUT_DEBUG_LEVEL;                    /* Par défaut */
+
      }
+    g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
 /* Print_config: Affichage (enfin log) la config actuelle en parametre                                    */
@@ -90,7 +213,6 @@
     Info_n( Config.log, DEBUG_CONFIG, "Config taille_clef_dh       ", Config.taille_clef_dh );
     Info_n( Config.log, DEBUG_CONFIG, "Config taille_clef_rsa      ", Config.taille_clef_rsa );
     Info_n( Config.log, DEBUG_CONFIG, "Config ssl crypt            ", Config.ssl_crypt );
-    Info_n( Config.log, DEBUG_CONFIG, "Config max msg visu         ", Config.max_msg_visu );
     Info_n( Config.log, DEBUG_CONFIG, "Config debug level          ", Config.debug_level );
     Info_n( Config.log, DEBUG_CONFIG, "Config taille_bloc_reseau   ", Config.taille_bloc_reseau );
     Info_n( Config.log, DEBUG_CONFIG, "Config timeout connexion    ", Config.timeout_connexion );

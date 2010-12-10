@@ -44,7 +44,6 @@
     gint  min_serveur;                                     /* Nombre de server min à lancer en même temps */
     gint  max_serveur;                                     /* Nombre de server max à lancer en même temps */
     gint  max_inactivite;                                            /* temps max d'inactivite du serveur */
-    gint  max_msg_visu;                             /* Nombre maximum de message dans une fenetre cliente */
     gint  taille_clef_dh;                                       /* Taille en bits de la clef DH de codage */
     gint  taille_clef_rsa;                                     /* Taille en bits de la clef RSA de codage */
     gint  taille_bloc_reseau;

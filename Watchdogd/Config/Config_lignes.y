@@ -83,8 +83,6 @@ une_ligne:      PORT EGAL ENTIER
                 { Config.taille_clef_dh = $3; }
                 | TAILLE_CLEF_RSA EGAL ENTIER
                 { Config.taille_clef_rsa = $3; }
-                | MAX_MSG_VISU EGAL ENTIER
-                { Config.max_msg_visu = $3; }
                 | TAILLE_BLOC_RESEAU EGAL ENTIER
                 { Config.taille_bloc_reseau = $3; }
                 | PORT_RS485 EGAL CHAINE
