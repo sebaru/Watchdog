@@ -81,6 +81,7 @@ blanc         [\t ]+
 "mode"                     { Dls_lval.val = MODE;        return MODE;        }
 "consigne"                 { Dls_lval.val = CONSIGNE;    return CONSIGNE;    }
 "reset"                    { Dls_lval.val = RESET;       return RESET;       }
+"ratio"                    { Dls_lval.val = RATIO;       return RATIO;       }
 "color"                    { Dls_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { Dls_lval.val = CLIGNO;      return CLIGNO;      }
 "slave"                    { Dls_lval.val = SLAVE;       return SLAVE;       }

@@ -54,7 +54,7 @@ int erreur;                                                             /* Compt
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
-%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE RESET
+%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE RESET RATIO
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
 %type  <val>    ordre
@@ -509,6 +509,11 @@ une_option:     MODE EGAL ENTIER
                 | RESET EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RESET;
+                   $$->entier = $3;
+                }}
+                | RATIO EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = RATIO;
                    $$->entier = $3;
                 }}
                 | SLAVE EGAL BI ENTIER

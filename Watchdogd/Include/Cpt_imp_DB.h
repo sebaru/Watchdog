@@ -40,8 +40,8 @@
 
  struct CPT_IMP
   { struct CPT_IMP_DB cpt_impdb;
-    gboolean actif;
-    gboolean reset;
+    gboolean actif;                                                       /* Mémorisation de l'etat du CI */
+    gint val_en_cours;                                    /* valeur en cours pour le calcul via les ratio */
   };
 
 /*************************************** Définitions des prototypes ***************************************/

@@ -233,16 +233,17 @@
 /**********************************************************************************************************/
  struct ACTION *New_action_cpt_imp( int num, GList *options )
   { struct ACTION *action;
-    int taille, reset;
+    int taille, reset, ratio;
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
+    ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
-    taille = 15;
+    taille = 20;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "SCI(%d,1,%d);", num, reset );
-    g_snprintf( action->sinon, taille, "SCI(%d,0,0);", num );
+    g_snprintf( action->alors, taille, "SCI(%d,1,%d,%d);", num, reset, ratio );
+    g_snprintf( action->sinon, taille, "SCI(%d,0,0,1);", num );
     return(action);
   }
 /**********************************************************************************************************/

@@ -351,13 +351,20 @@
 /* Met à jour le compteur impulsion                                                                       */
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
- void SCI( int num, int etat, int reset )
+ void SCI( int num, int etat, int reset, int ratio )
   { if (num>=NBR_COMPTEUR_IMP) return;
     if (etat)
      { if ( ! Partage->ci[ num ].actif )
         { Partage->ci[num].actif = TRUE;
-          if (!reset) { Partage->ci[num].cpt_impdb.valeur++; }
-                 else { Partage->ci[num].cpt_impdb.valeur=0; }
+          if (!reset)
+           { Partage->ci[num].val_en_cours++;
+             if (Partage->ci[num].val_en_cours>=ratio)
+              { Partage->ci[num].cpt_impdb.valeur++; }
+           }
+          else
+           { Partage->ci[num].val_en_cours = 0;                /* Valeur transitoire pour gérer les ratio */
+             Partage->ci[num].cpt_impdb.valeur=0;                                  /* Valeur réelle du CI */
+           }
         }
      }
     else
