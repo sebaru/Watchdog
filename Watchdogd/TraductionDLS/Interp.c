@@ -242,7 +242,7 @@ printf("2 new_action_cpt_imp\n");
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
-printf("3 new_action_cpt_imp\n");
+printf("3 new_action_cpt_imp %p\n", action);
 
     g_snprintf( action->alors, taille, "SCI(%d,1,%d);", num, reset );
     g_snprintf( action->sinon, taille, "SCI(%d,0,0);", num );

@@ -166,8 +166,9 @@ une_instr:      MOINS START DONNE action PVIRGULE
                 | MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
+printf("166 - $2=%p, $4=%p\n", $2, $3 );
 printf("166 - strlen $2 %d\n", strlen($2) );
-printf("166 - strlen $2 %d\n", strlen($4) );
+printf("166 - strlen $4 %d\n", strlen($4) );
                    taille = strlen($2)+strlen($4->alors)+11;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
@@ -371,7 +372,9 @@ action:         action VIRGULE une_action
                    g_free($3->alors); if ($3->sinon) { g_free($3->sinon); }
                    g_free($1); g_free($3);
                 }}
-                | une_action {{ $$=$1; }}
+                | une_action {{ $$=$1; 
+printf("Shitf une_action $1=%p\n", $1);
+}}
                 ;
 
 une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);     }}
