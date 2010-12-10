@@ -388,6 +388,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                 | CPT_H ENTIER                {{ $$=New_action_cpt_h($2);          }}
                 | CPT_IMP ENTIER liste_options
                   {{ $$=New_action_cpt_imp($2, $3);
+printf("Shift CPT ENTIER OPTIONS: %d %p\n", $2, $3);
                      Liberer_options($3);
                   }}
                 | MSG ENTIER                  {{ $$=New_action_msg($2);            }}
