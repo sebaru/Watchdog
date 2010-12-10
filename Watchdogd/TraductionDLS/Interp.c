@@ -54,7 +54,7 @@
  char *New_chaine( int longueur )
   { char *chaine;
     chaine = g_malloc0( longueur );
-    if (!chaine) { printf("New_chaine: Plus de mémoire \n"); exit(0); }
+    if (!chaine) { return(NULL); }
     return(chaine);
   }
 /**********************************************************************************************************/
@@ -120,7 +120,7 @@
  struct OPTION *New_option( void )
   { struct OPTION *option;
     option=(struct OPTION *)g_malloc0( sizeof(struct OPTION) );
-    if (!option) { printf("New_option: Plus de mémoire \n"); exit(0); }
+    if (!option) { return(NULL); }
     return(option);
   }
 /**********************************************************************************************************/
@@ -148,7 +148,7 @@
  struct ACTION *New_action( void )
   { struct ACTION *action;
     action=(struct ACTION *)g_malloc0( sizeof(struct ACTION) );
-    if (!action) { printf("New_action: Plus de mémoire \n"); exit(0); }
+    if (!action) { return(NULL); }
     action->alors = NULL;
     action->sinon = NULL;
     return(action);
@@ -234,21 +234,15 @@
  struct ACTION *New_action_cpt_imp( int num, GList *options )
   { struct ACTION *action;
     int taille, reset;
-printf("Enter new_action_cpt_imp\n");
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
-printf("2 new_action_cpt_imp\n");
 
     taille = 15;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
-printf("3 new_action_cpt_imp %p\n", action);
 
     g_snprintf( action->alors, taille, "SCI(%d,1,%d);", num, reset );
     g_snprintf( action->sinon, taille, "SCI(%d,0,0);", num );
-
-printf("4 new_action_cpt_imp %s\n", action->alors);
-printf("4 new_action_cpt_imp %s\n", action->sinon);
     return(action);
   }
 /**********************************************************************************************************/
@@ -335,7 +329,7 @@ printf("4 new_action_cpt_imp %s\n", action->sinon);
     /*if (Get_alias_par_bit( bit, num )) return(FALSE);                           /* Bit/Num deja definit ? */
 
     alias=(struct ALIAS *)g_malloc0( sizeof(struct ALIAS) );
-    if (!alias) { printf("New_alias: Plus de mémoire \n"); exit(0); }
+    if (!alias) { return(FALSE); }
     alias->nom = nom;
     alias->bit = bit;
     alias->num = num;

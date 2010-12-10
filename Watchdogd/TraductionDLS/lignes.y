@@ -95,7 +95,6 @@ listeAlias:     un_alias listeAlias
 un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                 {{ char *chaine;
                    int taille;
-printf("un_alias : %d\n", $4 );
                    switch($4)
                     { case BI    :
                       case MONO  :
@@ -166,10 +165,6 @@ une_instr:      MOINS START DONNE action PVIRGULE
                 | MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
-printf("166 - $2=%p, $4=%p\n", $2, $4 );
-printf("166 - strlen $2 %d\n", strlen($2) );
-printf("166 - strlen $4 alors %d\n", strlen($4->alors) );
-if ($4->sinon) printf("166 - strlen $4 sinon %d\n", strlen($4->sinon) );
                    taille = strlen($2)+strlen($4->alors)+11;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
@@ -180,16 +175,11 @@ if ($4->sinon) printf("166 - strlen $4 sinon %d\n", strlen($4->sinon) );
                     { instr = New_chaine( taille );
                       g_snprintf( instr, taille, "if(%s) { %s }\n", $2, $4->alors );
                     }
-printf("166 - instr %s\n", instr );
 
                    Emettre( instr ); g_free(instr);
-printf("166 - 1\n" );
                    if ($4->sinon) g_free($4->sinon); 
-printf("166 - 2\n" );
                    g_free($4->alors); g_free($4);
-printf("166 - 3\n" );
                    g_free($2);
-printf("166 - 4\n" );
                 }}
                 ;
 expr:           expr OU facteur
@@ -373,9 +363,7 @@ action:         action VIRGULE une_action
                    g_free($3->alors); if ($3->sinon) { g_free($3->sinon); }
                    g_free($1); g_free($3);
                 }}
-                | une_action {{ $$=$1; 
-printf("Shitf une_action $1=%p\n", $1);
-}}
+                | une_action {{ $$=$1; }}
                 ;
 
 une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);     }}
@@ -392,7 +380,6 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                 | CPT_H ENTIER                {{ $$=New_action_cpt_h($2);          }}
                 | CPT_IMP ENTIER liste_options
                   {{ $$=New_action_cpt_imp($2, $3);
-printf("Shift CPT ENTIER OPTIONS: $$=%p $2=%d $3=%p\n", $$, $2, $3);
                      Liberer_options($3);
                   }}
                 | MSG ENTIER                  {{ $$=New_action_msg($2);            }}
@@ -489,14 +476,14 @@ modulateur:     APRES        {{ $$=APRES;  }}
 ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL
                 ;
 /********************************************* Gestion des options ****************************************/
-liste_options:  POUV options PFERM   {{ $$ = $2; printf("une liste d'option\n");   }}
+liste_options:  POUV options PFERM   {{ $$ = $2;   }}
                 |                    {{ $$ = NULL; }}
                 ;
 
 options:        options VIRGULE une_option
                 {{ $$ = g_list_append( $1, $3 );
                 }}
-                | une_option    {{ $$ = g_list_append( NULL, $1 ); printf("une option\n"); }}
+                | une_option    {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
 une_option:     MODE EGAL ENTIER
