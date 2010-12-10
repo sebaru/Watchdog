@@ -234,16 +234,21 @@
  struct ACTION *New_action_cpt_imp( int num, GList *options )
   { struct ACTION *action;
     int taille, reset;
-
+printf("Enter new_action_cpt_imp\n");
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
+printf("2 new_action_cpt_imp\n");
 
     taille = 15;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
+printf("3 new_action_cpt_imp\n");
 
     g_snprintf( action->alors, taille, "SCI(%d,1,%d);", num, reset );
     g_snprintf( action->sinon, taille, "SCI(%d,0,0);", num );
+
+printf("4 new_action_cpt_imp %s\n", action->alors);
+printf("4 new_action_cpt_imp %s\n", action->sinon);
     return(action);
   }
 /**********************************************************************************************************/
@@ -379,8 +384,10 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Liberer_options ( GList *options )
-  { g_list_foreach( options, (GFunc)g_free, NULL );
-    g_list_free( options );
+  { if (options)
+     { g_list_foreach( options, (GFunc)g_free, NULL );
+       g_list_free( options );
+     }
   }
 /**********************************************************************************************************/
 /* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                         */
