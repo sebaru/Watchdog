@@ -65,6 +65,7 @@
  extern struct ACTION *New_action_tempo( int num, GList *options );
  extern struct ACTION *New_action_bi( int num, int barre );
  extern struct ACTION *New_action_cpt_h( int num );
+ extern struct ACTION *New_action_cpt_imp( int num, GList *options );
  extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );
  extern struct ALIAS *Get_alias_par_nom( char *nom );
  extern struct ALIAS *Get_alias_par_bit( int bit, int num );

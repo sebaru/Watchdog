@@ -169,7 +169,7 @@ une_instr:      MOINS START DONNE action PVIRGULE
 printf("166 - $2=%p, $4=%p\n", $2, $4 );
 printf("166 - strlen $2 %d\n", strlen($2) );
 printf("166 - strlen $4 alors %d\n", strlen($4->alors) );
-printf("166 - strlen $4 sinon %d\n", strlen($4->sinon) );
+if ($4->sinon) printf("166 - strlen $4 sinon %d\n", strlen($4->sinon) );
                    taille = strlen($2)+strlen($4->alors)+11;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
