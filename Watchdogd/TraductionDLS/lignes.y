@@ -371,7 +371,7 @@ action:         action VIRGULE une_action
                    g_free($3->alors); if ($3->sinon) { g_free($3->sinon); }
                    g_free($1); g_free($3);
                 }}
-                | une_action
+                | une_action {{ $$=$1; }}
                 ;
 
 une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);     }}
