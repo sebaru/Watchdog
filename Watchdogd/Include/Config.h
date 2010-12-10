@@ -90,7 +90,6 @@
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );
- extern void Interpreter_config ( FILE *rc );
 
 #endif
   
