@@ -166,6 +166,8 @@ une_instr:      MOINS START DONNE action PVIRGULE
                 | MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
+printf("166 - strlen $2 %d\n", strlen($2) );
+printf("166 - strlen $2 %d\n", strlen($4) );
                    taille = strlen($2)+strlen($4->alors)+11;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
@@ -176,11 +178,16 @@ une_instr:      MOINS START DONNE action PVIRGULE
                     { instr = New_chaine( taille );
                       g_snprintf( instr, taille, "if(%s) { %s }\n", $2, $4->alors );
                     }
+printf("166 - instr %s\n", instr );
 
                    Emettre( instr ); g_free(instr);
+printf("166 - 1\n" );
                    if ($4->sinon) g_free($4->sinon); 
+printf("166 - 2\n" );
                    g_free($4->alors); g_free($4);
+printf("166 - 3\n" );
                    g_free($2);
+printf("166 - 4\n" );
                 }}
                 ;
 expr:           expr OU facteur
