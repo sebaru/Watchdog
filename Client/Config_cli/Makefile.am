@@ -5,10 +5,10 @@
 #**********************************************************************************************************/
 
 noinst_LTLIBRARIES   = libconfig_cli.la
-libconfig_cli_la_SOURCES = Config_cli_lignes.y Config_cli_mots.l Config_cli.c
+libconfig_cli_la_SOURCES = Config_cli.c
 
 #Pour LEX et YACC
-libconfig_cli_la_LIBADD  = @LEXLIB@
+#libconfig_cli_la_LIBADD  = @LEXLIB@
 
 
 INCLUDES= -I$(top_srcdir) -I$(includedir) \
@@ -17,4 +17,4 @@ INCLUDES= -I$(top_srcdir) -I$(includedir) \
           -I../Include \
           $(GLIB_CFLAGS)
 
-CLEANFILES = Config_cli_lignes.h Config_cli_lignes.c Config_cli_mots.c
+CLEANFILES = 
