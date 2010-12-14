@@ -42,14 +42,14 @@
  static GtkWidget *Spin_max;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Option_unite;                                   /* Unite correspondante à l'entrée ana */
  static GtkWidget *Option_type;                                                /* Type de gestion de l'ea */
- static struct CMD_TYPE_ENTREEANA Entree;                                        /* EA en cours d'édition */
+ static struct CMD_TYPE_OPTION_ENTREEANA Entree;                                        /* EA en cours d'édition */
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_entreeANA: Fonction appelée qd on appuie sur un des boutons de l'interface           */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
- static gboolean CB_ajouter_editer_entreeANA ( GtkDialog *dialog, gint reponse, gboolean edition )
+ static gboolean CB_editer_option_entreeANA ( GtkDialog *dialog, gint reponse, gboolean edition )
   { Entree.min = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_min) );
     Entree.max = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_max) );
     Entree.type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
@@ -57,8 +57,8 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
-             { Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,
-                              (gchar *)&Entree, sizeof( struct CMD_TYPE_ENTREEANA ) );
+             { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_OPTION_ENTREEANA,
+                              (gchar *)&Entree, sizeof( struct CMD_TYPE_OPTION_ENTREEANA ) );
                break;
              }
        case GTK_RESPONSE_CANCEL:
@@ -72,25 +72,21 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_entreeANA ( struct CMD_TYPE_ENTREEANA *edit_entree )
+ void Menu_editer_option_entreeANA ( struct CMD_TYPE_OPTION_ENTREEANA *edit_entree )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt;
 
-    if (edit_entree)
-     { memcpy( &Entree, edit_entree, sizeof(struct CMD_TYPE_ENTREEANA) );
-                                                                          /* Save pour utilisation future */
-     }
-    else memset (&Entree, 0, sizeof(struct CMD_TYPE_ENTREEANA) );                  /* Sinon RAZ structure */
+    memcpy( &Entree, edit_entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
 
-    F_ajout = gtk_dialog_new_with_buttons( (edit_entree ? _("Edit a entreeANA") : _("Add a entreeANA")),
+    F_ajout = gtk_dialog_new_with_buttons( _("Option of entreeANA"),
                                            GTK_WINDOW(F_client),
                                            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                            GTK_STOCK_OK, GTK_RESPONSE_OK,
                                            NULL);
     g_signal_connect( F_ajout, "response",
-                      G_CALLBACK(CB_ajouter_editer_entreeANA),
-                      GINT_TO_POINTER( (edit_entree ? TRUE : FALSE) ) );
+                      G_CALLBACK(CB_editer_option_entreeANA),
+                      GINT_TO_POINTER( TRUE ) );
 
     frame = gtk_frame_new("Settings");                               /* Création de l'interface graphique */
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );

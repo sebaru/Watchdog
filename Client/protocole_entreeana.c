@@ -49,7 +49,7 @@
        case SSTAG_SERVEUR_EDIT_ENTREEANA_OK:
              { struct CMD_TYPE_ENTREEANA *eana;
                eana = (struct CMD_TYPE_ENTREEANA *)connexion->donnees;
-               Menu_ajouter_editer_entreeANA( eana );
+/*               Menu_ajouter_editer_entreeANA( eana );*/
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK:

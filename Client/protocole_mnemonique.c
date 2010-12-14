@@ -72,6 +72,12 @@
                Proto_rafraichir_un_mnemonique( mnemo );
              }
             break;
+       case SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK:
+             { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
+               option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
+               Menu_editer_option_bit_interne( option );
+             }
+            break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                Set_progress_plusun();
