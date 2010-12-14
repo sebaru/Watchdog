@@ -76,7 +76,7 @@
              { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
                option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
 printf("Recu autorisation d'edition option \n");
-               Menu_editer_option_bit_interne( option );
+               Proto_editer_option_bit_interne( option );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE:

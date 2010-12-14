@@ -217,7 +217,6 @@
  extern void Gerer_protocole_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_synoptique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_mnemonique ( struct CONNEXION *connexion );
- extern void Gerer_protocole_entreeana ( struct CONNEXION *connexion );
  extern void Gerer_protocole_supervision ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo ( struct CONNEXION *connexion );
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
@@ -323,7 +322,6 @@
  extern void Menu_want_camera ( void );
  extern void Menu_want_histo_hard ( void );
  extern void Menu_want_supervision( void );
- extern void Menu_want_entreeANA ( void );
  extern void Menu_want_courbe ( void );
  extern void Menu_want_histo_courbe ( void );
  extern void Menu_want_scenario ( void );
@@ -452,12 +450,8 @@
                                                                              /* Dans supervision_camera.c */
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
 
- extern void Proto_afficher_une_entreeANA( struct CMD_TYPE_OPTION_ENTREEANA *entree ); /* Dans liste_entreeana.c */
- extern void Proto_rafraichir_une_entreeANA( struct CMD_TYPE_OPTION_ENTREEANA *entree );
- extern void Creer_page_entreeANA( void );
-
-                                                                                /* Dans ajout_entreeana.c */
- extern void Menu_ajouter_editer_entreeANA ( struct CMD_TYPE_OPTION_ENTREEANA *edit_entree );
+                                                                                /* Dans option_entreeana.c */
+ extern void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree );
 
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
  extern void Begin_print (GtkPrintOperation *operation,

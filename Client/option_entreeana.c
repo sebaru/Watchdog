@@ -73,7 +73,7 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree )
+ void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt;
 

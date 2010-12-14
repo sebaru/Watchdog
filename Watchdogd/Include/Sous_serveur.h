@@ -62,7 +62,6 @@
  extern void Gerer_protocole_utilisateur( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_message( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_mnemonique( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_entreeana( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_supervision( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_histo( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_courbe( gint Id_serveur, struct CLIENT *client );
@@ -127,10 +126,10 @@
  extern void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
  extern void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
 
- extern void *Envoyer_entreeANA_thread ( struct CLIENT *client );                /* Dans envoi_entreana.c */
- extern void *Envoyer_entreeANA_for_courbe_thread ( struct CLIENT *client );
+ extern void *Envoyer_entreeANA_for_courbe_thread ( struct CLIENT *client );     /* Dans envoi_entreana.c */
  extern void *Envoyer_entreeANA_for_histo_courbe_thread ( struct CLIENT *client );
- extern void Proto_valider_editer_entreeANA ( struct CLIENT *client, struct CMD_TYPE_OPTION_ENTREEANA *rezo_entree );
+ extern void Proto_valider_editer_option_entreeANA ( struct CLIENT *client,
+                                                     struct CMD_TYPE_OPTION_ENTREEANA *rezo_entree );
 
                                                                                /* Dans envoi_synoptique.c */
  extern void *Envoyer_synoptiques_thread ( struct CLIENT *client );
