@@ -49,7 +49,7 @@
 
     if (entree)
      { option.type = MNEMO_ENTREE_ANA;
-       memcpy( &option.eana, entree, sizeof( struct CMD_TYPE_OPTION_BIT_INTERNE ) );
+       memcpy( &option.eana, entree, sizeof( struct CMD_TYPE_ENTREEANA ) );
        Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
                      (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
        g_free(entree);                                                              /* liberation mémoire */

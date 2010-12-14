@@ -41,6 +41,7 @@
 
  enum
   {  COLONNE_ID,
+     COLONNE_TYPE_INT,
      COLONNE_TYPE,
      COLONNE_OBJET,
      COLONNE_ACRONYME,
@@ -263,11 +264,11 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );               /* Recup du id */
-    gtk_tree_model_get( store, &iter, COLONNE_TYPE, &rezo_mnemonique.type, -1 );         /* Recup du type */
+    gtk_tree_model_get( store, &iter, COLONNE_TYPE_INT, &rezo_mnemonique.type, -1 );     /* Recup du type */
     gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
     memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
     g_free( libelle );
-printf("on veut les options du bit_interne %s\n", rezo_mnemonique.libelle );
+printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_mnemonique.libelle );
 
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,
                   (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
@@ -473,6 +474,7 @@ printf("on veut les options du bit_interne %s\n", rezo_mnemonique.libelle );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
+                                              G_TYPE_UINT,                               /* Type (entier) */
                                               G_TYPE_STRING,                     /* Type ("bistable"... ) */
                                               G_TYPE_STRING,                                     /* Objet */
                                               G_TYPE_STRING,                                  /* Acronyme */
@@ -576,6 +578,7 @@ printf("on veut les options du bit_interne %s\n", rezo_mnemonique.libelle );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID,       mnemonique->id,
+                         COLONNE_TYPE_INT, mnemonique->type,
                          COLONNE_TYPE,     chaine,
                          COLONNE_OBJET,    mnemonique->objet,
                          COLONNE_ACRONYME, mnemonique->acronyme,
