@@ -100,14 +100,6 @@
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
-/* Menu_want_mnemonique: l'utilisateur desire editer la base syns                                         */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_entreeANA ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_ENTREEANA, 0, TRUE )) return;
-    Envoi_serveur( TAG_ENTREEANA, SSTAG_CLIENT_WANT_PAGE_ENTREEANA, NULL, 0 );
-  }
-/**********************************************************************************************************/
 /* Menu_want_histo_hard: l'utilisateur desire voir l'historique                                           */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

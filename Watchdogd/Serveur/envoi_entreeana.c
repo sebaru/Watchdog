@@ -35,73 +35,13 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Proto_editer_entree: Le client desire editer un entree                                                 */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_editer_entreeANA ( struct CLIENT *client, struct CMD_TYPE_ENTREEANA *rezo_entree )
-  { struct CMD_TYPE_ENTREEANA *entree;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
-
-    if (entree)
-     { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_EDIT_ENTREEANA_OK,
-                  (gchar *)entree, sizeof(struct CMD_TYPE_ENTREEANA) );
-       g_free(entree);                                                              /* liberation mémoire */
-     }
-    else
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate entree %s", rezo_entree->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_valider_editer_entree: Le client valide l'edition d'un entree                                    */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_valider_editer_entreeANA ( struct CLIENT *client, struct CMD_TYPE_ENTREEANA *rezo_entree )
-  { struct CMD_TYPE_ENTREEANA *result;
-    gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    retour = Modifier_entreeANADB ( Config.log, Db_watchdog, rezo_entree );
-    if (retour==FALSE)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit entree %s", rezo_entree->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
-           if (result) 
-            { Envoi_client( client, TAG_ENTREEANA, SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_ENTREEANA) );
-              g_free(result);
-              Charger_eana ();                                             /* Update de la running config */
-            }
-           else
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate entree %s", rezo_entree->libelle);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-         }
-  }
-/**********************************************************************************************************/
 /* Envoyer_entreeANA_tag : Envoie les entreANA au client. Attention, c'est un thread !                    */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_entreeANA_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
-    struct CMD_TYPE_ENTREEANA *entree;
+    struct CMD_TYPE_OPTION_ENTREEANA *entree;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiANA", 0, 0, 0 );
@@ -138,19 +78,9 @@
        while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-       Envoi_client ( client, tag, sstag, (gchar *)entree, sizeof(struct CMD_TYPE_ENTREEANA) );
+       Envoi_client ( client, tag, sstag, (gchar *)entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
        g_free(entree);
      }
-  }
-/**********************************************************************************************************/
-/* Envoyer_classes: Envoi des classes au client GID_CLASSE                                                */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_entreeANA_thread ( struct CLIENT *client )
-  { Envoyer_entreeANA_tag( client, TAG_ENTREEANA, SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA,
-                                                  SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FIN );
-    pthread_exit(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_classes: Envoi des classes au client GID_CLASSE                                                */

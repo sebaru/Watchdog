@@ -28,8 +28,6 @@
 #ifndef _RESEAUX_ENTREEANA_H_
  #define _RESEAUX_ENTREEANA_H_
 
- #include "Reseaux_mnemonique.h"
-
  #define TAILLEBUF_HISTO_EANA         1600       /* 800 point de controle dans le client et buffer valana */
  #define NBR_VAL_INIT_COURBE          100                   /* Envoyé via 100 points à chaque paquet rezo */
 
@@ -61,7 +59,7 @@
     NBR_TYPE_UNITE
   };
 
- struct CMD_TYPE_ENTREEANA
+ struct CMD_TYPE_OPTION_ENTREEANA
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
     guint  unite;                                                                         /* Km, h, ° ... */
     gfloat min;
@@ -72,19 +70,6 @@
     gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
     gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
   };
-
- enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA,                       /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FIN,
-    SSTAG_SERVEUR_CREATE_PAGE_ENTREEANA_OK,                     /* OK pour affichage de la page entreeANA */
-    SSTAG_CLIENT_WANT_PAGE_ENTREEANA,
-
-    SSTAG_CLIENT_EDIT_ENTREEANA,                               /* Le client demande l'edition d'un groupe */
-    SSTAG_SERVEUR_EDIT_ENTREEANA_OK,           /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_CLIENT_VALIDE_EDIT_ENTREEANA,                          /* Le client renvoie les données editées */
-    SSTAG_SERVEUR_VALIDE_EDIT_ENTREEANA_OK,                    /* Le serveur valide les nouvelles données */
-  };
-
 
  extern gchar *Unite_vers_string ( guint type );
  extern gchar *Type_ea_vers_string ( guint type );

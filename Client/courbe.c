@@ -619,7 +619,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_TYPE_ENTREEANA *source )
+ static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_TYPE_OPTION_ENTREEANA *source )
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
@@ -685,7 +685,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_ENTREEANA *source )
+ void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_OPTION_ENTREEANA *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 

@@ -94,10 +94,13 @@
                 }
              }
             break;
-       case SSTAG_CLIENT_VALIDE_EDIT_OPTION_ENTREEANA:
-             { struct CMD_TYPE_ENTREEANA *entree;
-               entree = (struct CMD_TYPE_OPTION_ENTREEANA *)connexion->donnees;
-               Proto_valider_editer_entreeANA( client, entree );
+       case SSTAG_CLIENT_VALIDE_EDIT_OPTION_BIT_INTERNE:
+             { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
+               option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
+               switch(option->type)
+                { case MNEMO_ENTREE_ANA: Proto_valider_editer_option_entreeANA( client, &option->eana );
+                                         break;
+                }
              }
             break;
      }

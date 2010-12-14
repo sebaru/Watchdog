@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/envoi_mnemonique.c        Configuration des mnemoniques DLS de Watchdog v2.0         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 05 déc 2004 14:50:01 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 05 dÃ©c 2004 14:50:01 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -36,12 +36,12 @@
  #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Proto_editer_entree: Le client desire editer un entree                                                 */
-/* Entrée: le client demandeur et le entree en question                                                   */
+/* EntrÃ©e: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
   { struct CMD_TYPE_OPTION_BIT_INTERNE option;
-    struct CMD_TYPE_ENTREEANA *entree;
+    struct CMD_TYPE_OPTION_ENTREEANA *entree;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -49,10 +49,10 @@
 
     if (entree)
      { option.type = MNEMO_ENTREE_ANA;
-       memcpy( &option.eana, entree, sizeof( struct CMD_TYPE_ENTREEANA ) );
+       memcpy( &option.eana, entree, sizeof( struct CMD_TYPE_OPTION_ENTREEANA ) );
        Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
                      (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
-       g_free(entree);                                                              /* liberation mémoire */
+       g_free(entree);                                                              /* liberation mÃ©moire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -63,8 +63,41 @@
      }
   }
 /**********************************************************************************************************/
+/* Proto_valider_editer_entree: Le client valide l'edition d'un entree                                    */
+/* Entrï¿½e: le client demandeur et le entree en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_OPTION_ENTREEANA *rezo_entree )
+  { struct CMD_TYPE_OPTION_ENTREEANA *result;
+    gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Modifier_entreeANADB ( Config.log, Db_watchdog, rezo_entree );
+    if (retour==FALSE)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to edit entree %s", rezo_entree->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
+           if (result)
+            { g_free(result);
+              Charger_eana ();                                             /* Update de la running config */
+            }
+           else
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate entree %s", rezo_entree->libelle);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+         }
+  }
+/**********************************************************************************************************/
 /* Preparer_envoi_mnemonique: convertit une structure MNEMONIQUE en structure CMD_TYPE_MNEMONIQUE         */
-/* Entrée: un client et un utilisateur                                                                    */
+/* EntrÃ©e: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static struct CMD_TYPE_MNEMONIQUE *Preparer_envoi_mnemonique ( struct MNEMONIQUEDB *mnemo )
@@ -83,7 +116,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_editer_mnemonique: Le client desire editer un mnemo                                              */
-/* Entrée: le client demandeur et le mnemo en question                                                    */
+/* EntrÃ©e: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
@@ -104,7 +137,7 @@
 
        Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,
                   (gchar *)&edit_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
-       g_free(mnemo);                                                               /* liberation mémoire */
+       g_free(mnemo);                                                               /* liberation mÃ©moire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -116,7 +149,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_mnemonique: Le client valide l'edition d'un mnemo                                 */
-/* Entrée: le client demandeur et le mnemo en question                                                    */
+/* EntrÃ©e: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
@@ -161,7 +194,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_effacer_mnemonique: Retrait du mnemo en parametre                                                */
-/* Entrée: le client demandeur et le mnemo en question                                                    */
+/* EntrÃ©e: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
@@ -185,7 +218,7 @@
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_mnemonique: Un client nous demande d'ajouter un mnemo Watchdog                           */
-/* Entrée: le mnemo à créer                                                                               */
+/* EntrÃ©e: le mnemo Ã  crÃ©er                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
@@ -231,8 +264,8 @@
   }
 /**********************************************************************************************************/
 /* Proto_envoyer_type_num_mnemonique: Recherche et envoi du mnemonique de type et num en parametre        */
-/* Entrée: Le client demandeur et la structure de recherche                                               */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: Le client demandeur et la structure de recherche                                               */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
                                         struct CMD_TYPE_NUM_MNEMONIQUE *critere )
@@ -264,8 +297,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique;
@@ -278,12 +311,12 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Unref_client( client );                                        /* DÃ©rÃ©fÃ©rence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_mnemoDB( Config.log, db ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Unref_client( client );                                        /* DÃ©rÃ©fÃ©rence la structure cliente */
        Libere_DB_SQL( Config.log, &db );
        return;
      }
@@ -297,7 +330,7 @@
        if (!mnemo)
         { Libere_DB_SQL( Config.log, &db );
           Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
+          Unref_client( client );                                     /* DÃ©rÃ©fÃ©rence la structure cliente */
           return;
         }
 
@@ -305,7 +338,7 @@
        g_free(mnemo);
        if (rezo_mnemonique)
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+                                                     /* Attente de la possibilitÃ© d'envoyer sur le reseau */
 
           Envoi_client ( client, tag, sstag,
                          (gchar *)rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
@@ -315,8 +348,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_for_courbe_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique;
@@ -329,12 +362,12 @@
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Unref_client( client );                                        /* DÃ©rÃ©fÃ©rence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_mnemoDB_for_courbe( Config.log, db ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Unref_client( client );                                        /* DÃ©rÃ©fÃ©rence la structure cliente */
        Libere_DB_SQL( Config.log, &db );
        return;
      }                                                                           /* Si pas de histos (??) */
@@ -348,7 +381,7 @@
        if (!mnemo)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Libere_DB_SQL( Config.log, &db );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
+          Unref_client( client );                                     /* DÃ©rÃ©fÃ©rence la structure cliente */
           return;
         }
 
@@ -356,7 +389,7 @@
        g_free(mnemo);
        if (rezo_mnemonique)
         { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+                                                     /* Attente de la possibilitÃ© d'envoyer sur le reseau */
 
           Envoi_client ( client, tag, sstag,
                          (gchar *)rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
@@ -366,8 +399,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_mnemoniques_thread ( struct CLIENT *client )
   { Envoyer_mnemoniques_tag( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,
@@ -376,8 +409,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_mnemoniques_for_courbe_thread ( struct CLIENT *client )
   { Envoyer_mnemoniques_for_courbe_tag( client, TAG_COURBE, SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE,
@@ -386,8 +419,8 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
+/* EntrÃ©e: NÃ©ant                                                                                          */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_mnemoniques_for_histo_courbe_thread ( struct CLIENT *client )
   { Envoyer_mnemoniques_for_courbe_tag( client, TAG_HISTO_COURBE,

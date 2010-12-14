@@ -38,7 +38,6 @@
  #include "Reseaux_utilisateur.h"
  #include "Reseaux_message.h"
  #include "Reseaux_mnemonique.h"
- #include "Reseaux_entreeana.h"
  #include "Reseaux_supervision.h"
  #include "Reseaux_synoptique.h"
  #include "Reseaux_camera.h"
@@ -98,7 +97,6 @@
     TAG_SYNOPTIQUE,                                                            /* Gestion des synoptiques */
     TAG_MNEMONIQUE,                                                            /* Gestion des mnemoniques */
     TAG_MESSAGE,                                                                  /* Gestion des messages */
-    TAG_ENTREEANA,                                                    /* Gestions des entrees analogiques */
     TAG_SUPERVISION,                                                 /* Gestions de la partie supervision */
     TAG_HISTO,                                                                      /* Gestions des histo */
     TAG_ATELIER,                                                                 /* Gestions de l'atelier */

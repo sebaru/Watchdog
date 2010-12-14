@@ -37,6 +37,8 @@
  #define NBR_CARAC_ACRONYME_MNEMONIQUE       14
  #define NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8  (6*NBR_CARAC_ACRONYME_MNEMONIQUE)
 
+ #include "Reseaux_option_entreeana.h"
+
  enum
   { MNEMO_BISTABLE,                                               /* Definitions des types de mnemoniques */
     MNEMO_MONOSTABLE,
@@ -65,18 +67,6 @@
     guint num;
   };
 
- struct CMD_TYPE_OPTION_ENTREEANA
-  { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
-    guint  unite;                                                                         /* Km, h, ° ... */
-    gfloat min;
-    gfloat max;
-    guint  type;                                                               /* Type de gestion de l'EA */
-                                                                                        /* Vient du mnemo */
-    guint  num;                                                                         /* Numero de l'EA */
-    gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
-    gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
-  };
-
  struct CMD_TYPE_OPTION_BIT_INTERNE
   { guint type;
     union { struct CMD_TYPE_OPTION_ENTREEANA eana;
@@ -100,7 +90,7 @@
 
     SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,             /* Le client demande l'edition des options d'un bit */
     SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,  /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_CLIENT_VALIDE_EDIT_OPTION_ENTREEANA,                  /* Valide la modification de l'entree ANA */
+    SSTAG_CLIENT_VALIDE_EDIT_OPTION_BIT_INTERNE,                /* Valide la modification de l'entree ANA */
   };
 
 #endif

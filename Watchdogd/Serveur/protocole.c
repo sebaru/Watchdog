@@ -60,7 +60,6 @@
                case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( Id_serveur, client ); break;
                case TAG_MESSAGE     : Gerer_protocole_message      ( Id_serveur, client ); break;
                case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( Id_serveur, client ); break;
-               case TAG_ENTREEANA   : Gerer_protocole_entreeana    ( Id_serveur, client ); break;
                case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( Id_serveur, client ); break;
                case TAG_SUPERVISION : Gerer_protocole_supervision  ( Id_serveur, client ); break;
                case TAG_HISTO       : Gerer_protocole_histo        ( Id_serveur, client ); break;

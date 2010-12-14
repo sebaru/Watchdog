@@ -27,7 +27,7 @@
 
  #include <glib.h>
  #include <string.h>
- #include "Reseaux_entreeana.h"
+ #include "Reseaux_mnemonique.h"
 
  static gchar *UNITE_EA[NBR_TYPE_UNITE] =
   { "°C",

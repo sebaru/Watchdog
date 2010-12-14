@@ -25,8 +25,8 @@
  * Boston, MA  02110-1301  USA
  */
  
-#ifndef _CMD_TYPE_ENTREEANA_H_
- #define _CMD_TYPE_ENTREEANA_H_
+#ifndef _ENTREEANA_H_
+ #define _ENTREEANA_H_
 
  #include "Reseaux.h"
  #include "Db.h"
@@ -35,9 +35,9 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_eana ( void );
- extern struct CMD_TYPE_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num );
+ extern struct CMD_TYPE_OPTION_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num );
  extern gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db );
- extern gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_ENTREEANA *entreeana );
+ extern struct CMD_TYPE_OPTION_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db );
+ extern gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_ENTREEANA *entreeana );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

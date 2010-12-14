@@ -210,7 +210,9 @@
  void Menu_editer_option_bit_interne ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_option )
   { GtkWidget *frame, *table, *texte, *hboite;
     int cpt;
+printf("Menu_editer_option_bit_interne\n");
 
+printf(" type = %d\n", edit_option->type);
     switch( edit_option->type )
      { case MNEMO_ENTREE_ANA : Menu_editer_option_entreeANA( edit_option->eana );
                                break;

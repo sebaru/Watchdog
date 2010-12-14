@@ -58,14 +58,14 @@
      }                                                                         /* Si pas d'enregistrement */
 
     for( ; ; )
-     { struct CMD_TYPE_ENTREEANA *entree;
+     { struct CMD_TYPE_OPTION_ENTREEANA *entree;
        entree = Recuperer_entreeANADB_suite( Config.log, db );
        if (!entree)
         { Libere_DB_SQL( Config.log, &db );
           return;
         }
 
-       memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_ENTREEANA) );
+       memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
        g_free(entree);
      }
   }
@@ -94,8 +94,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
-  { struct CMD_TYPE_ENTREEANA *entreeana;
+ struct CMD_TYPE_OPTION_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_OPTION_ENTREEANA *entreeana;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -103,7 +103,7 @@
        return(NULL);
      }
 
-    entreeana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
+    entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana) Info( log, DEBUG_INFO, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
      { entreeana->id_mnemo = atoi(db->row[4]);
@@ -122,8 +122,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id )
-  { struct CMD_TYPE_ENTREEANA *entreeana;
+ struct CMD_TYPE_OPTION_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_OPTION_ENTREEANA *entreeana;
     gchar requete[512];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -146,7 +146,7 @@
        return(NULL);
      }
 
-    entreeana = (struct CMD_TYPE_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_ENTREEANA) );
+    entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana)
      { Info( log, DEBUG_INFO, "Rechercher_entreeanaDB: Mem error" ); }
     else
@@ -168,7 +168,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_ENTREEANA *entreeana )
+ gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_ENTREEANA *entreeana )
   { gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
