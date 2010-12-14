@@ -80,14 +80,14 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE:
-             { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
-               option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
-               switch ( option->type )
-                { case MNEMO_ENTREE_ANA: Proto_editer_option_entreeANA( client, option );
+             { struct CMD_TYPE_MNEMONIQUE *rezo_mnemo;
+               rezo_mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+               switch ( rezo_mnemo->type )
+                { case MNEMO_ENTREE_ANA: Proto_editer_option_entreeANA( client, rezo_mnemo );
                                          break;
                   default: { struct CMD_GTK_MESSAGE erreur;
                              g_snprintf( erreur.message, sizeof(erreur.message),
-                                         "No options for this object %s", option->eana.libelle);
+                                         "No options for this object %s", rezo_mnemo->libelle);
                              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                            }

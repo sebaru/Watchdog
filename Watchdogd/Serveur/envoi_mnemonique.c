@@ -39,23 +39,25 @@
 /* Entrée: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_OPTION_BIT_INTERNE *rezo_option )
-  { struct CMD_TYPE_ENTREEANA *entree;
+ void Proto_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
+  { struct CMD_TYPE_OPTION_BIT_INTERNE option;
+    struct CMD_TYPE_ENTREEANA *entree;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_option->eana.id_mnemo );
+    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_mnemo->id );
 
     if (entree)
-     { memcpy( &rezo_option->eana, entree, sizeof( struct CMD_TYPE_OPTION_BIT_INTERNE ) );
+     { option.type = MNEMO_ENTREE_ANA;
+       memcpy( &option.eana, entree, sizeof( struct CMD_TYPE_OPTION_BIT_INTERNE ) );
        Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
-                     (gchar *)rezo_option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
+                     (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
        g_free(entree);                                                              /* liberation mémoire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate entree %s", rezo_option->eana.libelle);
+                   "Unable to locate entree %s", rezo_mnemo->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }

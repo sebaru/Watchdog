@@ -265,10 +265,10 @@
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );               /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_TYPE, &rezo_mnemonique.type, -1 );         /* Recup du type */
     gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-
     memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
     g_free( libelle );
 printf("on veut les options du bit_interne %s\n", rezo_mnemonique.libelle );
+
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,
                   (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
