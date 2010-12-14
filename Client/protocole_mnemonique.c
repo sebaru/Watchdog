@@ -75,6 +75,7 @@
        case SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK:
              { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
                option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
+printf("Recu autorisation d'edition option \n");
                Menu_editer_option_bit_interne( option );
              }
             break;

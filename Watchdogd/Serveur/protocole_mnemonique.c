@@ -85,6 +85,12 @@
                switch ( option->type )
                 { case MNEMO_ENTREE_ANA: Proto_editer_option_entreeANA( client, option );
                                          break;
+                  default: { struct CMD_GTK_MESSAGE erreur;
+                             g_snprintf( erreur.message, sizeof(erreur.message),
+                                         "No options for this object %s", option->eana.libelle);
+                             Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                           (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+                           }
                 }
              }
             break;
