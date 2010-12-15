@@ -54,6 +54,11 @@
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_ENTREEANA, mnemo_a_virer->id );
                Lancer_requete_SQL ( log, db, requete );
                break;
+          case MNEMO_CPT_IMP:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPT_IMP, mnemo_a_virer->id );
+               Lancer_requete_SQL ( log, db, requete );
+               break;
           default:
                break;
         }
@@ -111,6 +116,12 @@
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
                         "('%f','%f','%d','%d')", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
+            Lancer_requete_SQL ( log, db, requete );
+            break;
+       case MNEMO_CPT_IMP:
+            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                        "INSERT INTO %s(val,unite,id_mnemo) VALUES "
+                        "('%d','%d','%d')", NOM_TABLE_CPT_IMP, 0, 0, last_id );
             Lancer_requete_SQL ( log, db, requete );
             break;
        default:
