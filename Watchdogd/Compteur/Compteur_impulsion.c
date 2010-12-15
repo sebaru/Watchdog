@@ -134,7 +134,7 @@
                 "SELECT id_mnemo,val,unite,num"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id=%d",
                 NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, /* From */
-                NOM_TABLE_MNEMO, NOM_TABLE_CPT_IMP, NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, id /* WHERE */
+                NOM_TABLE_MNEMO, NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, id /* WHERE */
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
