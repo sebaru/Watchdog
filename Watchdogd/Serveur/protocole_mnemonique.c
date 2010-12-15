@@ -83,8 +83,10 @@
              { struct CMD_TYPE_MNEMONIQUE *rezo_mnemo;
                rezo_mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                switch ( rezo_mnemo->type )
-                { case MNEMO_ENTREE_ANA: Proto_editer_option_entreeANA( client, rezo_mnemo );
-                                         break;
+                { case MNEMO_ENTREE_ANA  : Proto_editer_option_entreeANA( client, rezo_mnemo );
+                                           break;
+                  case MNEMO_CPT_IMP     : Proto_editer_option_compteur_imp( client, rezo_mnemo );
+                                           break;
                   default: { struct CMD_GTK_MESSAGE erreur;
                              g_snprintf( erreur.message, sizeof(erreur.message),
                                          "No options for this object %s", rezo_mnemo->libelle);
@@ -98,8 +100,10 @@
              { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
                option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
                switch(option->type)
-                { case MNEMO_ENTREE_ANA: Proto_valider_editer_option_entreeANA( client, &option->eana );
-                                         break;
+                { case MNEMO_ENTREE_ANA  : Proto_valider_editer_option_entreeANA( client, &option->eana );
+                                           break;
+                  case MNEMO_CPT_IMP     : Proto_valider_editer_option_compteur_imp( client, &option->cpt_imp );
+                                           break;
                 }
              }
             break;

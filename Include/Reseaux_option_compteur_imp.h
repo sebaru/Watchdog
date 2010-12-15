@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Include/Reseaux_entreeana.h:   Sous_tag de entreeana pour watchdog 2.0 par lefevre Sebastien           */
+/* Include/Reseaux_option compteur_imp.h:   Gestion des options des compteurs d'impulsions watchdog 2.0   */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * Reseaux_entreeana.h
+ * Reseaux_option_compteur_imp.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien LEFEVRE
@@ -25,31 +25,19 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef _RESEAUX_OPTION_ENTREEANA_H_
- #define _RESEAUX_OPTION_ENTREEANA_H_
+#ifndef _RESEAUX_CPT_IMP_H_
+ #define _RESEAUX_CPT_IMP_H_
 
- #define TAILLEBUF_HISTO_EANA         1600       /* 800 point de controle dans le client et buffer valana */
- #define NBR_VAL_INIT_COURBE          100                   /* Envoyé via 100 points à chaque paquet rezo */
-
- #define COURBE_TEMPS_TOP             5  /* 1 point = 5 secondes sur la grille courbes */
-
- enum
-  { ENTREEANA_NON_INTERP,
-    ENTREEANA_4_20_MA_12BITS,
-    ENTREEANA_4_20_MA_10BITS,
-    NBR_TYPE_ENTREEANA
-  };
-
- struct CMD_TYPE_OPTION_ENTREEANA
+ struct CMD_TYPE_OPTION_COMPTEUR_IMP
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
+    guint  valeur;                                                                  /* Valeur du compteur */
     guint  unite;                                                                         /* Km, h, ° ... */
-    gfloat min;
-    gfloat max;
-    guint  type;                                                               /* Type de gestion de l'EA */
                                                                                         /* Vient du mnemo */
-    guint  num;                                                                         /* Numero de l'EA */
+    guint  num;                                                                     /* Numero du compteur */
+#ifdef bouh
     gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
     gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
+#endif
   };
 
 #endif

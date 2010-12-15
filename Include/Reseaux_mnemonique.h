@@ -38,6 +38,7 @@
  #define NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8  (6*NBR_CARAC_ACRONYME_MNEMONIQUE)
 
  #include "Reseaux_option_entreeana.h"
+ #include "Reseaux_option_compteur_imp.h"
 
  enum
   { MNEMO_BISTABLE,                                               /* Definitions des types de mnemoniques */
@@ -70,6 +71,7 @@
  struct CMD_TYPE_OPTION_BIT_INTERNE
   { guint type;
     union { struct CMD_TYPE_OPTION_ENTREEANA eana;
+            struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
           };
   };
  enum 

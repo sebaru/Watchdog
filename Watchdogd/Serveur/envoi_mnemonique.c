@@ -96,6 +96,68 @@
          }
   }
 /**********************************************************************************************************/
+/* Proto_editer_option_compteur_imp: Le client desire editer une option de compteur d'impulsion           */
+/* Entrée: le client demandeur et le mnemonique du CI                                                     */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_editer_option_compteur_imp ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
+  { struct CMD_TYPE_OPTION_BIT_INTERNE option;
+    struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    cpt = Rechercher_cpt_impDB_par_id( Config.log, Db_watchdog, rezo_mnemo->id );
+
+    if (cpt)
+     { option.type = MNEMO_CPT_IMP;
+       memcpy( &option.cpt_imp, cpt, sizeof( struct CMD_TYPE_OPTION_COMPTEUR_IMP ) );
+       Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
+                     (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
+       g_free(cpt);                                                                 /* liberation mémoire */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to locate cpt_imp %s", rezo_mnemo->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_valider_editer_option_cpt_imp: Le client valide l'edition d'un compteur d'impulsion              */
+/* Entr�e: le client demandeur et le entree en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_editer_option_compteur_imp ( struct CLIENT *client,
+                                                 struct CMD_TYPE_OPTION_COMPTEUR_IMP *rezo_cpt )
+  { struct CMD_TYPE_OPTION_COMPTEUR_IMP *result;
+    gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Modifier_cpt_impDB ( Config.log, Db_watchdog, rezo_cpt );
+    if (retour==FALSE)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to edit cpt_imp CI%03d", rezo_cpt->num);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { result = Rechercher_cpt_impDB_par_id( Config.log, Db_watchdog, rezo_cpt->id_mnemo );
+           if (result)
+            { g_free(result);
+              Charger_cpt_imp ();                                          /* Update de la running config */
+            }
+           else
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate cpt_imp CI%03d", rezo_cpt->num);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+         }
+  }
+/**********************************************************************************************************/
 /* Preparer_envoi_mnemonique: convertit une structure MNEMONIQUE en structure CMD_TYPE_MNEMONIQUE         */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */

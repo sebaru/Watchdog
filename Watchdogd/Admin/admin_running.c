@@ -180,9 +180,9 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine),
-                   " EA%03d = %8.2f, val_int=%d, inrange=%d, mode=%s, min=%8.2f, max=%8.2f\n",
+                   " EA%03d = %8.2f, val_int=%d, inrange=%d, type=%d, min=%8.2f, max=%8.2f\n",
                    num, EA_ech(num), Partage->ea[num].val, EA_inrange(num),
-                   Type_ea_vers_string(Partage->ea[num].cmd_type_eana.type),
+                   Partage->ea[num].cmd_type_eana.type,
                    Partage->ea[num].cmd_type_eana.min, Partage->ea[num].cmd_type_eana.max 
                  );
        Write_admin ( client->connexion, chaine );

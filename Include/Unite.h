@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Commun/Unite.c        Gestion des unites entreeANAs de Watchdog v2.0                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 15 nov. 2009 13:43:06 CET */
+/* Include/Unite.h:   Déclaration des unite pour watchdog 2.0 par lefevre Sebastien                       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 09:47:24 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * Unite.c
+ * Unite.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien LEFEVRE
@@ -25,38 +25,30 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <glib.h>
- #include <string.h>
- #include "Unite.h"
-#ifdef bouh
- #include "Reseaux_mnemonique.h"
-#endif
+#ifndef _UNITE_H_
+ #define _UNITE_H_
 
- static gchar *UNITE_EA[NBR_TYPE_UNITE] =
-  { "°C",
-    "°K",
-    "mbar",
-    "bar",
-    "m",
-    "km",
-    "l",
-    "m/s",
-    "km/h",
-    "%",
-    "% HR",
-    "s",
-    "h",
-    "A",
-    "V"
+ enum
+  { UNITE_DEGRE_C,                                                   /* Definitions des types de messages */
+    UNITE_DEGRE_K,
+    UNITE_MILLIBAR,
+    UNITE_BAR,
+    UNITE_METRE,
+    UNITE_KILOMETRE,
+    UNITE_LITRE,
+    UNITE_METRE_PAR_SECONDE,
+    UNITE_KILOMETRE_PAR_HEURE,
+    UNITE_POURCENT,
+    UNITE_POURCENT_HR,
+    UNITE_SECONDE,
+    UNITE_HEURE,
+    UNITE_DATE,
+    UNITE_VOLTS,
+    NBR_TYPE_UNITE
   };
 
-/**********************************************************************************************************/
-/* Unite_vers_string: renvoie l'unite sous forme de chaine de caractere                                   */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- gchar *Unite_vers_string ( guint type )
-  { if (type<NBR_TYPE_UNITE) return( UNITE_EA[type] );
-                        else return ( "Unknown" );
-  }
+ extern gchar *Unite_vers_string ( guint type );
+
+#endif
 /*--------------------------------------------------------------------------------------------------------*/
+

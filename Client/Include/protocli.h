@@ -452,6 +452,7 @@
 
                                                                                 /* Dans option_entreeana.c */
  extern void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree );
+ extern gchar *Type_ea_vers_string ( guint type );
 
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
  extern void Begin_print (GtkPrintOperation *operation,

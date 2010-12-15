@@ -32,21 +32,17 @@
 
  #define NOM_TABLE_CPT_IMP    "dls_cpt_imp"
 
- struct CPT_IMP_DB
-  { guint  id;                                                                      /* Numero du compteur */
-    guint  valeur;                                                                  /* Valeur du compteur */
-    guchar unite;
-  };
-
  struct CPT_IMP
-  { struct CPT_IMP_DB cpt_impdb;
+  { struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_impdb;
     gboolean actif;                                                       /* Mémorisation de l'etat du CI */
     gint val_en_cours;                                    /* valeur en cours pour le calcul via les ratio */
   };
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_cpt_imp ( void );
- extern void Updater_cpt_impDB ( struct LOG *log, struct DB *db, struct CPT_IMP_DB *val );
- extern struct CPT_IMP_DB *Rechercher_cpt_impDB( struct LOG *log, struct DB *db, guint id );
+ extern void Updater_cpt_impDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_COMPTEUR_IMP *val );
+ extern struct CMD_TYPE_OPTION_COMPTEUR_IMP *Rechercher_cpt_impDB_par_id( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_OPTION_COMPTEUR_IMP *Rechercher_cpt_impDB_par_num( struct LOG *log, struct DB *db, guint num );
+ extern gboolean Modifier_cpt_impDB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

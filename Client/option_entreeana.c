@@ -29,6 +29,12 @@
  
  #include "Reseaux.h"
 
+ gchar *TYPE_EA[NBR_TYPE_ENTREEANA] =
+  { "Non Interprete",
+    "4/20 mA 12 bits",
+    "4/20 mA 10 bits"
+  };
+
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
@@ -44,6 +50,15 @@
  static GtkWidget *Option_type;                                                /* Type de gestion de l'ea */
  static struct CMD_TYPE_OPTION_BIT_INTERNE Entree;                               /* EA en cours d'édition */
 
+/**********************************************************************************************************/
+/* Type_ea_vers_string: renvoie le type d'ea sous forme de chaine de caractere                            */
+/* Entrée: numéro du type d'entree ANA                                                                    */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ gchar *Type_ea_vers_string ( guint type )
+  { if (type<NBR_TYPE_ENTREEANA) return( TYPE_EA[type] );
+                            else return ( "Unknown" );
+  }
 /**********************************************************************************************************/
 /* CB_ajouter_editer_entreeANA: Fonction appelée qd on appuie sur un des boutons de l'interface           */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */

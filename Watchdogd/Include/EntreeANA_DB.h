@@ -33,6 +33,14 @@
 
  #define NOM_TABLE_ENTREEANA    "eana"
 
+ struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
+  { struct CMD_TYPE_OPTION_ENTREEANA cmd_type_eana;
+    gdouble val_ech;
+    gint    val;
+    time_t  date;
+    guint   inrange;
+  };
+
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_eana ( void );
  extern struct CMD_TYPE_OPTION_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint num );

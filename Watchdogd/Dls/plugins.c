@@ -32,7 +32,6 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
- #include "Dls.h"
 
 /**********************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                          */
