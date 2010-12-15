@@ -113,7 +113,7 @@
        Cpt.cpt_imp.id_mnemo = edit_cpt_imp->eana.id_mnemo;
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CPT_IMP), edit_cpt_imp->cpt_imp.num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_cpt_imp->eana.unite );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_cpt_imp->cpt_imp.unite );
      }
     else { gtk_widget_grab_focus( Entry_num );
          }
