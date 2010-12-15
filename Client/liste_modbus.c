@@ -30,7 +30,6 @@
 
  #include "Reseaux.h"
 
- static GtkWidget *F_borne;                                            /* Widget de l'interface graphique */
  static GtkWidget *Liste_modbus;                      /* GtkTreeView pour la gestion des modbuss Watchdog */
  static GtkWidget *Liste_bornes_modbus;         /* GtkTreeView pour la gestion des bornes modbus Watchdog */
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
@@ -71,6 +70,7 @@
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_modbus, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_modbus, GNOME_STOCK_PIXMAP_OPEN ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Edit bornes"), NULL, Menu_editer_borne_modbus, GNOME_STOCK_PIXMAP_OPEN ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_modbus, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_modbus, GNOME_STOCK_PIXMAP_CLEAR ),
@@ -100,7 +100,8 @@
 /* CB_effacer_modbus: Fonction appelée qd on appuie sur un des boutons de l'interface                     */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/**********************************************    GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_modbus, GNOME_STOCK_PIXMAP_OPEN ),
+************************************************************/
  static gboolean CB_effacer_modbus ( GtkDialog *dialog, gint reponse, gboolean edition )
   { struct CMD_TYPE_MODBUS rezo_modbus;
     GtkTreeSelection *selection;
@@ -243,7 +244,6 @@
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gchar *libelle;
     guint nbr;
 
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_modbus) );
@@ -472,8 +472,6 @@
        return(TRUE);
      }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
-     { Menu_editer_modbus(); }
-    else if (event->type == GDK_BUTTON_PRESS && event->button == 1 )
      { Menu_editer_borne_modbus(); }
     return(FALSE);
   }
@@ -788,7 +786,6 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
-    g_object_set ( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Min"), renderer,
                                                          "text", COLONNE_BORNE_MIN,
                                                          NULL);
@@ -796,7 +793,6 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
-    g_object_set ( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Nombre"), renderer,
                                                          "text", COLONNE_BORNE_NBR,
                                                          NULL);
