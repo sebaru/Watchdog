@@ -106,7 +106,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    cpt = Rechercher_cpt_impDB_par_id( Config.log, Db_watchdog, rezo_mnemo->id );
+    cpt = Rechercher_cpt_impDB( Config.log, Db_watchdog, rezo_mnemo->id );
 
     if (cpt)
      { option.type = MNEMO_CPT_IMP;
@@ -143,7 +143,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cpt_impDB_par_id( Config.log, Db_watchdog, rezo_cpt->id_mnemo );
+    else { result = Rechercher_cpt_impDB( Config.log, Db_watchdog, rezo_cpt->id_mnemo );
            if (result)
             { g_free(result);
               Charger_cpt_imp ();                                          /* Update de la running config */
