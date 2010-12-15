@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 22 jun 2004 17:44:24 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 13:30:12 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -33,7 +33,6 @@
  #include <string.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
- #include "Config_lignes.h"
 
 /**********************************************************************************************************/
 /* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                    */

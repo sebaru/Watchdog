@@ -33,10 +33,6 @@
  #include <string.h>
 
  #include "Config_cli.h"
- #include "Config_cli_lignes.h"
-
- extern void Interpreter ( FILE *rc, struct CONFIG_CLI *config_cli );
-
 /**********************************************************************************************************/
 /* Lire_config_cli_cli: lecture et prise en compte de la configuration cliente Watchdog                   */
 /* Entrée: La structure à remplir, le nom du fichier originel                                             */
