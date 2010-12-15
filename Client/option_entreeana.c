@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Client/ajout_entreeANA.c        Addition/Edition d'un entreeANA Watchdog2.0                            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      ven 25 jun 2004 15:13:34 CEST */
+/* Client/option_entreeANA.c        Addition/Edition d'un entreeANA Watchdog2.0                           */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 11:37:22 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * ajout_entreeana.c
+ * option_entreeana.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sébastien Lefevre

@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/protocole_mnemonique.c    Gestion du protocole_mnemonique pour la connexion au serveur Watchdog */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 14:07:22 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 11:32:01 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -62,7 +62,6 @@
        case SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
-               printf("recu mnemo edit\n");
                Menu_ajouter_editer_mnemonique( mnemo );
              }
             break;
@@ -75,8 +74,12 @@
        case SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK:
              { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
                option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
-printf("Recu autorisation d'edition option \n");
-               Proto_editer_option_bit_interne( option );
+               switch( option->type )
+                { case MNEMO_ENTREE_ANA : Proto_editer_option_entreeANA( option );
+                                          break;
+                  case MNEMO_CPT_IMP    : Proto_editer_option_cpt_imp( option );
+                                          break;
+                }
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE:
