@@ -89,7 +89,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 6, 2, TRUE );
+    table = gtk_table_new( 2, 2, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -101,12 +101,12 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_num, 1, 2, 0, 1 );
 
     texte = gtk_label_new( _("Unit") );                                              /* Unite du compteur */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Option_unite = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_UNITE; cpt++ )
      { gtk_combo_box_insert_text( GTK_COMBO_BOX(Option_unite), cpt, Unite_vers_string(cpt) );
      }
-    gtk_table_attach_defaults( GTK_TABLE(table), Option_unite, 1, 2, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Option_unite, 1, 2, 1, 2 );
 
     if (edit_cpt_imp)                                                          /* Si edition d'un cpt_imp */
      { gchar chaine[32];
