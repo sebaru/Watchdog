@@ -45,7 +45,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_editer_option_cpt_imp ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { Cpt.eana.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
+  { Cpt.cpt_imp.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
