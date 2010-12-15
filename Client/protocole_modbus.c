@@ -41,6 +41,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_modbus ( struct CONNEXION *connexion )
   { static GList *Arrivee_modbus = NULL;
+    static GList *Arrivee_bornes = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_MODBUS_OK:
@@ -89,6 +90,25 @@
                g_list_free( Arrivee_modbus );
                Arrivee_modbus = NULL;
                Chercher_page_notebook( TYPE_PAGE_MODBUS, 0, TRUE );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               Set_progress_plusun();
+
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)g_malloc0( sizeof( struct CMD_TYPE_BORNE_MODBUS ) );
+               if (!borne) return; 
+
+               memcpy( borne, connexion->donnees, sizeof(struct CMD_TYPE_BORNE_MODBUS ) );
+               Arrivee_bornes = g_list_append( Arrivee_bornes, borne );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS_FIN:
+             { 
+               g_list_foreach( Arrivee_bornes, (GFunc)Proto_afficher_une_borne_modbus, NULL );
+               g_list_foreach( Arrivee_bornes, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_bornes );
+               Arrivee_bornes = NULL;
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MODBUS:

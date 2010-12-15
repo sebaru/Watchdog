@@ -30,13 +30,15 @@
 
  #include "Reseaux.h"
 
+ static GtkWidget *F_borne;                                            /* Widget de l'interface graphique */
  static GtkWidget *Liste_modbus;                      /* GtkTreeView pour la gestion des modbuss Watchdog */
+ static GtkWidget *Liste_bornes_modbus;         /* GtkTreeView pour la gestion des bornes modbus Watchdog */
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 
- enum                   /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
+ enum                                                       /* Numéro des colonnes dans les listes modbus */
   {  COLONNE_ID,
      COLONNE_ACTIF,
      COLONNE_WATCHDOG,
@@ -45,19 +47,30 @@
      COLONNE_LIBELLE,
      NBR_COLONNE
   };
+ enum                                                       /* Numéro des colonnes dans les listes bornes */
+  {  COLONNE_BORNE_ID,
+     COLONNE_BORNE_MODULE,
+     COLONNE_BORNE_TYPE,
+     COLONNE_BORNE_ADRESSE,
+     COLONNE_BORNE_MIN,
+     COLONNE_BORNE_NBR,
+     NBR_COLONNE_BORNE
+  };
+
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
  static void Menu_effacer_modbus ( void );
  static void Menu_editer_modbus ( void );
- static void Menu_editer_borne_modbus ( void );
  static void Menu_ajouter_modbus ( void );
  static void Menu_exporter_modbus ( void );
+ static void Menu_effacer_borne_modbus ( void );
+ static void Menu_editer_borne_modbus ( void );
+ static void Menu_ajouter_borne_modbus ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_modbus, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_modbus, GNOME_STOCK_PIXMAP_OPEN ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Edit Borne"), NULL, Menu_editer_borne_modbus, GNOME_STOCK_PIXMAP_OPEN ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_modbus, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_modbus, GNOME_STOCK_PIXMAP_CLEAR ),
@@ -67,6 +80,19 @@
  static GnomeUIInfo Menu_popup_nonselect[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_modbus, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_modbus, GNOME_STOCK_PIXMAP_PRINT ),
+    GNOMEUIINFO_END
+  };
+
+ static GnomeUIInfo Menu_popup_select_borne[]=
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_borne_modbus, GNOME_STOCK_PIXMAP_ADD ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_borne_modbus, GNOME_STOCK_PIXMAP_OPEN ),
+    GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_borne_modbus, GNOME_STOCK_PIXMAP_CLEAR ),
+    GNOMEUIINFO_END
+  };
+
+ static GnomeUIInfo Menu_popup_nonselect_borne[]=
+  { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_borne_modbus, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_END
   };
 
@@ -135,7 +161,7 @@
     dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                       GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
-                                      _("Do you want to delete %d modbus%c ?"), nbr, (nbr>1 ? 's' : ' ') );
+                                      _("Do you want to delete %d module%c modbus ?"), nbr, (nbr>1 ? 's' : ' ') );
     g_signal_connect( dialog, "response",
                       G_CALLBACK(CB_effacer_modbus), NULL );
     gtk_widget_show_all( dialog );
@@ -171,6 +197,90 @@
                   (gchar *)&rezo_modbus, sizeof(struct CMD_TYPE_MODBUS) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/**********************************************************************************************************/
+/* CB_effacer_borne_modbus: Fonction appelée qd on appuie sur un des boutons de l'interface               */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* sortie: TRUE                                                                                           */
+/**********************************************************************************************************/
+ static gboolean CB_effacer_borne_modbus ( GtkDialog *dialog, gint reponse, gboolean edition )
+  { struct CMD_TYPE_BORNE_MODBUS rezo_borne;
+    GtkTreeSelection *selection;
+    GtkTreeModel *store;
+    GList *lignes;
+    GtkTreeIter iter;
+
+    switch(reponse)
+     { case GTK_RESPONSE_YES:
+            selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_bornes_modbus) );
+            store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_bornes_modbus) );
+            lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+            while ( lignes )
+             { gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
+               gtk_tree_model_get( store, &iter, COLONNE_BORNE_ID, &rezo_borne.id, -1 );   /* Recup du id */
+
+               Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_DEL_BORNE_MODBUS,
+                             (gchar *)&rezo_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+               gtk_tree_selection_unselect_iter( selection, &iter );
+               lignes = lignes->next;
+             }
+            g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+            g_list_free (lignes);                                                   /* Liberation mémoire */
+            break;
+       default: break;
+     }
+    gtk_widget_destroy( GTK_WIDGET(dialog) );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Menu_ajouter_borne_modbus: Ajout d'une borne modbus                                                    */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_ajouter_borne_modbus ( void )
+  { GtkTreeSelection *selection;
+    struct CMD_TYPE_BORNE_MODBUS rezo_borne;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    gchar *libelle;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_modbus) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_modbus) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_borne.id, -1 );                    /* Recup du id */
+
+    Menu_ajouter_editer_borne_modbus( FALSE, &rezo_borne );
+   }
+/**********************************************************************************************************/
+/* Menu_effacer_borne_modbus: Retrait des bornes modbus selectionnés                                      */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_effacer_borne_modbus ( void )
+  { GtkTreeSelection *selection;
+    GtkWidget *dialog;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_bornes_modbus) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    printf("Menu effacer borne modbus: nbr=%d\n", nbr );
+    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+
+    dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
+                                      GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                      GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
+                                      _("Do you want to delete %d borne%c modbus ?"), nbr, (nbr>1 ? 's' : ' ') );
+    g_signal_connect( dialog, "response",
+                      G_CALLBACK(CB_effacer_borne_modbus), NULL );
+    gtk_widget_show_all( dialog );
   }
 /**********************************************************************************************************/
 /* Menu_editer_modbus: Demande d'edition du modbus selectionné                                            */
@@ -363,6 +473,46 @@
      }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
      { Menu_editer_modbus(); }
+    else if (event->type == GDK_BUTTON_PRESS && event->button == 1 )
+     { Menu_editer_borne_modbus(); }
+    return(FALSE);
+  }
+/**********************************************************************************************************/
+/* Gerer_popup_borne_modbus: Gestion du menu popup quand on clique droite sur la liste des bornes modbus  */
+/* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static gboolean Gerer_popup_borne_modbus ( GtkWidget *widget, GdkEventButton *event, gpointer data )
+  { static GtkWidget *Popup_select=NULL, *Popup_nonselect=NULL;
+    GtkTreeSelection *selection;
+    gboolean ya_selection;
+    GtkTreePath *path;
+    gint cellx, celly;
+    if (!event) return(FALSE);
+
+    if ( event->button == 3 )                                                         /* Gestion du popup */
+     { if (!Popup_select)    Popup_select = gnome_popup_menu_new( Menu_popup_select_borne );
+       if (!Popup_nonselect) Popup_nonselect = gnome_popup_menu_new( Menu_popup_nonselect_borne );
+
+       ya_selection = FALSE;
+       selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_bornes_modbus) );/* On recupere selection */
+       if (gtk_tree_selection_count_selected_rows(selection) == 0)
+        { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_bornes_modbus), event->x, event->y,
+                                          &path, NULL, &cellx, &celly );
+          
+          if (path)
+           { gtk_tree_selection_select_path( selection, path );
+             gtk_tree_path_free( path );
+             ya_selection = TRUE;
+           }
+        } else ya_selection = TRUE;                              /* ya bel et bien qqchose de selectionné */
+
+       gnome_popup_menu_do_popup_modal( (ya_selection ? Popup_select : Popup_nonselect),
+                                        NULL, NULL, event, NULL, F_client );
+       return(TRUE);
+     }
+    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
+     { Menu_editer_borne_modbus(); }
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -441,7 +591,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Creer_page_modbus( void )
-  { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur;
+  { GtkWidget *boite, *vboite, *scroll, *hboite, *bouton, *separateur;
     struct PAGE_NOTEBOOK *page;
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
@@ -454,12 +604,22 @@
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     
+    vboite = gtk_vbox_new( FALSE, 6 );
+    gtk_box_pack_start( GTK_BOX(hboite), vboite, TRUE, TRUE, 0 );
+
 /***************************************** La liste des modbuss *******************************************/
     Creer_liste_modbus( &Liste_modbus, &scroll );
-    gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
-
+    gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );
     g_signal_connect( G_OBJECT(Liste_modbus), "button_press_event",              /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_modbus), NULL );
+    separateur = gtk_hseparator_new();
+    gtk_box_pack_start( GTK_BOX(vboite), separateur, FALSE, FALSE, 0 );
+
+    Creer_liste_bornes_modbus( &Liste_bornes_modbus, &scroll );
+    gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );
+    g_signal_connect( G_OBJECT(Liste_bornes_modbus), "button_press_event",       /* Gestion du menu popup */
+                      G_CALLBACK(Gerer_popup_borne_modbus), NULL );
+
 /************************************ Les boutons de controles ********************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
@@ -580,5 +740,145 @@
 
     if (valide)
      { Rafraichir_visu_modbus( GTK_LIST_STORE(store), &iter, modbus ); }
+  }
+/**********************************************************************************************************/
+/* Creer_liste_bornes_modbus: Creation de la liste des bornes modbus                                      */
+/* Entrée: Le retour de la liste, le scroll qui va bien                                                   */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Creer_liste_bornes_modbus( GtkWidget **Liste, GtkWidget **Scroll )
+  { GtkTreeSelection *selection;
+    GtkTreeViewColumn *colonne;
+    GtkCellRenderer *renderer;
+    GtkListStore *store;
+    GtkWidget *scroll, *liste;
+
+    scroll = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+    *Scroll = scroll;
+
+    store = gtk_list_store_new ( NBR_COLONNE_BORNE,
+                                                    G_TYPE_UINT,                                    /* Id */
+                                                    G_TYPE_UINT,                                /* Module */
+                                                    G_TYPE_UINT,                                  /* Type */
+                                                    G_TYPE_UINT,                               /* Adresse */
+                                                    G_TYPE_UINT,                                   /* Min */
+                                                    G_TYPE_UINT                                    /* Nbr */
+                               );
+
+    liste = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                 /* Creation de la vue */
+    *Liste = liste;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(liste) );
+    gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
+    gtk_container_add( GTK_CONTAINER(scroll), liste );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
+                                                         "text", COLONNE_BORNE_TYPE,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_TYPE);             /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Adresse"), renderer,
+                                                         "text", COLONNE_BORNE_ADRESSE,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_ADRESSE );         /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Min"), renderer,
+                                                         "text", COLONNE_BORNE_MIN,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_MIN );             /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Nombre"), renderer,
+                                                         "text", COLONNE_BORNE_NBR,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_NBR );             /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    gtk_tree_view_set_rules_hint( GTK_TREE_VIEW(liste), TRUE );                        /* Pour faire beau */
+    g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
+  }
+/**********************************************************************************************************/
+/* Rafraichir_visu_borne_modbus: Rafraichissement d'une borne modbus à l'écran                            */
+/* Entrée: une reference sur la borne                                                                     */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Rafraichir_visu_borne_modbus( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_BORNE_MODBUS *borne )
+  { gtk_list_store_set ( store, iter,
+                         COLONNE_BORNE_ID, borne->id,
+                         COLONNE_BORNE_MODULE, borne->module,
+                         COLONNE_BORNE_TYPE, borne->type,
+                         COLONNE_BORNE_ADRESSE, borne->adresse,
+                         COLONNE_BORNE_MIN, borne->min,
+                         COLONNE_BORNE_NBR, borne->nbr,
+                         -1
+                       );
+  }
+/**********************************************************************************************************/
+/* Proto_afficher_une_borne_modbus: Affiche une nouvelle borne dans la liste                              */
+/* Entrée: une reference sur le modbus                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_afficher_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne )
+  { GtkListStore *store;
+    GtkTreeIter iter;
+
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_bornes_modbus) ));
+    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
+    Rafraichir_visu_borne_modbus ( store, &iter, borne );
+  }
+/**********************************************************************************************************/
+/* Cacher_une_borne_modbus: Enleve une borne modbus de la liste des modbuss                               */
+/* Entrée: une reference sur le modbus                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_cacher_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne )
+  { GtkTreeModel *store;
+    GtkTreeIter iter;
+    gboolean valide;
+    gint id;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_bornes_modbus) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == borne->id ) break;
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    if (valide)
+     { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+  }
+/**********************************************************************************************************/
+/* Proto_rafrachir_une_borne_modbus: Rafraichissement de la borne modbus en parametre                     */
+/* Entrée: une reference sur la borne                                                                     */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_rafraichir_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne )
+  { GtkTreeModel *store;
+    GtkTreeIter iter;
+    gboolean valide;
+    gint id;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_bornes_modbus) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == borne->id ) break;
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    if (valide)
+     { Rafraichir_visu_borne_modbus( GTK_LIST_STORE(store), &iter, borne ); }
   }
 /*--------------------------------------------------------------------------------------------------------*/
