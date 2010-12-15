@@ -79,6 +79,15 @@
                Proto_effacer_modbus( client, modbus );
              }
             break;
+       case SSTAG_CLIENT_WANT_BORNE_MODBUS:
+             { struct CMD_TYPE_MODBUS *modbus;
+               modbus = (struct CMD_TYPE_MODBUS *)connexion->donnees;
+               client->id_modbus_bornes_a_editer = modbus->id;
+               Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_borne_modbus_thread, client );
+               pthread_detach( tid );
+             }
+            break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_MODBUS:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;

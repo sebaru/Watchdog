@@ -199,7 +199,7 @@
 
     memcpy( &rezo_modbus.libelle, libelle, sizeof(rezo_modbus.libelle) );
     g_free( libelle );
-    Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_EDIT_BORNE_MODBUS,
+    Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_WANT_BORNE_MODBUS,
                   (gchar *)&rezo_modbus, sizeof(struct CMD_TYPE_MODBUS) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */

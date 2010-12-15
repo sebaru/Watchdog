@@ -68,6 +68,10 @@
     SSTAG_CLIENT_TYPE_NUM_MNEMO_MODBUS,                    /* Le client souhaite le mnemonique bit_motion */
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_MODBUS,                          /* Le serveur répond avec le mnemonique */
 
+    SSTAG_CLIENT_WANT_BORNE_MODBUS,                           /* Demande d'edition des bornes d'un module */
+    SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS,                    /* Ajout d'une borne dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS_FIN,       /* Ajout de la derniere borne dans la liste cliente */
+    
     SSTAG_CLIENT_ADD_BORNE_MODBUS,                  /* Le client desire ajouter une borne modbus watchdog */
     SSTAG_SERVEUR_ADD_BORNE_MODBUS_OK,                                /* L'ajout de l'objet est un succes */
 

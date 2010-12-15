@@ -206,13 +206,70 @@
      }
   }
 /**********************************************************************************************************/
-/* Envoyer_modbuss: Envoi des modbuss au client GID_MODBUS                                                */
+/* Envoyer_modbus_thread: Envoi des modules modbuss au client                                             */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_modbus_thread ( struct CLIENT *client )
   { Envoyer_modbus_thread_tag( client, TAG_MODBUS, SSTAG_SERVEUR_ADDPROGRESS_MODBUS,
                                                    SSTAG_SERVEUR_ADDPROGRESS_MODBUS_FIN );
+    return(NULL);
+  }
+/**********************************************************************************************************/
+/* Envoyer_borne_modbus_thread_tag: Envoi des bornes au client, avec des tags en paralmètres              */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void *Envoyer_borne_modbus_thread_tag ( struct CLIENT *client, guint tag, guint sstag, guint sstag_fin )
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+    struct CMD_ENREG nbr;
+    struct DB *db;
+
+    prctl(PR_SET_NAME, "W-EnvoiBORNE ", 0, 0, 0 );
+
+    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                      Config.db_username, Config.db_password, Config.db_port );
+    if (!db)
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    if ( ! Recuperer_borne_modbusDB( Config.log, db, client->id_modbus_bornes_a_editer ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       Libere_DB_SQL( Config.log, &db );
+       pthread_exit( NULL );
+     }
+
+    nbr.num = db->nbr_result;
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d bornes modbus", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
+
+    for( ; ; )
+     { borne = Recuperer_borne_modbusDB_suite( Config.log, db );
+       if (!borne)
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+          Libere_DB_SQL( Config.log, &db );
+          Unref_client( client );                                     /* Déréférence la structure cliente */
+          pthread_exit ( NULL );
+        }
+
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+       Envoi_client ( client, tag, sstag, (gchar *)borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+       g_free(borne);
+     }
+  }
+/**********************************************************************************************************/
+/* Envoyer_bornes_modbus_thread: Envoi les bornes modbus au client                                        */
+/* Entrée: le client qui a demandé l'edition                                                              */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_borne_modbus_thread ( struct CLIENT *client )
+  { Envoyer_borne_modbus_thread_tag( client, TAG_MODBUS, SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS,
+                                                         SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS_FIN );
     return(NULL);
   }
 /*--------------------------------------------------------------------------------------------------------*/

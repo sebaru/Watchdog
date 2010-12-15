@@ -43,23 +43,6 @@
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
-#ifdef bouh
- gchar *Mode_borne[NBR_MODE_BORNE+1] =
-  { "input_TOR", "output_TOR", "input_ANA", "output_ANA", "unknown" };
-
-/**********************************************************************************************************/
-/* Charger_tous_MODBUS: Requete la DB pour charger les modules et les bornes modbus                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
-/**********************************************************************************************************/
- gint Mode_borne_vers_id ( gchar *mode )
-  { gint i;
-    for (i = 0; i<NBR_MODE_BORNE; i++)
-     { if ( ! strcmp ( mode, Mode_borne[i] ) ) break;
-     }
-    return(i);
-  }
-#endif
 /**********************************************************************************************************/
 /* Retirer_modbusDB: Elimination d'un module modbus                                                       */
 /* Entrée: un log et une database                                                                         */

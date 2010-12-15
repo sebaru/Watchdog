@@ -123,6 +123,7 @@
     gint id_creation_plugin_dls;                             /* ID fichier du plugin en cours de creation */
     gint classe_icone;                                        /* Classe d'icone en cours de visualisation */
     gint num_supervision;                                 /* Numéro du synoptique en cours de supervision */
+    gint id_modbus_bornes_a_editer;              /* Numéro du module modbus dont il faut editer les bornes */
     struct CMD_WANT_SCENARIO_MOTIF sce;                     /* numéro du monostable du scenario a envoyer */
     struct CMD_REQUETE_HISTO_HARD requete;                   /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
