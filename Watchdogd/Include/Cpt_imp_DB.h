@@ -35,7 +35,9 @@
  struct CPT_IMP
   { struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_impdb;
     gboolean actif;                                                       /* Mémorisation de l'etat du CI */
-    gint val_en_cours;                                    /* valeur en cours pour le calcul via les ratio */
+    gint val_en_cours1;                                   /* valeur en cours pour le calcul via les ratio */
+    gint val_en_cours2;                       /* valeur en cours avant interprétation selon le type de CI */
+
   };
 
 /*************************************** Définitions des prototypes ***************************************/

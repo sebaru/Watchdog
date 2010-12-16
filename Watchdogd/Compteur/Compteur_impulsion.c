@@ -88,7 +88,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id_mnemo,val,unite,num"
+                "SELECT id_mnemo,val,unite,num,type_ci"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo ORDER BY %s.num",
                 NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_MNEMO, NOM_TABLE_CPT_IMP, /* WHERE */
@@ -118,6 +118,7 @@
        cpt_imp->valeur   = atoi(db->row[1]);
        cpt_imp->unite    = atoi(db->row[2]);
        cpt_imp->num      = atoi(db->row[3]);
+       cpt_imp->type     = atoi(db->row[4]);
      }
     return(cpt_imp);
   }
@@ -131,7 +132,7 @@
     gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id_mnemo,val,unite,num"
+                "SELECT id_mnemo,val,unite,num,type_ci"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.id=%d",
                 NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_MNEMO, NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, id /* WHERE */
@@ -154,6 +155,7 @@
        cpt_imp->valeur   = atoi(db->row[1]);
        cpt_imp->unite    = atoi(db->row[2]);
        cpt_imp->num      = atoi(db->row[3]);
+       cpt_imp->type     = atoi(db->row[4]);
      }
     Liberer_resultat_SQL ( log, db );
     return(cpt_imp);
@@ -168,8 +170,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "unite=%d WHERE id_mnemo=%d",
-                NOM_TABLE_CPT_IMP, cpt_imp->unite, cpt_imp->id_mnemo );
+                "unite='%d',type_ci='%d' WHERE id_mnemo=%d",
+                NOM_TABLE_CPT_IMP, cpt_imp->unite, cpt_imp->type, cpt_imp->id_mnemo );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

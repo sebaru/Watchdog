@@ -28,16 +28,20 @@
 #ifndef _RESEAUX_CPT_IMP_H_
  #define _RESEAUX_CPT_IMP_H_
 
+ enum
+  { CI_TOTALISATEUR,
+    CI_MOYENNEUR_SEC,
+    CI_MOYENNEUR_MIN,
+    NBR_TYPE_CI
+  };
+
  struct CMD_TYPE_OPTION_COMPTEUR_IMP
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
     guint  valeur;                                                                  /* Valeur du compteur */
     guint  unite;                                                                         /* Km, h, ° ... */
+    guint  type;                                                                          /* Km, h, ° ... */
                                                                                         /* Vient du mnemo */
     guint  num;                                                                     /* Numero du compteur */
-#ifdef bouh
-    gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
-    gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
-#endif
   };
 
 #endif
