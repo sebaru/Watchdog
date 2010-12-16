@@ -540,6 +540,7 @@
  extern void Proto_rafraichir_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne );
  extern void Creer_liste_modbus( GtkWidget **Liste, GtkWidget **Scroll );
  extern void Creer_liste_bornes_modbus( GtkWidget **Liste, GtkWidget **Scroll );
+ extern gchar *Mode_borne_vers_string ( guint type );
                                                                                    /* Dans ajout_modbus.c */
  extern void Menu_ajouter_editer_modbus ( struct CMD_TYPE_MODBUS *edit_modbus);
  extern void Menu_ajouter_editer_borne_modbus ( gboolean edition, struct CMD_TYPE_BORNE_MODBUS *edit_borne );

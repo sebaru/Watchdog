@@ -47,6 +47,14 @@
     gint nbr;
   };
 
+ enum
+  { BORNE_INPUT_TOR,
+    BORNE_OUTPUT_TOR,
+    BORNE_INPUT_ANA,
+    BORNE_OUTPUT_ANA,
+    NBR_MODE_BORNE
+  };
+
 /************************************************* Tag de communication ***********************************/
  enum 
   { SSTAG_CLIENT_WANT_PAGE_MODBUS,

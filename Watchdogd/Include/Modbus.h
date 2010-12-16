@@ -51,18 +51,6 @@
     guint admin_del_borne;                                                      /* Demande de deconnexion */
   };
 
- enum
-  { BORNE_INPUT_TOR,
-    BORNE_OUTPUT_TOR,
-    BORNE_INPUT_ANA,
-    BORNE_OUTPUT_ANA,
-    NBR_MODE_BORNE
-  };
-
-#ifdef bouh
- extern gchar *Mode_borne[NBR_MODE_BORNE+1];
-#endif
-
  struct TRAME_MODBUS_REQUETE_ETOR                                        /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
     guint16 proto_id; /* -> 0 = MOBUS */

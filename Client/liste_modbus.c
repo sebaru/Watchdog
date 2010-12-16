@@ -50,6 +50,7 @@
   {  COLONNE_BORNE_ID,
      COLONNE_BORNE_MODULE,
      COLONNE_BORNE_TYPE,
+     COLONNE_BORNE_TYPE_STRING,
      COLONNE_BORNE_ADRESSE,
      COLONNE_BORNE_MIN,
      COLONNE_BORNE_NBR,
@@ -96,12 +97,27 @@
     GNOMEUIINFO_END
   };
 
+ static gchar* Mode_borne [ NBR_MODE_BORNE ] =
+  { "Input TOR",
+    "Output TOR",
+    "Input ANA",
+    "Output ANA"
+  };
+
+/**********************************************************************************************************/
+/* Type_ea_vers_string: renvoie le type d'ea sous forme de chaine de caractere                            */
+/* Entrée: numéro du type d'entree ANA                                                                    */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ gchar *Mode_borne_vers_string ( guint type )
+  { if (type<NBR_MODE_BORNE) return( Mode_borne[type] );
+                        else return( "Unknown" );
+  }
 /**********************************************************************************************************/
 /* CB_effacer_modbus: Fonction appelée qd on appuie sur un des boutons de l'interface                     */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
-/**********************************************    GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_modbus, GNOME_STOCK_PIXMAP_OPEN ),
-************************************************************/
+/**********************************************************************************************************/
  static gboolean CB_effacer_modbus ( GtkDialog *dialog, gint reponse, gboolean edition )
   { struct CMD_TYPE_MODBUS rezo_modbus;
     GtkTreeSelection *selection;
@@ -759,6 +775,7 @@
                                                     G_TYPE_UINT,                                    /* Id */
                                                     G_TYPE_UINT,                                /* Module */
                                                     G_TYPE_UINT,                                  /* Type */
+                                                    G_TYPE_STRING,                         /* Type String */
                                                     G_TYPE_UINT,                               /* Adresse */
                                                     G_TYPE_UINT,                                   /* Min */
                                                     G_TYPE_UINT                                    /* Nbr */
@@ -771,29 +788,29 @@
     gtk_container_add( GTK_CONTAINER(scroll), liste );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
-                                                         "text", COLONNE_BORNE_TYPE,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Mode"), renderer,
+                                                         "text", COLONNE_BORNE_TYPE_STRING,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_TYPE);             /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_TYPE_STRING);      /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
     g_object_set ( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Adresse"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Adress"), renderer,
                                                          "text", COLONNE_BORNE_ADRESSE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_ADRESSE );         /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Min"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("First I/O bit"), renderer,
                                                          "text", COLONNE_BORNE_MIN,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_MIN );             /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Nombre"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("I/O Number"), renderer,
                                                          "text", COLONNE_BORNE_NBR,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BORNE_NBR );             /* On peut la trier */
@@ -812,6 +829,7 @@
                          COLONNE_BORNE_ID, borne->id,
                          COLONNE_BORNE_MODULE, borne->module,
                          COLONNE_BORNE_TYPE, borne->type,
+                         COLONNE_BORNE_TYPE_STRING, Mode_borne_vers_string(borne->type),
                          COLONNE_BORNE_ADRESSE, borne->adresse,
                          COLONNE_BORNE_MIN, borne->min,
                          COLONNE_BORNE_NBR, borne->nbr,
