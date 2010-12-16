@@ -860,27 +860,37 @@
                             if ( ! (module->response.data[1] & 0x03) )
                              { reponse = module->response.data[0] << 5;
                                reponse |= module->response.data[1] >> 3;
-                               SEA( cpt_e++, reponse );
+                               SEA( cpt_e, reponse );
+                               SEA_range( cpt_e, 1 );
                              }
-                            else SEA( cpt_e++, 0 );
+                            else SEA_range( cpt_e, 0 );
+
+                            cpt_e++ ;
                             if ( ! (module->response.data[3] & 0x03) )
                              { reponse = module->response.data[2] << 5;
                                reponse |= module->response.data[3] >> 3;
-                               SEA( cpt_e++, reponse );
+                               SEA( cpt_e, reponse );
+                               SEA_range( cpt_e, 1 );
                              }
-                            else SEA( cpt_e++, 0 );
+                            else SEA_range( cpt_e, 0 );
+
+                            cpt_e++ ;
                             if ( ! (module->response.data[5] & 0x03) )
                              { reponse = module->response.data[4] << 5;
                                reponse |= module->response.data[5] >> 3;
-                               SEA( cpt_e++, reponse );
+                               SEA( cpt_e, reponse );
+                               SEA_range( cpt_e, 1 );
                              }
-                            else SEA( cpt_e++, 0 );
+                            else SEA_range( cpt_e, 0 );
+
+                            cpt_e++ ;
                             if ( ! (module->response.data[7] & 0x03) )
                              { reponse = module->response.data[6] << 5;
                                reponse |= module->response.data[7] >> 3;
-                               SEA( cpt_e++, reponse );
+                               SEA( cpt_e, reponse );
+                               SEA_range( cpt_e, 1 );
                              }
-                            else SEA( cpt_e++, 0 );
+                            else SEA_range( cpt_e, 0 );
                           }
                          break;
                   default: Info_n( Config.log, DEBUG_MODBUS,

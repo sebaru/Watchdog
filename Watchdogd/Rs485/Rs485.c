@@ -232,7 +232,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static void Charger_un_rs485 ( gint id )
+ static gboolean Charger_un_rs485 ( gint id )
   { struct MODULE_RS485 *module;
     struct CMD_TYPE_RS485 *rs485;
     struct DB *db;
