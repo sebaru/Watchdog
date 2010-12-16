@@ -33,7 +33,7 @@
   { "Non Interprete",
     "4/20 mA 12 bits",
     "4/20 mA 10 bits",
-    "Borne WAGO 750-455"
+    "Borne WAGO"
   };
 
 /********************************* Définitions des prototypes programme ***********************************/

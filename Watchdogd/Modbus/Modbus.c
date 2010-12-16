@@ -771,7 +771,8 @@
      { case BORNE_INPUT_TOR:  Interroger_borne_input_tor( module );
             break;
 
-       case BORNE_INPUT_ANA:  Interroger_borne_input_ana( module );
+       case BORNE_INPUT_ANA:  if (!module->do_check_eana) return;
+                              Interroger_borne_input_ana( module );
             break;
 
        case BORNE_OUTPUT_TOR: Interroger_borne_output_tor( module );                /* Borne de sortie ?? */
@@ -1079,7 +1080,13 @@
               {                                        /* Si pas de requete, on passe a la borne suivante */
                 module->borne_en_cours = module->borne_en_cours->next;
                 if ( ! module->borne_en_cours )                                      /* Tour des bornes ? */
-                 { module->borne_en_cours = module->Bornes; }
+                 { module->borne_en_cours = module->Bornes;
+                                                       /* Interrogation borne ANA toutes les 5 secondes ! */
+                   if (module->date_next_eana<Partage->top)
+                    { module->date_next_eana = Partage->top + 50;
+                      module->do_check_eana = TRUE;
+                    } else module->do_check_eana = FALSE;
+                 }
 
 /***************************** Début de l'interrogation de la borne du module *****************************/
                 Interroger_borne ( module );

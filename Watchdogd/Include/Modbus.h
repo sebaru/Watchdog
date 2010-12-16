@@ -103,12 +103,14 @@
     gint nbr_oct_lu;                                                            /* Nombre d'octet deja lu */
     guint16 transaction_id;
     guint nbr_deconnect;
-    time_t date_retente;
-    time_t date_last_reponse;
-    gboolean request;
+    time_t date_retente;                           /* Prochaine date de raccrochage module en cas de DOWN */
+    time_t date_last_reponse;                                   /* Utilisé pour détecter un "DOWN module" */
+    time_t date_next_eana;                       /* Utilisé pour gérer les interrogations des bornes EANA */
+    gboolean do_check_eana;                                       /* Interrogation des bornes EANA ou non */
+    gboolean request;                /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
     struct TRAME_MODBUS_REPONSE response;
-    GList *Bornes;
-    GList *borne_en_cours;
+    GList *Bornes;                                             /* La liste des bornes associées au module */
+    GList *borne_en_cours;                                           /* La borne en cours d'interrogation */
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
