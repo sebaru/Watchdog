@@ -397,11 +397,6 @@ printf("bouh\n");
                                         NULL, NULL, event, NULL, F_client );
        return(TRUE);
      }
-#ifdef bouh
-    else if (event->type == GDK_BUTTON_PRESS && event->button == 1 )                    /* Simple clic ?? */
-     { Clic_classe();
-     }
-#endif
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
      { Menu_editer_classe(); }
     return(FALSE);

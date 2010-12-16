@@ -312,6 +312,9 @@
     gchar *libelle;
     guint nbr;
 
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_bornes_modbus) );
+    gtk_list_store_clear( GTK_LIST_STORE(store) );
+
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_modbus) );
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_modbus) );
 
@@ -526,7 +529,7 @@
        return(TRUE);
      }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
-     { Menu_editer_borne_modbus(); }
+     { Menu_editer_modbus(); }
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -626,6 +629,9 @@
     gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );
     g_signal_connect( G_OBJECT(Liste_modbus), "button_press_event",              /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_modbus), NULL );
+    g_signal_connect( G_OBJECT(gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_modbus) )), "changed",
+                      G_CALLBACK(Menu_editer_borne_modbus), NULL );
+
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(vboite), separateur, FALSE, FALSE, 0 );
 
