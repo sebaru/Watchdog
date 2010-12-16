@@ -97,7 +97,7 @@
 /**********************************************************************************************************/
  static void Afficher_mnemo_modbus ( void )
   { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
-    mnemo.type = MNEMO_MONOSTABLE;
+    mnemo.type = MNEMO_BISTABLE;
     mnemo.num  = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit) );
     
     Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_TYPE_NUM_MNEMO_MODBUS,
