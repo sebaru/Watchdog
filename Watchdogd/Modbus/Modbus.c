@@ -1024,7 +1024,7 @@
        if (Partage->com_modbus.admin_add_borne)
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding une borne",
                   Partage->com_modbus.admin_add_borne );
-          module = Chercher_module_by_id ( Partage->com_modbus.admin_del_borne );
+          module = Chercher_module_by_id ( Partage->com_modbus.admin_add_borne );
           Decharger_un_MODBUS ( module );
           Charger_un_MODBUS ( Partage->com_modbus.admin_add_borne );
           Partage->com_modbus.admin_add_borne = 0;

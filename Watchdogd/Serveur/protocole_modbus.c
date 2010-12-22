@@ -88,6 +88,12 @@
                pthread_detach( tid );
              }
             break;
+       case SSTAG_CLIENT_DEL_BORNE_MODBUS:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_effacer_borne_modbus( client, borne );
+             }
+            break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_MODBUS:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;

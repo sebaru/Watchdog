@@ -97,8 +97,8 @@
          }
   }
 /**********************************************************************************************************/
-/* Proto_effacer_modbus: Retrait du modbus en parametre                                                     */
-/* Entrée: le client demandeur et le modbus en question                                                    */
+/* Proto_effacer_modbus: Retrait du modbus en parametre                                                   */
+/* Entrée: le client demandeur et le modbus en question                                                   */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus )
@@ -112,7 +112,7 @@
      { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_DEL_MODBUS_OK,
                      (gchar *)rezo_modbus, sizeof(struct CMD_TYPE_MODBUS) );
        while (Partage->com_modbus.admin_del) sched_yield();
-       Partage->com_modbus.admin_del = rezo_modbus->id;                            /* Envoi au thread modbus */
+       Partage->com_modbus.admin_del = rezo_modbus->id;                         /* Envoi au thread modbus */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -123,8 +123,8 @@
      }
   }
 /**********************************************************************************************************/
-/* Proto_ajouter_modbus: Un client nous demande d'ajouter un modbus Watchdog                                */
-/* Entrée: le modbus à créer                                                                               */
+/* Proto_ajouter_modbus: Un client nous demande d'ajouter un modbus Watchdog                              */
+/* Entrée: le modbus à créer                                                                              */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus )
@@ -214,6 +214,32 @@
   { Envoyer_modbus_thread_tag( client, TAG_MODBUS, SSTAG_SERVEUR_ADDPROGRESS_MODBUS,
                                                    SSTAG_SERVEUR_ADDPROGRESS_MODBUS_FIN );
     return(NULL);
+  }
+/**********************************************************************************************************/
+/* Proto_effacer_borne_modbus: Retrait d'une borne modbus en parametre                                    */
+/* Entrée: le client demandeur et le modbus en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_effacer_borne_modbus ( struct CLIENT *client, struct CMD_TYPE_BORNE_MODBUS *rezo_borne )
+  { gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Retirer_borne_modbusDB( Config.log, Db_watchdog, rezo_borne );
+
+    if (retour)
+     { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_DEL_BORNE_MODBUS_OK,
+                     (gchar *)rezo_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+       while (Partage->com_modbus.admin_del) sched_yield();
+       Partage->com_modbus.admin_del_borne = rezo_borne->id;                    /* Envoi au thread modbus */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to delete borne");
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
   }
 /**********************************************************************************************************/
 /* Envoyer_borne_modbus_thread_tag: Envoi des bornes au client, avec des tags en paralmètres              */

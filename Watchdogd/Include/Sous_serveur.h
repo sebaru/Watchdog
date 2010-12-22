@@ -280,6 +280,7 @@ extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNE
  extern void Proto_effacer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
  extern void Proto_editer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
  extern void Proto_valider_editer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
+ extern void Proto_effacer_borne_modbus ( struct CLIENT *client, struct CMD_TYPE_BORNE_MODBUS *rezo_borne );
  extern void *Envoyer_modbus_thread ( struct CLIENT *client );
  extern void *Envoyer_borne_modbus_thread ( struct CLIENT *client );
 #endif
