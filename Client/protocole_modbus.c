@@ -111,6 +111,24 @@
                Arrivee_bornes = NULL;
              }
             break;
+       case SSTAG_SERVEUR_ADD_BORNE_MODBUS_OK:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_afficher_une_borne_modbus( borne );
+             }
+            break;
+       case SSTAG_SERVEUR_EDIT_BORNE_MODBUS_OK:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Menu_ajouter_editer_borne_modbus( TRUE, borne );
+             }
+            break;
+       case SSTAG_SERVEUR_VALIDE_EDIT_BORNE_MODBUS_OK:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_rafraichir_une_borne_modbus( borne );
+             }
+            break;
        case SSTAG_SERVEUR_DEL_BORNE_MODBUS_OK:
              { struct CMD_TYPE_BORNE_MODBUS *borne;
                borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;

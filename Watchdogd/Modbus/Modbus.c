@@ -324,7 +324,7 @@
                 "UPDATE %s SET "             
                 "type='%d',adresse='%d',min='%d',nbr='%d'"
                 " WHERE id=%d",
-                NOM_TABLE_MODULE_MODBUS,
+                NOM_TABLE_BORNE_MODBUS,
                 borne->type, borne->adresse, borne->min, borne->nbr,
                 borne->id );
 
