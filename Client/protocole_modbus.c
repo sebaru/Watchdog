@@ -111,6 +111,12 @@
                Arrivee_bornes = NULL;
              }
             break;
+       case SSTAG_SERVEUR_DEL_BORNE_MODBUS_OK:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_cacher_une_borne_modbus( borne );
+             }
+            break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MODBUS:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;

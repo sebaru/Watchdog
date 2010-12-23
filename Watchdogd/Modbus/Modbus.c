@@ -70,7 +70,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),
-                "DELETE FROM %s WHERE module = %d", NOM_TABLE_BORNE_MODBUS, borne_modbus->id );
+                "DELETE FROM %s WHERE id = %d", NOM_TABLE_BORNE_MODBUS, borne_modbus->id );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
