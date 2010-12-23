@@ -280,7 +280,8 @@
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_borne_min),        edit_borne->min     );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_borne_nbr),        edit_borne->nbr     );
      }
-    else { gtk_widget_grab_focus( Combo_borne_type );
+    else { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_borne_type), BORNE_INPUT_TOR );
+           gtk_widget_grab_focus( Combo_borne_type );
          }
     gtk_widget_show_all(F_borne);                                    /* Affichage de l'interface complète */
   }
