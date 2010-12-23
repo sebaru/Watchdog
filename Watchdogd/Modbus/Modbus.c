@@ -1005,13 +1005,13 @@
           Partage->com_modbus.admin_del = 0;
         }
 
-       if (Partage->com_modbus.admin_del_borne)
-        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Deleting une borne",
-                  Partage->com_modbus.admin_del_borne );
-          module = Chercher_module_by_id ( Partage->com_modbus.admin_del_borne );
+       if (Partage->com_modbus.admin_module_reload)
+        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading un module",
+                  Partage->com_modbus.admin_module_reload );
+          module = Chercher_module_by_id ( Partage->com_modbus.admin_module_reload );
           Decharger_un_MODBUS ( module );
-          Charger_un_MODBUS ( Partage->com_modbus.admin_del_borne );
-          Partage->com_modbus.admin_del_borne = 0;
+          Charger_un_MODBUS ( Partage->com_modbus.admin_module_reload );
+          Partage->com_modbus.admin_module_reload = 0;
         }
 
        if (Partage->com_modbus.admin_add)
@@ -1019,15 +1019,6 @@
                   Partage->com_modbus.admin_add );
           Charger_un_MODBUS ( Partage->com_modbus.admin_add );
           Partage->com_modbus.admin_add = 0;
-        }
-
-       if (Partage->com_modbus.admin_add_borne)
-        { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Adding une borne",
-                  Partage->com_modbus.admin_add_borne );
-          module = Chercher_module_by_id ( Partage->com_modbus.admin_add_borne );
-          Decharger_un_MODBUS ( module );
-          Charger_un_MODBUS ( Partage->com_modbus.admin_add_borne );
-          Partage->com_modbus.admin_add_borne = 0;
         }
 
        if (Partage->com_modbus.admin_start)

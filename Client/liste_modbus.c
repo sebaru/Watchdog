@@ -236,6 +236,7 @@
             while ( lignes )
              { gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
                gtk_tree_model_get( store, &iter, COLONNE_BORNE_ID, &rezo_borne.id, -1 );   /* Recup du id */
+               gtk_tree_model_get( store, &iter, COLONNE_BORNE_MODULE, &rezo_borne.module, -1 );/* Recup du id */
 
                Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_DEL_BORNE_MODBUS,
                              (gchar *)&rezo_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
@@ -271,7 +272,7 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_borne.id, -1 );                    /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_BORNE_MODULE, &rezo_borne.module, -1 );/* Recup du id module */
 
     Menu_ajouter_editer_borne_modbus( FALSE, &rezo_borne );
    }

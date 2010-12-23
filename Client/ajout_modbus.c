@@ -204,7 +204,7 @@
      { case GTK_RESPONSE_OK:
              { Envoi_serveur( TAG_MODBUS, (edition ? SSTAG_CLIENT_VALIDE_EDIT_BORNE_MODBUS
                                                    : SSTAG_CLIENT_ADD_BORNE_MODBUS),
-                              (gchar *)&Modbus, sizeof( struct CMD_TYPE_BORNE_MODBUS ) );
+                              (gchar *)&Borne, sizeof( struct CMD_TYPE_BORNE_MODBUS ) );
              }
             break;
        case GTK_RESPONSE_CANCEL:
@@ -222,7 +222,7 @@
   { GtkWidget *frame, *table, *texte, *hboite;
     gint i, cpt;
 
-    memcpy( &Borne, edit_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) ); /* Save pour utilisation future */
+    memcpy( &Borne, edit_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );   /* Save pour utilisation future */
     F_borne = gtk_dialog_new_with_buttons( (edition ? _("Edit a borne") : _("Add a borne")),
                                            GTK_WINDOW(F_client),
                                            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,

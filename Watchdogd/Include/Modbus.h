@@ -47,8 +47,7 @@
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     guint admin_add;                                                            /* Demande de deconnexion */
-    guint admin_add_borne;                                                      /* Demande de deconnexion */
-    guint admin_del_borne;                                                      /* Demande de deconnexion */
+    guint admin_module_reload;                                                  /* Demande de deconnexion */
   };
 
  struct TRAME_MODBUS_REQUETE_ETOR                                        /* Definition d'une trame MODBUS */

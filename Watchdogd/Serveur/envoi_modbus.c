@@ -269,10 +269,8 @@
             }
            else { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_VALIDE_EDIT_BORNE_MODBUS_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
-                  while (Partage->com_modbus.admin_del_borne) sched_yield();
-                  Partage->com_modbus.admin_del_borne = result->id;             /* Envoi au thread modbus */
-                  while (Partage->com_modbus.admin_add_borne) sched_yield();
-                  Partage->com_modbus.admin_add_borne = result->id;             /* Envoi au thread modbus */
+                  while (Partage->com_modbus.admin_module_reload) sched_yield();
+                  Partage->com_modbus.admin_module_reload = result->module;             /* Envoi au thread modbus */
                   g_free(result);
                 }
             }
@@ -293,8 +291,8 @@
     if (retour)
      { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_DEL_BORNE_MODBUS_OK,
                      (gchar *)rezo_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
-       while (Partage->com_modbus.admin_del) sched_yield();
-       Partage->com_modbus.admin_del_borne = rezo_borne->id;                    /* Envoi au thread modbus */
+       while (Partage->com_modbus.admin_module_reload) sched_yield();
+       Partage->com_modbus.admin_module_reload = rezo_borne->module;            /* Envoi au thread modbus */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -334,8 +332,8 @@
            else
             { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_ADD_BORNE_MODBUS_OK,
                             (gchar *)borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
-              while (Partage->com_modbus.admin_add_borne) sched_yield();
-              Partage->com_modbus.admin_add_borne = borne->id;                  /* Envoi au thread modbus */
+              while (Partage->com_modbus.admin_module_reload) sched_yield();
+              Partage->com_modbus.admin_module_reload = borne->module;          /* Envoi au thread modbus */
               g_free(borne);
             }
          }
