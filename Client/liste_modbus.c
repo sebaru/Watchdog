@@ -65,13 +65,14 @@
  static void Menu_ajouter_modbus ( void );
  static void Menu_exporter_modbus ( void );
  static void Menu_effacer_borne_modbus ( void );
- static void Menu_editer_borne_modbus ( void );
+ static void Menu_lister_borne_modbus ( void );
  static void Menu_ajouter_borne_modbus ( void );
+ static void Menu_editer_borne_modbus ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_modbus, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_modbus, GNOME_STOCK_PIXMAP_OPEN ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Edit bornes"), NULL, Menu_editer_borne_modbus, GNOME_STOCK_PIXMAP_OPEN ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("Edit bornes"), NULL, Menu_lister_borne_modbus, GNOME_STOCK_PIXMAP_OPEN ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Print"), NULL, Menu_exporter_modbus, GNOME_STOCK_PIXMAP_PRINT ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_modbus, GNOME_STOCK_PIXMAP_CLEAR ),
@@ -299,11 +300,11 @@
     gtk_widget_show_all( dialog );
   }
 /**********************************************************************************************************/
-/* Menu_editer_modbus: Demande d'edition du modbus selectionné                                            */
+/* Menu_lister_borne_modbus: Liste les bornes d'un module modbus                                          */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static void Menu_editer_borne_modbus ( void )
+ static void Menu_lister_borne_modbus ( void )
   { GtkTreeSelection *selection;
     struct CMD_TYPE_MODBUS rezo_modbus;
     GtkTreeModel *store;
@@ -330,6 +331,34 @@
     g_free( libelle );
     Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_WANT_BORNE_MODBUS,
                   (gchar *)&rezo_modbus, sizeof(struct CMD_TYPE_MODBUS) );
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);                                                           /* Liberation mémoire */
+  }
+/**********************************************************************************************************/
+/* Menu_editer_borne_modbus: Demande d'edition d'une borne d'un module modbus                             */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_editer_borne_modbus ( void )
+  { GtkTreeSelection *selection;
+    struct CMD_TYPE_BORNE_MODBUS rezo_borne;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_bornes_modbus) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_bornes_modbus) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_BORNE_ID, &rezo_borne.id, -1 );              /* Recup du id */
+
+    Envoi_serveur( TAG_MODBUS, SSTAG_CLIENT_EDIT_BORNE_MODBUS,
+                  (gchar *)&rezo_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -491,7 +520,7 @@
        return(TRUE);
      }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
-     { Menu_editer_borne_modbus(); }
+     { Menu_editer_modbus(); }
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -529,7 +558,7 @@
        return(TRUE);
      }
     else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
-     { Menu_editer_modbus(); }
+     { Menu_editer_borne_modbus(); }
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -629,8 +658,6 @@
     gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );
     g_signal_connect( G_OBJECT(Liste_modbus), "button_press_event",              /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_modbus), NULL );
-    g_signal_connect( G_OBJECT(gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_modbus) )), "changed",
-                      G_CALLBACK(Menu_editer_borne_modbus), NULL );
 
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(vboite), separateur, FALSE, FALSE, 0 );

@@ -216,6 +216,69 @@
     return(NULL);
   }
 /**********************************************************************************************************/
+/* Proto_editer_borne_modbus: Le client desire editer une borne modbus                                    */
+/* Entrée: le client demandeur et le modbus en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_editer_borne_modbus ( struct CLIENT *client, struct CMD_TYPE_BORNE_MODBUS *rezo_borne )
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    borne = Rechercher_borne_modbusDB( Config.log, Db_watchdog, rezo_borne->id );
+
+    if (borne)
+     { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_EDIT_BORNE_MODBUS_OK,
+                     (gchar *)borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+       g_free(borne);                                                               /* liberation mémoire */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to locate borne id %d", rezo_borne->id);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_valider_editer_borne_modbus: Le client valide l'edition d'une borne modbus                       */
+/* Entrée: le client demandeur et le modbus en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_editer_borne_modbus ( struct CLIENT *client, struct CMD_TYPE_BORNE_MODBUS *rezo_borne )
+  { struct CMD_TYPE_BORNE_MODBUS *result;
+    gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Modifier_borne_modbusDB ( Config.log, Db_watchdog, rezo_borne );
+    if (retour==FALSE)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to edit borne %d", rezo_borne->id);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { result = Rechercher_borne_modbusDB( Config.log, Db_watchdog, rezo_borne->id );
+         { if (!result)
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate borne %d", rezo_borne->id);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+           else { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_VALIDE_EDIT_BORNE_MODBUS_OK,
+                                (gchar *)result, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+                  while (Partage->com_modbus.admin_del_borne) sched_yield();
+                  Partage->com_modbus.admin_del_borne = result->id;             /* Envoi au thread modbus */
+                  while (Partage->com_modbus.admin_add_borne) sched_yield();
+                  Partage->com_modbus.admin_add_borne = result->id;             /* Envoi au thread modbus */
+                  g_free(result);
+                }
+            }
+         }
+  }
+/**********************************************************************************************************/
 /* Proto_effacer_borne_modbus: Retrait d'une borne modbus en parametre                                    */
 /* Entrée: le client demandeur et le modbus en question                                                   */
 /* Sortie: Niet                                                                                           */
@@ -240,6 +303,42 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+  }
+/**********************************************************************************************************/
+/* Proto_ajouter_borne_modbus: Un client nous demande d'ajouter une borne modbus Watchdog                 */
+/* Entrée: le modbus à créer                                                                              */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_ajouter_borne_modbus ( struct CLIENT *client, struct CMD_TYPE_BORNE_MODBUS *rezo_borne )
+  { struct CMD_TYPE_BORNE_MODBUS *borne;
+    struct DB *Db_watchdog;
+    gint id;
+    Db_watchdog = client->Db_watchdog;
+
+    id = Ajouter_borne_modbusDB ( Config.log, Db_watchdog, rezo_borne );
+    if (id == -1)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to add borne" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { borne = Rechercher_borne_modbusDB( Config.log, Db_watchdog, id );
+           if (!borne)
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate borne id %d", id );
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+           else
+            { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_ADD_BORNE_MODBUS_OK,
+                            (gchar *)borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );
+              while (Partage->com_modbus.admin_add_borne) sched_yield();
+              Partage->com_modbus.admin_add_borne = borne->id;                  /* Envoi au thread modbus */
+              g_free(borne);
+            }
+         }
   }
 /**********************************************************************************************************/
 /* Envoyer_borne_modbus_thread_tag: Envoi des bornes au client, avec des tags en paralmètres              */

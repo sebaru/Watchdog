@@ -88,6 +88,24 @@
                pthread_detach( tid );
              }
             break;
+       case SSTAG_CLIENT_EDIT_BORNE_MODBUS:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_editer_borne_modbus( client, borne );
+             }
+            break;
+       case SSTAG_CLIENT_VALIDE_EDIT_BORNE_MODBUS:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_valider_editer_borne_modbus( client, borne );
+             }
+            break;
+       case SSTAG_CLIENT_ADD_BORNE_MODBUS:
+             { struct CMD_TYPE_BORNE_MODBUS *borne;
+               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
+               Proto_ajouter_borne_modbus( client, borne );
+             }
+            break;
        case SSTAG_CLIENT_DEL_BORNE_MODBUS:
              { struct CMD_TYPE_BORNE_MODBUS *borne;
                borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
