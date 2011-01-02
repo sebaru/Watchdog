@@ -35,6 +35,7 @@
 
  struct PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar objet[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     gchar nom_fichier[60];                                                              /* Nom du fichier */
     guint id;                                                                     /* Numero du plugin DLS */
     guint on;

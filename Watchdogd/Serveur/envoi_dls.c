@@ -56,7 +56,8 @@
     rezo_dls->id   = dls->id;
     rezo_dls->on   = dls->on;
     rezo_dls->type = dls->type;
-    memcpy( &rezo_dls->nom, dls->nom, sizeof(rezo_dls->nom ) );
+    memcpy( &rezo_dls->nom,   dls->nom,   sizeof(rezo_dls->nom ) );
+    memcpy( &rezo_dls->objet, dls->objet, sizeof(rezo_dls->objet ) );
     return( rezo_dls );
   }
 /**********************************************************************************************************/

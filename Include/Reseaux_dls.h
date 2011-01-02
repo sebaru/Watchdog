@@ -50,6 +50,7 @@
 
  struct CMD_TYPE_PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar objet[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     guint id;
     guint on;
     guint type;                                                       /* Module, Sous groupe, groupe, ... */

@@ -36,6 +36,7 @@
 
  static GtkWidget *F_ajout;               /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du plugin en cours d'edition */
+ static GtkWidget *Entry_objet;                          /* L'objet en clair du plugin en cours d'edition */
  static GtkWidget *Combo_type;                                  /* Type du plugin (module, ssgrpupe, ...) */
  static GtkWidget *Check_actif;                                  /* Le plugin est-il activé dans le dls ? */
  static struct CMD_TYPE_PLUGIN_DLS Edit_dls;                                /* Message en cours d'édition */
@@ -63,6 +64,8 @@
                                                 gboolean edition )
   { g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
                 "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+    g_snprintf( Edit_dls.objet, sizeof(Edit_dls.objet),
+                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
     Edit_dls.on   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Edit_dls.type = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
 
@@ -86,7 +89,7 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls )
   { GtkWidget *frame, *vboite, *table, *texte;
-    gint cpt;
+    gint cpt, i;
 
     if (edit_dls)
      { memcpy( &Edit_dls, edit_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) ); /* Save pour utilisation future */
@@ -112,31 +115,42 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres du plugin_dls ************************************/
-    table = gtk_table_new( 2, 3, TRUE );
+    table = gtk_table_new( 3, 3, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
 
-    texte = gtk_label_new( _("Plugin name") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-    Entry_nom = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, 0, 1 );
-
+    i = 0;
     Check_actif = gtk_check_button_new_with_label( _("Enable") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, i, i+1 );
 
     texte = gtk_label_new( _("Type") );     /* Création de l'option menu pour le choix du type de message */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, i, i+1 );
 
     Combo_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_PLUGIN; cpt++ )
      { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_plugin_vers_string(cpt) ); }
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 3, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 3, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Plugin object") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_objet = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_PLUGIN_DLS );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 3, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Plugin name") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_nom = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, i, i+1 );
+
 
 
     if (edit_dls)                                                              /* Si edition d'un message */
-     { gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_dls->objet );
+       gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );
      }

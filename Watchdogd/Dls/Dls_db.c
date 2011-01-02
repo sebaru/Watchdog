@@ -58,8 +58,8 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
-  { gchar requete[200];
-    gchar *nom;
+  { gchar requete[1024];
+    gchar *nom, *objet;
 
     nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
@@ -67,12 +67,20 @@
        return(-1);
      }
 
+    objet = Normaliser_chaine ( log, dls->objet );                       /* Formatage correct des chaines */
+    if (!objet)
+     { Info( log, DEBUG_DB, "Ajouter_dlsDB: Normalisation impossible" );
+       g_free(nom);
+       return(-1);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,actif,type)"
-                   "VALUES ('%s','%s','%d');",
-                   NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type );
+                   "(name,actif,type,objet)"
+                   "VALUES ('%s','%s','%d','%s');",
+                   NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, objet );
     g_free(nom);
+    g_free(objet);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -88,8 +96,8 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                         /* Requete SQL */
-                "SELECT name,id,actif,type "
-                "FROM %s ORDER BY name", NOM_TABLE_DLS );
+                "SELECT name,id,actif,type,objet "
+                "FROM %s ORDER BY objet,type,name", NOM_TABLE_DLS );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -110,7 +118,8 @@
     dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( dls->nom, db->row[0], sizeof(dls->nom) );                            /* Recopie dans la structure */
+     { memcpy( dls->nom,   db->row[0], sizeof(dls->nom  ) );                 /* Recopie dans la structure */
+       memcpy( dls->objet, db->row[4], sizeof(dls->objet) );                 /* Recopie dans la structure */
        dls->id   = atoi(db->row[1]);
        dls->on   = atoi(db->row[2]);
        dls->type = atoi(db->row[3]);
@@ -127,7 +136,7 @@
     struct PLUGIN_DLS *dls;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,actif,type "
+                "SELECT name,id,actif,type,objet "
                 "FROM %s WHERE id=%d", NOM_TABLE_DLS, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -143,7 +152,8 @@
     dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Rechercher_dlsDB: Erreur allocation mémoire" );
     else
-     { memcpy( dls->nom, db->row[0], sizeof(dls->nom) );                            /* Recopie dans la structure */
+     { memcpy( dls->nom,   db->row[0], sizeof(dls->nom  ) );                 /* Recopie dans la structure */
+       memcpy( dls->objet, db->row[4], sizeof(dls->objet) );                 /* Recopie dans la structure */
        dls->id   = atoi(db->row[1]);
        dls->on   = atoi(db->row[2]);
        dls->type = atoi(db->row[3]);
@@ -157,7 +167,7 @@
 /**********************************************************************************************************/
  gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[1024];
-    gchar *nom;
+    gchar *nom, *objet;
 
     nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
@@ -165,11 +175,19 @@
        return(-1);
      }
 
+    objet = Normaliser_chaine ( log, dls->objet );                       /* Formatage correct des chaines */
+    if (!objet)
+     { Info( log, DEBUG_DB, "Ajouter_dlsDB: Normalisation impossible" );
+       g_free(nom);
+       return(-1);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "name='%s',actif='%d',type='%d' WHERE id=%d",
-                NOM_TABLE_DLS, nom, dls->on, dls->type, dls->id );
+                "name='%s',actif='%d',type='%d',objet='%s' WHERE id=%d",
+                NOM_TABLE_DLS, nom, dls->on, dls->type, objet, dls->id );
     g_free(nom);
+    g_free(objet);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
