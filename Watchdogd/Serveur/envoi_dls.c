@@ -53,8 +53,8 @@
     rezo_dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!rezo_dls) { return(NULL); }
 
-    rezo_dls->id = dls->id;
-    rezo_dls->on = dls->on;
+    rezo_dls->id   = dls->id;
+    rezo_dls->on   = dls->on;
     rezo_dls->type = dls->type;
     memcpy( &rezo_dls->nom, dls->nom, sizeof(rezo_dls->nom ) );
     return( rezo_dls );

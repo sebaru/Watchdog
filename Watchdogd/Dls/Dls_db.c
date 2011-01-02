@@ -88,7 +88,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                         /* Requete SQL */
-                "SELECT name,id,actif "
+                "SELECT name,id,actif,type "
                 "FROM %s ORDER BY name", NOM_TABLE_DLS );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
