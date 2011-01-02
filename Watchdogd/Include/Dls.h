@@ -38,6 +38,7 @@
     gchar nom_fichier[60];                                                              /* Nom du fichier */
     guint id;                                                                     /* Numero du plugin DLS */
     guint on;
+    guint type;                                                                         /* Type du plugin */
     gint starting;                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     void *handle;                                                          /* Handle du fichier librairie */
     void (*go)(int);                                                  /* Fonction de traitement du module */

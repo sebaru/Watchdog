@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Dls/Dls_db       Database DLS (gestion des noms de prgs, ...)                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 18 avr 2009 12:52:09 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 02 janv. 2011 19:06:19 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -69,9 +69,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,actif)"
-                   "VALUES ('%s',%s);",
-                   NOM_TABLE_DLS, nom, (dls->on ? "true" : "false") );
+                   "(name,actif,type)"
+                   "VALUES ('%s','%s','%d');",
+                   NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type );
     g_free(nom);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -111,8 +111,9 @@
     if (!dls) Info( log, DEBUG_DLS, "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( dls->nom, db->row[0], sizeof(dls->nom) );                            /* Recopie dans la structure */
-       dls->id = atoi(db->row[1]);
-       dls->on = atoi(db->row[2]);
+       dls->id   = atoi(db->row[1]);
+       dls->on   = atoi(db->row[2]);
+       dls->type = atoi(db->row[3]);
      }
     return( dls );
   }
@@ -126,7 +127,7 @@
     struct PLUGIN_DLS *dls;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,actif "
+                "SELECT name,id,actif,type "
                 "FROM %s WHERE id=%d", NOM_TABLE_DLS, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -142,9 +143,10 @@
     dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Rechercher_dlsDB: Erreur allocation mémoire" );
     else
-     { memcpy( dls->nom, db->row[0], sizeof(dls->nom) );                     /* Recopie dans la structure */
-       dls->id = id;
-       dls->on = atoi(db->row[1]);
+     { memcpy( dls->nom, db->row[0], sizeof(dls->nom) );                            /* Recopie dans la structure */
+       dls->id   = atoi(db->row[1]);
+       dls->on   = atoi(db->row[2]);
+       dls->type = atoi(db->row[3]);
      }
     return( dls );
   }
@@ -165,8 +167,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "name='%s',actif=%d WHERE id=%d",
-                NOM_TABLE_DLS, nom, dls->on, dls->id );
+                "name='%s',actif='%d',type='%d' WHERE id=%d",
+                NOM_TABLE_DLS, nom, dls->on, dls->type, dls->id );
     g_free(nom);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */

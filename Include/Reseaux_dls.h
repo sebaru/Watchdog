@@ -52,11 +52,20 @@
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     guint id;
     guint on;
+    guint type;                                                       /* Module, Sous groupe, groupe, ... */
   };
  
  struct CMD_TYPE_SOURCE_DLS
   { guint id;
     guint taille;                                 /* Taille des données qui suivent dans le paquet reseau */
+  };
+
+ enum
+  { PLUGIN_MODULE,                                                     /* Definitions des types de plugin */
+    PLUGIN_SSGROUPE,
+    PLUGIN_GROUPE,
+    PLUGIN_TOPLEVEL,
+    NBR_TYPE_PLUGIN
   };
 
  enum 

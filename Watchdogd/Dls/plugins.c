@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 19:54:47 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 02 janv. 2011 19:04:47 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*

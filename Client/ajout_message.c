@@ -127,9 +127,6 @@
        printf("AUDIO: Lancement APLAY failed\n");
        _exit(0);
      }
-/*    printf("AUDIO: waiting for APLAY to finish pid\n");
-    wait4(pid, NULL, 0, NULL );
-    printf("AUDIO: APLAY finished pid\n");*/
   }
 /**********************************************************************************************************/
 /* CB_ajouter_editer_message: Fonction appelée qd on appuie sur un des boutons de l'interface             */

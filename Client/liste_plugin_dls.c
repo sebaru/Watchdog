@@ -39,8 +39,24 @@
  enum
   {  COLONNE_ID,
      COLONNE_ACTIVE,
+     COLONNE_TYPE,
      COLONNE_NOM,
+     COLONNE_COLOR_FOND,
+     COLONNE_COLOR_TEXTE,
      NBR_COLONNE
+  };
+
+ static GdkColor COULEUR_PLUGIN_FOND[]=
+  { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Module */
+    { 0x0, 0xAFFF, 0xAFFF, 0xAFFF }, /* Sous-groupe */
+    { 0x0, 0x7FFF, 0x7FFF, 0x7FFF }, /* Groupe */
+    { 0x0, 0x0   , 0x0,    0x0    }, /* Top level */
+  };
+ static GdkColor COULEUR_PLUGIN_TEXTE[]=
+  { { 0x0, 0x0,    0x0,    0x0    },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
+    { 0x0, 0xFFF,  0xFFF,  0xFFFF },
   };
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
@@ -346,7 +362,10 @@
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                /* Id du plugin */
                                               G_TYPE_BOOLEAN,                                 /* Activé ? */
-                                              G_TYPE_STRING                                        /* Nom */
+                                              G_TYPE_UINT,                                        /* Type */
+                                              G_TYPE_STRING,                                       /* Nom */
+                                              GDK_TYPE_COLOR,                               /* Color_fond */
+                                              GDK_TYPE_COLOR                               /* Color_texte */
                                 );
 
     Liste_plugin_dls = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );      /* Creation de la vue */
@@ -372,6 +391,8 @@
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Plugin name"), renderer,
                                                          "text", COLONNE_NOM,
+                                                         "background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                   /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NOM);                    /* On peut la trier */
@@ -435,7 +456,10 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, plugin_dls->id,
                          COLONNE_ACTIVE, plugin_dls->on,
+                         COLONNE_TYPE, plugin_dls->type,
                          COLONNE_NOM, plugin_dls->nom,
+                         COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
+                         COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],
                           -1
                        );
   }
