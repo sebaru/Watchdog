@@ -36,30 +36,12 @@
  #include <sys/wait.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
  #ifndef REP_INCLUDE_GLIB
  #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
  #endif
-/**********************************************************************************************************/
-/* Preparer_envoi_groupe: convertit une structure PLUGIN_DLS en structure CMD_TYPE_PLUGIN_DLS             */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_TYPE_PLUGIN_DLS *Preparer_envoi_plugin_dls ( struct PLUGIN_DLS *dls )
-  { struct CMD_TYPE_PLUGIN_DLS *rezo_dls;
 
-    rezo_dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    if (!rezo_dls) { return(NULL); }
-
-    rezo_dls->id   = dls->id;
-    rezo_dls->on   = dls->on;
-    rezo_dls->type = dls->type;
-    memcpy( &rezo_dls->nom,   dls->nom,   sizeof(rezo_dls->nom ) );
-    memcpy( &rezo_dls->objet, dls->objet, sizeof(rezo_dls->objet ) );
-    return( rezo_dls );
-  }
 /**********************************************************************************************************/
 /* Proto_effacer_groupe: Retrait du groupe en parametre                                                   */
 /* Entrée: le client demandeur et le groupe en question                                                   */
@@ -109,20 +91,15 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
-  { struct CMD_TYPE_PLUGIN_DLS edit_dls;
-    struct PLUGIN_DLS *dls;
+  { struct CMD_TYPE_PLUGIN_DLS *dls;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
     dls = Rechercher_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls->id );
 
     if (dls)
-     { edit_dls.id         = dls->id;                                       /* Recopie des info editables */
-       edit_dls.on         = dls->on;
-       memcpy( &edit_dls.nom, dls->nom, sizeof(edit_dls.nom) );
-
-       Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
-                  (gchar *)&edit_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+     { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
+                  (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
        g_free(dls);                                                                 /* liberation mémoire */
      }
     else
@@ -139,7 +116,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
-  { struct PLUGIN_DLS *result;
+  { struct CMD_TYPE_PLUGIN_DLS *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -154,26 +131,15 @@
      }
     else { result = Rechercher_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls->id );
            if (result) 
-            { struct CMD_TYPE_PLUGIN_DLS *dls;
-              dls = Preparer_envoi_plugin_dls ( result );
-              g_free(result);
-              if (!dls)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { pthread_mutex_lock( &Partage->com_dls.synchro );
-                     Partage->com_dls.liste_plugin_reset =
+            { pthread_mutex_lock( &Partage->com_dls.synchro );
+              Partage->com_dls.liste_plugin_reset =
                               g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                              GINT_TO_POINTER(dls->id) );
-                     pthread_mutex_unlock( &Partage->com_dls.synchro );
+                                              GINT_TO_POINTER(result->id) );
+              pthread_mutex_unlock( &Partage->com_dls.synchro );
                       
-                     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
-                                   (gchar *)dls, sizeof(struct CMD_TYPE_MESSAGE) );
-                     g_free(dls);
-                   }
+              Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+              g_free(result);
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
@@ -344,7 +310,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
-  { struct PLUGIN_DLS *result;
+  { struct CMD_TYPE_PLUGIN_DLS *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -354,7 +320,6 @@
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to add plugin %s", rezo_dls->nom);
-                   printf("errrrrreur  %s\n", erreur.message );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -367,8 +332,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_TYPE_PLUGIN_DLS *dls;
-              gchar chaine[80];
+            { gchar chaine[80];
               gint id_fichier;
 
               g_snprintf(chaine, sizeof(chaine), "%d.dls", result->id );
@@ -384,19 +348,9 @@
                      write(id_fichier, chaine, strlen(chaine) );
                      close(id_fichier); 
 
-                     dls = Preparer_envoi_plugin_dls ( result );
+                     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,      /* Tout va bien */
+                                   (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
                      g_free(result);
-                     if (!dls)
-                      { struct CMD_GTK_MESSAGE erreur;
-                        g_snprintf( erreur.message, sizeof(erreur.message),
-                                    "Not enough memory" );
-                        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                      }
-                     else { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,/* Tout va bien */
-                                          (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-                            g_free(dls);
-                          }
                    }
             }
          }
@@ -407,9 +361,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_plugins_dls_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_PLUGIN_DLS *rezo_dls;
-    struct CMD_ENREG nbr;
-    struct PLUGIN_DLS *dls;
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_PLUGIN_DLS *dls;
     struct DB *db;
     
     prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
@@ -441,15 +394,11 @@
           pthread_exit ( NULL );
         }
 
-       rezo_dls = Preparer_envoi_plugin_dls( dls );
-       g_free(dls);
-       if(rezo_dls)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
-                         (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-          g_free(rezo_dls);
-        }
+       Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
+                      (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       g_free(dls);
      }
   }
 /**********************************************************************************************************/

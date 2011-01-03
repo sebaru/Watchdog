@@ -106,8 +106,8 @@
 /* Entrées: une hquery                                                                                    */
 /* Sortie: une structure plugindls, ou null si erreur ou fin de requete                                   */
 /**********************************************************************************************************/
- struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db )
-  { struct PLUGIN_DLS *dls;
+ struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_PLUGIN_DLS *dls;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -115,7 +115,7 @@
        return(NULL);
      }
 
-    dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( dls->nom,   db->row[0], sizeof(dls->nom  ) );                 /* Recopie dans la structure */
@@ -131,9 +131,9 @@
 /* Entrées: un log, une db et un id d'utilisateur                                                         */
 /* Sortie: une structure utilisateur, ou null si erreur                                                   */
 /**********************************************************************************************************/
- struct PLUGIN_DLS *Rechercher_plugin_dlsDB( struct LOG *log, struct DB *db, gint id )
+ struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( struct LOG *log, struct DB *db, gint id )
   { gchar requete[200];
-    struct PLUGIN_DLS *dls;
+    struct CMD_TYPE_PLUGIN_DLS *dls;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,actif,type,objet "
@@ -149,7 +149,7 @@
        return(NULL);
      }
 
-    dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Rechercher_dlsDB: Erreur allocation mémoire" );
     else
      { memcpy( dls->nom,   db->row[0], sizeof(dls->nom  ) );                 /* Recopie dans la structure */

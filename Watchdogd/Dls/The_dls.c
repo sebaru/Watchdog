@@ -533,7 +533,7 @@
         { struct PLUGIN_DLS *plugin_actuel;
           plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
 
-          if (plugin_actuel->on && plugin_actuel->go)
+          if (plugin_actuel->plugindb.on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
              plugin_actuel->go( plugin_actuel->starting );                          /* On appel le plugin */

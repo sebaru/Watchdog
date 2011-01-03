@@ -55,7 +55,7 @@
        dls = (struct PLUGIN_DLS *)liste_dls->data;
 
        g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, conso=%f, nom=%s\n",
-                           dls->id, dls->on, dls->conso, dls->nom );
+                           dls->plugindb.id, dls->plugindb.on, dls->conso, dls->plugindb.nom );
        Write_admin ( client->connexion, chaine );
        liste_dls = liste_dls->next;
      }
@@ -76,11 +76,11 @@
      { struct PLUGIN_DLS *dls;
        dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-       if ( id == -1 || id == dls->id)
-        { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->id );
+       if ( id == -1 || id == dls->plugindb.id)
+        { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
           Write_admin ( client->connexion, chaine );
           Compiler_source_dls ( NULL, id );
-          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->id );
+          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
           Write_admin ( client->connexion, chaine );
         }
        liste_dls = liste_dls->next;

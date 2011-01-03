@@ -34,12 +34,8 @@
  #define NOM_TABLE_DLS         "dls"
 
  struct PLUGIN_DLS
-  { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar objet[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+  { struct CMD_TYPE_PLUGIN_DLS plugindb;
     gchar nom_fichier[60];                                                              /* Nom du fichier */
-    guint id;                                                                     /* Numero du plugin DLS */
-    guint on;
-    guint type;                                                                         /* Type du plugin */
     gint starting;                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     void *handle;                                                          /* Handle du fichier librairie */
     void (*go)(int);                                                  /* Fonction de traitement du module */
@@ -62,8 +58,8 @@
  extern gboolean Retirer_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gboolean Recuperer_plugins_dlsDB( struct LOG *log, struct DB *db );
- extern struct PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db );
- extern struct PLUGIN_DLS *Rechercher_plugin_dlsDB( struct LOG *log, struct DB *db, gint id );
+ extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( struct LOG *log, struct DB *db, gint id );
  extern gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls );
 
  extern void Reseter_un_plugin ( gint id );

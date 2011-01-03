@@ -43,20 +43,20 @@
     void (*Go)(int);
     void *handle;
 
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->id );
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
-    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté ", dls->id );
+    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté ", dls->plugindb.id );
                    Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: -- sur ouverture", dlerror() );
                    return(FALSE);
                  }
     Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté sur absence GO", dls->id ); 
+    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté sur absence GO", dls->plugindb.id ); 
                dlclose( handle );
                return(FALSE);
              }
 
-    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: id", dls->id );
+    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: id", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
     dls->handle   = handle;
     dls->go       = Go;
@@ -73,7 +73,8 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  static gboolean Charger_un_plugin_by_id ( gint id )
-  { struct PLUGIN_DLS *dls;
+  { struct CMD_TYPE_PLUGIN_DLS *plugin_dls;
+    struct PLUGIN_DLS *dls;
     struct DB *db;                                                                   /* Database Watchdog */
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
@@ -83,13 +84,23 @@
        return(FALSE);
      }
 
-    dls = Rechercher_plugin_dlsDB( Config.log, db, id );
+    plugin_dls = Rechercher_plugin_dlsDB( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
 
-    if (!dls)
+    if (!plugin_dls)
      { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Plugin non trouvé", id );
        return(FALSE);
      }
+
+    dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+    if (!dls)
+     { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: out of memory", id );
+       g_free(plugin_dls);
+       return(FALSE);
+     }
+
+    memcpy( &dls->plugindb, plugin_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    g_free(plugin_dls);
 
     return ( Charger_un_plugin ( dls ) );
   }
@@ -107,11 +118,11 @@
     while(plugins)                                                       /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
-       if ( plugin->id == id )
+       if ( plugin->plugindb.id == id )
         { dlclose( plugin->handle );
           Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
-          Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_un_plugin_by_id: Dechargé", plugin->id );
+          Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_un_plugin_by_id: Dechargé", plugin->plugindb.id );
           break;
         }
        plugins = plugins->next;
@@ -142,12 +153,12 @@
     plugins = Partage->com_dls.Plugins;
     while(plugins)                                                       /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
-       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: tentative dechargement:", plugin->id );
+       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: tentative dechargement:", plugin->plugindb.id );
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
        g_free( plugin );
-       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: Dechargé", plugin->id );
+       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: Dechargé", plugin->plugindb.id );
        plugins = plugins->next;
      }
     g_list_free( Partage->com_dls.Plugins );
@@ -160,7 +171,8 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Charger_plugins ( void )
-  { struct PLUGIN_DLS *dls;
+  { struct CMD_TYPE_PLUGIN_DLS *plugin;
+    struct PLUGIN_DLS *dls;
     struct DB *db;                                                                   /* Database Watchdog */
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
@@ -172,15 +184,26 @@
 
     Recuperer_plugins_dlsDB( Config.log, db );
     do
-     { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
-       if (!dls)
+     { plugin = Recuperer_plugins_dlsDB_suite( Config.log, db );
+       if (!plugin)
         { Libere_DB_SQL( Config.log, &db );
           return;
         }
 
-       if (Config.compil == 1) Compiler_source_dls( NULL, dls->id );  /* Si option "compil" au demarrage" */
+       dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+       if (!dls)
+        { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: out of memory" );
+          g_free(plugin);
+          return;
+        }
+
+       memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       g_free(plugin);
+
+                                                                      /* Si option "compil" au demarrage" */
+       if (Config.compil == 1) Compiler_source_dls( NULL, dls->plugindb.id );
        if (Charger_un_plugin( dls )==TRUE)
-        { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->nom ); }
+        { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->plugindb.nom ); }
      } while ( TRUE );
     Config.compil = 0;
  }
@@ -198,11 +221,11 @@
     while(plugins)                                                       /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
-       if ( plugin->id == id )
-        { plugin->on = actif;
+       if ( plugin->plugindb.id == id )
+        { plugin->plugindb.on = actif;
           plugin->conso = 0.0;
           plugin->starting = 1;
-          Info_n( Config.log, DEBUG_DLS, "DLS: Activer_plugin_by_id done", plugin->id );
+          Info_n( Config.log, DEBUG_DLS, "DLS: Activer_plugin_by_id done", plugin->plugindb.id );
           break;
         }
        plugins = plugins->next;
