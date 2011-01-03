@@ -372,28 +372,28 @@
         { case TYPE_PASSERELLE:
                trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
                id_pass.id = trame_pass->pass->id;
-               memcpy( id_pass.libelle, trame_pass->pass->libelle, sizeof(id_pass.libelle) );
+               memcpy( &id_pass.libelle, trame_pass->pass->libelle, sizeof(id_pass.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_PASS,
                               (gchar *)&id_pass, sizeof( struct CMD_TYPE_PASSERELLE ) );
                break;
           case TYPE_COMMENTAIRE:
                trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
                id_comment.id = trame_comm->comment->id;
-               memcpy( id_comment.libelle, trame_comm->comment->libelle, sizeof(id_comment.libelle) );
+               memcpy( &id_comment.libelle, trame_comm->comment->libelle, sizeof(id_comment.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_COMMENT,
                               (gchar *)&id_comment, sizeof( struct CMD_TYPE_COMMENT ) );
                break;
           case TYPE_MOTIF:
                trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
                id_motif.id = trame_motif->motif->id;
-               memcpy( id_motif.libelle, trame_motif->motif->libelle, sizeof(id_motif.libelle) );
+               memcpy( &id_motif.libelle, trame_motif->motif->libelle, sizeof(id_motif.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_MOTIF,
                               (gchar *)&id_motif, sizeof( struct CMD_TYPE_MOTIF ) );
                break;
           case TYPE_CAPTEUR:
                trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
                id_capteur.id = trame_capteur->capteur->id;
-               memcpy( id_capteur.libelle, trame_capteur->capteur->libelle,
+               memcpy( &id_capteur.libelle, trame_capteur->capteur->libelle,
                        sizeof(id_capteur.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,
                               (gchar *)&id_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
@@ -401,7 +401,7 @@
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
                id_camera_sup.id = trame_camera_sup->camera_sup->id;
-               memcpy( id_camera_sup.libelle, trame_camera_sup->camera_sup->libelle,
+               memcpy( &id_camera_sup.libelle, trame_camera_sup->camera_sup->libelle,
                        sizeof(id_camera_sup.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
                               (gchar *)&id_camera_sup, sizeof( struct CMD_TYPE_CAMERA_SUP ) );

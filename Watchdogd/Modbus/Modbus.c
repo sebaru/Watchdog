@@ -170,8 +170,8 @@
     modbus = (struct CMD_TYPE_MODBUS *)g_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
     if (!modbus) Info( log, DEBUG_MODBUS, "Recuperer_modbusDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( modbus->libelle, db->row[5], sizeof(modbus->libelle) );
-       memcpy( modbus->ip,      db->row[2], sizeof(modbus->ip) );
+     { memcpy( &modbus->libelle, db->row[5], sizeof(modbus->libelle) );
+       memcpy( &modbus->ip,      db->row[2], sizeof(modbus->ip) );
        modbus->id        = atoi(db->row[0]);
        modbus->actif     = atoi(db->row[1]);
        modbus->bit       = atoi(db->row[3]);
@@ -233,8 +233,8 @@
     if (!modbus)
      { Info( log, DEBUG_MODBUS, "Rechercher_modbusDB: Mem error" ); }
     else
-     { memcpy( modbus->libelle, db->row[5], sizeof(modbus->libelle) );
-       memcpy( modbus->ip,      db->row[2], sizeof(modbus->ip) );
+     { memcpy( &modbus->libelle, db->row[5], sizeof(modbus->libelle) );
+       memcpy( &modbus->ip,      db->row[2], sizeof(modbus->ip) );
        modbus->id        = atoi(db->row[0]);
        modbus->actif     = atoi(db->row[1]);
        modbus->bit       = atoi(db->row[3]);

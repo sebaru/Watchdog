@@ -749,7 +749,7 @@ printf("bouh\n");
     gchar fichier[80];
     guint cpt_frame;
 
-    memcpy ( fichier, icone->nom_fichier, sizeof(fichier) );
+    memcpy ( &fichier, icone->nom_fichier, sizeof(fichier) );
 
     for (cpt_frame=0; ; cpt_frame++)
      {
@@ -777,7 +777,7 @@ printf("bouh\n");
        close(source);
        close(cible);
 
-       memcpy ( icone->nom_fichier, to_fichier, sizeof(icone->nom_fichier) );
+       memcpy ( &icone->nom_fichier, to_fichier, sizeof(icone->nom_fichier) );
        memcpy ( buffer, icone, sizeof(struct CMD_TYPE_ICONE) );
        source = open( to_fichier, O_RDONLY );
        Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_DEB_FILE,

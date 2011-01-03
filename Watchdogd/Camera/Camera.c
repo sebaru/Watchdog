@@ -125,9 +125,9 @@
     camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera) Info( log, DEBUG_CAMERA, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( camera->objet,    db->row[4], sizeof(camera->objet    ) );
-       memcpy( camera->location, db->row[5], sizeof(camera->location  ) );
-       memcpy( camera->libelle,  db->row[6], sizeof(camera->libelle ) );
+     { memcpy( &camera->objet,    db->row[4], sizeof(camera->objet    ) );
+       memcpy( &camera->location, db->row[5], sizeof(camera->location  ) );
+       memcpy( &camera->libelle,  db->row[6], sizeof(camera->libelle ) );
        camera->id         = atoi(db->row[0]);
        camera->num        = atoi(db->row[1]);
        camera->type       = atoi(db->row[2]);
@@ -165,9 +165,9 @@
     if (!camera)
      { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB: Mem error" ); }
     else
-     { memcpy( camera->objet,    db->row[3], sizeof(camera->objet    ) );
-       memcpy( camera->location, db->row[4], sizeof(camera->location  ) );
-       memcpy( camera->libelle,  db->row[5], sizeof(camera->libelle ) );
+     { memcpy( &camera->objet,    db->row[3], sizeof(camera->objet    ) );
+       memcpy( &camera->location, db->row[4], sizeof(camera->location  ) );
+       memcpy( &camera->libelle,  db->row[5], sizeof(camera->libelle ) );
        camera->num        = atoi(db->row[0]);
        camera->type       = atoi(db->row[1]);
        camera->bit        = atoi(db->row[2]);
