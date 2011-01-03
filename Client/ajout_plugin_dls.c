@@ -133,14 +133,14 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Plugin object") );
+    texte = gtk_label_new( _("Object") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_objet = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_PLUGIN_DLS );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Plugin name") );
+    texte = gtk_label_new( _("Name") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );

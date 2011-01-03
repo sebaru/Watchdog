@@ -118,8 +118,8 @@
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( dls->nom,   db->row[0], sizeof(dls->nom  ) );                 /* Recopie dans la structure */
-       memcpy( dls->objet, db->row[4], sizeof(dls->objet) );                 /* Recopie dans la structure */
+     { memcpy( &dls->nom,   db->row[0], sizeof(dls->nom  ) );                /* Recopie dans la structure */
+       memcpy( &dls->objet, db->row[4], sizeof(dls->objet) );                /* Recopie dans la structure */
        dls->id   = atoi(db->row[1]);
        dls->on   = atoi(db->row[2]);
        dls->type = atoi(db->row[3]);
@@ -152,8 +152,8 @@
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Rechercher_dlsDB: Erreur allocation mémoire" );
     else
-     { memcpy( dls->nom,   db->row[0], sizeof(dls->nom  ) );                 /* Recopie dans la structure */
-       memcpy( dls->objet, db->row[4], sizeof(dls->objet) );                 /* Recopie dans la structure */
+     { memcpy( &dls->nom,   db->row[0], sizeof(dls->nom  ) );                /* Recopie dans la structure */
+       memcpy( &dls->objet, db->row[4], sizeof(dls->objet) );                /* Recopie dans la structure */
        dls->id   = atoi(db->row[1]);
        dls->on   = atoi(db->row[2]);
        dls->type = atoi(db->row[3]);
