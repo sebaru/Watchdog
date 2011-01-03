@@ -44,8 +44,8 @@
     if (!rezo_util) { return(NULL); }
 
     rezo_util->id = util->id;
-    memcpy( rezo_util->nom,         util->nom, sizeof(rezo_util->nom) );
-    memcpy( rezo_util->commentaire, util->commentaire, sizeof(rezo_util->commentaire) );
+    memcpy( &rezo_util->nom,         util->nom, sizeof(rezo_util->nom) );
+    memcpy( &rezo_util->commentaire, util->commentaire, sizeof(rezo_util->commentaire) );
     return( rezo_util );
   }
 /**********************************************************************************************************/

@@ -118,7 +118,7 @@
     rs485 = (struct CMD_TYPE_RS485 *)g_malloc0( sizeof(struct CMD_TYPE_RS485) );
     if (!rs485) Info( log, DEBUG_RS485, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);
@@ -163,7 +163,7 @@
     if (!rs485)
      { Info( log, DEBUG_RS485, "Rechercher_rs485DB: Mem error" ); }
     else
-     { memcpy( rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);

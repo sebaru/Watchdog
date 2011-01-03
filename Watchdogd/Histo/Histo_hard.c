@@ -158,9 +158,9 @@
     histo_hard = (struct HISTO_HARDDB *)g_malloc0( sizeof(struct HISTO_HARDDB) );
     if (!histo_hard) Info( log, DEBUG_SERVEUR, "Recuperer_histo_hardDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */
-     { memcpy( histo_hard->histo.msg.libelle, db->row[1], sizeof(histo_hard->histo.msg.libelle) );
-       memcpy( histo_hard->histo.msg.objet,   db->row[2], sizeof(histo_hard->histo.msg.objet  ) );
-       memcpy( histo_hard->histo.nom_ack,     db->row[5], sizeof(histo_hard->histo.nom_ack    ) );
+     { memcpy( &histo_hard->histo.msg.libelle, db->row[1], sizeof(histo_hard->histo.msg.libelle) );
+       memcpy( &histo_hard->histo.msg.objet,   db->row[2], sizeof(histo_hard->histo.msg.objet  ) );
+       memcpy( &histo_hard->histo.nom_ack,     db->row[5], sizeof(histo_hard->histo.nom_ack    ) );
        histo_hard->histo.msg.num          = atoi(db->row[0]);
        histo_hard->histo.msg.type         = atoi(db->row[3]);
        histo_hard->histo.msg.num_syn      = atoi(db->row[4]);

@@ -112,8 +112,8 @@
        entreeana->max      = atof(db->row[1]);
        entreeana->unite    = atoi(db->row[2]);
        entreeana->type     = atoi(db->row[6]);
-       memcpy( entreeana->libelle, db->row[3], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
-       memcpy( entreeana->objet,   db->row[7], sizeof(entreeana->objet  ) ); /* Recopie dans la structure */
+       memcpy( &entreeana->libelle, db->row[3], sizeof(entreeana->libelle) );
+       memcpy( &entreeana->objet,   db->row[7], sizeof(entreeana->objet  ) );
      }
     return(entreeana);
   }
@@ -156,8 +156,8 @@
        entreeana->max      = atof(db->row[2]);
        entreeana->unite    = atoi(db->row[3]);
        entreeana->type     = atoi(db->row[5]);
-       memcpy( entreeana->libelle, db->row[4], sizeof(entreeana->libelle) ); /* Recopie dans la structure */
-       memcpy( entreeana->objet,   db->row[6], sizeof(entreeana->objet  ) ); /* Recopie dans la structure */
+       memcpy( &entreeana->libelle, db->row[4], sizeof(entreeana->libelle) );
+       memcpy( &entreeana->objet,   db->row[6], sizeof(entreeana->objet  ) );
      }
     Liberer_resultat_SQL ( log, db );
 

@@ -158,8 +158,8 @@
     if (!groupe) Info( log, DEBUG_USER, "Rechercher_groupeDB: Erreur allocation mémoire" );
     else
      { groupe->id = id;
-       memcpy( groupe->nom, db->row[0], sizeof(groupe->nom) );               /* Recopie dans la structure */
-       memcpy( groupe->commentaire, db->row[1], sizeof(groupe->commentaire) );
+       memcpy( &groupe->nom, db->row[0], sizeof(groupe->nom) );               /* Recopie dans la structure */
+       memcpy( &groupe->commentaire, db->row[1], sizeof(groupe->commentaire) );
      }
     Liberer_resultat_SQL ( log, db );
     return( groupe );
@@ -194,8 +194,8 @@
     if (!groupe) Info( log, DEBUG_USER, "Recuperer_groupeDB_suite: Erreur allocation mémoire" );
     else
      { groupe->id = atoi(db->row[0]);
-       memcpy( groupe->nom, db->row[1], sizeof(groupe->nom) );               /* Recopie dans la structure */
-       memcpy( groupe->commentaire, db->row[2], sizeof(groupe->commentaire) );
+       memcpy( &groupe->nom, db->row[1], sizeof(groupe->nom) );              /* Recopie dans la structure */
+       memcpy( &groupe->commentaire, db->row[2], sizeof(groupe->commentaire) );
      }
     return(groupe);
   } 

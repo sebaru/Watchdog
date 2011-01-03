@@ -82,7 +82,7 @@
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
-    memcpy( client->util->code, clef, sizeof( client->util->code ) );    
+    memcpy( &client->util->code, clef, sizeof( client->util->code ) );    
     g_free(clef);
 /***************************************** Identification du client ***************************************/
     crypt = Crypter( Config.log, Config.crypto_key, client->ident.password );

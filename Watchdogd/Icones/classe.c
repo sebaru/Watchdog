@@ -110,7 +110,7 @@
     classe = (struct CLASSEDB *)g_malloc0( sizeof(struct CLASSEDB) );
     if (!classe) Info( log, DEBUG_SERVEUR, "Recuperer_classeDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( classe->libelle, db->row[1], sizeof(classe->libelle) );       /* Recopie dans la structure */
+     { memcpy( &classe->libelle, db->row[1], sizeof(classe->libelle) );      /* Recopie dans la structure */
        classe->id          = atoi(db->row[0]);
      }
     return(classe);
@@ -140,7 +140,7 @@
     classe = (struct CLASSEDB *)g_malloc0( sizeof(struct CLASSEDB) );
     if (!classe) Info( log, DEBUG_SERVEUR, "Rechercher_classeDB: Mem error" );
     else
-     { memcpy( classe->libelle, db->row[0], sizeof(classe->libelle) );       /* Recopie dans la structure */
+     { memcpy( &classe->libelle, db->row[0], sizeof(classe->libelle) );      /* Recopie dans la structure */
        classe->id          = id;
      }
     return(classe);

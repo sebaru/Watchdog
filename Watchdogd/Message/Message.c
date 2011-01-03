@@ -135,10 +135,10 @@
     msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) Info( log, DEBUG_SERVEUR, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( msg->libelle,       db->row[2],  sizeof(msg->libelle) );      /* Recopie dans la structure */
-       memcpy( msg->objet,         db->row[7],  sizeof(msg->objet  ) );
-       memcpy( msg->libelle_audio, db->row[9],  sizeof(msg->libelle_audio) );
-       memcpy( msg->libelle_sms,   db->row[10], sizeof(msg->libelle_sms) );
+     { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle) );     /* Recopie dans la structure */
+       memcpy( &msg->objet,         db->row[7],  sizeof(msg->objet  ) );
+       memcpy( &msg->libelle_audio, db->row[9],  sizeof(msg->libelle_audio) );
+       memcpy( &msg->libelle_sms,   db->row[10], sizeof(msg->libelle_sms) );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
@@ -181,10 +181,10 @@
     if (!msg)
      { Info( log, DEBUG_SERVEUR, "Rechercher_msgDB: Mem error" ); }
     else
-     { memcpy( msg->libelle,       db->row[1], sizeof(msg->libelle) );       /* Recopie dans la structure */
-       memcpy( msg->objet,         db->row[6], sizeof(msg->objet  ) );
-       memcpy( msg->libelle_audio, db->row[8], sizeof(msg->libelle_audio) );
-       memcpy( msg->libelle_sms,   db->row[9], sizeof(msg->libelle_sms) );
+     { memcpy( &msg->libelle,       db->row[1], sizeof(msg->libelle) );      /* Recopie dans la structure */
+       memcpy( &msg->objet,         db->row[6], sizeof(msg->objet  ) );
+       memcpy( &msg->libelle_audio, db->row[8], sizeof(msg->libelle_audio) );
+       memcpy( &msg->libelle_sms,   db->row[9], sizeof(msg->libelle_sms) );
        msg->id          = atoi(db->row[0]);
        msg->num         = num;
        msg->type        = atoi(db->row[2]);
@@ -227,10 +227,10 @@
     if (!msg)
      { Info( log, DEBUG_SERVEUR, "Rechercher_msgDB_par_id: Mem error" ); }
     else
-     { memcpy( msg->libelle,       db->row[1], sizeof(msg->libelle) );       /* Recopie dans la structure */
-       memcpy( msg->objet,         db->row[6], sizeof(msg->objet  ) );
-       memcpy( msg->libelle_audio, db->row[8], sizeof(msg->libelle_audio) );
-       memcpy( msg->libelle_sms,   db->row[9], sizeof(msg->libelle_sms) );
+     { memcpy( &msg->libelle,       db->row[1], sizeof(msg->libelle) );      /* Recopie dans la structure */
+       memcpy( &msg->objet,         db->row[6], sizeof(msg->objet  ) );
+       memcpy( &msg->libelle_audio, db->row[8], sizeof(msg->libelle_audio) );
+       memcpy( &msg->libelle_sms,   db->row[9], sizeof(msg->libelle_sms) );
        msg->id          = id;
        msg->num         = atoi(db->row[0]);
        msg->type        = atoi(db->row[2]);

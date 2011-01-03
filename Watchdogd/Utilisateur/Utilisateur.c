@@ -226,8 +226,8 @@
     util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
     if (!util) Info( log, DEBUG_USER, "Recuperer_utilsDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( util->nom, db->row[0], sizeof(util->nom) );                   /* Recopie dans la structure */
-       memcpy( util->commentaire, db->row[3], sizeof(util->commentaire) );
+     { memcpy( &util->nom, db->row[0], sizeof(util->nom) );                  /* Recopie dans la structure */
+       memcpy( &util->commentaire, db->row[3], sizeof(util->commentaire) );
        util->id            = atoi(db->row[1]);
        util->changepass    = atoi(db->row[2]);
        util->actif         = atoi(db->row[4]);
@@ -266,8 +266,8 @@
     util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
     if (!util) Info( log, DEBUG_USER, "Rechercher_utilisateurDB: Erreur allocation mémoire" );
     else
-     { memcpy( util->nom, db->row[0], sizeof(util->nom) );                   /* Recopie dans la structure */
-       memcpy( util->commentaire, db->row[2], sizeof(util->commentaire) );
+     { memcpy( &util->nom, db->row[0], sizeof(util->nom) );                  /* Recopie dans la structure */
+       memcpy( &util->commentaire, db->row[2], sizeof(util->commentaire) );
        util->id            = id;
        util->changepass    = atoi(db->row[1]);
        util->actif         = atoi(db->row[3]);

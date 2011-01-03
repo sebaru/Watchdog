@@ -78,7 +78,7 @@
 
     edit_histo.id = rezo_histo->id;               /* On renseigne la structure de modification de l'histo */
     time( (time_t *)&edit_histo.date_fixe );
-    memcpy( edit_histo.nom_ack, client->util->nom, sizeof(edit_histo.nom_ack) );
+    memcpy( &edit_histo.nom_ack, client->util->nom, sizeof(edit_histo.nom_ack) );
 
     retour = Modifier_histoDB ( Config.log, Db_watchdog, &edit_histo );
     if (retour==FALSE)

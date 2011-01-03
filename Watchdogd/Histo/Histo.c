@@ -169,9 +169,9 @@
     histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
     if (!histo) Info( log, DEBUG_SERVEUR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );    /* Recopie dans la structure */
-       memcpy( histo->msg.objet,   db->row[2], sizeof(histo->msg.objet  ) ); /* Recopie dans la structure */
-       memcpy( histo->nom_ack,     db->row[5], sizeof(histo->nom_ack    ) ); /* Recopie dans la structure */
+     { memcpy( &histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );/* Recopie dans la structure */
+       memcpy( &histo->msg.objet,   db->row[2], sizeof(histo->msg.objet  ) );/* Recopie dans la structure */
+       memcpy( &histo->nom_ack,     db->row[5], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
        histo->msg.id           = 0;                                /* l'id n'est pas dans la base histo ! */
        histo->msg.num          = atoi(db->row[0]);
        histo->msg.type         = atoi(db->row[3]);
@@ -208,9 +208,9 @@
     histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
     if (!histo) Info( log, DEBUG_SERVEUR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( histo->msg.libelle, db->row[0], sizeof(histo->msg.libelle) ); /* Recopie dans la structure */
-       memcpy( histo->msg.objet,   db->row[1], sizeof(histo->msg.objet  ) ); /* Recopie dans la structure */
-       memcpy( histo->nom_ack,     db->row[4], sizeof(histo->nom_ack    ) ); /* Recopie dans la structure */
+     { memcpy( &histo->msg.libelle, db->row[0], sizeof(histo->msg.libelle) );/* Recopie dans la structure */
+       memcpy( &histo->msg.objet,   db->row[1], sizeof(histo->msg.objet  ) );/* Recopie dans la structure */
+       memcpy( &histo->nom_ack,     db->row[4], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
        histo->msg.num          = id;
        histo->msg.id           = 0;                  /* L'ID msg en histo n'est pas porteur d'information */
        histo->msg.type         = atoi(db->row[2]);

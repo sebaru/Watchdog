@@ -161,9 +161,9 @@
     mnemo = (struct MNEMONIQUEDB *)g_malloc0( sizeof(struct MNEMONIQUEDB) );
     if (!mnemo) Info( log, DEBUG_SERVEUR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );       /* Recopie dans la structure */
-       memcpy( mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );       /* Recopie dans la structure */
-       memcpy( mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );       /* Recopie dans la structure */
+     { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);
@@ -198,9 +198,9 @@
     if (!mnemo)
      { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB: Mem error" ); }
     else
-     { memcpy( mnemo->libelle,  db->row[0], sizeof(mnemo->libelle ) );       /* Recopie dans la structure */
-       memcpy( mnemo->objet,    db->row[2], sizeof(mnemo->objet   ) );       /* Recopie dans la structure */
-       memcpy( mnemo->acronyme, db->row[1], sizeof(mnemo->acronyme) );       /* Recopie dans la structure */
+     { memcpy( &mnemo->libelle,  db->row[0], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->objet,    db->row[2], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->acronyme, db->row[1], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
        mnemo->id          = id;
        mnemo->type        = atoi(db->row[3]);
        mnemo->num         = atoi(db->row[4]);
@@ -235,9 +235,9 @@
     if (!mnemo)
      { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB_type_num: Mem error" ); }
     else
-     { memcpy( mnemo->libelle,  db->row[0], sizeof(mnemo->libelle ) );       /* Recopie dans la structure */
-       memcpy( mnemo->objet,    db->row[2], sizeof(mnemo->objet   ) );       /* Recopie dans la structure */
-       memcpy( mnemo->acronyme, db->row[1], sizeof(mnemo->acronyme) );       /* Recopie dans la structure */
+     { memcpy( &mnemo->libelle,  db->row[0], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->objet,    db->row[2], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->acronyme, db->row[1], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
        mnemo->id      = atoi(db->row[3]);
        mnemo->type    = critere->type;
        mnemo->num     = critere->num;
@@ -318,9 +318,9 @@
     mnemo = (struct MNEMONIQUEDB *)g_malloc0( sizeof(struct MNEMONIQUEDB) );
     if (!mnemo) Info( log, DEBUG_SERVEUR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );       /* Recopie dans la structure */
-       memcpy( mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );       /* Recopie dans la structure */
-       memcpy( mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );       /* Recopie dans la structure */
+     { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);

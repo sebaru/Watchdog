@@ -127,9 +127,9 @@
     onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur) Info( log, DEBUG_ONDULEUR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( onduleur->host,    db->row[1], sizeof(onduleur->host   ) );
-       memcpy( onduleur->ups,     db->row[2], sizeof(onduleur->ups    ) );
-       memcpy( onduleur->libelle, db->row[9], sizeof(onduleur->libelle) );
+     { memcpy( &onduleur->host,    db->row[1], sizeof(onduleur->host   ) );
+       memcpy( &onduleur->ups,     db->row[2], sizeof(onduleur->ups    ) );
+       memcpy( &onduleur->libelle, db->row[9], sizeof(onduleur->libelle) );
        onduleur->id                = atoi(db->row[0]);
        onduleur->bit_comm          = atoi(db->row[3]);
        onduleur->actif             = atoi(db->row[4]);
@@ -169,9 +169,9 @@
     if (!onduleur)
      { Info( log, DEBUG_ONDULEUR, "Rechercher_onduleurDB: Mem error" ); }
     else
-     { memcpy( onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
-       memcpy( onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
-       memcpy( onduleur->libelle, db->row[8], sizeof(onduleur->libelle) );
+     { memcpy( &onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
+       memcpy( &onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
+       memcpy( &onduleur->libelle, db->row[8], sizeof(onduleur->libelle) );
        onduleur->bit_comm          = atoi(db->row[2]);
        onduleur->actif             = atoi(db->row[3]);
        onduleur->ea_ups_load       = atoi(db->row[4]);
