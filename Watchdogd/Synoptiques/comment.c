@@ -116,8 +116,8 @@
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info( log, DEBUG_SERVEUR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( comment->libelle, db->row[2], sizeof(comment->libelle) );     /* Recopie dans la structure */
-       memcpy( comment->font, db->row[3], sizeof(comment->font) );           /* Recopie dans la structure */
+     { memcpy( &comment->libelle, db->row[2], sizeof(comment->libelle) );    /* Recopie dans la structure */
+       memcpy( &comment->font, db->row[3], sizeof(comment->font) );          /* Recopie dans la structure */
        comment->id         = atoi(db->row[0]);
        comment->syn_id     = atoi(db->row[1]);
        comment->position_x = atoi(db->row[7]);                                     /* en abscisses et ordonnées */
@@ -155,11 +155,11 @@
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info( log, DEBUG_SERVEUR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( comment->libelle, db->row[1], sizeof(comment->libelle) );     /* Recopie dans la structure */
-       memcpy( comment->font, db->row[2], sizeof(comment->font) );           /* Recopie dans la structure */
+     { memcpy( &comment->libelle, db->row[1], sizeof(comment->libelle) );    /* Recopie dans la structure */
+       memcpy( &comment->font, db->row[2], sizeof(comment->font) );          /* Recopie dans la structure */
        comment->id         = id;
        comment->syn_id     = atoi(db->row[0]);
-       comment->position_x = atoi(db->row[6]);                                     /* en abscisses et ordonnées */
+       comment->position_x = atoi(db->row[6]);                               /* en abscisses et ordonnées */
        comment->position_y = atoi(db->row[7]);
        comment->rouge      = atoi(db->row[3]);
        comment->vert       = atoi(db->row[4]);

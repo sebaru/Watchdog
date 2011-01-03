@@ -114,7 +114,7 @@
        capteur->position_x   = atoi(db->row[5]);                             /* en abscisses et ordonnées */
        capteur->position_y   = atoi(db->row[6]);
        capteur->angle        = atof(db->row[7]);
-       memcpy( capteur->libelle, db->row[4], sizeof(capteur->libelle) );     /* Recopie dans la structure */
+       memcpy( &capteur->libelle, db->row[4], sizeof(capteur->libelle) );    /* Recopie dans la structure */
      }
     return(capteur);
   }
@@ -152,12 +152,12 @@
        capteur->position_x   = atoi(db->row[4]);                             /* en abscisses et ordonnées */
        capteur->position_y   = atoi(db->row[5]);
        capteur->angle        = atof(db->row[6]);
-       memcpy( capteur->libelle, db->row[3], sizeof(capteur->libelle) );     /* Recopie dans la structure */
+       memcpy( &capteur->libelle, db->row[3], sizeof(capteur->libelle) );    /* Recopie dans la structure */
      }
     return(capteur);
   }
 /**********************************************************************************************************/
-/* Modifier_capteurDB: Modification d'un capteur Watchdog                                           */
+/* Modifier_capteurDB: Modification d'un capteur Watchdog                                                 */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
@@ -165,7 +165,7 @@
   { gchar requete[1024];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, capteur->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( log, capteur->libelle );               /* Formatage correct des chaines */
     if (!libelle)
      { Info( log, DEBUG_SERVEUR, "Modifier_capteurDB: Normalisation impossible" );
        return(-1);

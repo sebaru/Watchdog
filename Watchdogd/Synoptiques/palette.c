@@ -108,7 +108,7 @@
        palette->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée la palette */
        palette->syn_cible_id = atoi(db->row[2]);                        /* Synoptique cible de la palette */
        palette->position     = atoi(db->row[4]);                             /* en abscisses et ordonnées */
-       memcpy ( palette->libelle, db->row[3], sizeof(palette->libelle) );
+       memcpy ( &palette->libelle, db->row[3], sizeof(palette->libelle) );
      }
     return(palette);
   }
@@ -146,7 +146,7 @@
        palette->syn_id       = atoi(db->row[0]);                   /* Synoptique ou est placée la palette */
        palette->syn_cible_id = atoi(db->row[1]);                        /* Synoptique cible de la palette */
        palette->position     = atoi(db->row[3]);                             /* en abscisses et ordonnées */
-       memcpy ( palette->libelle, db->row[2], sizeof(palette->libelle) );
+       memcpy ( &palette->libelle, db->row[2], sizeof(palette->libelle) );
      }
     return(palette);
   }

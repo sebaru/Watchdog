@@ -116,7 +116,7 @@
        passerelle->position_x     = atoi(db->row[7]);                        /* en abscisses et ordonnées */
        passerelle->position_y     = atoi(db->row[8]);
        passerelle->angle          = atof(db->row[9]);
-       memcpy ( passerelle->libelle, db->row[3], sizeof(passerelle->libelle) );
+       memcpy ( &passerelle->libelle, db->row[3], sizeof(passerelle->libelle) );
      }
     return(passerelle);
   }
@@ -161,7 +161,7 @@
        passerelle->position_x     = atoi(db->row[6]);                        /* en abscisses et ordonnées */
        passerelle->position_y     = atoi(db->row[7]);
        passerelle->angle          = atof(db->row[8]);
-       memcpy ( passerelle->libelle, db->row[2], sizeof(passerelle->libelle) );
+       memcpy ( &passerelle->libelle, db->row[2], sizeof(passerelle->libelle) );
      }
     return(passerelle);
   }

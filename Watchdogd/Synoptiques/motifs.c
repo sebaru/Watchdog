@@ -112,7 +112,7 @@
     motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info( log, DEBUG_SERVEUR, "Recuperer_motifDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( motif->libelle, db->row[1], sizeof(motif->libelle) );         /* Recopie dans la structure */
+     { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );        /* Recopie dans la structure */
        motif->id           = atoi(db->row[0]);
        motif->icone_id     = atoi(db->row[2]);                              /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[3]);
@@ -162,7 +162,7 @@
     motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info( log, DEBUG_SERVEUR, "Rechercher_motifDB: Erreur allocation mémoire" );
     else
-     { memcpy( motif->libelle, db->row[0], sizeof(motif->libelle) );         /* Recopie dans la structure */
+     { memcpy( &motif->libelle, db->row[0], sizeof(motif->libelle) );        /* Recopie dans la structure */
        motif->id           = id;
        motif->icone_id     = atoi(db->row[1]);                              /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[2]);

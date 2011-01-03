@@ -190,8 +190,8 @@ printf(" Groupe syn = %d\n", syn->groupe );
     syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!syn) Info( log, DEBUG_SERVEUR, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( syn->libelle, db->row[1], sizeof(syn->libelle) );             /* Recopie dans la structure */
-       memcpy( syn->mnemo,   db->row[2], sizeof(syn->mnemo  ) );             /* Recopie dans la structure */
+     { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
+       memcpy( &syn->mnemo,   db->row[2], sizeof(syn->mnemo  ) );            /* Recopie dans la structure */
        syn->id          = atoi(db->row[0]);
        syn->groupe      = atoi(db->row[3]);
      }
@@ -223,8 +223,8 @@ printf(" Groupe syn = %d\n", syn->groupe );
     if (!syn)
      { Info( log, DEBUG_SERVEUR, "Rechercher_synoptiqueDB: Mem error" ); }
     else
-     { memcpy( syn->libelle, db->row[0], sizeof(syn->libelle) );             /* Recopie dans la structure */
-       memcpy( syn->mnemo,   db->row[1], sizeof(syn->mnemo  ) );             /* Recopie dans la structure */
+     { memcpy( &syn->libelle, db->row[0], sizeof(syn->libelle) );            /* Recopie dans la structure */
+       memcpy( &syn->mnemo,   db->row[1], sizeof(syn->mnemo  ) );            /* Recopie dans la structure */
        syn->id          = id;
        syn->groupe      = atoi(db->row[2]);
      }

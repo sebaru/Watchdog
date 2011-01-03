@@ -110,9 +110,9 @@
        camera_sup->type         = atoi(db->row[5]);
        camera_sup->num          = atoi(db->row[6]);
        camera_sup->bit          = atoi(db->row[7]);
-       memcpy( camera_sup->objet,    db->row[8],  sizeof(camera_sup->objet) );/* Recopie dans la structure */
-       memcpy( camera_sup->location, db->row[9],  sizeof(camera_sup->location) );/* Recopie dans la structure */
-       memcpy( camera_sup->libelle,  db->row[10], sizeof(camera_sup->libelle) );/* Recopie dans la structure */
+       memcpy( &camera_sup->objet,    db->row[8],  sizeof(camera_sup->objet) );
+       memcpy( &camera_sup->location, db->row[9],  sizeof(camera_sup->location) );
+       memcpy( &camera_sup->libelle,  db->row[10], sizeof(camera_sup->libelle) );
      }
     return(camera_sup);
   }
@@ -148,15 +148,15 @@
     else
      { camera_sup->id           = id;
        camera_sup->camera_src_id= atoi(db->row[0]);
-       camera_sup->syn_id       = atoi(db->row[1]);                   /* Synoptique ou est placée le camera_sup */
-       camera_sup->position_x   = atoi(db->row[2]);                             /* en abscisses et ordonnées */
+       camera_sup->syn_id       = atoi(db->row[1]);             /* Synoptique ou est placée le camera_sup */
+       camera_sup->position_x   = atoi(db->row[2]);                          /* en abscisses et ordonnées */
        camera_sup->position_y   = atoi(db->row[3]);
        camera_sup->type         = atoi(db->row[4]);
        camera_sup->num          = atoi(db->row[5]);
        camera_sup->bit          = atoi(db->row[6]);
-       memcpy( camera_sup->objet,    db->row[7], sizeof(camera_sup->objet) );/* Recopie dans la structure */
-       memcpy( camera_sup->location, db->row[8], sizeof(camera_sup->location) );/* Recopie dans la structure */
-       memcpy( camera_sup->libelle,  db->row[9], sizeof(camera_sup->libelle) );/* Recopie dans la structure */
+       memcpy( &camera_sup->objet,    db->row[7], sizeof(camera_sup->objet) );
+       memcpy( &camera_sup->location, db->row[8], sizeof(camera_sup->location) );
+       memcpy( &camera_sup->libelle,  db->row[9], sizeof(camera_sup->libelle) );
      }
     return(camera_sup);
   }
