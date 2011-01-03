@@ -152,9 +152,17 @@ printf("release !\n");
           pid = fork();
           if (pid<0) return;
           else if (!pid)                                             /* Lancement de la ligne de commande */
-           { gchar chaine[sizeof(trame_camera_sup->camera_sup->location)+6];
+           {
+#ifdef bouh
+             gchar chaine[sizeof(trame_camera_sup->camera_sup->location)+6];
+#endif
+
+             execlp( "vlc", "vlc", trame_camera_sup->camera_sup->location, NULL );
+
+#ifdef bouh
              g_snprintf( chaine, sizeof(chaine), "uri=%s", trame_camera_sup->camera_sup->location );
              execlp( "gst-launch-0.10", "gst-launch-0.10", "playbin", chaine, NULL );
+#endif
              printf("AUDIO: Lancement gst-launch failed\n");
              _exit(0);
            }
