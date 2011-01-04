@@ -97,7 +97,7 @@
 
     g_snprintf( requete, sizeof(requete),                                         /* Requete SQL */
                 "SELECT name,id,actif,type,objet "
-                "FROM %s ORDER BY objet,type,name", NOM_TABLE_DLS );
+                "FROM %s ORDER BY objet,type DESC,name", NOM_TABLE_DLS );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
