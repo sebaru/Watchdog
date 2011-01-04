@@ -44,7 +44,7 @@
 /**********************************************************************************************************/
  gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar requete[200];
-    struct MNEMONIQUEDB *mnemo_a_virer;
+    struct CMD_TYPE_MNEMONIQUE *mnemo_a_virer;
 
     mnemo_a_virer = Rechercher_mnemoDB ( log, db, mnemo->id );
     if (mnemo_a_virer)
@@ -149,8 +149,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MNEMONIQUEDB *Recuperer_mnemoDB_suite( struct LOG *log, struct DB *db )
-  { struct MNEMONIQUEDB *mnemo;
+ struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -158,7 +158,7 @@
        return(NULL);
      }
 
-    mnemo = (struct MNEMONIQUEDB *)g_malloc0( sizeof(struct MNEMONIQUEDB) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo) Info( log, DEBUG_SERVEUR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
@@ -175,9 +175,9 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MNEMONIQUEDB *Rechercher_mnemoDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( struct LOG *log, struct DB *db, guint id )
   { gchar requete[200];
-    struct MNEMONIQUEDB *mnemo;
+    struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle,acronyme,objet,type,num FROM %s WHERE id=%d ORDER BY acronyme",
@@ -194,7 +194,7 @@
        return(NULL);
      }
 
-    mnemo = (struct MNEMONIQUEDB *)g_malloc0( sizeof(struct MNEMONIQUEDB) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo)
      { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB: Mem error" ); }
     else
@@ -212,10 +212,10 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MNEMONIQUEDB *Rechercher_mnemoDB_type_num ( struct LOG *log, struct DB *db,
+ struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct LOG *log, struct DB *db,
                                                     struct CMD_TYPE_NUM_MNEMONIQUE *critere )
   { gchar requete[200];
-    struct MNEMONIQUEDB *mnemo;
+    struct CMD_TYPE_MNEMONIQUE *mnemo;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle,acronyme,objet,id FROM %s WHERE type=%d AND num=%d",
@@ -231,7 +231,7 @@
        return(NULL);
      }
 
-    mnemo = (struct MNEMONIQUEDB *)g_malloc0( sizeof(struct MNEMONIQUEDB) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo)
      { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB_type_num: Mem error" ); }
     else
@@ -306,8 +306,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct MNEMONIQUEDB *Recuperer_mnemoDB_for_courbe_suite( struct LOG *log, struct DB *db )
-  { struct MNEMONIQUEDB *mnemo;
+ struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_for_courbe_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -315,7 +315,7 @@
        return(NULL);
      }
 
-    mnemo = (struct MNEMONIQUEDB *)g_malloc0( sizeof(struct MNEMONIQUEDB) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo) Info( log, DEBUG_SERVEUR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
