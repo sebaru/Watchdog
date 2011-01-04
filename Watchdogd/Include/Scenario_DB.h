@@ -33,45 +33,15 @@
 
  #define NOM_TABLE_SCENARIO    "dls_scenario"
 
- struct SCENARIO_DB
-  { guint  id;                                                                      /* Numero du compteur */
-    guint  actif;                                                                   /* Valeur du compteur */
-    guint  bit_m;                                                                   /* Valeur du compteur */
-    gboolean ts_jour;                                                               /* Valeur du compteur */
-    gboolean ts_mois;                                                               /* Valeur du compteur */
-    gboolean lundi;                                                                 /* Valeur du compteur */
-    gboolean mardi;                                                                 /* Valeur du compteur */
-    gboolean mercredi;                                                              /* Valeur du compteur */
-    gboolean jeudi;                                                                 /* Valeur du compteur */
-    gboolean vendredi;                                                              /* Valeur du compteur */
-    gboolean samedi;                                                                /* Valeur du compteur */
-    gboolean dimanche;                                                              /* Valeur du compteur */
-    gboolean janvier;                                                               /* Valeur du compteur */
-    gboolean fevrier;                                                               /* Valeur du compteur */
-    gboolean mars;                                                                  /* Valeur du compteur */
-    gboolean avril;                                                                 /* Valeur du compteur */
-    gboolean mai;                                                                   /* Valeur du compteur */
-    gboolean juin;                                                                  /* Valeur du compteur */
-    gboolean juillet;                                                               /* Valeur du compteur */
-    gboolean aout;                                                                  /* Valeur du compteur */
-    gboolean septembre;                                                             /* Valeur du compteur */
-    gboolean octobre;                                                               /* Valeur du compteur */
-    gboolean novembre;                                                              /* Valeur du compteur */
-    gboolean decembre;                                                              /* Valeur du compteur */
-    guint  heure;                                                                   /* Valeur du compteur */
-    guint  minute;                                                                  /* Valeur du compteur */
-    guchar libelle[NBR_CARAC_LIBELLE_SCENARIO_UTF8+1];
-  };
-
 /*************************************** Définitions des prototypes ***************************************/
  extern void Checker_scenario ( guint num );
  extern void Charger_scenario ( void );
  extern gint Ajouter_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *sc );
  extern gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *scenario );
  extern gboolean Retirer_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *sc );
- extern struct SCENARIO_DB *Rechercher_scenarioDB ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Recuperer_scenarioDB ( struct LOG *log, struct DB *db );
- extern struct SCENARIO_DB *Recuperer_scenarioDB_suite( struct LOG *log, struct DB *db );
+ extern struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct LOG *log, struct DB *db );
  extern gboolean Recuperer_scenarioDB_par_bitm ( struct LOG *log, struct DB *db,
                                                  struct CMD_WANT_SCENARIO_MOTIF *sce );
 

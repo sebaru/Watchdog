@@ -36,89 +36,20 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_scenario: convertit une structure MSG en structure CMD_TYPE_SCENARIO                      */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_TYPE_SCENARIO *Preparer_envoi_sc ( struct SCENARIO_DB *sc )
-  { struct CMD_TYPE_SCENARIO *rezo_sc;
-
-    rezo_sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
-    if (!rezo_sc) { return(NULL); }
-
-    rezo_sc->id        = sc->id;
-    rezo_sc->actif     = sc->actif;
-    rezo_sc->bit_m     = sc->bit_m;
-    rezo_sc->heure     = sc->heure;
-    rezo_sc->minute    = sc->minute;
-    rezo_sc->ts_jour   = sc->ts_jour;
-    rezo_sc->ts_mois   = sc->ts_mois;
-    rezo_sc->lundi     = sc->lundi;
-    rezo_sc->mardi     = sc->mardi;
-    rezo_sc->mercredi  = sc->mercredi;
-    rezo_sc->jeudi     = sc->jeudi;
-    rezo_sc->vendredi  = sc->vendredi;
-    rezo_sc->samedi    = sc->samedi;
-    rezo_sc->dimanche  = sc->dimanche;
-    rezo_sc->janvier   = sc->janvier;
-    rezo_sc->fevrier   = sc->fevrier;
-    rezo_sc->mars      = sc->mars;
-    rezo_sc->avril     = sc->avril;
-    rezo_sc->mai       = sc->mai;
-    rezo_sc->juin      = sc->juin;
-    rezo_sc->juillet   = sc->juillet;
-    rezo_sc->aout      = sc->aout;
-    rezo_sc->septembre = sc->septembre;
-    rezo_sc->octobre   = sc->octobre;
-    rezo_sc->novembre  = sc->novembre;
-    rezo_sc->decembre  = sc->decembre;
-    memcpy( &rezo_sc->libelle, sc->libelle, sizeof(rezo_sc->libelle) );
-    return( rezo_sc );
-  }
-/**********************************************************************************************************/
-/* Proto_editer_sc: Le client desire editer un sc                                                       */
-/* Entrée: le client demandeur et le sc en question                                                      */
+/* Proto_editer_sc: Le client desire editer un sc                                                         */
+/* Entrée: le client demandeur et le sc en question                                                       */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
-  { struct CMD_TYPE_SCENARIO edit_sc;
-    struct SCENARIO_DB *sc;
+  { struct CMD_TYPE_SCENARIO *sc;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
     sc = Rechercher_scenarioDB( Config.log, Db_watchdog, rezo_sc->id );
 
     if (sc)
-     { edit_sc.id        = sc->id;
-       edit_sc.actif     = sc->actif;
-       edit_sc.bit_m     = sc->bit_m;
-       edit_sc.heure     = sc->heure;
-       edit_sc.minute    = sc->minute;
-       edit_sc.ts_jour   = sc->ts_jour;
-       edit_sc.ts_mois   = sc->ts_mois;
-       edit_sc.lundi     = sc->lundi;
-       edit_sc.mardi     = sc->mardi;
-       edit_sc.mercredi  = sc->mercredi;
-       edit_sc.jeudi     = sc->jeudi;
-       edit_sc.vendredi  = sc->vendredi;
-       edit_sc.samedi    = sc->samedi;
-       edit_sc.dimanche  = sc->dimanche;
-       edit_sc.janvier   = sc->janvier;
-       edit_sc.fevrier   = sc->fevrier;
-       edit_sc.mars      = sc->mars;
-       edit_sc.avril     = sc->avril;
-       edit_sc.mai       = sc->mai;
-       edit_sc.juin      = sc->juin;
-       edit_sc.juillet   = sc->juillet;
-       edit_sc.aout      = sc->aout;
-       edit_sc.septembre = sc->septembre;
-       edit_sc.octobre   = sc->octobre;
-       edit_sc.novembre  = sc->novembre;
-       edit_sc.decembre  = sc->decembre;
-       memcpy( &edit_sc.libelle, sc->libelle, sizeof(rezo_sc->libelle) );
-
-       Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_EDIT_SCENARIO_OK,
-                  (gchar *)&edit_sc, sizeof(struct CMD_TYPE_SCENARIO) );
+     { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_EDIT_SCENARIO_OK,
+                  (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
        g_free(sc);                                                                 /* liberation mémoire */
      }
     else
@@ -135,7 +66,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
-  { struct SCENARIO_DB *result;
+  { struct CMD_TYPE_SCENARIO *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -150,21 +81,10 @@
      }
     else { result = Rechercher_scenarioDB( Config.log, Db_watchdog, rezo_sc->id );
            if (result) 
-            { struct CMD_TYPE_SCENARIO *sc;
-              sc = Preparer_envoi_sc ( result );
+            { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_VALIDE_EDIT_SCENARIO_OK,
+                             (gchar *)result, sizeof(struct CMD_TYPE_SCENARIO) );
               g_free(result);
-              if (!sc)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_VALIDE_EDIT_SCENARIO_OK,
-                                   (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
-                     g_free(sc);
-                     Charger_scenario ();
-                   }
+              Charger_scenario ();
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
@@ -181,7 +101,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
-  { struct SCENARIO_DB *result;
+  { struct CMD_TYPE_SCENARIO *result;
     gint id;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -203,21 +123,10 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_TYPE_SCENARIO *sc;
-              sc = Preparer_envoi_sc ( result );
+            { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_ADD_SCENARIO_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_SCENARIO) );
               g_free(result);
-              if (!sc)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Not enough memory" );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_ADD_SCENARIO_OK,
-                                   (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
-                     g_free(sc);
-                     Charger_scenario ();
-                   }
+              Charger_scenario ();
             }
          }
   }
@@ -235,9 +144,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_scenario_sup_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_SCENARIO *rezo_sc;
+  { struct CMD_TYPE_SCENARIO *sc;
     struct CMD_ENREG nbr;
-    struct SCENARIO_DB *sc;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiSUPSCE", 0, 0, 0 );
@@ -271,15 +179,11 @@
           pthread_exit ( NULL );
         }
 
-       rezo_sc = Preparer_envoi_sc( sc );
-       g_free(sc);
-       if (rezo_sc)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,
-                         (gchar *)rezo_sc, sizeof(struct CMD_TYPE_SCENARIO) );
-          g_free(rezo_sc);
-        }
+       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,
+                      (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
+       g_free(sc);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -97,10 +97,10 @@
      }                                                                           /* Si pas de histos (??) */
 
     for (i = 0; i<NBR_SCENARIO; i++)
-     { struct SCENARIO_DB *sc;
+     { struct CMD_TYPE_SCENARIO *sc;
        sc = Rechercher_scenarioDB ( Config.log, db, i );
        if (sc)
-        { memcpy ( &Partage->scenario[i], sc, sizeof(struct SCENARIO_DB) );
+        { memcpy ( &Partage->scenario[i], sc, sizeof(struct CMD_TYPE_SCENARIO) );
           g_free(sc);
         } else Partage->scenario[i].actif = FALSE;
      }
@@ -231,8 +231,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct SCENARIO_DB *Recuperer_scenarioDB_suite( struct LOG *log, struct DB *db )
-  { struct SCENARIO_DB *sc;
+ struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct LOG *log, struct DB *db )
+  { struct CMD_TYPE_SCENARIO *sc;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -240,7 +240,7 @@
        return(NULL);
      }
 
-    sc = (struct SCENARIO_DB *)g_malloc0( sizeof(struct SCENARIO_DB) );
+    sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
     if (!sc) Info( log, DEBUG_SERVEUR, "Recuperer_scenarioDB_suite: Erreur allocation mémoire" );
     else
      { sc->id        = atoi(db->row[26]);
@@ -278,8 +278,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct SCENARIO_DB *Rechercher_scenarioDB ( struct LOG *log, struct DB *db, guint id )
-  { struct SCENARIO_DB *sc;
+ struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( struct LOG *log, struct DB *db, guint id )
+  { struct CMD_TYPE_SCENARIO *sc;
     gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -298,7 +298,7 @@
        return(NULL);
      }
 
-    sc = (struct SCENARIO_DB *)g_malloc0( sizeof(struct SCENARIO_DB) );
+    sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
     if (!sc) Info( log, DEBUG_SERVEUR, "Rechercher_scenarioDB: Erreur allocation mémoire" );
     else
      { sc->id        = id;

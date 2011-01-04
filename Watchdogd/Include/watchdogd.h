@@ -155,7 +155,7 @@
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
     struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
-    struct SCENARIO_DB scenario [ NBR_SCENARIO ];
+    struct CMD_TYPE_SCENARIO scenario [ NBR_SCENARIO ];
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                  /* Monostables du DLS (DLS=rw, Sserveur=r) */
     guchar e [ NBR_ENTRE_TOR>>3 ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
