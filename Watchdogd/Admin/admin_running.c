@@ -210,7 +210,7 @@
     if ( ! strcmp ( commande, "getci" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " CI%03d = %d, type=%d, actif=%d, unite=%d, val1=%d, val2=%d\n",
+       g_snprintf( chaine, sizeof(chaine), " CI%03d = %8.2f, type=%d, actif=%d, unite=%d, val1=%8.2f, val2=%8.2f\n",
                    num, Partage->ci[num].cpt_impdb.valeur, Partage->ci[num].cpt_impdb.type, Partage->ci[num].actif,
                    Partage->ci[num].cpt_impdb.unite, Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
                  );

@@ -37,7 +37,7 @@
 
  struct CMD_TYPE_OPTION_COMPTEUR_IMP
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
-    guint  valeur;                                                                  /* Valeur du compteur */
+    gdouble valeur;                                                                 /* Valeur du compteur */
     guint  unite;                                                                         /* Km, h, ° ... */
     guint  type;                                                                          /* Km, h, ° ... */
                                                                                         /* Vient du mnemo */
