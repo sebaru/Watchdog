@@ -85,7 +85,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
                    "(name,actif,type,groupe,ssgroupe)"
-                   "VALUES ('%s','%s','%d','%s');",
+                   "VALUES ('%s','%s','%d','%s','%s');",
                    NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, groupe, ssgroupe );
     g_free(nom);
     g_free(groupe);
@@ -106,7 +106,7 @@
 
     g_snprintf( requete, sizeof(requete),                                         /* Requete SQL */
                 "SELECT name,id,actif,type,groupe,ssgroupe "
-                "FROM %s ORDER BY groupe,type DESC,name", NOM_TABLE_DLS );
+                "FROM %s ORDER BY groupe,ssgroupe,type DESC,name", NOM_TABLE_DLS );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

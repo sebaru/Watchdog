@@ -158,6 +158,7 @@
 
     if (edit_dls)                                                              /* Si edition d'un message */
      { gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_dls->groupe );
+       gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_dls->ssgroupe );
        gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );

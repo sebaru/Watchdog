@@ -482,7 +482,7 @@
                          COLONNE_ACTIVE, plugin_dls->on,
                          COLONNE_TYPE, plugin_dls->type,
                          COLONNE_GROUPE, plugin_dls->groupe,
-                         COLONNE_GROUPE, plugin_dls->ssgroupe,
+                         COLONNE_SSGROUPE, plugin_dls->ssgroupe,
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
                          COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],
