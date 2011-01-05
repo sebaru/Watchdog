@@ -371,26 +371,28 @@
           if (!reset)
            { Partage->ci[num].val_en_cours1++;
              if (Partage->ci[num].val_en_cours1>=ratio)
-              { Partage->ci[num].val_en_cours2++; }
+              { Partage->ci[num].val_en_cours2++;
+                Partage->ci[num].val_en_cours1=0;                         /* RAZ de la valeur de calcul 1 */
+              }
            }
           else
-           { Partage->ci[num].val_en_cours1 = 0;                /* Valeur transitoire pour gérer les ratio */
+           { Partage->ci[num].val_en_cours1 = 0;               /* Valeur transitoire pour gérer les ratio */
            }
         }
      }
     else
      { Partage->ci[ num ].actif = FALSE; }
 
-    switch (Partage->ci[ num ].cpt_impdb.type)                         /* Calcul de la valeur réelle du CI */
+    switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur réelle du CI */
      { case CI_TOTALISATEUR : Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
                               break;
-       case CI_MOYENNEUR_SEC: if (Partage->top%10)
+       case CI_MOYENNEUR_SEC: if ( ! Partage->top%10 )
                                { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
                                                                       Partage->ci[num].val_en_cours2)/2;
                                  Partage->ci[num].val_en_cours2 = 0; /* Raz pour recommencer le comptage la prochaine seconde */
                                }
                               break;
-       case CI_MOYENNEUR_MIN: if (Partage->top%600)
+       case CI_MOYENNEUR_MIN: if ( ! Partage->top%600 )
                                { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
                                                                       Partage->ci[num].val_en_cours2)/2;
                                  Partage->ci[num].val_en_cours2 = 0; /* Raz pour recommencer le comptage la prochaine minute */
