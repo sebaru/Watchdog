@@ -35,8 +35,8 @@
  struct CPT_IMP
   { struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_impdb;
     gboolean actif;                                                       /* Mémorisation de l'etat du CI */
-    gdouble val_en_cours1;                                /* valeur en cours pour le calcul via les ratio */
-    gdouble val_en_cours2;                    /* valeur en cours avant interprétation selon le type de CI */
+    gfloat val_en_cours1;                                 /* valeur en cours pour le calcul via les ratio */
+    gfloat val_en_cours2;                     /* valeur en cours avant interprétation selon le type de CI */
     time_t last_update;                               /* date de derniere update de la valeur du compteur */
   };
 

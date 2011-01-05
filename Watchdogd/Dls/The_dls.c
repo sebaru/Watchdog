@@ -105,7 +105,7 @@
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
- double CI( int num )
+ float CI( int num )
   { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
     else return (0.0);
   }
