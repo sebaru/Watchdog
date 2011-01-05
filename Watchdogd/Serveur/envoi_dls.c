@@ -271,7 +271,7 @@
           Info( Config.log, DEBUG_DLS, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
           if (client)
            { g_snprintf( erreur.message, sizeof(erreur.message), "Lancement compilateur failed !" );
-             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
                             (gchar *)&erreur, sizeof(erreur) );
            }
           _exit(0);
@@ -290,8 +290,10 @@
        pthread_mutex_unlock( &Partage->com_dls.synchro );
 
        if (client)
-        { g_snprintf( erreur.message, sizeof(erreur.message),
-                      "Compilation OK, Reset plugin OK" );
+        { if (retour == TRAD_DLS_WARNING)
+           { g_snprintf( erreur.message, sizeof(erreur.message), "Compilation OK with Warnings\nReset plugin OK" ); }
+          else
+           { g_snprintf( erreur.message, sizeof(erreur.message), "Compilation OK\nReset plugin OK" ); }
           Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
                         (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
         }
