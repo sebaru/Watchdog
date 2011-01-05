@@ -369,14 +369,14 @@
      { if ( ! Partage->ci[ num ].actif )
         { Partage->ci[num].actif = TRUE;
           if (reset)
-           { Partage->ci[num].val_en_cours1 = 0;               /* Valeur transitoire pour gérer les ratio */
-             Partage->ci[num].val_en_cours2 = 0;               /* Valeur transitoire pour gérer les ratio */
+           { Partage->ci[num].val_en_cours1 = 0.0;             /* Valeur transitoire pour gérer les ratio */
+             Partage->ci[num].val_en_cours2 = 0.0;             /* Valeur transitoire pour gérer les ratio */
            }
           else
            { Partage->ci[num].val_en_cours1++;
              if (Partage->ci[num].val_en_cours1>=ratio)
               { Partage->ci[num].val_en_cours2++;
-                Partage->ci[num].val_en_cours1=0;                         /* RAZ de la valeur de calcul 1 */
+                Partage->ci[num].val_en_cours1=0.0;                       /* RAZ de la valeur de calcul 1 */
               }
            }
         }
@@ -387,20 +387,20 @@
     switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur réelle du CI */
      { case CI_TOTALISATEUR : if ( Partage->ci[num].last_update + 1 < Partage->top )
                                { Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
-                                 Partage->ci[ num ].last_update = Partage->top;
+                                 Partage->ci[num].last_update = Partage->top;
                                }
                               break;
        case CI_MOYENNEUR_SEC: if ( Partage->ci[num].last_update + 10 < Partage->top )
                                { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
-                                                                      Partage->ci[num].val_en_cours2)/2;
-                                 Partage->ci[num].val_en_cours2 = 0; /* Raz pour recommencer le comptage la prochaine seconde */
-                                 Partage->ci[ num ].last_update = Partage->top;
+                                                                      Partage->ci[num].val_en_cours2)/2.0;
+                                 Partage->ci[num].val_en_cours2 = 0.0;
+                                 Partage->ci[num].last_update = Partage->top;
                                }
                               break;
        case CI_MOYENNEUR_MIN: if ( Partage->ci[num].last_update + 600 < Partage->top )
                                { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
-                                                                      Partage->ci[num].val_en_cours2)/2;
-                                 Partage->ci[num].val_en_cours2 = 0; /* Raz pour recommencer le comptage la prochaine minute */
+                                                                      Partage->ci[num].val_en_cours2)/2.0;
+                                 Partage->ci[num].val_en_cours2 = 0.0;
                                  Partage->ci[num].last_update = Partage->top;
                                }
                               break;

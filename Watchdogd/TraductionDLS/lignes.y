@@ -292,6 +292,17 @@ unite:          modulateur ENTIER HEURE ENTIER
                              g_snprintf( $$, taille, "TR(%d)", $3 );
                            }
                 }}
+                | CPT_IMP ordre VALF
+                {{ int taille;
+                   taille = 30;
+                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   switch( $1 )
+                    { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", $1, $3 );  break;
+                      case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", $1, $3 );  break;
+                      case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", $1, $3 ); break;
+                      case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", $1, $3 ); break;
+                    }
+                }}
                 | barre ID suite_id
                 {{ struct ALIAS *alias;
                    char *chaine;

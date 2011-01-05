@@ -59,7 +59,6 @@
 /**********************************************************************************************************/
  struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur )
   { struct CMD_ETAT_BIT_CAPTEUR *etat_capteur;
-    time_t valeur;
 
     if (!capteur) return(NULL);
 
@@ -97,19 +96,23 @@
             capteur->val_ech = Partage->ea[capteur->bit_controle].val_ech;
             return(etat_capteur);
        case MNEMO_CPTH:
-            valeur = (time_t)Partage->ch[capteur->bit_controle].cpthdb.valeur / 60;
-            g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                        "%05dh", (int)valeur
-                      );
-            capteur->val_ech = Partage->ch[capteur->bit_controle].cpthdb.valeur;
+             { time_t valeur;
+               valeur = (time_t)Partage->ch[capteur->bit_controle].cpthdb.valeur / 60;
+               g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
+                           "%05dh", (int)valeur
+                         );
+               capteur->val_ech = Partage->ch[capteur->bit_controle].cpthdb.valeur;
+             }
             break;
        case MNEMO_CPT_IMP:
-            valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
-            g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                        "%05d %s", (int)valeur,
-                        Unite_vers_string(Partage->ci[capteur->bit_controle].cpt_impdb.unite)
-                      );
-            capteur->val_ech = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
+             { gdouble valeur;
+               valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
+               g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
+                           "%8.2f %s", valeur,
+                           Unite_vers_string(Partage->ci[capteur->bit_controle].cpt_impdb.unite)
+                         );
+               capteur->val_ech = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
+             }
             break;
        default:
             g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),

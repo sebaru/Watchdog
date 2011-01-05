@@ -75,7 +75,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET val='%d' WHERE id_mnemo='%d';", NOM_TABLE_CPT_IMP,
+                "UPDATE %s SET val='%f' WHERE id_mnemo='%d';", NOM_TABLE_CPT_IMP,
                 cpt_imp->valeur, cpt_imp->id_mnemo );
 
     Lancer_requete_SQL ( log, db, requete );
@@ -116,7 +116,7 @@
     if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
      { cpt_imp->id_mnemo = atoi(db->row[0]);
-       cpt_imp->valeur   = atoi(db->row[1]);
+       cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->unite    = atoi(db->row[2]);
        cpt_imp->num      = atoi(db->row[3]);
        cpt_imp->type     = atoi(db->row[4]);
@@ -153,7 +153,7 @@
     if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
      { cpt_imp->id_mnemo = atoi(db->row[0]);
-       cpt_imp->valeur   = atoi(db->row[1]);
+       cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->unite    = atoi(db->row[2]);
        cpt_imp->num      = atoi(db->row[3]);
        cpt_imp->type     = atoi(db->row[4]);
