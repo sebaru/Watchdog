@@ -448,7 +448,7 @@
      { alias = (struct ALIAS *)liste->data;
        if (!alias->used)
         { gchar chaine[128];
-          g_snprintf(chaine, sizeof(chaine), "%s not used\n", alias->nom );
+          g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
           Emettre_erreur( chaine ); 
           retour = FALSE;
         }
