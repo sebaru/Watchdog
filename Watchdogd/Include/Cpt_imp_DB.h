@@ -37,7 +37,7 @@
     gboolean actif;                                                       /* Mémorisation de l'etat du CI */
     gint val_en_cours1;                                   /* valeur en cours pour le calcul via les ratio */
     gint val_en_cours2;                       /* valeur en cours avant interprétation selon le type de CI */
-
+    time_t last_update;                               /* date de derniere update de la valeur du compteur */
   };
 
 /*************************************** Définitions des prototypes ***************************************/

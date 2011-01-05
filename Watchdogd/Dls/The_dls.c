@@ -385,20 +385,23 @@
      { Partage->ci[ num ].actif = FALSE; }
 
     switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur réelle du CI */
-     { case CI_TOTALISATEUR : Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
+     { case CI_TOTALISATEUR : if ( Partage->ci[num].last_update + 1 < Partage->top )
+                               { Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
+                                 Partage->ci[ num ].last_update = Partage->top;
+                               }
                               break;
-       case CI_MOYENNEUR_SEC: if ( !(Partage->top%10) )
+       case CI_MOYENNEUR_SEC: if ( Partage->ci[num].last_update + 10 < Partage->top )
                                { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
                                                                       Partage->ci[num].val_en_cours2)/2;
                                  Partage->ci[num].val_en_cours2 = 0; /* Raz pour recommencer le comptage la prochaine seconde */
-printf("Top\n");
-printf("MAJ CPT %d val1 %d val2 %d valeur%d\n", num, Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2, Partage->ci[num].cpt_impdb.valeur);
+                                 Partage->ci[ num ].last_update = Partage->top;
                                }
                               break;
-       case CI_MOYENNEUR_MIN: if ( !(Partage->top%600) )
+       case CI_MOYENNEUR_MIN: if ( Partage->ci[num].last_update + 600 < Partage->top )
                                { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
                                                                       Partage->ci[num].val_en_cours2)/2;
                                  Partage->ci[num].val_en_cours2 = 0; /* Raz pour recommencer le comptage la prochaine minute */
+                                 Partage->ci[num].last_update = Partage->top;
                                }
                               break;
      }
