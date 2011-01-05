@@ -36,7 +36,8 @@
 
  static GtkWidget *F_ajout;               /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du plugin en cours d'edition */
- static GtkWidget *Entry_objet;                          /* L'objet en clair du plugin en cours d'edition */
+ static GtkWidget *Entry_groupe;                       /* Le groupe en clair du plugin en cours d'edition */
+ static GtkWidget *Entry_ssgroupe;                   /* Le ssgroupe en clair du plugin en cours d'edition */
  static GtkWidget *Combo_type;                                  /* Type du plugin (module, ssgrpupe, ...) */
  static GtkWidget *Check_actif;                                  /* Le plugin est-il activé dans le dls ? */
  static struct CMD_TYPE_PLUGIN_DLS Edit_dls;                                /* Message en cours d'édition */
@@ -64,8 +65,10 @@
                                                 gboolean edition )
   { g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
                 "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-    g_snprintf( Edit_dls.objet, sizeof(Edit_dls.objet),
-                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
+    g_snprintf( Edit_dls.groupe, sizeof(Edit_dls.groupe),
+                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
+    g_snprintf( Edit_dls.ssgroupe, sizeof(Edit_dls.ssgroupe),
+                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_ssgroupe) ) );
     Edit_dls.on   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Edit_dls.type = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
 
@@ -115,7 +118,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres du plugin_dls ************************************/
-    table = gtk_table_new( 3, 3, TRUE );
+    table = gtk_table_new( 4, 3, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -133,11 +136,18 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Object") );
+    texte = gtk_label_new( _("Groupe") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_objet = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_PLUGIN_DLS );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 3, i, i+1 );
+    Entry_groupe = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_groupe), NBR_CARAC_PLUGIN_DLS );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_groupe, 1, 3, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Sous-Groupe") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_ssgroupe = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ssgroupe), NBR_CARAC_PLUGIN_DLS );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ssgroupe, 1, 3, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Name") );
@@ -146,10 +156,8 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, i, i+1 );
 
-
-
     if (edit_dls)                                                              /* Si edition d'un message */
-     { gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_dls->objet );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_dls->groupe );
        gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );

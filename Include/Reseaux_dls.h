@@ -29,7 +29,7 @@
  #define _RESEAUX_DLS_H_
 
  #define NBR_CARAC_PLUGIN_DLS       40                                             /* Nom d'un plugin DLS */
- #define NBR_CARAC_PLUGIN_DLS_UTF8  (6*NBR_CARAC_PLUGIN_DLS)
+ #define NBR_CARAC_PLUGIN_DLS_UTF8  (2*NBR_CARAC_PLUGIN_DLS)
 
  #define NBR_BIT_DLS           10000
 
@@ -50,7 +50,8 @@
 
  struct CMD_TYPE_PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar objet[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar groupe[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar ssgroupe[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     guint id;
     guint on;
     guint type;                                                       /* Module, Sous groupe, groupe, ... */
