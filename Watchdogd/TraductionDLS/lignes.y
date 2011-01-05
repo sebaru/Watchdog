@@ -562,7 +562,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
 /**********************************************************************************************************/
  int Dls_error ( char *s )
   { int taille;
-    char *chaine, *too_many="too much errors...\n";
+    char *chaine, *too_many="too many errors...\n";
     if (erreur<10)
      { taille = strlen(ERR_SYNTAXE) + strlen(s) + 5;
        chaine = New_chaine( taille );
