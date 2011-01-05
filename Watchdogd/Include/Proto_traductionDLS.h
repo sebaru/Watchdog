@@ -30,6 +30,13 @@
  
  #include <glib.h>
  #include "Erreur.h"
+
+ enum { TRAD_DLS_OK,                                               /* Retour de la fonction Traduire DLS. */
+        TRAD_DLS_WARNING,
+        TRAD_DLS_ERROR,
+        TRAD_DLS_ERROR_FILE
+      };
+
  struct ACTION
   { gchar *alors;                                      /* Chaine pointant sur le nom du tableau (B/M/E..) */
     gchar *sinon;
@@ -52,7 +59,7 @@
   };
 
 /*********************************************** Prototypes ***********************************************/
- extern gboolean Traduire_DLS( struct LOG *log, gboolean new, gint id );                 /* Dans Interp.c */
+ extern gint Traduire_DLS( struct LOG *log, gboolean new, gint id );                     /* Dans Interp.c */
  extern char *New_chaine( int longueur );
  extern void Emettre( char *chaine );
  extern void Emettre_erreur( char *chaine );

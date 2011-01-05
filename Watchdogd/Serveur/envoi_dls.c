@@ -212,36 +212,42 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Compiler_source_dls( struct CLIENT *client, gint id )
-  { gboolean retour;
+  { gint retour;
 
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: Compilation module DLS", id );
     retour = Traduire_DLS( Config.log, (client ? TRUE : FALSE), id );
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: fin traduction", retour );
-    if (retour == FALSE)                                          /* Retour de la traduction D.L.S vers C */
+
+    if (retour == TRAD_DLS_ERROR_FILE && client)                  /* Retour de la traduction D.L.S vers C */
+     { struct CMD_GTK_MESSAGE erreur;
+       Info_n( Config.log, DEBUG_DLS,
+               "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S", id );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open file for compilation ID %d", id );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
+     }
+
+    if ( (retour == TRAD_DLS_ERROR || retour == TRAD_DLS_WARNING) && client)
      { struct CMD_GTK_MESSAGE erreur;
        gint id_fichier;
        gchar log[20];
 
        Info_n( Config.log, DEBUG_DLS,
-               "THRCompil: Compiler_source_dls: envoi erreur Traduction D.L.S", id );
-       if (client)
-        { g_snprintf( log, sizeof(log), "%d.log", id );
+               "THRCompil: Compiler_source_dls: envoi erreur/warning Traduction D.L.S", id );
+       g_snprintf( log, sizeof(log), "%d.log", id );
 
-          id_fichier = open( log, O_RDONLY, 0 );
-          if (id_fichier<0)
-           { g_snprintf( erreur.message, sizeof(erreur.message), "Et non....\nTraduction Down" );
-           }
-          else
-           { int nbr_car;
-             nbr_car = read (id_fichier, erreur.message, sizeof(erreur.message) );
-             if (nbr_car>=sizeof(erreur.message)) nbr_car = sizeof(erreur.message)-1;
-             erreur.message[nbr_car] = 0;                                       /* Caractere NULL d'arret */
-             close(id_fichier);
-           }
-          Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
-        }
+       id_fichier = open( log, O_RDONLY, 0 );
+       if (id_fichier<0)
+        { g_snprintf( erreur.message, sizeof(erreur.message), "Et non....\nTraduction Down" ); }
+       else { int nbr_car;
+              nbr_car = read (id_fichier, erreur.message, sizeof(erreur.message) );
+              if (nbr_car>=sizeof(erreur.message)) nbr_car = sizeof(erreur.message)-1;
+              erreur.message[nbr_car] = 0;                                       /* Caractere NULL d'arret */
+              close(id_fichier);
+            }
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
      }
-    else
+
+    if (retour == TRAD_DLS_WARNING || retour == TRAD_DLS_OK)
      { struct CMD_GTK_MESSAGE erreur;
        gint pidgcc;
        pidgcc = fork();

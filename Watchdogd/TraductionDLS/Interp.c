@@ -409,10 +409,10 @@
 /* Entrée: le nom du fichier, et l'identifiant cible (pour write)                                         */
 /* Sortie: le nombre d'erreur de traduction                                                               */
 /**********************************************************************************************************/
- gboolean Traduire_DLS( struct LOG *log_erreur, gboolean new, gint id )
+ gint Traduire_DLS( struct LOG *log_erreur, gboolean new, gint id )
   { gchar source[80], source_ok[80], cible[80], log[80];
     struct ALIAS *alias;
-    gboolean retour;
+    gint retour;
     GList *liste;
 
     prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
@@ -429,19 +429,21 @@
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
      { Info_c( Log, DEBUG_DLS, "Traduire_DLS: Creation cible impossible", cible ); 
-       return(FALSE);
+       return(TRAD_DLS_ERROR_FILE);
      }
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
      { close(Id_cible);
        Info_c( Log, DEBUG_DLS, "Traduire_DLS: Creation log impossible", cible ); 
-       return(FALSE);
+       return(TRAD_DLS_ERROR_FILE);
      }
 
     Alias = NULL;                                                              /* Par défaut, pas d'alias */
-    if (new) retour = Interpreter_source_dls( source );
-        else retour = Interpreter_source_dls( source_ok );
+
+    if ( Interpreter_source_dls( (new ? source : source_ok) ) )
+         { retour = TRAD_DLS_OK; }
+    else { retour = TRAD_DLS_ERROR; }
 
     liste = Alias;
     while(liste)
@@ -450,7 +452,7 @@
         { gchar chaine[128];
           g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
           Emettre_erreur( chaine ); 
-          retour = FALSE;
+          retour = TRAD_DLS_WARNING;
         }
        liste = liste->next;
      }
