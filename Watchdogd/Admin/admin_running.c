@@ -210,9 +210,9 @@
     if ( ! strcmp ( commande, "getci" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " CI%03d = %d, actif=%d, unite=%d\n",
-                   num, Partage->ci[num].cpt_impdb.valeur, Partage->ci[num].actif,
-                   Partage->ci[num].cpt_impdb.unite
+       g_snprintf( chaine, sizeof(chaine), " CI%03d = %d, type=%d, actif=%d, unite=%d, val1=%d, val2=%d\n",
+                   num, Partage->ci[num].cpt_impdb.valeur, Partage->ci[num].cpt_impdb.type, Partage->ci[num].actif,
+                   Partage->ci[num].cpt_impdb.unite, Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
                  );
        Write_admin ( client->connexion, chaine );
      } else
