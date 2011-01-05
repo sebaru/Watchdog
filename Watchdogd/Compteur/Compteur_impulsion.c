@@ -62,6 +62,7 @@
           return;
         }
        memcpy ( &Partage->ci[cpt_imp->num].cpt_impdb, cpt_imp, sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
+       Partage->ci[cpt_imp->num].val_en_cours2 = Partage->ci[cpt_imp->num].cpt_impdb.valeur;      /* Init */
        g_free(cpt_imp);
      }
   }
