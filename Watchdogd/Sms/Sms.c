@@ -83,6 +83,9 @@
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_c( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Open Phone NOK", gn_error_print(error) );
+       gn_lib_phone_close(state);
+       gn_lib_phoneprofile_free(&state);
+       gn_lib_library_free();
        return;
      }
 
