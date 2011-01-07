@@ -591,6 +591,7 @@
 /**********************************************************************************************************/
  static void Init_watchdog_modbus( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
+    gint retour;
 
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_STOR) );
 
@@ -602,11 +603,15 @@
     requete.fct            = MBUS_SORTIE_TOR;
     requete.valeur         = htons( 0x0000 );                          /* 5 secondes avant coupure sortie */
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
-         != sizeof (requete) )
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->modbus.id );
        Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: stop watchdog OK", module->modbus.id );
      }
 
     module->transaction_id++;
@@ -618,11 +623,15 @@
     requete.fct            = MBUS_SORTIE_TOR;
     requete.valeur         = htons( 0x0001 );                          /* 5 secondes avant coupure sortie */
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
-         != sizeof (requete) )
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->modbus.id );
        Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog OK", module->modbus.id );
      }
 
     module->transaction_id++;
@@ -634,11 +643,15 @@
     requete.fct            = MBUS_SORTIE_TOR;
     requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
-         != sizeof (requete) )
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->modbus.id );
        Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: init watchdog timer OK", module->modbus.id );
      }
 
     module->transaction_id++;
@@ -650,11 +663,15 @@
     requete.fct            = MBUS_SORTIE_TOR;
     requete.valeur         = htons( 0x0001 );                                              /* Start Timer */
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
-         != sizeof (requete) )
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: watchdog start failed", module->modbus.id );
        Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: watchdog start OK", module->modbus.id );
      }
 
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: Init OK", module->modbus.id );
@@ -910,7 +927,7 @@
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 50 < time(NULL))                     /* Detection attente trop longue */
+    if (module->date_last_reponse + 10 < time(NULL))                     /* Detection attente trop longue */
      { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
                module->modbus.id );
        Deconnecter_module( module );
@@ -920,10 +937,10 @@
     FD_ZERO(&fdselect);
     FD_SET(module->connexion, &fdselect );
     tv.tv_sec = 0;
-    tv.tv_usec= 100;                                                           /* Attente d'un caractere */
+    tv.tv_usec= 1000;                                                          /* Attente d'un caractere */
     retval = select(module->connexion+1, &fdselect, NULL, NULL, &tv );
 
-    if ( retval>=0 && FD_ISSET(module->connexion, &fdselect) )
+    if ( retval>0 && FD_ISSET(module->connexion, &fdselect) )
      { int bute;
        if (module->nbr_oct_lu<TAILLE_ENTETE_MODBUS)
             { bute = TAILLE_ENTETE_MODBUS; }
