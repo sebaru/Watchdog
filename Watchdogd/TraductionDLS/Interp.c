@@ -117,10 +117,19 @@
 /* Entrées: rien                                                                                          */
 /* Sortie: NULL si probleme                                                                               */
 /**********************************************************************************************************/
+ struct COMPARATEUR *New_comparateur( void )
+  { struct COMPARATEUR *comparateur;
+    comparateur=(struct COMPARATEUR *)g_malloc0( sizeof(struct COMPARATEUR) );
+    return(comparateur);
+  }
+/**********************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                   */
+/* Entrées: rien                                                                                          */
+/* Sortie: NULL si probleme                                                                               */
+/**********************************************************************************************************/
  struct OPTION *New_option( void )
   { struct OPTION *option;
     option=(struct OPTION *)g_malloc0( sizeof(struct OPTION) );
-    if (!option) { return(NULL); }
     return(option);
   }
 /**********************************************************************************************************/

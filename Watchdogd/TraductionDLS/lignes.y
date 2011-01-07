@@ -34,23 +34,26 @@
 
 extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
 int erreur;                                                             /* Compteur d'erreur du programme */
-#define  NON_DEFINI         "Ligne %d: %s is not defined\n"
-#define  DEJA_DEFINI        "Ligne %d: %s is already defined\n"
-#define  INTERDIT_GAUCHE    "Ligne %d: %s interdit en position gauche\n"
-#define  INTERDIT_DROITE    "Ligne %d: %s interdit en position droite\n"
-#define  INTERDIT_MSG_BARRE "Ligne %d: %s interdit en complement\n"
-#define  INTERDIT_REL_ORDRE "Ligne %d: %s interdit dans la relation d'ordre\n"
-#define  ERR_SYNTAXE        "Ligne %d: Erreur de syntaxe -> %s\n"
+#define  NON_DEFINI           "Ligne %d: %s is not defined\n"
+#define  DEJA_DEFINI          "Ligne %d: %s is already defined\n"
+#define  INTERDIT_GAUCHE      "Ligne %d: %s interdit en position gauche\n"
+#define  INTERDIT_DROITE      "Ligne %d: %s interdit en position droite\n"
+#define  INTERDIT_MSG_BARRE   "Ligne %d: %s interdit en complement\n"
+#define  INTERDIT_REL_ORDRE   "Ligne %d: %s interdit dans la relation d'ordre\n"
+#define  INTERDIT_COMPARAISON "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
+#define  MANQUE_COMPARAISON   "Ligne %d: %s doit s'utiliser dans une comparaison\n"
+#define  ERR_SYNTAXE          "Ligne %d: Erreur de syntaxe -> %s\n"
 
 
 %}
 
 %union { int val;
-         double valf;
+         float valf;
          char *chaine;
          GList *gliste;
          struct OPTION *option;
          struct ACTION *action;
+         struct COMPARATEUR *comparateur;
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
@@ -72,11 +75,12 @@ int erreur;                                                             /* Compt
 %token <val>    ENTIER
 %token <valf>   VALF
 
-%type  <val>     barre
-%type  <gliste>  liste_options options
-%type  <option>  une_option
-%type  <chaine>  unite facteur expr suite_id
-%type  <action>  action une_action
+%type  <val>         barre
+%type  <gliste>      liste_options options
+%type  <option>      une_option
+%type  <chaine>      unite facteur expr
+%type  <action>      action une_action
+%type  <comparateur> comparateur
 
 %%
 fichier: ligne_source_dls;
@@ -303,39 +307,94 @@ unite:          modulateur ENTIER HEURE ENTIER
                              g_snprintf( $$, taille, "TR(%d)", $3 );
                            }
                 }}
-                | barre ID suite_id
+                | barre ID comparateur
                 {{ struct ALIAS *alias;
                    char *chaine;
                    int taille;
                    alias = Get_alias_par_nom($2);                                /* On recupere l'alias */
                    if (alias)
-                    { if (alias->bit == TEMPO)
-                       { taille = 15;
-                         $$ = New_chaine( taille ); /* 10 caractères max */
-                         if (!$1) g_snprintf( $$, taille, "TR(%d)", alias->num );
-                             else g_snprintf( $$, taille, "TRbarre(%d)", alias->num );
-                       }
-                      else
-                       { switch(alias->bit) /* On traite que ce qui peut passer en "condition" */
-                          { case ENTREE:
-                            case BI    :
-                            case MONO  : taille = strlen(alias->nom)+2;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if (!$1) g_snprintf( $$, taille, "%s", alias->nom );
-                                         else g_snprintf( $$, taille, "!%s", alias->nom );
-                                         break;
-                            case EANA  : taille = strlen(alias->nom)+strlen($3)+20;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         g_snprintf( $$, taille, "EA_ech%s,%d)", $3, alias->num );
-                                         break;
-                            default:     taille = strlen($2) + strlen(INTERDIT_GAUCHE) + 1;
+                    { switch(alias->bit) /* On traite que ce qui peut passer en "condition" */
+                       { case TEMPO : if ($3)
+                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, INTERDIT_GAUCHE, ligne_source_dls, $2 );
+                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
                                          Emettre_erreur(chaine); g_free(chaine);
                                          erreur++;
                                          $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );
-                          }
+                                         g_snprintf( $$, 2, "0" );                                      
+                                       }
+                                      else
+                                       { taille = 15;
+                                         $$ = New_chaine( taille ); /* 10 caractères max */
+                                         if (!$1) g_snprintf( $$, taille, "TR(%d)", alias->num );
+                                         else g_snprintf( $$, taille, "TRbarre(%d)", alias->num );
+                                       }
+                                      break;
+                         case ENTREE:
+                         case BI    :
+                         case MONO  : if ($3)
+                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
+                                         chaine = New_chaine(taille);
+                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
+                                         Emettre_erreur(chaine); g_free(chaine);
+                                         erreur++;
+                                         $$=New_chaine(2);
+                                         g_snprintf( $$, 2, "0" );                                      
+                                       }
+                                      else
+                                       { taille = strlen(alias->nom)+2;
+                                         $$ = New_chaine( taille ); /* 10 caractères max */
+                                         if (!$1) g_snprintf( $$, taille, "%s", alias->nom );
+                                         else g_snprintf( $$, taille, "!%s", alias->nom );
+                                       }
+                                      break;
+                         case EANA  : if ($3)
+                                       { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
+                                         chaine = New_chaine(taille);
+                                         g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
+                                         Emettre_erreur(chaine); g_free(chaine);
+                                         erreur++;
+                                         $$=New_chaine(2);
+                                         g_snprintf( $$, 2, "0" );                                      
+                                       }
+                                      else
+                                       { taille = strlen(alias->nom)+50;
+                                         $$ = New_chaine( taille ); /* 10 caractères max */
+                                         switch($3->type)
+                                          { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $3->valf, alias->num ); break;
+                                            case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $3->valf, alias->num ); break;
+                                            case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $3->valf, alias->num ); break;
+                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $3->valf, alias->num ); break;
+                                          }
+                                       }
+                                      break;
+                         case CPT_IMP:if ($3)
+                                       { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
+                                         chaine = New_chaine(taille);
+                                         g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
+                                         Emettre_erreur(chaine); g_free(chaine);
+                                         erreur++;
+                                         $$=New_chaine(2);
+                                         g_snprintf( $$, 2, "0" );                                      
+                                       }
+                                      else
+                                       { taille = strlen(alias->nom)+50;
+                                         $$ = New_chaine( taille ); /* 10 caractères max */
+                                         switch($3->type)
+                                          { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $3->valf );  break;
+                                            case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $3->valf );  break;
+                                            case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $3->valf ); break;
+                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $3->valf ); break;
+                                          }
+                                       }
+                                      break;
+                         default:     taille = strlen($2) + strlen(INTERDIT_GAUCHE) + 1;
+                                      chaine = New_chaine(taille);
+                                      g_snprintf(chaine, taille, INTERDIT_GAUCHE, ligne_source_dls, $2 );
+                                      Emettre_erreur(chaine); g_free(chaine);
+                                      erreur++;
+                                      $$=New_chaine(2);
+                                      g_snprintf( $$, 2, "0" );
                        }
                     }
                    else { taille = strlen($2) + strlen(NON_DEFINI) + 1;
@@ -463,16 +522,10 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                 }}
                 ;
 
-suite_id:       ordre VALF
-                {{ int taille;
-                   taille = 30;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   switch( $1 )
-                    { case INF        : g_snprintf( $$, taille, "_inf(%f", $2 );  break;
-                      case SUP        : g_snprintf( $$, taille, "_sup(%f", $2 );  break;
-                      case INF_OU_EGAL: g_snprintf( $$, taille, "_inf_egal(%f", $2 ); break;
-                      case SUP_OU_EGAL: g_snprintf( $$, taille, "_sup_egal(%f", $2 ); break;
-                    }
+comparateur:    ordre VALF
+                {{ $$ = New_comparateur();
+                   $$->type = $1;
+                   $$->valf = $2;
                 }}
                 |     {{ $$=NULL; }}
                 ;

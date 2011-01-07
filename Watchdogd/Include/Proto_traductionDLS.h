@@ -49,6 +49,13 @@
           };
   };
 
+ struct COMPARATEUR
+  { gint type;
+    union { gint val;
+            gfloat valf;
+          };
+  };
+
  struct ALIAS
   { gchar *nom;
     gint bit;                                                            /* Type de tableau (E/A/B/M....) */
@@ -64,6 +71,7 @@
  extern void Emettre( char *chaine );
  extern void Emettre_erreur( char *chaine );
  extern void Emettre_init_alias( void );
+ extern struct COMPARATEUR *New_compareteur( void );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );

@@ -536,7 +536,6 @@
     module->date_last_reponse = time(NULL);
     module->borne_en_cours = module->Bornes;
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module", module->modbus.id );
-    SB( module->modbus.bit, 1 );                                 /* Mise a 1 du bit interne lié au module */
 
     return(TRUE);
   }
@@ -817,6 +816,7 @@
     else
      { int nbr, cpt_e;
        module->date_last_reponse = time(NULL);                                 /* Estampillage de la date */
+       SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
        nbr = module->response.nbr;
        switch ( module->response.fct )
         { case MBUS_ENTRE_TOR:                                       /* Quelles type de borne d'entrées ? */
@@ -1056,7 +1056,7 @@
            { if ( Connecter_module( module ) )
               { if ( module->modbus.watchdog )
                  { Init_watchdog_modbus(module); }
-                module->date_retente = 0;;
+                module->date_retente = 0;
                 module->started = TRUE;
               }
              else
