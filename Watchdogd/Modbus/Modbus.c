@@ -910,7 +910,7 @@
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 10 < time(NULL))                     /* Detection attente trop longue */
+    if (module->date_last_reponse + 50 < time(NULL))                     /* Detection attente trop longue */
      { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
                module->modbus.id );
        Deconnecter_module( module );
