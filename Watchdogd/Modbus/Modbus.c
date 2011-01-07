@@ -534,7 +534,7 @@
 
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                          /* Sauvegarde du fd */
-    module->date_last_reponse = time(NULL);
+    module->date_last_reponse = Partage->top;
     module->borne_en_cours = module->Bornes;
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module", module->modbus.id );
 
@@ -824,7 +824,7 @@
 
     else
      { int nbr, cpt_e;
-       module->date_last_reponse = time(NULL);                                 /* Estampillage de la date */
+       module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
        nbr = module->response.nbr;
        switch ( module->response.fct )
@@ -902,12 +902,15 @@
 
           case 0x80 + MBUS_ENTRE_TOR:
                Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur ENTRE_TOR" );
+               Deconnecter_module( module );
                break;
           case 0x80 + MBUS_SORTIE_TOR:
                Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur SORTIE_TOR" );
+               Deconnecter_module( module );
                break;
           case 0x80 + MBUS_ENTRE_ANA:
                Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur ENTRE_ANA" );
+               Deconnecter_module( module );
                break;
           default: Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: fct inconnu" );
         }
@@ -927,7 +930,7 @@
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 10 < time(NULL))                     /* Detection attente trop longue */
+    if (module->date_last_reponse + 100 < Partage->top)                  /* Detection attente trop longue */
      { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: Pb reponse module, deconnexion",
                module->modbus.id );
        Deconnecter_module( module );
