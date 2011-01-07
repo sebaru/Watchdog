@@ -31,6 +31,7 @@
  #include <sys/types.h>
  #include <sys/time.h>
  #include <sys/stat.h>
+ #include <errno.h>
  #include <sys/prctl.h>
  #include <termios.h>
  #include <unistd.h>
@@ -640,6 +641,7 @@
        Deconnecter_module( module );
      }
 
+    module->transaction_id++;
     requete.transaction_id = 0;
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
@@ -655,6 +657,7 @@
        Deconnecter_module( module );
      }
 
+    Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Init_watchdog_modbus: Init OK", module->modbus.id );
     module->transaction_id=1;
   }
 /**********************************************************************************************************/
@@ -736,17 +739,6 @@
                if ( A(cpt_a++) ) valeur |=  32;
                if ( A(cpt_a++) ) valeur |=  64;
                if ( A(cpt_a++) ) valeur |= 128;
-
-/* Changement normes 14/11/2010
-               if ( A(cpt_a++) ) valeur |=   1;
-               if ( A(cpt_a++) ) valeur |=   4;
-               if ( A(cpt_a++) ) valeur |=  16;
-               if ( A(cpt_a++) ) valeur |=  64;
-               if ( A(cpt_a++) ) valeur |=   2;
-               if ( A(cpt_a++) ) valeur |=   8;
-               if ( A(cpt_a++) ) valeur |=  32;
-               if ( A(cpt_a++) ) valeur |= 128;
-*/
                requete.valeur = htons( valeur );
                break;
        default: Info_n( Config.log, DEBUG_MODBUS,
@@ -832,17 +824,6 @@
                           SE( cpt_e++, ( module->response.data[0] & 32 ) );
                           SE( cpt_e++, ( module->response.data[0] & 64 ) );
                           SE( cpt_e++, ( module->response.data[0] & 128) );
-
-/* Changement de normes 14/11/2010
-                          SE( cpt_e++, ( module->response.data[0] & 1  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 4  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 16 ) );
-                          SE( cpt_e++, ( module->response.data[0] & 64 ) );
-                          SE( cpt_e++, ( module->response.data[0] & 2  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 8  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 32 ) );
-                          SE( cpt_e++, ( module->response.data[0] & 128) );
-*/
                           break;
                   default: Info_n( Config.log, DEBUG_MODBUS,
                                    "MODBUS: Processer_trame: borne InputTOR non gérée",
@@ -964,7 +945,9 @@
            }
          } 
         else
-         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: wrong trame", module->modbus.id );
+         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Recuperer_borne: wrong trame ID", module->modbus.id );
+           Info_n( Config.log, DEBUG_MODBUS, "                            ---- Retour", cpt );
+           Info_n( Config.log, DEBUG_MODBUS, "                            ---- Retour", errno );
            Deconnecter_module ( module );
          }
       }
