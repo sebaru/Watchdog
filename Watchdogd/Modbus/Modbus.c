@@ -933,7 +933,7 @@
                    (unsigned char *)&module->response +
                                      module->nbr_oct_lu,
                     bute-module->nbr_oct_lu );
-       if (cpt>0)
+       if (cpt>=0)
         { module->nbr_oct_lu += cpt;
           if (module->nbr_oct_lu >= 
               TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
