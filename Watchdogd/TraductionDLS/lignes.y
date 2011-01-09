@@ -348,7 +348,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          else g_snprintf( $$, taille, "!%s", alias->nom );
                                        }
                                       break;
-                         case EANA  : if ($3)
+                         case EANA  : if (!$3)
                                        { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
@@ -368,7 +368,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                           }
                                        }
                                       break;
-                         case CPT_IMP:if ($3)
+                         case CPT_IMP:if (!$3)
                                        { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
@@ -667,7 +667,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
 
        fclose(rc);
        if (erreur)
-        { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (retour>1 ? 's' : ' ') );
+        { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (erreur>1 ? 's' : ' ') );
           Emettre_erreur( chaine );
           return(FALSE);
         }

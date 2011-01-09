@@ -454,7 +454,7 @@
          { retour = TRAD_DLS_OK; }
     else { retour = TRAD_DLS_ERROR; }
 
-    if (erreur==0)                                            /* Si pas d'erreur, on regarde les warnings */
+    if (retour==TRAD_DLS_OK)                                  /* Si pas d'erreur, on regarde les warnings */
      { liste = Alias;
        while(liste)
         { alias = (struct ALIAS *)liste->data;

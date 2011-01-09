@@ -71,7 +71,7 @@
  extern void Emettre( char *chaine );
  extern void Emettre_erreur( char *chaine );
  extern void Emettre_init_alias( void );
- extern struct COMPARATEUR *New_compareteur( void );
+ extern struct COMPARATEUR *New_comparateur( void );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );
