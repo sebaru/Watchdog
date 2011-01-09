@@ -454,16 +454,18 @@
          { retour = TRAD_DLS_OK; }
     else { retour = TRAD_DLS_ERROR; }
 
-    liste = Alias;
-    while(liste)
-     { alias = (struct ALIAS *)liste->data;
-       if (!alias->used)
-        { gchar chaine[128];
-          g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
-          Emettre_erreur( chaine ); 
-          retour = TRAD_DLS_WARNING;
+    if (erreur==0)                                            /* Si pas d'erreur, on regarde les warnings */
+     { liste = Alias;
+       while(liste)
+        { alias = (struct ALIAS *)liste->data;
+          if (!alias->used)
+           { gchar chaine[128];
+             g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
+             Emettre_erreur( chaine ); 
+             retour = TRAD_DLS_WARNING;
+           }
+          liste = liste->next;
         }
-       liste = liste->next;
      }
 
     close(Id_cible);

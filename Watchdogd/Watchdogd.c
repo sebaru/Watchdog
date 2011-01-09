@@ -166,6 +166,16 @@
      }
   }
 /**********************************************************************************************************/
+/* Sauver_compteur : Envoie les infos Compteurs à la base de données pour sauvegarde !                    */
+/* Entrée : Néant                                                                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static Sauver_compteur ( struct DB *db )
+  { gint cpt;
+    for( cpt=0; cpt<NBR_COMPTEUR_H;   cpt++) { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
+    for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++) { Updater_cpt_impDB( Config.log, db, &Partage->ci[cpt].cpt_impdb); }     
+  }
+/**********************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -205,11 +215,8 @@
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
-        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPTH" );
-          for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
-           { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
-          for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++)
-           { Updater_cpt_impDB( Config.log, db, &Partage->ci[cpt].cpt_impdb); }     
+        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPT" );
+          Sauver_compteur( db );
           Exporter();
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
         }
@@ -238,6 +245,7 @@
      }
 
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
+    Sauver_compteur( db );                                             /* Dernière sauvegarde avant arret */
     Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: fin boucle sans fin" );
     Libere_DB_SQL( Config.log, &db );
     pthread_exit( NULL );
