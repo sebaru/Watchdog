@@ -29,7 +29,7 @@
  #define _RESEAUX_GTK_MESSAGE_H_
 
  #define NBR_CARAC_MSGERREUR         100                        /* 80 caractères de messages d'erreur max */
- #define NBR_CARAC_MSGERREUR_UTF8    (NBR_CARAC_MSGERREUR*6)
+ #define NBR_CARAC_MSGERREUR_UTF8    (2*NBR_CARAC_MSGERREUR)
 
  struct CMD_GTK_MESSAGE
   { gchar message[NBR_CARAC_MSGERREUR_UTF8+1];

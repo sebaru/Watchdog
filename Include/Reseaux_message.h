@@ -29,9 +29,9 @@
  #define _RESEAUX_MESSAGE_H_
 
  #define NBR_CARAC_LIBELLE_MSG    100                                                 /* Attention au SMS */
- #define NBR_CARAC_LIBELLE_MSG_UTF8  (6*NBR_CARAC_LIBELLE_MSG)
+ #define NBR_CARAC_LIBELLE_MSG_UTF8  (2*NBR_CARAC_LIBELLE_MSG)
  #define NBR_CARAC_OBJET_MSG      30
- #define NBR_CARAC_OBJET_MSG_UTF8    (6*NBR_CARAC_OBJET_MSG)
+ #define NBR_CARAC_OBJET_MSG_UTF8    (2*NBR_CARAC_OBJET_MSG)
  enum
   { MSG_ETAT,                                                        /* Definitions des types de messages */
     MSG_ALERTE,

@@ -29,7 +29,7 @@
  #define _RESEAUX_CAMERA_H_
 
  #define NBR_CARAC_LOCATION_CAMERA      100
- #define NBR_CARAC_LOCATION_CAMERA_UTF8 (6*NBR_CARAC_LOCATION_CAMERA)
+ #define NBR_CARAC_LOCATION_CAMERA_UTF8 (2*NBR_CARAC_LOCATION_CAMERA)
 
  enum
   { CAMERA_MODE_INCRUSTATION,                                         /* Definitions des types de cameras */

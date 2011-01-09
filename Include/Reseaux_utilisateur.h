@@ -31,9 +31,9 @@
  #define NBR_MAX_GROUPE_PAR_UTIL  100
 
  #define NBR_CARAC_LOGIN             16                           /* Idem pour la longueur max du password */
- #define NBR_CARAC_LOGIN_UTF8        (NBR_CARAC_LOGIN * 6)
+ #define NBR_CARAC_LOGIN_UTF8        (2*NBR_CARAC_LOGIN)
  #define NBR_CARAC_COMMENTAIRE       40
- #define NBR_CARAC_COMMENTAIRE_UTF8  (NBR_CARAC_COMMENTAIRE * 6)
+ #define NBR_CARAC_COMMENTAIRE_UTF8  (2*NBR_CARAC_COMMENTAIRE)
 
  struct CMD_UTIL_SETPASSWORD
   { guint  id;

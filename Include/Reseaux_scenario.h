@@ -29,7 +29,7 @@
  #define _RESEAUX_SCENARIO_H_
 
  #define NBR_CARAC_LIBELLE_SCENARIO  30
- #define NBR_CARAC_LIBELLE_SCENARIO_UTF8  (6*NBR_CARAC_LIBELLE_SCENARIO)
+ #define NBR_CARAC_LIBELLE_SCENARIO_UTF8  (2*NBR_CARAC_LIBELLE_SCENARIO)
 
  struct CMD_TYPE_SCENARIO
   { guint  id;                                                                      /* Numero du compteur */
