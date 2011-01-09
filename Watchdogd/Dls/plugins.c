@@ -182,30 +182,34 @@
        return;
      }
 
-    Recuperer_plugins_dlsDB( Config.log, db );
-    do
-     { plugin = Recuperer_plugins_dlsDB_suite( Config.log, db );
-       if (!plugin)
-        { Libere_DB_SQL( Config.log, &db );
-          return;
-        }
-
-       dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
-       if (!dls)
-        { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: out of memory" );
+    if (Recuperer_plugins_dlsDB( Config.log, db ))
+     { do
+        { plugin = Recuperer_plugins_dlsDB_suite( Config.log, db );
+          if (!plugin)
+           { Libere_DB_SQL( Config.log, &db );
+             Config.compil = 0;
+             return;
+           }
+   
+          dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+          if (!dls)
+           { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: out of memory" );
+             g_free(plugin);
+             return;
+           }
+   
+          memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
           g_free(plugin);
-          return;
-        }
-
-       memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-       g_free(plugin);
 
                                                                       /* Si option "compil" au demarrage" */
-       if (Config.compil == 1) Compiler_source_dls( NULL, dls->plugindb.id );
-       if (Charger_un_plugin( dls )==TRUE)
-        { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->plugindb.nom ); }
-     } while ( TRUE );
-    Config.compil = 0;
+          if (Config.compil == 1) Compiler_source_dls( NULL, dls->plugindb.id );
+          if (Charger_un_plugin( dls )==TRUE)
+           { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->plugindb.nom ); }
+        } while ( TRUE );
+     }
+    else  { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: Unable to load plugins" );
+            return;
+          }
  }
 /**********************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                    */
