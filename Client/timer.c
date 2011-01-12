@@ -43,9 +43,9 @@
  static void Timer_pass( struct TRAME_ITEM_PASS *trame_pass, gint cligno )
   {                                                                 /* Premier rectangle de la passerelle */
      if (trame_pass->cligno1 == 1 && !cligno &&                                    /* Gestion clignotement */
-        (trame_pass->en_cours_rouge1 != 0 ||
-         trame_pass->en_cours_vert1  != 0 ||
-         trame_pass->en_cours_bleu1  != 0
+        (trame_pass->en_cours_rouge1 != 100 ||
+         trame_pass->en_cours_vert1  != 100 ||
+         trame_pass->en_cours_bleu1  != 100
         )
        )
      { Trame_peindre_pass_1 ( trame_pass, 0, 0, 0 ); }
@@ -62,9 +62,9 @@
 
                                                                    /* Deuxieme rectangle de la passerelle */
     if (trame_pass->cligno2 == 1 && !cligno &&                                     /* Gestion clignotement */
-        (trame_pass->en_cours_rouge2 != 0 ||
-         trame_pass->en_cours_vert2  != 0 ||
-         trame_pass->en_cours_bleu2  != 0
+        (trame_pass->en_cours_rouge2 != 100 ||
+         trame_pass->en_cours_vert2  != 100 ||
+         trame_pass->en_cours_bleu2  != 100
         )
        )
      { Trame_peindre_pass_2 ( trame_pass, 0, 0, 0 ); }
@@ -127,9 +127,9 @@
      }
 
     if (trame_motif->cligno == 1 && !cligno &&                                    /* Gestion clignotement */
-        (trame_motif->en_cours_rouge != 0 ||
-         trame_motif->en_cours_vert  != 0 ||
-         trame_motif->en_cours_bleu  != 0
+        (trame_motif->en_cours_rouge != 100 ||
+         trame_motif->en_cours_vert  != 100 ||
+         trame_motif->en_cours_bleu  != 100
         )
        )
      { Trame_peindre_motif ( trame_motif, 0, 0, 0 ); }
