@@ -285,7 +285,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                     { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", $1, $3 );  break;
                       case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", $1, $3 );  break;
                       case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", $1, $3 ); break;
-                      case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", $1, $3 ); break;
+                      case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
                     }
                 }}
                 | barre POUV expr PFERM
@@ -384,7 +384,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                           { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $3->valf );  break;
                                             case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $3->valf );  break;
                                             case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $3->valf ); break;
-                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $3->valf ); break;
+                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $3->valf ); break;
                                           }
                                        }
                                       break;
