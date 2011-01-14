@@ -155,7 +155,7 @@
     gn_sms_default_submit(&sms);                                             /* The memory is zeroed here */
 
     memset(&sms.remote.number, 0, sizeof(sms.remote.number));
-    strncpy(sms.remote.number, "0683426100", sizeof(sms.remote.number) - 1);            /* Number a m'man */
+    strncpy(sms.remote.number, Config.sms_telephone, sizeof(sms.remote.number) - 1);    /* Number a m'man */
     if (sms.remote.number[0] == '+') 
          { sms.remote.type = GN_GSM_NUMBER_International; }
     else { sms.remote.type = GN_GSM_NUMBER_Unknown; }
@@ -210,11 +210,11 @@
     formpost = lastptr = NULL;
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "login",
-                  CURLFORM_COPYCONTENTS, "lefevreseb",
+                  CURLFORM_COPYCONTENTS, Config.smsbox_username,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "pass",
-                  CURLFORM_COPYCONTENTS, "mais0nSMS",
+                  CURLFORM_COPYCONTENTS, Config.smsbox_password,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "msg",
@@ -222,7 +222,7 @@
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "dest",
-                  CURLFORM_COPYCONTENTS, "0683426100",
+                  CURLFORM_COPYCONTENTS, Config.sms_telephone,
                   CURLFORM_END); 
     if (Partage->top < TOP_MIN_ENVOI_SMS)
      { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi trop tot !!", msg->libelle_sms );

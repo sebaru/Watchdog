@@ -90,6 +90,25 @@
         { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
+/********************************************* Partie SMS *************************************************/
+       chaine                    = g_key_file_get_string ( gkf, "SMS", "smsbox_username", NULL );
+       if (chaine)
+        { g_snprintf( Config.smsbox_username, sizeof(Config.smsbox_username), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.smsbox_username, sizeof(Config.smsbox_username), "%s", DEFAUT_SMSBOX_USERNAME  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "SMS", "smsbox_password", NULL );
+       if (chaine)
+        { g_snprintf( Config.smsbox_password, sizeof(Config.smsbox_password), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.smsbox_password, sizeof(Config.smsbox_password), "%s", DEFAUT_SMSBOX_PASSWORD  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "SMS", "sms_telephone", NULL );
+       if (chaine)
+        { g_snprintf( Config.sms_telephone, sizeof(Config.sms_telephone), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.sms_telephone, sizeof(Config.sms_telephone), "%s", DEFAUT_SMS_TELEPHONE  ); }
+
 /********************************************* Partie SERVER **********************************************/
        Config.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!Config.port) Config.port = DEFAUT_PORT;
@@ -225,5 +244,8 @@
     Info_c( Config.log, DEBUG_CONFIG, "Config crypto key           ", Config.crypto_key );
     Info_n( Config.log, DEBUG_CONFIG, "Config compil               ", Config.compil );
     Info_n( Config.log, DEBUG_CONFIG, "Config single               ", Config.single );
+    Info_c( Config.log, DEBUG_CONFIG, "Config smsbox username      ", Config.smsbox_username );
+    Info_c( Config.log, DEBUG_CONFIG, "Config smsbox password      ", Config.smsbox_password );
+    Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone        ", Config.sms_telephone );
   }
 /*--------------------------------------------------------------------------------------------------------*/

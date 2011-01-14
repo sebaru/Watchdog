@@ -170,7 +170,7 @@
 /* Entrée : Néant                                                                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static Sauver_compteur ( struct DB *db )
+ static void Sauver_compteur ( struct DB *db )
   { gint cpt;
     for( cpt=0; cpt<NBR_COMPTEUR_H;   cpt++) { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
     for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++) { Updater_cpt_impDB( Config.log, db, &Partage->ci[cpt].cpt_impdb); }     

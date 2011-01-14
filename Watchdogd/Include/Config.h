@@ -34,6 +34,9 @@
  #define TAILLE_PORT_RS485        30
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
  #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
+ #define TAILLE_NUM_TELEPHONE     16                /* Nombre de caractere maximum du numero de telephone */
+ #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */
+ #define TAILLE_SMSBOX_PASSWORD   32                        /* Nombre de caractere du mot de passe SMSBOX */
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
@@ -54,6 +57,9 @@
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
     gchar crypto_key[TAILLE_CRYPTO_KEY+1];            /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
+    gchar sms_telephone[TAILLE_NUM_TELEPHONE+1];                /* Numero de telephone pour les envoi SMS */
+    gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
+    gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
     gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
     guint debug_level;                                                    /* Niveau de debug du programme */
@@ -85,6 +91,9 @@
  #define DEFAUT_HOME                    g_get_home_dir()        /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_MAX_LOGIN_FAILED        3
  #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
+ #define DEFAUT_SMSBOX_USERNAME         "user"
+ #define DEFAUT_SMSBOX_PASSWORD         "changeit"
+ #define DEFAUT_SMS_TELEPHONE           "01"
 
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
