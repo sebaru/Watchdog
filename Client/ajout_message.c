@@ -339,11 +339,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, 8, 9 );
 
     if (edit_msg)                                                              /* Si edition d'un message */
-     { Msg.id = edit_msg->id;
-       Msg.num_syn = edit_msg->num_syn;
-       Msg.bit_voc = edit_msg->bit_voc;
-       Msg.vitesse_voc = edit_msg->vitesse_voc;
-       gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib_audio), edit_msg->libelle_audio );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib_sms), edit_msg->libelle_sms );
        gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_msg->objet );
@@ -359,6 +355,9 @@
      }
     else { gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_vitesse_voc), 150 );
            gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), TRUE );
+           gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), 0 );
+           gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type_voc), 0 );
+           gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_sms), 0 );
            gtk_widget_grab_focus( Spin_num );
          }
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
