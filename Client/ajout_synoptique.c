@@ -139,13 +139,6 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_access_groupe, 3, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Name") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_lib = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_SYNOPTIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
-
-    i++;
     texte = gtk_label_new( _("Groupe") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_groupe = gtk_entry_new();
@@ -166,6 +159,13 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_titre), NBR_CARAC_TITRE_SYNOPTIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_titre, 1, 4, i, i+1 );
 
+    i++;
+    texte = gtk_label_new( _("Name") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_lib = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_SYNOPTIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
+
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(gtk_widget_grab_focus), Entry_titre );
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
     if (edit_syn)                                                              /* Si edition d'un synoptique */
@@ -173,6 +173,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_syn->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_titre), edit_syn->titre );
        gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_syn->groupe );
+       gtk_entry_set_text( GTK_ENTRY(Entry_ssgroupe), edit_syn->ssgroupe );
        g_snprintf( chaine, sizeof(chaine), "%d", edit_syn->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
      }
