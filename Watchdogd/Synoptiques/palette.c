@@ -76,7 +76,7 @@
   { gchar requete[2048];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.name_gateway,%s.pos"
+                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.titre,%s.pos"
                 " FROM %s,%s WHERE %s.syn_id=%d AND %s.id=%s.syn_cible_id ORDER BY %s.pos",
                 NOM_TABLE_PALETTE, NOM_TABLE_PALETTE, NOM_TABLE_PALETTE,
                 NOM_TABLE_SYNOPTIQUE,
@@ -122,7 +122,7 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.syn_id,%s.syn_cible_id,%s.name_gateway,%s.pos "
+                "SELECT %s.syn_id,%s.syn_cible_id,%s.titre,%s.pos "
                 "FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id", 
                 NOM_TABLE_PALETTE, NOM_TABLE_PALETTE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_PALETTE,
