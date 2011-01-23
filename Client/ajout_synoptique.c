@@ -85,7 +85,7 @@
  static void CB_valider ( void )
   { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
 /**********************************************************************************************************/
-/* Ajouter_synoptique: Ajoute un synoptique au systeme                                                          */
+/* Ajouter_synoptique: Ajoute un synoptique au systeme                                                    */
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
