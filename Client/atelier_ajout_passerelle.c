@@ -256,7 +256,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
                          COLONNE_ID_SYN, synoptique->id,
                          COLONNE_LIBELLE_SYN, synoptique->libelle,
-                         COLONNE_MNEMO_SYN, synoptique->name_gateway,
+                         COLONNE_MNEMO_SYN, synoptique->titre,
                          -1
                        );
   }

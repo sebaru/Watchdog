@@ -31,14 +31,15 @@
  #define NBR_CARAC_LIBELLE_SYNOPTIQUE       50
  #define NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8  (2*NBR_CARAC_LIBELLE_SYNOPTIQUE)
 
- #define NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE         10
- #define NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE_UTF8    (2*NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE)
+ #define NBR_CARAC_TITRE_SYNOPTIQUE         10
+ #define NBR_CARAC_TITRE_SYNOPTIQUE_UTF8    (2*NBR_CARAC_TITRE_SYNOPTIQUE)
 
  struct CMD_TYPE_SYNOPTIQUE
   { guint id;                                                      /* Numero du message dans la structure */
     gchar  libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  name_gateway[NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE_UTF8+1];
-    gchar  groupe[NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE_UTF8+1];
+    gchar  titre[NBR_CARAC_TITRE_SYNOPTIQUE_UTF8+1];
+    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  ssgroupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     guint  access_groupe;
   };
 

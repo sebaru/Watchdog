@@ -78,7 +78,7 @@
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
-    gchar   libelle[NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
+    gchar   libelle[NBR_CARAC_TITRE_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
     gint    bit_controle;                                                                   /* Ixxx, Cxxx */
     guint   position_x;                                                      /* en abscisses et ordonnées */
     guint   position_y;
@@ -92,7 +92,7 @@
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
-    gchar   libelle[NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
+    gchar   libelle[NBR_CARAC_TITRE_SYNOPTIQUE_UTF8+1];                    /* Libelle du synoptique cible */
     guint   position;                                                        /* en abscisses et ordonnées */
   };
 /*********************************************** Gestion des capteurs ***************************************/

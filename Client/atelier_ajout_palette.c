@@ -343,7 +343,7 @@ printf("afficher: infos=%p infos->Liste_syn = %p   syn_id=%d\n", infos, infos->L
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
                          COLONNE_SYN_ID, synoptique->id,
                          COLONNE_LIBELLE_SYN, synoptique->libelle,
-                         COLONNE_MNEMO_SYN, synoptique->name_gateway,
+                         COLONNE_MNEMO_SYN, synoptique->titre,
                          -1
                        );
   }

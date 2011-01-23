@@ -38,8 +38,9 @@
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Entry_id;                             /* Numéro du synoptique en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                    /* Libelle du synoptique */
- static GtkWidget *Entry_name_gateway;                                        /* Mnemonique du synoptique */
+ static GtkWidget *Entry_titre;                                        /* Mnemonique du synoptique */
  static GtkWidget *Entry_groupe;                                                  /* Groupe du synoptique */
+ static GtkWidget *Entry_ssgroupe;                                                /* Groupe du synoptique */
  static GtkWidget *Combo_access_groupe;        /* Pour le choix d'appartenance du synoptique à tel ou tel groupe */
  static GList *Liste_index_groupe; /* Pour correspondance index de l'option menu/Id du groupe en question */
  static struct CMD_TYPE_SYNOPTIQUE Edit_syn;                                /* Message en cours d'édition */
@@ -53,10 +54,12 @@
   { gint index_groupe;
     g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    g_snprintf( Edit_syn.name_gateway, sizeof(Edit_syn.name_gateway),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_name_gateway) ) );
+    g_snprintf( Edit_syn.titre, sizeof(Edit_syn.titre),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_titre) ) );
     g_snprintf( Edit_syn.groupe, sizeof(Edit_syn.groupe),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
+    g_snprintf( Edit_syn.ssgroupe, sizeof(Edit_syn.ssgroupe),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ssgroupe) ) );
     index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_access_groupe) );
     if (index_groupe == -1)
      { Edit_syn.access_groupe = 1; }
@@ -117,7 +120,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 3, 4, FALSE );
+    table = gtk_table_new( 4, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -146,22 +149,29 @@
     texte = gtk_label_new( _("Groupe") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_groupe = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_groupe), NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_groupe), NBR_CARAC_LIBELLE_SYNOPTIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_groupe, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Name Gateway") );
+    texte = gtk_label_new( _("Sous-Groupe") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_name_gateway = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_name_gateway), NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_name_gateway, 1, 4, i, i+1 );
+    Entry_ssgroupe = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ssgroupe), NBR_CARAC_LIBELLE_SYNOPTIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ssgroupe, 1, 4, i, i+1 );
 
-    g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(gtk_widget_grab_focus), Entry_name_gateway );
+    i++;
+    texte = gtk_label_new( _("Titre") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_titre = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_titre), NBR_CARAC_TITRE_SYNOPTIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_titre, 1, 4, i, i+1 );
+
+    g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(gtk_widget_grab_focus), Entry_titre );
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
     if (edit_syn)                                                              /* Si edition d'un synoptique */
      { gchar chaine[10];
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_syn->libelle );
-       gtk_entry_set_text( GTK_ENTRY(Entry_name_gateway), edit_syn->name_gateway );
+       gtk_entry_set_text( GTK_ENTRY(Entry_titre), edit_syn->titre );
        gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_syn->groupe );
        g_snprintf( chaine, sizeof(chaine), "%d", edit_syn->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
