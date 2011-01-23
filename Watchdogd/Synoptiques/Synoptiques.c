@@ -54,12 +54,12 @@
     if (!syn) return(FALSE);
     if (syn->groupe == GID_TOUTLEMONDE) return(TRUE);
 
-printf(" Groupe syn = %d\n", syn->groupe );
+printf(" Groupe syn = %d\n", syn->access_groupe );
 
     cpt=0;
     while( util->gids[cpt] )
      { printf("utils->gids[%d] = %d\n", cpt, util->gids[cpt] );
-       if( util->gids[cpt] == syn->groupe )
+       if( util->gids[cpt] == syn->access_groupe )
         { g_free(syn);
           return(TRUE);
         }
@@ -133,27 +133,36 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
-  { gchar requete[200];
-    gchar *libelle, *mnemo;
+  { gchar requete[512];
+    gchar *libelle, *name_gateway, *groupe;
 
     libelle = Normaliser_chaine ( log, syn->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible libelle" );
        return(-1);
      }
 
-    mnemo = Normaliser_chaine ( log, syn->mnemo );                       /* Formatage correct des chaines */
-    if (!mnemo)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible" );
+    name_gateway = Normaliser_chaine ( log, syn->name_gateway );                       /* Formatage correct des chaines */
+    if (!name_gateway)
+     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible name gateway" );
        g_free(libelle);
        return(-1);
      }
 
+    groupe = Normaliser_chaine ( log, syn->groupe );                     /* Formatage correct des chaines */
+    if (!groupe)
+     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible groupe" );
+       g_free(libelle);
+       g_free(name_gateway);
+       return(-1);
+     }
+
     g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                "INSERT INTO %s(libelle,mnemo,groupe) VALUES "
-                "('%s','%s',%d)", NOM_TABLE_SYNOPTIQUE, libelle, mnemo, syn->groupe );
+                "INSERT INTO %s(libelle,name_gateway,access_groupe,groupe) VALUES "
+                "('%s','%s','%d','%s')", NOM_TABLE_SYNOPTIQUE, libelle, name_gateway, syn->access_groupe, groupe );
     g_free(libelle);
-    g_free(mnemo);
+    g_free(name_gateway);
+    g_free(groupe);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -168,8 +177,8 @@ printf(" Groupe syn = %d\n", syn->groupe );
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,mnemo,groupe"
-                " FROM %s ORDER BY mnemo,libelle", NOM_TABLE_SYNOPTIQUE );
+                "SELECT id,libelle,name_gateway,access_groupe"
+                " FROM %s ORDER BY groupe,libelle", NOM_TABLE_SYNOPTIQUE );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -191,9 +200,10 @@ printf(" Groupe syn = %d\n", syn->groupe );
     if (!syn) Info( log, DEBUG_SERVEUR, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
-       memcpy( &syn->mnemo,   db->row[2], sizeof(syn->mnemo  ) );            /* Recopie dans la structure */
-       syn->id          = atoi(db->row[0]);
-       syn->groupe      = atoi(db->row[3]);
+       memcpy( &syn->name_gateway,   db->row[2], sizeof(syn->name_gateway  ) );            /* Recopie dans la structure */
+       memcpy( &syn->groupe,   db->row[4], sizeof(syn->groupe  ) );          /* Recopie dans la structure */
+       syn->id            = atoi(db->row[0]);
+       syn->access_groupe = atoi(db->row[3]);
      }
     return(syn);
   }
@@ -207,7 +217,7 @@ printf(" Groupe syn = %d\n", syn->groupe );
     gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT libelle,mnemo,groupe FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, id );
+                "SELECT id,libelle,name_gateway,access_groupe,groupe FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -223,10 +233,11 @@ printf(" Groupe syn = %d\n", syn->groupe );
     if (!syn)
      { Info( log, DEBUG_SERVEUR, "Rechercher_synoptiqueDB: Mem error" ); }
     else
-     { memcpy( &syn->libelle, db->row[0], sizeof(syn->libelle) );            /* Recopie dans la structure */
-       memcpy( &syn->mnemo,   db->row[1], sizeof(syn->mnemo  ) );            /* Recopie dans la structure */
-       syn->id          = id;
-       syn->groupe      = atoi(db->row[2]);
+     { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
+       memcpy( &syn->name_gateway,   db->row[2], sizeof(syn->name_gateway  ) );/* Recopie dans la structure */
+       memcpy( &syn->groupe,   db->row[4], sizeof(syn->groupe  ) );          /* Recopie dans la structure */
+       syn->id            = atoi(db->row[0]);
+       syn->access_groupe = atoi(db->row[3]);
      }
     return(syn);
   }
@@ -237,27 +248,36 @@ printf(" Groupe syn = %d\n", syn->groupe );
 /**********************************************************************************************************/
  gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[1024];
-    gchar *libelle, *mnemo;
+    gchar *libelle, *name_gateway, *groupe;
 
     libelle = Normaliser_chaine ( log, syn->libelle );
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible libelle" );
        return(FALSE);
      }
 
-    mnemo = Normaliser_chaine ( log, syn->mnemo );
-    if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible" );
+    name_gateway = Normaliser_chaine ( log, syn->name_gateway );
+    if (!name_gateway)
+     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible name_gateway" );
        g_free(libelle);
+       return(FALSE);
+     }
+
+    groupe = Normaliser_chaine ( log, syn->groupe );
+    if (!groupe)
+     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible groupe" );
+       g_free(libelle);
+       g_free(name_gateway);
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',mnemo='%s',groupe=%d WHERE id=%d",
-                NOM_TABLE_SYNOPTIQUE, libelle, mnemo, syn->groupe, syn->id );
+                "libelle='%s',name_gateway='%s',access_groupe='%d',groupe='%s' WHERE id='%d'",
+                NOM_TABLE_SYNOPTIQUE, libelle, name_gateway, syn->groupe, groupe, syn->id );
     g_free(libelle);
-    g_free(mnemo);
+    g_free(name_gateway);
+    g_free(groupe);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

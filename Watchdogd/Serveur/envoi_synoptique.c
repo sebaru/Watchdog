@@ -40,21 +40,15 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
-  { struct CMD_TYPE_SYNOPTIQUE edit_syn;
-    struct CMD_TYPE_SYNOPTIQUE *syn;
+  { struct CMD_TYPE_SYNOPTIQUE *syn;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
     syn = Rechercher_synoptiqueDB( Config.log, Db_watchdog, rezo_syn->id );
 
     if (syn)
-     { edit_syn.id         = syn->id;                                       /* Recopie des info editables */
-       edit_syn.groupe     = syn->groupe;
-       memcpy( &edit_syn.libelle, syn->libelle, sizeof(edit_syn.libelle) );
-       memcpy( &edit_syn.mnemo,   syn->mnemo,   sizeof(edit_syn.mnemo) );
-
-       Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
-                  (gchar *)&edit_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+     { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
+                  (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
        g_free(syn);                                                                 /* liberation mémoire */
      }
     else

@@ -607,6 +607,8 @@
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: stop watchdog retour", retour );
        Deconnecter_module( module );
      }
     else
@@ -627,6 +629,8 @@
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog retour", retour );
        Deconnecter_module( module );
      }
     else
@@ -647,6 +651,8 @@
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: init watchdog timer retour", retour );
        Deconnecter_module( module );
      }
     else
@@ -667,6 +673,8 @@
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: watchdog start failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Init_watchdog_modbus: watchdog start retour", retour );
        Deconnecter_module( module );
      }
     else

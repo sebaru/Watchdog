@@ -39,7 +39,8 @@
 
  enum
   {  COLONNE_ID,
-     COLONNE_MNEMO,
+     COLONNE_GROUPE,
+     COLONNE_NAME_GATEWAY,
      COLONNE_LIBELLE,
      NBR_COLONNE
   };
@@ -274,8 +275,9 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
-                                              G_TYPE_STRING,                                   /* Libelle */
-                                              G_TYPE_STRING                                      /* mnémo */
+                                              G_TYPE_STRING,                                    /* Groupe */
+                                              G_TYPE_STRING,                              /* Name gateway */
+                                              G_TYPE_STRING                                       /* Name */
                                );
 
     Liste_synoptique = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );      /* Creation de la vue */
@@ -293,10 +295,17 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
 
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Mnemo"), renderer,
-                                                         "text", COLONNE_MNEMO,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe"), renderer,
+                                                         "text", COLONNE_GROUPE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_MNEMO);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE);
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_synoptique), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Mame Gateway"), renderer,
+                                                         "text", COLONNE_NAME_GATEWAY,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_NAME_GATEWAY);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_synoptique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de synoptique */
@@ -363,8 +372,9 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, synoptique->id,
+                         COLONNE_GROUPE, synoptique->groupe,
+                         COLONNE_NAME_GATEWAY, synoptique->name_gateway,
                          COLONNE_LIBELLE, synoptique->libelle,
-                         COLONNE_MNEMO, synoptique->mnemo,
                          -1
                        );
   }

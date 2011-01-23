@@ -183,7 +183,7 @@
 /**********************************************************************************************************/
  void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar chaine[256];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->mnemo, syn->libelle );
+    g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->groupe, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
     if (Msg.num_syn == syn->id)

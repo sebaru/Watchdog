@@ -38,8 +38,9 @@
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Entry_id;                             /* Numéro du synoptique en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                    /* Libelle du synoptique */
- static GtkWidget *Entry_mnemo;                                               /* Mnemonique du synoptique */
- static GtkWidget *Combo_groupe;        /* Pour le choix d'appartenance du synoptique à tel ou tel groupe */
+ static GtkWidget *Entry_name_gateway;                                        /* Mnemonique du synoptique */
+ static GtkWidget *Entry_groupe;                                                  /* Groupe du synoptique */
+ static GtkWidget *Combo_access_groupe;        /* Pour le choix d'appartenance du synoptique à tel ou tel groupe */
  static GList *Liste_index_groupe; /* Pour correspondance index de l'option menu/Id du groupe en question */
  static struct CMD_TYPE_SYNOPTIQUE Edit_syn;                                /* Message en cours d'édition */
 
@@ -52,13 +53,15 @@
   { gint index_groupe;
     g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    g_snprintf( Edit_syn.mnemo, sizeof(Edit_syn.mnemo),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_mnemo) ) );
-    index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_groupe) );
+    g_snprintf( Edit_syn.name_gateway, sizeof(Edit_syn.name_gateway),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_name_gateway) ) );
+    g_snprintf( Edit_syn.groupe, sizeof(Edit_syn.groupe),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
+    index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_access_groupe) );
     if (index_groupe == -1)
-     { Edit_syn.groupe = 1; }
+     { Edit_syn.access_groupe = 1; }
     else
-     { Edit_syn.groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data); }
+     { Edit_syn.access_groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data); }
                   
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -88,7 +91,8 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn )
   { GtkWidget *frame, *table, *texte, *hboite;
-printf(" Flag ajouter synoptique \n" );
+    gint i;
+
     if (edit_syn)
      { memcpy( &Edit_syn, edit_syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );    /* Save pour utilisation future */
      }
@@ -118,36 +122,47 @@ printf(" Flag ajouter synoptique \n" );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
+    i=0;
     texte = gtk_label_new( _("SynID") );              /* Id unique du synoptique en cours d'edition/ajout */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_id = gtk_entry_new();
     gtk_editable_set_editable( GTK_EDITABLE(Entry_id), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_id, 1, 2, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_id, 1, 2, i, i+1 );
 
-    texte = gtk_label_new( _("Group") ); /* Création de l'option menu pour le choix du type de synoptique */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
-    Combo_groupe = gtk_combo_box_new_text();
+    texte = gtk_label_new( _("Access Group") ); /* Création de l'option menu pour le choix du type de synoptique */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Combo_access_groupe = gtk_combo_box_new_text();
     Liste_index_groupe = NULL;
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 3, 4, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_access_groupe, 3, 4, i, i+1 );
 
+    i++;
     texte = gtk_label_new( _("Name") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_lib = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_SYNOPTIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
-    texte = gtk_label_new( _("Mnemo") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
-    Entry_mnemo = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_mnemo), NBR_CARAC_MNEMO_SYNOPTIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_mnemo, 1, 4, 2, 3 );
+    i++;
+    texte = gtk_label_new( _("Groupe") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_groupe = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_groupe), NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_groupe, 1, 4, i, i+1 );
 
-    g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(gtk_widget_grab_focus), Entry_mnemo );
+    i++;
+    texte = gtk_label_new( _("Name Gateway") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_name_gateway = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_name_gateway), NBR_CARAC_NAME_GATEWAY_SYNOPTIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_name_gateway, 1, 4, i, i+1 );
+
+    g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(gtk_widget_grab_focus), Entry_name_gateway );
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
     if (edit_syn)                                                              /* Si edition d'un synoptique */
      { gchar chaine[10];
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_syn->libelle );
-       gtk_entry_set_text( GTK_ENTRY(Entry_mnemo), edit_syn->mnemo );
+       gtk_entry_set_text( GTK_ENTRY(Entry_name_gateway), edit_syn->name_gateway );
+       gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_syn->groupe );
        g_snprintf( chaine, sizeof(chaine), "%d", edit_syn->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
      }
@@ -169,7 +184,7 @@ printf(" Flag afficher groupe pour syn \n" );
 
     while( liste )
      { groupe = (struct CMD_TYPE_GROUPE *)liste->data;
-       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
+       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_access_groupe), groupe->nom );
        Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
        liste = liste->next;
      }
@@ -194,7 +209,7 @@ printf("fin affichage groupe\n");
        liste = liste->next;
      }
     if (liste)
-     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_groupe), cpt );
+     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_access_groupe), cpt );
        printf("Set history %d\n", cpt );
      }
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
