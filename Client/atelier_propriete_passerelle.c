@@ -154,8 +154,8 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_propriete)->vbox ), table, FALSE, FALSE, 0 );
 
-    gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Bit de controle 1") ), 0, 1, 0, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Bit de controle 2") ), 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Bit vignette ACTIVITE") ), 0, 1, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Bit vignette SECURITE") ), 0, 1, 1, 2 );
 
     Spin_ctrl_1 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     g_signal_connect( G_OBJECT(Spin_ctrl_1), "changed",
