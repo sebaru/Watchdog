@@ -165,7 +165,7 @@
     gtk_container_add( GTK_CONTAINER(scroll), Liste_syn );
 
     renderer = gtk_cell_renderer_text_new();                                  /* Colonne de l'id du icone */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Mnemo"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Titre"), renderer,
                                                          "text", COLONNE_MNEMO_SYN,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_MNEMO_SYN);              /* On peut la trier */

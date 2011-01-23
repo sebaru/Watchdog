@@ -41,7 +41,7 @@
 
  enum
   {  COLONNE_SYN_ID,
-     COLONNE_MNEMO_SYN,
+     COLONNE_TITRE_SYN,
      COLONNE_LIBELLE_SYN,
      NBR_COLONNE_SYN
   };
@@ -49,7 +49,7 @@
   {  COLONNE_PALETTE_ID,
      COLONNE_SYN_CIBLE_ID,
      COLONNE_POSITION,
-     COLONNE_MNEMO_SYN_PALETTE,
+     COLONNE_TITRE_SYN_PALETTE,
      NBR_COLONNE_PALETTE
   };
 /**********************************************************************************************************/
@@ -77,7 +77,7 @@
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne de l'id de l'utilisateur */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Description"), renderer,
-                                                         "text", COLONNE_MNEMO_SYN_PALETTE,
+                                                         "text", COLONNE_TITRE_SYN_PALETTE,
                                                          NULL);
     gtk_tree_view_append_column ( GTK_TREE_VIEW(vue), colonne );
 
@@ -108,10 +108,10 @@
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne de l'id de l'utilisateur */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Mnemo"), renderer,
-                                                         "text", COLONNE_MNEMO_SYN,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Titre"), renderer,
+                                                         "text", COLONNE_TITRE_SYN,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_MNEMO_SYN);              /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TITRE_SYN);              /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW(vue), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne de l'id de l'utilisateur */
@@ -145,7 +145,7 @@
     while ( lignes )
      { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &palette.syn_cible_id, -1 );      /* Recup du id */
-       gtk_tree_model_get( store, &iter, COLONNE_MNEMO_SYN, &palette.libelle, -1 );        /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_TITRE_SYN, &palette.libelle, -1 );        /* Recup du id */
 
        palette.position = 0; /* Sera reintialisé par le serveur lors de l'ajout dans la BD */
        palette.syn_id = infos->syn.id;
@@ -177,7 +177,7 @@ printf("demande d'effacement palette\n" );
     while ( lignes )
      { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
        gtk_tree_model_get( store, &iter, COLONNE_PALETTE_ID, &palette.id, -1 );            /* Recup du id */
-       gtk_tree_model_get( store, &iter, COLONNE_MNEMO_SYN_PALETTE, &palette.libelle, -1 );/* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_TITRE_SYN_PALETTE, &palette.libelle, -1 );/* Recup du id */
 
        palette.syn_id = infos->syn.id;
 printf("Envoi demande d'effacement palette %d\n", palette.id );
@@ -288,7 +288,7 @@ printf("New Palette atelier: %d %s\n", rezo_palette->id, rezo_palette->libelle )
                          COLONNE_PALETTE_ID, rezo_palette->id,
                          COLONNE_SYN_CIBLE_ID, rezo_palette->syn_cible_id,
                          COLONNE_POSITION, rezo_palette->position,
-                         COLONNE_MNEMO_SYN_PALETTE, rezo_palette->libelle,
+                         COLONNE_TITRE_SYN_PALETTE, rezo_palette->libelle,
                          -1
                        );
   }
@@ -343,7 +343,7 @@ printf("afficher: infos=%p infos->Liste_syn = %p   syn_id=%d\n", infos, infos->L
     gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
                          COLONNE_SYN_ID, synoptique->id,
                          COLONNE_LIBELLE_SYN, synoptique->libelle,
-                         COLONNE_MNEMO_SYN, synoptique->titre,
+                         COLONNE_TITRE_SYN, synoptique->titre,
                          -1
                        );
   }
