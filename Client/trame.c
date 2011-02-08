@@ -723,14 +723,14 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                   NULL);
 
     trame_pass->item_rectangle_1 = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                        -7.0, -8.0, 12.0, 6.0,
-                                                        "fill-color", "green",
+                                                        -24.0, -8.0, 12.0, 16.0,
+                                                        "fill-color", "red",
                                                         "stroke-color", "yellow",
                                                         NULL);
 
     trame_pass->item_rectangle_2 = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                        -7.0, +2.0, 12.0, 6.0,
-                                                        "fill-color", "red",
+                                                        -7.0, -8.0, 12.0, 16.0,
+                                                        "fill-color", "green",
                                                         "stroke-color", "yellow",
                                                         NULL);
 
@@ -739,9 +739,9 @@ printf(" dX = %d dY = %d \n", taillex, tailley );*/
     tailley = 15;
     taillex = strlen(pass->libelle) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                 (double)-15.0,
+                                                 (double)-30.0,
                                                  (double)-(tailley/2+5.0),
-                                                 (double)+taillex+30.0,
+                                                 (double)+taillex+45.0,
                                                  (double)(tailley+10),
                                                  "stroke-color", "yellow",
                                                  "fill-color", "blue",

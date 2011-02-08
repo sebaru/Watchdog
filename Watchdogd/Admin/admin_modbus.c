@@ -56,10 +56,11 @@
 
        g_snprintf( chaine, sizeof(chaine),
                    "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, watchdog=%d, trans.=%d, "
-                   "deco.=%d, request=%d, retente=%d \n",
+                   "deco.=%d, request=%d, retente=%d, date_next_eana=%d\n",
                    module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.actif,
                    module->started, module->modbus.watchdog,
                    module->transaction_id, module->nbr_deconnect, module->request,
+                   module->date_next_eana,
                    (int)module->date_retente
                  );
        Write_admin ( client->connexion, chaine );
