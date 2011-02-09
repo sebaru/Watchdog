@@ -60,8 +60,12 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
-             { Envoi_serveur( TAG_MNEMONIQUE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE
-                                                       : SSTAG_CLIENT_ADD_MNEMONIQUE),
+             { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_ADD_MNEMONIQUE,
+                              (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+               break;
+             }
+       case GTK_RESPONSE_APPLY:
+             { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,
                               (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
                break;
              }
@@ -134,12 +138,23 @@
      }
     else memset (&Edit_mnemo, 0, sizeof(struct CMD_TYPE_MNEMONIQUE) );             /* Sinon RAZ structure */
 
-    F_ajout = gtk_dialog_new_with_buttons( (edit_mnemo ? _("Edit a mnemonique") : _("Add a mnemonique")),
-                                           GTK_WINDOW(F_client),
-                                           GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                           GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                           NULL);
+    if (edit_mnemo)
+     { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonique"),
+                                              GTK_WINDOW(F_client),
+                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_STOCK_COPY, GTK_RESPONSE_OK,
+                                              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                              GTK_STOCK_APPLY, GTK_RESPONSE_APPLY,
+                                              NULL);
+     }
+    else
+     { F_ajout = gtk_dialog_new_with_buttons( _("Add a mnemonique"),
+                                              GTK_WINDOW(F_client),
+                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                              GTK_STOCK_ADD, GTK_RESPONSE_OK,
+                                              NULL);
+     }
     g_signal_connect( F_ajout, "response",
                       G_CALLBACK(CB_ajouter_editer_mnemonique),
                       GINT_TO_POINTER( (edit_mnemo ? TRUE : FALSE) ) );
