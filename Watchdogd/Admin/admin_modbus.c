@@ -60,7 +60,7 @@
                    module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.actif,
                    module->started, module->modbus.watchdog,
                    module->transaction_id, module->nbr_deconnect, module->request,
-                   module->date_next_eana,
+                   (int)module->date_next_eana,
                    (int)module->date_retente
                  );
        Write_admin ( client->connexion, chaine );
