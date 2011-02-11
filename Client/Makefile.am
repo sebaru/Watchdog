@@ -21,7 +21,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  liste_message.c ajout_message.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c \
-			  liste_icone.c ajout_icone.c \
+			  liste_icone.c ajout_icone.c liste_icone.h \
 			  option_entreeana.c option_cpt_imp.c \
                           liste_camera.c ajout_camera.c protocole_camera.c \
 			  liste_scenario.c ajout_scenario.c protocole_scenario.c \
