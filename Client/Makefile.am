@@ -44,8 +44,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 
 Watchdog_client_LDADD  = $(top_srcdir)/Commun/libwatchdog.la \
                          Config_cli/libconfig_cli.la \
-                         $(GNOME2_LIBS) \
-			 -lgtkdatabox
+                         $(GNOME2_LIBS)
 
 INCLUDES=$(GNOME_INCLUDEDIR) -I$(top_srcdir)/Include \
                              -IInclude \
