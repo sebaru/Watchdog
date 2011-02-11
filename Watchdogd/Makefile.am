@@ -39,6 +39,8 @@ Watchdogd_LDADD   = Config/libconfig.la \
 
 Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS) $(LIRC_LIBS)
 
+sysconf_DATA = watchdogd.conf
+
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 $(GLIB_CFLAGS) \
