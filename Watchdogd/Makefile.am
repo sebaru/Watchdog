@@ -40,6 +40,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS) $(LIRC_LIBS)
 
 sysconf_DATA = watchdogd.conf
+data_DATA = init_db.sql
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
@@ -50,4 +51,5 @@ INCLUDES=-I$(top_srcdir)/Include \
 	 $(CURL_CFLAGS) \
 	 $(UPS_CFLAGS)
 
+EXTRA_DIST = watchdogd.conf init_db.sql
 MAINTAINERCLEANFILES = Makefile.in

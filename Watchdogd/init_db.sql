@@ -1,13 +1,19 @@
 -- phpMyAdmin SQL Dump
--- version 3.2.2.1
+-- version 3.3.9
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Dim 30 Mai 2010 à 19:31
--- Version du serveur: 5.1.42
--- Version de PHP: 5.3.1
+-- Généré le : Ven 11 Février 2011 à 16:49
+-- Version du serveur: 5.1.54
+-- Version de PHP: 5.3.4
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
 
 --
 -- Base de données: `WatchdogDB`
@@ -21,11 +27,26 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 DROP TABLE IF EXISTS `cameras`;
 CREATE TABLE IF NOT EXISTS `cameras` (
-  `id_mnemo` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `location` varchar(600) NOT NULL,
   `type` int(11) NOT NULL,
-  PRIMARY KEY (`id_mnemo`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `bit` int(11) NOT NULL,
+  `objet` text NOT NULL,
+  `libelle` text NOT NULL,
+  `num` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=894 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `cameras_motion`
+--
+
+DROP TABLE IF EXISTS `cameras_motion`;
+CREATE TABLE IF NOT EXISTS `cameras_motion` (
+  `id` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -49,128 +70,41 @@ CREATE TABLE IF NOT EXISTS `class` (
 DROP TABLE IF EXISTS `dls`;
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(240) COLLATE utf8_unicode_ci NOT NULL,
+  `type` int(11) NOT NULL,
+  `groupe` text COLLATE utf8_unicode_ci NOT NULL,
+  `ssgroupe` text COLLATE utf8_unicode_ci NOT NULL,
+  `name` text COLLATE utf8_unicode_ci NOT NULL,
   `actif` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=72 ;
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=78 ;
 
 -- --------------------------------------------------------
+
 --
 -- Structure de la table `dls_cpth`
 --
 
+DROP TABLE IF EXISTS `dls_cpth`;
 CREATE TABLE IF NOT EXISTS `dls_cpth` (
   `id` int(11) NOT NULL DEFAULT '0',
   `val` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Contenu de la table `dls_cpth`
+-- Structure de la table `dls_cpt_imp`
 --
 
-INSERT INTO `dls_cpth` (`id`, `val`) VALUES
-(0, 0),
-(1, 0),
-(2, 0),
-(3, 0),
-(4, 0),
-(5, 0),
-(6, 0),
-(7, 0),
-(8, 0),
-(9, 0),
-(10, 0),
-(11, 0),
-(12, 0),
-(13, 0),
-(14, 0),
-(15, 0),
-(16, 0),
-(17, 0),
-(18, 0),
-(19, 0),
-(20, 0),
-(21, 0),
-(22, 0),
-(23, 0),
-(24, 0),
-(25, 0),
-(26, 0),
-(27, 0),
-(28, 0),
-(29, 0),
-(30, 0),
-(31, 0),
-(32, 0),
-(33, 0),
-(34, 0),
-(35, 0),
-(36, 0),
-(37, 0),
-(38, 0),
-(39, 0),
-(40, 0),
-(41, 0),
-(42, 0),
-(43, 0),
-(44, 0),
-(45, 0),
-(46, 0),
-(47, 0),
-(48, 0),
-(49, 0),
-(50, 0),
-(51, 0),
-(52, 0),
-(53, 0),
-(54, 0),
-(55, 0),
-(56, 0),
-(57, 0),
-(58, 0),
-(59, 0),
-(60, 0),
-(61, 0),
-(62, 0),
-(63, 0),
-(64, 0),
-(65, 0),
-(66, 0),
-(67, 0),
-(68, 0),
-(69, 0),
-(70, 0),
-(71, 0),
-(72, 0),
-(73, 0),
-(74, 0),
-(75, 0),
-(76, 0),
-(77, 0),
-(78, 0),
-(79, 0),
-(80, 0),
-(81, 0),
-(82, 0),
-(83, 0),
-(84, 0),
-(85, 0),
-(86, 0),
-(87, 0),
-(88, 0),
-(89, 0),
-(90, 0),
-(91, 0),
-(92, 0),
-(93, 0),
-(94, 0),
-(95, 0),
-(96, 0),
-(97, 0),
-(98, 0),
-(99, 0);
+DROP TABLE IF EXISTS `dls_cpt_imp`;
+CREATE TABLE IF NOT EXISTS `dls_cpt_imp` (
+  `id_mnemo` int(11) NOT NULL,
+  `val` float NOT NULL,
+  `unite` int(11) NOT NULL,
+  `type_ci` int(11) NOT NULL,
+  PRIMARY KEY (`id_mnemo`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -244,6 +178,7 @@ CREATE TABLE IF NOT EXISTS `gids` (
 -- Structure de la table `groups`
 --
 
+DROP TABLE IF EXISTS `groups`;
 CREATE TABLE IF NOT EXISTS `groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(97) COLLATE utf8_unicode_ci NOT NULL,
@@ -252,20 +187,6 @@ CREATE TABLE IF NOT EXISTS `groups` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=12 ;
 
---
--- Contenu de la table `groups`
---
-
-INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
-(0, 'Everybody', 'The default group'),
-(1, 'Admin-UserDB', 'Members can add/remove/edit users/groups'),
-(2, 'Admin-MsgDB', 'Members can add/remove/edit Msgs'),
-(3, 'Admin-iconDB', 'Members can add/remove/edit icons'),
-(4, 'Admin-synopDB', 'Members can add/remove/edit syn'),
-(5, 'Log', 'Members can see the log'),
-(6, 'Admin-dlsDB', 'Members can add/remove/edit DLS plugins'),
-(7, 'Admin-histoDB', 'Members can ack/query histo'),
-(8, 'Admin-scenarioDB', 'Members can add/remove Scenario');
 -- --------------------------------------------------------
 
 --
@@ -276,10 +197,10 @@ DROP TABLE IF EXISTS `histo`;
 CREATE TABLE IF NOT EXISTS `histo` (
   `id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `objet` varchar(181) COLLATE utf8_unicode_ci NOT NULL,
+  `objet` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `num_syn` int(11) NOT NULL DEFAULT '0',
-  `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `nom_ack` text COLLATE utf8_unicode_ci,
   `date_create_sec` int(11) NOT NULL DEFAULT '0',
   `date_create_usec` int(11) NOT NULL DEFAULT '0',
   `date_fixe` int(11) NOT NULL DEFAULT '0',
@@ -299,7 +220,7 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
   `date_sec` int(11) NOT NULL DEFAULT '0',
   `date_usec` int(11) NOT NULL DEFAULT '0',
   `valeur` int(11) NOT NULL DEFAULT '0',
-  KEY `test` (`type`,`num`)
+  KEY `test` (`type`,`num`,`date_sec`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -337,7 +258,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=442 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=454 ;
 
 -- --------------------------------------------------------
 
@@ -350,11 +271,11 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
-  `objet` varchar(181) COLLATE utf8_unicode_ci NOT NULL,
-  `acronyme` varchar(85) COLLATE utf8_unicode_ci NOT NULL,
+  `objet` text COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=867 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1012 ;
 
 -- --------------------------------------------------------
 
@@ -386,9 +307,10 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip` (`ip`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
 
 -- --------------------------------------------------------
 
@@ -408,11 +330,12 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `bit_voc` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `objet` text COLLATE utf8_unicode_ci NOT NULL,
-  `sms` tinyint(1) NOT NULL DEFAULT '0',
+  `sms` int(11) NOT NULL DEFAULT '0',
   `type_voc` int(11) NOT NULL DEFAULT '4',
   `vitesse_voc` int(11) NOT NULL DEFAULT '150',
+  `time_repeat` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=469 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=487 ;
 
 -- --------------------------------------------------------
 
@@ -428,11 +351,12 @@ CREATE TABLE IF NOT EXISTS `onduleurs` (
   `ups` varchar(32) NOT NULL,
   `bit_comm` int(11) NOT NULL,
   `ea_ups_load` int(11) NOT NULL,
-  `ea_ups_realpower` int(11) NOT NULL,
+  `ea_ups_real_power` int(11) NOT NULL,
   `ea_battery_charge` int(11) NOT NULL,
   `ea_input_voltage` int(11) NOT NULL,
+  `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 -- --------------------------------------------------------
 
@@ -442,21 +366,21 @@ CREATE TABLE IF NOT EXISTS `onduleurs` (
 
 DROP TABLE IF EXISTS `rs485`;
 CREATE TABLE IF NOT EXISTS `rs485` (
-  `id` int(11) NOT NULL,
-  `actif` tinyint(1) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0',
+  `actif` tinyint(1) NOT NULL DEFAULT '0',
   `ea_min` int(11) NOT NULL DEFAULT '-1',
   `ea_max` int(11) NOT NULL DEFAULT '-1',
   `e_min` int(11) NOT NULL DEFAULT '-1',
   `e_max` int(11) NOT NULL DEFAULT '-1',
-  `ec_min` int(11) NOT NULL DEFAULT '-1',
-  `ec_max` int(11) NOT NULL DEFAULT '-1',
   `s_min` int(11) NOT NULL DEFAULT '-1',
   `s_max` int(11) NOT NULL DEFAULT '-1',
   `sa_min` int(11) NOT NULL DEFAULT '-1',
   `sa_max` int(11) NOT NULL DEFAULT '-1',
-  `bit` int(11) NOT NULL DEFAULT '0',
+  `bit_comm` int(11) NOT NULL DEFAULT '0',
+  `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
 
 -- --------------------------------------------------------
 
@@ -468,11 +392,12 @@ DROP TABLE IF EXISTS `syns`;
 CREATE TABLE IF NOT EXISTS `syns` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `mnemo` varchar(73) COLLATE utf8_unicode_ci NOT NULL,
-  `groupe` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `mnemo` (`mnemo`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=20 ;
+  `groupe` text COLLATE utf8_unicode_ci NOT NULL,
+  `ssgroupe` text COLLATE utf8_unicode_ci NOT NULL,
+  `titre` text COLLATE utf8_unicode_ci NOT NULL,
+  `access_groupe` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=30 ;
 
 -- --------------------------------------------------------
 
@@ -488,7 +413,7 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=30 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=31 ;
 
 -- --------------------------------------------------------
 
@@ -507,7 +432,7 @@ CREATE TABLE IF NOT EXISTS `syns_capteurs` (
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=24 ;
 
 -- --------------------------------------------------------
 
@@ -528,7 +453,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=119 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=148 ;
 
 -- --------------------------------------------------------
 
@@ -545,7 +470,8 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `gid` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
   `bitclic` int(11) NOT NULL DEFAULT '0',
-  `bitclic2` int(11) NOT NULL,
+  `bitclic2` int(11) NOT NULL DEFAULT '0',
+  `rafraich` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `larg` float NOT NULL DEFAULT '0',
@@ -557,7 +483,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=857 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=912 ;
 
 -- --------------------------------------------------------
 
@@ -592,7 +518,7 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `bitctrl2` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=28 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=58 ;
 
 -- --------------------------------------------------------
 
@@ -618,13 +544,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=5 ;
 
---
--- Contenu de la table `users`
---
-
-INSERT INTO `users` (`id`, `name`, `changepass`, `cansetpass`, `crypt`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
-(0, 'root', 0, 1, 'Ü}½¼Ož42Ó8ûDªMzæ¤n<BÅ>', 'Watchdog administrator', 0, 1, 1135427729, 0, 0, 1135427729);
-
 -- --------------------------------------------------------
 
 --
@@ -644,4 +563,3 @@ CREATE TABLE IF NOT EXISTS `utilisation_histo_bit` (
 DROP TABLE IF EXISTS `utilisation_histo_bit`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `utilisation_histo_bit` AS select count(0) AS `cpt`,`histo_bit`.`type` AS `type`,`histo_bit`.`num` AS `num` from `histo_bit` group by `histo_bit`.`type`,`histo_bit`.`num` order by count(0) desc;
-
