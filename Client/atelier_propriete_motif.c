@@ -399,9 +399,10 @@ printf("Changer_couleur %p\n", data);
      { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_DYNAMIQUE  ) ) );
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE   ) ) );
-       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_INDICATEUR ) ) );
+       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
+                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE   ) ) );
+
      }
     if (trame_motif->nbr_images >= 3)
      { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
