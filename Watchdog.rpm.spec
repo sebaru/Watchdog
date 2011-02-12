@@ -1,0 +1,84 @@
+	
+# This is a sample spec file for wget
+
+%define _topdir	 	/home/sebastien/rpmbuild
+%define name		Watchdog
+%define release		1
+%define version 	2.6.962
+Summary: 		Watchdog
+License: 		GPL
+Name: 			%{name}
+Version: 		%{version}
+Release: 		%{release}
+Source: 		%{name}-%{version}.tar.gz
+Prefix: 		/
+Group: 			Development/Tools
+Vendor:			A.B.L.S Corporation
+Packager:		Sébastien LEFEVRE <lefevre.seb@gmail.com>
+
+%description
+Fichier de spécification pour la création des packages RPM server, client et partagé
+
+%prep
+%setup 
+
+%build
+#aclocal
+#autoconf
+#automake --add-missing
+#autoheader
+#libtoolize
+./configure --prefix=%{buildroot} --exec-prefix=%{buildroot}/usr --includedir=%{buildroot}/usr/include --datarootdir=%{buildroot}/usr/share
+make
+
+%install
+make install
+
+#---------------------------- Package Commun ---------------------------------
+%package common
+Summary: The Watchdogd common library
+Group:                  Development/Tools
+%description common
+Common libraries for Client and Server !
+
+%files common
+%defattr(644,root,root)
+/usr/lib/libwatchdog*
+
+#---------------------------- Package Client --------------------------------
+
+%package client
+Summary: The Watchdog client
+Group:                  Development/Tools
+requires: Watchdog-common
+%description client
+This is the client side of Watchdog
+
+
+%files client
+%defattr(755,root,root)
+/usr/bin/Watchdog-client
+
+#----------------------------- Package Server -------------------------------
+%package server
+Summary: The Watchdogd Server
+Group:                  Development/Tools
+requires: Watchdog-common 
+%description server
+This is the server side of Watchdog
+
+%files server
+%defattr(644,root,root)
+/usr/include/*
+/usr/lib/libdls*
+/usr/share/Watchdog/init_db.sql
+/usr/share/Watchdog/openssl.cnf
+%attr(755,root,root) /usr/bin/Watchdogd
+%attr(755,root,root) /usr/bin/WatchdogdAdmin
+%attr(640,root,watchdog) %config /etc/watchdogd.conf
+#%config /etc/watchdogd.conf
+%doc /usr/share/Watchdog/Watchdog*pdf
+%doc /usr/share/Watchdog/Delete_old_avi.sh
+%doc /usr/share/Watchdog/Programmateur_mysql.sql
+
+
