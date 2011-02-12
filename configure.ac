@@ -118,6 +118,7 @@ ALL_LINGUAS=""
 
 AC_OUTPUT( \
 Makefile \
+Documentation/Makefile \
 Include/Makefile \
 Commun/Makefile \
 Client/Include/Makefile \

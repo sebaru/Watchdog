@@ -4,6 +4,6 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-SUBDIRS=Include Commun Watchdogd Client WatchdogdAdmin
+SUBDIRS=Documentation Include Commun Watchdogd Client WatchdogdAdmin
 ACLOCAL_AMFLAGS = -I m4
 MAINTAINERCLEANFILES = Makefile.in
