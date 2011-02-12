@@ -4,7 +4,7 @@
 %define _topdir	 	/home/sebastien/rpmbuild
 %define name		Watchdog
 %define release		1
-%define version 	2.6.962
+%define version 	2.6.964
 Summary: 		Watchdog
 License: 		GPL
 Name: 			%{name}
@@ -23,16 +23,11 @@ Fichier de spécification pour la création des packages RPM server, client et p
 %setup 
 
 %build
-#aclocal
-#autoconf
-#automake --add-missing
-#autoheader
-#libtoolize
 ./configure --prefix=%{buildroot} --exec-prefix=%{buildroot}/usr --includedir=%{buildroot}/usr/include --datarootdir=%{buildroot}/usr/share
-make
+make -j 2
 
 %install
-make install
+make -j 2 install
 
 #---------------------------- Package Commun ---------------------------------
 %package common
