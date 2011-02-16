@@ -58,7 +58,7 @@ This is the client side of Watchdog
 %package server
 Summary: The Watchdogd Server
 Group:                  Development/Tools
-requires: Watchdog-common 
+requires: Watchdog-common gcc
 %description server
 This is the server side of Watchdog
 
