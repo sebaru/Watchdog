@@ -145,6 +145,14 @@
         { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", DEFAUT_PORT_RS485  ); }
+
+/********************************************** Partie TELLSTICK ******************************************/
+       Config.tellstick_a_min    = g_key_file_get_integer ( gkf, "TELLSTICK", "min_a", NULL );
+       if (!Config.tellstick_a_min) Config.tellstick_a_min = DEFAUT_TELLSTICK_A_MIN;
+
+       Config.tellstick_a_max    = g_key_file_get_integer ( gkf, "TELLSTICK", "max_a", NULL );
+       if (!Config.tellstick_a_max) Config.tellstick_a_max = DEFAUT_TELLSTICK_A_MAX;
+
 /********************************************* Partie DEBUG ***********************************************/
        Config.debug_level = 0;
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SIGNAUX", NULL );
@@ -247,5 +255,7 @@
     Info_c( Config.log, DEBUG_CONFIG, "Config smsbox username      ", Config.smsbox_username );
     Info_c( Config.log, DEBUG_CONFIG, "Config smsbox password      ", Config.smsbox_password );
     Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone        ", Config.sms_telephone );
+    Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(min)     ", Config.tellstick_a_min );
+    Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(max)     ", Config.tellstick_a_max );
   }
 /*--------------------------------------------------------------------------------------------------------*/

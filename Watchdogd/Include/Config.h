@@ -68,6 +68,8 @@
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */
     gint single;                                                                /* Demarrage des thread ? */
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
+    gint tellstick_a_min;                           /* Numéro de la sortie minimum gérée par le tellstick */
+    gint tellstick_a_max;                           /* Numéro de la sortie maximum gérée par le tellstick */
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
@@ -94,6 +96,8 @@
  #define DEFAUT_SMSBOX_USERNAME         "user"
  #define DEFAUT_SMSBOX_PASSWORD         "changeit"
  #define DEFAUT_SMS_TELEPHONE           "01"
+ #define DEFAUT_TELLSTICK_A_MIN         -1
+ #define DEFAUT_TELLSTICK_A_MAX         -1
 
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
