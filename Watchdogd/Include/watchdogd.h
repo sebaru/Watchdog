@@ -43,6 +43,7 @@
  #include "Modbus.h"
  #include "Onduleur.h"
  #include "Rs485.h"
+ #include "Tellstick.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
  #include "Camera_DB.h"
@@ -145,6 +146,7 @@
     struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
     struct COM_RS485 com_rs485;                                                             /* Comm rs485 */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
+    struct COM_TELLSTICK com_tellstick;                         /* Communication avec le thread tellstick */
     struct COM_SMS com_sms;                                                              /* Comm msrv/sms */
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
@@ -192,6 +194,7 @@
  extern gboolean Demarrer_onduleur ( void );
  extern gboolean Demarrer_admin ( void );
  extern gboolean Demarrer_motion_detect ( void );
+ extern gboolean Demarrer_tellstick ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

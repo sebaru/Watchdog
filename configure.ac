@@ -134,6 +134,7 @@ Watchdogd/Admin/Makefile \
 Watchdogd/Rs485/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \
+Watchdogd/Tellstick/Makefile \
 Watchdogd/EntreeANA/Makefile \
 Watchdogd/Message/Makefile \
 Watchdogd/Mnemonique/Makefile \

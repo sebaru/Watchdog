@@ -58,6 +58,7 @@
  #define  DEBUG_AUDIO               (1<<17) /* Debug envoi AUDIO */
  #define  DEBUG_CAMERA              (1<<18) /* Debug CAMERA */
  #define  DEBUG_COURBE              (1<<19) /* Debug des echanges COURBE */
+ #define  DEBUG_TELLSTICK           (1<<20) /* Debug des echanges TELLSTICK */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

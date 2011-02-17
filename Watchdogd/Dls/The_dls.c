@@ -333,10 +333,12 @@
        if ( Partage->a[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
         { Partage->a[num].changes = 0; }
 
-       if ( Partage->a[num].changes <= 5 ) 
+       if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
         { Ajouter_arch( MNEMO_SORTIE, num, etat );
-          Partage->a[num].changes++;
-        } else if (Partage->top % 60) 
+          if (Config.tellstick_a_min <= num && num <= Config.tellstick_a_max)       /* Envoi au tellstick */
+           { Ajouter_tellstick( num ); }
+          Partage->a[num].changes++;                                              /* Un change de plus !! */
+        } else if (Partage->top % 600)                   /* Si persistence on prévient toutes les minutes */
         { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_change trop tôt !", num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;

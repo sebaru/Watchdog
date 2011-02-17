@@ -484,6 +484,7 @@
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
        pthread_mutex_init( &Partage->com_onduleur.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
+       pthread_mutex_init( &Partage->com_tellstick.synchro, &attr );
  
 #ifdef bouh
        for (i=0; i<NBR_MESSAGE_ECRITS; i++)                                 /* RAZ des last_send MESSAGES */
@@ -571,6 +572,9 @@ encore:
              if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
               { Info( Config.log, DEBUG_INFO, "MSRV: Pb ONDULEUR" ); }
 
+             if (!Demarrer_tellstick())                                            /* Démarrage Tellstick */
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb TELLSTICK" ); }
+
              if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
               { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
            }
@@ -594,12 +598,14 @@ encore:
      }
 
     pthread_mutex_destroy( &Partage->com_rs485.synchro );
+    pthread_mutex_destroy( &Partage->com_modbus.synchro );
     pthread_mutex_destroy( &Partage->com_sms.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_audio.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
+    pthread_mutex_destroy( &Partage->com_tellstick.synchro );
     for (i=0; i<Config.max_serveur; i++)
      { pthread_mutex_destroy( &Partage->Sous_serveur[i].synchro ); }
 

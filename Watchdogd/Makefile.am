@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           Compteur EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
-	  Synoptiques Camera Onduleur
+	  Synoptiques Camera Onduleur Tellstick
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -18,6 +18,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Rs485/librs485.la \
+		    Tellstick/libtellstick.la \
 		    Modbus/libmodbus.la \
 		    Sms/libsms.la \
 		    Archive/libarchive.la \

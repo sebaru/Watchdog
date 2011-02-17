@@ -48,6 +48,7 @@
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
+ static pthread_t TID_tellstick= 0;                           /* Le tid du TELLSTICK en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -232,6 +233,20 @@
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", TID_dls ); }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Demarrer_tellstick: Thread un process TELLSTICK                                                        */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_tellstick ( void )
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
+    if ( pthread_create( &TID_tellstick, NULL, (void *)Run_tellstick, NULL ) )
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
+       return(FALSE);
+     }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread tellstick seems to be running", TID_tellstick ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -471,6 +486,10 @@
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
     if (TID_rs485) { pthread_join( TID_rs485, NULL ); }                              /* Attente fin RS485 */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
+
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), TID_tellstick );
+    if (TID_tellstick) { pthread_join( TID_tellstick, NULL ); }                              /* Attente fin RS485 */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), TID_tellstick );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
     if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
