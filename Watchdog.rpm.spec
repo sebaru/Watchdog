@@ -4,7 +4,7 @@
 %define _topdir	 	/home/sebastien/rpmbuild
 %define name		Watchdog
 %define release		1
-%define version 	2.6.968
+%define version 	2.6.972
 Summary: 		Watchdog
 License: 		GPL
 Name: 			%{name}
