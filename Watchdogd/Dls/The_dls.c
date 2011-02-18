@@ -335,8 +335,7 @@
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
         { Ajouter_arch( MNEMO_SORTIE, num, etat );
-          if (Config.tellstick_a_min <= num && num <= Config.tellstick_a_max)       /* Envoi au tellstick */
-           { Ajouter_tellstick( num ); }
+          Ajouter_tellstick( num, etat );
           Partage->a[num].changes++;                                              /* Un change de plus !! */
         } else if (Partage->top % 600)                   /* Si persistence on prévient toutes les minutes */
         { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_change trop tôt !", num ); }

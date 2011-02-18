@@ -28,6 +28,11 @@
 #ifndef _TELLSTICK_H_
  #define _TELLSTICK_H_
 
+ struct TELLSTICKDB
+  { guint  id;                                                       /* Numero de la sortie a positionner */
+    guint  val;                                                                /* Valeur de la sortie TOR */
+  };
+
  struct COM_TELLSTICK                                                     /* Communication vers TELLSTICK */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_tell;                                             /* liste de struct MSGDB msg a envoyer */
@@ -37,7 +42,7 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_tellstick ( void );                                                  /* Dans Tellstick.c */
- extern void Ajouter_tellstick( gint num );
+ extern void Ajouter_tellstick( gint id, gint val );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
