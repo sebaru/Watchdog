@@ -125,6 +125,8 @@
 
           Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
 
+          Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
+
           if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top) /* Si Pas de message depuis xx */
            { Jouer_wav("jingle.wav"); }                                         /* On balance le jingle ! */
           Partage->com_audio.last_audio = Partage->top;

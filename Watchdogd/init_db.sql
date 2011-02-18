@@ -617,7 +617,8 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `objet`, `acronyme`, `libelle`) VALUE
 (8, 7, 3, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
 (9, 7, 0, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
 (10, 7, 2, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
-(11, 1, 5, 'WATCHDOG OUTILS', 'AUDIO_END', 'Fin d''emission de message Audio.');
+(11, 1, 4, 'WATCHDOG OUTILS', 'AUDIO_START', 'Emission de message Audio.'),
+(12, 1, 5, 'WATCHDOG OUTILS', 'AUDIO_END', 'Fin d''emission de message Audio.');
 -- --------------------------------------------------------
 
 --
