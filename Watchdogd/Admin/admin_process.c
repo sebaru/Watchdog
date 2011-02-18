@@ -68,10 +68,14 @@
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb DLS -> Arret" ); }
-        } 
+        }  else
        if ( ! strcmp ( thread, "onduleur" ) )
         { if (!Demarrer_onduleur())                                                 /* Démarrage ONDULEUR */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ONDULEUR -> Arret" ); }
+        }  else
+       if ( ! strcmp ( thread, "tellstick" ) )
+        { if (!Demarrer_tellstick())                                               /* Démarrage TELLSTICK */
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb TELLSTICK -> Arret" ); }
         } 
 
      } else
@@ -104,7 +108,7 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls,onduleur)\n" );
+                     "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls,onduleur,tellstick)\n" );
        Write_admin ( client->connexion,
                      "  stop                 - Stop all thread\n" );
        Write_admin ( client->connexion,
