@@ -226,26 +226,44 @@
                         GtkPrintContext   *context,
                         gint               page_nr,
                         GtkTreeIter *iter)
-  { guint active, id;
-    gchar *nom, chaine[20];
+  { gchar *nom, chaine[20], *groupe, *ssgroupe, *date_create, titre[128];
     GtkTreeModel *store;
+    struct tm *temps;
     gboolean valide;
+    guint active, id;
+    time_t timet;
     cairo_t *cr;
     gdouble y;
     
-    printf("Page_nr = %d\n", page_nr );
-  
     cr = gtk_print_context_get_cairo_context (context);
   
     cairo_select_font_face (cr, "Courier", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, PRINT_FONT_SIZE );
+    cairo_set_font_size (cr, 20.0 );
 
+    cairo_set_source_rgb (cr, 0.0, 0.0, 1.0);
+
+    timet = time(NULL);
+    temps = localtime( &timet );
+    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
+    else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
+
+    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( titre, sizeof(titre), " Watchdog - Modules D.L.S - %s - Page %d", date_create, page_nr+1 );
+    g_free( date_create );
+
+    cairo_move_to( cr, 0.0, 0.0 );
+    cairo_show_text (cr, titre );
+
+
+    cairo_set_font_size (cr, PRINT_FONT_SIZE );
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_plugin_dls) );
     valide = TRUE;
-    y = 0.0;
+    y = 2 * PRINT_FONT_SIZE;
     while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les objets du tableau */
-     { gtk_tree_model_get( store, iter, COLONNE_ID, &id, COLONNE_ACTIVE, &active, COLONNE_NOM, &nom, -1 );
-
+     { gtk_tree_model_get( store, iter, COLONNE_ID, &id, COLONNE_ACTIVE, &active,
+                                         COLONNE_NOM, &nom,
+                                         COLONNE_GROUPE, &groupe, COLONNE_SSGROUPE, &ssgroupe,
+                           -1 );
        cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
        if (active) { cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
                      cairo_show_text (cr, _("-ACTIVE- ") );
@@ -261,9 +279,19 @@
 
        cairo_move_to( cr, 9.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+       cairo_show_text (cr, groupe );
+
+       cairo_move_to( cr, 15.0*PRINT_FONT_SIZE, y );
+       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+       cairo_show_text (cr, ssgroupe );
+
+       cairo_move_to( cr, 30.0*PRINT_FONT_SIZE, y );
+       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
        cairo_show_text (cr, nom );
 
        g_free(nom);
+       g_free(groupe);
+       g_free(ssgroupe);
 
        valide = gtk_tree_model_iter_next( store, iter );
        y += PRINT_FONT_SIZE;

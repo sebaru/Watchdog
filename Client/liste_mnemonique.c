@@ -341,7 +341,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
 
     date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( titre, sizeof(titre), " Watchdog - Mnemonique - %s - Page %d", date_create, page_nr );
+    g_snprintf( titre, sizeof(titre), " Watchdog - Mnemonique - %s - Page %d", date_create, page_nr+1 );
     g_free( date_create );
 
     cairo_move_to( cr, 0.0, 0.0 );

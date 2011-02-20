@@ -40,7 +40,8 @@
  void Begin_print (GtkPrintOperation *operation,
                    GtkPrintContext   *context,
                    gpointer           user_data)    
-  { guint nbr_msg, nbr_page;
+  {
+    guint nbr_msg, nbr_page;
     GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
