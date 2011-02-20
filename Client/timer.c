@@ -48,7 +48,7 @@
          trame_pass->en_cours_bleu1  != 100
         )
        )
-     { Trame_peindre_pass_1 ( trame_pass, 0, 0, 0 ); }
+     { Trame_peindre_pass_1 ( trame_pass, 100, 100, 100 ); }
 
     if ( cligno && (trame_pass->en_cours_rouge1 != trame_pass->rouge1 ||
                     trame_pass->en_cours_vert1  != trame_pass->vert1  ||

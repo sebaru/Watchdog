@@ -39,28 +39,24 @@
 /**********************************************************************************************************/
  void Ajouter_tellstick( gint id, gint val )
   { struct TELLSTICKDB *tell;
-printf("----------------1 \n");
+
     if (id < Config.tellstick_a_min || Config.tellstick_a_max < id) return;             /* Test d'echelle */
      
-printf("----------------2 \n");
     if (Partage->com_tellstick.taille_tell > 150)
      { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Ajouter_tell: DROP tell (taille>150)  id", id );
        return;
      }
 
-printf("----------------3 \n");
     tell = (struct TELLSTICKDB *)g_malloc( sizeof(struct TELLSTICKDB) );
     if (!tell) return;
 
     tell->id  = id;
     tell->val = val;
 
-printf("----------------4 \n");
     pthread_mutex_lock( &Partage->com_tellstick.synchro );       /* Ajout dans la liste de tell a traiter */
     Partage->com_tellstick.liste_tell = g_list_append( Partage->com_tellstick.liste_tell, tell );
     Partage->com_tellstick.taille_tell++;
     pthread_mutex_unlock( &Partage->com_tellstick.synchro );
-printf("----------------5 \n");
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Tellstick                                                          */

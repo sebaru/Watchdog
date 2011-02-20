@@ -130,7 +130,7 @@ one_again:
 /**********************************************************************************************************/
  gint Recevoir_reseau( struct LOG *Log, struct CONNEXION *connexion )
   { int taille_recue;
-  
+
     if (!connexion) return( RECU_ERREUR );
 
     if ( connexion->index_entete != sizeof(struct ENTETE_CONNEXION) )               /* Entete complete ?? */
@@ -164,8 +164,8 @@ one_again:
 
        connexion->index_entete += taille_recue;                                 /* Indexage pour la suite */
 
-       if (connexion->index_entete == sizeof(struct ENTETE_CONNEXION))
-        { Info_n( Log, DEBUG_NETWORK, "Recu paquet de", connexion->socket );
+       if (connexion->index_entete >= sizeof(struct ENTETE_CONNEXION))
+        { Info_n( Log, DEBUG_NETWORK, "Recu entete de", connexion->socket );
           Info_n( Log, DEBUG_NETWORK, "           tag", connexion->entete.tag );
           Info_n( Log, DEBUG_NETWORK, "        ss_tag", connexion->entete.ss_tag );
           Info_n( Log, DEBUG_NETWORK, "       donnees", connexion->entete.taille_donnees );
@@ -196,7 +196,7 @@ one_again:
                              );
         }
 
-       if (taille_recue<=0)
+       if (taille_recue<0)
         { int err;
           err=errno;
           switch (err)
