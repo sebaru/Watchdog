@@ -39,6 +39,7 @@
     MODE_ADMIN_RS485,
     MODE_ADMIN_DLS,
     MODE_ADMIN_ONDULEUR,
+    MODE_ADMIN_TELLSTICK,
     NBR_MODE_ADMIN
   };
  extern gchar *Mode_admin[NBR_MODE_ADMIN];
