@@ -62,6 +62,7 @@
        Write_admin ( client->connexion, "  geti xxx             - Get Ixxx\n" );
        Write_admin ( client->connexion, "  getci xxx            - Get CIxxx\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
+       Write_admin ( client->connexion, "  sms message          - Envoi du message SMS via SMSBOX\n" );
        Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
        Write_admin ( client->connexion, "  rs                   - Affiche les status des equipements RS485\n" );
@@ -235,6 +236,13 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Ajouter_audio ( num );
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "sms" ) )
+     { gchar message[80];
+       sscanf ( ligne, "%s %d", commande, message );                 /* Découpage de la ligne de commande */
+       Envoyer_sms_smsbox_text ( message );
+       g_snprintf( chaine, sizeof(chaine), " Message sent\n" );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
