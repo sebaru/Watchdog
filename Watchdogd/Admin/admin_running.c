@@ -60,6 +60,7 @@
        Write_admin ( client->connexion, "  setg xxx i           - Set MSGxxx = i\n" );
        Write_admin ( client->connexion, "  gettr xxx            - Get TRxxx\n" );
        Write_admin ( client->connexion, "  geti xxx             - Get Ixxx\n" );
+       Write_admin ( client->connexion, "  seti xxx E R V B C   - Set Ixxx Etat Rouge Vert Bleu Cligno\n" );
        Write_admin ( client->connexion, "  getci xxx            - Get CIxxx\n" );
        Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
        Write_admin ( client->connexion, "  sms message          - Envoi du message SMS via SMSBOX\n" );
@@ -142,6 +143,19 @@
     if ( ! strcmp ( commande, "geti" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
+                                           "changes=%d, last_change=%d, top=%d\n",
+                   num, Partage->i[num].etat,
+                   Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
+                   Partage->i[num].cligno, Partage->i[num].changes, Partage->i[num].last_change,
+                   Partage->top );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "seti" ) )
+     { int num, etat, rouge, vert, bleu, cligno;                     /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d %d %d %d %d", commande, &num, &etat, &rouge, &vert, &bleu, &cligno );
+       SI(num, etat, rouge, vert, bleu, cligno, -1);
+       sleep(1);
        g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
                                            "changes=%d, last_change=%d, top=%d\n",
                    num, Partage->i[num].etat,
@@ -240,7 +254,7 @@
      } else
     if ( ! strcmp ( commande, "sms" ) )
      { gchar message[80];
-       sscanf ( ligne, "%s %d", commande, message );                 /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
        Envoyer_sms_smsbox_text ( message );
        g_snprintf( chaine, sizeof(chaine), " Message sent\n" );
        Write_admin ( client->connexion, chaine );
