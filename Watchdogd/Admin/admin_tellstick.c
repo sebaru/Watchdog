@@ -26,51 +26,8 @@
  */
  
  #include <glib.h>
- #include <telldus-core.h>
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- void Admin_tellstick_list ( struct CLIENT_ADMIN *client )
-  { int nbrDevice, i, supportedMethods, methods;
-    gchar chaine[128];
-
-    tdInit();
-
-    nbrDevice = tdGetNumberOfDevices();
-    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Number of devices = %d\n", nbrDevice );
-    Write_admin ( client->connexion, chaine );
-
-    for (i= 0; i<nbrDevice; i++)
-     { char *name, *proto, *house, *unit;
-       int id;
-       id    = tdGetDeviceId( i );
-       name  = tdGetName( id );
-       proto = tdGetProtocol( id );
-       house = tdGetDeviceParameter( id, "house", "NULL" );
-       unit  = tdGetDeviceParameter( id, "unit", "NULL" );
-       supportedMethods = TELLSTICK_TURNON | TELLSTICK_TURNOFF | TELLSTICK_BELL | TELLSTICK_LEARN;
-       methods = tdMethods( id, supportedMethods );
-
-       g_snprintf( chaine, sizeof(chaine),
-                   "   Tellstick [%d] -> name=%s, proto=%s, house=%s, unit=%s, methods=%s-%s-%s-%s\n",
-                   id, name, proto, house, unit,
-                   ( methods & TELLSTICK_TURNON  ? "ON"    : "  "     ),
-                   ( methods & TELLSTICK_TURNOFF ? "OFF"   : "   "    ),
-                   ( methods & TELLSTICK_BELL    ? "BELL"  : "    "   ),
-                   ( methods & TELLSTICK_LEARN   ? "LEARN" : "      " )
-                 );
-       Write_admin ( client->connexion, chaine );
-       tdReleaseString(name);
-       tdReleaseString(proto);
-       tdReleaseString(house);
-       tdReleaseString(unit);
-     }
-    tdClose();
-  }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -84,8 +41,8 @@
     if ( ! strcmp ( commande, "start" ) )
      {  /**/
 
-     } else if ( ! strcmp ( commande, "list" ) )
-     { Admin_tellstick_list ( client );
+     } else if ( (! strcmp ( commande, "list" )) && Partage->com_tellstick.Admin_tellstick_list )
+     { Partage->com_tellstick.Admin_tellstick_list(client);
      } else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'TELLSTICK'\n" );

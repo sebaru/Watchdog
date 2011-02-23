@@ -335,7 +335,8 @@
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
         { Ajouter_arch( MNEMO_SORTIE, num, etat );
-          Ajouter_tellstick( num, etat );
+          if (Partage->com_tellstick.Ajouter_tellstick)
+           { Partage->com_tellstick.Ajouter_tellstick( num, etat ); }
           Partage->a[num].changes++;                                              /* Un change de plus !! */
         } else if (Partage->top % 600)                   /* Si persistence on prévient toutes les minutes */
         { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_change trop tôt !", num ); }

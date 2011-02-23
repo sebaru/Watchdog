@@ -6,5 +6,5 @@
 
 SUBDIRS=Documentation Include Commun Watchdogd Client WatchdogdAdmin
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = Watchdog.rpm.spec
+#EXTRA_DIST = Watchdog.rpm.spec
 MAINTAINERCLEANFILES = Makefile.in

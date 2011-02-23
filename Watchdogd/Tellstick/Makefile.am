@@ -5,14 +5,14 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-noinst_LTLIBRARIES     = libtellstick.la
-libtellstick_la_SOURCES    = Tellstick.c
+lib_LTLIBRARIES     = libwatchdog-tellstick.la
+libwatchdog_tellstick_la_SOURCES    = Tellstick.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
-	  $(MYSQL_CFLAGS) \
-	  -I$(top_srcdir) -I$(includedir) \
+          -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
-	  -I../Include
+          $(MYSQL_CFLAGS) \
+          -I../Include
 
-libtellstick_la_LDFLAGS = -ltelldus-core
+libwatchdog_tellstick_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

@@ -35,6 +35,7 @@
  #include <errno.h>
  #include <openssl/ssl.h>
  #include <string.h>
+ #include <dlfcn.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
@@ -242,7 +243,37 @@
 /**********************************************************************************************************/
  gboolean Demarrer_tellstick ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
-    if ( pthread_create( &TID_tellstick, NULL, (void *)Run_tellstick, NULL ) )
+    Partage->com_tellstick.handle = dlopen( "libwatchdog-tellwtick.so", RTLD_LAZY );
+    if (!Partage->com_tellstick.handle)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed") );
+       return(FALSE);
+     }
+                                                              /* Recherche de la fonction 'Run_tellstick' */
+    Partage->com_tellstick.Run_tellstick = dlsym( Partage->com_tellstick.handle, "Run_tellstick" );
+    if (!Partage->com_tellstick.Run_tellstick)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Run_tellstick does not exist") );
+       dlclose( Partage->com_tellstick.handle );
+       Partage->com_tellstick.handle = NULL;
+       return(FALSE);
+     }
+                                                          /* Recherche de la fonction 'Ajouter_tellstick' */
+    Partage->com_tellstick.Ajouter_tellstick = dlsym( Partage->com_tellstick.handle, "Ajouter_tellstick" );
+    if (!Partage->com_tellstick.Ajouter_tellstick)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Ajouter_tellstick does not exist") );
+       dlclose( Partage->com_tellstick.handle );
+       Partage->com_tellstick.handle = NULL;
+       return(FALSE);
+     }
+                                                       /* Recherche de la fonction 'Admin_tellstick_list' */
+    Partage->com_tellstick.Admin_tellstick_list = dlsym( Partage->com_tellstick.handle, "Admin_tellstick_list" );
+    if (!Partage->com_tellstick.Admin_tellstick_list)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_list does not exist") );
+       dlclose( Partage->com_tellstick.handle );
+       Partage->com_tellstick.handle = NULL;
+       return(FALSE);
+     }
+
+    if ( pthread_create( &TID_tellstick, NULL, (void *)Partage->com_tellstick.Run_tellstick, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
        return(FALSE);
      }

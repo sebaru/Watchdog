@@ -18,7 +18,6 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Rs485/librs485.la \
-		    Tellstick/libtellstick.la \
 		    Modbus/libmodbus.la \
 		    Sms/libsms.la \
 		    Archive/libarchive.la \
@@ -38,7 +37,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Onduleur/libonduleur.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -rdynamic -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS) $(LIRC_LIBS)
+Watchdogd_LDFLAGS = -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS) $(LIRC_LIBS)
 
 sysconf_DATA = watchdogd.conf
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh
