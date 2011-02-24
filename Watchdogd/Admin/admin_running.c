@@ -69,6 +69,7 @@
        Write_admin ( client->connexion, "  rs                   - Affiche les status des equipements RS485\n" );
        Write_admin ( client->connexion, "  onduleur             - Affiche les status des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  ping                 - Ping Watchdog\n" );
+       Write_admin ( client->connexion, "  setrootpasswd        - Set the Watchdog root password\n" );
        Write_admin ( client->connexion, "  help                 - This help\n" );
        Write_admin ( client->connexion, "  mode type_mode       - Change de mode (" );
        i = 1;
@@ -281,6 +282,38 @@
               liste = liste->next;
             }
          }
+     } else
+    if ( ! strcmp ( commande, "setrootpasswd" ) )
+     { struct CMD_TYPE_UTILISATEUR util;
+       gchar password[80];
+       struct DB *db;
+
+       sscanf ( ligne, "%s %s", commande, password );                /* Découpage de la ligne de commande */
+
+       db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
+                         Config.db_username, Config.db_password, Config.db_port );
+       if (!db)
+        { g_snprintf( chaine, sizeof(chaine), " Unable to connect to Database\n" );
+          Write_admin ( client->connexion, chaine );
+        }
+       else
+        { util.id = 1;
+          g_snprintf( util.nom, sizeof(util.nom), "root" );
+          g_snprintf( util.commentaire, sizeof(util.commentaire), "Watchdog root user" );
+          util.cansetpass = TRUE;
+          util.setpassnow = TRUE;
+          g_snprintf( util.code_en_clair, sizeof(util.code_en_clair), "%s", password );
+          util.actif = TRUE;
+          util.expire = FALSE;
+          util.changepass = FALSE;
+          memset ( &util.gids, 0, sizeof(util.gids) );
+          if( Modifier_utilisateurDB( Config.log, db, Config.crypto_key, &util ) )
+           { g_snprintf( chaine, sizeof(chaine), " Password set\n" ); }
+          else
+           { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
+          Write_admin ( client->connexion, chaine );
+          Libere_DB_SQL( Config.log, &db );
+        }
      } else
     if ( ! strcmp ( commande, "audit" ) )
      { gint num;
