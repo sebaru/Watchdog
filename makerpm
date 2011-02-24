@@ -1,4 +1,9 @@
 #/bin/sh
+svn update
+aclocal
+autoconf
+automake
+./configure
 make dist-gzip
 mv Watchdog*.tar.gz /mnt/Satis-storage/Partage/Distributions/Watchdog/SOURCES/
 sed s/latest/2.6.`svnversion -n`/g Watchdog.rpm.spec > /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec

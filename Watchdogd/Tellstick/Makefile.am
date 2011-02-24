@@ -15,4 +15,4 @@ INCLUDES= $(GNOME2_CFLAGS) \
           $(MYSQL_CFLAGS) \
           -I../Include
 
-libwatchdog_tellstick_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
+libwatchdog_tellstick_la_LDFLAGS = -ltelldus-core -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

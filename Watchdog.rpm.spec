@@ -70,7 +70,7 @@ This is the server side of Watchdog
 /usr/share/Watchdog/openssl.cnf
 %attr(755,root,root) /usr/bin/Watchdogd
 %attr(755,root,root) /usr/bin/WatchdogdAdmin
-%attr(640,root,watchdog) %config /etc/watchdogd.conf
+%attr(640,root,watchdog) %config(noreplace) /etc/watchdogd.conf
 #%config /etc/watchdogd.conf
 %doc /usr/share/Watchdog/Watchdog*pdf
 %doc /usr/share/Watchdog/Delete_old_avi.sh
