@@ -243,7 +243,7 @@
 /**********************************************************************************************************/
  gboolean Demarrer_tellstick ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
-    Partage->com_tellstick.handle = dlopen( "libwatchdog-tellwtick.so", RTLD_LAZY );
+    Partage->com_tellstick.handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
     if (!Partage->com_tellstick.handle)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed") );
        return(FALSE);
@@ -524,7 +524,7 @@
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
     if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_rs485 );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_modbus );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), TID_sms );
     if (TID_sms) { pthread_join( TID_sms, NULL ); }                                    /* Attente fin SMS */
