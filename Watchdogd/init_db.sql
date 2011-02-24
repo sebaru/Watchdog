@@ -874,7 +874,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 INSERT INTO `users` (`id`, `name`, `changepass`, `cansetpass`, `crypt`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
-(1, 'root', 1, 1, 'bouh', 'Utilisateur Root', 0, 1, 0, 0, 0, 0);
+(0, 'root', 1, 1, 'bouh', 'Utilisateur Root', 0, 1, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 

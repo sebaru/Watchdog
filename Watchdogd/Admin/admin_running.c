@@ -297,7 +297,7 @@
           Write_admin ( client->connexion, chaine );
         }
        else
-        { util.id = 1;
+        { util.id = 0;
           g_snprintf( util.nom, sizeof(util.nom), "root" );
           g_snprintf( util.commentaire, sizeof(util.commentaire), "Watchdog root user" );
           util.cansetpass = TRUE;

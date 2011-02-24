@@ -139,11 +139,11 @@
 
        if ( tell->val == 1 && (methods | TELLSTICK_TURNON) )
         { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Turning ON", tell->id );
-          tdTurnOn ( tell-> id );
+          tdTurnOn ( tell->id );
         }
        else if ( tell->val == 0 && (methods | TELLSTICK_TURNOFF) )
         { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Turning OFF", tell->id );
-          tdTurnOff ( tell-> id );
+          tdTurnOff ( tell->id );
         }
 
        g_free(tell);
