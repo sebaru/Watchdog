@@ -245,7 +245,7 @@
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
     Partage->com_tellstick.handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
     if (!Partage->com_tellstick.handle)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed") );
+     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed"), dlerror() );
        return(FALSE);
      }
                                                               /* Recherche de la fonction 'Run_tellstick' */
