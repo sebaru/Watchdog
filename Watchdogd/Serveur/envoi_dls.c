@@ -238,10 +238,14 @@
        id_fichier = open( log, O_RDONLY, 0 );
        if (id_fichier<0)
         { g_snprintf( erreur.message, sizeof(erreur.message), "Et non....\nTraduction Down" ); }
-       else { int nbr_car;
-              nbr_car = read (id_fichier, erreur.message, sizeof(erreur.message) );
-              if (nbr_car>=sizeof(erreur.message)) nbr_car = sizeof(erreur.message)-1;
-              erreur.message[nbr_car] = 0;                                       /* Caractere NULL d'arret */
+       else { int nbr_car, index;
+              index = nbr_car = 0; 
+              for ( ; ; )
+               { nbr_car = read (id_fichier, erreur.message + index, sizeof(erreur.message)-1-index );
+                 if (nbr_car<0) break;
+                 index+=nbr_car;
+               }
+              erreur.message[index] = 0;                                        /* Caractere NULL d'arret */
               close(id_fichier);
             }
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
