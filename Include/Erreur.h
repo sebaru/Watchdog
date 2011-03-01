@@ -59,6 +59,7 @@
  #define  DEBUG_CAMERA              (1<<18) /* Debug CAMERA */
  #define  DEBUG_COURBE              (1<<19) /* Debug des echanges COURBE */
  #define  DEBUG_TELLSTICK           (1<<20) /* Debug des echanges TELLSTICK */
+ #define  DEBUG_LIRC                (1<<21) /* Debug des echanges LIRC */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

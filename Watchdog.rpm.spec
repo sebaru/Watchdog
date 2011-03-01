@@ -87,3 +87,16 @@ This is the server side of Watchdog - Telldus Module
 %files server-tellstick
 %defattr(644,root,root)
 /usr/lib/libwatchdog-tellstick*
+
+#----------------------------- Package Server-lirc -----------------------------------
+%package server-lirc
+Summary: The Watchdogd Server - Module lirc
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-lirc
+This is the server side of Watchdog - Lirc Module
+
+%files server-lirc
+%defattr(644,root,root)
+/usr/lib/libwatchdog-lirc*
+

@@ -44,6 +44,7 @@
  #include "Onduleur.h"
  #include "Rs485.h"
  #include "Tellstick.h"
+ #include "Lirc.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
  #include "Camera_DB.h"
@@ -153,6 +154,7 @@
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
     struct COM_ONDULEUR com_onduleur;                                      /* Com avec le thread ONDULEUR */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
+    struct COM_LIRC com_lirc;                                                  /* Com avec le thread LIRC */
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
@@ -195,6 +197,7 @@
  extern gboolean Demarrer_admin ( void );
  extern gboolean Demarrer_motion_detect ( void );
  extern gboolean Demarrer_tellstick ( void );
+ extern gboolean Demarrer_lirc ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

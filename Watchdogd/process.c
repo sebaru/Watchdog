@@ -50,6 +50,7 @@
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
  static pthread_t TID_tellstick= 0;                           /* Le tid du TELLSTICK en cours d'execution */
+ static pthread_t TID_lirc     = 0;                                /* Le tid du LIRC en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -277,7 +278,35 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread tellstick seems to be running", TID_tellstick ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running", TID_tellstick ); }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Demarrer_tellstick: Thread un process TELLSTICK                                                        */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_lirc ( void )
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Demande de demarrage"), getpid() );
+    Partage->com_lirc.handle = dlopen( "libwatchdog-lirc.so", RTLD_LAZY );
+    if (!Partage->com_lirc.handle)
+     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: dlopen failed"), dlerror() );
+       return(FALSE);
+     }
+                                                              /* Recherche de la fonction 'Run_tellstick' */
+    Partage->com_lirc.Run_lirc = dlsym( Partage->com_lirc.handle, "Run_lirc" );
+    if (!Partage->com_lirc.Run_lirc)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Run_lirc does not exist") );
+       dlclose( Partage->com_tellstick.handle );
+       Partage->com_lirc.handle = NULL;
+       return(FALSE);
+     }
+
+    if ( pthread_create( &TID_lirc, NULL, (void *)Partage->com_lirc.Run_lirc, NULL ) )
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: pthread_create failed") );
+       return(FALSE);
+     }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread tellstick seems to be running", TID_lirc ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -519,8 +548,12 @@
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), TID_tellstick );
-    if (TID_tellstick) { pthread_join( TID_tellstick, NULL ); }                              /* Attente fin RS485 */
+    if (TID_tellstick) { pthread_join( TID_tellstick, NULL ); }                  /* Attente fin TELLSTICK */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), TID_tellstick );
+
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), TID_lirc );
+    if (TID_lirc) { pthread_join( TID_lirc, NULL ); }                                 /* Attente fin LIRC */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), TID_lirc );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
     if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */

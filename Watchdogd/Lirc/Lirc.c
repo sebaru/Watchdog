@@ -28,6 +28,7 @@
  #include <glib.h>
  #include <unistd.h>
  #include <fcntl.h>
+ #include <sys/prctl.h>
  #include <lirc/lirc_client.h>
 
  #include "watchdogd.h"
@@ -36,34 +37,55 @@
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
 /**********************************************************************************************************/
-/* Camera_check_motion : Vérifie si l'outil motion a donner un bit a activer                              */
+/* Run_lirc : Vérifie si le serveur a recu une commande IR                                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: néant. Les bits DLS sont positionnés                                                           */
 /**********************************************************************************************************/
- void Lirc_check ( struct LOG *log, struct DB *db )
+ void Run_lirc ( void )
   { struct lirc_config *config;
-    gint fd;
+    guint fd;
+    prctl(PR_SET_NAME, "W-Lirc", 0, 0, 0 );
 
-    if ( (fd=lirc_init("Watchdogd",1))==-1) return;
+    Info( Config.log, DEBUG_LIRC, "LIRC: demarrage" );
+
+    if ( (fd=lirc_init("Watchdogd",1))==-1)
+     { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to open LIRCD... stopping...", pthread_self() );
+       pthread_exit(GINT_TO_POINTER(0));
+     }
+
     fcntl ( fd, F_SETFL, O_NONBLOCK );
 
-    if (lirc_readconfig ( NULL, &config, NULL)==0)
+    if (lirc_readconfig ( NULL, &config, NULL)!=0)
+     { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
+       pthread_exit(GINT_TO_POINTER(0));
+     }
+
+    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      { gchar *code;
        gchar *c;
        gint ret;
 
-       while(lirc_nextcode(&code)==0)
-        { if(code==NULL) continue;
-          while( (ret=lirc_code2char(config,code,&c))==0 &&
-                 c!=NULL)
-           {
-				printf("Execing command \"%s\"\n",c);
-           }
-          free(code);
-          if(ret==-1) break;
+       if (Partage->com_lirc.sigusr1)                                        /* On a recu sigusr1 ?? */
+        { Partage->com_lirc.sigusr1 = FALSE;
+          Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: SIGUSR1" );
         }
-       lirc_freeconfig(config);
+
+       if (lirc_nextcode(&code)==0 )
+        { if(code!=NULL)
+           { while( (ret=lirc_code2char(config,code,&c))==0 && c!=NULL)
+              {
+				printf("Execing command \"%s\"\n",c);
+              }
+             free(code);
+             if(ret==-1) break;
+           }
+        }
+       usleep(10000);
      }
+
+    lirc_freeconfig(config);
     lirc_deinit();
+    Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Down", pthread_self() );
+    pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -218,6 +218,9 @@
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_TELLSTICK", NULL );
        if (debug) Config.debug_level += DEBUG_TELLSTICK;
 
+       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_LIRC", NULL );
+       if (debug) Config.debug_level += DEBUG_LIRC;
+
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ALL", NULL );
        if (debug) Config.debug_level = ~0;
 

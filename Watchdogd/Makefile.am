@@ -5,12 +5,12 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           Compteur EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
-	  Synoptiques Camera Onduleur Tellstick
+	  Synoptiques Camera Onduleur Tellstick Lirc
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
                     ecoute.c shm.c \
-                    db.c ssl.c lirc.c \
+                    db.c ssl.c \
                     distrib_MSGxxx.c distrib_Ixxx.c
 
 Watchdogd_LDADD   = Config/libconfig.la \
@@ -37,7 +37,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Onduleur/libonduleur.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS) $(LIRC_LIBS)
+Watchdogd_LDFLAGS = -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS)
 
 sysconf_DATA = watchdogd.conf
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh
@@ -47,7 +47,6 @@ INCLUDES=-I$(top_srcdir)/Include \
 	 $(GLIB_CFLAGS) \
 	 $(BONOBO_CFLAGS) \
 	 $(MYSQL_CFLAGS) \
-	 $(LIRC_CFLAGS) \
 	 $(CURL_CFLAGS) \
 	 $(UPS_CFLAGS)
 

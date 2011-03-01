@@ -231,7 +231,6 @@
 
        if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
         { Camera_check_motion( Config.log, db );
-          Lirc_check ( Config.log, db );
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
 
@@ -469,10 +468,6 @@
 
        Partage->Arret            = TOURNE;
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
-#ifdef bouh
-       Partage->top              = 0;
-       Partage->top_cdg_plugin_dls = 0;
-#endif
        
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -485,21 +480,8 @@
        pthread_mutex_init( &Partage->com_onduleur.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_tellstick.synchro, &attr );
+       pthread_mutex_init( &Partage->com_lirc.synchro, &attr );
  
-#ifdef bouh
-       for (i=0; i<NBR_MESSAGE_ECRITS; i++)                                 /* RAZ des last_send MESSAGES */
-        { Partage->g[i].last_send = 0; }
-
-       for (i=0; i<NBR_BIT_CONTROLE; i++)                                      /* RAZ des last_send MOTIF */
-        { Partage->i[i].last_send = 0; }
-            
-       for (i=0; i<NBR_SORTIE_TOR; i++)                                      /* RAZ des last_send MOTIF */
-        { Partage->a[i].last_arch = 0; }
-
-       for (i=0; i<NBR_TEMPO; i++)                                      /* RAZ des consigne TEMPO */
-        { Partage->Tempo_R[i].consigne = 0; }
-#endif
-
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)
         { Partage->Sous_serveur[i].pid = -1;
@@ -575,6 +557,9 @@ encore:
              if (!Demarrer_tellstick())                                            /* Démarrage Tellstick */
               { Info( Config.log, DEBUG_INFO, "MSRV: Pb TELLSTICK" ); }
 
+             if (!Demarrer_lirc())                                                      /* Démarrage Lirc */
+              { Info( Config.log, DEBUG_INFO, "MSRV: Pb LIRC" ); }
+
              if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
               { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
            }
@@ -606,6 +591,7 @@ encore:
     pthread_mutex_destroy( &Partage->com_audio.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_tellstick.synchro );
+    pthread_mutex_destroy( &Partage->com_lirc.synchro );
     for (i=0; i<Config.max_serveur; i++)
      { pthread_mutex_destroy( &Partage->Sous_serveur[i].synchro ); }
 
