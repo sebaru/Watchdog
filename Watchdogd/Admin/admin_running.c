@@ -49,6 +49,7 @@
        Write_admin ( client->connexion, "  client               - Client Status\n" );
        Write_admin ( client->connexion, "  kick nom machine     - Kick client nom@machine\n" );
        Write_admin ( client->connexion, "  gete xxx             - Get Exxx\n" );
+       Write_admin ( client->connexion, "  sete xxx i           - Set Exxx = i\n" );
        Write_admin ( client->connexion, "  getea xxx            - Get EAxxx\n" );
        Write_admin ( client->connexion, "  getm xxx             - Get Mxxx\n" );
        Write_admin ( client->connexion, "  setm xxx i           - Set Mxxx = i\n" );
@@ -190,6 +191,13 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "sete" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       SE(num, val );
+       g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, val );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "getea" ) )
