@@ -42,6 +42,7 @@
     "Repos/Anime(1-n)",
     "Inerte/Repos/Actif",
     "Fond d'ecran",
+    "Repos/Anime(2-n)",
     NULL
   };
 
@@ -145,6 +146,19 @@
           top = 0;                                                            /* Raz pour prochaine frame */
         }
      }
+    else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_2N)
+     { if (top >= Trame_motif->motif->rafraich)
+        { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images)
+           { Trame_choisir_frame( Trame_motif_p1, 2,
+                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+           }
+          else
+           { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
+                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+           }
+          top = 0;                                                            /* Raz pour prochaine frame */
+        }
+     }
     else if (Trame_motif->motif->type_gestion == TYPE_BOUTON)
      { Trame_choisir_frame( Trame_motif_p1, (Trame_motif_p1->num_image == 2 ? 1 : 2),
                                             ROUGE1, VERT1, BLEU1 );                    /* frame numero ++ */
@@ -185,7 +199,8 @@
                              ok_timer = TIMER_ON;
                              break;
        case TYPE_CYCLIQUE_0N:
-       case TYPE_CYCLIQUE_1N:gtk_widget_set_sensitive( Spin_rafraich, TRUE );
+       case TYPE_CYCLIQUE_1N:
+       case TYPE_CYCLIQUE_2N:gtk_widget_set_sensitive( Spin_rafraich, TRUE );
                              ok_timer = TIMER_ON;
                              printf("type cyclique: ok_timer = %d\n", ok_timer );
                              break;
@@ -232,8 +247,9 @@
        case  4: Trame_motif->motif->type_gestion = TYPE_INDICATEUR; break;
        case  5: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_0N;break;
        case  6: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_1N;break;
-       case  7: Trame_motif->motif->type_gestion = TYPE_PROGRESSIF; break;
-       case  8: Trame_motif->motif->type_gestion = TYPE_BOUTON;     break;
+       case  7: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_2N;break;
+       case  8: Trame_motif->motif->type_gestion = TYPE_PROGRESSIF; break;
+       case  9: Trame_motif->motif->type_gestion = TYPE_BOUTON;     break;
        default: Trame_motif->motif->type_gestion = TYPE_INERTE;     break;
      }
     printf("Gestion = %s\n", Type_gestion_motif( Trame_motif->motif->type_gestion) );
@@ -418,7 +434,9 @@ printf("Changer_couleur %p\n", data);
      }
     if (trame_motif->nbr_images >= 3)
      { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                           gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_1N ) ) );
+                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_1N ) ) );
+       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
+                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_2N ) ) );
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_PROGRESSIF ) ) );
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
@@ -439,8 +457,9 @@ printf("Changer_couleur %p\n", data);
        case  TYPE_INDICATEUR : choix = 4; break;
        case  TYPE_CYCLIQUE_0N: choix = 5; break;
        case  TYPE_CYCLIQUE_1N: choix = 6; break;
-       case  TYPE_PROGRESSIF : choix = 7; break;
-       case  TYPE_BOUTON     : choix = 8; break;
+       case  TYPE_CYCLIQUE_2N: choix = 7; break;
+       case  TYPE_PROGRESSIF : choix = 8; break;
+       case  TYPE_BOUTON     : choix = 9; break;
        default: choix = 0; break;
      }
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_gestion), choix );

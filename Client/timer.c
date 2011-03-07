@@ -144,6 +144,31 @@
                                                      trame_motif->bleu );
              }
             break;
+       case TYPE_CYCLIQUE_2N:
+            if (trame_motif->etat >= 2)
+             {  if (trame_motif->num_image != trame_motif->nbr_images-1)
+                 { Trame_choisir_frame ( trame_motif, trame_motif->num_image+1,
+                                                      trame_motif->rouge,
+                                                      trame_motif->vert,
+                                                      trame_motif->bleu );
+                 }
+                else
+                 { Trame_choisir_frame ( trame_motif, 2, trame_motif->rouge,
+                                                         trame_motif->vert,
+                                                         trame_motif->bleu );
+                 }
+             }
+            else if (trame_motif->etat == 1)
+             { Trame_choisir_frame ( trame_motif, 1, trame_motif->rouge,
+                                                     trame_motif->vert,
+                                                     trame_motif->bleu );
+             }
+            else
+             { Trame_choisir_frame ( trame_motif, 0, trame_motif->rouge,
+                                                     trame_motif->vert,
+                                                     trame_motif->bleu );
+             }
+            break;
      }
 
     if (trame_motif->cligno == 1 && !cligno &&                                    /* Gestion clignotement */

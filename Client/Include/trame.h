@@ -51,7 +51,8 @@
     TYPE_INDICATEUR,
     TYPE_CYCLIQUE_1N,
     TYPE_BOUTON,
-    TYPE_FOND
+    TYPE_FOND,
+    TYPE_CYCLIQUE_2N
   };
 
  enum                                                             /* Différente action associée à un item */
