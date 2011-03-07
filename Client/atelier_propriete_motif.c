@@ -36,10 +36,10 @@
   { "Inerte",
     "Actif",
     "Repos/Actif",
-    "Repos/Anime",
+    "Repos/Anime(0-n)",
     "Repos/Anime/Repos",
     "Indicateur",
-    " ------- a virer ----",
+    "Repos/Anime(1-n)",
     "Inerte/Repos/Actif",
     "Fond d'ecran",
     NULL
@@ -122,13 +122,26 @@
                                             ROUGE1, VERT1, BLEU1 );                    /* frame numero ++ */
        printf("Timer, type INDICATEUR\n");
      }
-    else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE ||
+    else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_0N ||
              Trame_motif->motif->type_gestion == TYPE_PROGRESSIF
             )
      { if (top >= Trame_motif->motif->rafraich)
         { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
                                                ROUGE1, VERT1, BLEU1 );                 /* frame numero ++ */
           printf("bouh %d\n", Trame_motif_p1->num_image );
+          top = 0;                                                            /* Raz pour prochaine frame */
+        }
+     }
+    else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_1N)
+     { if (top >= Trame_motif->motif->rafraich)
+        { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images)
+           { Trame_choisir_frame( Trame_motif_p1, 1,
+                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+           }
+          else
+           { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
+                                  ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
+           }
           top = 0;                                                            /* Raz pour prochaine frame */
         }
      }
@@ -171,7 +184,8 @@
        case TYPE_BOUTON:     Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
                              ok_timer = TIMER_ON;
                              break;
-       case TYPE_CYCLIQUE:   gtk_widget_set_sensitive( Spin_rafraich, TRUE );
+       case TYPE_CYCLIQUE_0N:
+       case TYPE_CYCLIQUE_1N:gtk_widget_set_sensitive( Spin_rafraich, TRUE );
                              ok_timer = TIMER_ON;
                              printf("type cyclique: ok_timer = %d\n", ok_timer );
                              break;
@@ -214,10 +228,10 @@
      { case  0: Trame_motif->motif->type_gestion = TYPE_INERTE;     break;
        case  1: Trame_motif->motif->type_gestion = TYPE_FOND;       break;
        case  2: Trame_motif->motif->type_gestion = TYPE_STATIQUE;   break;
-       case  3: Trame_motif->motif->type_gestion = TYPE_ANALOGIQUE; break;
-       case  4: Trame_motif->motif->type_gestion = TYPE_DYNAMIQUE;  break;
-       case  5: Trame_motif->motif->type_gestion = TYPE_INDICATEUR; break;
-       case  6: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE;   break;
+       case  3: Trame_motif->motif->type_gestion = TYPE_DYNAMIQUE;  break;
+       case  4: Trame_motif->motif->type_gestion = TYPE_INDICATEUR; break;
+       case  5: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_0N;break;
+       case  6: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_1N;break;
        case  7: Trame_motif->motif->type_gestion = TYPE_PROGRESSIF; break;
        case  8: Trame_motif->motif->type_gestion = TYPE_BOUTON;     break;
        default: Trame_motif->motif->type_gestion = TYPE_INERTE;     break;
@@ -391,8 +405,6 @@ printf("Changer_couleur %p\n", data);
                            gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_FOND ) ) );
     gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                            gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_STATIQUE ) ) );
-    gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                           gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_ANALOGIQUE ) ) );
     printf("Rafraichir_proprietes3:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
     if (trame_motif->nbr_images >= 2)                                    /* Sensibilite des boutons radio */
@@ -401,11 +413,13 @@ printf("Changer_couleur %p\n", data);
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_INDICATEUR ) ) );
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE   ) ) );
+                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_0N) ) );
 
      }
     if (trame_motif->nbr_images >= 3)
      { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
+                           gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_1N ) ) );
+       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_PROGRESSIF ) ) );
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_BOUTON     ) ) );
@@ -418,15 +432,15 @@ printf("Changer_couleur %p\n", data);
 /*    choix = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_gestion) );*/
 
     switch(motif->type_gestion)
-     { case  TYPE_INERTE    : choix = 0; break;
-       case  TYPE_FOND      : choix = 1; break;
-       case  TYPE_STATIQUE  : choix = 2; break;
-       case  TYPE_ANALOGIQUE: choix = 3; break;
-       case  TYPE_DYNAMIQUE : choix = 4; break;
-       case  TYPE_INDICATEUR: choix = 5; break;
-       case  TYPE_CYCLIQUE  : choix = 6; break;
-       case  TYPE_PROGRESSIF: choix = 7; break;
-       case  TYPE_BOUTON    : choix = 8; break;
+     { case  TYPE_INERTE     : choix = 0; break;
+       case  TYPE_FOND       : choix = 1; break;
+       case  TYPE_STATIQUE   : choix = 2; break;
+       case  TYPE_DYNAMIQUE  : choix = 3; break;
+       case  TYPE_INDICATEUR : choix = 4; break;
+       case  TYPE_CYCLIQUE_0N: choix = 5; break;
+       case  TYPE_CYCLIQUE_1N: choix = 6; break;
+       case  TYPE_PROGRESSIF : choix = 7; break;
+       case  TYPE_BOUTON     : choix = 8; break;
        default: choix = 0; break;
      }
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_gestion), choix );
