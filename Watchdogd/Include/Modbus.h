@@ -28,10 +28,19 @@
 #ifndef _MODBUS_H_
  #define _MODBUS_H_
 
- #define MBUS_ENTRE_TOR  0x01
- #define MBUS_ENTRE_ANA  0x04
- #define MBUS_SORTIE_TOR 0x06
- #define MBUS_SORTIE_ANA 0x06
+ #define MBUS_ENTRE_TOR      0x01
+ #define MBUS_ENTRE_ANA      0x04
+ #define MBUS_SORTIE_TOR     0x06
+ #define MBUS_SORTIE_ANA     0x06
+ #define MBUS_WRITE_REGISTER 0x06
+
+ enum
+  { MODBUS_INIT_WATCHDOG1,
+    MODBUS_INIT_WATCHDOG2,
+    MODBUS_INIT_WATCHDOG3,
+    MODBUS_INIT_WATCHDOG4,
+
+  };
  
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */
  #define MODBUS_RETRY       100                      /* 10 secondes entre chaque retry si pb de connexion */
@@ -87,6 +96,7 @@
 
     gboolean started;                                                                  /* Est-il actif ?? */
     gint connexion;                                                                 /* FD de connexion IP */
+    gint mode;                                                /* Mode dans le processus de connexion WAGO */
     gint nbr_oct_lu;                                                            /* Nombre d'octet deja lu */
     guint16 transaction_id;
     guint nbr_deconnect;
