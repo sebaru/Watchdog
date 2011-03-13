@@ -630,6 +630,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_description: OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -661,6 +662,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: stop watchdog OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -692,6 +694,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -723,6 +726,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: init watchdog timer OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -754,6 +758,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: watchdog start OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -784,6 +789,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_ANA: OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -814,6 +820,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_sortie_ANA: OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -844,6 +851,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_TOR: OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -874,6 +882,7 @@
     else
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_sortie_TOR: OK", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
 /**********************************************************************************************************/
@@ -893,9 +902,10 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_entree_tor );
 
-    if ( write ( module->connexion, &requete, requete.taille + 6 )                    /* Envoi de la requete */
+    if ( write ( module->connexion, &requete, requete.taille + 6 )                 /* Envoi de la requete */
          != sizeof (requete) )
      { Deconnecter_module( module ); }
+    else module->request = TRUE;                                              /* Une requete a élé lancée */
   }
 /**********************************************************************************************************/
 /* Interroger_entree_ana: Interrogation des entrees analogique d'un module wago                           */
@@ -917,6 +927,7 @@
     if ( write ( module->connexion, &requete, requete.taille + 6 )                    /* Envoi de la requete */
          != sizeof (requete) )
      { Deconnecter_module( module ); }
+    else module->request = TRUE;                                              /* Une requete a élé lancée */
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -949,6 +960,7 @@
     if ( write ( module->connexion, &requete, requete.taille + 6 )                 /* Envoi de la requete */
          != sizeof (requete) )
      { Deconnecter_module( module ); }
+    else module->request = TRUE;                                              /* Une requete a élé lancée */
   }
 /**********************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                          */
@@ -1338,8 +1350,7 @@
            { if ( module->request )                                  /* Requete en cours pour ce module ? */
               { Recuperer_reponse_module ( module ); }
              else 
-              { module->request = TRUE;                                       /* Une requete a élé lancée */
-                switch (module->mode)
+              { switch (module->mode)
                  { 
 #ifdef bouh
 case MODBUS_REQUEST_SENT:
@@ -1368,19 +1379,13 @@ case MODBUS_REQUEST_SENT:
                    case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
                    case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
                    case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
-                                                else { module->request = FALSE;
-                                                       module->mode = MODBUS_GET_AI;
-                                                     }
+                                                else module->mode = MODBUS_GET_AI;
                                                 break;
                    case MODBUS_GET_AI         : if (module->nbr_entree_ana) Interroger_entree_ana( module );
-                                                else { module->request = FALSE;
-                                                       module->mode = MODBUS_SET_DO;
-                                                     }
+                                                else module->mode = MODBUS_SET_DO;
                                                 break;
                    case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
-                                                else { module->request = FALSE;
-                                                       module->mode = MODBUS_SET_DO; /*GET_DI;*/
-                                                     }
+                                                else module->mode = MODBUS_SET_DO; /*GET_DI;*/
                                                 break;
                    
                  }
