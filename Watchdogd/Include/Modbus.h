@@ -43,6 +43,8 @@
     MODBUS_INIT_WATCHDOG4,
     MODBUS_GET_NBR_AI,
     MODBUS_GET_NBR_AO,
+    MODBUS_GET_NBR_DI,
+    MODBUS_GET_NBR_DO,
     MODBUS_GET_DI,
   };
  
@@ -106,6 +108,8 @@
     guint16 transaction_id;
     guint nbr_entree_ana;                               /* Nombre de entree analogique donnée par le wago */
     guint nbr_sortie_ana;                               /* Nombre de sortie analogique donnée par le wago */
+    guint nbr_entree_tor;                                      /* Nombre de entree TOR donnée par le wago */
+    guint nbr_sortie_tor;                                      /* Nombre de sortie TOR donnée par le wago */
     guint nbr_deconnect;
     time_t date_retente;                           /* Prochaine date de raccrochage module en cas de DOWN */
     time_t date_last_reponse;                                   /* Utilisé pour détecter un "DOWN module" */

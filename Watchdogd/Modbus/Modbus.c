@@ -801,6 +801,66 @@
      }
   }
 /**********************************************************************************************************/
+/* Interroger_nbr_entree_TOR : Demander au module d'envoyer son nombre d'entree TOR                       */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/**********************************************************************************************************/
+ static void Interroger_nbr_entree_TOR( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint retour;
+
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = htons( 0x1025 );
+    requete.nbr            = htons( 0x0001 );
+
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_entree_TOR: failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_entree_TOR: retour", retour );
+       Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_entree_TOR: OK", module->modbus.id );
+     }
+  }
+/**********************************************************************************************************/
+/* Interroger_nbr_sortie_TOR : Demander au module d'envoyer son nombre de sortie TOR                      */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/**********************************************************************************************************/
+ static void Interroger_nbr_sortie_TOR( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint retour;
+
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = htons( 0x1024 );
+    requete.nbr            = htons( 0x0001 );
+
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_sortie_TOR: failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_sortie_TOR: retour", retour );
+       Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_sortie_TOR: OK", module->modbus.id );
+     }
+  }
+/**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
@@ -1011,6 +1071,20 @@
                module->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
                Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get number Sortie ANA",
                        module->nbr_sortie_ana
+                     );
+               module->mode = MODBUS_GET_NBR_DI;
+               break;
+          case MODBUS_GET_NBR_DI:
+               module->nbr_entree_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get number Entree TOR",
+                       module->nbr_entree_tor
+                     );
+               module->mode = MODBUS_GET_NBR_DO;
+               break;
+          case MODBUS_GET_NBR_DO:
+               module->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get number Sortie TOR",
+                       module->nbr_sortie_tor
                      );
                module->mode = MODBUS_GET_DI;
                break;
@@ -1283,6 +1357,8 @@ case MODBUS_REQUEST_SENT:
                    case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
                    case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
                    case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
+                   case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
+                   case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
                    case MODBUS_GET_DI         : Interroger_entree_tor( module ); break;
                  }
                 module->request = TRUE;                                       /* Une requete a élé lancée */
