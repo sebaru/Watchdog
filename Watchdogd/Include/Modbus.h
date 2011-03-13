@@ -87,8 +87,7 @@
     guint16 taille; /* taille, en comptant le unit_id */
     guint8 unit_id; /* 0xFF */
     guint8 fct;
-    guint8 nbr;
-    guint8 data[16]; /* max = 8*2octets ANA */
+    guint8 data[64]; /* max = 64 octets description wago */
   };
 
  struct MODULE_MODBUS

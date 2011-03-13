@@ -862,16 +862,15 @@
      { int nbr, cpt_e;
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
-       nbr = module->response.nbr;
        if ( module->response.fct >=0x80 )
         { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur Reponse Module", module->modbus.id );
           Info_n( Config.log, DEBUG_MODBUS, "                               Error          ", module->response.fct );
-          Info_n( Config.log, DEBUG_MODBUS, "                               Exception Code ", module->response.nbr );
+          Info_n( Config.log, DEBUG_MODBUS, "                               Exception Code ", (int)module->response.data[0] );
           Deconnecter_module( module );
         }
        else switch (module->mode)
         { case MODBUS_INIT_WATCHDOG1: Info_n( Config.log, DEBUG_MODBUS,
-                                      "MODBUS: Processer_trame: Watchdog1", ntohs(module->response.nbr) );
+                                      "MODBUS: Processer_trame: Watchdog1", ntohs( ((gint16 *)module->response.data)[0]) );
                                       module->mode = MODBUS_INIT_WATCHDOG2;
                                       break;
         }
