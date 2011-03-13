@@ -28,12 +28,10 @@
 #ifndef _MODBUS_H_
  #define _MODBUS_H_
 
- #define MBUS_READ_COIL      0x01
- #define MBUS_ENTRE_ANA      0x04
- #define MBUS_SORTIE_TOR     0x06
- #define MBUS_SORTIE_ANA     0x06
- #define MBUS_READ_REGISTER  0x04
- #define MBUS_WRITE_REGISTER 0x06
+ #define MBUS_READ_COIL            0x01
+ #define MBUS_WRITE_MULTIPLE_COIL  0x05
+ #define MBUS_READ_REGISTER        0x04
+ #define MBUS_WRITE_REGISTER       0x06
 
  enum
   { MODBUS_GET_DESCRIPTION,
