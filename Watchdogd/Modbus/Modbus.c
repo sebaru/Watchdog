@@ -883,9 +883,6 @@
 /**********************************************************************************************************/
  static void Interroger_entree_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
-    struct CMD_TYPE_BORNE_MODBUS *borne;
-    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
-    memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_ETOR) );
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
@@ -901,23 +898,21 @@
      { Deconnecter_module( module ); }
   }
 /**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
+/* Interroger_entree_ana: Interrogation des entrees analogique d'un module wago                           */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Interroger_borne_input_ana( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_EANA requete;                            /* Definition d'une trame MODBUS */
-    struct CMD_TYPE_BORNE_MODBUS *borne;
-    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
-    memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_EANA) );
+ static void Interroger_entree_ana( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
 
+    module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( borne->adresse );
-    requete.nbr            = htons( borne->nbr );
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.fct            = MBUS_ENTRE_ANA;
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = 0x00;
+    requete.nbr            = htons( module->nbr_entree_ana );
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
@@ -967,28 +962,6 @@
      { Deconnecter_module( module ); }
   }
 /**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
- static void Interroger_borne( struct MODULE_MODBUS *module )
-  { struct CMD_TYPE_BORNE_MODBUS *borne;
-    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
-    switch (borne->type)
-     { case BORNE_INPUT_TOR:  Interroger_borne_input_tor( module );
-            break;
-
-       case BORNE_INPUT_ANA:  if (!module->do_check_eana) return;
-                              Interroger_borne_input_ana( module );
-            break;
-
-       case BORNE_OUTPUT_TOR: Interroger_borne_output_tor( module );                /* Borne de sortie ?? */
-            break;
-
-       default: Info(Config.log, DEBUG_MODBUS, "MODBUS: Interroger_borne: type de borne non reconnu" );
-     }
-  }
-/**********************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                          */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
@@ -1015,7 +988,7 @@
        Deconnecter_module( module );
      }
     else
-     { int nbr, cpt_e, cpt_byte, cpt_poid, valeur, cpt;
+     { int cpt_e, cpt_byte, cpt_poid, cpt;
        gint16 chaine[17];
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
@@ -1036,7 +1009,24 @@
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
                 }
-               module->mode = MODBUS_GET_DO;
+               module->mode = MODBUS_GET_AI;
+               break;
+          case MODBUS_GET_AI:
+               cpt_e = module->modbus.min_e_ana;
+               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
+                { if ( ! (module->response.data[ 2*cpt + 1 ] & 0x03) )
+                   { int reponse;
+                     reponse = module->response.data[ 2*cpt ] << 5;
+                     reponse |= module->response.data[ 2*cpt + 1] >> 3;
+                     SEA( cpt_e, reponse );
+                     SEA_range( cpt_e, 1 );
+                     printf(" Setting EA%d = %d in range\n", cpt_e, reponse ); 
+                   }
+                  else { SEA_range( cpt_e, 0 );  printf(" Setting EA%d not in range\n", cpt_e ); 
+                       }
+                  cpt_e++;
+                }
+               /*module->mode = MODBUS_GET_DO;*/
                break;
           case MODBUS_GET_DESCRIPTION:
                memset ( chaine, 0, sizeof(chaine) );
@@ -1388,11 +1378,14 @@ case MODBUS_REQUEST_SENT:
                    case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
                    case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
                    case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
-                                                else module->mode = MODBUS_GET_DO;
+                                                else module->mode = MODBUS_GET_AI;
                                                 break;
-                   case MODBUS_GET_DO         : if (module->nbr_sortie_tor) {/*Interroger_entree_tor( module );*/}
-                                                else module->mode = MODBUS_GET_DI;
+                   case MODBUS_GET_AI         : if (module->nbr_entree_ana) Interroger_entree_ana( module );
+                                                /*else module->mode = MODBUS_GET_AI;*/
                                                 break;
+/*                   case MODBUS_GET_DO         : if (module->nbr_sortie_tor) Interroger_entree_tor( module );
+  /*                                              else module->mode = MODBUS_GET_DI;
+                                                break;*/
                    
                  }
                 module->request = TRUE;                                       /* Une requete a élé lancée */

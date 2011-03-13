@@ -46,7 +46,7 @@
     MODBUS_GET_NBR_DI,
     MODBUS_GET_NBR_DO,
     MODBUS_GET_DI,
-    MODBUS_GET_DO,
+    MODBUS_GET_AI,
   };
  
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */
