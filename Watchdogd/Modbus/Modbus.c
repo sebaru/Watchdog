@@ -1384,6 +1384,7 @@ case MODBUS_REQUEST_SENT:
                                                 break;
                    
                  }
+sleep(2);
               }
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
