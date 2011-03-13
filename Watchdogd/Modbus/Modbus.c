@@ -537,6 +537,7 @@
     module->date_last_reponse = Partage->top;
     module->borne_en_cours = module->Bornes;
     module->transaction_id=1;
+    module->mode = MODBUS_GET_DESCRIPTION;
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Connecter_module", module->modbus.id );
 
     return(TRUE);
@@ -586,24 +587,54 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
+/* Interroger_description : envoie une commande d'identification au module                                */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
 /**********************************************************************************************************/
- static void Init_watchdog1_modbus( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
+ static void Interroger_description( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
     gint retour;
-
-    memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_STOR) );
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( 0x100A );
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = htons( 0x2020 );
+    requete.nbr            = htons( 16 );
+
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_description: failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_description: retour", retour );
+       Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_description: OK", module->modbus.id );
+     }
+
+    module->request = TRUE;                                                  /* Une requete a été envoyée */
+  }
+/**********************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                  */
+/* Entrée: identifiants des modules et borne                                                              */
+/* Sortie: ?                                                                                              */
+/**********************************************************************************************************/
+ static void Init_watchdog1( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint retour;
+
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.valeur         = htons( 0x0000 );                          /* 5 secondes avant coupure sortie */
+    requete.adresse        = htons( 0x100A );
+    requete.valeur         = htons( 0x0000 );
 
     retour = write ( module->connexion, &requete, sizeof(requete) );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
@@ -625,17 +656,18 @@
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Init_watchdog2_modbus( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
+ static void Init_watchdog2( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( 0x1009 );
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.valeur         = htons( 0x0001 );                          /* 5 secondes avant coupure sortie */
+    requete.adresse        = htons( 0x1009 );
+    requete.valeur         = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, sizeof(requete) );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
@@ -657,17 +689,17 @@
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Init_watchdog3_modbus( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
+ static void Init_watchdog3( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( 0x1000 );
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
+    requete.adresse        = htons( 0x1000 );
     requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
 
     retour = write ( module->connexion, &requete, sizeof(requete) );
@@ -690,17 +722,17 @@
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Init_watchdog4_modbus( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
+ static void Init_watchdog4( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( 0x100A );
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
+    requete.adresse        = htons( 0x100A );
     requete.valeur         = htons( 0x0001 );                                              /* Start Timer */
 
     retour = write ( module->connexion, &requete, sizeof(requete) );
@@ -719,20 +751,53 @@
     module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
+/* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre d'entree ANALOGIQUE                */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/**********************************************************************************************************/
+ static void Interroger_nbr_entree_ANA( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint retour;
+
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = htons( 0x1023 );
+    requete.nbr            = htons( 0x0001 );
+
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_entree_ANA: failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_entree_ANA: retour", retour );
+       Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_entree_ANA: OK", module->modbus.id );
+     }
+
+    module->request = TRUE;                                                  /* Une requete a été envoyée */
+  }
+/**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Interroger_borne_input_tor( struct MODULE_MODBUS *module )
+ static void Interroger_entree_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE_ETOR requete;                            /* Definition d'une trame MODBUS */
     struct CMD_TYPE_BORNE_MODBUS *borne;
     borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_ETOR) );
 
+    module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( borne->adresse );
+    requete.adresse        = 0x00;
     requete.nbr            = htons( borne->nbr );
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
     requete.fct            = MBUS_ENTRE_TOR;
@@ -770,12 +835,11 @@
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static void Interroger_borne_output_tor( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_STOR requete;                            /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
     struct CMD_TYPE_BORNE_MODBUS *borne;
     gint cpt_a, valeur;
     borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
 
-    memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_STOR) );
 
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
@@ -860,6 +924,7 @@
      }
     else
      { int nbr, cpt_e, valeur;
+       gint16 chaine[17];
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
        if ( module->response.fct >=0x80 )
@@ -869,16 +934,62 @@
           Deconnecter_module( module );
         }
        else switch (module->mode)
-        { case MODBUS_INIT_WATCHDOG1: Info_n( Config.log, DEBUG_MODBUS,
-                                              "MODBUS: Processer_trame: Watchdog1",
-                                              ntohs( *(gint16 *)((gchar *)&module->response.data + 0) )
-                                            );
-                                      Info_n( Config.log, DEBUG_MODBUS,
-                                              "MODBUS: Processer_trame: Watchdog1",
-                                              ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
-                                            );
-                                      module->mode = MODBUS_INIT_WATCHDOG2;
-                                      break;
+        { case MODBUS_GET_DESCRIPTION:
+               memset ( chaine, 0, sizeof(chaine) );
+               chaine[0] = ntohs( *(gint16 *)((gchar *)&module->response.data +  1) );
+               chaine[1] = ntohs( *(gint16 *)((gchar *)&module->response.data +  3) );
+               chaine[2] = ntohs( *(gint16 *)((gchar *)&module->response.data +  5) );
+               chaine[3] = ntohs( *(gint16 *)((gchar *)&module->response.data +  7) );
+               chaine[4] = ntohs( *(gint16 *)((gchar *)&module->response.data +  9) );
+               chaine[5] = ntohs( *(gint16 *)((gchar *)&module->response.data + 11) );
+               chaine[6] = ntohs( *(gint16 *)((gchar *)&module->response.data + 13) );
+               chaine[7] = ntohs( *(gint16 *)((gchar *)&module->response.data + 15) );
+
+               Info_c( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get Description", (gchar *) chaine );
+               module->mode = MODBUS_INIT_WATCHDOG1;
+               break;
+          case MODBUS_INIT_WATCHDOG1:
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog1",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 0) )
+                     );
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog1",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
+                     );
+               module->mode = MODBUS_INIT_WATCHDOG2;
+               break;
+          case MODBUS_INIT_WATCHDOG2:
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog2",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 0) )
+                     );
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog2",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
+                     );
+               module->mode = MODBUS_INIT_WATCHDOG3;
+               break;
+          case MODBUS_INIT_WATCHDOG3:
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog3",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 0) )
+                     );
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog3",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
+                     );
+               module->mode = MODBUS_INIT_WATCHDOG4;
+               break;
+          case MODBUS_INIT_WATCHDOG4:
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog4",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 0) )
+                     );
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Watchdog4",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
+                     );
+               module->mode = MODBUS_GET_NBR_AI;
+               break;
+          case MODBUS_GET_NBR_AI:
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get number Entree ANA",
+                       ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ) / 16
+                     );
+               module->mode = MODBUS_GET_DI;
+               break;
         }
 #ifdef bouh
        switch ( module->response.fct )
@@ -1112,7 +1223,6 @@
            { if ( Connecter_module( module ) )
               { module->date_retente = 0;
                 module->started = TRUE;
-                module->mode = MODBUS_INIT_WATCHDOG1;
               }
              else
               { Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Module DOWN", module->modbus.id );
@@ -1141,8 +1251,13 @@ case MODBUS_REQUEST_SENT:
                      Interroger_borne ( module );
                      break;
 #endif
-                case MODBUS_INIT_WATCHDOG1: Init_watchdog1_modbus( module );
-                     break;
+                case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+                case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
+                case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
+                case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
+                case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
+                case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
+                case MODBUS_GET_DI         : Interroger_entree_tor( module ); break;
               }
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
