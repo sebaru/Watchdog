@@ -47,6 +47,7 @@
     MODBUS_GET_NBR_DO,
     MODBUS_GET_DI,
     MODBUS_GET_AI,
+    MODBUS_SET_DO,
   };
  
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */
@@ -86,6 +87,7 @@
     guint16 adresse;
     union { guint16 nbr;
             guint16 valeur;
+            guchar data[32];
           };
   };
 
@@ -96,7 +98,7 @@
     guint16 taille; /* taille, en comptant le unit_id */
     guint8 unit_id; /* 0xFF */
     guint8 fct;
-    guint8 data[64]; /* max = 64 octets description wago */
+    guint8 data[32]; /* max = 64 octets description wago */
   };
 
  struct MODULE_MODBUS

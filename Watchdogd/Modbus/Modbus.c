@@ -619,7 +619,7 @@
     requete.adresse        = htons( 0x2020 );
     requete.nbr            = htons( 16 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_description: failed", module->modbus.id );
@@ -650,7 +650,7 @@
     requete.adresse        = htons( 0x100A );
     requete.valeur         = htons( 0x0000 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->modbus.id );
@@ -681,7 +681,7 @@
     requete.adresse        = htons( 0x1009 );
     requete.valeur         = htons( 0x0001 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->modbus.id );
@@ -712,7 +712,7 @@
     requete.adresse        = htons( 0x1000 );
     requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->modbus.id );
@@ -743,7 +743,7 @@
     requete.adresse        = htons( 0x100A );
     requete.valeur         = htons( 0x0001 );                                              /* Start Timer */
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: watchdog start failed", module->modbus.id );
@@ -773,7 +773,7 @@
     requete.adresse        = htons( 0x1023 );
     requete.nbr            = htons( 0x0001 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_ANA: failed", module->modbus.id );
@@ -803,7 +803,7 @@
     requete.adresse        = htons( 0x1022 );
     requete.nbr            = htons( 0x0001 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_sortie_ANA: failed", module->modbus.id );
@@ -833,7 +833,7 @@
     requete.adresse        = htons( 0x1025 );
     requete.nbr            = htons( 0x0001 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_TOR: failed", module->modbus.id );
@@ -863,7 +863,7 @@
     requete.adresse        = htons( 0x1024 );
     requete.nbr            = htons( 0x0001 );
 
-    retour = write ( module->connexion, &requete, sizeof(requete) );
+    retour = write ( module->connexion, &requete, requete.taille + 6 );
     if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_sortie_TOR: failed", module->modbus.id );
@@ -893,7 +893,7 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_entree_tor );
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
+    if ( write ( module->connexion, &requete, requete.taille + 6 )                    /* Envoi de la requete */
          != sizeof (requete) )
      { Deconnecter_module( module ); }
   }
@@ -914,7 +914,7 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_entree_ana );
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
+    if ( write ( module->connexion, &requete, requete.taille + 6 )                    /* Envoi de la requete */
          != sizeof (requete) )
      { Deconnecter_module( module ); }
   }
@@ -923,41 +923,30 @@
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
- static void Interroger_borne_output_tor( struct MODULE_MODBUS *module )
+ static void Interroger_sortie_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
-    struct CMD_TYPE_BORNE_MODBUS *borne;
-    gint cpt_a, valeur;
-    borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
+    gint cpt_a, cpt_poid, cpt_byte, cpt;
 
-
+    memset(&requete, 0, sizeof(requete) );                           /* Mise a zero globale de la requete */
+    module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0004 + (module->nbr_sortie_tor/8 + 1) );                  /* taille */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = htons( borne->adresse );
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.fct            = MBUS_SORTIE_TOR;
+    requete.fct            = MBUS_WRITE_REGISTER;
+    requete.adresse        = 0x00;
 
-    switch ( borne->nbr )
-     { case 8:                                                           /* Bornes a 8 sorties !! */
-               requete.taille         = htons( 0x0006 );        /* taille, en comptant le unit_id */
-               cpt_a = borne->min;
-               valeur = 0;
-               if ( A(cpt_a++) ) valeur |=   1;
-               if ( A(cpt_a++) ) valeur |=   2;
-               if ( A(cpt_a++) ) valeur |=   4;
-               if ( A(cpt_a++) ) valeur |=   8;
-               if ( A(cpt_a++) ) valeur |=  16;
-               if ( A(cpt_a++) ) valeur |=  32;
-               if ( A(cpt_a++) ) valeur |=  64;
-               if ( A(cpt_a++) ) valeur |= 128;
-               requete.valeur = htons( valeur );
-               break;
-       default: Info_n( Config.log, DEBUG_MODBUS,
-                        "MODBUS: Interroger_borne_output_tor: borne InputTOR non gérée", borne->nbr
-                      );
-     }
+    cpt_a = module->modbus.min_s_tor;
 
-    if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
+    for ( cpt_poid = 1, cpt_byte = 0, cpt = 0; cpt<module->nbr_sortie_tor; cpt++)
+      { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
+        if ( A(cpt_a) ) requete.data[cpt_byte] |= cpt_poid;
+        cpt_a++;
+        cpt_poid = cpt_poid << 1;
+/*  ????? requete.valeur = htons( valeur );*/
+      }
+               
+    if ( write ( module->connexion, &requete, requete.taille + 6 )                 /* Envoi de la requete */
          != sizeof (requete) )
      { Deconnecter_module( module ); }
   }
@@ -1026,6 +1015,9 @@
                        }
                   cpt_e++;
                 }
+               module->mode = MODBUS_SET_DO;
+               break;
+          case MODBUS_SET_DO:
                module->mode = MODBUS_GET_DI;
                break;
           case MODBUS_GET_DESCRIPTION:
@@ -1381,11 +1373,11 @@ case MODBUS_REQUEST_SENT:
                                                 else module->mode = MODBUS_GET_AI;
                                                 break;
                    case MODBUS_GET_AI         : if (module->nbr_entree_ana) Interroger_entree_ana( module );
-                                                /*else module->mode = MODBUS_GET_AI;*/
+                                                else module->mode = MODBUS_SET_DO;
                                                 break;
-/*                   case MODBUS_GET_DO         : if (module->nbr_sortie_tor) Interroger_entree_tor( module );
-  /*                                              else module->mode = MODBUS_GET_DI;
-                                                break;*/
+                   case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_entree_tor( module );
+                                                else module->mode = MODBUS_GET_DI;
+                                                break;
                    
                  }
                 module->request = TRUE;                                       /* Une requete a élé lancée */
