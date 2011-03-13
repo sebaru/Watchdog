@@ -99,8 +99,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(actif,ip,bit,watchdog,libelle) VALUES ('%d','%s',%d,%d,'%s')",
-                NOM_TABLE_MODULE_MODBUS, modbus->actif, ip, modbus->bit, modbus->watchdog, libelle
+                "INSERT INTO %s(actif,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana) "
+                "VALUES ('%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
+                NOM_TABLE_MODULE_MODBUS, modbus->actif, ip, modbus->bit, modbus->watchdog, libelle,
+                modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana
               );
     g_free(ip);
     g_free(libelle);
@@ -135,7 +137,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,actif,ip,bit,watchdog,libelle"
+                "SELECT id,actif,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana "
                 " FROM %s ORDER BY libelle", NOM_TABLE_MODULE_MODBUS );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -177,6 +179,10 @@
        modbus->actif     = atoi(db->row[1]);
        modbus->bit       = atoi(db->row[3]);
        modbus->watchdog  = atoi(db->row[4]);
+       modbus->min_e_tor = atoi(db->row[6]);
+       modbus->min_e_ana = atoi(db->row[7]);
+       modbus->min_s_tor = atoi(db->row[8]);
+       modbus->min_s_ana = atoi(db->row[9]);
      }
     return(modbus);
   }
@@ -216,7 +222,7 @@
     struct CMD_TYPE_MODBUS *modbus;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,actif,ip,bit,watchdog,libelle"
+                "SELECT id,actif,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana"
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_MODULE_MODBUS, id );
        
@@ -240,6 +246,10 @@
        modbus->actif     = atoi(db->row[1]);
        modbus->bit       = atoi(db->row[3]);
        modbus->watchdog  = atoi(db->row[4]);
+       modbus->min_e_tor = atoi(db->row[6]);
+       modbus->min_e_ana = atoi(db->row[7]);
+       modbus->min_s_tor = atoi(db->row[8]);
+       modbus->min_s_ana = atoi(db->row[9]);
      }
     return(modbus);
   }
@@ -304,10 +314,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "actif='%d',ip='%s',bit='%d',watchdog='%d',libelle='%s'"
+                "actif='%d',ip='%s',bit='%d',watchdog='%d',libelle='%s',"
+                "min_e_tor='%d',min_e_ana='%d',min_s_tor='%d',min_s_ana='%d'"
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_MODBUS,
                 modbus->actif, ip, modbus->bit, modbus->watchdog, libelle,
+                modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana,
                 modbus->id );
     g_free(libelle);
     g_free(ip);
@@ -405,11 +417,15 @@
     memcpy( &module->modbus, modbus, sizeof(struct CMD_TYPE_MODBUS) );
     g_free(modbus);
 
-    Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id       = ", module->modbus.id       );
-    Info_n( Config.log, DEBUG_MODBUS, "                      -  actif    = ", module->modbus.actif    );
-    Info_c( Config.log, DEBUG_MODBUS, "                      -  ip       = ", module->modbus.ip       );
-    Info_n( Config.log, DEBUG_MODBUS, "                      -  bit      = ", module->modbus.bit      );
-    Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog = ", module->modbus.watchdog );
+    Info_n( Config.log, DEBUG_MODBUS, "Charger_modules_MODBUS:  id        = ", module->modbus.id        );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  actif     = ", module->modbus.actif     );
+    Info_c( Config.log, DEBUG_MODBUS, "                      -  ip        = ", module->modbus.ip        );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  bit       = ", module->modbus.bit       );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  watchdog  = ", module->modbus.watchdog  );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  min_e_tor = ", module->modbus.min_e_tor );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  min_e_ana = ", module->modbus.min_e_ana );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  min_s_tor = ", module->modbus.min_s_tor );
+    Info_n( Config.log, DEBUG_MODBUS, "                      -  min_s_ana = ", module->modbus.min_s_ana );
 
     if ( ! Charger_borne_module_MODBUS( db, module ) )
      { Libere_DB_SQL( Config.log, &db );
@@ -1011,8 +1027,7 @@
         }
        else switch (module->mode)
         { case MODBUS_GET_DI:
-cpt_e = 0; /*module->modbus.min_e;*/               
-               
+               cpt_e = module->modbus.min_e_tor;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
                 { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
                   printf(" Setting E%d = %d\n", cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) ); 
