@@ -620,7 +620,7 @@
     requete.nbr            = htons( 16 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_description: failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -651,7 +651,7 @@
     requete.valeur         = htons( 0x0000 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: stop watchdog failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -682,7 +682,7 @@
     requete.valeur         = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -713,7 +713,7 @@
     requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: init watchdog timer failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -744,7 +744,7 @@
     requete.valeur         = htons( 0x0001 );                                              /* Start Timer */
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: watchdog start failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -774,7 +774,7 @@
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_ANA: failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -804,7 +804,7 @@
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_sortie_ANA: failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -834,7 +834,7 @@
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_TOR: failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
@@ -864,7 +864,7 @@
     requete.nbr            = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, requete.taille + 6 );
-    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+    if ( retour != requete.taille+6 )                                              /* Envoi de la requete */
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_sortie_TOR: failed", module->modbus.id );
        Info_n( Config.log, DEBUG_MODBUS,
