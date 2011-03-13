@@ -1014,10 +1014,10 @@
           case MODBUS_GET_AI:
                cpt_e = module->modbus.min_e_ana;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                { if ( ! (module->response.data[ 2*cpt + 1 ] & 0x03) )
+                { if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                    { int reponse;
-                     reponse = module->response.data[ 2*cpt ] << 5;
-                     reponse |= module->response.data[ 2*cpt + 1] >> 3;
+                     reponse = module->response.data[ 2*cpt + 1 ] << 5;
+                     reponse |= module->response.data[ 2*cpt + 2] >> 3;
                      SEA( cpt_e, reponse );
                      SEA_range( cpt_e, 1 );
                      printf(" Setting EA%d = %d in range\n", cpt_e, reponse ); 
@@ -1026,7 +1026,7 @@
                        }
                   cpt_e++;
                 }
-               /*module->mode = MODBUS_GET_DO;*/
+               module->mode = MODBUS_GET_DI;
                break;
           case MODBUS_GET_DESCRIPTION:
                memset ( chaine, 0, sizeof(chaine) );
