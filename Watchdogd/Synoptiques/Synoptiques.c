@@ -298,7 +298,7 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
                 "UPDATE %s SET "             
                 "libelle='%s',titre='%s',access_groupe='%d',groupe='%s',ssgroupe='%s' "
                 "WHERE id='%d'",
-                NOM_TABLE_SYNOPTIQUE, libelle, titre, syn->access_groupe, syn->groupe, groupe, ssgroupe, syn->id );
+                NOM_TABLE_SYNOPTIQUE, libelle, titre, syn->access_groupe, groupe, ssgroupe, syn->id );
     g_free(libelle);
     g_free(titre);
     g_free(groupe);

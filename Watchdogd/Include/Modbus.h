@@ -28,7 +28,7 @@
 #ifndef _MODBUS_H_
  #define _MODBUS_H_
 
- #define MBUS_ENTRE_TOR      0x01
+ #define MBUS_READ_COIL      0x01
  #define MBUS_ENTRE_ANA      0x04
  #define MBUS_SORTIE_TOR     0x06
  #define MBUS_SORTIE_ANA     0x06
@@ -46,6 +46,7 @@
     MODBUS_GET_NBR_DI,
     MODBUS_GET_NBR_DO,
     MODBUS_GET_DI,
+    MODBUS_GET_DO,
   };
  
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */

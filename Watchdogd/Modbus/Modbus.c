@@ -866,7 +866,7 @@
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static void Interroger_entree_tor( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE_ETOR requete;                            /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
     struct CMD_TYPE_BORNE_MODBUS *borne;
     borne = (struct CMD_TYPE_BORNE_MODBUS *)module->borne_en_cours->data;
     memset (&requete, 0, sizeof(struct TRAME_MODBUS_REQUETE_ETOR) );
@@ -874,11 +874,11 @@
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
-    requete.adresse        = 0x00;
-    requete.nbr            = htons( borne->nbr );
     requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.fct            = MBUS_ENTRE_TOR;
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_COIL;
+    requete.adresse        = 0x00;
+    requete.nbr            = htons( module->nbr_entree_tor );
 
     if ( write ( module->connexion, &requete, sizeof(requete) )                    /* Envoi de la requete */
          != sizeof (requete) )
@@ -999,7 +999,7 @@
        Deconnecter_module( module );
      }
     else
-     { int nbr, cpt_e, valeur;
+     { int nbr, cpt_e, cpt_byte, cpt_poid, valeur, cpt;
        gint16 chaine[17];
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
@@ -1010,7 +1010,20 @@
           Deconnecter_module( module );
         }
        else switch (module->mode)
-        { case MODBUS_GET_DESCRIPTION:
+        { case MODBUS_GET_DI:
+cpt_e = 0; /*module->modbus.min_e;*/               
+               
+               for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
+                { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
+                  printf(" Setting E%d = %d\n", cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) ); 
+
+                  cpt_e++;
+                  cpt_poid = cpt_poid << 1;
+                  if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
+                }
+               module->mode = MODBUS_GET_DO;
+               break;
+          case MODBUS_GET_DESCRIPTION:
                memset ( chaine, 0, sizeof(chaine) );
                chaine[0] = ntohs( *(gint16 *)((gchar *)&module->response.data +  1) );
                chaine[1] = ntohs( *(gint16 *)((gchar *)&module->response.data +  3) );
@@ -1359,7 +1372,13 @@ case MODBUS_REQUEST_SENT:
                    case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
                    case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
                    case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
-                   case MODBUS_GET_DI         : Interroger_entree_tor( module ); break;
+                   case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
+                                                else module->mode = MODBUS_GET_DO;
+                                                break;
+                   case MODBUS_GET_DO         : if (module->nbr_sortie_tor) {/*Interroger_entree_tor( module );*/}
+                                                else module->mode = MODBUS_GET_DI;
+                                                break;
+                   
                  }
                 module->request = TRUE;                                       /* Une requete a élé lancée */
               }
