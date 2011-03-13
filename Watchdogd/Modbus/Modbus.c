@@ -870,8 +870,10 @@
           Deconnecter_module( module );
         }
        else switch (module->mode)
-        { case MODBUS_INIT_WATCHDOG1:
-               break;
+        { case MODBUS_INIT_WATCHDOG1: Info_n( Config.log, DEBUG_MODBUS,
+                                      "MODBUS: Processer_trame: Watchdog1", ntohs(module->response.nbr) );
+                                      module->mode = MODBUS_INIT_WATCHDOG2;
+                                      break;
         }
 #ifdef bouh
        switch ( module->response.fct )
