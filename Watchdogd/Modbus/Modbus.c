@@ -615,8 +615,6 @@
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_description: OK", module->modbus.id );
      }
-
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -648,8 +646,6 @@
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: stop watchdog OK", module->modbus.id );
      }
-
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -681,8 +677,6 @@
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: close modbus tcp on watchdog OK", module->modbus.id );
      }
-
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -714,8 +708,6 @@
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: init watchdog timer OK", module->modbus.id );
      }
-
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -747,8 +739,6 @@
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Init_watchdog_modbus: watchdog start OK", module->modbus.id );
      }
-
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
 /* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre d'entree ANALOGIQUE                */
@@ -779,8 +769,36 @@
      { Info_n( Config.log, DEBUG_MODBUS,
                "MODBUS: Interroger_nbr_entree_ANA: OK", module->modbus.id );
      }
+  }
+/**********************************************************************************************************/
+/* Interroger_nbr_entree_ANA : Demander au module d'envoyer son nombre de sortie ANALOGIQUE               */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/**********************************************************************************************************/
+ static void Interroger_nbr_sortie_ANA( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint retour;
 
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = htons( 0x1022 );
+    requete.nbr            = htons( 0x0001 );
+
+    retour = write ( module->connexion, &requete, sizeof(requete) );
+    if ( retour != sizeof (requete) )                                              /* Envoi de la requete */
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_sortie_ANA: failed", module->modbus.id );
+       Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_sortie_ANA: retour", retour );
+       Deconnecter_module( module );
+     }
+    else
+     { Info_n( Config.log, DEBUG_MODBUS,
+               "MODBUS: Interroger_nbr_sortie_ANA: OK", module->modbus.id );
+     }
   }
 /**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
@@ -893,8 +911,6 @@
 
        default: Info(Config.log, DEBUG_MODBUS, "MODBUS: Interroger_borne: type de borne non reconnu" );
      }
-
-    module->request = TRUE;                                                  /* Une requete a été envoyée */
   }
 /**********************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                          */
@@ -985,8 +1001,16 @@
                module->mode = MODBUS_GET_NBR_AI;
                break;
           case MODBUS_GET_NBR_AI:
+               module->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
                Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get number Entree ANA",
-                       ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ) / 16
+                       module->nbr_entree_ana
+                     );
+               module->mode = MODBUS_GET_NBR_AO;
+               break;
+          case MODBUS_GET_NBR_AO:
+               module->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
+               Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Get number Sortie ANA",
+                       module->nbr_sortie_ana
                      );
                module->mode = MODBUS_GET_DI;
                break;
@@ -1232,8 +1256,9 @@
           else
            { if ( module->request )                                  /* Requete en cours pour ce module ? */
               { Recuperer_reponse_module ( module ); }
-             else switch (module->mode)
-              { 
+             else 
+              { switch (module->mode)
+                 { 
 #ifdef bouh
 case MODBUS_REQUEST_SENT:
                      else
@@ -1251,13 +1276,16 @@ case MODBUS_REQUEST_SENT:
                      Interroger_borne ( module );
                      break;
 #endif
-                case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
-                case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
-                case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
-                case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
-                case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
-                case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
-                case MODBUS_GET_DI         : Interroger_entree_tor( module ); break;
+                   case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+                   case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
+                   case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
+                   case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
+                   case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
+                   case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
+                   case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
+                   case MODBUS_GET_DI         : Interroger_entree_tor( module ); break;
+                 }
+                module->request = TRUE;                                       /* Une requete a élé lancée */
               }
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */

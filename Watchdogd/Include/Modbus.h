@@ -42,6 +42,7 @@
     MODBUS_INIT_WATCHDOG3,
     MODBUS_INIT_WATCHDOG4,
     MODBUS_GET_NBR_AI,
+    MODBUS_GET_NBR_AO,
     MODBUS_GET_DI,
   };
  
@@ -103,6 +104,8 @@
     gint mode;                                                /* Mode dans le processus de connexion WAGO */
     gint nbr_oct_lu;                                                            /* Nombre d'octet deja lu */
     guint16 transaction_id;
+    guint nbr_entree_ana;                               /* Nombre de entree analogique donnée par le wago */
+    guint nbr_sortie_ana;                               /* Nombre de sortie analogique donnée par le wago */
     guint nbr_deconnect;
     time_t date_retente;                           /* Prochaine date de raccrochage module en cas de DOWN */
     time_t date_last_reponse;                                   /* Utilisé pour détecter un "DOWN module" */
