@@ -859,7 +859,7 @@
        Deconnecter_module( module );
      }
     else
-     { int nbr, cpt_e;
+     { int nbr, cpt_e, valeur;
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
        if ( module->response.fct >=0x80 )
@@ -870,7 +870,13 @@
         }
        else switch (module->mode)
         { case MODBUS_INIT_WATCHDOG1: Info_n( Config.log, DEBUG_MODBUS,
-                                      "MODBUS: Processer_trame: Watchdog1", ntohs( ((gint16 *)module->response.data)[0]) );
+                                              "MODBUS: Processer_trame: Watchdog1",
+                                              ntohs( *(gint16 *)((gchar *)&module->response.data + 0) )
+                                            );
+                                      Info_n( Config.log, DEBUG_MODBUS,
+                                              "MODBUS: Processer_trame: Watchdog1",
+                                              ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
+                                            );
                                       module->mode = MODBUS_INIT_WATCHDOG2;
                                       break;
         }
