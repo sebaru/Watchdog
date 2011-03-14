@@ -535,15 +535,9 @@
  extern void Proto_cacher_un_modbus( struct CMD_TYPE_MODBUS *modbus );
  extern void Proto_rafraichir_un_modbus( struct CMD_TYPE_MODBUS *modbus );
  extern void Creer_page_modbus( void );
- extern void Proto_afficher_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne );
- extern void Proto_cacher_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne );
- extern void Proto_rafraichir_une_borne_modbus( struct CMD_TYPE_BORNE_MODBUS *borne );
  extern void Creer_liste_modbus( GtkWidget **Liste, GtkWidget **Scroll );
- extern void Creer_liste_bornes_modbus( GtkWidget **Liste, GtkWidget **Scroll );
- extern gchar *Mode_borne_vers_string ( guint type );
                                                                                    /* Dans ajout_modbus.c */
  extern void Menu_ajouter_editer_modbus ( struct CMD_TYPE_MODBUS *edit_modbus);
- extern void Menu_ajouter_editer_borne_modbus ( gboolean edition, struct CMD_TYPE_BORNE_MODBUS *edit_borne );
 
  extern void Proto_afficher_mnemo_modbus ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
