@@ -945,16 +945,14 @@
     requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.fct            = MBUS_WRITE_MULTIPLE_COIL;
     requete.adresse        = 0x00;
-    requete.nbr            = htons( module->nbr_sortie_tor );                                   /* taille */
-    requete.data[2]        = (module->nbr_sortie_tor/8 + 1);
+    requete.nbr            = htons( module->nbr_sortie_tor );                                /* bit count */
+    requete.data[2]        = (module->nbr_sortie_tor/8);                                    /* Byte count */
     cpt_a = module->modbus.min_s_tor;
-
     for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++)
       { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
         if ( A(cpt_a) ) requete.data[cpt_byte] |= cpt_poid;
         cpt_a++;
         cpt_poid = cpt_poid << 1;
-/*  ????? requete.valeur = htons( valeur );*/
       }
                
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )/* Envoi de la requete (taille + header )*/

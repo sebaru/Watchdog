@@ -29,7 +29,7 @@
  #define _MODBUS_H_
 
  #define MBUS_READ_COIL            0x01
- #define MBUS_WRITE_MULTIPLE_COIL  0x05
+ #define MBUS_WRITE_MULTIPLE_COIL  0x0F
  #define MBUS_READ_REGISTER        0x04
  #define MBUS_WRITE_REGISTER       0x06
 
@@ -64,17 +64,6 @@
     guint admin_add;                                                            /* Demande de deconnexion */
     guint admin_module_reload;                                                  /* Demande de deconnexion */
   };
-
- struct TRAME_MODBUS_REQUETE_ETOR                                        /* Definition d'une trame MODBUS */
-  { guint16 transaction_id;
-    guint16 proto_id; /* -> 0 = MOBUS */
-    guint16 taille; /* taille, en comptant le unit_id */
-    guint8 unit_id; /* 0xFF */
-    guint8 fct;
-    guint16 adresse;
-    guint16 nbr;
-  };
- #define TRAME_MODBUS_REQUETE_EANA TRAME_MODBUS_REQUETE_ETOR
 
  struct TRAME_MODBUS_REQUETE                                             /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
