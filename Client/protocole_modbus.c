@@ -92,49 +92,6 @@
                Chercher_page_notebook( TYPE_PAGE_MODBUS, 0, TRUE );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS:
-             { struct CMD_TYPE_BORNE_MODBUS *borne;
-               Set_progress_plusun();
-
-               borne = (struct CMD_TYPE_BORNE_MODBUS *)g_malloc0( sizeof( struct CMD_TYPE_BORNE_MODBUS ) );
-               if (!borne) return; 
-
-               memcpy( borne, connexion->donnees, sizeof(struct CMD_TYPE_BORNE_MODBUS ) );
-               Arrivee_bornes = g_list_append( Arrivee_bornes, borne );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_BORNE_MODBUS_FIN:
-             { 
-               g_list_foreach( Arrivee_bornes, (GFunc)Proto_afficher_une_borne_modbus, NULL );
-               g_list_foreach( Arrivee_bornes, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_bornes );
-               Arrivee_bornes = NULL;
-             }
-            break;
-       case SSTAG_SERVEUR_ADD_BORNE_MODBUS_OK:
-             { struct CMD_TYPE_BORNE_MODBUS *borne;
-               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
-               Proto_afficher_une_borne_modbus( borne );
-             }
-            break;
-       case SSTAG_SERVEUR_EDIT_BORNE_MODBUS_OK:
-             { struct CMD_TYPE_BORNE_MODBUS *borne;
-               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
-               Menu_ajouter_editer_borne_modbus( TRUE, borne );
-             }
-            break;
-       case SSTAG_SERVEUR_VALIDE_EDIT_BORNE_MODBUS_OK:
-             { struct CMD_TYPE_BORNE_MODBUS *borne;
-               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
-               Proto_rafraichir_une_borne_modbus( borne );
-             }
-            break;
-       case SSTAG_SERVEUR_DEL_BORNE_MODBUS_OK:
-             { struct CMD_TYPE_BORNE_MODBUS *borne;
-               borne = (struct CMD_TYPE_BORNE_MODBUS *)connexion->donnees;
-               Proto_cacher_une_borne_modbus( borne );
-             }
-            break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MODBUS:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;

@@ -49,13 +49,6 @@
  static GtkWidget *Spin_min_s_ana;
  static struct CMD_TYPE_MODBUS Modbus;                                       /* Module en cours d'édition */
 
- static GtkWidget *F_borne;                                            /* Widget de l'interface graphique */
- static GtkWidget *Combo_borne_type;
- static GtkWidget *Spin_borne_adresse;
- static GtkWidget *Spin_borne_min;
- static GtkWidget *Spin_borne_nbr;
- static struct CMD_TYPE_BORNE_MODBUS Borne;                                   /* Borne en cours d'edition */
-
 /**********************************************************************************************************/
 /* CB_ajouter_editer_modbus: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -222,101 +215,5 @@
            gtk_widget_grab_focus( Spin_watchdog );
          }
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
-  }
-/**********************************************************************************************************/
-/* CB_ajouter_editer_borne_modbus: Fonction appelée qd on appuie sur un des boutons de l'interface        */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
- static gboolean CB_ajouter_editer_borne_modbus ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { Borne.type    = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_borne_type) );
-    Borne.adresse = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_borne_adresse) );
-    Borne.min     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_borne_min) );
-    Borne.nbr     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_borne_nbr) );
-
-    switch(reponse)
-     { case GTK_RESPONSE_OK:
-             { Envoi_serveur( TAG_MODBUS, (edition ? SSTAG_CLIENT_VALIDE_EDIT_BORNE_MODBUS
-                                                   : SSTAG_CLIENT_ADD_BORNE_MODBUS),
-                              (gchar *)&Borne, sizeof( struct CMD_TYPE_BORNE_MODBUS ) );
-             }
-            break;
-       case GTK_RESPONSE_CANCEL:
-       default:              break;
-     }
-    gtk_widget_destroy(F_borne);
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Menu_ajouter_editer_borne_modbus: Ajoute une borne au systeme                                          */
-/* Entrée: rien                                                                                           */
-/* sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Menu_ajouter_editer_borne_modbus ( gboolean edition, struct CMD_TYPE_BORNE_MODBUS *edit_borne )
-  { GtkWidget *frame, *table, *texte, *hboite;
-    gint i, cpt;
-
-    memcpy( &Borne, edit_borne, sizeof(struct CMD_TYPE_BORNE_MODBUS) );   /* Save pour utilisation future */
-    F_borne = gtk_dialog_new_with_buttons( (edition ? _("Edit a borne") : _("Add a borne")),
-                                           GTK_WINDOW(F_client),
-                                           GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                           GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                           NULL);
-    g_signal_connect( F_borne, "response",
-                      G_CALLBACK(CB_ajouter_editer_borne_modbus),
-                      GINT_TO_POINTER( edition ) );
-
-    frame = gtk_frame_new("Settings");                               /* Création de l'interface graphique */
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_borne)->vbox ), frame, TRUE, TRUE, 0 );
-
-    hboite = gtk_hbox_new( FALSE, 6 );
-    gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    gtk_container_add( GTK_CONTAINER(frame), hboite );
-
-    table = gtk_table_new( 4, 2, TRUE );
-    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
-    gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
-
-    i=0;
-    texte = gtk_label_new( _("Type") );                                      /* Numéro MODBUS de la borne */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-
-    Combo_borne_type = gtk_combo_box_new_text();
-    for ( cpt=0; cpt<NBR_MODE_BORNE; cpt++ )
-     { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_borne_type), Mode_borne_vers_string(cpt) ); }
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_borne_type, 1, 2, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Adresse") );                                   /* Numéro MODBUS de la borne */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_borne_adresse = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS-1, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_borne_adresse, 1, 2, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Bit interne min") );                                 /* Bit logique minimum */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_borne_min = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS-1, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_borne_min, 1, 2, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Nombre d'I/O") );                               /* Nombre d'I/O de la borne */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_borne_nbr = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS-1, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_borne_nbr, 1, 2, i, i+1 );
-
-    if (edition)                                                                /* Si edition d'un modbus */
-     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_borne_type),        edit_borne->type );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_borne_adresse),    edit_borne->adresse );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_borne_min),        edit_borne->min     );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_borne_nbr),        edit_borne->nbr     );
-     }
-    else { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_borne_type), BORNE_INPUT_TOR );
-           gtk_widget_grab_focus( Combo_borne_type );
-         }
-    gtk_widget_show_all(F_borne);                                    /* Affichage de l'interface complète */
   }
 /*--------------------------------------------------------------------------------------------------------*/
