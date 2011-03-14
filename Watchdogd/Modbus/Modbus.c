@@ -998,8 +998,6 @@
                cpt_e = module->modbus.min_e_tor;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
                 { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
-                  printf(" Setting E%d = %d\n", cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) ); 
-
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -1015,10 +1013,8 @@
                      reponse |= module->response.data[ 2*cpt + 2] >> 3;
                      SEA( cpt_e, reponse );
                      SEA_range( cpt_e, 1 );
-                     printf(" Setting EA%d = %d in range\n", cpt_e, reponse ); 
                    }
-                  else { SEA_range( cpt_e, 0 );  printf(" Setting EA%d not in range\n", cpt_e ); 
-                       }
+                  else SEA_range( cpt_e, 0 );
                   cpt_e++;
                 }
                module->mode = MODBUS_SET_DO;
@@ -1382,7 +1378,10 @@ case MODBUS_REQUEST_SENT:
                                                 else module->mode = MODBUS_SET_DO;
                                                 break;
                    case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
-                                                else module->mode = MODBUS_SET_DO; /*GET_DI;*/
+                                                else module->mode = MODBUS_SET_AO;
+                                                break;
+                   case MODBUS_SET_AO         : /*if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
+                                                else*/ module->mode = MODBUS_GET_DI;
                                                 break;
                    
                  }
