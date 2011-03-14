@@ -171,13 +171,6 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit, 2, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Name/@IP") );                                     /* L'adresse IP du module */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_ip = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_ip), sizeof(Modbus.ip) );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ip, 1, 4, i, i+1 );
-
-    i++;
     texte = gtk_label_new( _("Min _E()") );                                 /* Numéro min de l'entree TOR */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Spin_min_e_tor = gtk_spin_button_new_with_range( 0, NBR_ENTRE_TOR-1, 1 );
@@ -198,6 +191,13 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     Spin_min_s_ana = gtk_spin_button_new_with_range( 0, NBR_SORTIE_ANA-1, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_min_s_ana, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Name/@IP") );                                     /* L'adresse IP du module */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_ip = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ip), sizeof(Modbus.ip) );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ip, 1, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Libelle") );                                       /* Le modbus en lui-meme */

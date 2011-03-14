@@ -42,6 +42,10 @@
      COLONNE_ACTIF,
      COLONNE_WATCHDOG,
      COLONNE_BIT,
+     COLONNE_MIN_E_TOR,
+     COLONNE_MIN_E_ANA,
+     COLONNE_MIN_S_TOR,
+     COLONNE_MIN_S_ANA,
      COLONNE_IP,
      COLONNE_LIBELLE,
      NBR_COLONNE
@@ -582,6 +586,10 @@
                                               G_TYPE_BOOLEAN,                                    /* actif */
                                               G_TYPE_UINT,                                    /* Watchdog */
                                               G_TYPE_UINT,                                         /* bit */
+                                              G_TYPE_UINT,                                   /* min_e_tor */
+                                              G_TYPE_UINT,                                   /* min_e_ana */
+                                              G_TYPE_UINT,                                   /* min_s_tor */
+                                              G_TYPE_UINT,                                   /* min_s_ana */
                                               G_TYPE_STRING,                                        /* IP */
                                               G_TYPE_STRING                                    /* libelle */
                                );
@@ -612,6 +620,38 @@
                                                          "text", COLONNE_BIT,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BIT );                   /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Min _E()"), renderer,
+                                                         "text", COLONNE_MIN_E_TOR,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_MIN_E_TOR );             /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Min _EA()"), renderer,
+                                                         "text", COLONNE_MIN_E_ANA,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_MIN_E_ANA );             /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Min _A()"), renderer,
+                                                         "text", COLONNE_MIN_S_TOR,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_MIN_S_TOR );             /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
+    g_object_set ( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Min _AA()"), renderer,
+                                                         "text", COLONNE_MIN_S_ANA,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_MIN_S_ANA );             /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de modbus */
@@ -717,6 +757,10 @@
                          COLONNE_ACTIF, modbus->actif,
                          COLONNE_LIBELLE, modbus->libelle,
                          COLONNE_BIT, modbus->bit,
+                         COLONNE_MIN_E_TOR, modbus->min_e_tor,
+                         COLONNE_MIN_E_ANA, modbus->min_e_ana,
+                         COLONNE_MIN_S_TOR, modbus->min_s_tor,
+                         COLONNE_MIN_S_ANA, modbus->min_s_ana,
                          COLONNE_IP, modbus->ip,
                          COLONNE_WATCHDOG, modbus->watchdog,
                          -1
