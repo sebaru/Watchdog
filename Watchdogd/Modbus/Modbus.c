@@ -1101,97 +1101,7 @@
                module->mode = MODBUS_GET_DI;
                break;
         }
-#ifdef bouh
-       switch ( module->response.fct )
-        { case MBUS_ENTRE_TOR:                                       /* Quelles type de borne d'entrées ? */
-               switch ( borne->nbr )
-                { case 8:                                                        /* Bornes a 8 entrées !! */
-                          if (nbr != 1) break;         /* Si nous n'avons pas recu le bon nombre d'octets */
-                          cpt_e = borne->min;
-                          SE( cpt_e++, ( module->response.data[0] & 1  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 2  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 4  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 8  ) );
-                          SE( cpt_e++, ( module->response.data[0] & 16 ) );
-                          SE( cpt_e++, ( module->response.data[0] & 32 ) );
-                          SE( cpt_e++, ( module->response.data[0] & 64 ) );
-                          SE( cpt_e++, ( module->response.data[0] & 128) );
-                          break;
-                  default: Info_n( Config.log, DEBUG_MODBUS,
-                                   "MODBUS: Processer_trame: borne InputTOR non gérée",
-                                   borne->nbr
-                                 );
-                }
-               break;
-          case MBUS_SORTIE_TOR:                                      /* Quelles type de borne de sortie ? */
-               break;
-          case MBUS_ENTRE_ANA:                                       /* Quelles type de borne d'entrées ? */
-               switch ( borne->nbr )
-                { case 4: { guint reponse;                                       /* Bornes a 4 entrées !! */
-                            if (nbr != 8) break;       /* Si nous n'avons pas recu le bon nombre d'octets */
-
-                            cpt_e = borne->min;
-                            if ( ! (module->response.data[1] & 0x03) )
-                             { reponse = module->response.data[0] << 5;
-                               reponse |= module->response.data[1] >> 3;
-                               SEA( cpt_e, reponse );
-                               SEA_range( cpt_e, 1 );
-                             }
-                            else SEA_range( cpt_e, 0 );
-
-                            cpt_e++ ;
-                            if ( ! (module->response.data[3] & 0x03) )
-                             { reponse = module->response.data[2] << 5;
-                               reponse |= module->response.data[3] >> 3;
-                               SEA( cpt_e, reponse );
-                               SEA_range( cpt_e, 1 );
-                             }
-                            else SEA_range( cpt_e, 0 );
-
-                            cpt_e++ ;
-                            if ( ! (module->response.data[5] & 0x03) )
-                             { reponse = module->response.data[4] << 5;
-                               reponse |= module->response.data[5] >> 3;
-                               SEA( cpt_e, reponse );
-                               SEA_range( cpt_e, 1 );
-                             }
-                            else SEA_range( cpt_e, 0 );
-
-                            cpt_e++ ;
-                            if ( ! (module->response.data[7] & 0x03) )
-                             { reponse = module->response.data[6] << 5;
-                               reponse |= module->response.data[7] >> 3;
-                               SEA( cpt_e, reponse );
-                               SEA_range( cpt_e, 1 );
-                             }
-                            else SEA_range( cpt_e, 0 );
-                          }
-                         break;
-                  default: Info_n( Config.log, DEBUG_MODBUS,
-                                   "MODBUS: Processer_trame: borne InputANA non gérée", 
-                                   borne->nbr
-                                 );
-                }
-               break;
-
-
-          case 0x80 + MBUS_ENTRE_TOR:
-               Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur ENTRE_TOR" );
-               Deconnecter_module( module );
-               break;
-          case 0x80 + MBUS_SORTIE_TOR:
-               Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur SORTIE_TOR" );
-               Deconnecter_module( module );
-               break;
-          case 0x80 + MBUS_ENTRE_ANA:
-               Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: Erreur ENTRE_ANA" );
-               Deconnecter_module( module );
-               break;
-          default: Info( Config.log, DEBUG_MODBUS, "MODBUS: Processer_trame: fct inconnu" );
-        }
-#endif
      }
-
     memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
   }
 /**********************************************************************************************************/
@@ -1343,7 +1253,11 @@
            { if ( module->request )                                  /* Requete en cours pour ce module ? */
               { Recuperer_reponse_module ( module ); }
              else 
-              { switch (module->mode)
+              { if (module->date_next_eana<Partage->top)           /* Gestion décalée des I/O Analogiques */
+                 { module->date_next_eana = Partage->top + 50;                   /* Toutes les 5 secondes */
+                   module->do_check_eana = TRUE;
+                 }
+                switch (module->mode)
                  { 
 #ifdef bouh
 case MODBUS_REQUEST_SENT:
@@ -1353,10 +1267,7 @@ case MODBUS_REQUEST_SENT:
                         if ( ! module->borne_en_cours )                                      /* Tour des bornes ? */
                          { module->borne_en_cours = module->Bornes;
                                                        /* Interrogation borne ANA toutes les 5 secondes ! */
-                        if (module->date_next_eana<Partage->top)
-                         { module->date_next_eana = Partage->top + 50;
-                            module->do_check_eana = TRUE;
-                         } else module->do_check_eana = FALSE;
+                        
                       }
 /***************************** Début de l'interrogation de la borne du module *****************************/
                      Interroger_borne ( module );
@@ -1374,14 +1285,19 @@ case MODBUS_REQUEST_SENT:
                    case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
                                                 else module->mode = MODBUS_GET_AI;
                                                 break;
-                   case MODBUS_GET_AI         : if (module->nbr_entree_ana) Interroger_entree_ana( module );
+                   case MODBUS_GET_AI         : if (module->nbr_entree_ana && module->do_check_eana)
+                                                     Interroger_entree_ana( module );
                                                 else module->mode = MODBUS_SET_DO;
                                                 break;
                    case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
                                                 else module->mode = MODBUS_SET_AO;
                                                 break;
-                   case MODBUS_SET_AO         : /*if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
-                                                else*/ module->mode = MODBUS_GET_DI;
+                   case MODBUS_SET_AO         : if (module->nbr_sortie_ana && module->do_check_eana)
+                                                 { /*Interroger_sortie_ana( module );*/
+                                                   module->mode = MODBUS_GET_DI; /* pour debug */
+                                                 }
+                                                else module->mode = MODBUS_GET_DI;
+                                                module->do_check_eana = FALSE;       /* Le check est fait */
                                                 break;
                    
                  }

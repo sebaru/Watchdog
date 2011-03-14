@@ -648,7 +648,10 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
+  `min_e_tor` int(11) NOT NULL,
+  `min_e_ana` int(11) NOT NULL,
+  `min_s_tor` int(11) NOT NULL,
+  `min_s_ana` int(11) NOT NULL,  PRIMARY KEY (`id`),
   UNIQUE KEY `ip` (`ip`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
