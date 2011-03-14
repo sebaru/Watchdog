@@ -1258,22 +1258,7 @@
                    module->do_check_eana = TRUE;
                  }
                 switch (module->mode)
-                 { 
-#ifdef bouh
-case MODBUS_REQUEST_SENT:
-                     else
-                      {                                        /* Si pas de requete, on passe a la borne suivante */
-                        module->borne_en_cours = module->borne_en_cours->next;
-                        if ( ! module->borne_en_cours )                                      /* Tour des bornes ? */
-                         { module->borne_en_cours = module->Bornes;
-                                                       /* Interrogation borne ANA toutes les 5 secondes ! */
-                        
-                      }
-/***************************** Début de l'interrogation de la borne du module *****************************/
-                     Interroger_borne ( module );
-                     break;
-#endif
-                   case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+                 { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
                    case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
                    case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
                    case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;

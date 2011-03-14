@@ -43,6 +43,10 @@
  static GtkWidget *Entry_ip;                                                             /* @IP du module */
  static GtkWidget *Entry_lib;                                                        /* Libelle du modbus */
  static GtkWidget *Check_actif;                                         /* Le module doit-il etre actif ? */
+ static GtkWidget *Spin_min_e_tor;
+ static GtkWidget *Spin_min_e_ana;
+ static GtkWidget *Spin_min_s_tor;
+ static GtkWidget *Spin_min_s_ana;
  static struct CMD_TYPE_MODBUS Modbus;                                       /* Module en cours d'édition */
 
  static GtkWidget *F_borne;                                            /* Widget de l'interface graphique */
@@ -65,6 +69,10 @@
     Modbus.actif      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Modbus.watchdog   = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_watchdog) );
     Modbus.bit        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit) );
+    Modbus.min_e_tor  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_min_e_tor) );
+    Modbus.min_e_ana  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_min_e_ana) );
+    Modbus.min_s_tor  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_min_s_tor) );
+    Modbus.min_s_ana  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_min_s_ana) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -136,7 +144,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 4, 4, TRUE );
+    table = gtk_table_new( 6, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -170,6 +178,28 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_ip, 1, 4, i, i+1 );
 
     i++;
+    texte = gtk_label_new( _("Min _E()") );                                 /* Numéro min de l'entree TOR */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_min_e_tor = gtk_spin_button_new_with_range( 0, NBR_ENTRE_TOR-1, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_min_e_tor, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("Min _EA()") );                                /* Numéro min de l'entree ANA */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_min_e_ana = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA-1, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_min_e_ana, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Min _A()") );                                /* Numéro min de la sortie TOR */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_min_s_tor = gtk_spin_button_new_with_range( 0, NBR_SORTIE_TOR-1, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_min_s_tor, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("Min _AA()") );                               /* Numéro min de la sortie ANA */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_min_s_ana = gtk_spin_button_new_with_range( 0, NBR_SORTIE_ANA-1, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_min_s_ana, 3, 4, i, i+1 );
+
+    i++;
     texte = gtk_label_new( _("Libelle") );                                       /* Le modbus en lui-meme */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_lib = gtk_entry_new();
@@ -182,6 +212,10 @@
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_modbus->actif );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_watchdog),    edit_modbus->watchdog );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit),         edit_modbus->bit );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_e_tor),   edit_modbus->min_e_tor );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_e_ana),   edit_modbus->min_e_ana );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_s_tor),   edit_modbus->min_s_tor );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_s_ana),   edit_modbus->min_s_ana );
        gtk_widget_grab_focus( Entry_lib );
      }
     else { gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), TRUE );
