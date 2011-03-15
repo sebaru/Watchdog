@@ -55,28 +55,18 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   "\n MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, mode=%d, watchdog=%d, trans.=%d, "
-                   "deco.=%d, request=%d, retente=%d, date_next_eana=%d\n",
+                   "\n"
+                   " MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, mode=%d, watchdog=%d, \n"
+                   "                 min_e_tor=%d, min_e_ana=%d, min_s_tor=%d, min_s_ana=%d\n"
+                   "                 trans.=%d, deco.=%d, request=%d, retente=%d, date_next_eana=%d\n",
                    module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.actif,
                    module->started, module->mode, module->modbus.watchdog,
+                   module->modbus.min_e_tor, module->modbus.min_e_ana,
+                   module->modbus.min_s_tor, module->modbus.min_s_ana,
                    module->transaction_id, module->nbr_deconnect, module->request,
-                   (int)module->date_next_eana,
-                   (int)module->date_retente
+                   (int)module->date_retente, (int)module->date_next_eana
                  );
        Write_admin ( client->connexion, chaine );
-
-       liste_bornes = module->Bornes;
-       while ( liste_bornes )
-        { struct CMD_TYPE_BORNE_MODBUS *borne;
-          borne = (struct CMD_TYPE_BORNE_MODBUS *)liste_bornes->data;
-          g_snprintf( chaine, sizeof(chaine),
-                      " - Borne %02d -> type=%d, adresse=%d, min=%d, nbr=%d\n",
-                      borne->id, borne->type, borne->adresse, borne->min, borne->nbr
-                    );
-          Write_admin ( client->connexion, chaine );
-          liste_bornes = liste_bornes->next;
-        }
-       liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
