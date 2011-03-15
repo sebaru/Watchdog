@@ -1020,7 +1020,7 @@
                module->mode = MODBUS_SET_DO;
                break;
           case MODBUS_SET_DO:
-               module->mode = MODBUS_GET_DI;
+               module->mode = MODBUS_SET_AO;
                break;
           case MODBUS_GET_DESCRIPTION:
                memset ( chaine, 0, sizeof(chaine) );
