@@ -41,7 +41,6 @@
 /**********************************************************************************************************/
  void Gerer_protocole_modbus ( struct CONNEXION *connexion )
   { static GList *Arrivee_modbus = NULL;
-    static GList *Arrivee_bornes = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_MODBUS_OK:

@@ -53,7 +53,6 @@
  #define MODBUS_RETRY       100                      /* 10 secondes entre chaque retry si pb de connexion */
 
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
- #define NOM_TABLE_BORNE_MODBUS    "modbus_bornes"
 
  struct COM_MODBUS                                                 /* Communication entre DLS et la MODBUS */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
@@ -108,8 +107,6 @@
     gboolean do_check_eana;                                       /* Interrogation des bornes EANA ou non */
     gboolean request;                /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
     struct TRAME_MODBUS_REPONSE response;
-    GList *Bornes;                                             /* La liste des bornes associées au module */
-    GList *borne_en_cours;                                           /* La borne en cours d'interrogation */
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
@@ -120,12 +117,6 @@
  extern gint Ajouter_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
  extern gboolean Retirer_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
  extern gboolean Modifier_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
- extern struct CMD_TYPE_BORNE_MODBUS *Rechercher_borne_modbusDB ( struct LOG *log, struct DB *db, guint id );
- extern struct CMD_TYPE_BORNE_MODBUS *Recuperer_borne_modbusDB_suite( struct LOG *log, struct DB *db );
- extern gboolean Recuperer_borne_modbusDB ( struct LOG *log, struct DB *db, guint module );
- extern gint Ajouter_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *modbus );
- extern gboolean Retirer_borne_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *modbus );
- extern gboolean Modifier_borne_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_BORNE_MODBUS *modbus );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 
