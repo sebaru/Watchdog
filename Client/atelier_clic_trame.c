@@ -44,6 +44,52 @@
     return(groupe);
   }
 /**********************************************************************************************************/
+/* Raise_to_top : Raise le item selectionné                                                               */
+/* Entrée: Rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Raise_to_top ( void )
+  { struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    switch (infos->Selection.type)
+     { case TYPE_MOTIF      : goo_canvas_item_raise ( infos->Selection.trame_motif->item_groupe, NULL );
+                              break;
+       case TYPE_CAPTEUR    : goo_canvas_item_raise ( infos->Selection.trame_capteur->item_groupe, NULL );
+                              break;
+       case TYPE_PASSERELLE : goo_canvas_item_raise ( infos->Selection.trame_pass->item_groupe, NULL );
+                              break;
+       default: printf("Raise_to_top: Type de selection inconnu\n");
+     }
+  }
+/**********************************************************************************************************/
+/* Raise_to_top : Raise le item selectionné                                                               */
+/* Entrée: Rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Lower_to_bottom ( void )
+  { struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    switch (infos->Selection.type)
+     { case TYPE_MOTIF      : goo_canvas_item_lower ( infos->Selection.trame_motif->item_groupe, NULL );
+                              break;
+       case TYPE_CAPTEUR    : goo_canvas_item_lower ( infos->Selection.trame_capteur->item_groupe, NULL );
+                              break;
+       case TYPE_PASSERELLE : goo_canvas_item_lower ( infos->Selection.trame_pass->item_groupe, NULL );
+                              break;
+       default: printf("Lower_to_bottom: Type de selection inconnu\n");
+     }
+  }
+/**********************************************************************************************************/
 /* Afficher_propriete: Affiche les proprietes de l'objet                                                  */
 /* Entrée: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -228,6 +274,8 @@ printf("Afficher_propriete: debut\n");
        GNOMEUIINFO_ITEM_STOCK( N_("Default color"), NULL,
                                Changer_couleur_directe, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
        GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:1"), NULL, NULL/*Mettre_echelle_un*/, GNOME_STOCK_PIXMAP_NEW ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Raise to top"), NULL, Raise_to_top, GNOME_STOCK_PIXMAP_TOP ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottem"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
