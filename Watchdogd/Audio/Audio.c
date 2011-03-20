@@ -153,7 +153,7 @@
              fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
              dup2( fd_cible, 1 );
              g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
-             execlp( "espeak", "espeak", "-s", chaine2, "-v", chaine, texte, NULL );
+             execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
              Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement espeak failed", pid );
              _exit(0);
            }
