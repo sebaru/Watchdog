@@ -275,7 +275,7 @@ printf("Afficher_propriete: debut\n");
                                Changer_couleur_directe, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
        GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:1"), NULL, NULL/*Mettre_echelle_un*/, GNOME_STOCK_PIXMAP_NEW ),
        GNOMEUIINFO_ITEM_STOCK( N_("Raise to top"), NULL, Raise_to_top, GNOME_STOCK_PIXMAP_TOP ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottem"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottom"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
