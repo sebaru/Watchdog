@@ -73,8 +73,10 @@
        if (lirc_nextcode(&code)==0 )
         { if(code!=NULL)
            { while( (ret=lirc_code2char(config,code,&c))==0 && c!=NULL)
-              {
+              { gint m;
 				printf("Execing command \"%s\"\n",c);
+                m = atoi (c);
+                Envoyer_commande_dls(m);
               }
              free(code);
              if(ret==-1) break;
