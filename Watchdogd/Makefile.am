@@ -40,7 +40,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 Watchdogd_LDFLAGS = -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS)
 
 sysconf_DATA = watchdogd.conf
-pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh
+pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \

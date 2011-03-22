@@ -98,5 +98,6 @@ This is the server side of Watchdog - Lirc Module
 
 %files server-lirc
 %defattr(644,root,root)
+/usr/share/Watchdog/lircrc
 /usr/lib/libwatchdog-lirc*
 
