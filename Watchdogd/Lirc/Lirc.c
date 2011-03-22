@@ -70,23 +70,22 @@
           Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: SIGUSR1" );
           lirc_freeconfig(config);
           if (lirc_readconfig ( NULL, &config, NULL)!=0)
-           { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
+           { config = NULL;
+             Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
              break;
            }
         }
 
        if (lirc_nextcode(&code)==0)                          /* Si un code est présent sur le socket lirc */
         { if(code!=NULL)
-           { printf("LIRC ------ Code recu = %s\n", code );
-             while( (ret=lirc_code2char(config,code,&c))==0)
+           { while( (ret=lirc_code2char(config,code,&c))==0)
               { gint m;
                 if (c == NULL) break;
-                printf(" c = %s\n", c );
                 m = atoi (c);
-		Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Recu commande. Positionnement du monostable", m );
+		Info_c( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Recu commande", code );
+		Info_c( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: -------------", c );
                 Envoyer_commande_dls(m);
               }
-             printf("LIRC ------ ret = %d , c = %p\n", ret, c );
              free(code);
              if(ret==-1) break;
            }
@@ -94,7 +93,7 @@
        usleep(1000);
      }
 
-    lirc_freeconfig(config);
+    if (config) lirc_freeconfig(config);
     lirc_deinit();
     Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Down", pthread_self() );
     pthread_exit(GINT_TO_POINTER(0));

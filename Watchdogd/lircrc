@@ -10,7 +10,7 @@ end
 begin
         prog    = Watchdogd
         remote  = *
-        buttun  = VOLUME_DOWN
+        button  = VOLUME_UP
         repeat  = 0
         delay   = 0
         config  = 2
@@ -19,7 +19,7 @@ end
 begin
         prog    = Watchdogd
         remote  = *
-        buttun  = VOLUME_DOWN
+        button  = VOLUME_DOWN
         repeat  = 0
         delay   = 0
         config  = 3
