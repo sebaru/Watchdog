@@ -41,7 +41,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
@@ -338,12 +337,12 @@
 /**********************************************************************************************************/
  gboolean Demarrer_audio ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: Demande de demarrage"), getpid() );
-    if (pthread_create( &TID_audio, NULL, (void *)Run_audio, NULL ))
+    if (pthread_create( &Partage->com_audio.TID, NULL, (void *)Run_audio, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: pthread_create failed") );
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_audio: thread audio seems to be running",
-                   TID_audio ); }
+                   Partage->com_audio.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -560,9 +559,9 @@
     if (Partage->com_arch.TID) { pthread_join( Partage->com_arch.TID, NULL ); }                                 /* Attente fin ARCH */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), Partage->com_arch.TID );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
-    if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), TID_audio );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), Partage->com_audio.TID );
+    if (Partage->com_audio.TID) { pthread_join( Partage->com_audio.TID, NULL ); }                              /* Attente fin AUDIO */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), Partage->com_audio.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
 

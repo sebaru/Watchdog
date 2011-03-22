@@ -89,6 +89,7 @@
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
      { Info_c( Config.log, DEBUG_DB, "AUDIO: Run_audio: Unable to open database", Config.db_database );
+       Partage->com_audio.TID = 0;                        /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -201,6 +202,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
     Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: Down", pthread_self() );
+    Partage->com_audio.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

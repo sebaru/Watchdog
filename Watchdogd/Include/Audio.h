@@ -33,7 +33,8 @@
  #define NUM_BIT_M_AUDIO_END         5                       /* M5 positionné quand arret diffusion audio */
 
  struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_audio;                                                   /* liste de message a prononcer */
     gboolean sigusr1;
     gint last_audio;
