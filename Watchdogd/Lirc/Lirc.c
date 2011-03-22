@@ -71,7 +71,7 @@
           lirc_freeconfig(config);
           if (lirc_readconfig ( NULL, &config, NULL)!=0)
            { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
-             pthread_exit(GINT_TO_POINTER(0));
+             break;
            }
         }
 
@@ -82,9 +82,9 @@
               { gint m;
                 if (c == NULL) break;
                 printf(" c = %s\n", c );
-                /*m = atoi (c);*/
-		Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Recu commande. Positionnement du monostable", 1 );
-                /*Envoyer_commande_dls(m);*/
+                m = atoi (c);
+		Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Recu commande. Positionnement du monostable", m );
+                Envoyer_commande_dls(m);
               }
              printf("LIRC ------ ret = %d , c = %p\n", ret, c );
              free(code);

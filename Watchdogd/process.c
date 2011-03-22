@@ -306,7 +306,7 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread tellstick seems to be running", TID_lirc ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread lirc seems to be running", TID_lirc ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
