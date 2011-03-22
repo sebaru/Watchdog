@@ -41,7 +41,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_sms      = 0;                                 /* Le tid du SMS en cours d'execution */
  static pthread_t TID_rs485    = 0;                               /* Le tid du rs485 en cours d'execution */
  static pthread_t TID_modbus   = 0;                              /* Le tid du MODBUS en cours d'execution */
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
@@ -327,11 +326,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_sms ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: Demande de demarrage"), getpid() );
-    if (pthread_create( &TID_sms, NULL, (void *)Run_sms, NULL ))
+    if (pthread_create( &Partage->com_sms.TID, NULL, (void *)Run_sms, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_sms: thread sms seems to be running", TID_sms ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_sms: thread sms seems to be running", Partage->com_sms.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -555,9 +554,9 @@
     if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_modbus );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), TID_sms );
-    if (TID_sms) { pthread_join( TID_sms, NULL ); }                                    /* Attente fin SMS */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), TID_sms );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), Partage->com_sms.TID );
+    if (Partage->com_sms.TID) { pthread_join( Partage->com_sms.TID, NULL ); }                                    /* Attente fin SMS */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), Partage->com_sms.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), Partage->com_arch.TID );
     if (Partage->com_arch.TID) { pthread_join( Partage->com_arch.TID, NULL ); }                                 /* Attente fin ARCH */

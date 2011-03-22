@@ -88,12 +88,12 @@
        g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------ running = %s\n",
+       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s\n",
                    (Partage->com_dls.TID       ? "YES" : "NO")
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------ running = %s\n",
+       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s\n",
                    (Partage->com_arch.TID       ? "YES" : "NO")
                  );
        Write_admin ( client->connexion, chaine );

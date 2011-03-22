@@ -297,12 +297,12 @@
     while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
      {
 
-       if (Partage->com_sms.sigusr1)                                 /* A-t'on recu un signal USR1 ? */
+       if (Partage->com_sms.sigusr1)                                      /* A-t'on recu un signal USR1 ? */
         { int nbr;
 
           Partage->com_sms.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "SMS: Run_sms: SIGUSR1" );
-          pthread_mutex_lock( &Partage->com_sms.synchro );/* On recupere le nombre de sms en attente */
+          pthread_mutex_lock( &Partage->com_sms.synchro );     /* On recupere le nombre de sms en attente */
           nbr = g_list_length(Partage->com_sms.liste_sms);
           pthread_mutex_unlock( &Partage->com_sms.synchro );
           Info_n( Config.log, DEBUG_INFO, "SMS: Nbr SMS a envoyer", nbr );
@@ -343,6 +343,7 @@
      }
 
     Info_n( Config.log, DEBUG_SMS, "SMS: Run_sms: Down", pthread_self() );
+    Partage->com_sms.TID = 0;                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
