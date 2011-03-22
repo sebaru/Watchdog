@@ -130,13 +130,12 @@ printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gesti
      { if (top >= Trame_motif->motif->rafraich)
         { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
                                                ROUGE1, VERT1, BLEU1 );                 /* frame numero ++ */
-          printf("bouh %d\n", Trame_motif_p1->num_image );
           top = 0;                                                            /* Raz pour prochaine frame */
         }
      }
     else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_1N)
      { if (top >= Trame_motif->motif->rafraich)
-        { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images)
+        { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images-1)
            { Trame_choisir_frame( Trame_motif_p1, 1,
                                   ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
            }
@@ -149,7 +148,7 @@ printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gesti
      }
     else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_2N)
      { if (top >= Trame_motif->motif->rafraich)
-        { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images)
+        { if (Trame_motif_p1->num_image == Trame_motif_p1->nbr_images-1)
            { Trame_choisir_frame( Trame_motif_p1, 2,
                                   ROUGE1, VERT1, BLEU1 );                              /* frame numero ++ */
            }
