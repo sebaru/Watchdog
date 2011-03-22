@@ -28,7 +28,7 @@
 #ifndef _RESEAUX_GTK_MESSAGE_H_
  #define _RESEAUX_GTK_MESSAGE_H_
 
- #define NBR_CARAC_MSGERREUR         100                        /* 80 caractères de messages d'erreur max */
+ #define NBR_CARAC_MSGERREUR         512                        /* 80 caractères de messages d'erreur max */
  #define NBR_CARAC_MSGERREUR_UTF8    (2*NBR_CARAC_MSGERREUR)
 
  struct CMD_GTK_MESSAGE
