@@ -74,8 +74,8 @@
         { if(code!=NULL)
            { while( (ret=lirc_code2char(config,code,&c))==0 && c!=NULL)
               { gint m;
-				printf("Execing command \"%s\"\n",c);
                 m = atoi (c);
+		Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Recu commande. Positionnement du monostable", m );
                 Envoyer_commande_dls(m);
               }
              free(code);

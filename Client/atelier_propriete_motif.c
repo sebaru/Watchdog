@@ -118,6 +118,7 @@
   { static gint top=0;
 
     if (!ok_timer) return(TRUE);
+printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gestion );
     if (Trame_motif->motif->type_gestion == TYPE_INDICATEUR)
      { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
                                             ROUGE1, VERT1, BLEU1 );                    /* frame numero ++ */

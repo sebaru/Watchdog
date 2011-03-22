@@ -76,6 +76,10 @@
        if ( ! strcmp ( thread, "tellstick" ) )
         { if (!Demarrer_tellstick())                                               /* Démarrage TELLSTICK */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb TELLSTICK -> Arret" ); }
+        }  else
+       if ( ! strcmp ( thread, "lirc" ) )
+        { if (!Demarrer_lirc())                                                         /* Démarrage LIRC */
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb LIRC -> Arret" ); }
         } 
 
      } else
