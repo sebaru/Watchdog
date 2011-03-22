@@ -415,8 +415,8 @@
   }
 /**********************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                          */
-/* Entrée: le nom du fichier, et l'identifiant cible (pour write)                                         */
-/* Sortie: le nombre d'erreur de traduction                                                               */
+/* Entrée: la structure de log, l'id du modul, new = true si il faut compiler le .dls.new                 */
+/* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                */
 /**********************************************************************************************************/
  gint Traduire_DLS( struct LOG *log_erreur, gboolean new, gint id )
   { gchar source[80], source_ok[80], cible[80], log[80];

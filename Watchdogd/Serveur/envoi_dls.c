@@ -237,14 +237,11 @@
 
        id_fichier = open( log, O_RDONLY, 0 );
        if (id_fichier<0)
-        { g_snprintf( erreur.message, sizeof(erreur.message), "Et non....\nTraduction Down" ); }
+        { g_snprintf( erreur.message, sizeof(erreur.message), "Impossible d'ouvrir le\nfichier de log de compilation" ); }
        else { int nbr_car, index;
               index = nbr_car = 0; 
-              for ( ; ; )
-               { nbr_car = read (id_fichier, erreur.message + index, sizeof(erreur.message)-1-index );
-                 if (nbr_car<0) break;
-                 index+=nbr_car;
-               }
+              while ( (nbr_car = read (id_fichier, erreur.message + index, sizeof(erreur.message)-1-index )) > 0 )
+               { index+=nbr_car; }
               erreur.message[index] = 0;                                        /* Caractere NULL d'arret */
               close(id_fichier);
             }
