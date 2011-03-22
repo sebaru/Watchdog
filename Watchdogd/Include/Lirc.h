@@ -32,7 +32,7 @@
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean sigusr1;
-    void *handle;                                          /* handle de gestion de la librairie tellstick */
+    void *dl_handle;                                            /* handle de gestion de la librairie Lirc */
     void (*Run_lirc)(void);                                   /* Fonction principale de gestion du thread */
   };
 

@@ -287,17 +287,17 @@
 /**********************************************************************************************************/
  gboolean Demarrer_lirc ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Demande de demarrage"), getpid() );
-    Partage->com_lirc.handle = dlopen( "libwatchdog-lirc.so", RTLD_LAZY );
-    if (!Partage->com_lirc.handle)
+    Partage->com_lirc.dl_handle = dlopen( "libwatchdog-lirc.so", RTLD_LAZY );
+    if (!Partage->com_lirc.dl_handle)
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: dlopen failed"), dlerror() );
        return(FALSE);
      }
                                                               /* Recherche de la fonction 'Run_tellstick' */
-    Partage->com_lirc.Run_lirc = dlsym( Partage->com_lirc.handle, "Run_lirc" );
+    Partage->com_lirc.Run_lirc = dlsym( Partage->com_lirc.dl_handle, "Run_lirc" );
     if (!Partage->com_lirc.Run_lirc)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Run_lirc does not exist") );
        dlclose( Partage->com_tellstick.handle );
-       Partage->com_lirc.handle = NULL;
+       Partage->com_lirc.dl_handle = NULL;
        return(FALSE);
      }
 

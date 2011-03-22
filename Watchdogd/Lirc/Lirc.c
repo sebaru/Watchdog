@@ -96,6 +96,7 @@
     if (config) lirc_freeconfig(config);
     lirc_deinit();
     Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Down", pthread_self() );
+    Partage->com_lirc.TID = NULL;                         /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
