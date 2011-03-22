@@ -157,6 +157,8 @@
                        Partage->com_arch.sigusr1 = TRUE;          
                        Partage->com_audio.sigusr1 = TRUE;          
                        Partage->com_admin.sigusr1 = TRUE;          
+                       Partage->com_tellstick.sigusr1 = TRUE;          
+                       Partage->com_lirc.sigusr1 = TRUE;          
                      }
                      break;
        case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
