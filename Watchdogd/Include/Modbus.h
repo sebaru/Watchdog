@@ -55,7 +55,8 @@
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
 
  struct COM_MODBUS                                                 /* Communication entre DLS et la MODBUS */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_MODBUS;
     gboolean reload;
     guint admin_del;                                                            /* Demande de deconnexion */

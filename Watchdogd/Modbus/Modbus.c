@@ -995,6 +995,7 @@
 
     if ( Charger_tous_MODBUS() == FALSE )                                /* Chargement des modules modbus */
      { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: No module MODBUS found -> stop" );
+       Partage->com_modbus.TID = 0;                       /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -1119,6 +1120,7 @@
 
     Decharger_tous_MODBUS();
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Down", pthread_self() );
+    Partage->com_modbus.TID = 0;                          /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

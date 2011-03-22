@@ -41,7 +41,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_modbus   = 0;                              /* Le tid du MODBUS en cours d'execution */
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
@@ -383,7 +382,7 @@
 /**********************************************************************************************************/
  gboolean Demarrer_modbus ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: Demande de demarrage"), getpid() );
-    if (pthread_create( &TID_modbus, NULL, (void *)Run_modbus, NULL ))
+    if (pthread_create( &Partage->com_modbus.TID, NULL, (void *)Run_modbus, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: pthread_create failed") );
        return(FALSE);
      }
@@ -549,9 +548,9 @@
     if (Partage->com_lirc.TID) { pthread_join( Partage->com_lirc.TID, NULL ); }                                 /* Attente fin LIRC */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), Partage->com_lirc.TID );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
-    if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), TID_modbus );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), Partage->com_modbus.TID );
+    if (Partage->com_modbus.TID) { pthread_join( Partage->com_modbus.TID, NULL ); }                           /* Attente fin MODBUS */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), Partage->com_modbus.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), Partage->com_sms.TID );
     if (Partage->com_sms.TID) { pthread_join( Partage->com_sms.TID, NULL ); }                                    /* Attente fin SMS */
