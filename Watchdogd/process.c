@@ -42,7 +42,6 @@
  #include "watchdogd.h"
 
  static pthread_t TID_sms      = 0;                                 /* Le tid du SMS en cours d'execution */
- static pthread_t TID_dls      = 0;                                 /* Le tid du DLS en cours d'execution */
  static pthread_t TID_rs485    = 0;                               /* Le tid du rs485 en cours d'execution */
  static pthread_t TID_arch     = 0;                                /* Le tid du ARCH en cours d'execution */
  static pthread_t TID_modbus   = 0;                              /* Le tid du MODBUS en cours d'execution */
@@ -228,11 +227,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_dls ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
-    if ( pthread_create( &TID_dls, NULL, (void *)Run_dls, NULL ) )
+    if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", TID_dls ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", Partage->com_dls.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -533,9 +532,9 @@
         }
      }
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), TID_dls );
-    if (TID_dls) { pthread_join( TID_dls, NULL ); }                                    /* Attente fin DLS */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), TID_dls );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), Partage->com_dls.TID );
+    if (Partage->com_dls.TID) { pthread_join( Partage->com_dls.TID, NULL ); }                                    /* Attente fin DLS */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), TID_onduleur );
     if (TID_onduleur) { pthread_join( TID_onduleur, NULL ); }                     /* Attente fin ONDULEUR */

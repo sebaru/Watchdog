@@ -571,6 +571,7 @@
      }
     Decharger_plugins();                                                  /* Dechargement des modules DLS */
     Info_n( Config.log, DEBUG_DLS, "Run_dls: DLS Down", pthread_self() );
+    Partage->com_dls.TID = NULL;                          /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

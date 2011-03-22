@@ -88,6 +88,11 @@
        g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
 
+       g_snprintf( chaine, sizeof(chaine), " Library D.L.S     -> ------------ running = %s\n",
+                   (Partage->com_dls.TID       ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
        g_snprintf( chaine, sizeof(chaine), " Library LIRC      -> loaded = %s, running = %s\n",
                    (Partage->com_lirc.dl_handle ? "YES" : "NO"),
                    (Partage->com_lirc.TID       ? "YES" : "NO")

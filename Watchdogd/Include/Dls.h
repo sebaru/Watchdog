@@ -44,7 +44,8 @@
 
 
  struct COM_DLS                                             /* Communication entre le serveur et DLS */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Plugins;                                                   /* Liste des plugins chargés de DLS */
     GList *liste_m;                                                           /* liste des Mxxx a activer */
     GList *liste_plugin_reset;                                            /* liste des plugins a resetter */
