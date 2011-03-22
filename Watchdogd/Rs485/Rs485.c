@@ -551,6 +551,7 @@
     fd_rs485 = Init_rs485();
     if (fd_rs485<0)                                                        /* On valide l'acces aux ports */
      { Info( Config.log, DEBUG_RS485, "RS485: Acces RS485 impossible, terminé");
+       Partage->com_rs485.TID = 0;                        /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
     else { Info_n( Config.log, DEBUG_RS485, "RS485: Acces RS485 FD", fd_rs485 ); }
@@ -701,6 +702,7 @@
     close(fd_rs485);
     Decharger_tous_rs485();
     Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: Down", pthread_self() );
+    Partage->com_rs485.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

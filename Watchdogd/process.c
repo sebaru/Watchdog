@@ -41,7 +41,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_rs485    = 0;                               /* Le tid du rs485 en cours d'execution */
  static pthread_t TID_modbus   = 0;                              /* Le tid du MODBUS en cours d'execution */
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
@@ -311,12 +310,12 @@
 /**********************************************************************************************************/
  gboolean Demarrer_rs485 ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Demande de demarrage"), getpid() );
-    if (pthread_create( &TID_rs485, NULL, (void *)Run_rs485, NULL ))
+    if (pthread_create( &Partage->com_rs485.TID, NULL, (void *)Run_rs485, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rs485: thread rs485 seems to be running",
-                   TID_rs485 ); }
+                   Partage->com_rs485.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -538,9 +537,9 @@
     if (TID_onduleur) { pthread_join( TID_onduleur, NULL ); }                     /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), TID_onduleur );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), TID_rs485 );
-    if (TID_rs485) { pthread_join( TID_rs485, NULL ); }                              /* Attente fin RS485 */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
+    if (Partage->com_rs485.TID) { pthread_join( Partage->com_rs485.TID, NULL ); }                              /* Attente fin RS485 */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), Partage->com_rs485.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
     if (Partage->com_tellstick.TID) { pthread_join( Partage->com_tellstick.TID, NULL ); }                  /* Attente fin TELLSTICK */

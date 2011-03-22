@@ -66,14 +66,14 @@
   };
 
  struct COM_RS485                                                 /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_RS485;
     gboolean reload;
     guint admin_del;                                                            /* Demande de deconnexion */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     guint admin_add;                                                            /* Demande de deconnexion */
-    guint admin_add_borne;                                                      /* Demande de deconnexion */
   };
 /*********************************************** Déclaration des prototypes *******************************/
  extern void Run_rs485 ( void );                                                          /* Dans Rs485.c */

@@ -93,6 +93,16 @@
                  );
        Write_admin ( client->connexion, chaine );
 
+       g_snprintf( chaine, sizeof(chaine), " Built-in SMS      -> ------------- running = %s\n",
+                   (Partage->com_sms.TID       ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
+       g_snprintf( chaine, sizeof(chaine), " Built-in RS485    -> ------------- running = %s\n",
+                   (Partage->com_rs485.TID     ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s\n",
                    (Partage->com_arch.TID       ? "YES" : "NO")
                  );
