@@ -498,10 +498,11 @@
     prctl(PR_SET_NAME, "W-ONDULEUR", 0, 0, 0 );
     Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: demarrage" );
 
-    Partage->com_onduleur.Modules_ONDULEUR = NULL;                            /* Init des variables du thread */
+    Partage->com_onduleur.Modules_ONDULEUR = NULL;                        /* Init des variables du thread */
 
-    if ( Charger_tous_ONDULEUR() == FALSE )                                /* Chargement des modules onduleur */
+    if ( Charger_tous_ONDULEUR() == FALSE )                            /* Chargement des modules onduleur */
      { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: No module ONDULEUR found -> stop" );
+       Partage->com_onduleur.TID = 0;                     /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
@@ -590,6 +591,7 @@
 
     Decharger_tous_ONDULEUR();
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Down", pthread_self() );
+    Partage->com_onduleur.TID = 0;                        /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

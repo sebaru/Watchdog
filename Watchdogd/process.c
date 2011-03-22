@@ -41,7 +41,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
@@ -206,12 +205,12 @@
 /**********************************************************************************************************/
  gboolean Demarrer_onduleur ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
-    if ( pthread_create( &TID_onduleur, NULL, (void *)Run_onduleur, NULL ) )
+    if ( pthread_create( &Partage->com_onduleur.TID, NULL, (void *)Run_onduleur, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: pthread_create failed") );
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
-                   TID_onduleur );
+                   Partage->com_onduleur.TID );
          }
     return(TRUE);
   }
@@ -531,9 +530,9 @@
     if (Partage->com_dls.TID) { pthread_join( Partage->com_dls.TID, NULL ); }                                    /* Attente fin DLS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), TID_onduleur );
-    if (TID_onduleur) { pthread_join( TID_onduleur, NULL ); }                     /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), TID_onduleur );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
+    if (Partage->com_onduleur.TID) { pthread_join( Partage->com_onduleur.TID, NULL ); }                     /* Attente fin ONDULEUR */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
     if (Partage->com_rs485.TID) { pthread_join( Partage->com_rs485.TID, NULL ); }                              /* Attente fin RS485 */

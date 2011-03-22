@@ -37,7 +37,8 @@
  #define NOM_TABLE_ONDULEUR   "onduleurs"
 
  struct COM_ONDULEUR                                               /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_ONDULEUR;
     gboolean reload;
     guint admin_del;                                                            /* Demande de deconnexion */
