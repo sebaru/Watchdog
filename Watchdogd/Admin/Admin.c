@@ -208,6 +208,7 @@
     Fd_ecoute = Activer_ecoute_admin ();
     if ( Fd_ecoute < 0 )
      { Info( Config.log, DEBUG_ADMIN, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
+       Partage->com_admin.TID = 0;                        /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      } else Info( Config.log, DEBUG_ADMIN, "ADMIN: Run_admin: En ecoute !" );
 
@@ -252,6 +253,7 @@
 
     Desactiver_ecoute_admin ();
     Info_n( Config.log, DEBUG_ADMIN, "Admin: Run_admin: Down", pthread_self() );
+    Partage->com_admin.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

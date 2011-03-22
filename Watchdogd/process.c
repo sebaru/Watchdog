@@ -41,7 +41,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -351,12 +350,12 @@
 /**********************************************************************************************************/
  gboolean Demarrer_admin ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: Demande de demarrage"), getpid() );
-    if (pthread_create( &TID_admin, NULL, (void *)Run_admin, NULL ))
+    if (pthread_create( &Partage->com_admin.TID, NULL, (void *)Run_admin, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: pthread_create failed") );
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_admin: thread admin seems to be running",
-                   TID_admin ); }
+                   Partage->com_admin.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -565,9 +564,9 @@
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
 
     if (flag)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), TID_admin );
-       if (TID_admin) { pthread_join( TID_admin, NULL ); }                           /* Attente fin ADMIN */
-       Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), TID_admin );
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), Partage->com_admin.TID );
+       if (Partage->com_admin.TID) { pthread_join( Partage->com_admin.TID, NULL ); }                           /* Attente fin ADMIN */
+       Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), Partage->com_admin.TID );
      }
 
     Info( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Fin stopper_fils") );

@@ -51,7 +51,8 @@
   };
 
  struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean sigusr1; 
   };
 
