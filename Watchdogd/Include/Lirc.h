@@ -28,8 +28,9 @@
 #ifndef _LIRC_H_
  #define _LIRC_H_
 
- struct COM_LIRC                                                     /* Communication vers LIRC */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+ struct COM_LIRC                                                               /* Communication vers LIRC */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean sigusr1;
     void *handle;                                          /* handle de gestion de la librairie tellstick */
     void (*Run_lirc)(void);                                   /* Fonction principale de gestion du thread */

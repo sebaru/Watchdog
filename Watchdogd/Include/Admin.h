@@ -67,6 +67,7 @@
  extern void Admin_dls_list ( struct CLIENT_ADMIN *client );
  extern void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_onduleur_list ( struct CLIENT_ADMIN *client );
+ extern void Admin_tellstick ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Write_admin ( gint fd, gchar *chaine );
 
 #endif

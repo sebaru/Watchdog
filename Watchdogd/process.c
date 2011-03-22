@@ -50,7 +50,6 @@
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
  static pthread_t TID_tellstick= 0;                           /* Le tid du TELLSTICK en cours d'execution */
- static pthread_t TID_lirc     = 0;                                /* Le tid du LIRC en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -302,11 +301,11 @@
        return(FALSE);
      }
 
-    if ( pthread_create( &TID_lirc, NULL, (void *)Partage->com_lirc.Run_lirc, NULL ) )
+    if ( pthread_create( &Partage->com_lirc.TID, NULL, (void *)Partage->com_lirc.Run_lirc, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread lirc seems to be running", TID_lirc ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread lirc seems to be running", Partage->com_lirc.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -551,9 +550,9 @@
     if (TID_tellstick) { pthread_join( TID_tellstick, NULL ); }                  /* Attente fin TELLSTICK */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), TID_tellstick );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), TID_lirc );
-    if (TID_lirc) { pthread_join( TID_lirc, NULL ); }                                 /* Attente fin LIRC */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), TID_lirc );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), Partage->com_lirc.TID );
+    if (Partage->com_lirc.TID) { pthread_join( Partage->com_lirc.TID, NULL ); }                                 /* Attente fin LIRC */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), Partage->com_lirc.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), TID_modbus );
     if (TID_modbus) { pthread_join( TID_modbus, NULL ); }                           /* Attente fin MODBUS */
