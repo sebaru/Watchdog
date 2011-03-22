@@ -103,6 +103,21 @@
                  );
        Write_admin ( client->connexion, chaine );
 
+       g_snprintf( chaine, sizeof(chaine), " Built-in MODBUS   -> ------------- running = %s\n",
+                   (Partage->com_modbus.TID     ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
+       g_snprintf( chaine, sizeof(chaine), " Built-in AUDIO    -> ------------- running = %s\n",
+                   (Partage->com_audio.TID     ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
+       g_snprintf( chaine, sizeof(chaine), " Built-in ONDULEUR -> ------------- running = %s\n",
+                   (Partage->com_onduleur.TID     ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s\n",
                    (Partage->com_arch.TID       ? "YES" : "NO")
                  );
