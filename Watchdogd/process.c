@@ -43,7 +43,6 @@
 
  static pthread_t TID_sms      = 0;                                 /* Le tid du SMS en cours d'execution */
  static pthread_t TID_rs485    = 0;                               /* Le tid du rs485 en cours d'execution */
- static pthread_t TID_arch     = 0;                                /* Le tid du ARCH en cours d'execution */
  static pthread_t TID_modbus   = 0;                              /* Le tid du MODBUS en cours d'execution */
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
@@ -372,11 +371,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_arch ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: Demande de demarrage"), getpid() );
-    if (pthread_create( &TID_arch, NULL, (void *)Run_arch, NULL ))
+    if (pthread_create( &Partage->com_arch.TID, NULL, (void *)Run_arch, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_arch: thread arch seems to be running", TID_arch ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_arch: thread arch seems to be running", Partage->com_arch.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -391,7 +390,7 @@
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_modbus: thread modbus seems to be running",
-                   TID_arch ); }
+                   Partage->com_arch.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -560,9 +559,9 @@
     if (TID_sms) { pthread_join( TID_sms, NULL ); }                                    /* Attente fin SMS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), TID_sms );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), TID_arch );
-    if (TID_arch) { pthread_join( TID_arch, NULL ); }                                 /* Attente fin ARCH */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), TID_arch );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), Partage->com_arch.TID );
+    if (Partage->com_arch.TID) { pthread_join( Partage->com_arch.TID, NULL ); }                                 /* Attente fin ARCH */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), Partage->com_arch.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), TID_audio );
     if (TID_audio) { pthread_join( TID_audio, NULL ); }                              /* Attente fin AUDIO */
