@@ -34,11 +34,12 @@
   };
 
  struct COM_TELLSTICK                                                     /* Communication vers TELLSTICK */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_tell;                                             /* liste de struct MSGDB msg a envoyer */
     gint taille_tell;
     gboolean sigusr1;
-    void *handle;                                          /* handle de gestion de la librairie tellstick */
+    void *dl_handle;                                       /* handle de gestion de la librairie tellstick */
     void (*Run_tellstick)(void);                              /* Fonction principale de gestion du thread */
     void (*Ajouter_tellstick)( gint, gint );    /* Fonction d'ajout d'une sortie tellstick dans le tampon */
     void (*Admin_tellstick_list)( struct CLIENT_ADMIN * );       /* List des modules tellstick configurés */

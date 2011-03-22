@@ -150,6 +150,7 @@
      }
     tdClose();
     Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Down", pthread_self() );
+    Partage->com_tellstick.TID = NULL;                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

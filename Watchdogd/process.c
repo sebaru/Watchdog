@@ -49,7 +49,6 @@
  static pthread_t TID_audio    = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_onduleur = 0;                              /* Le tid du AUDIO  en cours d'execution */
  static pthread_t TID_admin    = 0;                              /* Le tid du ADMIN  en cours d'execution */
- static pthread_t TID_tellstick= 0;                           /* Le tid du TELLSTICK en cours d'execution */
  static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
 
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
@@ -243,41 +242,41 @@
 /**********************************************************************************************************/
  gboolean Demarrer_tellstick ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
-    Partage->com_tellstick.handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
-    if (!Partage->com_tellstick.handle)
+    Partage->com_tellstick.dl_handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
+    if (!Partage->com_tellstick.dl_handle)
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed"), dlerror() );
        return(FALSE);
      }
                                                               /* Recherche de la fonction 'Run_tellstick' */
-    Partage->com_tellstick.Run_tellstick = dlsym( Partage->com_tellstick.handle, "Run_tellstick" );
+    Partage->com_tellstick.Run_tellstick = dlsym( Partage->com_tellstick.dl_handle, "Run_tellstick" );
     if (!Partage->com_tellstick.Run_tellstick)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Run_tellstick does not exist") );
-       dlclose( Partage->com_tellstick.handle );
-       Partage->com_tellstick.handle = NULL;
+       dlclose( Partage->com_tellstick.dl_handle );
+       Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
      }
                                                           /* Recherche de la fonction 'Ajouter_tellstick' */
-    Partage->com_tellstick.Ajouter_tellstick = dlsym( Partage->com_tellstick.handle, "Ajouter_tellstick" );
+    Partage->com_tellstick.Ajouter_tellstick = dlsym( Partage->com_tellstick.dl_handle, "Ajouter_tellstick" );
     if (!Partage->com_tellstick.Ajouter_tellstick)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Ajouter_tellstick does not exist") );
-       dlclose( Partage->com_tellstick.handle );
-       Partage->com_tellstick.handle = NULL;
+       dlclose( Partage->com_tellstick.dl_handle );
+       Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
      }
                                                        /* Recherche de la fonction 'Admin_tellstick_list' */
-    Partage->com_tellstick.Admin_tellstick_list = dlsym( Partage->com_tellstick.handle, "Admin_tellstick_list" );
+    Partage->com_tellstick.Admin_tellstick_list = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_list" );
     if (!Partage->com_tellstick.Admin_tellstick_list)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_list does not exist") );
-       dlclose( Partage->com_tellstick.handle );
-       Partage->com_tellstick.handle = NULL;
+       dlclose( Partage->com_tellstick.dl_handle );
+       Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
      }
 
-    if ( pthread_create( &TID_tellstick, NULL, (void *)Partage->com_tellstick.Run_tellstick, NULL ) )
+    if ( pthread_create( &Partage->com_tellstick.TID, NULL, (void *)Partage->com_tellstick.Run_tellstick, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running", TID_tellstick ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running", Partage->com_tellstick.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -296,7 +295,7 @@
     Partage->com_lirc.Run_lirc = dlsym( Partage->com_lirc.dl_handle, "Run_lirc" );
     if (!Partage->com_lirc.Run_lirc)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Run_lirc does not exist") );
-       dlclose( Partage->com_tellstick.handle );
+       dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_lirc.dl_handle = NULL;
        return(FALSE);
      }
@@ -546,9 +545,9 @@
     if (TID_rs485) { pthread_join( TID_rs485, NULL ); }                              /* Attente fin RS485 */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), TID_rs485 );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), TID_tellstick );
-    if (TID_tellstick) { pthread_join( TID_tellstick, NULL ); }                  /* Attente fin TELLSTICK */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), TID_tellstick );
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
+    if (Partage->com_tellstick.TID) { pthread_join( Partage->com_tellstick.TID, NULL ); }                  /* Attente fin TELLSTICK */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), Partage->com_tellstick.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), Partage->com_lirc.TID );
     if (Partage->com_lirc.TID) { pthread_join( Partage->com_lirc.TID, NULL ); }                                 /* Attente fin LIRC */

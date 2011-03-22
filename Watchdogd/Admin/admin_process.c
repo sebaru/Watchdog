@@ -88,11 +88,18 @@
        g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Library LIRC -> loaded = %s, running = %s\n",
+       g_snprintf( chaine, sizeof(chaine), " Library LIRC      -> loaded = %s, running = %s\n",
                    (Partage->com_lirc.dl_handle ? "YES" : "NO"),
                    (Partage->com_lirc.TID       ? "YES" : "NO")
                  );
        Write_admin ( client->connexion, chaine );
+
+       g_snprintf( chaine, sizeof(chaine), " Library TELLSTICK -> loaded = %s, running = %s\n",
+                   (Partage->com_tellstick.dl_handle ? "YES" : "NO"),
+                   (Partage->com_tellstick.TID       ? "YES" : "NO")
+                 );
+       Write_admin ( client->connexion, chaine );
+
      } else
     if ( ! strcmp ( commande, "stop" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : stop process" );
