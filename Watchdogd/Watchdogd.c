@@ -398,7 +398,7 @@
     gboolean fg;
 
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
-    printf(" Going to background : %s\n", (fg ? "FALSE", "TRUE") );
+    printf(" Going to background : %s\n", (fg ? "FALSE" : "TRUE") );
 
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );
     if (fd_lock<0)
