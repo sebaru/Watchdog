@@ -467,6 +467,8 @@
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
        memset( &Partage->com_onduleur, 0, sizeof(Partage->com_onduleur) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
+       memset( &Partage->com_lirc,     0, sizeof(Partage->com_lirc) );
+       memset( &Partage->com_tellstick,0, sizeof(Partage->com_tellstick) );
 
        Partage->Arret            = TOURNE;
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
