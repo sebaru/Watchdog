@@ -327,15 +327,15 @@
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
 
-    nbr_bytes = Config.taille_clef_rsa>>3;
-    chaine = g_malloc0( nbr_bytes );
-    if (!chaine)
-     { printf( " Not enough memory\n" );
-       exit(EXIT_OK);
-     }
-
     if (initrsa)
      { RSA *rsa;
+
+       nbr_bytes = Config.taille_clef_rsa>>3;
+       chaine = g_malloc0( nbr_bytes );
+       if (!chaine)
+        { printf( " Not enough memory\n" );
+          exit(EXIT_OK);
+        }
 
        rsa = RSA_generate_key( Config.taille_clef_rsa, 65537, NULL, NULL );
        if (!rsa)
@@ -398,6 +398,7 @@
     gboolean fg;
 
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
+    printf(" Going to background : %s\n", (fg ? "FALSE", "TRUE") );
 
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );
     if (fd_lock<0)
