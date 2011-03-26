@@ -456,21 +456,19 @@
                      break;
               }
 /****************************************** Envoi des chaines capteurs ************************************/
-             if (client->mode == VALIDE && client->bit_capteurs)
+             if (client->mode == VALIDE && client->bit_capteurs && client->date_next_send_capteur < Partage->top)
               { struct CAPTEUR *capteur;
                 GList *liste_capteur;
+                client->date_next_send_capteur = Partage->top + TEMPS_UPDATE_CAPTEUR;
                 liste_capteur = client->bit_capteurs;
                 while (liste_capteur)                                 /* Pour tous les capteurs du client */
                  { capteur = (struct CAPTEUR *)liste_capteur->data;
 
                    if (Tester_update_capteur(capteur))             /* Doit-on updater le capteur client ? */
                     { struct CMD_ETAT_BIT_CAPTEUR *etat;
-                      printf("Formatage capteur type %d bit %d\n", capteur->type, capteur->bit_controle );
                       etat = Formater_capteur(capteur);                /* Formatage de la chaine associée */
-                      if (etat)
-                       { printf("Envoi client capteur type %d bit %d\n", etat->type, etat->bit_controle );
-                                                                                          /* envoi client */
-                         Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
+                      if (etat)                                                           /* envoi client */
+                       { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
                                        (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
                          g_free(etat);                                            /* On libere la mémoire */
                        }

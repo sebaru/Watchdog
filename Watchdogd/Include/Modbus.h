@@ -33,6 +33,8 @@
  #define MBUS_READ_REGISTER        0x04
  #define MBUS_WRITE_REGISTER       0x06
 
+ #define MBUS_TEMPS_UPDATE_IO_ANA  2               /* Rafraichssiement des I/Os ANA toutes les 2 dixièmes */
+
  enum
   { MODBUS_GET_DESCRIPTION,
     MODBUS_INIT_WATCHDOG1,

@@ -1080,7 +1080,7 @@
               { Recuperer_reponse_module ( module ); }
              else 
               { if (module->date_next_eana<Partage->top)           /* Gestion décalée des I/O Analogiques */
-                 { module->date_next_eana = Partage->top + 50;                   /* Toutes les 5 secondes */
+                 { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;/* Tous les 2 dixieme */
                    module->do_check_eana = TRUE;
                  }
                 switch (module->mode)

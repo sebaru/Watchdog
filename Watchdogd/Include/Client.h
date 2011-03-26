@@ -35,8 +35,8 @@
  #include "Reseaux.h"
  #include "Utilisateur_DB.h"
 
- #define TAILLE_MACHINE  30                                          /* Taille max pour un nom d'hote DNS */
-
+ #define TAILLE_MACHINE            30                                /* Taille max pour un nom d'hote DNS */
+ #define TEMPS_UPDATE_CAPTEUR      20              /* Rafraichissement des capteurs toutes les 2 secondes */
  enum
   { ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
     ATTENTE_IDENT,                                /* Permet de demander l'identification de l'utilisateur */
@@ -92,7 +92,7 @@
     struct UTILISATEURDB *util;
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */
     guchar defaut;                                                            /* Defaut d'envoi au client */
-    time_t        seconde;                                                        /* Seconde de connexion */
+    time_t seconde;                                                               /* Seconde de connexion */
     guint  pulse;                                                                      /* pulse du client */
     struct
      { int fd;                                        /* descripteur du fichier actuellement en transfert */
@@ -123,7 +123,8 @@
     gint id_creation_plugin_dls;                             /* ID fichier du plugin en cours de creation */
     gint classe_icone;                                        /* Classe d'icone en cours de visualisation */
     gint num_supervision;                                 /* Numéro du synoptique en cours de supervision */
-    gint id_modbus_bornes_a_editer;              /* Numéro du module modbus dont il faut editer les bornes */
+    gint id_modbus_bornes_a_editer;             /* Numéro du module modbus dont il faut editer les bornes */
+    gint date_next_send_capteur;                         /* Date du prochain envoi des capteurs au client */
     struct CMD_WANT_SCENARIO_MOTIF sce;                     /* numéro du monostable du scenario a envoyer */
     struct CMD_REQUETE_HISTO_HARD requete;                   /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
