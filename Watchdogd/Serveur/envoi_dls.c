@@ -212,23 +212,24 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Compiler_source_dls( struct CLIENT *client, gint id )
-  { gint retour;
+  { struct CMD_GTK_MESSAGE erreur;
+    gint index_buffer_erreur;
+    gint retour;
 
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: Compilation module DLS", id );
     retour = Traduire_DLS( Config.log, (client ? TRUE : FALSE), id );
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: fin traduction", retour );
 
     if (retour == TRAD_DLS_ERROR_FILE && client)                  /* Retour de la traduction D.L.S vers C */
-     { struct CMD_GTK_MESSAGE erreur;
-       Info_n( Config.log, DEBUG_DLS,
+     { Info_n( Config.log, DEBUG_DLS,
                "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S", id );
        g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open file for compilation ID %d", id );
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
      }
 
+    index_buffer_erreur = 0;            /* On commence par remplir le début du buffer re remonté d'erreur */
     if ( (retour == TRAD_DLS_ERROR || retour == TRAD_DLS_WARNING) && client)
-     { struct CMD_GTK_MESSAGE erreur;
-       gint id_fichier;
+     { gint id_fichier;
        gchar log[20];
 
        Info_n( Config.log, DEBUG_DLS,
@@ -237,20 +238,20 @@
 
        id_fichier = open( log, O_RDONLY, 0 );
        if (id_fichier<0)
-        { g_snprintf( erreur.message, sizeof(erreur.message), "Impossible d'ouvrir le\nfichier de log de compilation" ); }
-       else { int nbr_car, index;
-              index = nbr_car = 0; 
-              while ( (nbr_car = read (id_fichier, erreur.message + index, sizeof(erreur.message)-1-index )) > 0 )
-               { index+=nbr_car; }
-              erreur.message[index] = 0;                                        /* Caractere NULL d'arret */
+        { g_snprintf( erreur.message, sizeof(erreur.message), "Impossible d'ouvrir le\nfichier de log de compilation" );
+          Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
+        }
+       else { int nbr_car;
+              nbr_car = 0; 
+              while ( (nbr_car = read (id_fichier, erreur.message + index_buffer_erreur,
+                                       sizeof(erreur.message)-1-index_buffer_erreur )) > 0 )
+               { index_buffer_erreur+=nbr_car; }
               close(id_fichier);
             }
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );
      }
 
     if (retour == TRAD_DLS_WARNING || retour == TRAD_DLS_OK)
-     { struct CMD_GTK_MESSAGE erreur;
-       gint pidgcc;
+     { gint pidgcc;
        pidgcc = fork();
        if (pidgcc<0)
         { struct CMD_GTK_MESSAGE erreur;
@@ -285,16 +286,20 @@
                "THRCompil: Proto_compiler_source_dls: gcc is down, OK", pidgcc );
 
 
-       pthread_mutex_lock( &Partage->com_dls.synchro );
+       pthread_mutex_lock( &Partage->com_dls.synchro );             /* Demande le reset du plugin à D.L.S */
        Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
                                                              GINT_TO_POINTER(id) );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
 
        if (client)
         { if (retour == TRAD_DLS_WARNING)
-           { g_snprintf( erreur.message, sizeof(erreur.message), "Compilation OK with Warnings\nReset plugin OK" ); }
+           { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
+                         "\n Compilation OK with Warnings\nReset plugin OK" );
+           }
           else
-           { g_snprintf( erreur.message, sizeof(erreur.message), "Compilation OK\nReset plugin OK" ); }
+           { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
+                         "\n Compilation OK\nReset plugin OK" );
+           }
           Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
                         (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
         }
