@@ -785,6 +785,38 @@
     else module->request = TRUE;                                              /* Une requete a élé lancée */
   }
 /**********************************************************************************************************/
+/* Interroger_sortie_ana: Envoie les informations liées aux sorties ANA du module                         */
+/* Entrée: le module à interroger                                                                         */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Interroger_sortie_ana( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint cpt_a, cpt_poid, cpt_byte, cpt, taille;
+
+    memset(&requete, 0, sizeof(requete) );                           /* Mise a zero globale de la requete */
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    taille                 = 0x0006 + (module->nbr_sortie_ana*2 + 1);
+    requete.taille         = htons( taille );                                                   /* taille */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_WRITE_MULTIPLE_REGISTER;
+    requete.adresse        = 0x00;
+    requete.nbr            = htons( module->nbr_sortie_ana );                                /* bit count */
+    requete.data[2]        = (module->nbr_sortie_ana*2);                                    /* Byte count */
+    cpt_a = module->modbus.min_s_ana;
+    for ( cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_ana; cpt++)
+      { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
+        requete.data [cpt_byte  ] = 0x30; /*Partage->aa[cpt_a].val_int>>5;*/
+        requete.data [cpt_byte+1] = 0x00; /*(Partage->aa[cpt_a].val_int & 0x1F)<<3;*/
+        cpt_a++; cpt_byte += 2;
+      }
+               
+    if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )/* Envoi de la requete (taille + header )*/
+     { Deconnecter_module( module ); }
+    else module->request = TRUE;                                              /* Une requete a élé lancée */
+  }
+/**********************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                          */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
@@ -846,6 +878,9 @@
                break;
           case MODBUS_SET_DO:
                module->mode = MODBUS_SET_AO;
+               break;
+          case MODBUS_SET_AO:
+               module->mode = MODBUS_GET_DI;
                break;
           case MODBUS_GET_DESCRIPTION:
                memset ( chaine, 0, sizeof(chaine) );
@@ -1104,8 +1139,7 @@
                                                 else module->mode = MODBUS_SET_AO;
                                                 break;
                    case MODBUS_SET_AO         : if (module->nbr_sortie_ana && module->do_check_eana)
-                                                 { /*Interroger_sortie_ana( module );*/
-                                                   module->mode = MODBUS_GET_DI; /* pour debug */
+                                                 { Interroger_sortie_ana( module );
                                                  }
                                                 else module->mode = MODBUS_GET_DI;
                                                 module->do_check_eana = FALSE;       /* Le check est fait */
