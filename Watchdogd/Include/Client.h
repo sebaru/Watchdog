@@ -92,7 +92,7 @@
     struct UTILISATEURDB *util;
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */
     guchar defaut;                                                            /* Defaut d'envoi au client */
-    time_t seconde;                                                               /* Seconde de connexion */
+    time_t date_connexion;                                                              /* Date connexion */
     guint  pulse;                                                                      /* pulse du client */
     struct
      { int fd;                                        /* descripteur du fichier actuellement en transfert */

@@ -28,12 +28,14 @@
 #ifndef _RS485_H_
  #define _RS485_H_
 
- #define FCT_IDENT      0x01
- #define FCT_ENTRE_TOR  0x02
- #define FCT_ENTRE_ANA  0x03
- #define FCT_SORTIE_TOR 0x04
- #define FCT_PING       0xFF
+ #define RS485_FCT_IDENT      0x01
+ #define RS485_FCT_ENTRE_TOR  0x02
+ #define RS485_FCT_ENTRE_ANA  0x03
+ #define RS485_FCT_SORTIE_TOR 0x04
+ #define RS485_FCT_PING       0xFF
  
+ #define RS485_TEMPS_UPDATE_IO_ANA  10                                /* Get IO/ANA toutes les secondes ! */
+
  #define NOM_TABLE_MODULE_RS485   "rs485"
  #define TAILLE_ENTETE  6
  #define TAILLE_DONNEES 10
@@ -62,7 +64,7 @@
 
     time_t date_requete;
     time_t date_retente;
-    time_t date_ana;
+    time_t date_next_get_ana;
   };
 
  struct COM_RS485                                                 /* Communication entre DLS et la RS485 */

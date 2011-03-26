@@ -115,7 +115,7 @@
 
               g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s\n",
                           i, client_srv->ident.version, client_srv->util->nom, client_srv->machine,
-                          client_srv->mode, client_srv->defaut, ctime(&client_srv->seconde) );
+                          client_srv->mode, client_srv->defaut, ctime(&client_srv->date_connexion) );
               Write_admin ( client->connexion, chaine );
 
               liste = liste->next;

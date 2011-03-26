@@ -404,7 +404,7 @@
 /**********************************************************************************************************/
  static void Envoyer_trame_want_inputANA( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_ana=
-     { 0x00, 0xFF, FCT_ENTRE_ANA, 0x00,
+     { 0x00, 0xFF, RS485_FCT_ENTRE_ANA, 0x00,
    	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
        0xFF, 0xFF
      };
@@ -417,7 +417,7 @@
 /**********************************************************************************************************/
  static void Envoyer_trame_want_inputTOR( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_tor=
-     { 0x00, 0xFF, FCT_ENTRE_TOR, 0x00,
+     { 0x00, 0xFF, RS485_FCT_ENTRE_TOR, 0x00,
    	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
        0xFF, 0xFF
      };
@@ -494,14 +494,14 @@
      }
 
     switch( trame->fonction )
-     { case FCT_IDENT: printf("bouh\n");
+     { case RS485_FCT_IDENT: printf("bouh\n");
 	               trame_ident = (struct TRAME_RS485_IDENT *)trame->donnees;
                        printf("Recu Ident de %d: version %d.%d, nbr ana %d, nbr tor %d (%d choc), sortie %d\n",
                               trame->source, trame_ident->version_major, trame_ident->version_minor,
                               trame_ident->nbr_entre_ana, trame_ident->nbr_entre_tor,
                               trame_ident->nbr_entre_choc, trame_ident->nbr_sortie_tor );
                        break;
-       case FCT_ENTRE_TOR:
+       case RS485_FCT_ENTRE_TOR:
              { int e, cpt, nbr_e;
                nbr_e = module->rs485.e_max - module->rs485.e_min + 1;
                for( cpt = 0; cpt<nbr_e; cpt++)
@@ -510,7 +510,7 @@
                 }
              }
 	    break;
-       case FCT_ENTRE_ANA:
+       case RS485_FCT_ENTRE_ANA:
              { int cpt, nbr_ea;
                if (module->rs485.ea_min == -1) nbr_ea = 0;
                else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
@@ -626,12 +626,12 @@
 
           if ( attente_reponse == FALSE )
            { if ( module->date_retente <= Partage->top )                         /* module banni ou non ? */
-              { if (module->date_ana > Partage->top)                        /* Ana toutes les 10 secondes */
+              { if (module->date_next_get_ana > Partage->top)               /* Ana toutes les 10 secondes */
                  { Envoyer_trame_want_inputTOR( module, fd_rs485 );
                  }
                 else
                  { Envoyer_trame_want_inputANA( module, fd_rs485 );
-                   module->date_ana = Partage->top + 50;           /* Prochain update ana dans 2 secondes */
+                   module->date_next_get_ana = Partage->top + RS485_TEMPS_UPDATE_IO_ANA;/* Prochain update ana dans 2 secondes */
                  }
 
                 usleep(1);

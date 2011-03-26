@@ -202,7 +202,7 @@
             else { g_snprintf( client->machine, TAILLE_MACHINE, "%s",               /* Ou bien Adresse IP */
                                (gchar *)inet_ntoa(distant.sin_addr) );
                  }
-       time( &client->seconde );                       /* Enregistrement de la date de debut de connexion */
+       time( &client->date_connexion );                /* Enregistrement de la date de debut de connexion */
        client->pulse = Partage->top;
        client->Id_serveur = ss_id;
        client->courbe.id = -1;
