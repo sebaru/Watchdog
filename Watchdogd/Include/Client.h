@@ -37,6 +37,7 @@
 
  #define TAILLE_MACHINE            30                                /* Taille max pour un nom d'hote DNS */
  #define TEMPS_UPDATE_CAPTEUR      20              /* Rafraichissement des capteurs toutes les 2 secondes */
+ #define TEMPS_PULSE               20                                       /* Envoi d'un pulse au client */
  enum
   { ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
     ATTENTE_IDENT,                                /* Permet de demander l'identification de l'utilisateur */
