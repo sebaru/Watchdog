@@ -791,7 +791,7 @@
 /**********************************************************************************************************/
  static void Interroger_sortie_ana( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
-    gint cpt_a, cpt_poid, cpt_byte, cpt, taille;
+    gint cpt_a, cpt_byte, cpt, taille;
 
     memset(&requete, 0, sizeof(requete) );                           /* Mise a zero globale de la requete */
     module->transaction_id++;
