@@ -264,7 +264,8 @@
            }
         }
        else if (!pidgcc)
-        { gchar source[80], cible[80];
+        { struct CMD_GTK_MESSAGE erreur;
+          gchar source[80], cible[80];
           g_snprintf( source, sizeof(source), "%d.c", id );
           g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
           Info( Config.log, DEBUG_DLS, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
@@ -294,11 +295,11 @@
        if (client)
         { if (retour == TRAD_DLS_WARNING)
            { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
-                         "\n Compilation OK with Warnings\nReset plugin OK" );
+                         "\n -> Compilation OK with Warnings\nReset plugin OK" );
            }
           else
            { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
-                         "\n Compilation OK\nReset plugin OK" );
+                         "\n -> Compilation OK\nReset plugin OK" );
            }
           Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
                         (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
