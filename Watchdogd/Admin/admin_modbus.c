@@ -67,6 +67,7 @@
                    (int)module->date_retente, (int)module->date_next_eana
                  );
        Write_admin ( client->connexion, chaine );
+       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Partage->com_modbus.synchro );
   }
