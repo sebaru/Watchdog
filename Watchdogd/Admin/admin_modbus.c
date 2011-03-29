@@ -46,7 +46,7 @@
 /**********************************************************************************************************/
  void Admin_modbus_list ( struct CLIENT_ADMIN *client )
   { GList *liste_modules, *liste_bornes;
-    gchar chaine[128];
+    gchar chaine[512];
 
     pthread_mutex_lock( &Partage->com_modbus.synchro );
     liste_modules = Partage->com_modbus.Modules_MODBUS;
