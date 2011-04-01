@@ -264,6 +264,14 @@
        return(FALSE);
      }
 
+    Partage->com_tellstick.Admin_tellstick_learn = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_learn" );
+    if (!Partage->com_tellstick.Admin_tellstick_learn)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_learn does not exist") );
+       dlclose( Partage->com_tellstick.dl_handle );
+       Partage->com_tellstick.dl_handle = NULL;
+       return(FALSE);
+     }
+
     if ( pthread_create( &Partage->com_tellstick.TID, NULL, (void *)Partage->com_tellstick.Run_tellstick, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
        return(FALSE);

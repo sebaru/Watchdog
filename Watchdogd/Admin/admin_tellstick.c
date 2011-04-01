@@ -36,18 +36,19 @@
  void Admin_tellstick ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
-    if ( ! strcmp ( commande, "start" ) )
-     {  /**/
-
+    if ( ! strcmp ( commande, "learn" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Partage->com_tellstick.Admin_tellstick_learn(client, num);
      } else if ( (! strcmp ( commande, "list" )) && Partage->com_tellstick.Admin_tellstick_list )
      { Partage->com_tellstick.Admin_tellstick_list(client);
      } else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'TELLSTICK'\n" );
        Write_admin ( client->connexion,
-                     "  ************         - Start a thread (arch,rs,mbus,sms,audio,dls,onduleur,tellstick)\n" );
+                     "  learn id             - Envoie une commande LEARN au device\n" );
        Write_admin ( client->connexion,
                      "  **********           - Stop all thread\n" );
        Write_admin ( client->connexion,

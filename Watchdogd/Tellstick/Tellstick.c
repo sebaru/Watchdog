@@ -63,6 +63,29 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
+ void Admin_tellstick_learn ( struct CLIENT_ADMIN *client, gint num )
+  { int methods;
+    gchar chaine[128];
+
+    tdInit();
+
+    methods = tdMethods( num, TELLSTICK_LEARN );                                 /* Get methods of device */
+
+    if ( methods | TELLSTICK_LEARN )
+     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Learning", num );
+       tdLearn ( num );
+     }
+
+    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Learning of device = %d\n", num );
+    Write_admin ( client->connexion, chaine );
+
+    tdClose();
+  }
+/**********************************************************************************************************/
+/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
  void Admin_tellstick_list ( struct CLIENT_ADMIN *client )
   { int nbrDevice, i, supportedMethods, methods;
     gchar chaine[128];
