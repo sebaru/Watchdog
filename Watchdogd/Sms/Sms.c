@@ -130,7 +130,10 @@
              num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
              Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Recu SMS", (gchar *)sms.user_data[0].u.text );
              Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm:       de", sms.remote.number );
-             Envoyer_commande_dls ( num_bit );                                /* Activation du monostable */
+             if ( Config.sms_m_min <= num_bit && num_bit <= Config.sms_m_max)
+              { Envoyer_commande_dls ( num_bit ); }                           /* Activation du monostable */ 
+             else Info_n ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: permission denied M number", num_bit );
+
            }
           else
            { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Wrong CDE", (gchar *)sms.user_data[0].u.text );

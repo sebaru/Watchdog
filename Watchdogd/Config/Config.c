@@ -109,6 +109,12 @@
        else
         { g_snprintf( Config.sms_telephone, sizeof(Config.sms_telephone), "%s", DEFAUT_SMS_TELEPHONE  ); }
 
+       Config.sms_m_min          = g_key_file_get_integer ( gkf, "TELLSTICK", "min_m", NULL );
+       if (!Config.sms_m_min) Config.sms_m_min = DEFAUT_SMS_M_MIN;
+
+       Config.sms_m_max          = g_key_file_get_integer ( gkf, "TELLSTICK", "max_m", NULL );
+       if (!Config.sms_m_max) Config.sms_m_max = DEFAUT_SMS_M_MAX;
+
 /********************************************* Partie SERVER **********************************************/
        Config.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!Config.port) Config.port = DEFAUT_PORT;
