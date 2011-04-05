@@ -67,8 +67,6 @@
   { int methods;
     gchar chaine[128];
 
-    tdInit();
-
     methods = tdMethods( num, TELLSTICK_LEARN );                                 /* Get methods of device */
 
     if ( methods | TELLSTICK_LEARN )
@@ -78,8 +76,6 @@
 
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Learning of device = %d\n", num );
     Write_admin ( client->connexion, chaine );
-
-    tdClose();
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
@@ -89,8 +85,6 @@
  void Admin_tellstick_list ( struct CLIENT_ADMIN *client )
   { int nbrDevice, i, supportedMethods, methods;
     gchar chaine[128];
-
-    tdInit();
 
     nbrDevice = tdGetNumberOfDevices();
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Number of devices = %d\n", nbrDevice );
@@ -108,12 +102,13 @@
        methods = tdMethods( id, supportedMethods );
 
        g_snprintf( chaine, sizeof(chaine),
-                   "   Tellstick [%d] -> name=%s, proto=%s, house=%s, unit=%s, methods=%s-%s-%s-%s\n",
-                   id, name, proto, house, unit,
+                   "   Tellstick [%d] -> proto=%s, house=%s, unit=%s, methods=%s-%s-%s-%s, name=%s\n",
+                   id, proto, house, unit,
                    ( methods & TELLSTICK_TURNON  ? "ON"    : "  "     ),
                    ( methods & TELLSTICK_TURNOFF ? "OFF"   : "   "    ),
                    ( methods & TELLSTICK_BELL    ? "BELL"  : "    "   ),
-                   ( methods & TELLSTICK_LEARN   ? "LEARN" : "      " )
+                   ( methods & TELLSTICK_LEARN   ? "LEARN" : "      " ),
+                   name
                  );
        Write_admin ( client->connexion, chaine );
        tdReleaseString(name);
@@ -121,7 +116,6 @@
        tdReleaseString(house);
        tdReleaseString(unit);
      }
-    tdClose();
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Tellstick                                                          */
