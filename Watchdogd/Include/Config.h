@@ -57,7 +57,8 @@
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
     gchar crypto_key[TAILLE_CRYPTO_KEY+1];            /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
-    gchar sms_telephone[TAILLE_NUM_TELEPHONE+1];                /* Numero de telephone pour les envoi SMS */
+    gchar sms_telephone1[TAILLE_NUM_TELEPHONE+1];               /* Numero de telephone pour les envoi SMS */
+    gchar sms_telephone2[TAILLE_NUM_TELEPHONE+1];               /* Numero de telephone pour les envoi SMS */
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
     gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
@@ -98,10 +99,10 @@
  #define DEFAUT_SMSBOX_USERNAME         "user"
  #define DEFAUT_SMSBOX_PASSWORD         "changeit"
  #define DEFAUT_SMS_TELEPHONE           "01"
- #define DEFAUT_TELLSTICK_A_MIN         -1
- #define DEFAUT_TELLSTICK_A_MAX         -1
  #define DEFAUT_SMS_M_MIN               -1
  #define DEFAUT_SMS_M_MAX               -1
+ #define DEFAUT_TELLSTICK_A_MIN         -1
+ #define DEFAUT_TELLSTICK_A_MAX         -1
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );

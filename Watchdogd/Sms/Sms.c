@@ -158,7 +158,7 @@
 /* Entrée: le message à envoyer sateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static void Envoi_sms_gsm ( struct CMD_TYPE_MESSAGE *msg )
+ static void Envoi_sms_gsm ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
   { struct gn_statemachine *state;
     gn_error error;
     gn_data data;
@@ -179,7 +179,7 @@
     gn_sms_default_submit(&sms);                                             /* The memory is zeroed here */
 
     memset(&sms.remote.number, 0, sizeof(sms.remote.number));
-    strncpy(sms.remote.number, Config.sms_telephone, sizeof(sms.remote.number) - 1);    /* Number a m'man */
+    strncpy(sms.remote.number, telephone, sizeof(sms.remote.number) - 1);               /* Number a m'man */
     if (sms.remote.number[0] == '+') 
          { sms.remote.type = GN_GSM_NUMBER_International; }
     else { sms.remote.type = GN_GSM_NUMBER_Unknown; }
@@ -224,7 +224,7 @@
 /* Entrée: le message à envoyer sateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static void Envoi_sms_smsbox ( struct CMD_TYPE_MESSAGE *msg )
+ static void Envoi_sms_smsbox ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
   { gchar erreur[CURL_ERROR_SIZE+1];
     struct curl_httppost *formpost;
     struct curl_httppost *lastptr;
@@ -246,7 +246,7 @@
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "dest",
-                  CURLFORM_COPYCONTENTS, Config.sms_telephone,
+                  CURLFORM_COPYCONTENTS, telephone,
                   CURLFORM_END); 
     if (Partage->top < TOP_MIN_ENVOI_SMS)
      { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi trop tot !!", msg->libelle_sms );
@@ -276,7 +276,9 @@
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
        res = curl_easy_perform(curl);
        if (!res)
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS OK", msg->libelle_sms ); }
+        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS OK", msg->libelle_sms );
+          Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox:         vers", telephone );
+        }
        else
         { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL", erreur); }
      }
@@ -331,9 +333,15 @@
 
        if (Partage->top < TOP_MIN_ENVOI_SMS)
         { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi trop tot !!", msg->libelle_sms ); }
-       else if (msg->sms == MSG_SMS_GSM) Envoi_sms_gsm ( msg );
+       else if (msg->sms == MSG_SMS_GSM)
+        { if ( strcmp(Config.sms_telephone1, DEFAUT_SMS_TELEPHONE) ) Envoi_sms_gsm ( msg, Config.sms_telephone1 );
+          if ( strcmp(Config.sms_telephone2, DEFAUT_SMS_TELEPHONE) ) Envoi_sms_gsm ( msg, Config.sms_telephone2 );
+        }
 /**************************************** Envoi en mode SMSBOX ********************************************/
-       else if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox ( msg );
+       else if (msg->sms == MSG_SMS_SMSBOX)
+        { if ( strcmp(Config.sms_telephone1, DEFAUT_SMS_TELEPHONE) ) Envoi_sms_smsbox ( msg, Config.sms_telephone1 );
+          if ( strcmp(Config.sms_telephone2, DEFAUT_SMS_TELEPHONE) ) Envoi_sms_smsbox ( msg, Config.sms_telephone2 );
+        }
 
        pthread_mutex_lock( &Partage->com_sms.synchro );
        Partage->com_sms.liste_sms = g_list_remove ( Partage->com_sms.liste_sms, msg );

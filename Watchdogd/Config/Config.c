@@ -103,16 +103,22 @@
        else
         { g_snprintf( Config.smsbox_password, sizeof(Config.smsbox_password), "%s", DEFAUT_SMSBOX_PASSWORD  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "SMS", "sms_telephone", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "SMS", "sms_telephone1", NULL );
        if (chaine)
-        { g_snprintf( Config.sms_telephone, sizeof(Config.sms_telephone), "%s", chaine ); g_free(chaine); }
+        { g_snprintf( Config.sms_telephone1, sizeof(Config.sms_telephone1), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.sms_telephone, sizeof(Config.sms_telephone), "%s", DEFAUT_SMS_TELEPHONE  ); }
+        { g_snprintf( Config.sms_telephone1, sizeof(Config.sms_telephone1), "%s", DEFAUT_SMS_TELEPHONE  ); }
 
-       Config.sms_m_min          = g_key_file_get_integer ( gkf, "TELLSTICK", "min_m", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "SMS", "sms_telephone2", NULL );
+       if (chaine)
+        { g_snprintf( Config.sms_telephone2, sizeof(Config.sms_telephone2), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.sms_telephone2, sizeof(Config.sms_telephone2), "%s", DEFAUT_SMS_TELEPHONE  ); }
+
+       Config.sms_m_min          = g_key_file_get_integer ( gkf, "SMS", "min_m", NULL );
        if (!Config.sms_m_min) Config.sms_m_min = DEFAUT_SMS_M_MIN;
 
-       Config.sms_m_max          = g_key_file_get_integer ( gkf, "TELLSTICK", "max_m", NULL );
+       Config.sms_m_max          = g_key_file_get_integer ( gkf, "SMS", "max_m", NULL );
        if (!Config.sms_m_max) Config.sms_m_max = DEFAUT_SMS_M_MAX;
 
 /********************************************* Partie SERVER **********************************************/
@@ -266,7 +272,8 @@
     Info_n( Config.log, DEBUG_CONFIG, "Config single               ", Config.single );
     Info_c( Config.log, DEBUG_CONFIG, "Config smsbox username      ", Config.smsbox_username );
     Info_c( Config.log, DEBUG_CONFIG, "Config smsbox password      ", Config.smsbox_password );
-    Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone        ", Config.sms_telephone );
+    Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone1       ", Config.sms_telephone1 );
+    Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone2       ", Config.sms_telephone2 );
     Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(min)     ", Config.tellstick_a_min );
     Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(max)     ", Config.tellstick_a_max );
   }
