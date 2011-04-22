@@ -32,6 +32,7 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
+ #include <locale.h>
 
  #include "watchdogd.h"
 /**********************************************************************************************************/
@@ -176,11 +177,12 @@
      { Info( log, DEBUG_SERVEUR, "Modifier_cpt_impDB: Normalisation unite impossible" );
        return(FALSE);
      }
-
+    setlocale( LC_NUMERIC, "C" );                                      /* Pour le formatage du %f correct */
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "unite='%s',multi='%4.3f',type_ci='%d' WHERE id_mnemo=%d",
+                "unite='%s',multi='%f',type_ci='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_CPT_IMP, unite, cpt_imp->multi, cpt_imp->type, cpt_imp->id_mnemo );
+    setlocale( LC_NUMERIC, "" );
     g_free(unite);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
