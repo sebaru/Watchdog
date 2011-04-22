@@ -106,10 +106,16 @@
             break;
        case MNEMO_CPT_IMP:
              { gdouble valeur;
+               gchar *format;
                valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
+               valeur *= Partage->ci[capteur->bit_controle].cpt_impdb.multi;      /* Multiplication ! */
+               switch (Partage->ci[capteur->bit_controle].cpt_impdb.type)
+                { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
+                  default:              format = "%8.2f %s"; break;
+                }
                g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                           "%8.2f %s", valeur,
-                           Unite_vers_string(Partage->ci[capteur->bit_controle].cpt_impdb.unite)
+                           format, valeur,
+                           Partage->ci[capteur->bit_controle].cpt_impdb.unite
                          );
                capteur->val_ech = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
              }
