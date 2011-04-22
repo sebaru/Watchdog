@@ -28,6 +28,9 @@
 #ifndef _RESEAUX_CPT_IMP_H_
  #define _RESEAUX_CPT_IMP_H_
 
+ #define NBR_CARAC_UNITE_CPT_IMP       8
+ #define NBR_CARAC_UNITE_CPT_IMP_UTF8  (2*NBR_CARAC_UNITE_CPT_IMP)
+
  enum
   { CI_TOTALISATEUR,
     CI_MOYENNEUR_SEC,
@@ -38,8 +41,10 @@
  struct CMD_TYPE_OPTION_COMPTEUR_IMP
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
     gfloat valeur;                                                                  /* Valeur du compteur */
-    guint  unite;                                                                         /* Km, h, ° ... */
-    guint  type;                                                                          /* Km, h, ° ... */
+    guint  type;                                                                /* Totalisateur/Moyenneur */
+    gfloat multi;                                                                       /* Multiplicateur */
+    gchar  unite[NBR_CARAC_UNITE_CPT_IMP_UTF8+1];                                         /* Km, h, ° ... */
+
                                                                                         /* Vient du mnemo */
     guint  num;                                                                     /* Numero du compteur */
   };

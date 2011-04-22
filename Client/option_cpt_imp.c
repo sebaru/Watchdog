@@ -42,7 +42,8 @@
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Entry_num;                               /* Numéro du cpt_imp en cours d'édition/ajout */
- static GtkWidget *Option_unite;                                   /* Unite correspondante à l'entrée ana */
+ static GtkWidget *Entry_unite;                                    /* Unite correspondante à l'entrée ana */
+ static GtkWidget *Spin_multi;                                              /* Multiplicateur d'affichage */
  static GtkWidget *Option_type;                            /* Type de capteur (totalisateur/moyenneur/..) */
  static struct CMD_TYPE_OPTION_BIT_INTERNE Cpt;                                  /* EA en cours d'édition */
 
@@ -61,9 +62,10 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_editer_option_cpt_imp ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { Cpt.cpt_imp.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
+  { g_snprintf( Cpt.cpt_imp.unite, sizeof(Cpt.cpt_imp.unite),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_unite) ) );
     Cpt.cpt_imp.type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type ) );
-
+    Cpt.cpt_imp.multi = gtk_spin_button_get_value( GTK_SPIN_BUTTON(Spin_multi) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -107,7 +109,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 3, 2, TRUE );
+    table = gtk_table_new( 4, 2, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -122,11 +124,15 @@
     i++;
     texte = gtk_label_new( _("Unit") );                                              /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Option_unite = gtk_combo_box_new_text();
-    for ( cpt=0; cpt<NBR_TYPE_UNITE; cpt++ )
-     { gtk_combo_box_insert_text( GTK_COMBO_BOX(Option_unite), cpt, Unite_vers_string(cpt) );
-     }
-    gtk_table_attach_defaults( GTK_TABLE(table), Option_unite, 1, 2, i, i+1 );
+    Entry_unite = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_unite), NBR_CARAC_UNITE_CPT_IMP );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_unite, 1, 2, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Multi") );                                              /* Unite du compteur */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_multi = gtk_spin_button_new_with_range( 0.001, 1000.0, 0.1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_multi, 1, 2, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Type") );                                              /* Unite du compteur */
@@ -142,7 +148,8 @@
        Cpt.cpt_imp.id_mnemo = edit_cpt_imp->eana.id_mnemo;
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CPT_IMP), edit_cpt_imp->cpt_imp.num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_cpt_imp->cpt_imp.unite );
+       gtk_entry_set_text( GTK_ENTRY(Entry_unite), edit_cpt_imp->cpt_imp.unite );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), edit_cpt_imp->cpt_imp.multi );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  edit_cpt_imp->cpt_imp.type  );
      }
     else { gtk_widget_grab_focus( Entry_num );

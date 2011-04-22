@@ -120,8 +120,8 @@
             break;
        case MNEMO_CPT_IMP:
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                        "INSERT INTO %s(val,unite,id_mnemo,type_ci) VALUES "
-                        "('%d','%d','%d','%d')", NOM_TABLE_CPT_IMP, 0, 0, last_id, 0 );
+                        "INSERT INTO %s(val,id_mnemo,type_ci,multi,unite) VALUES "
+                        "('%d','%d','%d','%f','%s')", NOM_TABLE_CPT_IMP, 0, last_id, 0, 1.0, "n/a" );
             Lancer_requete_SQL ( log, db, requete );
             break;
        default:

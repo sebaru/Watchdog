@@ -118,8 +118,9 @@ CREATE TABLE IF NOT EXISTS `dls_cpth` (
 CREATE TABLE IF NOT EXISTS `dls_cpt_imp` (
   `id_mnemo` int(11) NOT NULL,
   `val` float NOT NULL,
-  `unite` int(11) NOT NULL,
   `type_ci` int(11) NOT NULL,
+  `multi` float NOT NULL DEFAULT '1',
+  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -817,6 +818,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `rouge` int(11) NOT NULL DEFAULT '0',
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
+  `layer` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
