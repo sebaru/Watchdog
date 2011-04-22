@@ -119,7 +119,7 @@
        cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->num      = atoi(db->row[2]);
        cpt_imp->type     = atoi(db->row[3]);
-       cpt_imp->multi    = atoi(db->row[4]);
+       cpt_imp->multi    = atof(db->row[4]);
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     return(cpt_imp);
@@ -157,7 +157,7 @@
        cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->num      = atoi(db->row[2]);
        cpt_imp->type     = atoi(db->row[3]);
-       cpt_imp->multi    = atoi(db->row[4]);
+       cpt_imp->multi    = atof(db->row[4]);
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     Liberer_resultat_SQL ( log, db );

@@ -131,7 +131,7 @@
     i++;
     texte = gtk_label_new( _("Multi") );                                              /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Spin_multi = gtk_spin_button_new_with_range( 0.001, 1000.0, 0.1 );
+    Spin_multi = gtk_spin_button_new_with_range( 0.001, 1000.0, 0.001 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_multi, 1, 2, i, i+1 );
 
     i++;
