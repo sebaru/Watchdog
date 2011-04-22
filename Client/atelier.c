@@ -318,11 +318,13 @@ printf("fin Detruire page atelier\n");
 
     infos->Check_grid = gtk_check_button_new_with_label( _("Grille magnetique") );
     gtk_box_pack_start( GTK_BOX(hboite), infos->Check_grid, FALSE, FALSE, 0 );
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_grid), TRUE );
     g_signal_connect_swapped( G_OBJECT(infos->Check_grid), "toggled",
                               G_CALLBACK(Menu_grille_magnetique), infos );
 
     infos->Spin_grid = gtk_spin_button_new_with_range( 1.0, 20.0, 5.0 );
     gtk_box_pack_start( GTK_BOX(hboite), infos->Spin_grid, FALSE, FALSE, 0 );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(infos->Spin_grid), 10.0 );
     Menu_grille_magnetique( infos );
 
 /******************************************* Ajout de motifs **********************************************/

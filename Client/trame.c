@@ -833,10 +833,10 @@ printf(" dX = %d dY = %d \n", taillex, tailley );*/
      { for ( x=grille; x<taille_x; x+=grille )
         { for ( y=grille; y<taille_y; y+=grille )
            { goo_canvas_polyline_new_line (trame->canvas_root, x, y-1.0, x, y+1.0, 
-                                           "stroke_color", "dark_blue", NULL );
+                                           "stroke_color", "blue", NULL );
 
              goo_canvas_polyline_new_line (trame->canvas_root, x-1.0, y, x+1.0, y, 
-                                           "stroke_color", "darkblue", NULL );
+                                           "stroke_color", "blue", NULL );
            }
         }
      }

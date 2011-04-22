@@ -56,7 +56,7 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
-  { gchar requete[512];
+  { gchar requete[1024];
     gchar *libelle;
 
     libelle = Normaliser_chaine ( log, motif->libelle );                 /* Formatage correct des chaines */
@@ -67,7 +67,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(icone,syn,libelle,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich) VALUES "
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer) VALUES "
                 "('%d','%d','%s','%d','%d','%d','%d','%d','%f','%f','%f','%d','%d','%d','%d','%d','%d','%d','%d')",
                 NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->gid,
