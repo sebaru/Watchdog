@@ -108,7 +108,7 @@
              { gdouble valeur;
                gchar *format;
                valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
-               valeur *= Partage->ci[capteur->bit_controle].cpt_impdb.multi;      /* Multiplication ! */
+               valeur = valeur * (gdouble)Partage->ci[capteur->bit_controle].cpt_impdb.multi;      /* Multiplication ! */
                switch (Partage->ci[capteur->bit_controle].cpt_impdb.type)
                 { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
                   default:              format = "%8.2f %s"; break;
