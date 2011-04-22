@@ -51,6 +51,8 @@
  static void Raise_to_top ( void )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
+    GList *liste;
+    gint layer;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
@@ -58,6 +60,19 @@
 
     switch (infos->Selection.type)
      { case TYPE_MOTIF      : goo_canvas_item_raise ( infos->Selection.trame_motif->item_groupe, NULL );
+                              liste = infos->Trame_atelier->trame_items;
+                              layer = 0;
+                              while (liste)
+                               { struct TRAME_ITEM_MOTIF *trame_motif;
+                                 switch ( *((gint *)liste->data) )
+                                  { case TYPE_MOTIF:
+                                         trame_motif = ((struct TRAME_ITEM_MOTIF *)liste->data);
+                                         if (trame_motif->motif->layer > layer) layer = trame_motif->motif->layer;
+                                         break;
+                                  }
+                                 liste = liste->next;
+                               }
+                              infos->Selection.trame_motif->motif->layer = layer + 1;
                               break;
        case TYPE_CAPTEUR    : goo_canvas_item_raise ( infos->Selection.trame_capteur->item_groupe, NULL );
                               break;
@@ -67,13 +82,14 @@
      }
   }
 /**********************************************************************************************************/
-/* Raise_to_top : Raise le item selectionné                                                               */
+/* Lower_to_bottom : Lower le motif au fond                                                               */
 /* Entrée: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Lower_to_bottom ( void )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
+    GList *liste;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
@@ -81,6 +97,18 @@
 
     switch (infos->Selection.type)
      { case TYPE_MOTIF      : goo_canvas_item_lower ( infos->Selection.trame_motif->item_groupe, NULL );
+                              liste = infos->Trame_atelier->trame_items;
+                              while (liste)
+                               { struct TRAME_ITEM_MOTIF *trame_motif;
+                                 switch ( *((gint *)liste->data) )
+                                  { case TYPE_MOTIF:
+                                         trame_motif = ((struct TRAME_ITEM_MOTIF *)liste->data);
+                                         trame_motif->motif->layer++;
+                                         break;
+                                  }
+                                 liste = liste->next;
+                               }
+                              infos->Selection.trame_motif->motif->layer = 0;
                               break;
        case TYPE_CAPTEUR    : goo_canvas_item_lower ( infos->Selection.trame_capteur->item_groupe, NULL );
                               break;
