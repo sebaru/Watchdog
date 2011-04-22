@@ -58,6 +58,7 @@
     guchar  vert0;
     guchar  bleu0;
     gchar   type_gestion;                                                  /* Statique/dynamique/cyclique */
+    gint    layer;
   };
 
 /*********************************************** Gestion des commentaires *********************************/

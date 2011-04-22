@@ -68,12 +68,14 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(icone,syn,libelle,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich) VALUES "
-                "(%d,%d,'%s',%d,%d,%d,%d,%d,'%f','%f','%f',%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MOTIF,
+                "('%d','%d','%s','%d','%d','%d','%d','%d','%f','%f','%f','%d','%d','%d','%d','%d','%d','%d','%d')",
+                NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->gid,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
-                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich );
+                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich,
+                motif->layer );
     g_free(libelle);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -81,7 +83,7 @@
     return( Recuperer_last_ID_SQL( log, db ) );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_motifDB: Recupération de la liste des motifs d'un synoptique                                 */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -90,13 +92,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich"
-                " FROM %s WHERE syn=%d ORDER BY id", NOM_TABLE_MOTIF, id_syn );
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
+                " FROM %s WHERE syn='%d' ORDER BY layer", NOM_TABLE_MOTIF, id_syn );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_motifDB_suite : Contination de la recupération de la liste des motifs d'un synoptique        */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -131,6 +133,7 @@
        motif->vert0        = atoi(db->row[15]);
        motif->bleu0        = atoi(db->row[16]);
        motif->rafraich     = atoi(db->row[18]);
+       motif->layer        = atoi(db->row[19]);
      }
     return(motif);
   }
@@ -145,8 +148,8 @@
 
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich "
+                "SELECT id,libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
                 "FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -162,25 +165,26 @@
     motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info( log, DEBUG_SERVEUR, "Rechercher_motifDB: Erreur allocation mémoire" );
     else
-     { memcpy( &motif->libelle, db->row[0], sizeof(motif->libelle) );        /* Recopie dans la structure */
-       motif->id           = id;
-       motif->icone_id     = atoi(db->row[1]);                              /* Correspond au fichier .gif */
-       motif->syn_id       = atoi(db->row[2]);
-       motif->gid          = atoi(db->row[3]);                   /* Nom du groupe d'appartenance du motif */
-       motif->bit_controle = atoi(db->row[4]);                                              /* Ixxx, Cxxx */
-       motif->bit_clic     = atoi(db->row[5]);/* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->bit_clic2    = atoi(db->row[16]);  /* Bit à activer quand on clic avec bouton gauche souris */
-       motif->position_x   = atoi(db->row[6]);                               /* en abscisses et ordonnées */
-       motif->position_y   = atoi(db->row[7]);
-       motif->largeur      = atof(db->row[8]);                     /* Taille de l'image sur le synoptique */
-       motif->hauteur      = atof(db->row[9]);
-       motif->angle        = atof(db->row[10]);
-       motif->type_dialog  = atoi(db->row[11]);  /* Type de la boite de dialogue pour le clic de commande */
-       motif->type_gestion = atoi(db->row[12]);              
-       motif->rouge0       = atoi(db->row[13]);
-       motif->vert0        = atoi(db->row[14]);
-       motif->bleu0        = atoi(db->row[15]);
-       motif->rafraich     = atoi(db->row[17]);
+     { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );        /* Recopie dans la structure */
+       motif->id           = atoi(db->row[0]);
+       motif->icone_id     = atoi(db->row[2]);                              /* Correspond au fichier .gif */
+       motif->syn_id       = atoi(db->row[3]);
+       motif->gid          = atoi(db->row[4]);                   /* Nom du groupe d'appartenance du motif */
+       motif->bit_controle = atoi(db->row[5]);                                              /* Ixxx, Cxxx */
+       motif->bit_clic     = atoi(db->row[6]);/* Bit à activer quand on clic avec le bouton gauche souris */
+       motif->bit_clic2    = atoi(db->row[17]);  /* Bit à activer quand on clic avec bouton gauche souris */
+       motif->position_x   = atoi(db->row[7]);                               /* en abscisses et ordonnées */
+       motif->position_y   = atoi(db->row[8]);
+       motif->largeur      = atof(db->row[9]);                     /* Taille de l'image sur le synoptique */
+       motif->hauteur      = atof(db->row[10]);
+       motif->angle        = atof(db->row[11]);
+       motif->type_dialog  = atoi(db->row[12]);  /* Type de la boite de dialogue pour le clic de commande */
+       motif->type_gestion = atoi(db->row[13]);              
+       motif->rouge0       = atoi(db->row[14]);
+       motif->vert0        = atoi(db->row[15]);
+       motif->bleu0        = atoi(db->row[16]);
+       motif->rafraich     = atoi(db->row[18]);
+       motif->layer        = atoi(db->row[19]);
      }
     return(motif);
   }
@@ -201,15 +205,16 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "icone=%d,libelle='%s',gid=%d,bitctrl=%d,bitclic=%d,posx=%d,posy=%d,larg='%f',"
-                "haut='%f',angle='%f',dialog=%d,gestion=%d,rouge=%d,vert=%d,bleu=%d,bitclic2=%d,"
-                "rafraich=%d"
+                "libelle='%s',gid='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%f',"
+                "haut='%f',angle='%f',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',"
+                "rafraich='%d',layer='%d'"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
-                motif->icone_id, libelle, motif->gid,
+                libelle, motif->gid,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
                 motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich,
+                motif->layer,
                 motif->id );
     g_free(libelle);
 
