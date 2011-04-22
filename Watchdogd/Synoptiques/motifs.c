@@ -150,7 +150,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
-                "FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
+                " FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
