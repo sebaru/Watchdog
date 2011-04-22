@@ -179,7 +179,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "unite='%s',multi='%f',type_ci='%d' WHERE id_mnemo=%d",
+                "unite='%s',multi='%4.3f',type_ci='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_CPT_IMP, unite, cpt_imp->multi, cpt_imp->type, cpt_imp->id_mnemo );
     g_free(unite);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
