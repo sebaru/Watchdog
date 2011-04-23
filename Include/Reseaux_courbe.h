@@ -32,7 +32,7 @@
   { guint  slot_id;                                                                          /* Numero de l'ea */
     guint  type;
     guint  date;
-    guint  val;
+    guint  val_int;
   };
 
  struct CMD_TYPE_COURBE

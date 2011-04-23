@@ -139,7 +139,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
             envoi_courbe.slot_id = courbe->slot_id;         /* Valeurs par defaut si pas d'enregistrement */
             envoi_courbe.type    = courbe->type;
             envoi_courbe.date    = (date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP);
-            envoi_courbe.val     = (courbe->type == MNEMO_ENTREE ? E(courbe->id) : 0);
+            envoi_courbe.val_int = (courbe->type == MNEMO_ENTREE ? E(courbe->id) : 0);
 
             for( i=0; i<TAILLEBUF_HISTO_EANA; )
              { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend un enreg. */
@@ -147,12 +147,12 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
                if (!arch && i!=0) break;
 
                if (i==0)
-                { if (arch) { envoi_courbe.date = arch->date_sec;               /* Si enreg, on le pousse */
-                              envoi_courbe.val  = arch->valeur;
+                { if (arch) { envoi_courbe.date    = arch->date_sec;            /* Si enreg, on le pousse */
+                              envoi_courbe.val_int = arch->valeur;
                               g_free(arch);
                             }                        /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
-                       else { envoi_courbe.date = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
-                              envoi_courbe.val  = Partage->ea[courbe->id].val_int;
+                       else { envoi_courbe.date    = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
+                              envoi_courbe.val_int = Partage->ea[courbe->id].val_int;
                             }                              
                   Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                 (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
@@ -171,13 +171,13 @@ encore:
                    }
                   else
                    { if (envoi_courbe.date + COURBE_TEMPS_TOP > arch->date_sec)
-                      { envoi_courbe.val  = arch->valeur;/* Si plus d'un eregistrement dans les meme 5 sec */
+                      { envoi_courbe.val_int = arch->valeur;/* Si plus d'un eregistrement dans les meme 5 sec */
         /* printf("Skip  %d arch %d val %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val, i );*/
                         g_free(arch);
                       }
                      else
-                       { envoi_courbe.date = arch->date_sec;
-                         envoi_courbe.val  = arch->valeur;
+                       { envoi_courbe.date    = arch->date_sec;
+                         envoi_courbe.val_int = arch->valeur;
                          g_free(arch);
                          Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                        (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );

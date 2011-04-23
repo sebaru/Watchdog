@@ -119,9 +119,20 @@
                               infos->Courbes[cpt].mnemo.libelle );
                   break;
              case MNEMO_ENTREE_ANA:
-                  valeur = (gdouble)(val_int*(infos->Courbes[cpt].eana.max - infos->Courbes[cpt].eana.min))/4095.0
+                  switch ( infos->Courbes[cpt].eana.type )
+                   { case ENTREEANA_NON_INTERP:
+                          valeur = val_int;
+                          break;
+                     /*case ENTREEANA_4_20_MA_10BITS:
+                          append_courbe->val = ((append_courbe->val<<2)-816.0) * 4095.0 / 3280.0;
+                          break;*/
+                     case ENTREEANA_4_20_MA_12BITS:
+                          valeur = (gdouble)(val_int*(infos->Courbes[cpt].eana.max - infos->Courbes[cpt].eana.min))/4095.0
                             + infos->Courbes[cpt].eana.min;                         /* Valeur à l'echelle */ 
-
+                          break;
+                     default : valeur = -1.0;
+                   }
+                  
                   g_snprintf( description, sizeof(description),
                               "EA%d = %8.2f %s - %s (%8.2f/%8.2f)",
                               infos->Courbes[cpt].eana.num, valeur, 
@@ -732,7 +743,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                   memmove( courbe->X_date, courbe->X_date+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(time_t));
                   courbe->X_date[TAILLEBUF_HISTO_EANA-1] = append_courbe->date;
 
-                  switch ( courbe->eana.type )
+                  /*switch ( courbe->eana.type )
                    { case ENTREEANA_NON_INTERP:
                      append_courbe->val = (gdouble)
                       ((append_courbe->val-courbe->eana.min)*4095.0
@@ -744,8 +755,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                      case ENTREEANA_4_20_MA_12BITS:
                           append_courbe->val = (append_courbe->val-816.0) * 4095.0 / 3280.0;
                           break;
-                   }
-                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = append_courbe->val;
+                   }*/
+                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = append_courbe->val_int;
                 }
                return(TRUE);                                             /* Nous avons fait quelque chose */
                break;
@@ -762,7 +773,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                 {
                   memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
                   courbe->Y[TAILLEBUF_HISTO_EANA-1] = (append_courbe->slot_id*ENTREAXE_Y_TOR +
-                                                             (append_courbe->val ? HAUTEUR_Y_TOR : 0.0));
+                                                             (append_courbe->val_int ? HAUTEUR_Y_TOR : 0.0));
                   memmove( courbe->X_date, courbe->X_date+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(time_t));
                   courbe->X_date[TAILLEBUF_HISTO_EANA-1] = append_courbe->date;
                 }
@@ -773,8 +784,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Afficher_un_source: Ajoute un source dans la liste des sources                                         */
-/* Entrée: une reference sur le source                                                                    */
+/* Proto_append_courbe : Le serveur envoie des informations pour compléter une courbe à l'écran           */
+/* Entrée: une reference sur la courbe                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe )

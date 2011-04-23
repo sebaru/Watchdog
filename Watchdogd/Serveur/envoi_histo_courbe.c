@@ -90,7 +90,7 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
             envoi_courbe.slot_id = rezo_courbe.slot_id;     /* Valeurs par defaut si pas d'enregistrement */
             envoi_courbe.type    = rezo_courbe.type;
             envoi_courbe.date    = 0;
-            envoi_courbe.val     = (rezo_courbe.type == MNEMO_ENTREE ? E(rezo_courbe.id) : 0);
+            envoi_courbe.val_int = (rezo_courbe.type == MNEMO_ENTREE ? E(rezo_courbe.id) : 0);
 
             delta_x = (client->histo_courbe.date_last - client->histo_courbe.date_first) /
                       TAILLEBUF_HISTO_EANA;
@@ -101,8 +101,8 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
                if (!arch) break;
 
                if (i==0)
-                { envoi_courbe.date = arch->date_sec;
-                  envoi_courbe.val  = arch->valeur;
+                { envoi_courbe.date    = arch->date_sec;
+                  envoi_courbe.val_int = arch->valeur;
                   g_free(arch);
                   Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
                                 (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
@@ -121,13 +121,13 @@ encore:
                    }
                   else
                    { if (envoi_courbe.date + delta_x > arch->date_sec)
-                      { envoi_courbe.val  = arch->valeur;/* Si plus d'un eregistrement dans les meme 5 sec */
+                      { envoi_courbe.val_int = arch->valeur;/* Si plus d'un eregistrement dans les meme 5 sec */
         /* printf("Skip  %d arch %d val %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val, i );*/
                         g_free(arch);
                       }
                      else
-                       { envoi_courbe.date = arch->date_sec;
-                         envoi_courbe.val  = arch->valeur;
+                       { envoi_courbe.date    = arch->date_sec;
+                         envoi_courbe.val_int = arch->valeur;
                          g_free(arch);
                          Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
                                        (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
