@@ -627,7 +627,7 @@ printf("posx_select = %d\n", infos->posx_select );
                               G_CALLBACK(Menu_rescale), infos );
 
     infos->Check_rescale = gtk_check_button_new_with_label( _("Auto Rescale") );
-    gtk_box_pack_start( GTK_BOX(hboite), infos->Check_rescale, FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX(boite), infos->Check_rescale, FALSE, FALSE, 0 );
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
 
     gtk_widget_show_all( page->child );
@@ -826,9 +826,9 @@ printf("ajouter courbe 2\n" );
 printf("Ajout courbe milieu\n");
 
 
-    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) )
-     { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.05 ); }
     gtk_widget_queue_draw (infos->Databox);
+    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) == TRUE )
+     { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 ); }
 
 printf("Ajout courbe fin\n");
   }
