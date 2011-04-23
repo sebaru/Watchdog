@@ -37,7 +37,7 @@
   { struct CMD_TYPE_OPTION_ENTREEANA cmd_type_eana;
     gdouble val_ech;
     gint    val_int;
-    time_t  last_arch;                                                     /* Date de la derniere archive */
+    guint   last_arch;                                                     /* Date de la derniere archive */
     guint   inrange;
   };
 

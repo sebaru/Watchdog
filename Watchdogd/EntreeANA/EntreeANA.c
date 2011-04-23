@@ -66,6 +66,7 @@
         }
 
        memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
+       Partage->ea[entree->num].last_arch = 0;    /* Mise à zero du champ de la derniere date d'archivage */
        g_free(entree);
      }
   }
