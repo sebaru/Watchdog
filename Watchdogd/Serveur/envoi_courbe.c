@@ -152,7 +152,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
                               g_free(arch);
                             }                        /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
                        else { envoi_courbe.date = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
-                              envoi_courbe.val  = Partage->ea[courbe->id].val;
+                              envoi_courbe.val  = Partage->ea[courbe->id].val_int;
                             }                              
                   Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                 (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );

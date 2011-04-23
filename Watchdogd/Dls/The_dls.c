@@ -178,12 +178,17 @@
  void SEA( int num, int val_int )
   { if (num>=NBR_ENTRE_ANA) return;
 
-    if (Partage->ea[ num ].val != val_int)
-     { Partage->ea[ num ].val   = val_int;
-       Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
+    if (Partage->ea[ num ].val_int != val_int)
+     { Partage->ea[ num ].val_int = val_int;
+       if ( Partage->ea[ num ].last_arch + 50 < Partage->top )  /* Archive au mieux toutes les 5 secondes */
+        { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
+          Partage->ea[ num ].last_arch = time(NULL);   
+        }
+
+       Partage->ea[ num ].last_arch = time(NULL);   /* utilisé ?? */
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
-               Partage->ea[ num ].val_ech = Partage->ea[ num ].val;               /* Pas d'interprétation !! */
+               Partage->ea[ num ].val_ech = val_int;               /* Pas d'interprétation !! */
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
@@ -219,7 +224,6 @@
           default:
                Partage->ea[num].val_ech = 0.0;
         }
-       Partage->ea[ num ].date    = time(NULL);   /* utilisé ?? */
      }
                                                                      /* Gestion historique interne Valana */  }
 /**********************************************************************************************************/

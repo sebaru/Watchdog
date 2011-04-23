@@ -36,8 +36,8 @@
  struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
   { struct CMD_TYPE_OPTION_ENTREEANA cmd_type_eana;
     gdouble val_ech;
-    gint    val;
-    time_t  date;
+    gint    val_int;
+    time_t  last_arch;                                                     /* Date de la derniere archive */
     guint   inrange;
   };
 
