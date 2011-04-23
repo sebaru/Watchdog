@@ -128,6 +128,42 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
     Envoi_client ( client, TAG_COURBE, SSTAG_SERVEUR_ADD_COURBE_OK,        /* Envoi préparation au client */
                    (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
 
+    date = time(NULL);                                                    /* On recupere la date actuelle */
+
+    Recuperer_archDB ( Config.log, db, courbe->type, courbe->id, (date - 2*3600), date );
+               
+    envoi_courbe.slot_id = courbe->slot_id;                 /* Valeurs par defaut si pas d'enregistrement */
+    envoi_courbe.type    = courbe->type;
+
+    arch = Recuperer_archDB_suite( Config.log, db );                        /* On prend le premier enreg. */
+
+    if (arch) { envoi_courbe.date    = arch->date_sec;                          /* Si enreg, on le pousse */
+                envoi_courbe.val_int = arch->valeur;
+              }                                      /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
+    else      { envoi_courbe.date    = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
+                envoi_courbe.val_int = 0.01; /* switch courbe->type !! */
+              }                              
+    Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
+                  (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
+    if (arch)                              /* Si on a traité un enreg, on va traiter les autres en boucle */
+     { g_free(arch);                                             /* Libération de l'enregistrement d'init */
+printf("Debut boucle\n");
+       for( ; ; )
+        { arch = Recuperer_archDB_suite( Config.log, db );                          /* On prend un enreg. */
+printf("----- arch = %p\n", arch);
+
+          if (!arch) break;
+          envoi_courbe.date    = arch->date_sec;
+          envoi_courbe.val_int = arch->valeur;
+          Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
+                       (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
+          g_free(arch);
+        }
+     }
+
+
+#ifdef bouh
+
     switch( courbe->type )
      { case MNEMO_ENTREE: printf("a voir\n"); break;
 
@@ -195,7 +231,7 @@ encore:
             break;
        default : printf("Error\n");
      }
-
+#endif
     client->courbes = g_list_append ( client->courbes, courbe );
 
     Libere_DB_SQL( Config.log, &db );
