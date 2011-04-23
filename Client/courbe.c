@@ -792,6 +792,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
     else gtk_widget_queue_draw (infos->Databox);                                /* Mise à jour du Databox */
+    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) == TRUE )
+     { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 ); }
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_courbe: Appeler lorsque le client recoit la reponse d'ajout de courbe par le serveur     */
@@ -827,8 +829,6 @@ printf("Ajout courbe milieu\n");
 
 
     gtk_widget_queue_draw (infos->Databox);
-    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) == TRUE )
-     { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 ); }
 
 printf("Ajout courbe fin\n");
   }
