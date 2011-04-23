@@ -182,7 +182,7 @@
      { Partage->ea[ num ].val_int = val_int;
        if ( Partage->ea[ num ].last_arch + 50 < Partage->top )  /* Archive au mieux toutes les 5 secondes */
         { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
-          Partage->ea[ num ].last_arch = time(NULL);   
+          Partage->ea[ num ].last_arch = Partage->top;   
         }
 
        Partage->ea[ num ].last_arch = time(NULL);   /* utilisé ?? */
