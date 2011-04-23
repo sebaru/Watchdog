@@ -123,9 +123,10 @@
                    { case ENTREEANA_NON_INTERP:
                           valeur = val_int;
                           break;
-                     /*case ENTREEANA_4_20_MA_10BITS:
-                          append_courbe->val = ((append_courbe->val<<2)-816.0) * 4095.0 / 3280.0;
-                          break;*/
+                     case ENTREEANA_4_20_MA_10BITS:
+                          valeur = (gdouble)((val_int<<2)*(infos->Courbes[cpt].eana.max - infos->Courbes[cpt].eana.min))/4095.0
+                            + infos->Courbes[cpt].eana.min;                         /* Valeur à l'echelle */ 
+                          break;
                      case ENTREEANA_4_20_MA_12BITS:
                           valeur = (gdouble)(val_int*(infos->Courbes[cpt].eana.max - infos->Courbes[cpt].eana.min))/4095.0
                             + infos->Courbes[cpt].eana.min;                         /* Valeur à l'echelle */ 
@@ -725,9 +726,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
  gint Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe )
   {
 
-#ifdef bouh
- printf("append courbe : date = %d val = %d\n", append_courbe->date, append_courbe->val );
-#endif
+ printf("append courbe : date = %d val_int = %d\n", append_courbe->date, append_courbe->val_int );
+
 
        switch(courbe->type)
         { case MNEMO_ENTREE_ANA:

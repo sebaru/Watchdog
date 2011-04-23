@@ -163,7 +163,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
 encore:
                   if (envoi_courbe.date + COURBE_TEMPS_TOP < arch->date_sec)
                    { envoi_courbe.date = envoi_courbe.date + COURBE_TEMPS_TOP;
-         /*printf("Envoi %d arch %d val %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val, i );  */
+         printf("Envoi %d arch %d val_int %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val_int, i );  
                      Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                    (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                      i++;                                  /* nous avons envoyé un enregistrement de plus */
@@ -172,7 +172,7 @@ encore:
                   else
                    { if (envoi_courbe.date + COURBE_TEMPS_TOP > arch->date_sec)
                       { envoi_courbe.val_int = arch->valeur;/* Si plus d'un eregistrement dans les meme 5 sec */
-        /* printf("Skip  %d arch %d val %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val, i );*/
+         printf("Skip  %d arch %d val %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val_int, i );
                         g_free(arch);
                       }
                      else
@@ -189,7 +189,7 @@ encore:
 
             while (i<TAILLEBUF_HISTO_EANA)                          /* A-t'on envoyé le nombre souhaité ? */
              { envoi_courbe.date = envoi_courbe.date + COURBE_TEMPS_TOP;
-         /*printf("Termine   %d val %d  i %d\n",     envoi_courbe.date, envoi_courbe.val, i );*/
+         printf("Termine   %d val %d  i %d\n",     envoi_courbe.date, envoi_courbe.val_int, i );
                Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                              (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                i++;
