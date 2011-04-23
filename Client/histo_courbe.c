@@ -667,6 +667,7 @@ printf("ajouter courbe 2\n" );
     new_courbe = &infos->Courbes[courbe->slot_id];
     new_courbe->nbr_points = 0;
 
+#ifdef bouh
     for (cpt=0; cpt<TAILLEBUF_HISTO_EANA; cpt++)                    /* Initialisation des buffers courbes */
      { infos->X[cpt] = 1.0*cpt;
        new_courbe->X_date[cpt] = 0;
@@ -676,7 +677,7 @@ printf("ajouter courbe 2\n" );
     new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, infos->X, new_courbe->Y,
                                                 &COULEUR_COURBE[courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
-
+#endif
     /*gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.05 );*/
     /*gtk_databox_redraw (GTK_DATABOX(infos->Databox));*/
 

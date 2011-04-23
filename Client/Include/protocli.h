@@ -95,6 +95,7 @@
     GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
     GdkColor couleur;                                                             /* Couleur de la courbe */
     guint nbr_points;   /* Seb : a virer. 12/07/2010*//* Pour l'ajout initial des données dans la zone graphique */
+    gfloat X[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées X de la courbe */
     gfloat Y[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées Y de la courbe */
     time_t X_date[TAILLEBUF_HISTO_EANA];                                  /* Coordonnées date des courbes */
     guint type;
@@ -116,13 +117,13 @@
     GtkWidget *Databox;
     GtkWidget *Entry[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
     GtkWidget *Radio[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
+    GtkWidget *Check_rescale;
     struct COURBE Courbes[NBR_MAX_COURBES];
     GtkDataboxGraph *index_grille;                       /* Index de la grille retourné par le gtkdatabox */
     GtkDataboxGraph *index_select;                       /* Index de la grille retourné par le gtkdatabox */
     GtkWidget *Date_debut;
     GtkWidget *Date_fin;
     GtkWidget *Entry_date_select;                                 /* Affichage de la date actuelle select */
-    gfloat X[TAILLEBUF_HISTO_EANA];        /* Coordonnées X des courbes. Toutes les courbes ont le meme X */
     gint echelle_active;                                     /* N° de la courbe dont l'echelle est active */
   };
 

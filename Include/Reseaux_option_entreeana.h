@@ -28,7 +28,6 @@
 #ifndef _RESEAUX_OPTION_ENTREEANA_H_
  #define _RESEAUX_OPTION_ENTREEANA_H_
 
- #define TAILLEBUF_HISTO_EANA         1600       /* 800 point de controle dans le client et buffer valana */
  #define NBR_VAL_INIT_COURBE          100                   /* Envoyé via 100 points à chaque paquet rezo */
 
  #define COURBE_TEMPS_TOP             5  /* 1 point = 5 secondes sur la grille courbes */

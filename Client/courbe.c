@@ -84,17 +84,19 @@
      { infos->x_select[0] = 0.0;                                                /* Coord affichage select */
        infos->x_select[1] = 0.0;                                                /* Coord affichage select */
        infos->y_select[0] = 0.0;                                                /* Coord affichage select */
-       infos->y_select[1] = (gdouble)(MAX_RESOLUTION-1);                        /* Coord affichage select */
+       infos->y_select[1] = 1.0*MAX_RESOLUTION-1;                               /* Coord affichage select */
        infos->index_select =  gtk_databox_lines_new ( 2, infos->x_select, infos->y_select,
                                                       &couleur, 1);
        gtk_databox_graph_add (GTK_DATABOX(infos->Databox), infos->index_select);
      }
 
     infos->posx_select = gtk_databox_pixel_to_value_x (GTK_DATABOX(infos->Databox), (gint16) event->motion.x );
-    infos->x_select[1] = infos->x_select[0] = infos->posx_select;
+printf("posx_select = %d\n", infos->posx_select );
+    infos->x_select[1] = infos->x_select[0] = 1.0*infos->posx_select;
 
     if (infos->Courbes[infos->echelle_active].actif)
-         { time_select = infos->Courbes[infos->echelle_active].X_date[infos->posx_select];
+         { /*time_select = infos->Courbes[infos->echelle_active].X[infos->posx_select] + COURBE_ORIGINE_TEMPS;*/
+           time_select = infos->posx_select + COURBE_ORIGINE_TEMPS;
            temps = localtime( (time_t *)&time_select );
            strftime( date, sizeof(date), "%F %T", temps );
            date_create = g_locale_to_utf8( date, -1, NULL, NULL, NULL );
@@ -103,7 +105,7 @@
            g_free( date_create );
          }
     else { gtk_entry_set_text( GTK_ENTRY(infos->Entry_date_select), "Pas d'echelle selectionee" ); }
-
+#ifdef bouh
     for (cpt=0; cpt<NBR_MAX_COURBES; cpt++)                         /* Affichage des descriptions courbes */
      { if (infos->Courbes[cpt].actif)
         { gfloat valeur;
@@ -149,6 +151,7 @@
         }
        gtk_entry_set_text( GTK_ENTRY(infos->Entry[cpt]), description );
      }
+#endif
     gtk_widget_queue_draw (infos->Databox);
     return(FALSE);
   }
@@ -582,16 +585,16 @@
     gtk_box_pack_start( GTK_BOX(vboite), infos->Entry_date_select, FALSE, FALSE, 0 );
 
 /****************************************** La databox ****************************************************/
-    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, FALSE, FALSE, FALSE, TRUE );
+    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, TRUE, TRUE, FALSE, TRUE );
     gtk_box_pack_start( GTK_BOX(vboite), table2, TRUE, TRUE, 0 );
 
     gtk_databox_set_scale_type_x ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_databox_set_scale_type_y ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_widget_modify_bg (infos->Databox, GTK_STATE_NORMAL, &fond);
 
-    gtk_databox_set_total_limits ( GTK_DATABOX(infos->Databox),
+/*    gtk_databox_set_total_limits ( GTK_DATABOX(infos->Databox),
                                    0.0, TAILLEBUF_HISTO_EANA*1.0,
-                                   MAX_RESOLUTION*1.0, 0.0 );
+                                   MAX_RESOLUTION*1.0, 0.0 );*/
 
     ruler = (GtkWidget *)gtk_databox_get_ruler_y ( GTK_DATABOX (infos->Databox) );
     gtk_databox_ruler_set_range ( GTK_DATABOX_RULER(ruler), 10.0, 0.0, 5.0 );
@@ -622,6 +625,10 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_rescale), infos );
+
+    infos->Check_rescale = gtk_check_button_new_with_label( _("Auto Rescale") );
+    gtk_box_pack_start( GTK_BOX(hboite), infos->Check_rescale, FALSE, FALSE, 0 );
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
 
     gtk_widget_show_all( page->child );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( libelle ) );
@@ -723,42 +730,20 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
 /* Entrée: une courbe, et une structure append_courbe                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- gint Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe )
-  {
-
- printf("append courbe : date = %d val_int = %d\n", append_courbe->date, append_courbe->val_int );
-
+ gboolean Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe )
+  { gint i;
+                                            /* Decalage pour que le time_t passe dans le float du databox */
+    append_courbe->date -= COURBE_ORIGINE_TEMPS; 
 
        switch(courbe->type)
         { case MNEMO_ENTREE_ANA:
-#ifdef bouh
-               if (courbe->nbr_points < TAILLEBUF_HISTO_EANA)
-                { courbe->Y[courbe->nbr_points] = append_courbe->val;
-                  courbe->X_date[courbe->nbr_points] = append_courbe->date;
-                  courbe->nbr_points++;
+                { memmove( courbe->X, courbe->X+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
+                  memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
+                  courbe->X[TAILLEBUF_HISTO_EANA-1] = 1.0*append_courbe->date;
+                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = 1.0*append_courbe->val_int;
+                  printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[TAILLEBUF_HISTO_EANA-1], courbe->Y[TAILLEBUF_HISTO_EANA-1] );
+                  return(TRUE);                                          /* Nous avons fait quelque chose */
                 }
-               else
-#endif
-                { memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
-                  memmove( courbe->X_date, courbe->X_date+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(time_t));
-                  courbe->X_date[TAILLEBUF_HISTO_EANA-1] = append_courbe->date;
-
-                  /*switch ( courbe->eana.type )
-                   { case ENTREEANA_NON_INTERP:
-                     append_courbe->val = (gdouble)
-                      ((append_courbe->val-courbe->eana.min)*4095.0
-                      /(courbe->eana.max - courbe->eana.min));
-                     break;
-                     case ENTREEANA_4_20_MA_10BITS:
-                          append_courbe->val = ((append_courbe->val<<2)-816.0) * 4095.0 / 3280.0;
-                          break;
-                     case ENTREEANA_4_20_MA_12BITS:
-                          append_courbe->val = (append_courbe->val-816.0) * 4095.0 / 3280.0;
-                          break;
-                   }*/
-                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = append_courbe->val_int;
-                }
-               return(TRUE);                                             /* Nous avons fait quelque chose */
                break;
           case MNEMO_ENTREE:
 #ifdef bouh
@@ -769,7 +754,6 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                   courbe->nbr_points++;
                 }
                else
-#endif
                 {
                   memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
                   courbe->Y[TAILLEBUF_HISTO_EANA-1] = (append_courbe->slot_id*ENTREAXE_Y_TOR +
@@ -777,6 +761,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                   memmove( courbe->X_date, courbe->X_date+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(time_t));
                   courbe->X_date[TAILLEBUF_HISTO_EANA-1] = append_courbe->date;
                 }
+#endif
                return(TRUE);                                             /* Nous avons fait quelque chose */
                break;
           default: printf("type inconnu %d\n", courbe->type); break;
@@ -830,19 +815,19 @@ printf("ajouter courbe 2\n" );
     new_courbe = &infos->Courbes[courbe->slot_id];
 
     for (cpt=0; cpt<TAILLEBUF_HISTO_EANA; cpt++)                    /* Initialisation des buffers courbes */
-     { infos->X[cpt] = 1.0*cpt;
-       new_courbe->X_date[cpt] = 0;
+     { new_courbe->X[cpt] = 0.0;
        new_courbe->Y[cpt] = 0.0; 
      }
 
-    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, infos->X, new_courbe->Y,
+    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
                                                 &COULEUR_COURBE[courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
 
 printf("Ajout courbe milieu\n");
 
 
-    /*gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.05 );*/
+    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) )
+     { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.05 ); }
     gtk_widget_queue_draw (infos->Databox);
 
 printf("Ajout courbe fin\n");
