@@ -208,7 +208,7 @@
        g_snprintf( chaine, sizeof(chaine),
                    " EA%03d = %8.2f, val_int=%d, inrange=%d, type=%d, last_arch=%d, min=%8.2f, max=%8.2f\n",
                    num, EA_ech(num), Partage->ea[num].val_int, EA_inrange(num),
-                   Partage->ea[num].cmd_type_eana.type, (int)Partage->ea[num].last_arch, 
+                   Partage->ea[num].cmd_type_eana.type, Partage->ea[num].last_arch, 
                    Partage->ea[num].cmd_type_eana.min, Partage->ea[num].cmd_type_eana.max 
                  );
        Write_admin ( client->connexion, chaine );

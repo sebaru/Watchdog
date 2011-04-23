@@ -184,8 +184,6 @@
         { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
           Partage->ea[ num ].last_arch = Partage->top;   
         }
-
-       Partage->ea[ num ].last_arch = time(NULL);   /* utilisé ?? */
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = val_int;               /* Pas d'interprétation !! */
