@@ -66,6 +66,7 @@
                 " ORDER BY `date_sec`,`date_usec`",
                 NOM_TABLE_ARCH, type, num, TAILLEBUF_HISTO_EANA );
 */
+   Info_c( log, DEBUG_ARCHIVE, "Recuperer_archDB: Requete SQL", requete );
 
    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

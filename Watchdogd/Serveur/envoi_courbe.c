@@ -140,9 +140,10 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
             envoi_courbe.type    = courbe->type;
             envoi_courbe.date    = (date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP);
             envoi_courbe.val_int = (courbe->type == MNEMO_ENTREE ? E(courbe->id) : 0);
-
+printf("Debut boucle\n");
             for( i=0; i<TAILLEBUF_HISTO_EANA; )
              { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend un enreg. */
+printf("----- arch = %p, i=%d\n", arch, i);
 
                if (!arch && i!=0) break;
 
