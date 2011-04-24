@@ -74,6 +74,7 @@
 /**********************************************************************************************************/
  gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data )
   { static GdkColor couleur = { 0x0, 0xFFFF, 0xFFFF, 0xFFFF };
+    gfloat left, right, top, bottom;
     gchar date[128], *date_create;
     gchar description[256];
     struct tm *temps;
@@ -90,9 +91,13 @@
        gtk_databox_graph_add (GTK_DATABOX(infos->Databox), infos->index_select);
      }
 
+    gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
+
     infos->posx_select = gtk_databox_pixel_to_value_x (GTK_DATABOX(infos->Databox), (gint16) event->motion.x );
-printf("posx_select = %d\n", infos->posx_select );
     infos->x_select[1] = infos->x_select[0] = 1.0*infos->posx_select;
+    infos->y_select[0] = bottom;
+    infos->y_select[1] = top;
+printf("posx_select = %d\n", infos->posx_select );
 
     if (infos->Courbes[infos->echelle_active].actif)
          { /*time_select = infos->Courbes[infos->echelle_active].X[infos->posx_select] + COURBE_ORIGINE_TEMPS;*/
