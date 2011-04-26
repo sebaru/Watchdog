@@ -93,7 +93,12 @@
  struct COURBE
   { gboolean actif;
     gboolean init;                                               /* Devons nous initialiser les tampons ? */
-    GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
+    GtkDataboxGraph *marker_select;                                   /* Index retourné par le gtkdatabox */
+    gfloat marker_select_x;
+    gfloat marker_select_y;
+    GtkDataboxGraph *marker_last;                                     /* Index retourné par le gtkdatabox */
+    gfloat marker_last_x;
+    gfloat marker_last_y;
     GdkColor couleur;                                                             /* Couleur de la courbe */
     guint nbr_points;   /* Seb : a virer. 12/07/2010*//* Pour l'ajout initial des données dans la zone graphique */
     gfloat X[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées X de la courbe */

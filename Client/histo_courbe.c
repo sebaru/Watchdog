@@ -88,7 +88,7 @@
        if( infos->Courbes[infos->slot_id].actif )                          /* Enleve la précédente courbe */
         { infos->Courbes[infos->slot_id].actif = FALSE;
           gtk_entry_set_text( GTK_ENTRY(infos->Entry[infos->slot_id]), "" );
-          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].index );
+/*          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].index );*/
           gtk_widget_queue_draw (infos->Databox);
         }
 
@@ -152,7 +152,7 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
        new_courbe->type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
-       gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
+ /*      gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );*/
        gtk_widget_queue_draw (infos->Databox);
      }
     gtk_widget_destroy(F_source);
