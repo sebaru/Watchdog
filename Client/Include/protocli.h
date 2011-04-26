@@ -91,7 +91,8 @@
   };
 
  struct COURBE
-  { guint actif;
+  { gboolean actif;
+    gboolean init;                                               /* Devons nous initialiser les tampons ? */
     GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
     GdkColor couleur;                                                             /* Couleur de la courbe */
     guint nbr_points;   /* Seb : a virer. 12/07/2010*//* Pour l'ajout initial des données dans la zone graphique */

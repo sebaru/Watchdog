@@ -130,7 +130,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
 
     date = time(NULL);                                                    /* On recupere la date actuelle */
 
-    Recuperer_archDB ( Config.log, db, courbe->type, courbe->id, (date - 2*3600), date );
+    Recuperer_archDB ( Config.log, db, courbe->type, courbe->id, (date - 3*3600), date );
                
     envoi_courbe.slot_id = courbe->slot_id;                 /* Valeurs par defaut si pas d'enregistrement */
     envoi_courbe.type    = courbe->type;
@@ -140,11 +140,17 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
     if (arch) { envoi_courbe.date    = arch->date_sec;                          /* Si enreg, on le pousse */
                 envoi_courbe.val_int = arch->valeur;
               }                                      /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
-    else      { envoi_courbe.date    = date - 2*3600;
-                envoi_courbe.val_int = 0.01; /* switch courbe->type !! */
+    else      { envoi_courbe.date    = date - 3*3600;
+                switch (courbe->type)
+                 { case MNEMO_ENTREE_ANA : envoi_courbe.val_int = Partage->ea[courbe->id].val_int; break;
+                   case MNEMO_ENTREE     : envoi_courbe.val_int = E(courbe->id);  break;
+                   case MNEMO_BISTABLE   : envoi_courbe.val_int = B(courbe->id);  break;
+                   default : envoi_courbe.val_int = 0; break;
+                 }
               }                              
     Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                   (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
+
     if (arch)                              /* Si on a traité un enreg, on va traiter les autres en boucle */
      { g_free(arch);                                             /* Libération de l'enregistrement d'init */
 printf("Debut boucle\n");
@@ -160,7 +166,6 @@ printf("----- arch = %p\n", arch);
           g_free(arch);
         }
      }
-
 
 #ifdef bouh
 

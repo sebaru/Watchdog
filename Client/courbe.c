@@ -776,13 +776,24 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     struct COURBE *courbe;
+    gint cpt;
 
     page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, FALSE );
     if (!page) return;
     infos = (struct TYPE_INFO_COURBE *)page->infos;           /* Récupération des meta données de la page */
 
     courbe = &infos->Courbes[append_courbe->slot_id];
-    if ( ! (courbe && courbe->actif && Append_courbe( courbe, append_courbe) ) )
+    if ( ! (courbe && courbe->actif) ) return;
+
+    if (courbe->init == FALSE) /* Devons-nous initialiser les tampons ?? */
+     { for (cpt=0; cpt<TAILLEBUF_HISTO_EANA; cpt++)                 /* Initialisation des buffers courbes */
+        { courbe->X[cpt] = append_courbe->date - COURBE_ORIGINE_TEMPS;
+          courbe->Y[cpt] = append_courbe->val_int; 
+        }
+       courbe->init = TRUE;                                               /* Les tampons sont initialisés */
+     }
+
+    if ( ! Append_courbe(courbe, append_courbe) )
      { struct CMD_TYPE_COURBE rezo_courbe;
        rezo_courbe.type    = append_courbe->type;
        rezo_courbe.slot_id = append_courbe->slot_id;/* On demande au serveur de ne plus nous envoyer les infos */
@@ -816,12 +827,7 @@ printf("ajouter courbe 2\n" );
 
     /* La nouvelle courbe va dans l'id courbe->slot_id */
     new_courbe = &infos->Courbes[courbe->slot_id];
-
-    for (cpt=0; cpt<TAILLEBUF_HISTO_EANA; cpt++)                    /* Initialisation des buffers courbes */
-     { new_courbe->X[cpt] = 0.0;
-       new_courbe->Y[cpt] = 0.0; 
-     }
-
+    new_courbe->init = FALSE;
     new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
                                                 &COULEUR_COURBE[courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
