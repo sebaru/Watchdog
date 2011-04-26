@@ -101,6 +101,7 @@
     gfloat marker_last_y;
     GdkColor couleur;                                                             /* Couleur de la courbe */
     guint nbr_points;   /* Seb : a virer. 12/07/2010*//* Pour l'ajout initial des données dans la zone graphique */
+    GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
     gfloat X[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées X de la courbe */
     gfloat Y[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées Y de la courbe */
     time_t X_date[TAILLEBUF_HISTO_EANA];                                  /* Coordonnées date des courbes */

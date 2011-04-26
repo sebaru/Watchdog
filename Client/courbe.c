@@ -68,6 +68,11 @@
     { 0x0, 0xFFFF, 0x0,    0xFFFF },
   };
 
+/**********************************************************************************************************/
+/* Valeur_to_description_marker: Formate une chaine de caractere pour informé de l'etat d'une entrée      */
+/* Entrée: la courbe et la position x à formater                                                          */
+/* sortie: la chaine de caractere (non freeable, non re-entrant)                                          */
+/**********************************************************************************************************/
  static gchar *Valeur_to_description_marker ( struct COURBE *courbe, guint cherche_posx )
   { static gchar description[80];
     float valeur;
@@ -277,6 +282,7 @@ printf("posx_select = %d cherche_posx=%d y= %f\n", infos->posx_select, cherche_p
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
        new_courbe->type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
+       gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_select );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_last );
        gtk_widget_queue_draw (infos->Databox);
@@ -735,6 +741,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                   courbe->Y[TAILLEBUF_HISTO_EANA-1] = 1.0*append_courbe->val_int;
                   courbe->marker_last_x = courbe->X[TAILLEBUF_HISTO_EANA-1];
                   courbe->marker_last_y = courbe->Y[TAILLEBUF_HISTO_EANA-1];
+                  gtk_databox_markers_set_label ( GTK_DATABOX_MARKERS(courbe->marker_last), 0, GTK_DATABOX_MARKERS_TEXT_E,
+                                                  Valeur_to_description_marker(courbe, TAILLEBUF_HISTO_EANA-1), TRUE );
                   printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[TAILLEBUF_HISTO_EANA-1], courbe->Y[TAILLEBUF_HISTO_EANA-1] );
                   return(TRUE);                                          /* Nous avons fait quelque chose */
                 }
@@ -805,6 +813,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
         { gfloat left, right, top, bottom;
           gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
           gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
+
           gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left,  right, 1.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
         }
        gtk_widget_queue_draw (infos->Databox);                                  /* Mise à jour du Databox */
@@ -829,6 +838,10 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     new_courbe = &infos->Courbes[courbe->slot_id];
     new_courbe->init = FALSE;
 
+    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
+                                                &COULEUR_COURBE[courbe->slot_id], 1);
+    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
+
     new_courbe->marker_select = gtk_databox_markers_new ( 1, &new_courbe->marker_select_x, &new_courbe->marker_select_y,
                                                           &COULEUR_COURBE[courbe->slot_id], 10,
                                                           GTK_DATABOX_MARKERS_TRIANGLE
@@ -837,8 +850,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     gtk_databox_graph_set_hide ( new_courbe->marker_select, TRUE );
 
     new_courbe->marker_last = gtk_databox_markers_new ( 1, &new_courbe->marker_last_x, &new_courbe->marker_last_y,
-                                                        &COULEUR_COURBE[courbe->slot_id], 10,
-                                                        GTK_DATABOX_MARKERS_SOLID_LINE
+                                                        &COULEUR_COURBE[courbe->slot_id], 5,
+                                                        GTK_DATABOX_MARKERS_TRIANGLE
                                                       );
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_last);
 
