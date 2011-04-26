@@ -140,7 +140,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
     if (arch) { envoi_courbe.date    = arch->date_sec;                          /* Si enreg, on le pousse */
                 envoi_courbe.val_int = arch->valeur;
               }                                      /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
-    else      { envoi_courbe.date    = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
+    else      { envoi_courbe.date    = date - 2*3600;
                 envoi_courbe.val_int = 0.01; /* switch courbe->type !! */
               }                              
     Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,

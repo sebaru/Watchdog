@@ -89,19 +89,18 @@
        infos->index_select =  gtk_databox_lines_new ( 2, infos->x_select, infos->y_select,
                                                       &couleur, 1);
        gtk_databox_graph_add (GTK_DATABOX(infos->Databox), infos->index_select);
-     }
+     } else gtk_databox_graph_set_hide (infos->index_select, FALSE);
 
     gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
 
     infos->posx_select = gtk_databox_pixel_to_value_x (GTK_DATABOX(infos->Databox), (gint16) event->motion.x );
     infos->x_select[1] = infos->x_select[0] = 1.0*infos->posx_select;
-    infos->y_select[0] = bottom;
-    infos->y_select[1] = top;
+    infos->y_select[0] = bottom + (top-bottom)/10.0;
+    infos->y_select[1] = top - (top-bottom)/10.0;
 printf("posx_select = %d\n", infos->posx_select );
 
     if (infos->Courbes[infos->echelle_active].actif)
-         { /*time_select = infos->Courbes[infos->echelle_active].X[infos->posx_select] + COURBE_ORIGINE_TEMPS;*/
-           time_select = infos->posx_select + COURBE_ORIGINE_TEMPS;
+         { time_select = infos->posx_select + COURBE_ORIGINE_TEMPS;
            temps = localtime( (time_t *)&time_select );
            strftime( date, sizeof(date), "%F %T", temps );
            date_create = g_locale_to_utf8( date, -1, NULL, NULL, NULL );
@@ -170,9 +169,8 @@ printf("posx_select = %d\n", infos->posx_select );
     gchar description[256];
 
     if (infos->index_select)                                                        /* Ajout d'une grille */
-     { gtk_databox_graph_remove (GTK_DATABOX (infos->Databox), infos->index_select);
+     { gtk_databox_graph_set_hide (infos->index_select, TRUE);
        gtk_entry_set_text ( GTK_ENTRY(infos->Entry_date_select), "" );
-       infos->index_select = NULL;
      }
 
     for (cpt=0; cpt<NBR_MAX_COURBES; cpt++)                         /* Affichage des descriptions courbes */
@@ -590,16 +588,12 @@ printf("posx_select = %d\n", infos->posx_select );
     gtk_box_pack_start( GTK_BOX(vboite), infos->Entry_date_select, FALSE, FALSE, 0 );
 
 /****************************************** La databox ****************************************************/
-    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, TRUE, TRUE, FALSE, TRUE );
+    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, TRUE, TRUE, FALSE, FALSE );
     gtk_box_pack_start( GTK_BOX(vboite), table2, TRUE, TRUE, 0 );
 
     gtk_databox_set_scale_type_x ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_databox_set_scale_type_y ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_widget_modify_bg (infos->Databox, GTK_STATE_NORMAL, &fond);
-
-/*    gtk_databox_set_total_limits ( GTK_DATABOX(infos->Databox),
-                                   0.0, TAILLEBUF_HISTO_EANA*1.0,
-                                   MAX_RESOLUTION*1.0, 0.0 );*/
 
     ruler = (GtkWidget *)gtk_databox_get_ruler_y ( GTK_DATABOX (infos->Databox) );
     gtk_databox_ruler_set_range ( GTK_DATABOX_RULER(ruler), 10.0, 0.0, 5.0 );
@@ -796,9 +790,11 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_DEL_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
-    else gtk_widget_queue_draw (infos->Databox);                                /* Mise à jour du Databox */
-    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) == TRUE )
-     { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 ); }
+    else
+     { if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_rescale) ) == TRUE )
+        { gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 ); }
+       gtk_widget_queue_draw (infos->Databox);                                  /* Mise à jour du Databox */
+     }
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_courbe: Appeler lorsque le client recoit la reponse d'ajout de courbe par le serveur     */
