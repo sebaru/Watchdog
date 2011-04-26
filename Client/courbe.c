@@ -91,16 +91,32 @@
                           valeur = courbe->Y[cherche_posx];
                           break;
                      case ENTREEANA_4_20_MA_10BITS:
-                          valeur = (gdouble)((4.0*courbe->Y[cherche_posx])*(courbe->eana.max - courbe->eana.min))/4095.0
-                            + courbe->eana.min;                         /* Valeur à l'echelle */ 
+                          if (courbe->Y[cherche_posx] < 204)
+                           { valeur = 0.0;                                 /* Valeur à l'echelle */ 
+                           }
+                          else
+                           { valeur = (gdouble)
+                                        ((courbe->Y[cherche_posx]-204)*(courbe->eana.max - courbe->eana.min))/820.0
+                                      + courbe->eana.min;                             /* Valeur à l'echelle */ 
+                           }
                           break;
                      case ENTREEANA_4_20_MA_12BITS:
-                          valeur = (gdouble)(courbe->Y[cherche_posx]*(courbe->eana.max - courbe->eana.min))/4095.0
-                            + courbe->eana.min;                         /* Valeur à l'echelle */ 
+                          if (courbe->Y[cherche_posx] < 816)
+                           { valeur = 0.0;                                 /* Valeur à l'echelle */ 
+                           }
+                          else
+                           { valeur = (gdouble)
+                                        ((courbe->Y[cherche_posx]-816)*(courbe->eana.max - courbe->eana.min))/3280.0
+                                      + courbe->eana.min;                             /* Valeur à l'echelle */ 
+                           }
+                          break;
+                     case ENTREEANA_WAGO_750455:
+                          valeur = (gdouble)
+                                     (courbe->Y[cherche_posx]*(courbe->eana.max - courbe->eana.min))/4095.0
+                                    + courbe->eana.min;                             /* Valeur à l'echelle */ 
                           break;
                      default : valeur = -1.0;
-                   }
-                  
+                   }                  
                   g_snprintf( description, sizeof(description),
                               "EA%d = %8.2f %s",
                               courbe->eana.num, valeur, 
@@ -814,7 +830,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
           gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
           gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
 
-          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left,  right, 1.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
+          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left+800,  right+800, 1.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
         }
        gtk_widget_queue_draw (infos->Databox);                                  /* Mise à jour du Databox */
      }
@@ -850,7 +866,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     gtk_databox_graph_set_hide ( new_courbe->marker_select, TRUE );
 
     new_courbe->marker_last = gtk_databox_markers_new ( 1, &new_courbe->marker_last_x, &new_courbe->marker_last_y,
-                                                        &COULEUR_COURBE[courbe->slot_id], 5,
+                                                        &COULEUR_COURBE[courbe->slot_id], 10,
                                                         GTK_DATABOX_MARKERS_TRIANGLE
                                                       );
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_last);
