@@ -98,7 +98,7 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
                    default : envoi_courbe.val_int = 0; break;
                  }
               }                              
-    Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
+    Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
                   (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
 
     if (arch)                              /* Si on a traité un enreg, on va traiter les autres en boucle */
@@ -109,13 +109,11 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
           if (!arch) break;
           envoi_courbe.date    = arch->date_sec;
           envoi_courbe.val_int = arch->valeur;
-          Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
+          Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
                        (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
           g_free(arch);
         }
      }
-
-
     Libere_DB_SQL( Config.log, &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(NULL);
