@@ -115,7 +115,7 @@
  #define NBR_MAX_COURBES   6                             /* Nombre maximum de courbes affichées a l'écran */
  #define MAX_RESOLUTION    4096
  #define ENTREAXE_Y_TOR    (MAX_RESOLUTION/NBR_MAX_COURBES)         /* Axe Y pour chacune des courbes TOR */
- #define HAUTEUR_Y_TOR     (MAX_RESOLUTION/NBR_MAX_COURBES * 75/100)/* Hauteur pour chacune des coubes TOR*/
+ #define HAUTEUR_Y_TOR     ((MAX_RESOLUTION/NBR_MAX_COURBES) * 0.75)/* Hauteur pour chacune des coubes TOR*/
 
  struct TYPE_INFO_COURBE
   { guint slot_id;                                                   /* Numero du slot en cours d'edition */
