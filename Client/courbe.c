@@ -461,7 +461,7 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
 /**********************************************************************************************************/
  void Creer_page_courbe ( gchar *libelle )
   { GdkColor grille = { 0x0, 0x7FFF, 0x7FFF, 0x7FFF };
-    GtkWidget *bouton, *boite, *hboite, *vboite, *table, *table2, *separateur, *ruler;
+    GtkWidget *bouton, *boite, *hboite, *vboite, *table, *table2, *separateur;
     struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
 
