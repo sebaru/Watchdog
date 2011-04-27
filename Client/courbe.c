@@ -73,52 +73,53 @@
 /* Entrée: la courbe et la position x à formater                                                          */
 /* sortie: la chaine de caractere (non freeable, non re-entrant)                                          */
 /**********************************************************************************************************/
- static gchar *Valeur_to_description_marker ( struct COURBE *courbe, guint cherche_posx )
+ static gchar *Valeur_to_description_marker ( struct COURBE *courbe, guint index_posx )
   { static gchar description[80];
     float valeur;
 
     switch(courbe->type)
-           { case MNEMO_ENTREE:
+           { case MNEMO_SORTIE:
+             case MNEMO_ENTREE:
                   g_snprintf( description, sizeof(description),
-                              "%s%d = %d",
+                              "%s%d=%d",
                               Type_bit_interne_court(courbe->type),
                               courbe->mnemo.num,
-                              ( (gint)courbe->Y[cherche_posx] % ENTREAXE_Y_TOR == 0 ? 0 : 1) );
+                              ( (gint)courbe->Y[index_posx] % ENTREAXE_Y_TOR == 0 ? 0 : 1) );
                   break;
              case MNEMO_ENTREE_ANA:
                   switch ( courbe->eana.type )
                    { case ENTREEANA_NON_INTERP:
-                          valeur = courbe->Y[cherche_posx];
+                          valeur = courbe->Y[index_posx];
                           break;
                      case ENTREEANA_4_20_MA_10BITS:
-                          if (courbe->Y[cherche_posx] < 204)
+                          if (courbe->Y[index_posx] < 204)
                            { valeur = 0.0;                                 /* Valeur à l'echelle */ 
                            }
                           else
                            { valeur = (gdouble)
-                                        ((courbe->Y[cherche_posx]-204)*(courbe->eana.max - courbe->eana.min))/820.0
+                                        ((courbe->Y[index_posx]-204)*(courbe->eana.max - courbe->eana.min))/820.0
                                       + courbe->eana.min;                             /* Valeur à l'echelle */ 
                            }
                           break;
                      case ENTREEANA_4_20_MA_12BITS:
-                          if (courbe->Y[cherche_posx] < 816)
+                          if (courbe->Y[index_posx] < 816)
                            { valeur = 0.0;                                 /* Valeur à l'echelle */ 
                            }
                           else
                            { valeur = (gdouble)
-                                        ((courbe->Y[cherche_posx]-816)*(courbe->eana.max - courbe->eana.min))/3280.0
+                                        ((courbe->Y[index_posx]-816)*(courbe->eana.max - courbe->eana.min))/3280.0
                                       + courbe->eana.min;                             /* Valeur à l'echelle */ 
                            }
                           break;
                      case ENTREEANA_WAGO_750455:
                           valeur = (gdouble)
-                                     (courbe->Y[cherche_posx]*(courbe->eana.max - courbe->eana.min))/4095.0
+                                     (courbe->Y[index_posx]*(courbe->eana.max - courbe->eana.min))/4095.0
                                     + courbe->eana.min;                             /* Valeur à l'echelle */ 
                           break;
                      default : valeur = -1.0;
                    }                  
                   g_snprintf( description, sizeof(description),
-                              "EA%d = %8.2f %s",
+                              "EA%d=%8.2f %s",
                               courbe->eana.num, valeur, 
                               Unite_vers_string( courbe->eana.unite ) );
                   break;
@@ -127,8 +128,17 @@
     return(description);
   }
 /**********************************************************************************************************/
+/* CB_zoom_databox: Appellé quand l'utilisateur fait un zoom sur le databox                               */
+/* Entrée: la page infos en question                                                                      */
+/* sortie: TRUE                                                                                           */
+/**********************************************************************************************************/
+ gboolean CB_zoom_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data )
+  { gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_rescale), FALSE );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
 /* CB_deplacement_databox: Fonction appelée qd on appuie sur un des boutons de l'interface                */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* Entrée: la page infos en question                                                                      */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data )
@@ -136,41 +146,34 @@
     gchar date[128], *date_create;
     struct tm *temps;
     time_t time_select;
-    guint cpt;
+    guint cpt, posx_select;
 
     gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
-    infos->y_select[0] = bottom;
-    infos->y_select[1] = top;
 
-    infos->posx_select = gtk_databox_pixel_to_value_x (GTK_DATABOX(infos->Databox), (gint16) event->motion.x );
-    infos->x_select[1] = infos->x_select[0] = 1.0*infos->posx_select;
+    posx_select = gtk_databox_pixel_to_value_x (GTK_DATABOX(infos->Databox), (gint16) event->motion.x );
 
     for (cpt=0; cpt<NBR_MAX_COURBES; cpt++)                         /* Affichage des descriptions courbes */
      { if (infos->Courbes[cpt].actif)
-        { gint cherche_posx;
-          for(cherche_posx = 0; cherche_posx< TAILLEBUF_HISTO_EANA; cherche_posx++)
-           { if ( infos->posx_select < infos->Courbes[cpt].X[cherche_posx] ) break;
+        { gint index_posx;
+          for(index_posx = 0; index_posx< TAILLEBUF_HISTO_EANA; index_posx++)
+           { if ( posx_select < infos->Courbes[cpt].X[index_posx] ) break;
            }
-          if (cherche_posx>=TAILLEBUF_HISTO_EANA) cherche_posx = TAILLEBUF_HISTO_EANA-1;
-printf("posx_select = %d cherche_posx=%d y= %f\n", infos->posx_select, cherche_posx, infos->Courbes[cpt].Y[cherche_posx]  );
-          infos->Courbes[cpt].marker_select_x = infos->Courbes[cpt].X[cherche_posx];
-          infos->Courbes[cpt].marker_select_y = infos->Courbes[cpt].Y[cherche_posx];
+          if (index_posx>=TAILLEBUF_HISTO_EANA) index_posx = TAILLEBUF_HISTO_EANA-1;
+          infos->Courbes[cpt].marker_select_x = infos->Courbes[cpt].X[index_posx];
+          infos->Courbes[cpt].marker_select_y = infos->Courbes[cpt].Y[index_posx];
           gtk_databox_markers_set_label ( GTK_DATABOX_MARKERS(infos->Courbes[cpt].marker_select), 0, GTK_DATABOX_MARKERS_TEXT_S,
-                                         Valeur_to_description_marker(&infos->Courbes[cpt], cherche_posx), TRUE );
+                                         Valeur_to_description_marker(&infos->Courbes[cpt], index_posx), TRUE );
           gtk_databox_graph_set_hide ( infos->Courbes[cpt].marker_select, FALSE );
         }
      }
 
-    if (infos->Courbes[infos->echelle_active].actif)
-         { time_select = infos->posx_select + COURBE_ORIGINE_TEMPS;
-           temps = localtime( (time_t *)&time_select );
-           strftime( date, sizeof(date), "%F %T", temps );
-           date_create = g_locale_to_utf8( date, -1, NULL, NULL, NULL );
+    time_select = posx_select + COURBE_ORIGINE_TEMPS;
+    temps = localtime( (time_t *)&time_select );
+    strftime( date, sizeof(date), "%F %T", temps );
+    date_create = g_locale_to_utf8( date, -1, NULL, NULL, NULL );
 
-           gtk_entry_set_text( GTK_ENTRY(infos->Entry_date_select), date_create );
-           g_free( date_create );
-         }
-    else { gtk_entry_set_text( GTK_ENTRY(infos->Entry_date_select), "Pas d'echelle selectionee" ); }
+    gtk_entry_set_text( GTK_ENTRY(infos->Entry_date_select), date_create );
+    g_free( date_create );
     gtk_widget_queue_draw (infos->Databox);
     return(FALSE);
   }
@@ -181,40 +184,12 @@ printf("posx_select = %d cherche_posx=%d y= %f\n", infos->posx_select, cherche_p
 /**********************************************************************************************************/
  gboolean CB_sortir_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data )
   { gint cpt;
-    gchar description[256];
-
-    if (infos->index_select)                                                        /* Ajout d'une grille */
-     { gtk_entry_set_text ( GTK_ENTRY(infos->Entry_date_select), "" );
-     }
 
     for (cpt=0; cpt<NBR_MAX_COURBES; cpt++)                         /* Affichage des descriptions courbes */
      { if (infos->Courbes[cpt].actif)
         { gtk_databox_graph_set_hide (infos->Courbes[cpt].marker_select, TRUE);
-          switch(infos->Courbes[cpt].type)
-           { case MNEMO_ENTREE:
-                  g_snprintf( description, sizeof(description),
-                              "%s%d  - %s",
-                              Type_bit_interne_court(infos->Courbes[cpt].type),
-                              infos->Courbes[cpt].mnemo.num,
-                              infos->Courbes[cpt].mnemo.libelle );
-                  break;
-             case MNEMO_ENTREE_ANA:
-                  g_snprintf( description, sizeof(description),
-                              "EA%d - %s (%8.2f/%8.2f)",
-                              infos->Courbes[cpt].eana.num,
-                              infos->Courbes[cpt].eana.libelle,
-                              infos->Courbes[cpt].eana.min, infos->Courbes[cpt].eana.max );
-                  break;
-             default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
-           }
         }
-       else
-        { g_snprintf( description, sizeof(description), " -- no info -- " );
-        }
-       gtk_entry_set_text( GTK_ENTRY(infos->Entry[cpt]), description );
      }
-
-    gtk_widget_queue_draw (infos->Databox);
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -466,15 +441,6 @@ printf("posx_select = %d cherche_posx=%d y= %f\n", infos->posx_select, cherche_p
  void Menu_changer_echelle5 ( struct TYPE_INFO_COURBE *infos )
   { Menu_changer_echelle( infos, 5 ); }
 /**********************************************************************************************************/
-/* Menu_rescale: Demande de recadrage des courbes                                                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_rescale ( struct TYPE_INFO_COURBE *infos )
-  { 
-    gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
-  }
-/**********************************************************************************************************/
 /* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                            */
 /* Entrée: la page en question                                                                            */
 /* Sortie: rien                                                                                           */
@@ -606,6 +572,8 @@ printf("posx_select = %d cherche_posx=%d y= %f\n", infos->posx_select, cherche_p
 /****************************************** La databox ****************************************************/
     gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, TRUE, TRUE, FALSE, FALSE );
     gtk_box_pack_start( GTK_BOX(vboite), table2, TRUE, TRUE, 0 );
+    g_signal_connect_swapped( G_OBJECT(infos->Databox), "zoomed",
+                              G_CALLBACK(CB_zoom_databox), infos );
 
     gtk_databox_set_scale_type_x ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_databox_set_scale_type_y ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
@@ -636,12 +604,7 @@ printf("posx_select = %d cherche_posx=%d y= %f\n", infos->posx_select, cherche_p
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
-    bouton = gtk_button_new_with_label( _("Rescale") );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_rescale), infos );
-
-    infos->Check_rescale = gtk_check_button_new_with_label( _("Auto Rescale") );
+    infos->Check_rescale = gtk_check_button_new_with_label( _("Fil de l'eau") );
     gtk_box_pack_start( GTK_BOX(boite), infos->Check_rescale, FALSE, FALSE, 0 );
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
 
@@ -830,7 +793,8 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
           gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
           gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
 
-          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left+800,  right+800, 1.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
+          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left+800,  right+800, top + 0.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
+          gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
         }
        gtk_widget_queue_draw (infos->Databox);                                  /* Mise à jour du Databox */
      }
@@ -844,6 +808,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
     struct COURBE *new_courbe;
+    gchar description[256];
 
     page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );               /* Récupération page courbe */
     if (!page) return;
@@ -872,5 +837,23 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_last);
 
     gtk_widget_queue_draw (infos->Databox);
+
+    switch(new_courbe->type)
+     { case MNEMO_SORTIE:
+       case MNEMO_ENTREE:
+            g_snprintf( description, sizeof(description), "%s%d  - %s",
+                        Type_bit_interne_court(new_courbe->type),
+                        new_courbe->mnemo.num,
+                        new_courbe->mnemo.libelle );
+            break;
+       case MNEMO_ENTREE_ANA:
+            g_snprintf( description, sizeof(description), "EA%d - %s (%8.2f/%8.2f)",
+                        new_courbe->eana.num,
+                        new_courbe->eana.libelle,
+                        new_courbe->eana.min, new_courbe->eana.max );
+            break;
+       default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
+     }
+    gtk_entry_set_text( GTK_ENTRY(infos->Entry[courbe->slot_id]), description );
   }
 /*--------------------------------------------------------------------------------------------------------*/

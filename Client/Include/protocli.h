@@ -119,15 +119,12 @@
 
  struct TYPE_INFO_COURBE
   { guint slot_id;                                                   /* Numero du slot en cours d'edition */
-    guint posx_select;
-    gfloat x_select[2], y_select[2];                                            /* Coord affichage select */
     GtkWidget *Databox;
     GtkWidget *Entry[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
     GtkWidget *Radio[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
     GtkWidget *Check_rescale;
     struct COURBE Courbes[NBR_MAX_COURBES];
     GtkDataboxGraph *index_grille;                       /* Index de la grille retourné par le gtkdatabox */
-    GtkDataboxGraph *index_select;                       /* Index de la grille retourné par le gtkdatabox */
     GtkWidget *Date_debut;
     GtkWidget *Date_fin;
     GtkWidget *Entry_date_select;                                 /* Affichage de la date actuelle select */
