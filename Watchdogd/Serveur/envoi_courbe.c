@@ -46,7 +46,7 @@
     liste_courbe = client->courbes;                                          /* Recherche de la structure */
     while (liste_courbe)
      { courbe = (struct COURBE *)liste_courbe->data;
-       if (courbe->slot_id == rezo_courbe->slot_id && courbe->type == rezo_courbe->type)
+       if (courbe->slot_id == rezo_courbe->slot_id)
         { client->courbes = g_list_remove( client->courbes, courbe );
           return;
         }
@@ -144,7 +144,7 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
                 switch (courbe->type)
                  { case MNEMO_ENTREE_ANA : envoi_courbe.val_int = Partage->ea[courbe->id].val_int; break;
                    case MNEMO_ENTREE     : envoi_courbe.val_int = E(courbe->id);  break;
-                   case MNEMO_BISTABLE   : envoi_courbe.val_int = B(courbe->id);  break;
+                   case MNEMO_SORTIE     : envoi_courbe.val_int = A(courbe->id);  break;
                    default : envoi_courbe.val_int = 0; break;
                  }
               }                              
@@ -153,10 +153,8 @@ printf("New courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
 
     if (arch)                              /* Si on a traité un enreg, on va traiter les autres en boucle */
      { g_free(arch);                                             /* Libération de l'enregistrement d'init */
-printf("Debut boucle\n");
        for( ; ; )
         { arch = Recuperer_archDB_suite( Config.log, db );                          /* On prend un enreg. */
-printf("----- arch = %p\n", arch);
 
           if (!arch) break;
           envoi_courbe.date    = arch->date_sec;
@@ -166,77 +164,6 @@ printf("----- arch = %p\n", arch);
           g_free(arch);
         }
      }
-
-#ifdef bouh
-
-    switch( courbe->type )
-     { case MNEMO_ENTREE: printf("a voir\n"); break;
-
-       case MNEMO_ENTREE_ANA:
-            date = time(NULL);                                            /* On recupere la date actuelle */
-
-            Recuperer_archDB ( Config.log, db, courbe->type, courbe->id,
-                               (date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP), date );
-               
-            envoi_courbe.slot_id = courbe->slot_id;         /* Valeurs par defaut si pas d'enregistrement */
-            envoi_courbe.type    = courbe->type;
-
-            arch = Recuperer_archDB_suite( Config.log, db );                /* On prend le premier enreg. */
-
-            if (arch) { envoi_courbe.date    = arch->date_sec;                  /* Si enreg, on le pousse */
-                        envoi_courbe.val_int = arch->valeur;
-                      }                              /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
-            else      { envoi_courbe.date    = date - TAILLEBUF_HISTO_EANA*COURBE_TEMPS_TOP;
-                        envoi_courbe.val_int = Partage->ea[courbe->id].val_int;
-                      }                              
-            Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                          (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-            i=1;                                                   /* nous avons envoyé un enregistrement */
-            if (arch)                      /* Si on a traité un enreg, on va traiter les autres en boucle */
-             { g_free(arch);                                     /* Libération de l'enregistrement d'init */
-printf("Debut boucle\n");
-               for( ; i<TAILLEBUF_HISTO_EANA; )
-                { arch = Recuperer_archDB_suite( Config.log, db );                  /* On prend un enreg. */
-printf("----- arch = %p, i=%d\n", arch, i);
-
-                  if (!arch) break;
-encore:
-                  if (envoi_courbe.date + COURBE_TEMPS_TOP < arch->date_sec)              /* enreg tardif */
-                   { envoi_courbe.date = envoi_courbe.date + COURBE_TEMPS_TOP;
-         printf("Envoi %d arch %d val_int %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val_int, i );  
-                     Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                   (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                     i++;                                  /* nous avons envoyé un enregistrement de plus */
-                     goto encore;
-                   }
-                  else
-                   { if (envoi_courbe.date + COURBE_TEMPS_TOP > arch->date_sec)
-                      { envoi_courbe.val_int = arch->valeur;/* Si plus d'un eregistrement dans les meme 5 sec */
-         printf("Skip  %d arch %d val %d  i %d\n", envoi_courbe.date, arch->date_sec, envoi_courbe.val_int, i );
-                      }
-                     else
-                      { envoi_courbe.date    = arch->date_sec;
-                        envoi_courbe.val_int = arch->valeur;
-                        Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                      (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                        i++;                              /* nous avons envoyé un enregistrement de plus */
-                      }
-                     g_free(arch);
-                   }
-                }
-             }
-
-            while (i<TAILLEBUF_HISTO_EANA)                          /* A-t'on envoyé le nombre souhaité ? */
-             { envoi_courbe.date = envoi_courbe.date + COURBE_TEMPS_TOP;
-         printf("Termine   %d val %d  i %d\n",     envoi_courbe.date, envoi_courbe.val_int, i );
-               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-               i++;
-             }
-            break;
-       default : printf("Error\n");
-     }
-#endif
     client->courbes = g_list_append ( client->courbes, courbe );
 
     Libere_DB_SQL( Config.log, &db );

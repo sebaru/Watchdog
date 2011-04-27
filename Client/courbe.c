@@ -276,7 +276,7 @@
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_select );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_last );
-       gtk_widget_queue_draw (infos->Databox);
+       gtk_entry_set_text( GTK_ENTRY(infos->Entry[infos->slot_id]), " -- no info --" );
      }
     gtk_widget_destroy(F_source);
     F_source = NULL;
