@@ -31,6 +31,7 @@
  #include <gtkdatabox_points.h>
  #include <gtkdatabox_lines.h>
  #include <gtkdatabox_grid.h>
+ #include <gtkdatabox_markers.h>
  
  #include "Reseaux.h"
  #include "Config_cli.h"
@@ -132,7 +133,6 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
                break;
            default: printf(" Type de courbe non trouvée !!  \n" );
         }
-       new_courbe->nbr_points=0;
                                                           /* Placement de la nouvelle courbe sur l'id gui */
        gtk_tree_selection_unselect_iter( selection, &iter );
        g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
@@ -152,7 +152,8 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
        new_courbe->type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
- /*      gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );*/
+       gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
+       gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_select );
        gtk_widget_queue_draw (infos->Databox);
      }
     gtk_widget_destroy(F_source);
@@ -280,7 +281,8 @@ printf("Envoie want page source for histo courbe\n");
  static void Menu_changer_courbe5 ( struct TYPE_INFO_COURBE *infos )
   { Menu_changer_courbe( infos, 4 ); }
  static void Menu_changer_courbe6 ( struct TYPE_INFO_COURBE *infos )
-  { Menu_changer_courbe( infos, 5 ); }/**********************************************************************************************************/
+  { Menu_changer_courbe( infos, 5 ); }
+/**********************************************************************************************************/
 /* Menu_rescale: Demande de recadrage des courbes                                                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
@@ -346,7 +348,7 @@ printf("Envoie want page source for histo courbe\n");
 /**********************************************************************************************************/
  void Creer_page_histo_courbe ( gchar *libelle )
   { GdkColor grille = { 0x0, 0x7FFF, 0x7FFF, 0x7FFF };
-    GtkWidget *bouton, *boite, *hboite, *vboite, *table, *table2, *separateur, *ruler;
+    GtkWidget *bouton, *boite, *hboite, *vboite, *table, *table2, *separateur;
     struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GdkColor fond   = { 0x0, 0x0, 0x0, 0x0 };
@@ -479,21 +481,12 @@ printf("Envoie want page source for histo courbe\n");
     gtk_box_pack_start( GTK_BOX(vboite), infos->Entry_date_select, FALSE, FALSE, 0 );
 
 /****************************************** La databox ****************************************************/
-    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, FALSE, FALSE, FALSE, TRUE );
+    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, FALSE, FALSE, FALSE, FALSE );
     gtk_box_pack_start( GTK_BOX(vboite), table2, TRUE, TRUE, 0 );
 
-/*    infos->Databox = gtk_databox_new();*/
     gtk_databox_set_scale_type_x ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_databox_set_scale_type_y ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_widget_modify_bg (infos->Databox, GTK_STATE_NORMAL, &fond);
-
-    gtk_databox_set_total_limits ( GTK_DATABOX(infos->Databox),
-                                   0.0, TAILLEBUF_HISTO_EANA*1.0,
-                                   MAX_RESOLUTION*1.0, 0.0 );
-
-    ruler = (GtkWidget *)gtk_databox_get_ruler_y ( GTK_DATABOX (infos->Databox) );
-    gtk_databox_ruler_set_range ( GTK_DATABOX_RULER(ruler), 10.0, 0.0, 5.0 );
-    gtk_databox_ruler_set_scale_type ( GTK_DATABOX_RULER(ruler), GTK_DATABOX_SCALE_LINEAR );
 
     g_signal_connect_swapped( G_OBJECT(infos->Databox), "motion_notify_event",
                               G_CALLBACK(CB_deplacement_databox), infos );
@@ -501,9 +494,6 @@ printf("Envoie want page source for histo courbe\n");
     g_signal_connect_swapped( G_OBJECT(infos->Databox), "leave_notify_event",
                               G_CALLBACK(CB_sortir_databox), infos );
 
-    gtk_databox_set_total_limits ( GTK_DATABOX(infos->Databox),
-                                   0.0, TAILLEBUF_HISTO_EANA*1.0,
-                                   MAX_RESOLUTION*1.0, 0.0 );
     infos->index_grille = gtk_databox_grid_new ( 3, 10, &grille, 1 );
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), infos->index_grille);
 
@@ -654,7 +644,7 @@ printf("Envoie want page source for histo courbe\n");
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
     struct COURBE *new_courbe;
-    gint cpt;
+    gchar description[256];
 
 printf("ajouter courbe page %d\n", courbe->slot_id );
     page = Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, TRUE );         /* Récupération page courbe */
@@ -665,21 +655,40 @@ printf("ajouter courbe 2\n" );
 
     /* La nouvelle courbe va dans l'id gui_courbe_id */
     new_courbe = &infos->Courbes[courbe->slot_id];
-    new_courbe->nbr_points = 0;
+    new_courbe->init = FALSE;
 
-#ifdef bouh
-    for (cpt=0; cpt<TAILLEBUF_HISTO_EANA; cpt++)                    /* Initialisation des buffers courbes */
-     { infos->X[cpt] = 1.0*cpt;
-       new_courbe->X_date[cpt] = 0;
-       new_courbe->Y[cpt] = 0.0; 
-     }
-
-    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, infos->X, new_courbe->Y,
+    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
                                                 &COULEUR_COURBE[courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
-#endif
-    /*gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.05 );*/
-    /*gtk_databox_redraw (GTK_DATABOX(infos->Databox));*/
+
+    new_courbe->marker_select = gtk_databox_markers_new ( 1, &new_courbe->marker_select_x, &new_courbe->marker_select_y,
+                                                          &COULEUR_COURBE[courbe->slot_id], 10,
+                                                          GTK_DATABOX_MARKERS_TRIANGLE
+                                                        );
+    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_select);
+    gtk_databox_graph_set_hide ( new_courbe->marker_select, TRUE );
+ 
+    new_courbe->marker_last = NULL;
+
+    gtk_widget_queue_draw (infos->Databox);
+
+    switch(new_courbe->type)
+     { case MNEMO_SORTIE:
+       case MNEMO_ENTREE:
+            g_snprintf( description, sizeof(description), "%s%d  - %s",
+                        Type_bit_interne_court(new_courbe->type),
+                        new_courbe->mnemo.num,
+                        new_courbe->mnemo.libelle );
+            break;
+       case MNEMO_ENTREE_ANA:
+            g_snprintf( description, sizeof(description), "EA%d - %s (%8.2f/%8.2f)",
+                        new_courbe->eana.num,
+                        new_courbe->eana.libelle,
+                        new_courbe->eana.min, new_courbe->eana.max );
+            break;
+       default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
+     }
+    gtk_entry_set_text( GTK_ENTRY(infos->Entry[courbe->slot_id]), description );
 
 printf("Ajout courbe fin\n");
   }

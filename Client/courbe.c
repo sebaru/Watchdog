@@ -581,10 +581,6 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
     gtk_databox_set_scale_type_y ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
     gtk_widget_modify_bg (infos->Databox, GTK_STATE_NORMAL, &fond);
 
-    ruler = (GtkWidget *)gtk_databox_get_ruler_y ( GTK_DATABOX (infos->Databox) );
-    gtk_databox_ruler_set_range ( GTK_DATABOX_RULER(ruler), 10.0, 0.0, 5.0 );
-    gtk_databox_ruler_set_scale_type ( GTK_DATABOX_RULER(ruler), GTK_DATABOX_SCALE_LINEAR );
-
     g_signal_connect_swapped( G_OBJECT(infos->Databox), "motion_notify_event",
                               G_CALLBACK(CB_deplacement_databox), infos );
     gtk_widget_add_events( GTK_WIDGET(infos->Databox), GDK_LEAVE_NOTIFY_MASK );
