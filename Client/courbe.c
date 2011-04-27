@@ -606,7 +606,7 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
-    infos->Check_rescale = gtk_check_button_new_with_label( _("Fil de l'eau") );
+    infos->Check_rescale = gtk_check_button_new_with_label( _("Temps reel") );
     gtk_box_pack_start( GTK_BOX(boite), infos->Check_rescale, FALSE, FALSE, 0 );
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
 

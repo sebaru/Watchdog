@@ -446,7 +446,7 @@
     query[2] = "ups.load";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER load",
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER load",
                upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
@@ -457,7 +457,7 @@
     query[2] = "ups.realpower";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER real_power",
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER real_power",
                upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
@@ -468,7 +468,7 @@
     query[2] = "battery.charge";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER battery_charge",
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery_charge",
                upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
@@ -479,7 +479,7 @@
     query[2] = "input.voltage";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_module: Wrong ANSWER input_voltage",
+     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER input_voltage",
                upscli_upserror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
      }
