@@ -28,7 +28,6 @@
 #ifndef _RESEAUX_COURBE_H_
  #define _RESEAUX_COURBE_H_
 
- #define TAILLEBUF_HISTO_EANA          1600      /* 800 point de controle dans le client et buffer valana */
  #define COURBE_ORIGINE_TEMPS    1300000000/* Origine des temps pour que le time_t INT passe dans les float de gtkdatabox */
 
  struct CMD_APPEND_COURBE

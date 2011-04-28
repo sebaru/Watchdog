@@ -155,10 +155,10 @@
     for (cpt=0; cpt<NBR_MAX_COURBES; cpt++)                         /* Affichage des descriptions courbes */
      { if (infos->Courbes[cpt].actif)
         { gint index_posx;
-          for(index_posx = 0; index_posx< TAILLEBUF_HISTO_EANA; index_posx++)
+          for(index_posx = 0; index_posx < infos->Courbes[cpt].taille_donnees; index_posx++)
            { if ( posx_select < infos->Courbes[cpt].X[index_posx] ) break;
            }
-          if (index_posx>=TAILLEBUF_HISTO_EANA) index_posx = TAILLEBUF_HISTO_EANA-1;
+          if (index_posx>=infos->Courbes[cpt].taille_donnees) index_posx = infos->Courbes[cpt].taille_donnees-1;
 printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X[index_posx], infos->Courbes[cpt].Y[index_posx] );
           infos->Courbes[cpt].marker_select_x = infos->Courbes[cpt].X[index_posx];
           infos->Courbes[cpt].marker_select_y = infos->Courbes[cpt].Y[index_posx];
@@ -179,7 +179,7 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* CB_ajouter_editer_source: Fonction appelée qd on appuie sur un des boutons de l'interface           */
+/* CB_ajouter_editer_source: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
@@ -195,7 +195,7 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* CB_ajouter_editer_source: Fonction appelée qd on appuie sur un des boutons de l'interface           */
+/* CB_ajouter_editer_source: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
@@ -715,7 +715,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
      { case MNEMO_ENTREE_ANA:
                 { courbe->X[courbe->taille_donnees-1] = 1.0*append_courbe->date;
                   courbe->Y[courbe->taille_donnees-1] = 1.0*append_courbe->val_int;
-                  printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[TAILLEBUF_HISTO_EANA-1], courbe->Y[TAILLEBUF_HISTO_EANA-1] );
+                  printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
        case MNEMO_SORTIE:
@@ -723,7 +723,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                 { courbe->X[courbe->taille_donnees-1] = 1.0*append_courbe->date;
                   courbe->Y[courbe->taille_donnees-1] = 1.0*(append_courbe->slot_id*ENTREAXE_Y_TOR +
                                                           (append_courbe->val_int ? HAUTEUR_Y_TOR : 0));
-                  printf("3 - append courbe : X=%f, Y=%f\n", courbe->X[TAILLEBUF_HISTO_EANA-1], courbe->Y[TAILLEBUF_HISTO_EANA-1] );
+                  printf("3 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
        default: printf("type inconnu %d\n", courbe->type);
@@ -791,15 +791,9 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     if (!infos) return;
 
     /* La nouvelle courbe va dans l'id courbe->slot_id */
-    new_courbe = &infos->Courbes[courbe->slot_id];
-    new_courbe->taille_donnees = 1;
-    new_courbe->X = (gfloat *)g_malloc0 ( new_courbe->taille_donnees * sizeof(gfloat) );
-    new_courbe->Y = (gfloat *)g_malloc0 ( new_courbe->taille_donnees * sizeof(gfloat) );
-
-    new_courbe->index = gtk_databox_lines_new ( new_courbe->taille_donnees,
-                                                &new_courbe->X[0], &new_courbe->Y[0],
-                                                &COULEUR_COURBE[courbe->slot_id], 1);
-    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
+    new_courbe                 = &infos->Courbes[courbe->slot_id];
+    new_courbe->index          = NULL;
+    new_courbe->taille_donnees = 0;
 
     new_courbe->marker_select = gtk_databox_markers_new ( 1, &new_courbe->marker_select_x, &new_courbe->marker_select_y,
                                                           &COULEUR_COURBE[courbe->slot_id], 10,
@@ -843,6 +837,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
     struct COURBE *courbe;
+    gint cpt, i;
 
     page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );               /* Récupération page courbe */
     if (!page) return;
@@ -853,16 +848,21 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
 
     printf(" Recu %d enreg pour le slot %d old enreg = %d\n", start_courbe->taille_donnees, start_courbe->slot_id, courbe->taille_donnees );
 
-    courbe->taille_donnees += start_courbe->taille_donnees;
-
+    cpt = courbe->taille_donnees;                 /* Sauvegarde pour garnissage dans la boucle ci dessous */
+    courbe->taille_donnees += start_courbe->taille_donnees;                  /* Agrandissement du tableau */
     courbe->X = g_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
     courbe->Y = g_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
-
     printf("realloc OK.\n");
 
-    gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );  /* Suppression ancien graph */
+    for ( i=0; cpt < courbe->taille_donnees; cpt++, i++ )
+     { courbe->X[cpt] = start_courbe->valeurs[i].date - COURBE_ORIGINE_TEMPS;
+       courbe->Y[cpt] = start_courbe->valeurs[i].val_int;
+       printf(" ajout enreg %d: X = %f, Y=%f\n", cpt, courbe->X[cpt], courbe->Y[cpt] );
+     }
+                                                                         /* Suppression de l'ancien graph */
+    if (courbe->index) gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );
     courbe->index = gtk_databox_lines_new ( courbe->taille_donnees,
-                                            &courbe->X[0], &courbe->Y[0],
+                                            courbe->X, courbe->Y,
                                             &COULEUR_COURBE[start_courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
 

@@ -150,7 +150,7 @@
 
        if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
         { Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_START_COURBE, (gchar *)envoi_courbe,
-                        sizeof(struct CMD_START_COURBE) + (envoi_courbe->taille_donnees-1) * sizeof(struct CMD_START_COURBE_VALEUR) );
+                        sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
           Info_n( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: taille donnees", envoi_courbe->taille_donnees );
           envoi_courbe->taille_donnees = 0;
         }

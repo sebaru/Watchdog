@@ -656,7 +656,7 @@ printf("ajouter courbe 2\n" );
     /* La nouvelle courbe va dans l'id gui_courbe_id */
     new_courbe = &infos->Courbes[courbe->slot_id];
 /*    new_courbe->init = FALSE;*/
-
+#ifdef bouh
     new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
                                                 &COULEUR_COURBE[courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
@@ -667,7 +667,7 @@ printf("ajouter courbe 2\n" );
                                                         );
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_select);
     gtk_databox_graph_set_hide ( new_courbe->marker_select, TRUE );
- 
+ #endif
     new_courbe->marker_last = NULL;
 
     gtk_widget_queue_draw (infos->Databox);
