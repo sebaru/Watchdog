@@ -41,26 +41,39 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_histo_courbe_thread ( struct CLIENT *client )
-  { struct CMD_APPEND_COURBE envoi_courbe;
+  { struct CMD_START_COURBE *envoi_courbe;
     struct ARCHDB *arch;
     struct CMD_TYPE_COURBE rezo_courbe;
     struct DB *db;
+    guint max_enreg;
 
     prctl(PR_SET_NAME, "W-HISTOCourbe", 0, 0, 0 );
-#ifdef bouh
-    memcpy ( &rezo_courbe, &client->courbe, sizeof( rezo_courbe ) );
+    memcpy ( &rezo_courbe, &client->courbe, sizeof( struct CMD_TYPE_COURBE ) );
+                 /* La sauvegarde en local a été effectuée, nous indiquons au master qu'il peut continuer */
     client->courbe.num=-1;
+/******************************************** Préparation structure d'envoi *******************************/
+    envoi_courbe = (struct CMD_START_COURBE *)g_malloc0( Config.taille_bloc_reseau );
+    if (!envoi_courbe)
+     { struct CMD_GTK_MESSAGE erreur;
+       Info( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: Pb d'allocation memoire envoi_courbe" );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit(NULL);
+     }
+    envoi_courbe->slot_id        = rezo_courbe.slot_id;     /* Valeurs par defaut si pas d'enregistrement */
+    envoi_courbe->type           = rezo_courbe.type;
+    envoi_courbe->taille_donnees = 0;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Info( Config.log, DEBUG_DB, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
+       Info( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
+       g_free(envoi_courbe);
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
-
-
-printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.num );
 
     Envoi_client ( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_ADD_HISTO_COURBE_OK,  /* Envoi préparation au client */
                    (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
@@ -70,45 +83,33 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.num )
        client->histo_courbe.date_first = client->histo_courbe.date_last - 3600;
      }
 
-    Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.num,
+    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
+    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
+
+    Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.num,                  /* Requete SQL */
                        client->histo_courbe.date_first,
-                       client->histo_courbe.date_last );
-               
-    envoi_courbe.slot_id = rezo_courbe.slot_id;             /* Valeurs par defaut si pas d'enregistrement */
-    envoi_courbe.type    = rezo_courbe.type;
-
-    arch = Recuperer_archDB_suite( Config.log, db );                        /* On prend le premier enreg. */
-
-    if (arch) { envoi_courbe.date    = arch->date_sec;                          /* Si enreg, on le pousse */
-                envoi_courbe.val_int = arch->valeur;
-              }                                      /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
-    else      { envoi_courbe.date    = client->histo_courbe.date_first;
-                switch (rezo_courbe.type)
-                 { case MNEMO_ENTREE_ANA : envoi_courbe.val_int = Partage->ea[rezo_courbe.num].val_int; break;
-                   case MNEMO_ENTREE     : envoi_courbe.val_int = E(rezo_courbe.num);  break;
-                   case MNEMO_SORTIE     : envoi_courbe.val_int = A(rezo_courbe.num);  break;
-                   default : envoi_courbe.val_int = 0; break;
-                 }
-              }                              
-    Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
-                  (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-
-    if (arch)                              /* Si on a traité un enreg, on va traiter les autres en boucle */
-     { g_free(arch);                                             /* Libération de l'enregistrement d'init */
-       for( ; ; )
-        { arch = Recuperer_archDB_suite( Config.log, db );                          /* On prend un enreg. */
-
-          if (!arch) break;
-          envoi_courbe.date    = arch->date_sec;
-          envoi_courbe.val_int = arch->valeur;
-          Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_APPEND_HISTO_COURBE,
-                       (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
+                       client->histo_courbe.date_last );          
+    do
+     { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend le premier enreg. */
+       if (arch)                                               /* Si enregegistrement, alors on le pousse */
+        { envoi_courbe->valeurs[envoi_courbe->taille_donnees].date    = arch->date_sec;
+          envoi_courbe->valeurs[envoi_courbe->taille_donnees].val_int = arch->valeur;
+          envoi_courbe->taille_donnees++;/* Nous avons 1 enregistrement de plus dans la structure d'envoi */
           g_free(arch);
         }
+
+       if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
+        { Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_START_HISTO_COURBE, (gchar *)envoi_courbe,
+                        sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
+          Info_n( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: taille donnees", envoi_courbe->taille_donnees );
+          envoi_courbe->taille_donnees = 0;
+        }
      }
+    while (arch);                                          /* On tourne tant qu'il y a des enregistrement */
+
+    g_free(envoi_courbe);                             /* Nous n'avons plus besoin de la structure d'envoi */
     Libere_DB_SQL( Config.log, &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
-#endif
     pthread_exit(NULL);
   }
 /*--------------------------------------------------------------------------------------------------------*/
