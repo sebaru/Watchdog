@@ -260,7 +260,7 @@
                g_free(libelle);
                break;
         }
-
+                                                          /* Placement de la nouvelle courbe sur l'id gui */
        gtk_tree_selection_unselect_iter( selection, &iter );
        g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
        g_list_free (lignes);                                                        /* Liberation mémoire */

@@ -49,6 +49,7 @@
  enum
   {  COLONNE_ID,
      COLONNE_TYPE,
+     COLONNE_TYPE_EA,
      COLONNE_OBJET,
      COLONNE_NUM,
      COLONNE_MIN,
@@ -113,10 +114,10 @@
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = TRUE;                /* Récupération des données EANA dans la structure COURBE */
        new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
-printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
                new_courbe->eana.num = rezo_courbe.num;
+               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.type, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE, &new_courbe->eana.unite, -1 );
@@ -132,14 +133,12 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
                g_snprintf( new_courbe->mnemo.libelle, sizeof(new_courbe->mnemo.libelle), "%s", libelle );
                g_free(libelle);
                break;
-           default: printf(" Type de courbe non trouvée !!  \n" );
         }
                                                           /* Placement de la nouvelle courbe sur l'id gui */
        gtk_tree_selection_unselect_iter( selection, &iter );
        g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
        g_list_free (lignes);                                                        /* Liberation mémoire */
 
-       printf("Envoi serveur TAG_CLIENT_ADD_HISTO_COURBE %d\n", rezo_courbe.num );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
@@ -196,6 +195,7 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                    /* Id (num) */
                                               G_TYPE_UINT,                                        /* Type */
+                                              G_TYPE_UINT,                                     /* Type EA */
                                               G_TYPE_STRING,                                     /* Objet */
                                               G_TYPE_STRING,                 /* Num (id en string "EAxxx" */
                                               G_TYPE_FLOAT,                                       /* min */
@@ -514,6 +514,7 @@ printf("Envoie want page source for histo courbe\n");
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, MNEMO_ENTREE_ANA,
+                         COLONNE_TYPE_EA, source->type,
                          COLONNE_OBJET, "a venir",
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, source->min,
@@ -545,6 +546,7 @@ printf("Envoie want page source for histo courbe\n");
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, source->type,
+                         COLONNE_TYPE_EA, 0,
                          COLONNE_OBJET, source->objet,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, 0.0,
