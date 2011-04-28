@@ -138,7 +138,7 @@
 
     Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: début d'envoi" );
     max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
-    Recuperer_archDB ( Config.log, db, courbe->type, courbe->num, (date - 3*3600), date );
+    Recuperer_archDB ( Config.log, db, courbe->type, courbe->num, (date - COURBE_NBR_HEURE_ARCHIVE*3600), date );
     do
      { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend le premier enreg. */
        if (arch)                                               /* Si enregegistrement, alors on le pousse */

@@ -159,7 +159,6 @@
            { if ( posx_select < infos->Courbes[cpt].X[index_posx] ) break;
            }
           if (index_posx>=infos->Courbes[cpt].taille_donnees) index_posx = infos->Courbes[cpt].taille_donnees-1;
-printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X[index_posx], infos->Courbes[cpt].Y[index_posx] );
           infos->Courbes[cpt].marker_select_x = infos->Courbes[cpt].X[index_posx];
           infos->Courbes[cpt].marker_select_y = infos->Courbes[cpt].Y[index_posx];
           gtk_databox_markers_set_label ( GTK_DATABOX_MARKERS(infos->Courbes[cpt].marker_select), 0, GTK_DATABOX_MARKERS_TEXT_S,

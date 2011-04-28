@@ -45,6 +45,7 @@
     gdouble val_ech;
   };
 
+ #define COURBE_NBR_HEURE_ARCHIVE          24       /* 24 heures d'archive pour les courbes en temps réel */
 /*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/
 
                                                                                         /* Dans serveur.c */
