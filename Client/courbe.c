@@ -227,7 +227,7 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
        lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
 
        gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_courbe.id, -1 );                /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_courbe.num, -1 );               /* Recup du id */
        gtk_tree_model_get( store, &iter, COLONNE_TYPE, &rezo_courbe.type, -1 );          /* Recup du type */
        gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
        memcpy( &rezo_courbe.libelle, libelle, sizeof(rezo_courbe.libelle) );
@@ -240,7 +240,7 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
        new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.num = rezo_courbe.id;
+               new_courbe->eana.num = rezo_courbe.num;
                gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.type, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
@@ -251,8 +251,8 @@ printf("Trouvé index_posx = %d, X=%f, Y=%f\n", index_posx, infos->Courbes[cpt].X
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
-               new_courbe->mnemo.id = rezo_courbe.id;
-               new_courbe->mnemo.num = rezo_courbe.id;
+               new_courbe->mnemo.id = rezo_courbe.num;
+               new_courbe->mnemo.num = rezo_courbe.num;
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
                g_snprintf( new_courbe->mnemo.libelle, sizeof(new_courbe->mnemo.libelle), "%s", libelle );
                g_free(libelle);
@@ -707,22 +707,21 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  gboolean Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe )
-  { gint cpt;                               /* Decalage pour que le time_t passe dans le float du databox */
-    append_courbe->date -= COURBE_ORIGINE_TEMPS; 
-    memmove( courbe->X, courbe->X+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
-    memmove( courbe->Y, courbe->Y+1, (TAILLEBUF_HISTO_EANA-1)*sizeof(gfloat));
+  { append_courbe->date -= COURBE_ORIGINE_TEMPS; 
+    memmove( courbe->X, courbe->X+1, (courbe->taille_donnees-1)*sizeof(gfloat));
+    memmove( courbe->Y, courbe->Y+1, (courbe->taille_donnees-1)*sizeof(gfloat));
                   
     switch(courbe->type)
      { case MNEMO_ENTREE_ANA:
-                { courbe->X[TAILLEBUF_HISTO_EANA-1] = 1.0*append_courbe->date;
-                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = 1.0*append_courbe->val_int;
+                { courbe->X[courbe->taille_donnees-1] = 1.0*append_courbe->date;
+                  courbe->Y[courbe->taille_donnees-1] = 1.0*append_courbe->val_int;
                   printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[TAILLEBUF_HISTO_EANA-1], courbe->Y[TAILLEBUF_HISTO_EANA-1] );
                 }
                break;
        case MNEMO_SORTIE:
        case MNEMO_ENTREE:
-                { courbe->X[TAILLEBUF_HISTO_EANA-1] = 1.0*append_courbe->date;
-                  courbe->Y[TAILLEBUF_HISTO_EANA-1] = 1.0*(append_courbe->slot_id*ENTREAXE_Y_TOR +
+                { courbe->X[courbe->taille_donnees-1] = 1.0*append_courbe->date;
+                  courbe->Y[courbe->taille_donnees-1] = 1.0*(append_courbe->slot_id*ENTREAXE_Y_TOR +
                                                           (append_courbe->val_int ? HAUTEUR_Y_TOR : 0));
                   printf("3 - append courbe : X=%f, Y=%f\n", courbe->X[TAILLEBUF_HISTO_EANA-1], courbe->Y[TAILLEBUF_HISTO_EANA-1] );
                 }
@@ -730,21 +729,12 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
        default: printf("type inconnu %d\n", courbe->type);
                 return(FALSE);
      }
-    courbe->marker_last_x = courbe->X[TAILLEBUF_HISTO_EANA-1];
-    courbe->marker_last_y = courbe->Y[TAILLEBUF_HISTO_EANA-1];
-    gtk_databox_markers_set_label ( GTK_DATABOX_MARKERS(courbe->marker_last), 0, GTK_DATABOX_MARKERS_TEXT_E,
-                                    Valeur_to_description_marker(courbe, TAILLEBUF_HISTO_EANA-1), TRUE );
-
-    if (courbe->init == FALSE)                                  /* Devons-nous initialiser les tampons ?? */
-     { for (cpt=0; cpt<TAILLEBUF_HISTO_EANA-1; cpt++)               /* Initialisation des buffers courbes */
-        { courbe->X[cpt] = append_courbe->date;
-          courbe->Y[cpt] = courbe->Y[TAILLEBUF_HISTO_EANA-1];            /* Recopie de la derniere valeur */
-        }
-       courbe->marker_select_x = courbe->marker_last_x;
-       courbe->marker_select_y = courbe->marker_last_y;
-       courbe->init = TRUE;                                               /* Les tampons sont initialisés */
+    if (courbe->marker_last)
+     { courbe->marker_last_x = courbe->X[courbe->taille_donnees-1];
+       courbe->marker_last_y = courbe->Y[courbe->taille_donnees-1];
+       gtk_databox_markers_set_label ( GTK_DATABOX_MARKERS(courbe->marker_last), 0, GTK_DATABOX_MARKERS_TEXT_E,
+                                       Valeur_to_description_marker(courbe, courbe->taille_donnees-1), TRUE );
      }
-
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -768,7 +758,7 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
      { struct CMD_TYPE_COURBE rezo_courbe;
        rezo_courbe.type    = append_courbe->type;
        rezo_courbe.slot_id = append_courbe->slot_id;/* On demande au serveur de ne plus nous envoyer les infos */
-       rezo_courbe.id      = 0;
+       rezo_courbe.num      = 0;
        Envoi_serveur( TAG_COURBE, SSTAG_CLIENT_DEL_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
@@ -802,9 +792,12 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
 
     /* La nouvelle courbe va dans l'id courbe->slot_id */
     new_courbe = &infos->Courbes[courbe->slot_id];
-    new_courbe->init = FALSE;
+    new_courbe->taille_donnees = 1;
+    new_courbe->X = (gfloat *)g_malloc0 ( new_courbe->taille_donnees * sizeof(gfloat) );
+    new_courbe->Y = (gfloat *)g_malloc0 ( new_courbe->taille_donnees * sizeof(gfloat) );
 
-    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
+    new_courbe->index = gtk_databox_lines_new ( new_courbe->taille_donnees,
+                                                &new_courbe->X[0], &new_courbe->Y[0],
                                                 &COULEUR_COURBE[courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
 
@@ -840,5 +833,41 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
        default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
      }
     gtk_entry_set_text( GTK_ENTRY(infos->Entry[courbe->slot_id]), description );
+  }
+/**********************************************************************************************************/
+/* Proto_start_courbe: Appeler lorsque le client recoit un premier bloc de valeur a afficher              */
+/* Entrée: une reference sur la courbe                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_start_courbe( struct CMD_START_COURBE *start_courbe )
+  { struct PAGE_NOTEBOOK *page;
+    struct TYPE_INFO_COURBE *infos;
+    struct COURBE *courbe;
+
+    page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );               /* Récupération page courbe */
+    if (!page) return;
+    infos = page->infos;
+    if (!infos) return;
+
+    courbe = &infos->Courbes[start_courbe->slot_id];
+
+    printf(" Recu %d enreg pour le slot %d old enreg = %d\n", start_courbe->taille_donnees, start_courbe->slot_id, courbe->taille_donnees );
+
+    courbe->taille_donnees += start_courbe->taille_donnees;
+
+    courbe->X = g_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
+    courbe->Y = g_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
+
+    printf("realloc OK.\n");
+
+    gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );  /* Suppression ancien graph */
+    courbe->index = gtk_databox_lines_new ( courbe->taille_donnees,
+                                            &courbe->X[0], &courbe->Y[0],
+                                            &COULEUR_COURBE[start_courbe->slot_id], 1);
+    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
+
+    printf("graph OK.\n");
+
+    gtk_widget_queue_draw (infos->Databox);
   }
 /*--------------------------------------------------------------------------------------------------------*/

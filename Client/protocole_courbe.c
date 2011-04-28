@@ -51,16 +51,12 @@
                Proto_ajouter_courbe( courbe );
              }
             break;
-   /*    case SSTAG_SERVEUR_INIT_COURBE:
-             { struct CMD_APPEND_COURBE *courbe, *test;
-               gint cpt;
-               courbe = (struct CMD_APPEND_COURBE *)connexion->donnees;
-               for ( cpt=0; cpt<(connexion->entete.taille_donnees/sizeof(struct CMD_APPEND_COURBE)); cpt++ )
-                { test = &courbe[cpt];
-                  Proto_append_courbe( courbe );
-                }
+       case SSTAG_SERVEUR_START_COURBE:
+             { struct CMD_START_COURBE *courbe;
+               courbe = (struct CMD_START_COURBE *)connexion->donnees;
+               Proto_start_courbe( courbe );
              }
-            break;*/
+            break;
        case SSTAG_SERVEUR_APPEND_COURBE:
              { struct CMD_APPEND_COURBE *courbe;
                courbe = (struct CMD_APPEND_COURBE *)connexion->donnees;

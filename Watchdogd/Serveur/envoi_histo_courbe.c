@@ -55,9 +55,9 @@
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-HISTOCourbe", 0, 0, 0 );
-
+#ifdef bouh
     memcpy ( &rezo_courbe, &client->courbe, sizeof( rezo_courbe ) );
-    client->courbe.id=-1;
+    client->courbe.num=-1;
 
     db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
                       Config.db_username, Config.db_password, Config.db_port );
@@ -68,7 +68,7 @@
      }                                                                           /* Si pas de histos (??) */
 
 
-printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
+printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.num );
 
     Envoi_client ( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_ADD_HISTO_COURBE_OK,  /* Envoi préparation au client */
                    (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
@@ -78,7 +78,7 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
        client->histo_courbe.date_first = client->histo_courbe.date_last - 3600;
      }
 
-    Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.id,
+    Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.num,
                        client->histo_courbe.date_first,
                        client->histo_courbe.date_last );
                
@@ -92,9 +92,9 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
               }                                      /* Si pas d'enreg, l'EA n'a pas bougé sur la période */
     else      { envoi_courbe.date    = client->histo_courbe.date_first;
                 switch (rezo_courbe.type)
-                 { case MNEMO_ENTREE_ANA : envoi_courbe.val_int = Partage->ea[rezo_courbe.id].val_int; break;
-                   case MNEMO_ENTREE     : envoi_courbe.val_int = E(rezo_courbe.id);  break;
-                   case MNEMO_SORTIE     : envoi_courbe.val_int = A(rezo_courbe.id);  break;
+                 { case MNEMO_ENTREE_ANA : envoi_courbe.val_int = Partage->ea[rezo_courbe.num].val_int; break;
+                   case MNEMO_ENTREE     : envoi_courbe.val_int = E(rezo_courbe.num);  break;
+                   case MNEMO_SORTIE     : envoi_courbe.val_int = A(rezo_courbe.num);  break;
                    default : envoi_courbe.val_int = 0; break;
                  }
               }                              
@@ -116,6 +116,7 @@ printf("New histo courbe: type %d num %d\n", rezo_courbe.type, rezo_courbe.id );
      }
     Libere_DB_SQL( Config.log, &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
+#endif
     pthread_exit(NULL);
   }
 /*--------------------------------------------------------------------------------------------------------*/

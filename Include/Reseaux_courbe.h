@@ -32,16 +32,26 @@
  #define COURBE_ORIGINE_TEMPS    1300000000/* Origine des temps pour que le time_t INT passe dans les float de gtkdatabox */
 
  struct CMD_APPEND_COURBE
-  { guint  slot_id;                                                                          /* Numero de l'ea */
-    guint  type;
+  { guint  slot_id;                               /* Numero du slot de la courbe dans l'interface cliente */
+    guint  type; /* utile ?? */
     guint  date;
     guint  val_int;
   };
 
+ struct CMD_START_COURBE
+  { guint  slot_id;                                                                     /* Numero de l'ea */
+    guint  type;                                                         /* Type de courbe (E, EA, A, ... */
+    guint  taille_donnees;       /* Taille en octet du nombre de données valides qui suivent la structure */
+    struct CMD_START_COURBE_VALEUR
+           { guint date;                                                           /* tableau dynamique ! */
+             guint val_int;
+           } valeurs[];
+  };
+
  struct CMD_TYPE_COURBE
   { guint  slot_id;                                           /* Pour affichage sur le bon slot du client */
-    guint  id;                                                         /* Numéro de la courbe en question */
-    guint  type;
+    guint  type;                                                         /* Type de bit (eana, e, a, ...) */
+    guint  num;                                                        /* Numéro de la courbe en question */
     guchar libelle [ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
   };
 
@@ -53,10 +63,11 @@
     SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE_FIN,
     SSTAG_CLIENT_ADD_COURBE,                               /* Le client a fait son choix -> ajout demandé */
     SSTAG_SERVEUR_ADD_COURBE_OK,                          /* Le serveur repond OK pour la requete cliente */
+    SSTAG_SERVEUR_START_COURBE,                         /* Le serveur envoie les enregistrements archivés */
     SSTAG_SERVEUR_APPEND_COURBE,                   /* Le serveur envoie periodiquement la nouvelle valeur */
 
-    SSTAG_CLIENT_DEL_COURBE,                                        /* Le client desire retirer un groupe */
-    SSTAG_SERVEUR_DEL_COURBE_OK,                                       /* L'ajout du groupe est un succes */
+    SSTAG_CLIENT_DEL_COURBE,                                       /* Le client desire retirer une courbe */
+    SSTAG_SERVEUR_DEL_COURBE_OK,                         /* La suppression de la courbe s'est bien passée */
   };
 
 #endif

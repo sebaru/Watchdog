@@ -118,19 +118,18 @@
     GList *bit_capteurs;               /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
     GList *bit_init_capteur;   /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
 
-/* Courbes */
+/* Courbes en temps réel */
+    struct CMD_TYPE_COURBE courbe;                    /* Structure parametres Proto_ajouter_courbe_thread */
     GList *courbes;                          /* Ensemble des entrees analogiques monitorées par le client */
 
     gint id_creation_plugin_dls;                             /* ID fichier du plugin en cours de creation */
     gint classe_icone;                                        /* Classe d'icone en cours de visualisation */
     gint num_supervision;                                 /* Numéro du synoptique en cours de supervision */
-    gint id_modbus_bornes_a_editer;             /* Numéro du module modbus dont il faut editer les bornes */
     gint date_next_send_capteur;                         /* Date du prochain envoi des capteurs au client */
     struct CMD_WANT_SCENARIO_MOTIF sce;                     /* numéro du monostable du scenario a envoyer */
     struct CMD_REQUETE_HISTO_HARD requete;                   /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
 
-    struct CMD_TYPE_COURBE courbe;                    /* Structure parametres Proto_ajouter_courbe_thread */
     struct CMD_TYPE_SYNOPTIQUE syn;                   /* Structure parametres Proto_ajouter_courbe_thread */
 
     struct CMD_HISTO_COURBE histo_courbe;        /* Structure pour travailler sur les historiques courbes */

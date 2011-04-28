@@ -102,7 +102,7 @@
        lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
 
        gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_courbe.id, -1 );                /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_courbe.num, -1 );                /* Recup du id */
        gtk_tree_model_get( store, &iter, COLONNE_TYPE, &rezo_courbe.type, -1 );          /* Recup du type */
        gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
        memcpy( &rezo_courbe.libelle, libelle, sizeof(rezo_courbe.libelle) );
@@ -115,7 +115,7 @@
 printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.num = rezo_courbe.id;
+               new_courbe->eana.num = rezo_courbe.num;
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE, &new_courbe->eana.unite, -1 );
@@ -125,8 +125,8 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
-               new_courbe->mnemo.id = rezo_courbe.id;
-               new_courbe->mnemo.num = rezo_courbe.id;
+               new_courbe->mnemo.id = rezo_courbe.num;
+               new_courbe->mnemo.num = rezo_courbe.num;
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
                g_snprintf( new_courbe->mnemo.libelle, sizeof(new_courbe->mnemo.libelle), "%s", libelle );
                g_free(libelle);
@@ -138,7 +138,7 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
        g_list_free (lignes);                                                        /* Liberation mémoire */
 
-       printf("Envoi serveur TAG_CLIENT_ADD_HISTO_COURBE %d\n", rezo_courbe.id );
+       printf("Envoi serveur TAG_CLIENT_ADD_HISTO_COURBE %d\n", rezo_courbe.num );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
@@ -298,11 +298,11 @@ printf("Envoie want page source for histo courbe\n");
        rezo_courbe.type = infos->Courbes[cpt].type;
        switch ( rezo_courbe.type )
         { case MNEMO_ENTREE_ANA:
-               rezo_courbe.id = infos->Courbes[cpt].eana.num;
+               rezo_courbe.num = infos->Courbes[cpt].eana.num;
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
-               rezo_courbe.id = infos->Courbes[cpt].mnemo.id;
+               rezo_courbe.num = infos->Courbes[cpt].mnemo.id;
                break;
         }
 
@@ -628,9 +628,9 @@ printf("Envoie want page source for histo courbe\n");
     if ( ! (courbe && courbe->actif && Append_courbe( courbe, append_courbe) ) )
      { struct CMD_TYPE_COURBE rezo_courbe;
        rezo_courbe.type = append_courbe->type;
-       rezo_courbe.id = append_courbe->slot_id; /* On demande au serveur de ne plus nous envoyer les infos */
-       rezo_courbe.id = 0;                      /* On demande au serveur de ne plus nous envoyer les infos */
-       printf("Envoi serveur TAG_CLIENT_DEL_HISTO_COURBE %d\n", rezo_courbe.id );
+       rezo_courbe.num = append_courbe->slot_id; /* On demande au serveur de ne plus nous envoyer les infos */
+       rezo_courbe.num = 0;                      /* On demande au serveur de ne plus nous envoyer les infos */
+       printf("Envoi serveur TAG_CLIENT_DEL_HISTO_COURBE %d\n", rezo_courbe.num );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_DEL_HISTO_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      } else gtk_widget_queue_draw (infos->Databox);
@@ -655,7 +655,7 @@ printf("ajouter courbe 2\n" );
 
     /* La nouvelle courbe va dans l'id gui_courbe_id */
     new_courbe = &infos->Courbes[courbe->slot_id];
-    new_courbe->init = FALSE;
+/*    new_courbe->init = FALSE;*/
 
     new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
                                                 &COULEUR_COURBE[courbe->slot_id], 1);

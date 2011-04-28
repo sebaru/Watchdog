@@ -56,7 +56,7 @@
              }
             break;
        case SSTAG_CLIENT_ADD_COURBE:
-             { while (client->courbe.id != -1) { printf("attends\n"); sched_yield(); }
+             { while (client->courbe.num != -1) { printf("attends\n"); sched_yield(); }
                memcpy( &client->courbe, connexion->donnees, sizeof(struct CMD_TYPE_COURBE) );
                Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Proto_ajouter_courbe_thread, client );

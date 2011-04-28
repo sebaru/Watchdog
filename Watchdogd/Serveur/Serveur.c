@@ -205,7 +205,7 @@
        time( &client->date_connexion );                /* Enregistrement de la date de debut de connexion */
        client->pulse = Partage->top;
        client->Id_serveur = ss_id;
-       client->courbe.id = -1;
+       client->courbe.num = -1;                           /* Init: pas de courbe a envoyer pour le moment */
        pthread_mutex_init( &client->mutex_write, NULL );
        pthread_mutex_init( &client->mutex_struct_used, NULL );
        client->struct_used = 0;                            /* Par défaut, personne n'utilise la structure */
@@ -480,7 +480,7 @@
 /****************************************** Envoi des courbes analogiques *********************************/
              if (client->mode == VALIDE && client->courbes)
               { static gint update;
-                struct COURBE *courbe;
+                struct CMD_TYPE_COURBE *courbe;
                 GList *liste_courbe;
 
                 if (update < Partage->top)
@@ -490,24 +490,24 @@
 
                    liste_courbe = client->courbes;
                    while (liste_courbe)
-                    { courbe = (struct COURBE *)liste_courbe->data;
+                    { courbe = (struct CMD_TYPE_COURBE *)liste_courbe->data;
 
                       envoi_courbe.slot_id = courbe->slot_id;
                       envoi_courbe.type    = courbe->type;
                               
                       switch (courbe->type)
                        { case MNEMO_SORTIE:
-                              envoi_courbe.val_int = A(courbe->id);
+                              envoi_courbe.val_int = A(courbe->num);
                               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                               break;
                          case MNEMO_ENTREE:
-                              envoi_courbe.val_int = E(courbe->id);
+                              envoi_courbe.val_int = E(courbe->num);
                               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                               break;
                          case MNEMO_ENTREE_ANA:
-                              envoi_courbe.val_int = Partage->ea[courbe->id].val_int;
+                              envoi_courbe.val_int = Partage->ea[courbe->num].val_int;
                               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                               break;

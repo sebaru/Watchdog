@@ -92,7 +92,6 @@
 
  struct COURBE
   { gboolean actif;
-    gboolean init;                                               /* Devons nous initialiser les tampons ? */
     GtkDataboxGraph *marker_select;                                   /* Index retourné par le gtkdatabox */
     gfloat marker_select_x;
     gfloat marker_select_y;
@@ -101,8 +100,9 @@
     gfloat marker_last_y;
     GdkColor couleur;                                                             /* Couleur de la courbe */
     GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
-    gfloat X[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées X de la courbe */
-    gfloat Y[TAILLEBUF_HISTO_EANA];                                         /* Coordonnées Y de la courbe */
+    guint taille_donnees;                         /* Taille (en nombre de gfloat) des tableaux ci dessous */
+    gfloat *X;                                                              /* Coordonnées X de la courbe */
+    gfloat *Y;                                                              /* Coordonnées Y de la courbe */
     guint type;
     union
      { struct CMD_TYPE_OPTION_ENTREEANA eana;                                            /* Libelle de la courbe */
@@ -473,6 +473,7 @@
  extern gboolean CB_sortir_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
  extern void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe );
  extern void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe );
+ extern void Proto_start_courbe( struct CMD_START_COURBE *courbe );
                                                                                    /* Dans histo_courbe.c */
  extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
  extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );

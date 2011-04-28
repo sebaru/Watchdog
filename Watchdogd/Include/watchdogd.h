@@ -111,13 +111,6 @@
     gint next_repeat;
   };
 
- struct COURBE
-  { guint id;
-    guint slot_id;
-    guint type;
-/*    time_t  date;*/
-  };
-
  struct I_MOTIF
   { gint etat;
     gint rouge;
