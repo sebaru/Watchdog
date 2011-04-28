@@ -102,9 +102,7 @@
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit(NULL);
      }
-    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: début recopie" );
     memcpy ( courbe, &rezo_courbe, sizeof( struct CMD_TYPE_COURBE ) );
-    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: fin recopie" );
         
 /******************************************** Préparation structure d'envoi *******************************/
     envoi_courbe = (struct CMD_START_COURBE *)g_malloc0( Config.taille_bloc_reseau );
@@ -126,7 +124,7 @@
                       Config.db_username, Config.db_password, Config.db_port );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Info( Config.log, DEBUG_DB, "Proto_ajouter_courbe_thread: Unable to open database (dsn)" );
+       Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: Unable to open database (dsn)" );
        g_free(courbe);
        g_free(envoi_courbe);
        pthread_exit( NULL );
@@ -149,11 +147,11 @@
           envoi_courbe->taille_donnees++;/* Nous avons 1 enregistrement de plus dans la structure d'envoi */
           g_free(arch);
         }
-    Info_n( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: taille donnees", envoi_courbe->taille_donnees );
 
        if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
         { Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_START_COURBE, (gchar *)envoi_courbe,
                         sizeof(struct CMD_START_COURBE) + (envoi_courbe->taille_donnees-1) * sizeof(struct CMD_START_COURBE_VALEUR) );
+          Info_n( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: taille donnees", envoi_courbe->taille_donnees );
           envoi_courbe->taille_donnees = 0;
         }
      }

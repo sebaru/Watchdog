@@ -623,22 +623,6 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `objet`, `acronyme`, `libelle`) VALUE
 -- --------------------------------------------------------
 
 --
--- Structure de la table `modbus_bornes`
---
-
-CREATE TABLE IF NOT EXISTS `modbus_bornes` (
-  `type` int(11) NOT NULL,
-  `adresse` int(11) NOT NULL,
-  `min` int(11) NOT NULL,
-  `nbr` int(11) NOT NULL,
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `module` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `modbus_modules`
 --
 
