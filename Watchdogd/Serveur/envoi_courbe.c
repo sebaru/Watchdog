@@ -102,8 +102,10 @@
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit(NULL);
      }
-    memcpy ( &courbe, &rezo_courbe, sizeof( struct CMD_TYPE_COURBE ) );
-    
+    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: début recopie" );
+    memcpy ( courbe, &rezo_courbe, sizeof( struct CMD_TYPE_COURBE ) );
+    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: fin recopie" );
+        
 /******************************************** Préparation structure d'envoi *******************************/
     envoi_courbe = (struct CMD_START_COURBE *)g_malloc0( Config.taille_bloc_reseau );
     if (!envoi_courbe)
