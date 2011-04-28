@@ -204,6 +204,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_onduleur ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
+    if (Partage->com_onduleur.Thread_tourne == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: An instance is already running"),
+               Partage->com_onduleur.TID );
+       return(FALSE);
+     }
     if ( pthread_create( &Partage->com_onduleur.TID, NULL, (void *)Run_onduleur, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: pthread_create failed") );
        return(FALSE);
@@ -538,7 +543,10 @@
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
-    if (Partage->com_onduleur.TID) { pthread_join( Partage->com_onduleur.TID, NULL ); }                     /* Attente fin ONDULEUR */
+    if (Partage->com_onduleur.Thread_tourne == TRUE)
+     { Partage->com_onduleur.Thread_tourne = FALSE;
+       pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );

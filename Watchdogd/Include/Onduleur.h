@@ -40,6 +40,7 @@
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_ONDULEUR;
+    gboolean Thread_tourne; /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean reload;
     guint admin_del;                                                            /* Demande de deconnexion */
     guint admin_start;                                                          /* Demande de deconnexion */
