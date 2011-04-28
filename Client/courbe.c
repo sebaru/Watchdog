@@ -852,22 +852,20 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     courbe->taille_donnees += start_courbe->taille_donnees;                  /* Agrandissement du tableau */
     courbe->X = g_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
     courbe->Y = g_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
-    printf("realloc OK.\n");
 
     for ( i=0; cpt < courbe->taille_donnees; cpt++, i++ )
      { courbe->X[cpt] = start_courbe->valeurs[i].date - COURBE_ORIGINE_TEMPS;
        courbe->Y[cpt] = start_courbe->valeurs[i].val_int;
-       printf(" ajout enreg %d: X = %f, Y=%f\n", cpt, courbe->X[cpt], courbe->Y[cpt] );
      }
                                                                          /* Suppression de l'ancien graph */
+    courbe->marker_select_x = courbe->X[0];
+    courbe->marker_select_y = courbe->Y[0];
+          
     if (courbe->index) gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );
     courbe->index = gtk_databox_lines_new ( courbe->taille_donnees,
                                             courbe->X, courbe->Y,
                                             &COULEUR_COURBE[start_courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
-
-    printf("graph OK.\n");
-
     gtk_widget_queue_draw (infos->Databox);
   }
 /*--------------------------------------------------------------------------------------------------------*/
