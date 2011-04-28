@@ -566,8 +566,6 @@
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
-printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
-        source->num, source->type, source->objet, source->min, source->max, source->unite );
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
@@ -719,16 +717,9 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe )
-  { struct PAGE_NOTEBOOK *page;
-    struct TYPE_INFO_COURBE *infos;
-    struct COURBE *new_courbe;
+ void Ajouter_courbe( struct CMD_TYPE_COURBE *courbe, struct TYPE_INFO_COURBE *infos, gboolean marker_last )
+  { struct COURBE *new_courbe;
     gchar description[256];
-
-    page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );               /* Récupération page courbe */
-    if (!page) return;
-    infos = page->infos;
-    if (!infos) return;
 
     /* La nouvelle courbe va dans l'id courbe->slot_id */
     new_courbe                 = &infos->Courbes[courbe->slot_id];
@@ -742,11 +733,14 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_select);
     gtk_databox_graph_set_hide ( new_courbe->marker_select, TRUE );
 
-    new_courbe->marker_last = gtk_databox_markers_new ( 1, &new_courbe->marker_last_x, &new_courbe->marker_last_y,
-                                                        &COULEUR_COURBE[courbe->slot_id], 10,
-                                                        GTK_DATABOX_MARKERS_TRIANGLE
-                                                      );
-    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_last);
+    if (marker_last)
+     { new_courbe->marker_last = gtk_databox_markers_new ( 1, &new_courbe->marker_last_x, &new_courbe->marker_last_y,
+                                                           &COULEUR_COURBE[courbe->slot_id], 10,
+                                                           GTK_DATABOX_MARKERS_TRIANGLE
+                                                         );
+       gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_last);
+     }
+    else new_courbe->marker_last = NULL;
 
     gtk_widget_queue_draw (infos->Databox);
 
@@ -769,20 +763,29 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
     gtk_entry_set_text( GTK_ENTRY(infos->Entry[courbe->slot_id]), description );
   }
 /**********************************************************************************************************/
-/* Proto_start_courbe: Appeler lorsque le client recoit un premier bloc de valeur a afficher              */
-/* Entrée: une reference sur la courbe                                                                    */
+/* Proto_ajouter_courbe: Appeler lorsque le client recoit la reponse d'ajout de courbe par le serveur     */
+/* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_start_courbe( struct CMD_START_COURBE *start_courbe )
+ void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe )
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
-    struct COURBE *courbe;
-    gint cpt, i;
 
     page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );               /* Récupération page courbe */
     if (!page) return;
     infos = page->infos;
     if (!infos) return;
+
+    Ajouter_courbe ( courbe, infos, TRUE );
+  }
+/**********************************************************************************************************/
+/* Proto_start_courbe: Appeler lorsque le client recoit un premier bloc de valeur a afficher              */
+/* Entrée: une reference sur la courbe                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Afficher_courbe( struct CMD_START_COURBE *start_courbe, struct TYPE_INFO_COURBE *infos )
+  { struct COURBE *courbe;
+    gint cpt, i;
 
     courbe = &infos->Courbes[start_courbe->slot_id];
 
@@ -807,5 +810,21 @@ printf("Rafraichir_visu_EA id %d type %d objet %s min %f max %f unite %d\n",
                                             &COULEUR_COURBE[start_courbe->slot_id], 1);
     gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
     gtk_widget_queue_draw (infos->Databox);
+  }
+/**********************************************************************************************************/
+/* Proto_start_courbe: Appeler lorsque le client recoit un premier bloc de valeur a afficher              */
+/* Entrée: une reference sur la courbe                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_start_courbe( struct CMD_START_COURBE *start_courbe )
+  { struct PAGE_NOTEBOOK *page;
+    struct TYPE_INFO_COURBE *infos;
+
+    page = Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );               /* Récupération page courbe */
+    if (!page) return;
+    infos = page->infos;
+    if (!infos) return;
+
+    Afficher_courbe ( start_courbe, infos );
   }
 /*--------------------------------------------------------------------------------------------------------*/

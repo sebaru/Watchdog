@@ -44,10 +44,7 @@
     SSTAG_CLIENT_SET_DATE,                                     /* Le client a fait son choix dans la date */
     SSTAG_CLIENT_ADD_HISTO_COURBE,                         /* Le client a fait son choix -> ajout demandé */
     SSTAG_SERVEUR_ADD_HISTO_COURBE_OK,                    /* Le serveur repond OK pour la requete cliente */
-    SSTAG_SERVEUR_APPEND_HISTO_COURBE,             /* Le serveur envoie periodiquement la nouvelle valeur */
-
-    SSTAG_CLIENT_DEL_HISTO_COURBE,                                  /* Le client desire retirer un groupe */
-    SSTAG_SERVEUR_DEL_HISTO_COURBE_OK,                                 /* L'ajout du groupe est un succes */
+    SSTAG_SERVEUR_START_HISTO_COURBE,              /* Le serveur envoie periodiquement la nouvelle valeur */
   };
 
 #endif

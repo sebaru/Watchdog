@@ -61,10 +61,10 @@
                 }
              }
             break;*/
-       case SSTAG_SERVEUR_APPEND_HISTO_COURBE:
-             { struct CMD_APPEND_COURBE *courbe;
-               courbe = (struct CMD_APPEND_COURBE *)connexion->donnees;
-               Proto_append_histo_courbe( courbe );
+       case SSTAG_SERVEUR_START_HISTO_COURBE:
+             { struct CMD_START_COURBE *courbe;
+               courbe = (struct CMD_START_COURBE *)connexion->donnees;
+               Proto_start_histo_courbe( courbe );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_HISTO_COURBE:

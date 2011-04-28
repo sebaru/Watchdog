@@ -62,12 +62,6 @@
                pthread_detach( tid );
              }
             break;
-       case SSTAG_CLIENT_DEL_HISTO_COURBE:
-             { struct CMD_TYPE_COURBE *courbe;
-               courbe = (struct CMD_TYPE_COURBE *)connexion->donnees;
-               Proto_effacer_histo_courbe( client, courbe );
-             }
-            break;
        case SSTAG_CLIENT_SET_DATE:
              { struct CMD_HISTO_COURBE *courbe;
                courbe = (struct CMD_HISTO_COURBE *)connexion->donnees;

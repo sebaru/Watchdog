@@ -143,13 +143,7 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
     else if (reponse == GTK_RESPONSE_REJECT)                            /* On retire la courbe de la visu */
-     { rezo_courbe.slot_id = infos->slot_id;
-
-       printf("Envoi serveur TAG_CLIENT_DEL_COURBE %d\n", rezo_courbe.slot_id );
-       Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_DEL_HISTO_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
-
-       new_courbe = &infos->Courbes[infos->slot_id];
+     { new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
        new_courbe->type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
@@ -587,31 +581,6 @@ printf("Envoie want page source for histo courbe\n");
     Rafraichir_visu_source_histo ( &iter, source );
   }
 /**********************************************************************************************************/
-/* Afficher_un_source: Ajoute un source dans la liste des sources                                */
-/* Entrée: une reference sur le source                                                                 */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_append_histo_courbe( struct CMD_APPEND_COURBE *append_courbe )
-  { struct TYPE_INFO_COURBE *infos;
-    struct PAGE_NOTEBOOK *page;
-    struct COURBE *courbe;
-
-    page = Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, FALSE );
-    if (!page) return;
-    infos = (struct TYPE_INFO_COURBE *)page->infos;        /* Récupération des meta données de la page */
-
-    courbe = &infos->Courbes[append_courbe->slot_id];
-    if ( ! (courbe && courbe->actif && Append_courbe( courbe, append_courbe) ) )
-     { struct CMD_TYPE_COURBE rezo_courbe;
-       rezo_courbe.type = append_courbe->type;
-       rezo_courbe.num = append_courbe->slot_id; /* On demande au serveur de ne plus nous envoyer les infos */
-       rezo_courbe.num = 0;                      /* On demande au serveur de ne plus nous envoyer les infos */
-       printf("Envoi serveur TAG_CLIENT_DEL_HISTO_COURBE %d\n", rezo_courbe.num );
-       Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_DEL_HISTO_COURBE,
-                      (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
-     } else gtk_widget_queue_draw (infos->Databox);
-  }
-/**********************************************************************************************************/
 /* Proto_ajouter_courbe: Appeler lorsque le client recoit la reponse d'ajout de courbe par le serveur     */
 /* Entrée: une reference sur le source                                                                 */
 /* Sortie: Néant                                                                                          */
@@ -619,53 +588,28 @@ printf("Envoie want page source for histo courbe\n");
  void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe )
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_COURBE *infos;
-    struct COURBE *new_courbe;
-    gchar description[256];
 
-printf("ajouter courbe page %d\n", courbe->slot_id );
     page = Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, TRUE );         /* Récupération page courbe */
     if (!page) return;
     infos = page->infos;
     if (!infos) return;
-printf("ajouter courbe 2\n" );
 
-    /* La nouvelle courbe va dans l'id gui_courbe_id */
-    new_courbe = &infos->Courbes[courbe->slot_id];
-/*    new_courbe->init = FALSE;*/
-#ifdef bouh
-    new_courbe->index = gtk_databox_lines_new ( TAILLEBUF_HISTO_EANA, new_courbe->X, new_courbe->Y,
-                                                &COULEUR_COURBE[courbe->slot_id], 1);
-    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->index);
+    Ajouter_courbe ( courbe, infos, FALSE );
+  }
+/**********************************************************************************************************/
+/* Proto_start_courbe: Appeler lorsque le client recoit un premier bloc de valeur a afficher              */
+/* Entrée: une reference sur la courbe                                                                    */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Proto_start_histo_courbe( struct CMD_START_COURBE *start_courbe )
+  { struct PAGE_NOTEBOOK *page;
+    struct TYPE_INFO_COURBE *infos;
 
-    new_courbe->marker_select = gtk_databox_markers_new ( 1, &new_courbe->marker_select_x, &new_courbe->marker_select_y,
-                                                          &COULEUR_COURBE[courbe->slot_id], 10,
-                                                          GTK_DATABOX_MARKERS_TRIANGLE
-                                                        );
-    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), new_courbe->marker_select);
-    gtk_databox_graph_set_hide ( new_courbe->marker_select, TRUE );
- #endif
-    new_courbe->marker_last = NULL;
+    page = Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, TRUE );         /* Récupération page courbe */
+    if (!page) return;
+    infos = page->infos;
+    if (!infos) return;
 
-    gtk_widget_queue_draw (infos->Databox);
-
-    switch(new_courbe->type)
-     { case MNEMO_SORTIE:
-       case MNEMO_ENTREE:
-            g_snprintf( description, sizeof(description), "%s%d  - %s",
-                        Type_bit_interne_court(new_courbe->type),
-                        new_courbe->mnemo.num,
-                        new_courbe->mnemo.libelle );
-            break;
-       case MNEMO_ENTREE_ANA:
-            g_snprintf( description, sizeof(description), "EA%d - %s (%8.2f/%8.2f)",
-                        new_courbe->eana.num,
-                        new_courbe->eana.libelle,
-                        new_courbe->eana.min, new_courbe->eana.max );
-            break;
-       default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
-     }
-    gtk_entry_set_text( GTK_ENTRY(infos->Entry[courbe->slot_id]), description );
-
-printf("Ajout courbe fin\n");
+    Afficher_courbe ( start_courbe, infos );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -104,8 +104,8 @@
     gfloat *X;                                                              /* Coordonnées X de la courbe */
     gfloat *Y;                                                              /* Coordonnées Y de la courbe */
     guint type;
-    union
-     { struct CMD_TYPE_OPTION_ENTREEANA eana;                                            /* Libelle de la courbe */
+    union                                                                      /* Option liée à la courbe */
+     { struct CMD_TYPE_OPTION_ENTREEANA eana;
        struct CMD_TYPE_MNEMONIQUE mnemo;
      };
   };
@@ -469,8 +469,10 @@
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
  extern gboolean CB_sortir_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
+ extern void Ajouter_courbe( struct CMD_TYPE_COURBE *courbe, struct TYPE_INFO_COURBE *infos, gboolean marker_last );
  extern void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe );
  extern void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe );
+ extern void Afficher_courbe( struct CMD_START_COURBE *courbe, struct TYPE_INFO_COURBE *infos );
  extern void Proto_start_courbe( struct CMD_START_COURBE *courbe );
                                                                                    /* Dans histo_courbe.c */
  extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
@@ -478,14 +480,7 @@
  extern void Creer_page_histo_courbe ( gchar *libelle );
  extern void Detruire_page_histo_courbe( struct PAGE_NOTEBOOK *page );
  extern gint Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe );
- extern void Menu_changer_echelle0 ( struct TYPE_INFO_COURBE *infos );
- extern void Menu_changer_echelle1 ( struct TYPE_INFO_COURBE *infos );
- extern void Menu_changer_echelle2 ( struct TYPE_INFO_COURBE *infos );
- extern void Menu_changer_echelle3 ( struct TYPE_INFO_COURBE *infos );
- extern void Menu_changer_echelle4 ( struct TYPE_INFO_COURBE *infos );
- extern void Menu_changer_echelle5 ( struct TYPE_INFO_COURBE *infos );
  extern void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe );
- extern void Proto_append_histo_courbe( struct CMD_APPEND_COURBE *append_courbe );
 
 
  extern void Proto_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );   /* Dans liste_scenario.c */

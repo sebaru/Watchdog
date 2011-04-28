@@ -34,15 +34,7 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
-/**********************************************************************************************************/
-/* Proto_effacer_entree: Retrait du entree en parametre                                                   */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_effacer_histo_courbe ( struct CLIENT *client, struct CMD_TYPE_COURBE *rezo_courbe )
-  { /*struct COURBE *courbe;*/
 
-  }
 /**********************************************************************************************************/
 /* Proto_ajouter_entree: Un client nous demande d'ajouter un entree Watchdog                              */
 /* Entrée: le entree à créer                                                                              */
