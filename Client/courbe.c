@@ -214,6 +214,9 @@
        if( infos->Courbes[infos->slot_id].actif )                          /* Enleve la précédente courbe */
         { infos->Courbes[infos->slot_id].actif = FALSE;
           gtk_entry_set_text( GTK_ENTRY(infos->Entry[infos->slot_id]), "" );
+          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].index );
+          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].marker_select );
+          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].marker_last );
           gtk_widget_queue_draw (infos->Databox);
         }
 
@@ -725,6 +728,8 @@
     new_courbe                 = &infos->Courbes[courbe->slot_id];
     new_courbe->index          = NULL;
     new_courbe->taille_donnees = 0;
+    new_courbe->X              = NULL;
+    new_courbe->Y              = NULL;
 
     new_courbe->marker_select = gtk_databox_markers_new ( 1, &new_courbe->marker_select_x, &new_courbe->marker_select_y,
                                                           &COULEUR_COURBE[courbe->slot_id], 10,
@@ -785,30 +790,45 @@
 /**********************************************************************************************************/
  void Afficher_courbe( struct CMD_START_COURBE *start_courbe, struct TYPE_INFO_COURBE *infos )
   { struct COURBE *courbe;
+    gfloat *new_X, *new_Y;
     gint cpt, i;
 
     courbe = &infos->Courbes[start_courbe->slot_id];
 
     printf(" Recu %d enreg pour le slot %d old enreg = %d\n", start_courbe->taille_donnees, start_courbe->slot_id, courbe->taille_donnees );
 
+    if (courbe->taille_donnees > 600000)
+     { printf(" Depassement du nombre d'enregistrement \n");
+       return;
+     }
+
     cpt = courbe->taille_donnees;                 /* Sauvegarde pour garnissage dans la boucle ci dessous */
     courbe->taille_donnees += start_courbe->taille_donnees;                  /* Agrandissement du tableau */
-    courbe->X = g_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
-    courbe->Y = g_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
 
-    for ( i=0; cpt < courbe->taille_donnees; cpt++, i++ )
-     { courbe->X[cpt] = start_courbe->valeurs[i].date - COURBE_ORIGINE_TEMPS;
-       courbe->Y[cpt] = start_courbe->valeurs[i].val_int;
-     }
+    new_X = g_try_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
+    new_Y = g_try_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
+
+    printf(" New taille = %d\n", courbe->taille_donnees * sizeof(gfloat) );
+
+    if (new_X && new_Y)
+     { courbe->X = new_X;
+       courbe->Y = new_Y;
+
+       for ( i=0; cpt < courbe->taille_donnees; cpt++, i++ )
+        { courbe->X[cpt] = start_courbe->valeurs[i].date - COURBE_ORIGINE_TEMPS;
+          courbe->Y[cpt] = start_courbe->valeurs[i].val_int;
+        }
                                                                          /* Suppression de l'ancien graph */
+          
+       if (courbe->index) gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );
+       courbe->index = gtk_databox_lines_new ( courbe->taille_donnees,
+                                               courbe->X, courbe->Y,
+                                               &COULEUR_COURBE[start_courbe->slot_id], 1);
+       gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
+     } else printf("Afficher_courbe : realloc failed\n");
+
     courbe->marker_select_x = courbe->X[0];
     courbe->marker_select_y = courbe->Y[0];
-          
-    if (courbe->index) gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );
-    courbe->index = gtk_databox_lines_new ( courbe->taille_donnees,
-                                            courbe->X, courbe->Y,
-                                            &COULEUR_COURBE[start_courbe->slot_id], 1);
-    gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
     gtk_widget_queue_draw (infos->Databox);
   }
 /**********************************************************************************************************/

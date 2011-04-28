@@ -89,7 +89,8 @@
        if( infos->Courbes[infos->slot_id].actif )                          /* Enleve la précédente courbe */
         { infos->Courbes[infos->slot_id].actif = FALSE;
           gtk_entry_set_text( GTK_ENTRY(infos->Entry[infos->slot_id]), "" );
-/*          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].index );*/
+          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].index );
+          gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), infos->Courbes[infos->slot_id].marker_select );
           gtk_widget_queue_draw (infos->Databox);
         }
 
@@ -149,6 +150,7 @@ printf("New courbe (%d) avant: type=%d\n", infos->slot_id, new_courbe->type );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_select );
        gtk_widget_queue_draw (infos->Databox);
+       gtk_entry_set_text( GTK_ENTRY(infos->Entry[infos->slot_id]), " -- no info --" );
      }
     gtk_widget_destroy(F_source);
     F_source = NULL;
@@ -304,7 +306,6 @@ printf("Envoie want page source for histo courbe\n");
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
-    /*gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );*/
   }
 /**********************************************************************************************************/
 /* Rafraichir_sensibilite: Grise ou non les champs de recherche de l'historique hard                      */
@@ -611,5 +612,6 @@ printf("Envoie want page source for histo courbe\n");
     if (!infos) return;
 
     Afficher_courbe ( start_courbe, infos );
+    gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
   }
 /*--------------------------------------------------------------------------------------------------------*/
