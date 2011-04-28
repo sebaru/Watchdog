@@ -452,7 +452,7 @@ printf("Envoie want page source for histo courbe\n");
     gtk_box_pack_start( GTK_BOX(vboite), infos->Entry_date_select, FALSE, FALSE, 0 );
 
 /****************************************** La databox ****************************************************/
-    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, FALSE, FALSE, FALSE, FALSE );
+    gtk_databox_create_box_with_scrollbars_and_rulers ( &infos->Databox, &table2, TRUE, TRUE, FALSE, FALSE );
     gtk_box_pack_start( GTK_BOX(vboite), table2, TRUE, TRUE, 0 );
 
     gtk_databox_set_scale_type_x ( GTK_DATABOX (infos->Databox), GTK_DATABOX_SCALE_LINEAR );
@@ -537,7 +537,7 @@ printf("Envoie want page source for histo courbe\n");
     gchar chaine[20];
 
     page = Page_actuelle();
-    if (page->type != TYPE_PAGE_HISTO_COURBE) return;                                            /* Bon type ?? */
+    if (page->type != TYPE_PAGE_HISTO_COURBE) return;                                      /* Bon type ?? */
     infos = (struct TYPE_INFO_COURBE *)page->infos;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
