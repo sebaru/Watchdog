@@ -179,8 +179,8 @@
   { if (num>=NBR_ENTRE_ANA) return;
 
     if (Partage->ea[ num ].val_int != val_int)
-     { Partage->ea[ num ].val_int = val_int;
-       if ( Partage->ea[ num ].last_arch + 50 < Partage->top )  /* Archive au mieux toutes les 5 secondes */
+     { Partage->ea[ num ].val_int = val_int;                    /* Archive au mieux toutes les 5 secondes */
+       if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
         { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
           Partage->ea[ num ].last_arch = Partage->top;   
         }
@@ -223,7 +223,12 @@
                Partage->ea[num].val_ech = 0.0;
         }
      }
-                                                                     /* Gestion historique interne Valana */  }
+    else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );               /* Archive au pire toutes les 10 min */
+       Partage->ea[ num ].last_arch = Partage->top;   
+     }
+                                                                     /* Gestion historique interne Valana */
+  }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
 /* Entrée: numero, etat                                                                                   */
@@ -361,7 +366,7 @@
         { int new_top, delta;
           new_top = Partage->top;
           delta = new_top - Partage->ch[num].old_top;
-          if (delta > 600)
+          if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
            { Partage->ch[num].cpthdb.valeur ++;
              Partage->ch[num].old_top = new_top;
            }
