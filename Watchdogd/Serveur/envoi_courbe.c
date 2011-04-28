@@ -65,8 +65,8 @@
     struct CMD_TYPE_COURBE *courbe;
     struct DB *db;
     GList *liste_courbe;
+    guint max_enreg;
     time_t date;
-    guint i;
 
     prctl(PR_SET_NAME, "W-EnvoiCOURBE", 0, 0, 0 );
 
@@ -136,6 +136,8 @@
 /******************************************** Préparation des buffers d'envoi *****************************/
     date = time(NULL);                                                    /* On recupere la date actuelle */
 
+    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: début d'envoi" );
+    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
     Recuperer_archDB ( Config.log, db, courbe->type, courbe->num, (date - 3*3600), date );
     do
      { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend le premier enreg. */
@@ -145,10 +147,11 @@
           envoi_courbe->taille_donnees++;/* Nous avons 1 enregistrement de plus dans la structure d'envoi */
           g_free(arch);
         }
+    Info_n( Config.log, DEBUG_COURBE, "Proto_ajouter_courbe_thread: taille donnees", envoi_courbe->taille_donnees );
 
-       if ( (!arch) || envoi_courbe->taille_donnees == Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE) )
+       if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
         { Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_START_COURBE, (gchar *)envoi_courbe,
-                        sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
+                        sizeof(struct CMD_START_COURBE) + (envoi_courbe->taille_donnees-1) * sizeof(struct CMD_START_COURBE_VALEUR) );
           envoi_courbe->taille_donnees = 0;
         }
      }
