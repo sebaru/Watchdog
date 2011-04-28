@@ -374,10 +374,6 @@ printf("Envoie want page source for histo courbe\n");
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
 
-    infos->Radio[0] = gtk_radio_button_new ( NULL );
-    g_signal_connect_swapped( G_OBJECT(infos->Radio[0]), "toggled",
-                              G_CALLBACK(Menu_changer_echelle0), infos );
-    gtk_table_attach( GTK_TABLE(table), infos->Radio[0], 0, 1, 0, 1, 0, 0, 0, 0 );
     bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_changer_courbe1), infos );
@@ -387,10 +383,6 @@ printf("Envoie want page source for histo courbe\n");
     gtk_editable_set_editable( GTK_EDITABLE(infos->Entry[0]), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry[0], 2, 3, 0, 1 );
 
-    infos->Radio[1] = gtk_radio_button_new_from_widget ( GTK_RADIO_BUTTON(infos->Radio[0]) );
-    g_signal_connect_swapped( G_OBJECT(infos->Radio[1]), "toggled",
-                              G_CALLBACK(Menu_changer_echelle1), infos );
-    gtk_table_attach( GTK_TABLE(table), infos->Radio[1], 0, 1, 1, 2, 0, 0, 0, 0 );
     bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_changer_courbe2), infos );
@@ -400,10 +392,6 @@ printf("Envoie want page source for histo courbe\n");
     gtk_editable_set_editable( GTK_EDITABLE(infos->Entry[1]), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry[1], 2, 3, 1, 2 );
 
-    infos->Radio[2] = gtk_radio_button_new_from_widget ( GTK_RADIO_BUTTON(infos->Radio[1]) );
-    g_signal_connect_swapped( G_OBJECT(infos->Radio[2]), "toggled",
-                              G_CALLBACK(Menu_changer_echelle2), infos );
-    gtk_table_attach( GTK_TABLE(table), infos->Radio[2], 0, 1, 2, 3, 0, 0, 0, 0 );
     bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_changer_courbe3), infos );
@@ -413,10 +401,6 @@ printf("Envoie want page source for histo courbe\n");
     gtk_editable_set_editable( GTK_EDITABLE(infos->Entry[2]), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry[2], 2, 3, 2, 3 );
 
-    infos->Radio[3] = gtk_radio_button_new_from_widget ( GTK_RADIO_BUTTON(infos->Radio[2]) );
-    g_signal_connect_swapped( G_OBJECT(infos->Radio[3]), "toggled",
-                              G_CALLBACK(Menu_changer_echelle3), infos );
-    gtk_table_attach( GTK_TABLE(table), infos->Radio[3], 3, 4, 0, 1, 0, 0, 0, 0 );
     bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_changer_courbe4), infos );
@@ -426,10 +410,6 @@ printf("Envoie want page source for histo courbe\n");
     gtk_editable_set_editable( GTK_EDITABLE(infos->Entry[3]), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry[3], 5, 6, 0, 1 );
 
-    infos->Radio[4] = gtk_radio_button_new_from_widget ( GTK_RADIO_BUTTON(infos->Radio[3]) );
-    g_signal_connect_swapped( G_OBJECT(infos->Radio[4]), "toggled",
-                              G_CALLBACK(Menu_changer_echelle4), infos );
-    gtk_table_attach( GTK_TABLE(table), infos->Radio[4], 3, 4, 1, 2, 0, 0, 0, 0 );
     bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_changer_courbe5), infos );
@@ -439,10 +419,6 @@ printf("Envoie want page source for histo courbe\n");
     gtk_editable_set_editable( GTK_EDITABLE(infos->Entry[4]), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry[4], 5, 6, 1, 2 );
 
-    infos->Radio[5] = gtk_radio_button_new_from_widget ( GTK_RADIO_BUTTON(infos->Radio[4]) );
-    g_signal_connect_swapped( G_OBJECT(infos->Radio[5]), "toggled",
-                              G_CALLBACK(Menu_changer_echelle5), infos );
-    gtk_table_attach( GTK_TABLE(table), infos->Radio[5], 3, 4, 2, 3, 0, 0, 0, 0 );
     bouton = gtk_button_new_from_stock( GTK_STOCK_EDIT );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_changer_courbe6), infos );

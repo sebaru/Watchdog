@@ -119,14 +119,12 @@
   { guint slot_id;                                                   /* Numero du slot en cours d'edition */
     GtkWidget *Databox;
     GtkWidget *Entry[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
-    GtkWidget *Radio[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
     GtkWidget *Check_rescale;
     struct COURBE Courbes[NBR_MAX_COURBES];
     GtkDataboxGraph *index_grille;                       /* Index de la grille retourné par le gtkdatabox */
     GtkWidget *Date_debut;
     GtkWidget *Date_fin;
     GtkWidget *Entry_date_select;                                 /* Affichage de la date actuelle select */
-    gint echelle_active;                                     /* N° de la courbe dont l'echelle est active */
   };
 
  struct TYPE_INFO_SOURCE_DLS
