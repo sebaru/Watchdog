@@ -188,6 +188,8 @@
        Write_admin ( client->connexion,
                      "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick)\n" );
        Write_admin ( client->connexion,
+                     "  list                 - Liste les statut des threads\n" );
+       Write_admin ( client->connexion,
                      "  RELOAD               - Reload configuration\n" );
        Write_admin ( client->connexion,
                      "  REBOOT               - Restart all processes\n" );

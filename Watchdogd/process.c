@@ -582,9 +582,10 @@
     Info( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Debut stopper_fils") );
 
     for (i=0; i<Config.max_serveur; i++)                   /* Arret de tous les fils en cours d'execution */
-     { if (Partage->Sous_serveur[i].pid != -1)                             /* Attente de la fin du fils i */
+     { if (Partage->Sous_serveur[i].Thread_run == TRUE)                    /* Attente de la fin du fils i */
         { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SSRV pid to finish"),
                                           Partage->Sous_serveur[i].pid );
+          Partage->Sous_serveur[i].Thread_run = FALSE;
           pthread_join( Partage->Sous_serveur[i].pid, NULL );
           Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SSRV pid down"),
                                           Partage->Sous_serveur[i].pid );

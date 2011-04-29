@@ -41,38 +41,37 @@
     if ( ! strcmp ( commande, "help" ) )
      { gint i;
        Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
-       Write_admin ( client->connexion, "  audit                - Audit bit/s\n" );
-       Write_admin ( client->connexion, "  ident                - ID du serveur Watchdog\n" );
-       Write_admin ( client->connexion, "  dls                  - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  debug debug_level    - Set debug level\n" );
-       Write_admin ( client->connexion, "  ssrv                 - SousServers Status\n" );
-       Write_admin ( client->connexion, "  client               - Client Status\n" );
-       Write_admin ( client->connexion, "  kick nom machine     - Kick client nom@machine\n" );
-       Write_admin ( client->connexion, "  gete xxx             - Get Exxx\n" );
-       Write_admin ( client->connexion, "  sete xxx i           - Set Exxx = i\n" );
-       Write_admin ( client->connexion, "  getea xxx            - Get EAxxx\n" );
-       Write_admin ( client->connexion, "  getm xxx             - Get Mxxx\n" );
-       Write_admin ( client->connexion, "  setm xxx i           - Set Mxxx = i\n" );
-       Write_admin ( client->connexion, "  getb xxx             - Get Bxxx\n" );
-       Write_admin ( client->connexion, "  setb xxx i           - Set Bxxx = i\n" );
-       Write_admin ( client->connexion, "  geta xxx i           - Get Axxx\n" );
-       Write_admin ( client->connexion, "  seta xxx i           - Set Axxx = i\n" );
-       Write_admin ( client->connexion, "  getg xxx             - Get MSGxxx\n" );
-       Write_admin ( client->connexion, "  setg xxx i           - Set MSGxxx = i\n" );
-       Write_admin ( client->connexion, "  gettr xxx            - Get TRxxx\n" );
-       Write_admin ( client->connexion, "  geti xxx             - Get Ixxx\n" );
-       Write_admin ( client->connexion, "  seti xxx E R V B C   - Set Ixxx Etat Rouge Vert Bleu Cligno\n" );
-       Write_admin ( client->connexion, "  getci xxx            - Get CIxxx\n" );
-       Write_admin ( client->connexion, "  tell message num     - Envoi AUDIO num\n" );
-       Write_admin ( client->connexion, "  sms message          - Envoi du message SMS via SMSBOX\n" );
-       Write_admin ( client->connexion, "  msgs message         - Envoi d'un message a tous les clients\n" );
-       Write_admin ( client->connexion, "  mbus                 - Liste les modules MODBUS+Borne\n" );
-       Write_admin ( client->connexion, "  rs                   - Affiche les status des equipements RS485\n" );
-       Write_admin ( client->connexion, "  onduleur             - Affiche les status des equipements ONDULEUR\n" );
-       Write_admin ( client->connexion, "  ping                 - Ping Watchdog\n" );
-       Write_admin ( client->connexion, "  setrootpasswd        - Set the Watchdog root password\n" );
-       Write_admin ( client->connexion, "  help                 - This help\n" );
-       Write_admin ( client->connexion, "  mode type_mode       - Change de mode (" );
+       Write_admin ( client->connexion, "  audit                 - Audit bit/s\n" );
+       Write_admin ( client->connexion, "  ident                 - ID du serveur Watchdog\n" );
+       Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
+       Write_admin ( client->connexion, "  ssrv                  - SousServers Status\n" );
+       Write_admin ( client->connexion, "  client                - Client Status\n" );
+       Write_admin ( client->connexion, "  kick nom machine      - Kick client nom@machine\n" );
+       Write_admin ( client->connexion, "  gete xxx              - Get Exxx\n" );
+       Write_admin ( client->connexion, "  sete xxx i            - Set Exxx = i\n" );
+       Write_admin ( client->connexion, "  getea xxx             - Get EAxxx\n" );
+       Write_admin ( client->connexion, "  getm xxx              - Get Mxxx\n" );
+       Write_admin ( client->connexion, "  setm xxx i            - Set Mxxx = i\n" );
+       Write_admin ( client->connexion, "  getb xxx              - Get Bxxx\n" );
+       Write_admin ( client->connexion, "  setb xxx i            - Set Bxxx = i\n" );
+       Write_admin ( client->connexion, "  geta xxx i            - Get Axxx\n" );
+       Write_admin ( client->connexion, "  seta xxx i            - Set Axxx = i\n" );
+       Write_admin ( client->connexion, "  getg xxx              - Get MSGxxx\n" );
+       Write_admin ( client->connexion, "  setg xxx i            - Set MSGxxx = i\n" );
+       Write_admin ( client->connexion, "  gettr xxx             - Get TRxxx\n" );
+       Write_admin ( client->connexion, "  geti xxx              - Get Ixxx\n" );
+       Write_admin ( client->connexion, "  seti xxx E R V B C    - Set Ixxx Etat Rouge Vert Bleu Cligno\n" );
+       Write_admin ( client->connexion, "  getci xxx             - Get CIxxx\n" );
+       Write_admin ( client->connexion, "  tell message num      - Envoi AUDIO num\n" );
+       Write_admin ( client->connexion, "  sms message           - Envoi du message SMS via SMSBOX\n" );
+       Write_admin ( client->connexion, "  msgs message          - Envoi d'un message a tous les clients\n" );
+       Write_admin ( client->connexion, "  mbus                  - Liste les modules MODBUS+Borne\n" );
+       Write_admin ( client->connexion, "  rs                    - Affiche les status des equipements RS485\n" );
+       Write_admin ( client->connexion, "  onduleur              - Affiche les status des equipements ONDULEUR\n" );
+       Write_admin ( client->connexion, "  ping                  - Ping Watchdog\n" );
+       Write_admin ( client->connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
+       Write_admin ( client->connexion, "  help                  - This help\n" );
+       Write_admin ( client->connexion, "  mode type_mode        - Change de mode (" );
        i = 1;
        while ( i < NBR_MODE_ADMIN )
         { Write_admin ( client->connexion, Mode_admin[i] );
@@ -80,7 +79,10 @@
           i++;
         }
        Write_admin ( client->connexion, "running)\n" );
-       Write_admin ( client->connexion, "  exit                 - Revient au mode RUNNING\n" );
+       Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
+       Write_admin ( client->connexion, "                                             cdg,network,archive,connexion,dls,modbus,admin,rs485,\n" );
+       Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,lirc)\n" );
+       Write_admin ( client->connexion, "  exit                  - Revient au mode RUNNING\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
@@ -363,10 +365,60 @@
        
      } else
     if ( ! strcmp ( commande, "debug" ) )
-     { int debug;
-       sscanf ( ligne, "%s %d", commande, &debug );                  /* Découpage de la ligne de commande */
-       Info_change_debug ( Config.log, debug );
-       g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", debug );
+     { gchar debug[128];
+
+       sscanf ( ligne, "%s %s", commande, debug );
+
+       if ( ! strcmp ( debug, "all"       ) )
+        { Info_change_debug ( Config.log, ~0 ); } else
+       if ( ! strcmp ( debug, "none"      ) )
+        { Info_change_debug ( Config.log,  0 ); } else
+       if ( ! strcmp ( debug, "signaux"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
+       if ( ! strcmp ( debug, "db"        ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_DB        ); } else
+       if ( ! strcmp ( debug, "config"    ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CONFIG    ); } else
+       if ( ! strcmp ( debug, "user"      ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_USER      ); } else
+       if ( ! strcmp ( debug, "crypto"    ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CRYPTO    ); } else
+       if ( ! strcmp ( debug, "info"      ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_INFO      ); } else
+       if ( ! strcmp ( debug, "serveur"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SERVEUR   ); } else
+       if ( ! strcmp ( debug, "cdg"       ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CDG       ); } else
+       if ( ! strcmp ( debug, "network"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_NETWORK   ); } else
+       if ( ! strcmp ( debug, "archive"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ARCHIVE   ); } else
+       if ( ! strcmp ( debug, "connexion" ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CONNEXION ); } else
+       if ( ! strcmp ( debug, "dls"       ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_DLS       ); } else
+       if ( ! strcmp ( debug, "modbus"    ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_MODBUS    ); } else
+       if ( ! strcmp ( debug, "admin"     ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ADMIN     ); } else
+       if ( ! strcmp ( debug, "rs485"     ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_RS485     ); } else
+       if ( ! strcmp ( debug, "onduleur"  ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ONDULEUR  ); } else
+       if ( ! strcmp ( debug, "sms"       ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SMS       ); } else
+       if ( ! strcmp ( debug, "audio"     ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_AUDIO     ); } else
+       if ( ! strcmp ( debug, "camera"    ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CAMERA    ); } else
+       if ( ! strcmp ( debug, "courbe"    ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_COURBE    ); } else
+       if ( ! strcmp ( debug, "tellstick" ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_TELLSTICK ); } else
+       if ( ! strcmp ( debug, "lirc"      ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_LIRC      ); }
+
+       g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", Config.debug_level );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ping" ) )

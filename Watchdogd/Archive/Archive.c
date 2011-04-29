@@ -90,6 +90,10 @@
 
        if (Partage->com_arch.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
         { Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: SIGUSR1" );
+          pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
+          Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
+                  g_list_length(Partage->com_arch.liste_arch) );
+          pthread_mutex_unlock( &Partage->com_arch.synchro );
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
