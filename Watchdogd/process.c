@@ -461,7 +461,7 @@
  static gint Rechercher_empl_libre ( void )
   { gint i;
     for (i=0; i<Config.max_serveur; i++)      /* Recherche d'un emplacement libre pour le nouveau serveur */
-     { if (Partage->Sous_serveur[i].pid == -1) return(i); }
+     { if (Partage->Sous_serveur[i].Thread_run == FALSE) return(i); }
     return(-1);
   }
 /**********************************************************************************************************/
@@ -472,7 +472,7 @@
  static gint Rechercher_serveur_inactif ( void )
   { gint i;
     for (i=0; i<Config.max_serveur; i++)                                /* Recherche d'un serveur inactif */
-     { if (Partage->Sous_serveur[i].pid != -1 &&
+     { if (Partage->Sous_serveur[i].Thread_run == TRUE &&
            Partage->Sous_serveur[i].nb_client == 0) return(i);
      }
     return(-1);
@@ -486,7 +486,7 @@
   { gint i, choix;
     choix = -1;                                                     /* On début, nous n'avons rien choisi */
     for (i=0; i<Config.max_serveur; i++)            /* Recherche d'un serveur moins chargé que les autres */
-     { if (Partage->Sous_serveur[i].pid != -1)
+     { if (Partage->Sous_serveur[i].Thread_run == TRUE)
         { if (choix==-1) choix = i;                                                   /* Premier choix !! */
           else { if (Partage->Sous_serveur[i].nb_client < Partage->Sous_serveur[choix].nb_client)
                   { choix = i; }
@@ -504,7 +504,7 @@
   { gint i, nb;
     nb = 0;                                                         /* On début, nous n'avons rien choisi */
     for (i=0; i<Config.max_serveur; i++)                                /* Recherche de tous les serveurs */
-     { if (Partage->Sous_serveur[i].pid != -1)
+     { if (Partage->Sous_serveur[i].Thread_run == TRUE)
         { nb += Partage->Sous_serveur[i].nb_client; }
      }
     return(nb);
@@ -562,7 +562,7 @@
 
     nbr_ssrv=0;
     for (i=0; i<Config.max_serveur; i++)                                /* Recherche de tous les serveurs */
-     { if (Partage->Sous_serveur[i].pid != -1) nbr_ssrv++;
+     { if (Partage->Sous_serveur[i].Thread_run == TRUE) nbr_ssrv++;
      }
 
     while (nbr_ssrv < Config.min_serveur)                     /* Si nous avons trop peu de serveur online */
