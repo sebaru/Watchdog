@@ -147,22 +147,17 @@
 /**********************************************************************************************************/
  void Decharger_plugins ( void )
   { struct PLUGIN_DLS *plugin;
-    GList *plugins;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    plugins = Partage->com_dls.Plugins;
-    while(plugins)                                                       /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
+    while(Partage->com_dls.Plugins)                                                       /* Liberation mémoire des modules */
+     { plugin = (struct PLUGIN_DLS *)Partage->com_dls.Plugins->data;
        Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: tentative dechargement:", plugin->plugindb.id );
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
        g_free( plugin );
        Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: Dechargé", plugin->plugindb.id );
-       plugins = plugins->next;
      }
-    g_list_free( Partage->com_dls.Plugins );
-    Partage->com_dls.Plugins = NULL;
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
