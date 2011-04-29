@@ -230,7 +230,7 @@
           Partage->com_lirc.Thread_reload      = TRUE;
           Partage->com_tellstick.Thread_reload = TRUE;
           for (i=0; i<Config.max_serveur; i++)
-           { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_reload = TRUE; }
+           { Partage->Sous_serveur[i].Thread_reload = TRUE; }
 
           Lire_config( NULL );                              /* Lecture sur le fichier /etc/watchdogd.conf */
           Print_config();
@@ -253,7 +253,7 @@
           Partage->com_lirc.Thread_sigusr1      = TRUE;
           Partage->com_tellstick.Thread_sigusr1 = TRUE;
           for (i=0; i<Config.max_serveur; i++)
-           { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
+           { Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
           Traiter_sigusr1();                     /* Appel de la fonction pour traiter le signal pour MSRV */
           Partage->com_msrv.Thread_sigusr1      = FALSE;
         }
