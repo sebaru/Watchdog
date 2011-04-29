@@ -418,8 +418,9 @@
        if ( ! strcmp ( debug, "lirc"      ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_LIRC      ); }
 
-       g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", Config.debug_level );
+       g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", Config.log->debug_level );
        Write_admin ( client->connexion, chaine );
+       Config.debug_level = Config.log->debug_level;  /* Sauvegarde pour persistence (export des données) */
      } else
     if ( ! strcmp ( commande, "ping" ) )
      { Write_admin ( client->connexion, " Pong !\n" );
