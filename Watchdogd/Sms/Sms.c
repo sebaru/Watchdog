@@ -298,19 +298,26 @@
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     Info ( Config.log, DEBUG_INFO, "SMS: Run_sms: Demarrage" );
+                                                                /* Initialisation des variables du thread */
+    Partage->com_sms.Thread_run    = TRUE;                                          /* Le thread tourne ! */
 
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+    while(Partage->com_sms.Thread_run == TRUE)                           /* On tourne tant que necessaire */
      {
 
-       if (Partage->com_sms.sigusr1)                                      /* A-t'on recu un signal USR1 ? */
+       if (Partage->com_sms.Thread_reload)                              /* A-t'on recu un signal RELOAD ? */
+        { Info( Config.log, DEBUG_INFO, "SMS: Run_sms: RELOAD" );
+          Partage->com_sms.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_sms.Thread_sigusr1)                               /* A-t'on recu un signal USR1 ? */
         { int nbr;
 
-          Partage->com_sms.sigusr1 = FALSE;
           Info( Config.log, DEBUG_INFO, "SMS: Run_sms: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_sms.synchro );     /* On recupere le nombre de sms en attente */
           nbr = g_list_length(Partage->com_sms.liste_sms);
           pthread_mutex_unlock( &Partage->com_sms.synchro );
           Info_n( Config.log, DEBUG_INFO, "SMS: Nbr SMS a envoyer", nbr );
+          Partage->com_sms.Thread_sigusr1 = FALSE;
         }
 
 /********************************************** Lecture de SMS ********************************************/

@@ -121,21 +121,29 @@
 /* Main: Fonction principale du thread Tellstick                                                          */
 /**********************************************************************************************************/
  void Run_tellstick ( void )
-  { guint top, methods;
+  { guint methods;
     prctl(PR_SET_NAME, "W-Tellstick", 0, 0, 0 );
 
     Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: demarrage" );
 
     Partage->com_tellstick.liste_tell = NULL;                             /* Initialisation des variables */
-    top = Partage->top;                                        /* Initialisation des tellivages temporels */
     tdInit();
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+
+    Partage->com_tellstick.Thread_run = TRUE;                    /* On dit au maitre que le thread tourne */
+    while(Partage->com_tellstick.Thread_run == TRUE)                  /* On tourne tant que l'on a besoin */
      { struct TELLSTICKDB *tell;
-       if (Partage->com_tellstick.sigusr1)                                        /* On a recu sigusr1 ?? */
-        { Partage->com_tellstick.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: SIGUSR1" );
+       if (Partage->com_tellstick.Thread_reload)                                      /* On a recu reload */
+        { Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: RELOAD" );
+          tdClose();
+          tdInit();
+          Partage->com_tellstick.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_tellstick.Thread_sigusr1)                                 /* On a recu sigusr1 ?? */
+        { Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: SIGUSR1" );
           Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Reste a traiter",
                   Partage->com_tellstick.taille_tell );
+          Partage->com_tellstick.Thread_sigusr1 = FALSE;
         }
 
        if (!Partage->com_tellstick.liste_tell)                            /* Si pas de message, on tourne */

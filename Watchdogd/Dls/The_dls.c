@@ -496,19 +496,25 @@
 
     Info( Config.log, DEBUG_DLS, "DLS: demarrage" );                                        /* Log Start */
              
-    Partage->com_dls.Plugins            = NULL;            /* Initialisation des variables du thread */
-    Partage->com_dls.liste_m            = NULL;            /* Initialisation des variables du thread */
+    Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
+    Partage->com_dls.liste_m            = NULL;
     Partage->com_dls.liste_plugin_reset = NULL;
+    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+    while(Partage->com_dls.Thread_run == TRUE)                           /* On tourne tant que necessaire */
      { struct timeval tv_avant, tv_apres;
 
-       if (Partage->com_dls.reload)
-        { Partage->com_dls.reload = FALSE;
-          Info( Config.log, DEBUG_INFO, "DLS: Run_dls: RELOADING" );
+       if (Partage->com_dls.Thread_reload)
+        { Info( Config.log, DEBUG_INFO, "DLS: Run_dls: RELOADING" );
           Decharger_plugins();
           Charger_plugins();
+          Partage->com_dls.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_dls.Thread_sigusr1)
+        { Info( Config.log, DEBUG_INFO, "DLS: Run_dls: SIGUSR1" );
+          Partage->com_dls.Thread_sigusr1 = FALSE;
         }
 
        if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */

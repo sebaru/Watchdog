@@ -34,9 +34,9 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_rs485_reload ( struct CLIENT_ADMIN *client )
-  { Partage->com_rs485.reload = TRUE;
+  { Partage->com_rs485.Thread_reload = TRUE;
     Write_admin ( client->connexion, " RS485 Reloading in progress\n" );
-    while (Partage->com_rs485.reload) sched_yield();
+    while (Partage->com_rs485.Thread_reload) sched_yield();
     Write_admin ( client->connexion, " RS485 Reloading done\n" );
   }
 /**********************************************************************************************************/

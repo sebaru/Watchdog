@@ -91,7 +91,7 @@
            else { Envoi_client( client, TAG_ONDULEUR, SSTAG_SERVEUR_VALIDE_EDIT_ONDULEUR_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_ONDULEUR) );
                   g_free(result);
-                  Partage->com_onduleur.reload = TRUE;
+                  Partage->com_onduleur.Thread_reload = TRUE;
                 }
             }
          }

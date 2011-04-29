@@ -90,7 +90,7 @@
             }
            else { Envoi_client( client, TAG_RS485, SSTAG_SERVEUR_VALIDE_EDIT_RS485_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_RS485) );
-                  Partage->com_rs485.reload = TRUE;                /* Modification -> Reload module rs485 */
+                  Partage->com_rs485.Thread_reload = TRUE;         /* Modification -> Reload module rs485 */
                   g_free(result);
                 }
             }

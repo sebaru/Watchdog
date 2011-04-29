@@ -93,15 +93,21 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    Partage->com_audio.liste_audio = NULL;                      /* Initialisation des variables du thread */
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { if (Partage->com_audio.sigusr1)                                            /* On a recu sigusr1 ?? */
-        { Partage->com_audio.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: SIGUSR1" );
+    Partage->com_audio.Thread_run = TRUE;                                           /* Le thread tourne ! */
+    while(Partage->com_audio.Thread_run == TRUE)                         /* On tourne tant que necessaire */
+     {
+       if (Partage->com_audio.Thread_reload)                                      /* On a recu sigusr1 ?? */
+        { Info( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: RELOAD" );
+          Partage->com_audio.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_audio.Thread_sigusr1)                                     /* On a recu sigusr1 ?? */
+        { Info( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_audio.synchro );                             /* lockage futex */
           Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: Reste a traiter",
                                            g_list_length(Partage->com_audio.liste_audio) );
           pthread_mutex_unlock( &Partage->com_audio.synchro );
+          Partage->com_audio.Thread_sigusr1 = FALSE;
         }
 
        if (!Partage->com_audio.liste_audio)                               /* Si pas de message, on tourne */

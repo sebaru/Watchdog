@@ -66,8 +66,7 @@
 /**********************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
-    guint top;
-    prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
+   prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info( Config.log, DEBUG_ARCHIVE, "ARCH: demarrage" );
 
@@ -80,13 +79,18 @@
      }
 
     Partage->com_arch.liste_arch = NULL;                                  /* Initialisation des variables */
-    top = Partage->top;                                        /* Initialisation des archivages temporels */
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+    Partage->com_arch.Thread_run = TRUE;                                            /* Le thread tourne ! */
+    while(Partage->com_arch.Thread_run == TRUE)                          /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
-       if (Partage->com_arch.sigusr1)                                             /* On a recu sigusr1 ?? */
-        { Partage->com_arch.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: SIGUSR1" );
+       if (Partage->com_arch.Thread_reload)                                         /* On a recu RELOAD ? */
+        { Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: RELOAD" );
+          Partage->com_arch.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_arch.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
+        { Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: SIGUSR1" );
+          Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
        if (!Partage->com_arch.liste_arch)                                 /* Si pas de message, on tourne */
@@ -98,10 +102,8 @@
        pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
        Partage->com_arch.liste_arch = g_list_remove ( Partage->com_arch.liste_arch, arch );
-#ifdef DEBUG
        Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
-                                       g_list_length(Partage->com_arch.liste_arch) );
-#endif
+               g_list_length(Partage->com_arch.liste_arch) );
        Partage->com_arch.taille_arch--;
        pthread_mutex_unlock( &Partage->com_arch.synchro );
        Ajouter_archDB ( Config.log, db, arch );

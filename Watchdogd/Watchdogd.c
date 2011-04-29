@@ -140,26 +140,8 @@
        case SIGPIPE: Info( Config.log, DEBUG_INFO, "Recu SIGPIPE" ); break;
        case SIGBUS:  Info( Config.log, DEBUG_INFO, "Recu SIGBUS" ); break;
        case SIGIO:   Info( Config.log, DEBUG_INFO, "Recu SIGIO" ); break;
-       case SIGUSR1: { int i;
-                       Info( Config.log, DEBUG_INFO, "Recu SIGUSR1: dumping infos" );
-                       Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: jeton", Partage->jeton );
-                       for (i=0; i<Config.max_serveur; i++)
-                        { Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: SSRV  id", i );
-                          Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: SSRV pid", Partage->Sous_serveur[i].pid );
-                          Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: SSRV nbr_client", Partage->Sous_serveur[i].nb_client );
-                          if (Partage->Sous_serveur[i].pid) Partage->Sous_serveur[i].sigusr1 = TRUE;
-                        }
-                       Partage->com_dls.reload = TRUE;
-                       Partage->com_onduleur.reload   = TRUE;
-                       Partage->com_rs485.reload   = TRUE;
-                       Partage->com_sms.sigusr1 = TRUE;
-                       Partage->com_modbus.reload = TRUE;
-                       Partage->com_arch.sigusr1 = TRUE;          
-                       Partage->com_audio.sigusr1 = TRUE;          
-                       Partage->com_admin.sigusr1 = TRUE;          
-                       Partage->com_tellstick.sigusr1 = TRUE;          
-                       Partage->com_lirc.sigusr1 = TRUE;          
-                     }
+       case SIGUSR1: Info( Config.log, DEBUG_INFO, "Recu SIGUSR1: dumping infos" );
+                     Partage->com_msrv.Thread_sigusr1 = TRUE;
                      break;
        case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->Arret = RELOAD;
@@ -210,11 +192,49 @@
     pthread_sigmask( SIG_SETMASK, &sigset, NULL );
 
     sleep(1);
-    while( Partage->Arret < FIN )
+    Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
+    while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
      { Gerer_jeton();                                          /* Don du jeton au serveur le moins chargé */
 
        Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
+
+       if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
+        { guint i;
+          Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: RELOAD" );
+          Partage->com_rs485.Thread_reload     = TRUE;
+          Partage->com_modbus.Thread_reload    = TRUE;
+          Partage->com_sms.Thread_reload       = TRUE;
+          Partage->com_dls.Thread_reload       = TRUE;
+          Partage->com_arch.Thread_reload      = TRUE;
+          Partage->com_audio.Thread_reload     = TRUE;
+          Partage->com_onduleur.Thread_reload  = TRUE;
+          Partage->com_admin.Thread_reload     = TRUE;
+          Partage->com_lirc.Thread_reload      = TRUE;
+          Partage->com_tellstick.Thread_reload = TRUE;
+          for (i=0; i<Config.max_serveur; i++)
+           { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_reload = TRUE; }
+          Partage->com_msrv.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_msrv.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
+        { guint i;
+          Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: SIGUSR1" );
+          Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: jeton", Partage->jeton );
+          Partage->com_rs485.Thread_sigusr1     = TRUE;
+          Partage->com_modbus.Thread_sigusr1    = TRUE;
+          Partage->com_sms.Thread_sigusr1       = TRUE;
+          Partage->com_dls.Thread_sigusr1       = TRUE;
+          Partage->com_arch.Thread_sigusr1      = TRUE;
+          Partage->com_audio.Thread_sigusr1     = TRUE;
+          Partage->com_onduleur.Thread_sigusr1  = TRUE;
+          Partage->com_admin.Thread_sigusr1     = TRUE;
+          Partage->com_lirc.Thread_sigusr1      = TRUE;
+          Partage->com_tellstick.Thread_sigusr1 = TRUE;
+          for (i=0; i<Config.max_serveur; i++)
+           { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
+          Partage->com_msrv.Thread_sigusr1 = FALSE;
+        }
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
         { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPT" );

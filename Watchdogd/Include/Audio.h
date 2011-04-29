@@ -36,8 +36,10 @@
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *liste_audio;                                                   /* liste de message a prononcer */
-    gboolean sigusr1;
-    gint last_audio;
+    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
+    gint last_audio;                                               /* Date de la derniere emission sonore */
   };
 
 /*************************************** Définitions des prototypes ***************************************/

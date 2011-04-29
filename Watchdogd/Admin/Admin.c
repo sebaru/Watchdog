@@ -214,10 +214,17 @@
 
     Clients = NULL;                                             /* Initialisation des variables du thread */
 
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
-     { if (Partage->com_admin.sigusr1)                                            /* On a recu sigusr1 ?? */
-        { Partage->com_admin.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
+    Partage->com_admin.Thread_run = TRUE;                                           /* Le thread tourne ! */
+    while(Partage->com_admin.Thread_run == TRUE)                         /* On tourne tant que necessaire */
+     {
+       if (Partage->com_admin.Thread_reload)                                        /* On a recu RELOAD ? */
+        { Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: RELOAD" );
+          Partage->com_admin.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_admin.Thread_sigusr1)                                     /* On a recu sigusr1 ?? */
+        { Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
+          Partage->com_admin.Thread_sigusr1 = FALSE;
         }
 
        Accueillir_un_admin( Fd_ecoute );                  /* Accueille les nouveaux admin */

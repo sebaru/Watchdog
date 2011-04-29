@@ -34,9 +34,9 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_modbus_reload ( struct CLIENT_ADMIN *client )
-  { Partage->com_modbus.reload = TRUE;
+  { Partage->com_modbus.Thread_reload = TRUE;
     Write_admin ( client->connexion, " MODBUS Reloading in progress\n" );
-    while (Partage->com_modbus.reload) sched_yield();
+    while (Partage->com_modbus.Thread_reload) sched_yield();
     Write_admin ( client->connexion, " MODBUS Reloading done\n" );
   }
 /**********************************************************************************************************/

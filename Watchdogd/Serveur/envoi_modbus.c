@@ -90,7 +90,7 @@
             }
            else { Envoi_client( client, TAG_MODBUS, SSTAG_SERVEUR_VALIDE_EDIT_MODBUS_OK,
                                 (gchar *)result, sizeof(struct CMD_TYPE_MODBUS) );
-                  Partage->com_modbus.reload = TRUE;                /* Modification -> Reload module modbus */
+                  Partage->com_modbus.Thread_reload = TRUE;       /* Modification -> Reload module modbus */
                   g_free(result);
                 }
             }

@@ -91,6 +91,9 @@
 
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
     GList *liste_msg_repeat;                                       /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */

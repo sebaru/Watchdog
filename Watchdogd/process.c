@@ -189,6 +189,11 @@
  static gboolean Demarrer_sous_serveur ( int id )
   { static int nbr_thread = 0;
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
+    if (Partage->Sous_serveur[id].Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: An instance is already running"),
+               Partage->Sous_serveur[id].pid );
+       return(FALSE);
+     }
     if ( pthread_create( &Partage->Sous_serveur[id].pid, NULL, (void *)Run_serveur, GINT_TO_POINTER(id) ) )
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: pthread_create failed"), strerror(errno) );
        return(FALSE);
@@ -204,7 +209,7 @@
 /**********************************************************************************************************/
  gboolean Demarrer_onduleur ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
-    if (Partage->com_onduleur.Thread_tourne == TRUE)
+    if (Partage->com_onduleur.Thread_run == TRUE)
      { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: An instance is already running"),
                Partage->com_onduleur.TID );
        return(FALSE);
@@ -225,6 +230,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_dls ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
+    if (Partage->com_dls.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: An instance is already running"),
+               Partage->com_dls.TID );
+       return(FALSE);
+     }
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: pthread_create failed") );
        return(FALSE);
@@ -239,6 +249,13 @@
 /**********************************************************************************************************/
  gboolean Demarrer_tellstick ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
+
+    if (Partage->com_tellstick.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: An instance is already running"),
+               Partage->com_tellstick.TID );
+       return(FALSE);
+     }
+
     Partage->com_tellstick.dl_handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
     if (!Partage->com_tellstick.dl_handle)
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed"), dlerror() );
@@ -291,6 +308,12 @@
 /**********************************************************************************************************/
  gboolean Demarrer_lirc ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Demande de demarrage"), getpid() );
+    if (Partage->com_lirc.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: An instance is already running"),
+               Partage->com_lirc.TID );
+       return(FALSE);
+     }
+
     Partage->com_lirc.dl_handle = dlopen( "libwatchdog-lirc.so", RTLD_LAZY );
     if (!Partage->com_lirc.dl_handle)
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: dlopen failed"), dlerror() );
@@ -319,6 +342,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_rs485 ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Demande de demarrage"), getpid() );
+    if (Partage->com_rs485.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: An instance is already running"),
+               Partage->com_rs485.TID );
+       return(FALSE);
+     }
     if (pthread_create( &Partage->com_rs485.TID, NULL, (void *)Run_rs485, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
@@ -334,6 +362,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_sms ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: Demande de demarrage"), getpid() );
+    if (Partage->com_sms.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: An instance is already running"),
+               Partage->com_sms.TID );
+       return(FALSE);
+     }
     if (pthread_create( &Partage->com_sms.TID, NULL, (void *)Run_sms, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: pthread_create failed") );
        return(FALSE);
@@ -342,12 +375,17 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_audio: Thread un process sms                                                                    */
+/* Demarrer_audio: Thread un process audio                                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_audio ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: Demande de demarrage"), getpid() );
+    if (Partage->com_audio.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: An instance is already running"),
+               Partage->com_audio.TID );
+       return(FALSE);
+     }
     if (pthread_create( &Partage->com_audio.TID, NULL, (void *)Run_audio, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: pthread_create failed") );
        return(FALSE);
@@ -357,12 +395,17 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_audio: Thread un process sms                                                                    */
+/* Demarrer_audio: Thread un process admin                                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_admin ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: Demande de demarrage"), getpid() );
+    if (Partage->com_admin.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: An instance is already running"),
+               Partage->com_admin.TID );
+       return(FALSE);
+     }
     if (pthread_create( &Partage->com_admin.TID, NULL, (void *)Run_admin, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: pthread_create failed") );
        return(FALSE);
@@ -372,12 +415,17 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_arch: Thread un process sms                                                                    */
+/* Demarrer_arch: Thread un process arch                                                                  */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_arch ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: Demande de demarrage"), getpid() );
+    if (Partage->com_arch.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: An instance is already running"),
+               Partage->com_arch.TID );
+       return(FALSE);
+     }
     if (pthread_create( &Partage->com_arch.TID, NULL, (void *)Run_arch, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: pthread_create failed") );
        return(FALSE);
@@ -392,6 +440,11 @@
 /**********************************************************************************************************/
  gboolean Demarrer_modbus ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: Demande de demarrage"), getpid() );
+    if (Partage->com_modbus.Thread_run == TRUE)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: An instance is already running"),
+               Partage->com_modbus.TID );
+       return(FALSE);
+     }
     if (pthread_create( &Partage->com_modbus.TID, NULL, (void *)Run_modbus, NULL ))
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: pthread_create failed") );
        return(FALSE);
@@ -539,49 +592,76 @@
      }
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), Partage->com_dls.TID );
-    if (Partage->com_dls.TID) { pthread_join( Partage->com_dls.TID, NULL ); }                                    /* Attente fin DLS */
+    if (Partage->com_dls.Thread_run == TRUE)
+     { Partage->com_dls.Thread_run = FALSE;
+       pthread_join( Partage->com_dls.TID, NULL );                                     /* Attente fin DLS */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
-    if (Partage->com_onduleur.Thread_tourne == TRUE)
-     { Partage->com_onduleur.Thread_tourne = FALSE;
+    if (Partage->com_onduleur.Thread_run == TRUE)
+     { Partage->com_onduleur.Thread_run = FALSE;
        pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
      }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
-    if (Partage->com_rs485.TID) { pthread_join( Partage->com_rs485.TID, NULL ); }                              /* Attente fin RS485 */
+    if (Partage->com_rs485.Thread_run == TRUE)
+     { Partage->com_rs485.Thread_run = FALSE;
+       pthread_join( Partage->com_rs485.TID, NULL );                                 /* Attente fin RS485 */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), Partage->com_rs485.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
-    if (Partage->com_tellstick.TID) { pthread_join( Partage->com_tellstick.TID, NULL ); }                  /* Attente fin TELLSTICK */
+    if (Partage->com_tellstick.Thread_run == TRUE)
+     { Partage->com_tellstick.Thread_run = FALSE;
+       pthread_join( Partage->com_tellstick.TID, NULL );                         /* Attente fin TELLSTICK */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), Partage->com_tellstick.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), Partage->com_lirc.TID );
-    if (Partage->com_lirc.TID) { pthread_join( Partage->com_lirc.TID, NULL ); }                                 /* Attente fin LIRC */
+    if (Partage->com_lirc.Thread_run == TRUE)
+     { Partage->com_lirc.Thread_run = FALSE;
+       pthread_join( Partage->com_lirc.TID, NULL );                                   /* Attente fin LIRC */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), Partage->com_lirc.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), Partage->com_modbus.TID );
-    if (Partage->com_modbus.TID) { pthread_join( Partage->com_modbus.TID, NULL ); }                           /* Attente fin MODBUS */
+    if (Partage->com_modbus.Thread_run == TRUE)
+     { Partage->com_modbus.Thread_run = FALSE;
+       pthread_join( Partage->com_modbus.TID, NULL );                               /* Attente fin MODBUS */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), Partage->com_modbus.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), Partage->com_sms.TID );
-    if (Partage->com_sms.TID) { pthread_join( Partage->com_sms.TID, NULL ); }                                    /* Attente fin SMS */
+    if (Partage->com_sms.Thread_run == TRUE)
+     { Partage->com_sms.Thread_run = FALSE;
+       pthread_join( Partage->com_sms.TID, NULL );                                     /* Attente fin SMS */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), Partage->com_sms.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), Partage->com_arch.TID );
-    if (Partage->com_arch.TID) { pthread_join( Partage->com_arch.TID, NULL ); }                                 /* Attente fin ARCH */
+    if (Partage->com_arch.Thread_run == TRUE)
+     { Partage->com_arch.Thread_run = FALSE;
+       pthread_join( Partage->com_arch.TID, NULL );                                   /* Attente fin ARCH */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), Partage->com_arch.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), Partage->com_audio.TID );
-    if (Partage->com_audio.TID) { pthread_join( Partage->com_audio.TID, NULL ); }                              /* Attente fin AUDIO */
+    if (Partage->com_audio.Thread_run == TRUE)
+     { Partage->com_audio.Thread_run = FALSE;
+       pthread_join( Partage->com_audio.TID, NULL );                                 /* Attente fin AUDIO */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), Partage->com_audio.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
 
     if (flag)
      { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), Partage->com_admin.TID );
-       if (Partage->com_admin.TID) { pthread_join( Partage->com_admin.TID, NULL ); }                           /* Attente fin ADMIN */
+        if (Partage->com_admin.Thread_run == TRUE)
+         { Partage->com_admin.Thread_run = FALSE;
+           pthread_join( Partage->com_admin.TID, NULL );                                     /* Attente fin ADMIN */
+         }
        Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), Partage->com_admin.TID );
      }
 

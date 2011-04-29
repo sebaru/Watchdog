@@ -60,20 +60,27 @@
        pthread_exit(GINT_TO_POINTER(0));
      }
 
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+    Partage->com_lirc.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
+    while(Partage->com_lirc.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
      { gchar *code;
        gchar *c;
        gint ret;
 
-       if (Partage->com_lirc.sigusr1)                                             /* On a recu sigusr1 ?? */
-        { Partage->com_lirc.sigusr1 = FALSE;
-          Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: SIGUSR1" );
+       if (Partage->com_lirc.Thread_reload)                                           /* On a recu RELOAD */
+        { Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: RELOAD" );
           lirc_freeconfig(config);
           if (lirc_readconfig ( NULL, &config, NULL)!=0)
            { config = NULL;
              Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
+             Partage->com_lirc.Thread_run = FALSE;                        /* On demande l'arret du thread */
              break;
            }
+          Partage->com_lirc.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_lirc.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
+        { Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: SIGUSR1" );
+          Partage->com_lirc.Thread_sigusr1 = FALSE;
         }
 
        if (lirc_nextcode(&code)==0)                          /* Si un code est présent sur le socket lirc */

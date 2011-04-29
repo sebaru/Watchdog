@@ -49,7 +49,9 @@
     GList *Plugins;                                                   /* Liste des plugins chargés de DLS */
     GList *liste_m;                                                           /* liste des Mxxx a activer */
     GList *liste_plugin_reset;                                            /* liste des plugins a resetter */
-    gboolean reload;
+    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     guint temps_sched;

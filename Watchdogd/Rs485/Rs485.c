@@ -557,6 +557,7 @@
     else { Info_n( Config.log, DEBUG_RS485, "RS485: Acces RS485 FD", fd_rs485 ); }
 
     Partage->com_rs485.Modules_RS485 = NULL;                    /* Initialisation des variables du thread */
+    Partage->com_rs485.Thread_run    = TRUE;                                        /* Le thread tourne ! */
 
     Charger_tous_rs485();                                                 /* Chargement des modules rs485 */
 
@@ -564,15 +565,20 @@
     id_en_cours = 0;
     attente_reponse = FALSE;
 
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+    while(Partage->com_rs485.Thread_run == TRUE)                         /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
-       if (Partage->com_rs485.reload == TRUE)
+       if (Partage->com_rs485.Thread_reload == TRUE)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Reloading conf" );
           Decharger_tous_rs485();
           Charger_tous_rs485();
-          Partage->com_rs485.reload = FALSE;
+          Partage->com_rs485.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_rs485.Thread_sigusr1 == TRUE)
+        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: SIGUSR1" );
+          Partage->com_rs485.Thread_sigusr1 = FALSE;
         }
 
        if (Partage->com_rs485.admin_del)

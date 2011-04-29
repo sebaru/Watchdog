@@ -55,22 +55,20 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Unref_client ( struct CLIENT *client )
-  {
-    pthread_mutex_lock( &client->mutex_struct_used );
+  { pthread_mutex_lock( &client->mutex_struct_used );
     if (client->struct_used) client->struct_used--;
     pthread_mutex_unlock( &client->mutex_struct_used );
-  };
+  }
 /**********************************************************************************************************/
 /* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                 */
 /* Entrée: un client                                                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Ref_client ( struct CLIENT *client )
-  {
-    pthread_mutex_lock( &client->mutex_struct_used );
+  { pthread_mutex_lock( &client->mutex_struct_used );
     client->struct_used++;
     pthread_mutex_unlock( &client->mutex_struct_used );
-  };
+  }
 /**********************************************************************************************************/
 /* Mode_vers_string: Conversion d'un mode vers une chaine de caracteres                                   */
 /* Entrée: un mode                                                                                        */
@@ -240,7 +238,6 @@
     struct sigaction sig;
     pthread_t tid;
     gchar nom[16];
-    guint Arret;
 
     g_snprintf(nom, sizeof(nom), "W-SRV%03d", id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
@@ -249,17 +246,15 @@
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGINT, &sig, NULL );                                               /* On ignore le SIGINT */
 
-    Partage->Sous_serveur[id].inactivite = Partage->top;                     /* On prend l'heure actuelle */
-    Arret = 0;
-    Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
-
                                                   /* Initialisation de la zone interne et comm du serveur */
+    Partage->Sous_serveur[id].inactivite = Partage->top;                     /* On prend l'heure actuelle */
+    Partage->Sous_serveur[id].Thread_run = TRUE;                                    /* Le thread tourne ! */
+    Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
     Partage->Sous_serveur[id].nb_client = 0;
-   /* Partage->Sous_serveur[id].pid = getpid(); /*pthread_self(); /* Le fils est pret et en informe le pere */
 
     Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: Enable", id );
          
-    while( Partage->Arret < FIN && Arret != FIN )  /* On tourne tant que le pere est en vie et arret!=fin */
+    while( Partage->Sous_serveur[id].Thread_run == TRUE )                /* On tourne tant que necessaire */
      { if (Partage->jeton == id)                                                /* Avons nous le jeton ?? */
         { if (Accueillir_un_client( id ) == TRUE)                         /* Un client vient d'arriver ?? */
            { Partage->jeton = -1;                                /* On signale que l'on accepte le client */
@@ -267,9 +262,17 @@
            }
         }
 
-       if (Partage->Sous_serveur[id].sigusr1)                                 /* Gestion des signaux USR1 */
-        { Partage->Sous_serveur[id].sigusr1 = FALSE;
-          Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: SIGUSR1", id );
+       if (Partage->Sous_serveur[id].Thread_sigusr1)                          /* Gestion des signaux USR1 */
+        { gchar chaine[256];
+          g_snprintf( chaine, sizeof(chaine), "SSRV: Run_serveur: id %d, pid %d, nbr_client %d",
+                      id, (guint)Partage->Sous_serveur[id].pid, Partage->Sous_serveur[id].nb_client );
+          Info( Config.log, DEBUG_SERVEUR, chaine );
+          Partage->Sous_serveur[id].Thread_sigusr1 = FALSE;
+        }
+
+       if (Partage->Sous_serveur[id].Thread_reload)                         /* Gestion des signaux RELOAD */
+        { Partage->Sous_serveur[id].Thread_reload = FALSE;
+          Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: RELOAD", id );
         }
 
        if (Partage->Sous_serveur[id].Clients)                                    /* Si il y a des clients */
@@ -532,7 +535,7 @@
        else
        if ( Partage->Sous_serveur[id].inactivite + Config.max_inactivite < Partage->top ) /* Inactivite ? */
         { Info( Config.log, DEBUG_SERVEUR, "Inactivity time reached" );
-          Arret = FIN;                      /* Arret "Local" du process: n'impacte pas les autres process */
+          Partage->Sous_serveur[id].Thread_run = FALSE;                       /* Arret "Local" du process */
         }
 /****************************************** Ecoute des paroles du superviseur *****************************/
        if (Partage->Sous_serveur[id].type_info != TYPE_INFO_VIDE)

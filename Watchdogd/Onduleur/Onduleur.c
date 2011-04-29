@@ -498,25 +498,29 @@
     prctl(PR_SET_NAME, "W-ONDULEUR", 0, 0, 0 );
     Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: demarrage" );
 
-    Partage->com_onduleur.Thread_tourne = TRUE;                  /* On dit au maitre que le thread tourne */
     Partage->com_onduleur.Modules_ONDULEUR = NULL;                        /* Init des variables du thread */
 
     if ( Charger_tous_ONDULEUR() == FALSE )                            /* Chargement des modules onduleur */
      { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: No module ONDULEUR found -> stop" );
        Partage->com_onduleur.TID = 0;                     /* On indique au master que le thread est mort. */
-       Partage->com_onduleur.Thread_tourne = FALSE;       /* On dit au maitre que le thread ne tourne pas */
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    while(Partage->com_onduleur.Thread_tourne == TRUE)                /* On tourne tant que l'on a besoin */
+    Partage->com_onduleur.Thread_run = TRUE;                     /* On dit au maitre que le thread tourne */
+    while(Partage->com_onduleur.Thread_run == TRUE)                   /* On tourne tant que l'on a besoin */
      { sleep(1);
        sched_yield();
 
-       if (Partage->com_onduleur.reload == TRUE)
+       if (Partage->com_onduleur.Thread_reload == TRUE)
         { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Reloading conf" );
           Decharger_tous_ONDULEUR();
           Charger_tous_ONDULEUR();
-          Partage->com_onduleur.reload = FALSE;
+          Partage->com_onduleur.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_onduleur.Thread_sigusr1 == TRUE)
+        { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: SIGUSR1" );
+          Partage->com_onduleur.Thread_sigusr1 = FALSE;
         }
 
        if (Partage->com_onduleur.admin_del)
@@ -594,7 +598,6 @@
     Decharger_tous_ONDULEUR();
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Down", pthread_self() );
     Partage->com_onduleur.TID = 0;                        /* On indique au master que le thread est mort. */
-    Partage->com_onduleur.Thread_tourne = FALSE;          /* On dit au maitre que le thread ne tourne pas */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -1034,15 +1034,21 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    while(Partage->Arret < FIN)                    /* On tourne tant que le pere est en vie et arret!=fin */
+    Partage->com_modbus.Thread_run = TRUE;                                          /* Le thread tourne ! */
+    while(Partage->com_modbus.Thread_run == TRUE)                        /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
 
-       if (Partage->com_modbus.reload == TRUE)
+       if (Partage->com_modbus.Thread_reload == TRUE)
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
           Decharger_tous_MODBUS();
           Charger_tous_MODBUS();
-          Partage->com_modbus.reload = FALSE;
+          Partage->com_modbus.Thread_reload = FALSE;
+        }
+
+       if (Partage->com_modbus.Thread_sigusr1 == TRUE)
+        { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: SIGUSR1" );
+          Partage->com_modbus.Thread_sigusr1 = FALSE;
         }
 
        if (Partage->com_modbus.admin_del)

@@ -32,7 +32,9 @@
  struct SOUS_SERVEUR
   { pthread_t pid;
     gint nb_client;
-    gboolean sigusr1;
+    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
     gboolean type_info;                                          /* Acquisition de l'information actuelle */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Clients;                                         /* La liste des clients qui se sont connectés */

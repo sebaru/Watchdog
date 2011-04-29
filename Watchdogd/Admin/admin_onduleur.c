@@ -34,9 +34,9 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_onduleur_reload ( struct CLIENT_ADMIN *client )
-  { Partage->com_onduleur.reload = TRUE;
+  { Partage->com_onduleur.Thread_reload = TRUE;
     Write_admin ( client->connexion, " ONDULEUR Reloading in progress\n" );
-    while (Partage->com_onduleur.reload) sched_yield();
+    while (Partage->com_onduleur.Thread_reload) sched_yield();
     Write_admin ( client->connexion, " ONDULEUR Reloading done\n" );
   }
 /**********************************************************************************************************/
