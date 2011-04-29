@@ -60,14 +60,6 @@
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
- enum
-  { TOURNE,
-    FIN,                                                                            /* Arret des serveurs */
-    RELOAD,                                              /* Déchargement librairies/Config + Rechargement */
-    REBOOT,                                                                       /* Relance des serveurs */
-    CLEARREBOOT,                                                       /* Relance sans import des données */
-  };
- 
  #define EXIT_ERREUR       -1                                               /* Sortie sur erreur inconnue */
  #define EXIT_OK           0                                                            /* Sortie normale */
  #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
@@ -92,6 +84,8 @@
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reboot;                              /* TRUE si le reboot doit suivre une RAZ mémoire */
+    gboolean Thread_clear_reboot;                        /* TRUE si le reboot doit suivre une RAZ mémoire */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
     GList *liste_msg_repeat;                                       /* liste de struct MSGDB msg a envoyer */
@@ -138,8 +132,6 @@
     guint audit_bit_interne_per_sec_hold;
     guint audit_tour_dls_per_sec;     
     guint audit_tour_dls_per_sec_hold;
-    guchar Arret;                                                  /* != 0 si l'arret systeme est demandé */
-
                                                                                 /* Interfacage avec D.L.S */
     struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
     struct COM_RS485 com_rs485;                                                             /* Comm rs485 */

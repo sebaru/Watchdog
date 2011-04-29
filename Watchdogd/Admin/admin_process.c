@@ -49,11 +49,11 @@
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ARCH -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "rs" ) )
+       if ( ! strcmp ( thread, "rs485" ) )
         { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RS485 -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "mbus" ) )
+       if ( ! strcmp ( thread, "modbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb MODBUS -> Arret" ); }
         } else
@@ -81,6 +81,27 @@
         { if (!Demarrer_lirc())                                                         /* Démarrage LIRC */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb LIRC -> Arret" ); }
         } 
+
+     } else
+    if ( ! strcmp ( commande, "stop" ) )
+     { gchar thread[128], chaine[128];
+       sscanf ( ligne, "%s %s", commande, thread );
+
+       g_snprintf( chaine, sizeof(chaine), " Stopping %s\n", thread );
+       Write_admin ( client->connexion, chaine );
+
+       if ( ! strcmp ( thread, "all" ) )
+        { Stopper_fils(FALSE);                           /* Termine tous les process sauf le thread ADMIN */
+        } else
+       if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
+       if ( ! strcmp ( thread, "rs485"     ) ) { Partage->com_rs485.Thread_run     = FALSE; } else
+       if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
+       if ( ! strcmp ( thread, "sms"       ) ) { Partage->com_sms.Thread_run       = FALSE; } else
+       if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
+       if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
+       if ( ! strcmp ( thread, "onduleur"  ) ) { Partage->com_onduleur.Thread_run  = FALSE; } else
+       if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; } else
+       if ( ! strcmp ( thread, "lirc"      ) ) { Partage->com_lirc.Thread_run      = FALSE; } 
 
      } else
     if ( ! strcmp ( commande, "list" ) )
@@ -136,38 +157,36 @@
        Write_admin ( client->connexion, chaine );
 
      } else
-    if ( ! strcmp ( commande, "stop" ) )
-     { Info( Config.log, DEBUG_INFO, "Admin_process : stop process" );
-       Write_admin ( client->connexion, "stopping process\n" );
-       Stopper_fils(FALSE);                              /* Termine tous les process sauf le thread ADMIN */
-     } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : SHUTDOWN demandé" );
        Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
-       Partage->Arret = FIN;
+       Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : REBOOT demandé" );
        Write_admin ( client->connexion, "REBOOT in progress\n" );
-       Partage->Arret = REBOOT;
+       Partage->com_msrv.Thread_reboot = TRUE;
+       Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : CLEAR-REBOOT demandé" );
        Write_admin ( client->connexion, "CLEAR-REBOOT in progress\n" );
-       Partage->Arret = CLEARREBOOT;
+       Partage->com_msrv.Thread_clear_reboot = TRUE;
+       Partage->com_msrv.Thread_reboot = TRUE;
+       Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : RELOAD demandé" );
        Write_admin ( client->connexion, "RELOAD in progress\n" );
-       Partage->Arret = RELOAD;
+       Partage->com_msrv.Thread_reload = TRUE;
      } else
     if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs,mbus,sms,audio,dls,onduleur,tellstick)\n" );
+                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick)\n" );
        Write_admin ( client->connexion,
-                     "  stop                 - Stop all thread\n" );
+                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick)\n" );
        Write_admin ( client->connexion,
                      "  RELOAD               - Reload configuration\n" );
        Write_admin ( client->connexion,

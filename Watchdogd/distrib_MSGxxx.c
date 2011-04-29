@@ -153,7 +153,8 @@
      { if (Partage->Sous_serveur[i].pid == -1 || 
            Partage->Sous_serveur[i].nb_client == 0)
            continue;                                                               /* Si offline, on swap */
-       while(Partage->Arret<FIN && Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
+       while(Partage->com_msrv.Thread_run == TRUE &&
+             Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
      }
   }
 /**********************************************************************************************************/

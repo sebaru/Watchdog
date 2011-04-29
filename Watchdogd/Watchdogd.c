@@ -126,16 +126,13 @@
 
     switch (num)
      { case SIGQUIT:
-       case SIGINT:  Info_n( Config.log, DEBUG_INFO, "SIGINT Caught", Partage->Arret );
-                     Partage->Arret = FIN;                   /* On demande l'arret de la boucle programme */
-                     Info_n( Config.log, DEBUG_INFO, "Arret=fin", Partage->Arret );
+       case SIGINT:  Info( Config.log, DEBUG_INFO, "Recu SIGINT" );
+                     Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
-       case SIGTERM: Info_n( Config.log, DEBUG_INFO, "SIGTERM Caught", Partage->Arret );
-                                                                           /* Si arret demandé du serveur */
-                     Partage->Arret = FIN;                   /* On demande l'arret de la boucle programme */
-                     Info_n( Config.log, DEBUG_INFO, "Arret=fin", Partage->Arret );
+       case SIGTERM: Info( Config.log, DEBUG_INFO, "Recu SIGTERM" );
+                     Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
-       case SIGCHLD: Info( Config.log, DEBUG_INFO, "SIGCHLD Caught" ); /* Si arret demandé du serveur */
+       case SIGCHLD: Info( Config.log, DEBUG_INFO, "Recu SIGCHLD" );
                      break;
        case SIGPIPE: Info( Config.log, DEBUG_INFO, "Recu SIGPIPE" ); break;
        case SIGBUS:  Info( Config.log, DEBUG_INFO, "Recu SIGBUS" ); break;
@@ -144,7 +141,7 @@
                      Partage->com_msrv.Thread_sigusr1 = TRUE;
                      break;
        case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
-                     Partage->Arret = RELOAD;
+                     Partage->com_msrv.Thread_reload = TRUE;
                      break;
        default: Info_n( Config.log, DEBUG_INFO, "Recu signal", num ); break;
      }
@@ -214,7 +211,11 @@
           Partage->com_tellstick.Thread_reload = TRUE;
           for (i=0; i<Config.max_serveur; i++)
            { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_reload = TRUE; }
-          Partage->com_msrv.Thread_reload = FALSE;
+
+          Lire_config( NULL );                              /* Lecture sur le fichier /etc/watchdogd.conf */
+          Print_config();
+          Info_change_debug ( Config.log, Config.debug_level );
+          Partage->com_msrv.Thread_reload      = FALSE;
         }
 
        if (Partage->com_msrv.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
@@ -233,7 +234,7 @@
           Partage->com_tellstick.Thread_sigusr1 = TRUE;
           for (i=0; i<Config.max_serveur; i++)
            { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
-          Partage->com_msrv.Thread_sigusr1 = FALSE;
+          Partage->com_msrv.Thread_sigusr1      = FALSE;
         }
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
@@ -491,7 +492,6 @@
        memset( &Partage->com_lirc,     0, sizeof(Partage->com_lirc) );
        memset( &Partage->com_tellstick,0, sizeof(Partage->com_tellstick) );
 
-       Partage->Arret            = TOURNE;
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        
        pthread_mutexattr_init( &attr );
@@ -528,7 +528,6 @@
 
        sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sigset, NULL );
-encore:   
 
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
        Charger_eana();
@@ -599,14 +598,6 @@ encore:
         }
       }
 
-    if (Partage->Arret == RELOAD)
-     { Lire_config( NULL );                                 /* Lecture sur le fichier /etc/watchdogd.conf */
-       Print_config();
-       Info_change_debug ( Config.log, Config.debug_level );
-       Partage->Arret = TOURNE;
-       goto encore;
-     }
-
     pthread_mutex_destroy( &Partage->com_rs485.synchro );
     pthread_mutex_destroy( &Partage->com_modbus.synchro );
     pthread_mutex_destroy( &Partage->com_sms.synchro );
@@ -625,11 +616,11 @@ encore:
     if (Socket_ecoute>0) close(Socket_ecoute);
     if (Config.rsa) RSA_free( Config.rsa );
 
-    if (Partage->Arret != CLEARREBOOT) Exporter();           /* Tente d'exporter les données avant reload */
+    if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();       /* Tente d'exporter les données */
     else { Info_c( Config.log, DEBUG_INFO, "CLEAR-REBOOT : Erasing export file", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
-    if (Partage->Arret == REBOOT || Partage->Arret == CLEARREBOOT)
+    if (Partage->com_msrv.Thread_reboot == TRUE)
      { gint pid;
        Info( Config.log, DEBUG_INFO, "Rebooting ..." );
        pid = fork();
