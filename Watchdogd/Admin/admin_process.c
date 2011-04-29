@@ -111,56 +111,56 @@
        Write_admin ( client->connexion, chaine );
 
        for (i=0; i<Config.max_serveur; i++)
-        { g_snprintf( chaine, sizeof(chaine), " Built-in SSRV[%d] -> ------------- running = %s, TID=%d\n", i,
+        { g_snprintf( chaine, sizeof(chaine), " Built-in SSRV[%d]  -> ------------- running = %s, TID = %d\n", i,
                       (Partage->Sous_serveur[i].Thread_run ? "YES" : "NO"), (gint)Partage->Sous_serveur[i].pid
                     );
           Write_admin ( client->connexion, chaine );
         }
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s\n",
-                   (Partage->com_dls.TID       ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_dls.Thread_run ? "YES" : "NO"), (gint)Partage->com_dls.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in SMS      -> ------------- running = %s\n",
-                   (Partage->com_sms.TID       ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in SMS      -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_sms.Thread_run ? "YES" : "NO"), (gint)Partage->com_sms.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in RS485    -> ------------- running = %s\n",
-                   (Partage->com_rs485.TID     ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in RS485    -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_rs485.Thread_run ? "YES" : "NO"), (gint)Partage->com_rs485.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in MODBUS   -> ------------- running = %s\n",
-                   (Partage->com_modbus.TID     ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in MODBUS   -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_modbus.Thread_run ? "YES" : "NO"), (gint)Partage->com_modbus.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in AUDIO    -> ------------- running = %s\n",
-                   (Partage->com_audio.TID     ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in AUDIO    -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_audio.Thread_run ? "YES" : "NO"), (gint)Partage->com_audio.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in ONDULEUR -> ------------- running = %s\n",
-                   (Partage->com_onduleur.TID     ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in ONDULEUR -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_onduleur.Thread_run ? "YES" : "NO"), (gint)Partage->com_onduleur.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s\n",
-                   (Partage->com_arch.TID       ? "YES" : "NO")
+       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
+                   (Partage->com_arch.Thread_run ? "YES" : "NO"), (gint)Partage->com_arch.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Library LIRC      -> loaded = %s, running = %s\n",
+       g_snprintf( chaine, sizeof(chaine), " Library LIRC      -> loaded = %s, running = %s, TID = %d\n",
                    (Partage->com_lirc.dl_handle ? "YES" : "NO"),
-                   (Partage->com_lirc.TID       ? "YES" : "NO")
+                   (Partage->com_lirc.Thread_run ? "YES" : "NO"), (gint)Partage->com_lirc.TID
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Library TELLSTICK -> loaded = %s, running = %s\n",
+       g_snprintf( chaine, sizeof(chaine), " Library TELLSTICK -> loaded = %s, running = %s, TID = %d\n",
                    (Partage->com_tellstick.dl_handle ? "YES" : "NO"),
-                   (Partage->com_tellstick.TID       ? "YES" : "NO")
+                   (Partage->com_tellstick.Thread_run ? "YES" : "NO"), (gint)Partage->com_tellstick.TID
                  );
        Write_admin ( client->connexion, chaine );
 

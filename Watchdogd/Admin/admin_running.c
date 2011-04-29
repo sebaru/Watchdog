@@ -80,7 +80,7 @@
         }
        Write_admin ( client->connexion, "running)\n" );
        Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
-       Write_admin ( client->connexion, "                                             cdg,network,archive,connexion,dls,modbus,admin,rs485,\n" );
+       Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
        Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,lirc)\n" );
        Write_admin ( client->connexion, "  exit                  - Revient au mode RUNNING\n" );
      } else
@@ -391,7 +391,7 @@
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CDG       ); } else
        if ( ! strcmp ( debug, "network"   ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_NETWORK   ); } else
-       if ( ! strcmp ( debug, "archive"   ) )
+       if ( ! strcmp ( debug, "arch"   ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ARCHIVE   ); } else
        if ( ! strcmp ( debug, "connexion" ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CONNEXION ); } else

@@ -530,7 +530,10 @@
  
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)
-        { Partage->Sous_serveur[i].pid = -1;
+        { Partage->Sous_serveur[i].Thread_run = FALSE;
+          Partage->Sous_serveur[i].Thread_sigusr1 = FALSE;
+          Partage->Sous_serveur[i].Thread_reload = FALSE;
+          Partage->Sous_serveur[i].pid = -1;
           Partage->Sous_serveur[i].nb_client = -1;
           Partage->Sous_serveur[i].type_info = TYPE_INFO_VIDE;                    /* Pas d'info à traiter */
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
