@@ -157,6 +157,26 @@
     for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++) { Updater_cpt_impDB( Config.log, db, &Partage->ci[cpt].cpt_impdb); }     
   }
 /**********************************************************************************************************/
+/* Tatiter_sigusr1 : Print les variable importante dans les lgos                                          */
+/* Entrée : Néant                                                                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Traiter_sigusr1 ( void )
+  { guint nbr_i, nbr_msg_on, nbr_msg_off, nbr_msg_repeat;
+    gchar chaine[256];
+
+    pthread_mutex_lock( &Partage->com_msrv.synchro );
+    nbr_i          = g_list_length(Partage->com_msrv.liste_i);
+    nbr_msg_off    = g_list_length( Partage->com_msrv.liste_msg_off );     /* Recuperation du numero de i */
+    nbr_msg_on     = g_list_length( Partage->com_msrv.liste_msg_on );      /* Recuperation du numero de i */
+    nbr_msg_repeat = g_list_length( Partage->com_msrv.liste_msg_repeat );             /* liste des repeat */
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+    g_snprintf( chaine, sizeof(chaine), "MSRV: Reste %d I, %d MSG_ON, %d MSG_OFF, %d MSG_REPEAT",
+                nbr_i, nbr_msg_on, nbr_msg_off, nbr_msg_repeat );
+    Info( Config.log, DEBUG_INFO, chaine );
+  }
+/**********************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -234,6 +254,7 @@
           Partage->com_tellstick.Thread_sigusr1 = TRUE;
           for (i=0; i<Config.max_serveur; i++)
            { if (Partage->Sous_serveur[i].Thread_run) Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
+          Traiter_sigusr1();                     /* Appel de la fonction pour traiter le signal pour MSRV */
           Partage->com_msrv.Thread_sigusr1      = FALSE;
         }
 
