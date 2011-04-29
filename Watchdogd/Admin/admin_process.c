@@ -106,8 +106,16 @@
      } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar chaine[128];
+       guint i;
        g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
+
+       for (i=0; i<Config.max_serveur; i++)
+        { g_snprintf( chaine, sizeof(chaine), " Built-in SSRV[%d] -> ------------- running = %s, TID=%d\n", i,
+                      (Partage->Sous_serveur[i].Thread_run ? "YES" : "NO"), (gint)Partage->Sous_serveur[i].pid
+                    );
+          Write_admin ( client->connexion, chaine );
+        }
 
        g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s\n",
                    (Partage->com_dls.TID       ? "YES" : "NO")
