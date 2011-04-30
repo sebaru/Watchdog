@@ -583,7 +583,7 @@
     Partage->Sous_serveur[id].nb_client = -1;
     Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                          /* Information traitée */
     Partage->Sous_serveur[id].Clients   = NULL;
-    Partage->Sous_serveur[id].pid       = -1;
+    Partage->Sous_serveur[id].pid       = 0;
     if (Partage->jeton == id)
      { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
        Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: jeton rendu", id );

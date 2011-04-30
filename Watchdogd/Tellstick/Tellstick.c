@@ -134,8 +134,6 @@
      { struct TELLSTICKDB *tell;
        if (Partage->com_tellstick.Thread_reload)                                      /* On a recu reload */
         { Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: RELOAD" );
-          tdClose();
-          tdInit();
           Partage->com_tellstick.Thread_reload = FALSE;
         }
 
