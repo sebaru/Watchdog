@@ -533,7 +533,7 @@
            }
         }
        else
-       if ( Partage->Sous_serveur[id].inactivite + Config.max_inactivite < Partage->top ) /* Inactivite ? */
+       if ( Partage->Sous_serveur[id].inactivite + 10*Config.max_inactivite < Partage->top )/* Inactivite ? */
         { Info( Config.log, DEBUG_SERVEUR, "Inactivity time reached" );
           Partage->Sous_serveur[id].Thread_run = FALSE;                       /* Arret "Local" du process */
         }

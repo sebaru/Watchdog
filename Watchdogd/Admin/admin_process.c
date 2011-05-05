@@ -164,8 +164,8 @@
        Write_admin ( client->connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Library TELLSTICK -> loaded = %s, running = %s, TID = %d\n",
-                   (Partage->com_tellstick.dl_handle ? "YES" : "NO"),
-                   (Partage->com_tellstick.Thread_run ? "YES" : "NO"), (gint)Partage->com_tellstick.TID
+                   (Partage->com_tellstick.dl_handle ? "YES" : " NO"),
+                   (Partage->com_tellstick.Thread_run ? "YES" : " NO"), (gint)Partage->com_tellstick.TID
                  );
        Write_admin ( client->connexion, chaine );
 
