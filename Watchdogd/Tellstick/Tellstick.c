@@ -34,7 +34,7 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
 /**********************************************************************************************************/
-/* Ajouter_tell: Ajoute une tellive dans la base de données                                               */
+/* Ajouter_tellstick: Ajoute une tellstick dans la liste des envoi tellstick                              */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
 /**********************************************************************************************************/
  void Ajouter_tellstick( gint id, gint val )
@@ -59,9 +59,9 @@
     pthread_mutex_unlock( &Partage->com_tellstick.synchro );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_tellstick_learn: Envoi une commande de LEARN tellstick                                           */
+/* Entrée: Le client admin et le numéro ID du tellstick                                                   */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_tellstick_learn ( struct CLIENT_ADMIN *client, gint num )
   { int methods;
@@ -75,6 +75,44 @@
      }
 
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Learning of device = %d\n", num );
+    Write_admin ( client->connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_tellstick_start: Envoi une commande de START tellstick                                           */
+/* Entrée: Le client admin et le numéro ID du tellstick                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Admin_tellstick_start ( struct CLIENT_ADMIN *client, gint num )
+  { int methods;
+    gchar chaine[128];
+
+    methods = tdMethods( num, TELLSTICK_TURNON );                                /* Get methods of device */
+
+    if ( methods | TELLSTICK_TURNON )
+     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Starting", num );
+       tdTurnOn ( num );
+     }
+
+    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Starting device = %d\n", num );
+    Write_admin ( client->connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_tellstick_stop : Envoi une commande de STOP  tellstick                                           */
+/* Entrée: Le client admin et le numéro ID du tellstick                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Admin_tellstick_stop ( struct CLIENT_ADMIN *client, gint num )
+  { int methods;
+    gchar chaine[128];
+
+    methods = tdMethods( num, TELLSTICK_TURNOFF );                               /* Get methods of device */
+
+    if ( methods | TELLSTICK_TURNOFF )
+     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Stopping", num );
+       tdTurnOff ( num );
+     }
+
+    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Stoppping device = %d\n", num );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/

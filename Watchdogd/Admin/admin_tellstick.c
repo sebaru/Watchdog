@@ -42,21 +42,28 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Partage->com_tellstick.Admin_tellstick_learn(client, num);
-     } else if ( (! strcmp ( commande, "list" )) && Partage->com_tellstick.Admin_tellstick_list )
-     { Partage->com_tellstick.Admin_tellstick_list(client);
-     } else if ( ! strcmp ( commande, "help" ) )
+     }
+    else if ( (!strcmp ( commande, "start" )) && Partage->com_tellstick.Admin_tellstick_start )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Partage->com_tellstick.Admin_tellstick_start(client, num);
+     }
+    else if ( (!strcmp ( commande, "stop" )) && Partage->com_tellstick.Admin_tellstick_stop )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Partage->com_tellstick.Admin_tellstick_stop(client, num);
+     }
+    else if ( (! strcmp ( commande, "list" )) && Partage->com_tellstick.Admin_tellstick_list )
+     { Partage->com_tellstick.Admin_tellstick_list(client); }
+    else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'TELLSTICK'\n" );
        Write_admin ( client->connexion,
                      "  learn id             - Envoie une commande LEARN au device\n" );
        Write_admin ( client->connexion,
-                     "  **********           - Stop all thread\n" );
+                     "  stop id              - Stop module id\n" );
        Write_admin ( client->connexion,
-                     "  ************         - Reload configuration\n" );
-       Write_admin ( client->connexion,
-                     "  ***************      - Restart all tellstickes\n" );
-       Write_admin ( client->connexion,
-                     "  ************         - Restart all tellstickes with no DATA import/export\n" );
+                     "  start id             - Start module id\n" );
        Write_admin ( client->connexion,
                      "  list                 - list all devices\n" );
      }

@@ -186,7 +186,7 @@
 /* Entrée: l'id du fils                                                                                   */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- static gboolean Demarrer_sous_serveur ( int id )
+ gboolean Demarrer_sous_serveur ( int id )
   { static int nbr_thread = 0;
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
     if (Partage->Sous_serveur[id].Thread_run == TRUE)
@@ -289,6 +289,22 @@
     Partage->com_tellstick.Admin_tellstick_learn = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_learn" );
     if (!Partage->com_tellstick.Admin_tellstick_learn)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_learn does not exist") );
+       dlclose( Partage->com_tellstick.dl_handle );
+       Partage->com_tellstick.dl_handle = NULL;
+       return(FALSE);
+     }
+
+    Partage->com_tellstick.Admin_tellstick_start = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_start" );
+    if (!Partage->com_tellstick.Admin_tellstick_start)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_start does not exist") );
+       dlclose( Partage->com_tellstick.dl_handle );
+       Partage->com_tellstick.dl_handle = NULL;
+       return(FALSE);
+     }
+
+    Partage->com_tellstick.Admin_tellstick_stop = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_stop" );
+    if (!Partage->com_tellstick.Admin_tellstick_stop)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_stop does not exist") );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
@@ -522,7 +538,7 @@
      { i = Rechercher_serveur_inactif();                           /* A la recherche d'un serveur inactif */
        if (i!=-1)                                             /* Si c'est le cas, on lui assigne le jeton */
         { Partage->jeton = i;
-          Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: serveur sans client trouvé") );
+          Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: serveur sans client trouve") );
         }
        else                  /* Tous nos serveurs sont utilisés, il faut donc soit créer un autre serveur */
         {                                            /* soit donner la connexion à un serveur deja occupé */

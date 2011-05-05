@@ -187,6 +187,7 @@
  extern gboolean Demarrer_motion_detect ( void );
  extern gboolean Demarrer_tellstick ( void );
  extern gboolean Demarrer_lirc ( void );
+ extern gboolean Demarrer_sous_serveur ( int id );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

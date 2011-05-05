@@ -40,7 +40,8 @@
 
     if ( ! strcmp ( commande, "start" ) )
      { gchar thread[128], chaine[128];
-       sscanf ( ligne, "%s %s", commande, thread );
+       guint num;
+       sscanf ( ligne, "%s %s %d", commande, thread, &num );
 
        g_snprintf( chaine, sizeof(chaine), " Starting %s\n", thread );
        Write_admin ( client->connexion, chaine );
@@ -80,6 +81,10 @@
        if ( ! strcmp ( thread, "lirc" ) )
         { if (!Demarrer_lirc())                                                         /* Démarrage LIRC */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb LIRC -> Arret" ); }
+        }  else
+       if ( ! strcmp ( thread, "ssrv" ) )
+        { if (!Demarrer_sous_serveur(num))                                         /* Démarrage d'un SSRV */
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SSRV -> Arret" ); }
         } 
 
      } else
@@ -192,9 +197,9 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick)\n" );
+                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv)\n" );
        Write_admin ( client->connexion,
-                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick)\n" );
+                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv)\n" );
        Write_admin ( client->connexion,
                      "  list                 - Liste les statut des threads\n" );
        Write_admin ( client->connexion,
