@@ -211,9 +211,7 @@
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
     while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
-     { Gerer_jeton();                                          /* Don du jeton au serveur le moins chargé */
-
-       Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
+     { Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
@@ -275,6 +273,7 @@
 
        if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
         { Camera_check_motion( Config.log, db );
+          Gerer_jeton();                                       /* Don du jeton au serveur le moins chargé */
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
 

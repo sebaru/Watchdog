@@ -187,8 +187,7 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_sous_serveur ( int id )
-  { static int nbr_thread = 0;
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
+  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
     if (Partage->Sous_serveur[id].Thread_run == TRUE)
      { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: An instance is already running"),
                Partage->Sous_serveur[id].pid );
@@ -198,8 +197,8 @@
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: pthread_create failed"), strerror(errno) );
        return(FALSE);
      }
-    else nbr_thread++;
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: nbr_thread"), nbr_thread );
+    else pthread_detach( Partage->Sous_serveur[id].pid );            /* On détache le thread Sous-Serveur */
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur"), id );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -601,10 +600,9 @@
      { if (Partage->Sous_serveur[i].Thread_run == TRUE)                    /* Attente de la fin du fils i */
         { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SSRV pid to finish"),
                                           Partage->Sous_serveur[i].pid );
-          Partage->Sous_serveur[i].Thread_run = FALSE;
-          pthread_join( Partage->Sous_serveur[i].pid, NULL );
-          Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SSRV pid down"),
-                                          Partage->Sous_serveur[i].pid );
+          Partage->Sous_serveur[i].Thread_run = FALSE;             /* Attention, les thread sont detach ! */
+          while (Partage->Sous_serveur[i].pid) sched_yield();
+          Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SSRV down id "), i );
         }
      }
 
