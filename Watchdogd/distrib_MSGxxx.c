@@ -144,17 +144,19 @@
   { guint i;
 
     for (i=0; i<Config.max_serveur; i++)                         /* Pour tous les eventuels fils serveurs */
-     { if (Partage->Sous_serveur[i].pid == -1 || 
+     { if (Partage->Sous_serveur[i].Thread_run == FALSE || 
            Partage->Sous_serveur[i].nb_client == 0)
            continue;                                                               /* Si offline, on swap */
        Partage->Sous_serveur[i].type_info = type;
      }
     for (i=0; i<Config.max_serveur; i++)                              /* Attente traitement info par fils */
-     { if (Partage->Sous_serveur[i].pid == -1 || 
+     { if (Partage->Sous_serveur[i].Thread_run == FALSE || 
            Partage->Sous_serveur[i].nb_client == 0)
            continue;                                                               /* Si offline, on swap */
        while(Partage->com_msrv.Thread_run == TRUE &&
-             Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE) sched_yield();
+             Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE &&
+             Partage->Sous_serveur[i].Thread_run == TRUE)
+        { sched_yield(); }
      }
   }
 /**********************************************************************************************************/

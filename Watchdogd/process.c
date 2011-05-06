@@ -581,12 +581,12 @@
      { if (Partage->Sous_serveur[i].Thread_run == TRUE) nbr_ssrv++;
      }
 
-    while (nbr_ssrv < Config.min_serveur)                     /* Si nous avons trop peu de serveur online */
-     { i = Rechercher_empl_libre();
-       if (i==-1) break;
-       Info_n( Config.log, DEBUG_INFO, _("MSRV: Gerer_manque_process: Too few servers, we create a new one"), i );
-       if (!Demarrer_sous_serveur(i)) break;
-       nbr_ssrv++;
+    if (nbr_ssrv >= Config.min_serveur) return;               /* Si nous avons trop peu de serveur online */
+
+    i = Rechercher_empl_libre();
+    if (i!=-1)
+     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Gerer_manque_process: Too few servers, we create a new one"), i );
+       Demarrer_sous_serveur(i);
      }
   }
 /**********************************************************************************************************/

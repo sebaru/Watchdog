@@ -107,7 +107,7 @@
        gint i;
         
        for (i=0; i<Config.max_serveur; i++)
-         { if (Partage->Sous_serveur[i].pid == -1) continue;
+         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
 
            pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
            liste = Partage->Sous_serveur[i].Clients;
@@ -278,7 +278,7 @@
        gint i;
 
        for (i=0; i<Config.max_serveur; i++)
-         { if (Partage->Sous_serveur[i].pid == -1) continue;
+         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
            liste = Partage->Sous_serveur[i].Clients;
            while(liste)                                               /* Parcours de la liste des clients */
             { struct CMD_GTK_MESSAGE erreur;
