@@ -537,23 +537,42 @@
         { Info( Config.log, DEBUG_SERVEUR, "Inactivity time reached" );
           Partage->Sous_serveur[id].Thread_run = FALSE;                       /* Arret "Local" du process */
         }
-/****************************************** Ecoute des paroles du superviseur *****************************/
+/****************************************** Ecoute des messages histo  ************************************/
+       if (Partage->Sous_serveur[id].new_histo)
+        { struct CMD_TYPE_HISTO *histo;
+/* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
+          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].new_histo->data;
+          pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
+          Partage->Sous_serveur[id].new_histo = g_list_remove ( Partage->Sous_serveur[id].new_histo, histo );
+          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
+       
+          Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
+                         (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
+          g_free(histo);
+        }
+
+       if (Partage->Sous_serveur[id].del_histo)
+        { struct CMD_TYPE_HISTO *histo;
+/* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
+          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].del_histo->data;
+          pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
+          Partage->Sous_serveur[id].del_histo = g_list_remove ( Partage->Sous_serveur[id].del_histo, histo );
+          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
+       
+          Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
+                         (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
+          g_free(histo);
+        }
+
        if (Partage->Sous_serveur[id].type_info != TYPE_INFO_VIDE)
         { GList *liste_clients;
           struct CLIENT *client;
 /* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
-          Info( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: type_info != vide" );
+          Info( Config.log, DEBUG_INFO, "SSRV: Run_serveur: type_info != vide" );
        
+
           switch( Partage->Sous_serveur[id].type_info )
-           { case TYPE_INFO_NEW_HISTO:
-                  Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                                (gchar *)&Partage->new_histo, sizeof(struct CMD_TYPE_HISTO) );
-                  break;
-             case TYPE_INFO_DEL_HISTO:
-                  Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                                (gchar *)&Partage->del_histo, sizeof(struct CMD_TYPE_HISTO) );
-                  break;
-             case TYPE_INFO_NEW_MOTIF:
+           { case TYPE_INFO_NEW_MOTIF:
                   liste_clients = Partage->Sous_serveur[id].Clients;
                   while (liste_clients)
                    { client = (struct CLIENT *)liste_clients->data;

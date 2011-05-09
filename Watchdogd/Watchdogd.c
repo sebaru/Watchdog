@@ -498,8 +498,6 @@
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 
-       memset( &Partage->new_histo,    0, sizeof(Partage->new_histo) );
-       memset( &Partage->del_histo,    0, sizeof(Partage->del_histo) );
        memset( &Partage->com_msrv,     0, sizeof(Partage->com_msrv) );
        memset( &Partage->com_rs485,    0, sizeof(Partage->com_rs485) );
        memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );

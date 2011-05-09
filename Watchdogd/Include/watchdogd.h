@@ -76,8 +76,6 @@
 
  enum
   { TYPE_INFO_VIDE,                                                     /* Le fils a traité l'information */ 
-    TYPE_INFO_NEW_HISTO,                                   /* Le fils doit traiter un nouveau message DLS */
-    TYPE_INFO_DEL_HISTO,                                       /* Le fils doit traiter un message DLS OFF */
     TYPE_INFO_NEW_MOTIF                                         /* Le fils doit traiter un evenement Ixxx */
   };
 
@@ -158,8 +156,6 @@
     struct TEMPO Tempo_R[NBR_TEMPO];
 
                                                                    /* Interfacage serveur -> sous-serveur */
-    struct CMD_TYPE_HISTO    new_histo;                                   /* Envoi d'un histo aux clients */
-    struct CMD_TYPE_HISTO    del_histo;                                  /* Destruction d'un histo client */
     struct CMD_ETAT_BIT_CTRL new_motif;                                        /* Changement d'etat motif */
 
     struct SOUS_SERVEUR *Sous_serveur;
