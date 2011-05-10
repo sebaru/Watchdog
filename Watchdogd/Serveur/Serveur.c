@@ -570,7 +570,7 @@
           struct CMD_ETAT_BIT_CTRL *motif;
 
           pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
-          motif = (struct CMD_ETAT_BIT_CTRL *) Partage->Sous_serveur[id].del_histo->data;
+          motif = (struct CMD_ETAT_BIT_CTRL *) Partage->Sous_serveur[id].new_motif->data;
           Partage->Sous_serveur[id].new_motif = g_list_remove ( Partage->Sous_serveur[id].new_motif, motif );
           pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
 
