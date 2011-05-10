@@ -532,7 +532,6 @@
           Partage->Sous_serveur[i].Thread_reload = FALSE;
           Partage->Sous_serveur[i].pid = -1;
           Partage->Sous_serveur[i].nb_client = -1;
-          Partage->Sous_serveur[i].type_info = TYPE_INFO_VIDE;                    /* Pas d'info à traiter */
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
 

@@ -74,11 +74,6 @@
  #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
  #define FICHIER_EXPORT              "export.wdg"
 
- enum
-  { TYPE_INFO_VIDE,                                                     /* Le fils a traité l'information */ 
-    TYPE_INFO_NEW_MOTIF                                         /* Le fils doit traiter un evenement Ixxx */
-  };
-
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
@@ -154,9 +149,6 @@
     struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                               /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                           /* DLS=rw, Sserveur=r */
     struct TEMPO Tempo_R[NBR_TEMPO];
-
-                                                                   /* Interfacage serveur -> sous-serveur */
-    struct CMD_ETAT_BIT_CTRL new_motif;                                        /* Changement d'etat motif */
 
     struct SOUS_SERVEUR *Sous_serveur;
     struct SOUS_SERVEUR ss_serveur;                                            /* !! Tableau dynamique !! */

@@ -540,9 +540,9 @@
 /****************************************** Ecoute des messages histo  ************************************/
        if (Partage->Sous_serveur[id].new_histo)
         { struct CMD_TYPE_HISTO *histo;
-/* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
-          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].new_histo->data;
+
           pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
+          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].new_histo->data;
           Partage->Sous_serveur[id].new_histo = g_list_remove ( Partage->Sous_serveur[id].new_histo, histo );
           pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
        
@@ -553,9 +553,9 @@
 
        if (Partage->Sous_serveur[id].del_histo)
         { struct CMD_TYPE_HISTO *histo;
-/* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
-          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].del_histo->data;
+
           pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
+          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].del_histo->data;
           Partage->Sous_serveur[id].del_histo = g_list_remove ( Partage->Sous_serveur[id].del_histo, histo );
           pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
        
@@ -564,29 +564,27 @@
           g_free(histo);
         }
 
-       if (Partage->Sous_serveur[id].type_info != TYPE_INFO_VIDE)
+       if (Partage->Sous_serveur[id].new_motif)
         { GList *liste_clients;
           struct CLIENT *client;
-/* Faire le tri selon que le client est autorisé ou non à recevoir l'information !!!! */
-          Info( Config.log, DEBUG_INFO, "SSRV: Run_serveur: type_info != vide" );
-       
+          struct CMD_ETAT_BIT_CTRL *motif;
 
-          switch( Partage->Sous_serveur[id].type_info )
-           { case TYPE_INFO_NEW_MOTIF:
-                  liste_clients = Partage->Sous_serveur[id].Clients;
-                  while (liste_clients)
-                   { client = (struct CLIENT *)liste_clients->data;
-                     if ( g_list_find( client->bit_syns, GINT_TO_POINTER(Partage->new_motif.num) ) )
-                      { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                                      (gchar *)&Partage->new_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
-                      }
-                     liste_clients = liste_clients->next;
-                   }
-                  break;
+          pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
+          motif = (struct CMD_ETAT_BIT_CTRL *) Partage->Sous_serveur[id].del_histo->data;
+          Partage->Sous_serveur[id].new_motif = g_list_remove ( Partage->Sous_serveur[id].new_motif, motif );
+          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
+
+          liste_clients = Partage->Sous_serveur[id].Clients;
+          while (liste_clients)
+           { client = (struct CLIENT *)liste_clients->data;
+             if ( g_list_find( client->bit_syns, GINT_TO_POINTER(motif->num) ) )
+              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                              (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
+              }
+             liste_clients = liste_clients->next;
            }
-          Info( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: type_info traité" );
-          Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                    /* Information traitée */
-        } 
+          g_free(motif);
+        }
 
        usleep(1000); sched_yield();                                /* On ne sature pas le microprocesseur */
      }
@@ -605,7 +603,6 @@
     g_list_free(Partage->Sous_serveur[id].Clients);
 
     Partage->Sous_serveur[id].nb_client = -1;
-    Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                          /* Information traitée */
     Partage->Sous_serveur[id].Clients   = NULL;
     Partage->Sous_serveur[id].pid       = 0;
     if (Partage->Sous_serveur[id].new_histo)
@@ -617,6 +614,11 @@
      { g_list_foreach( Partage->Sous_serveur[id].del_histo, (GFunc) g_free, NULL );
        g_list_free ( Partage->Sous_serveur[id].del_histo );
        Partage->Sous_serveur[id].del_histo = NULL;
+     }
+    if (Partage->Sous_serveur[id].new_motif)
+     { g_list_foreach( Partage->Sous_serveur[id].new_motif, (GFunc) g_free, NULL );
+       g_list_free ( Partage->Sous_serveur[id].new_motif );
+       Partage->Sous_serveur[id].new_motif = NULL;
      }
     Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: Down", id );
     pthread_exit( NULL );

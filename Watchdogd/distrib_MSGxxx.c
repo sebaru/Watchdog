@@ -193,8 +193,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog )
-  { struct CMD_TYPE_HISTO *histo;
-    gint num;
+  { gint num;
 
     if (Partage->com_msrv.liste_msg_off)                        /* Priorité à la disparition des messages */
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */

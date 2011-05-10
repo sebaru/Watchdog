@@ -39,12 +39,13 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
-  { gint i, num;
+  { struct CMD_ETAT_BIT_CTRL *new_motif;
+    gint num;
 
-    if (!Partage->com_msrv.liste_i) return;                               /* Si pas de i, on se barre */
+    if (!Partage->com_msrv.liste_i) return;                                   /* Si pas de i, on se barre */
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de msg a traiter */
-    num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);            /* Recuperation du numero de i */
+    pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
+    num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);                /* Recuperation du numero de i */
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls: Reste a traiter",
                                    g_list_length(Partage->com_msrv.liste_i) );
     Partage->com_msrv.liste_i = g_list_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
@@ -54,27 +55,37 @@
     Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls:       mode", Partage->i[num].etat );
 
 /***************************** Création de la structure passée aux clients ********************************/
-    Partage->new_motif.num    = num;
-    Partage->new_motif.etat   = Partage->i[num].etat;
-    Partage->new_motif.rouge  = Partage->i[num].rouge;
-    Partage->new_motif.vert   = Partage->i[num].vert;
-    Partage->new_motif.bleu   = Partage->i[num].bleu;
-    Partage->new_motif.cligno = Partage->i[num].cligno;
+    new_motif = (struct CMD_ETAT_BIT_CTRL *) g_malloc0( sizeof(struct CMD_ETAT_BIT_CTRL) );
+    if (new_motif)
+     { guint i;
 
-    for (i=0; i<Config.max_serveur; i++)                         /* Pour tous les eventuels fils serveurs */
-     { if (Partage->Sous_serveur[i].Thread_run == FALSE || 
-           Partage->Sous_serveur[i].nb_client == 0)
-           continue;                                                               /* Si offline, on swap */
-       Partage->Sous_serveur[i].type_info = TYPE_INFO_NEW_MOTIF;
+       new_motif->num    = num;
+       new_motif->etat   = Partage->i[num].etat;
+       new_motif->rouge  = Partage->i[num].rouge;
+       new_motif->vert   = Partage->i[num].vert;
+       new_motif->bleu   = Partage->i[num].bleu;
+       new_motif->cligno = Partage->i[num].cligno;
+
+       for (i=0; i<Config.max_serveur; i++)
+        { struct CMD_ETAT_BIT_CTRL *motif_ssrv;
+          if (Partage->Sous_serveur[i].Thread_run == TRUE)
+           { motif_ssrv = (struct CMD_ETAT_BIT_CTRL *)g_malloc0( sizeof( struct CMD_ETAT_BIT_CTRL ) );
+             if (motif_ssrv)
+              { memcpy ( motif_ssrv, new_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );            /* Recopie */
+                pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+                Partage->Sous_serveur[i].new_motif = g_list_append ( Partage->Sous_serveur[i].new_motif,
+                                                                     motif_ssrv );
+                pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+              }
+             else
+              { Info( Config.log, DEBUG_INFO, "MSRV: Gerer_arrive_Ixxx_dls: not enough memory" ); }
+           }
+        }
+       g_free (new_motif);
      }
-    for (i=0; i<Config.max_serveur; i++)                              /* Attente traitement info par fils */
-     { if (Partage->Sous_serveur[i].Thread_run == FALSE || 
-           Partage->Sous_serveur[i].nb_client == 0)
-           continue;                                                               /* Si offline, on swap */
-       while(Partage->com_msrv.Thread_run == TRUE &&
-             Partage->Sous_serveur[i].type_info != TYPE_INFO_VIDE &&
-             Partage->Sous_serveur[i].Thread_run == TRUE)
-        { sched_yield(); }
+    else
+     { Info_n( Config.log, DEBUG_INFO,
+               "MSRV: Gerer_arrive_Ixxx_dls: Probleme d'allocation mémoire", num );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
