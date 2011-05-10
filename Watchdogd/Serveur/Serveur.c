@@ -591,6 +591,11 @@
        usleep(1000); sched_yield();                                /* On ne sature pas le microprocesseur */
      }
 /********************************************* Arret du serveur *******************************************/
+    if (Partage->jeton == id)
+     { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
+       Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: jeton rendu", id );
+     }
+
     while(Partage->Sous_serveur[id].Clients)                          /* Parcours de la liste des clients */
      { struct CLIENT *client;                                         /* Deconnection de tous les clients */
        client = (struct CLIENT *)Partage->Sous_serveur[id].Clients->data;
@@ -603,9 +608,15 @@
     Partage->Sous_serveur[id].type_info = TYPE_INFO_VIDE;                          /* Information traitée */
     Partage->Sous_serveur[id].Clients   = NULL;
     Partage->Sous_serveur[id].pid       = 0;
-    if (Partage->jeton == id)
-     { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
-       Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: jeton rendu", id );
+    if (Partage->Sous_serveur[id].new_histo)
+     { g_list_foreach( Partage->Sous_serveur[id].new_histo, (GFunc) g_free, NULL );
+       g_list_free ( Partage->Sous_serveur[id].new_histo );
+       Partage->Sous_serveur[id].new_histo = NULL;
+     }
+    if (Partage->Sous_serveur[id].del_histo)
+     { g_list_foreach( Partage->Sous_serveur[id].del_histo, (GFunc) g_free, NULL );
+       g_list_free ( Partage->Sous_serveur[id].del_histo );
+       Partage->Sous_serveur[id].del_histo = NULL;
      }
     Info_n( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: Down", id );
     pthread_exit( NULL );

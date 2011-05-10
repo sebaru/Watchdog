@@ -64,7 +64,7 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static struct CMD_TYPE_HISTO *Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
+ static void Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
   { struct CMD_TYPE_HISTO *new_histo;
     struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
@@ -73,12 +73,12 @@
     if (!msg)
      { Info_n( Config.log, DEBUG_INFO,
                "MSRV: Gerer_arrive_message_dls_on: Message non trouvé", num );
-       return(NULL);                                  /* On n'a pas trouvé le message, alors on s'en va ! */
+       return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     else if (!msg->enable)                               /* Distribution du message aux sous serveurs */
      { Info_n( Config.log, DEBUG_INFO,
                "MSRV: Gerer_arrive_message_dls_on: Message inhibe", num );
-       return(NULL);
+       return;
      }
 
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
@@ -95,6 +95,7 @@
     new_histo = (struct CMD_TYPE_HISTO *) g_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (new_histo)
      { struct timeval tv;
+       guint i;
        gettimeofday( &tv, NULL );
        new_histo->date_create_sec  = tv.tv_sec;
        new_histo->date_create_usec = tv.tv_usec;
@@ -104,30 +105,47 @@
        memcpy( &new_histo->libelle, msg->libelle, sizeof(msg->libelle) );
        memcpy( &new_histo->objet,   msg->objet,   sizeof(msg->objet  ) );
 
-       memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
+       for (i=0; i<Config.max_serveur; i++)
+        { struct CMD_TYPE_HISTO *histo_ssrv;
+          if (Partage->Sous_serveur[i].Thread_run == TRUE)
+           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
+             if (histo_ssrv)
+              { memcpy ( histo_ssrv, new_histo, sizeof(struct CMD_TYPE_HISTO) );               /* Recopie */
+                pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+                Partage->Sous_serveur[i].new_histo = g_list_append ( Partage->Sous_serveur[i].new_histo,
+                                                                     histo_ssrv );
+                pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+              }
+             else
+              { Info( Config.log, DEBUG_INFO, "MSRV: Gerer_arrive_message_dls_on: not enough memory" ); }
+           }
+        }
+
+       memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );                    /* Ajout dans la DB */
        memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
        histo.date_create_sec  = new_histo->date_create_sec;
        histo.date_create_usec = new_histo->date_create_usec;
        histo.date_fixe = 0;
 
        Ajouter_histoDB( Config.log, Db_watchdog, &histo );                         /* Si ajout dans DB OK */
+       g_free (new_histo);
      }
     else
      { Info_n( Config.log, DEBUG_INFO,
                "MSRV: Gerer_arrive_message_dls_on: Probleme d'allocation mémoire", num );
      }
     g_free( msg );                                                 /* On a plus besoin de cette reference */
-    return(new_histo);
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static struct CMD_TYPE_HISTO *Gerer_arrive_MSGxxx_dls_off ( struct DB *Db_watchdog, gint num )
+ static void Gerer_arrive_MSGxxx_dls_off ( struct DB *Db_watchdog, gint num )
   { /* Le virer de la base histoDB */
     struct CMD_TYPE_HISTO *del_histo;
     struct HISTO_HARDDB histo_hard;
     struct HISTODB *histo;
+    guint i;
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Retrait de la liste des messages en REPEAT */
     Partage->com_msrv.liste_msg_repeat = g_list_remove ( Partage->com_msrv.liste_msg_repeat,
@@ -135,7 +153,7 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     histo = Rechercher_histoDB( Config.log, Db_watchdog, num );
-    if (!histo) return(NULL);
+    if (!histo) return;
 
     memcpy( &histo_hard, histo, sizeof(struct HISTODB) );
     time ( &histo_hard.date_fin );
@@ -145,31 +163,29 @@
     del_histo = (struct CMD_TYPE_HISTO *) g_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (del_histo)
      { del_histo->id = num;
+
+       for (i=0; i<Config.max_serveur; i++)
+        { struct CMD_TYPE_HISTO *histo_ssrv;
+          if (Partage->Sous_serveur[i].Thread_run == TRUE)
+           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
+             if (histo_ssrv)
+              { memcpy ( histo_ssrv, del_histo, sizeof(struct CMD_TYPE_HISTO) );               /* Recopie */
+                pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+                Partage->Sous_serveur[i].del_histo = g_list_append ( Partage->Sous_serveur[i].del_histo,
+                                                                     histo_ssrv );
+                pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+              }
+             else
+              { Info( Config.log, DEBUG_INFO, "MSRV: Gerer_arrive_message_dls_off: not enough memory" ); }
+           }
+        }
+
        Retirer_histoDB( Config.log, Db_watchdog, del_histo );
+       g_free (del_histo);
      }
     else
      { Info_n( Config.log, DEBUG_INFO,
                "MSRV: Gerer_arrive_message_dls_off: Probleme d'allocation mémoire", num );
-     }
-    return(del_histo);
-  }
-
-/**********************************************************************************************************/
-/* Envoi_demande_traitement : Demande aux ssrv de traiter la requete                                      */
-/* Entrée : Le type de traitement (ajout ou suppression)                                                  */
-/* Sortie : rien                                                                                          */
-/**********************************************************************************************************/
- static void Envoi_demande_traitement ( gboolean ajout, struct CMD_TYPE_HISTO *histo )
-  { guint i;
-
-    for (i=0; i<Config.max_serveur; i++)                         /* Pour tous les eventuels fils serveurs */
-     { if (Partage->Sous_serveur[i].Thread_run == TRUE && 
-           Partage->Sous_serveur[i].nb_client > 0)
-        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-          if (ajout) Partage->Sous_serveur[i].new_histo = g_list_append ( Partage->Sous_serveur[i].new_histo, histo );
-                else Partage->Sous_serveur[i].del_histo = g_list_append ( Partage->Sous_serveur[i].del_histo, histo );
-          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-        }
      }
   }
 /**********************************************************************************************************/
@@ -189,10 +205,7 @@
                                       g_list_length(Partage->com_msrv.liste_msg_off) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Disparition msg", num );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       histo = Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
-       if (histo) { Envoi_demande_traitement( FALSE, histo );
-                    g_free(histo);
-                  }
+       Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
      }
     else if (Partage->com_msrv.liste_msg_on)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
@@ -203,10 +216,7 @@
                                       g_list_length(Partage->com_msrv.liste_msg_on) );
        Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Apparition msg", num );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       histo = Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
-       if (histo) { Envoi_demande_traitement( TRUE, histo );
-                    g_free(histo);
-                  }
+       Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
