@@ -273,6 +273,7 @@
 
        if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
         { Camera_check_motion( Config.log, db );
+          Asterisk_check_call( Config.log, db );
           Gerer_jeton();                                       /* Don du jeton au serveur le moins chargé */
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }

@@ -47,6 +47,7 @@
  #include "Lirc.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
+ #include "Asterisk_DB.h"
  #include "Camera_DB.h"
  #include "Sms.h"
  #include "Dls.h"

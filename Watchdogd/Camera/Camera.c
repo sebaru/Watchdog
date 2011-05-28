@@ -34,8 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Camera_DB.h"
 
 /**********************************************************************************************************/
 /* Retirer_cameraDB: Elimination d'un camera                                                              */

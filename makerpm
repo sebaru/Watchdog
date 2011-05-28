@@ -8,5 +8,5 @@ make dist-gzip
 mv Watchdog*.tar.gz /mnt/Satis-storage/Partage/Distributions/Watchdog/SOURCES/
 VERSION=`svnversion -n`
 sed s/latest/2.6.$VERSION/g Watchdog.rpm.spec > /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
-rpmbuild --buildroot /mnt/Satis-storage/Partage/Distributions/Watchdog/BUILDROOT -ba /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
+rpmbuild --clean --rmsource --buildroot /mnt/Satis-storage/Partage/Distributions/Watchdog/BUILDROOT -bb /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
 genhdlist2 /mnt/Satis-storage/Partage/Distributions/Watchdog/RPMS/i586

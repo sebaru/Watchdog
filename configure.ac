@@ -141,6 +141,7 @@ Watchdogd/Message/Makefile \
 Watchdogd/Mnemonique/Makefile \
 Watchdogd/Scenario/Makefile \
 Watchdogd/Camera/Makefile \
+Watchdogd/Asterisk/Makefile \
 Watchdogd/Icones/Makefile \
 Watchdogd/Histo/Makefile \
 Watchdogd/Utilisateur/Makefile \

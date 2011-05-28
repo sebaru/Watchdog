@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           Compteur EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
-	  Synoptiques Camera Onduleur Tellstick Lirc
+	  Synoptiques Camera Onduleur Tellstick Lirc Asterisk
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -35,6 +35,7 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Synoptiques/libsyn.la \
 		    Camera/libcamera.la \
 		    Onduleur/libonduleur.la \
+		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 Watchdogd_LDFLAGS = -lssl -lpopt $(GLIB_LIBS) $(BONOBO_LIBS) $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS)

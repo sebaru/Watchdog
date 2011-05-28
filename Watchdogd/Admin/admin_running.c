@@ -416,7 +416,9 @@
        if ( ! strcmp ( debug, "tellstick" ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_TELLSTICK ); } else
        if ( ! strcmp ( debug, "lirc"      ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_LIRC      ); }
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_LIRC      ); } else
+       if ( ! strcmp ( debug, "asterisk"  ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ASTERISK  ); }
        else
         { g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch\n" );
           Write_admin ( client->connexion, chaine );
