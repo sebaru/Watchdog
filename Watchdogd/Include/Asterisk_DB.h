@@ -31,7 +31,7 @@
  #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_ASTERISK              "asterisks"
+ #define NOM_TABLE_ASTERISK              "from_asterisk"
 
 /******************************************** Gestion des camera ******************************************/
  struct CMD_TYPE_ASTERISK
