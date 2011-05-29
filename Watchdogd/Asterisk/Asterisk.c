@@ -98,7 +98,7 @@
     gint id;
 
     if ( ! Recuperer_asteriskDB ( log, db ) ) return;             /* On récupère UN seul enregistrement ! */
-
+    id = 0;
     while ( (asterisk = Recuperer_asteriskDB_suite ( log, db )) != NULL )
      {
        Info_c( log, DEBUG_ASTERISK, "Asterisk_check_call:          Call from", asterisk->calleridname );
@@ -113,6 +113,6 @@
        id = asterisk->id;
        g_free(asterisk);
      }
-    Retirer_asteriskDB( log, db, id );
+    if (id) Retirer_asteriskDB( log, db, id );
   }
 /*--------------------------------------------------------------------------------------------------------*/
