@@ -42,9 +42,6 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern gboolean Retirer_asteriskDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ASTERISK *asterisk );
- extern gboolean Recuperer_asteriskDB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_ASTERISK *Recuperer_asteriskDB_suite( struct LOG *log, struct DB *db );
  extern void Asterisk_check_call ( struct LOG *log, struct DB *db );
 
 #endif

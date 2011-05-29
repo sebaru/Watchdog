@@ -73,6 +73,8 @@
     gint tellstick_a_max;                           /* Numéro de la sortie maximum gérée par le tellstick */
     gint sms_m_min;                               /* Numéro du monostable minimum gérée par le thread sms */
     gint sms_m_max;                               /* Numéro du monostable maximum gérée par le thread SMS */
+    gint asterisk_m_min;                     /* Numéro du monostable minimum gérée par le thread ASTERISK */
+    gint asterisk_m_max;                     /* Numéro du monostable maximum gérée par le thread ASTERISK */
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
@@ -103,6 +105,8 @@
  #define DEFAUT_SMS_M_MAX               -1
  #define DEFAUT_TELLSTICK_A_MIN         -1
  #define DEFAUT_TELLSTICK_A_MAX         -1
+ #define DEFAUT_ASTERISK_M_MIN          -1
+ #define DEFAUT_ASTERISK_M_MAX          -1
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );

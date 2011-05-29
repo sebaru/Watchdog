@@ -165,6 +165,13 @@
        Config.tellstick_a_max    = g_key_file_get_integer ( gkf, "TELLSTICK", "max_a", NULL );
        if (!Config.tellstick_a_max) Config.tellstick_a_max = DEFAUT_TELLSTICK_A_MAX;
 
+/********************************************** Partie ASTERISK *******************************************/
+       Config.asterisk_m_min    = g_key_file_get_integer ( gkf, "ASTERISK", "min_m", NULL );
+       if (!Config.asterisk_m_min) Config.asterisk_m_min = DEFAUT_ASTERISK_M_MIN;
+
+       Config.asterisk_m_max    = g_key_file_get_integer ( gkf, "ASTERISK", "max_m", NULL );
+       if (!Config.asterisk_m_max) Config.asterisk_m_max = DEFAUT_ASTERISK_M_MAX;
+
 /********************************************* Partie DEBUG ***********************************************/
        Config.debug_level = 0;
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SIGNAUX", NULL );

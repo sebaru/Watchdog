@@ -40,11 +40,11 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_asteriskDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ASTERISK *asterisk )
+ static gboolean Retirer_asteriskDB ( struct LOG *log, struct DB *db, gint id )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_ASTERISK, asterisk->id );
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_ASTERISK, id );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -53,12 +53,12 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_asteriskDB ( struct LOG *log, struct DB *db )
+ static gboolean Recuperer_asteriskDB ( struct LOG *log, struct DB *db )
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,calleridnum,calleridname,bit"
-                " FROM %s ORDER BY id",
+                " FROM %s ORDER BY id LIMIT 1",
                 NOM_TABLE_ASTERISK                                                                /* FROM */
               );
 
@@ -69,7 +69,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_ASTERISK *Recuperer_asteriskDB_suite( struct LOG *log, struct DB *db )
+ static struct CMD_TYPE_ASTERISK *Recuperer_asteriskDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_ASTERISK *asterisk;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -95,17 +95,24 @@
 /**********************************************************************************************************/
  void Asterisk_check_call ( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_ASTERISK *asterisk;
+    gint id;
 
-    if ( ! Recuperer_asteriskDB ( log, db ) ) return;
+    if ( ! Recuperer_asteriskDB ( log, db ) ) return;             /* On récupère UN seul enregistrement ! */
 
     while ( (asterisk = Recuperer_asteriskDB_suite ( log, db )) != NULL )
      {
        Info_c( log, DEBUG_ASTERISK, "Asterisk_check_call:          Call from", asterisk->calleridname );
        Info_c( log, DEBUG_ASTERISK, "Asterisk_check_call:                Num", asterisk->calleridnum );
-       Info_n( log, DEBUG_ASTERISK, "Asterisk_check_call: Mise a un du bit M", asterisk->bit );
-       Envoyer_commande_dls ( asterisk->bit ); 
-       Retirer_asteriskDB( log, db, asterisk );
+       if ( Config.asterisk_m_min <= asterisk->bit &&
+                                     asterisk->bit <= Config.asterisk_m_max )
+        { Info_n( log, DEBUG_ASTERISK, "Asterisk_check_call: Mise a un du bit M", asterisk->bit );
+          Envoyer_commande_dls ( asterisk->bit );
+        }
+       else
+        { Info_n( log, DEBUG_ASTERISK, "Asterisk_check_call: Numero de bit hors range", asterisk->bit ); }
+       id = asterisk->id;
        g_free(asterisk);
      }
+    Retirer_asteriskDB( log, db, id );
   }
 /*--------------------------------------------------------------------------------------------------------*/
