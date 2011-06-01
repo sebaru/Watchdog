@@ -56,7 +56,9 @@
     pthread_mutex_unlock( &Partage->com_audio.synchro );
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du RS485                                                                     */
+/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                           */
+/* Entrée : le nom du fichier wav                                                                         */
+/* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Jouer_wav ( gchar *fichier )
   { gint pid;
@@ -73,6 +75,98 @@
     Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: waiting for APLAY to finish pid", pid );
     wait4(pid, NULL, 0, NULL );
     Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: APLAY finished pid", pid );
+  }
+/**********************************************************************************************************/
+/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                       */
+/* Entrée : le message à jouer                                                                            */
+/* Sortie : True si OK, False sinon                                                                       */
+/**********************************************************************************************************/
+ static gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg )
+  { gchar nom_fichier[128];
+    gint fd_cible, pid;
+
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.mp3", msg->num );
+    fd_cible = open ( nom_fichier, O_RDONLY, 0 );
+    if (fd_cible < 0) return(FALSE);
+
+    Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Envoi d'un mp3", nom_fichier );
+    pid = fork();
+    if (pid<0)
+     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Lancement MPG123 failed (fork)", pid ); }
+    else if (!pid)
+     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Lancement MPG123 failed (exec)", pid );
+       _exit(0);
+     }
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: waiting for MPG123 to finish pid", pid );
+    wait4(pid, NULL, 0, NULL );
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: MPG123 finished pid", pid );
+
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Jouer_espeak : Joue un message via synthèse vocale et attend la fin de la diffusion                    */
+/* Entrée : le message à jouer                                                                            */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Jouer_espeak ( struct CMD_TYPE_MESSAGE *msg )
+  { gchar nom_fichier[128], cible[128];
+    gint fd_cible, pid, num;
+
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
+    unlink( nom_fichier );                                            /* Destruction des anciens fichiers */
+    g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
+    unlink( cible );                                                  /* Destruction des anciens fichiers */
+/***************************************** Création du PHO ************************************************/
+    num = msg->num;                                /* Attention, on fork donc plus de mémoire partagée !! */
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de ESPEAK", num );
+    pid = fork();
+    if (pid<0)
+     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Fabrication .pho failed", num ); }
+    else if (!pid)                                                 /* Création du .au en passant par .pho */
+     { gchar texte[80], chaine[30], chaine2[30];
+       switch (msg->type_voc)
+        { case 0: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
+          case 1: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
+          case 2: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
+          default:
+          case 3: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
+        }
+       g_snprintf( chaine2, sizeof(chaine2), "%d", msg->vitesse_voc );
+       fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       dup2( fd_cible, 1 );
+       g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
+       execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
+       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement espeak failed", pid );
+       _exit(0);
+     }
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for espeak to finish pid", pid );
+    wait4(pid, NULL, 0, NULL );
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: espeak finished pid", pid );
+
+/****************************************** Création du AU ************************************************/
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de MBROLA", num );
+    pid = fork();
+    if (pid<0)
+     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Fabrication .au failed", num ); }
+    else if (!pid)                                                 /* Création du .au en passant par .pho */
+     { gchar chaine[30];
+       switch (msg->type_voc)
+        { case 0: g_snprintf( chaine, sizeof(chaine), "fr1" ); break;
+          case 1: g_snprintf( chaine, sizeof(chaine), "fr2" ); break;
+          case 2: g_snprintf( chaine, sizeof(chaine), "fr6" ); break;
+          default:
+          case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
+        }
+       execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
+       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement mbrola failed", pid );
+       _exit(0);
+     }
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for mbrola to finish pid", pid );
+    wait4(pid, NULL, 0, NULL );
+    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: mbrola finished pid", pid );
+/****************************************** Lancement de l'audio ******************************************/
+    Jouer_wav(cible);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */
@@ -127,9 +221,7 @@
 
        msg = Rechercher_messageDB( Config.log, db, num );
        if (msg)
-        { gchar nom_fichier[128], cible[128];
-          gint fd_cible, pid;
-
+        { 
           Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
 
           Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
@@ -138,70 +230,8 @@
            { Jouer_wav("jingle.wav"); }                                         /* On balance le jingle ! */
           Partage->com_audio.last_audio = Partage->top;
 
-          g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
-          unlink( nom_fichier );                                      /* Destruction des anciens fichiers */
-          g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
-          unlink( cible );                                            /* Destruction des anciens fichiers */
-/***************************************** Création du PHO ************************************************/
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de ESPEAK", num );
-          pid = fork();
-          if (pid<0)
-           { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Fabrication .pho failed", num ); }
-          else if (!pid)                                           /* Création du .au en passant par .pho */
-           { gchar texte[80], chaine[30], chaine2[30];
-             switch (msg->type_voc)
-              { case 0: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
-                case 1: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
-                case 2: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
-                default:
-                case 3: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
-              }
-             g_snprintf( chaine2, sizeof(chaine2), "%d", msg->vitesse_voc );
-             fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-             dup2( fd_cible, 1 );
-             g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
-             execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
-             Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement espeak failed", pid );
-             _exit(0);
-           }
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for espeak to finish pid", pid );
-          wait4(pid, NULL, 0, NULL );
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: espeak finished pid", pid );
-
-/****************************************** Création du AU ************************************************/
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de MBROLA", num );
-          pid = fork();
-          if (pid<0)
-           { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Fabrication .au failed", num ); }
-          else if (!pid)                                           /* Création du .au en passant par .pho */
-           { gchar chaine[30];
-             switch (msg->type_voc)
-              { case 0: g_snprintf( chaine, sizeof(chaine), "fr1" ); break;
-                case 1: g_snprintf( chaine, sizeof(chaine), "fr2" ); break;
-                case 2: g_snprintf( chaine, sizeof(chaine), "fr6" ); break;
-                default:
-                case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
-              }
-             execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
-             Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement mbrola failed", pid );
-             _exit(0);
-           }
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for mbrola to finish pid", pid );
-          wait4(pid, NULL, 0, NULL );
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: mbrola finished pid", pid );
-/****************************************** Lancement de l'audio ******************************************/
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de APLAY", num );
-          pid = fork();
-          if (pid<0)
-           { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement APLAY failed", num ); }
-          else if (!pid)
-           { execlp( "aplay", "aplay", "-R", "1", cible, NULL );
-             Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement APLAY failed", pid );
-             _exit(0);
-           }
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for APLAY to finish pid", pid );
-          wait4(pid, NULL, 0, NULL );
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: APLAY finished pid", pid );
+          if ( ! Jouer_mp3 ( msg ) )               /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+           { Jouer_espeak ( msg ); }
 
           g_free(msg);
         }
