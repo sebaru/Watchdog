@@ -81,7 +81,7 @@
     g_snprintf(chaine, sizeof(chaine), "control_localhost off\n");
     write(id, chaine, strlen(chaine));
 #endif
-    g_snprintf(chaine, sizeof(chaine), "process_id_file %s/motion.pid\n", Config.home);
+    g_snprintf(chaine, sizeof(chaine), "process_id_file %s/Camera/motion.pid\n", Config.home);
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "daemon on\n");
     write(id, chaine, strlen(chaine));
@@ -101,7 +101,7 @@
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "text_right %%Y-%%m-%%d\\n%%T-%%q\n");
     write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "target_dir %s\n", Config.home);
+    g_snprintf(chaine, sizeof(chaine), "target_dir %s/Camera\n", Config.home);
     write(id, chaine, strlen(chaine));
     g_snprintf(chaine, sizeof(chaine), "mysql_db %s\n", Config.db_database);
     write(id, chaine, strlen(chaine));
@@ -121,9 +121,9 @@
         { Libere_DB_SQL( Config.log, &db );
           break;
         }
-       g_snprintf(nom_fichier, sizeof(nom_fichier), "camera%04d.conf", camera->id);
+       g_snprintf(nom_fichier, sizeof(nom_fichier), "Camera/camera%04d.conf", camera->id);
 
-       g_snprintf(chaine, sizeof(chaine), "thread %s/%s\n", Config.home, nom_fichier);
+       g_snprintf(chaine, sizeof(chaine), "thread %s/Camera/%s\n", Config.home, nom_fichier);
        write(id, chaine, strlen(chaine));
        
        unlink(nom_fichier);
@@ -163,7 +163,7 @@
 
     if (!Creer_config_file_motion()) return(FALSE);
 
-    g_snprintf(chaine, sizeof(chaine), "%s/motion.pid", Config.home);
+    g_snprintf(chaine, sizeof(chaine), "%s/Camera/motion.pid", Config.home);
     id = open ( chaine, O_RDONLY, 0 );
     if (id<0) { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
                 return(FALSE);
