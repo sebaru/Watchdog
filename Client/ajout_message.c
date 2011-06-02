@@ -153,7 +153,7 @@
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,
                    (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
 
-    while( (taille = read ( id_source, &buffer_envoi, taille_max ) ) > 0 )            /* Envoi du fichier */
+    while( (taille = read ( id_source, buffer_envoi, taille_max ) ) > 0 )             /* Envoi du fichier */
      { msg_mp3->taille = taille;
        if (!Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3,
                            (gchar *)msg_mp3, taille + sizeof(struct CMD_TYPE_MESSAGE_MP3) ))
