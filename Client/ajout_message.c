@@ -37,9 +37,10 @@
  #include "Reseaux.h"
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
+ #include "Config_cli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
+ extern struct CONFIG_CLI Config_cli;                                  /* Configuration generale watchdog */
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Spin_num;                                /* Numéro du message en cours d'édition/ajout */
@@ -47,6 +48,7 @@
  static GtkWidget *Entry_lib_audio;                                           /* Libelle audio du message */
  static GtkWidget *Entry_lib_sms;                                               /* Libelle sms du message */
  static GtkWidget *Entry_objet;                                                       /* Objet du message */
+ static GtkWidget *Entry_mp3;                                                       /* nom de fichier mp3 */
  static GtkWidget *Combo_type;                                                  /* Type actuel du message */
  static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
  static GtkWidget *Check_enable;                                  /* Le message est-il actif ou inhibe ?? */
@@ -129,6 +131,42 @@
      }
   }
 /**********************************************************************************************************/
+/* Valider_fichier_mp3: Confirmation et envoi du fichier mp3 au serveur                                   */
+/* Entrée: la page du notebook en cours d'edition                                                         */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Valider_fichier_mp3 ( struct CMD_TYPE_MESSAGE *msg, gchar *fichier )
+  { struct CMD_TYPE_MESSAGE_MP3 *msg_mp3;
+    gint taille, taille_max, id_source;
+    gchar *buffer_envoi;
+
+    id_source = open ( fichier, O_RDONLY, 0 );
+    if (id_source<0) return;
+
+    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_malloc0( Config_cli.taille_bloc_reseau );
+    if (!msg_mp3) return;
+    buffer_envoi     = (gchar *)msg_mp3 + sizeof(struct CMD_TYPE_MESSAGE_MP3);
+    taille_max       = Config_cli.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGE_MP3);
+    msg_mp3->num     = msg->num;
+    msg_mp3->taille  = 0;
+                                                          /* Demande de suppression du fichier source MP3 */
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,
+                   (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
+
+    while( (taille = read ( id_source, &buffer_envoi, taille_max ) ) > 0 )            /* Envoi du fichier */
+     { msg_mp3->taille = taille;
+       if (!Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3,
+                           (gchar *)msg_mp3, taille + sizeof(struct CMD_TYPE_MESSAGE_MP3) ))
+        { printf("erreur envoi au serveur\n"); }
+       printf("Octets envoyés: %d\n", taille);
+     }
+
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN,                     /* Fin du transfert */
+                   (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
+    close(id_source);
+    g_free(msg_mp3);
+  }
+/**********************************************************************************************************/
 /* CB_ajouter_editer_message: Fonction appelée qd on appuie sur un des boutons de l'interface             */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
@@ -167,6 +205,9 @@
              { Envoi_serveur( TAG_MESSAGE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MESSAGE
                                                     : SSTAG_CLIENT_ADD_MESSAGE),
                               (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
+               Valider_fichier_mp3 ( &Msg,
+                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
+                                   );
              }
             break;
        case GTK_RESPONSE_CANCEL:
@@ -250,7 +291,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 9, 4, TRUE );
+    table = gtk_table_new( 10, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -337,6 +378,13 @@
     Entry_lib_sms = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_sms), NBR_CARAC_LIBELLE_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, 8, 9 );
+
+    texte = gtk_label_new( _("Mp3 upload") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 9, 10 );
+
+    Entry_mp3 = gnome_file_entry_new("Mp3Filename", _("Select a file for mp3") );
+    gnome_file_entry_set_modal( GNOME_FILE_ENTRY(Entry_mp3), TRUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_mp3, 1, 4, 9, 10 );
 
     if (edit_msg)                                                              /* Si edition d'un message */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );

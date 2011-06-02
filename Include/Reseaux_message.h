@@ -65,6 +65,12 @@
     guint  time_repeat;                                       /* Temps entre deux répétitions (si non nul */
   };
 
+ 
+ struct CMD_TYPE_MESSAGE_MP3                                   /* Structure pour l'échange du fichier mp3 */
+  { guint num;
+    guint taille;                                 /* Taille des données qui suivent dans le paquet reseau */
+  };
+
  enum 
   { SSTAG_CLIENT_WANT_PAGE_MESSAGE,
     SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK,                                /* Affichage de la page onduleur */
@@ -88,6 +94,11 @@
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC,
+
+    SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,                        /* Le client commence l'envoi du fichier mp3 */
+    SSTAG_CLIENT_VALIDE_EDIT_MP3,                                   /* Le client confitnue l'envoi du mp3 */
+    SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN,                       /* Le client a terminé l'envoi du fichier mp3 */
+
   };
 
 #endif
