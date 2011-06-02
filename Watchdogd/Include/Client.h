@@ -123,6 +123,7 @@
     GList *courbes;                          /* Ensemble des entrees analogiques monitorées par le client */
 
     gint id_creation_plugin_dls;                             /* ID fichier du plugin en cours de creation */
+    gint id_creation_message_mp3;                          /* ID fichier message mp3 en cours de creation */
     gint classe_icone;                                        /* Classe d'icone en cours de visualisation */
     gint num_supervision;                                 /* Numéro du synoptique en cours de supervision */
     gint date_next_send_capteur;                         /* Date du prochain envoi des capteurs au client */

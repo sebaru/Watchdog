@@ -130,6 +130,9 @@
  extern void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
  extern void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
  extern void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg );
+ extern void Proto_effacer_message_mp3 ( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3 );
+ extern void Proto_valider_message_mp3( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3,
+                                        gchar *buffer );
 
  extern void *Envoyer_entreeANA_for_courbe_thread ( struct CLIENT *client );     /* Dans envoi_entreana.c */
  extern void *Envoyer_entreeANA_for_histo_courbe_thread ( struct CLIENT *client );

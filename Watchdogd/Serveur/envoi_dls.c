@@ -43,8 +43,8 @@
  #endif
 
 /**********************************************************************************************************/
-/* Proto_effacer_groupe: Retrait du groupe en parametre                                                   */
-/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Proto_effacer_fichier_dls: Suppression du code d'un plugin avant reception du nouveau code client      */
+/* Entrée: le client demandeur et l'id du fichier plugin                                                  */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, gint id )

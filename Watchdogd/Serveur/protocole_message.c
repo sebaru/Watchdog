@@ -91,6 +91,24 @@
                                                  client, mnemo );
              }
             break;
+       case SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB:
+             { struct CMD_TYPE_MESSAGE_MP3 *msg_mp3;
+               msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)connexion->donnees;
+               Proto_effacer_message_mp3( client, msg_mp3 );
+             }
+            break;
+       case SSTAG_CLIENT_VALIDE_EDIT_MP3:
+             { struct CMD_TYPE_MESSAGE_MP3 *msg_mp3;
+               msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)connexion->donnees;
+               Proto_valider_message_mp3( client, msg_mp3,
+                                          (gchar *)msg_mp3 + sizeof(struct CMD_TYPE_MESSAGE_MP3) );
+             }
+            break;
+       case SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN:
+             { close( client->id_creation_message_mp3 );                      /* Fermeture du fichier mp3 */
+               client->id_creation_message_mp3 = 0;
+             }
+            break;
     }
   }
 /*--------------------------------------------------------------------------------------------------------*/
