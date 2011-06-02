@@ -88,7 +88,7 @@
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB:
              { struct CMD_TYPE_SOURCE_DLS *edit_dls;
                edit_dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
-               Proto_effacer_fichier_plugin_dls( client, edit_dls->id );
+               Proto_effacer_fichier_plugin_dls( client, edit_dls );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS:

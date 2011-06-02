@@ -121,7 +121,7 @@
                                        gchar *buffer );
  extern void Compiler_source_dls( struct CLIENT *client, gint id );
  extern void *Proto_compiler_source_dls( struct CLIENT *client );
- extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, gint id );
+ extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls );
  extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
 
@@ -142,7 +142,6 @@
  extern void *Envoyer_synoptiques_pour_atelier_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_atelier_palette_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_message_thread ( struct CLIENT *client );
- extern struct CMD_TYPE_SYNOPTIQUE *Preparer_envoi_synoptique ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Proto_editer_synoptique_thread ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
  extern void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
  extern void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );

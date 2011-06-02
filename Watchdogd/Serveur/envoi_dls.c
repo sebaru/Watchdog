@@ -47,10 +47,10 @@
 /* Entrée: le client demandeur et l'id du fichier plugin                                                  */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, gint id )
+ void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
   { gchar chaine[80];
     gint id_fichier;
-    g_snprintf( chaine, sizeof(chaine), "%d.dls.new", id );
+    g_snprintf( chaine, sizeof(chaine), "%d.dls.new", edit_dls->id );
     unlink ( chaine );
     id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     close(id_fichier);

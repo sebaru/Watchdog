@@ -26,6 +26,7 @@
  */
  
  #include <glib.h>
+ #include <unistd.h>
 /******************************************** Prototypes de fonctions *************************************/
  #include "Reseaux.h"
  #include "watchdogd.h"
