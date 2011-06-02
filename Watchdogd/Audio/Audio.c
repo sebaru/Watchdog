@@ -85,9 +85,12 @@
   { gchar nom_fichier[128];
     gint fd_cible, pid;
 
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.mp3", msg->num );
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
-    if (fd_cible < 0) return(FALSE);
+    if (fd_cible < 0) { Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: fichier nom trouve", nom_fichier );
+                        return(FALSE);
+                      }
+    else close (fd_cible);
 
     Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Envoi d'un mp3", nom_fichier );
     pid = fork();
@@ -113,9 +116,9 @@
   { gchar nom_fichier[128], cible[128];
     gint fd_cible, pid, num;
 
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.pho", msg->num );
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.pho", msg->num );
     unlink( nom_fichier );                                            /* Destruction des anciens fichiers */
-    g_snprintf( cible,       sizeof(cible),       "%d.au",  msg->num );
+    g_snprintf( cible,       sizeof(cible),       "Son/%d.au",  msg->num );
     unlink( cible );                                                  /* Destruction des anciens fichiers */
 /***************************************** Création du PHO ************************************************/
     num = msg->num;                                /* Attention, on fork donc plus de mémoire partagée !! */
@@ -227,7 +230,7 @@
           Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
 
           if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top) /* Si Pas de message depuis xx */
-           { Jouer_wav("jingle.wav"); }                                         /* On balance le jingle ! */
+           { Jouer_wav("Son/jingle.wav"); }                                         /* On balance le jingle ! */
           Partage->com_audio.last_audio = Partage->top;
 
           if ( ! Jouer_mp3 ( msg ) )               /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
