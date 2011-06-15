@@ -525,6 +525,7 @@
 
              if (Partage->top > client->pulse)                                    /* Gestion du KEEPALIVE */
               { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );
+                SQL_ping ( Config.log, client->Db_watchdog );/* A remplacer plus tard par des connexions furtives */
                 client->pulse = Partage->top + TEMPS_PULSE;
               }
 
