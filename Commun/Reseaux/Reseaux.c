@@ -279,6 +279,9 @@ one_again:
           if (retour<=0)
            { Info_n( Log, DEBUG_NETWORK, "Envoyer_reseau: code de retour", err );
              Info_c( Log, DEBUG_NETWORK, "              chaine de retour", strerror(err) );
+             if (connexion->ssl)
+              { Info_n( Log, DEBUG_NETWORK, " retour SSL", SSL_get_error( connexion->ssl, retour ) );
+              }
              return(err);
            } else Info_n( Log, DEBUG_NETWORK, "donnees envoyees buffer", retour );
           cpt += retour;

@@ -154,8 +154,7 @@ one_again:
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille )
-  { if ( Attendre_envoi_disponible ( Config_cli.log, Connexion ) != 0 ||
-         Envoyer_reseau( Config_cli.log, Connexion, W_SERVEUR, tag, ss_tag, buffer, taille ) )
+  { if ( Envoyer_reseau( Config_cli.log, Connexion, W_SERVEUR, tag, ss_tag, buffer, taille ) )
      { Info( Config_cli.log, DEBUG_CONNEXION, "Deconnexion sur erreur envoi au serveur" );
        Deconnecter_sale();
        Log ( _("Disconnected (server offline ?)") );
