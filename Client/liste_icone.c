@@ -783,7 +783,6 @@ printf("bouh\n");
        Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_DEB_FILE,
                       (gchar *)icone, sizeof(struct CMD_TYPE_ICONE) );
 
-/*       while (Attendre_envoi_disponible(Config.log, Connexion)==-1) usleep(1);*/
        while ( (taille = read( source, buffer + sizeof(struct CMD_TYPE_ICONE),
                                 sizeof(buffer) - sizeof(struct CMD_TYPE_ICONE) ) ) > 0 )
         { Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_FILE,

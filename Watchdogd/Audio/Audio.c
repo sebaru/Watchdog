@@ -87,7 +87,7 @@
 
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
-    if (fd_cible < 0) { Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: fichier nom trouve", nom_fichier );
+    if (fd_cible < 0) { Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: fichier non trouve", nom_fichier );
                         return(FALSE);
                       }
     else close (fd_cible);
@@ -229,7 +229,7 @@
           Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
 
           if (Partage->com_audio.last_audio + AUDIO_JINGLE < Partage->top) /* Si Pas de message depuis xx */
-           { Jouer_wav("Son/jingle.wav"); }                                         /* On balance le jingle ! */
+           { Jouer_wav("Son/jingle.wav"); }                                     /* On balance le jingle ! */
           Partage->com_audio.last_audio = Partage->top;
 
           if ( ! Jouer_mp3 ( msg ) )               /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
