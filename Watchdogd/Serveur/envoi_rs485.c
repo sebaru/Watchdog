@@ -170,8 +170,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiRS485", 0, 0, 0 );
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );

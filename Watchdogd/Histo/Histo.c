@@ -46,8 +46,7 @@
   { struct DB *db;
     gchar requete[1024];
     
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database,        /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db)
      { Info( Config.log, DEBUG_SERVEUR, "Charger_histoDB: Connexion DB failed" );
        return;

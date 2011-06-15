@@ -190,8 +190,7 @@
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
     Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Debut boucle sans fin" );
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db)
      { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
 

@@ -71,8 +71,7 @@
 /* Entrée: toutes les infos necessaires a la connexion                                                    */
 /* Sortie: une structure DB de référence                                                                  */
 /**********************************************************************************************************/
- struct DB *Init_DB_SQL ( struct LOG *log, gchar *host, gchar *database,
-                          gchar *user, gchar *password, guint port )
+ struct DB *Init_DB_SQL ( struct LOG *log )
   { struct DB *db;
     my_bool reconnect;
     db = (struct DB *)g_malloc0( sizeof(struct DB) );
@@ -91,7 +90,7 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
-    if ( ! mysql_real_connect( db->mysql, host, user, password, database, port, NULL, 0 ) )
+    if ( ! mysql_real_connect( db->mysql, Config.db_host, Config.db_username, Config.db_password, Config.db_database, Config.db_port, NULL, 0 ) )
      { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base",
                               (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
@@ -99,8 +98,8 @@
        return (NULL);
      }
     db->free = TRUE;
-    Info_c( log, DEBUG_DB, "Init_DB_SQL: Connexion effective DB", database );
-    Info_c( log, DEBUG_DB, "                          avec user", user );
+    Info_c( log, DEBUG_DB, "Init_DB_SQL: Connexion effective DB", Config.db_database );
+    Info_c( log, DEBUG_DB, "                          avec user", Config.db_username );
     return(db);
   }
 /**********************************************************************************************************/

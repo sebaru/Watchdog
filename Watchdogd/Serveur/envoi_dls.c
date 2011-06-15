@@ -78,7 +78,6 @@
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
-       Proto_effacer_fichier_plugin_dls( client, rezo_dls->id );     /* Destruction du fichier sur disque */
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to delete plugin %s", rezo_dls->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -382,8 +381,7 @@
     
     prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );

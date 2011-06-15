@@ -303,8 +303,7 @@
 
        sscanf ( ligne, "%s %s", commande, password );                /* Découpage de la ligne de commande */
 
-       db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                         Config.db_username, Config.db_password, Config.db_port );
+       db = Init_DB_SQL( Config.log );
        if (!db)
         { g_snprintf( chaine, sizeof(chaine), " Unable to connect to Database\n" );
           Write_admin ( client->connexion, chaine );

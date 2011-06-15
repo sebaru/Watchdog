@@ -237,8 +237,7 @@
     struct CMD_TYPE_RS485 *rs485;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
     module = (struct MODULE_RS485 *)g_malloc0(sizeof(struct MODULE_RS485));
@@ -276,8 +275,7 @@
   { struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/

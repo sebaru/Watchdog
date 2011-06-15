@@ -208,10 +208,9 @@
        pthread_mutex_init( &client->mutex_struct_used, NULL );
        client->struct_used = 0;                            /* Par défaut, personne n'utilise la structure */
 
-       client->Db_watchdog = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                                          Config.db_username, Config.db_password, Config.db_port );
+       client->Db_watchdog = Init_DB_SQL( Config.log );
        if (!client->Db_watchdog)
-        { Info( Config.log, DEBUG_DB,
+        { Info( Config.log, DEBUG_SERVEUR,
                   "SSRV: Accueillir_nouveaux_client: Unable to open database" );
           Deconnecter( client );
         }

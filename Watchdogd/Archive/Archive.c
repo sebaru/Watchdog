@@ -70,8 +70,7 @@
 
     Info( Config.log, DEBUG_ARCHIVE, "ARCH: demarrage" );
 
-    db = Init_DB_SQL( Config.log, Config.db_host,Config.db_database, /* Connexion en tant que user normal */
-                      Config.db_username, Config.db_password, Config.db_port );
+    db = Init_DB_SQL( Config.log );
     if (!db)
      { Info_c( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Unable to open database", Config.db_database );
        Partage->com_arch.TID = 0;                         /* On indique au master que le thread est mort. */
