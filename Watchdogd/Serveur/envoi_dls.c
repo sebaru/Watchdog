@@ -300,10 +300,11 @@
            { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
                          "\n -> Compilation OK\nReset plugin OK" );
            }
-          Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
-                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
         }
      }
+    if (client) Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,           /* Envoi du résultat */
+                              (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: terminé", id );
   }
 /**********************************************************************************************************/
