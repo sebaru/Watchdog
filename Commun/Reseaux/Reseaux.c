@@ -242,7 +242,9 @@ one_again:
 
     cpt = sizeof(struct ENTETE_CONNEXION);
     while(cpt)
-     { if (connexion->ssl)
+     {
+encore_entete:
+       if (connexion->ssl)
         { retour = SSL_write( connexion->ssl, &Entete, cpt ); }                      /* Envoi de l'entete */
        else retour = write( connexion->socket, &Entete, cpt );                       /* Envoi de l'entete */
 
@@ -253,6 +255,7 @@ one_again:
           if (connexion->ssl)
            { Info_n( Log, DEBUG_NETWORK, " retour SSL", SSL_get_error( connexion->ssl, retour ) );
            }
+          if (err == EAGAIN) goto encore_entete;
           return(err);
         } else Info_n( Log, DEBUG_NETWORK, "donnees envoyees entete", retour );
           
@@ -264,7 +267,7 @@ one_again:
        cpt = 0;
        while(cpt < Entete.taille_donnees)
         {
-
+encore_buffer:
           if ( (retour=Attendre_envoi_disponible(Log, connexion)) )
            { Info_n( Log, DEBUG_NETWORK, "Envoyer_reseau: timeout depassé (ou erreur)", connexion->socket );
              Info_n( Log, DEBUG_NETWORK, "                             code de retour", retour );
@@ -282,6 +285,7 @@ one_again:
              if (connexion->ssl)
               { Info_n( Log, DEBUG_NETWORK, " retour SSL", SSL_get_error( connexion->ssl, retour ) );
               }
+             if (err == EAGAIN) goto encore_buffer;
              return(err);
            } else Info_n( Log, DEBUG_NETWORK, "donnees envoyees buffer", retour );
           cpt += retour;
