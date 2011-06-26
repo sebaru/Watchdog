@@ -405,8 +405,6 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->onduleur.host );
-    SB( module->onduleur.bit_comm, 1 );                          /* Mise a 1 du bit interne lié au module */
-
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -484,6 +482,8 @@
     else { valeur = atoi (answer[3]);
            SEA( module->onduleur.ea_input_voltage, valeur );  
          }
+
+    SB( module->onduleur.bit_comm, 1 );                          /* Mise a 1 du bit interne lié au module */
     return(TRUE);
   }
 /**********************************************************************************************************/
