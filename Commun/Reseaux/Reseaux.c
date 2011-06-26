@@ -129,7 +129,7 @@ one_again:
 /* Sortie: -1 si erreur, 0 si kedal, le code de controle sinon                                            */
 /**********************************************************************************************************/
  gint Recevoir_reseau( struct LOG *Log, struct CONNEXION *connexion )
-  { int taille_recue;
+  { int taille_recue, err;
 
     if (!connexion) return( RECU_ERREUR );
 
@@ -146,12 +146,11 @@ one_again:
                                sizeof(struct ENTETE_CONNEXION)-connexion->index_entete
                              );
         }
+       err=errno;
 
        if (taille_recue==0) return(RECU_RIEN);
        if (taille_recue<0)
-        { int err;
-          err=errno;
-          switch (err)
+        { switch (err)
            { case EPIPE     :
              case ECONNRESET: return( RECU_ERREUR_CONNRESET );
              case ESPIPE    : return( RECU_ERREUR );                                  /* Reperage illegal */
@@ -238,6 +237,7 @@ one_again:
 
     Info_n( Log, DEBUG_NETWORK, "Envoi du paquet au client", connexion->socket );
     Info_n( Log, DEBUG_NETWORK, "                      tag", tag );
+    Info_n( Log, DEBUG_NETWORK, "                   ss_tag", ss_tag );
     Info_n( Log, DEBUG_NETWORK, "                  donnees", taille_totale );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
