@@ -38,6 +38,7 @@
     MSG_DEFAUT,
     MSG_ALARME,
     MSG_VEILLE,
+    MSG_ATTENTE,
     NBR_TYPE_MSG
   };
 

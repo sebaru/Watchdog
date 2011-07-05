@@ -89,6 +89,7 @@
        case MSG_ALARME   : return( _("Alarme") );
        case MSG_DEFAUT   : return( _("Trouble") );
        case MSG_VEILLE   : return( _("Veille") );
+       case MSG_ATTENTE  : return( _("Attente") );
      }
     return( _("Unknown") );
   }
