@@ -75,7 +75,7 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
-  { gchar requete[200];
+  { gchar requete[1024];
     gchar *libelle, *objet, *acro;
     gint last_id;
 
