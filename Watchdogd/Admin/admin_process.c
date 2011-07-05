@@ -178,6 +178,8 @@
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : REBOOT demandé" );
        Write_admin ( client->connexion, "REBOOT in progress\n" );
+       Ajouter_audio( 9999 ); /* Message audio avant reboot */
+       sleep(2);
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
      } else
