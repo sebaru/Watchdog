@@ -431,7 +431,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du nom de plugin_dls */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Sous-Groupe"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Page"), renderer,
                                                          "text", COLONNE_SSGROUPE,
                                                          "background-gdk", COLONNE_COLOR_FOND,
                                                          "foreground-gdk", COLONNE_COLOR_TEXTE,
