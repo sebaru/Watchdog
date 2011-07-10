@@ -50,7 +50,7 @@
  static gchar *Type_plugin_vers_string ( guint32 type )
   { switch (type)
      { case PLUGIN_MODULE   : return( _("Module") );
-       case PLUGIN_SSGROUPE : return( _("Sous-Groupe") );
+       case PLUGIN_SSGROUPE : return( _("Page") );
        case PLUGIN_GROUPE   : return( _("Groupe") );
        case PLUGIN_TOPLEVEL : return( _("Top Level") );
      }
