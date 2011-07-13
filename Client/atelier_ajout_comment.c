@@ -86,20 +86,21 @@
     switch(style)
      { case STYLE_TITRE:
             gnome_font_picker_set_font_name( GNOME_FONT_PICKER(Font_comment),
-                                             "-abisource-arial-bold-r-normal-*-*-640-*-*-p-*-iso8859-1" );
+                                             "Bitstream Vera Serif Italic 22" );
             gnome_color_picker_set_i8( GNOME_COLOR_PICKER( Couleur_comment ),
-                                       255, 255, 0, 0 );                                   /* R G B Alpha */
+                                       0, 0, 0, 0 );                                       /* R G B Alpha */
             break;
        case STYLE_SOUS_TITRE:
             gnome_font_picker_set_font_name( GNOME_FONT_PICKER(Font_comment),
-                                             "-urw-chancery l-medium-i-normal-*-*-320-*-*-p-*-iso8859-1" );
+                                             "Bitstream Vera Serif Bold Italic 12" );
             gnome_color_picker_set_i8( GNOME_COLOR_PICKER( Couleur_comment ),
-                                       0, 0, 255, 0 );
+                                       0, 0, 0, 0 );
             break;
        case STYLE_ANNOTATION:
-            gnome_font_picker_set_font_name( GNOME_FONT_PICKER(Font_comment), "10x20" );
+            gnome_font_picker_set_font_name( GNOME_FONT_PICKER(Font_comment),
+                                             "Bitstream Vera Serif Italic 10" );
             gnome_color_picker_set_i8( GNOME_COLOR_PICKER( Couleur_comment ),
-                                       200, 200, 200, 0 );
+                                       0, 0, 0, 0 );
             break;
      }
   }
