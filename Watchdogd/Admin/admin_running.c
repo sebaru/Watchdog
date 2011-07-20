@@ -285,7 +285,7 @@
               struct CLIENT *client_wat;
               client_wat = (struct CLIENT *)liste->data;
 
-              g_snprintf( erreur.message, sizeof(erreur.message), "AdminMSG : %s", commande[5] );
+              g_snprintf( erreur.message, sizeof(erreur.message), "AdminMSG : %s", ligne + 5 );
               Envoi_client( client_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
 
