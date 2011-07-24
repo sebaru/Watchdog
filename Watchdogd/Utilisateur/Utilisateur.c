@@ -145,9 +145,6 @@
     gchar *comment;
     gchar *crypt;
 
-    if (util->id < NBR_UTILISATEUR_RESERVE) 
-     { return(FALSE); }
-
     comment = Normaliser_chaine ( log, util->commentaire );
     if (!comment)
      { Info( log, DEBUG_USER, "Modifier_utilisateurDB: Normalisation impossible" );
