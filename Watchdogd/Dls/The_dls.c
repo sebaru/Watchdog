@@ -382,9 +382,9 @@
  void SCI( int num, int etat, int reset, int ratio )
   { if (num>=NBR_COMPTEUR_IMP) return;
     if (etat)
-     { if ( ! Partage->ci[ num ].actif )
+     { if ( ! Partage->ci[ num ].actif )                                              /* Passage en actif */
         { Partage->ci[num].actif = TRUE;
-          if (reset)
+          if (reset)                                                /* Le compteur doit-il etre resetté ? */
            { Partage->ci[num].val_en_cours1 = 0.0;             /* Valeur transitoire pour gérer les ratio */
              Partage->ci[num].val_en_cours2 = 0.0;             /* Valeur transitoire pour gérer les ratio */
            }

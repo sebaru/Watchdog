@@ -166,7 +166,7 @@
     gchar chaine[256];
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
-    nbr_i          = g_list_length(Partage->com_msrv.liste_i);
+    nbr_i          = g_list_length( Partage->com_msrv.liste_i );
     nbr_msg_off    = g_list_length( Partage->com_msrv.liste_msg_off );     /* Recuperation du numero de i */
     nbr_msg_on     = g_list_length( Partage->com_msrv.liste_msg_on );      /* Recuperation du numero de i */
     nbr_msg_repeat = g_list_length( Partage->com_msrv.liste_msg_repeat );             /* liste des repeat */

@@ -139,7 +139,7 @@
     else memset (&Edit_mnemo, 0, sizeof(struct CMD_TYPE_MNEMONIQUE) );             /* Sinon RAZ structure */
 
     if (edit_mnemo)
-     { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonique"),
+     { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonic"),
                                               GTK_WINDOW(F_client),
                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                               GTK_STOCK_COPY, GTK_RESPONSE_OK,
@@ -148,7 +148,7 @@
                                               NULL);
      }
     else
-     { F_ajout = gtk_dialog_new_with_buttons( _("Add a mnemonique"),
+     { F_ajout = gtk_dialog_new_with_buttons( _("Add a mnemonic"),
                                               GTK_WINDOW(F_client),
                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -186,7 +186,7 @@
     Spin_num = gtk_spin_button_new_with_range( 0.0, NBR_BIT_DLS, 1.0 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 3, 4, 0, 1 );
 
-    texte = gtk_label_new( _("Object") );
+    texte = gtk_label_new( _("Groupe / Page / Module") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Entry_objet = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MNEMONIQUE );

@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/WatchdogdAdmin.c        Administration de Watchdog                                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 07 sep 2008 12:16:53 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 24 juil. 2011 21:18:07 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -35,6 +35,8 @@
  #include <popt.h>
  #include <string.h>
  #include <stdio.h>
+ #include <readline/readline.h>
+ #include <readline/history.h>
 
  #include "config.h"
 
@@ -63,7 +65,8 @@
        close(connexion);
        return(FALSE);
      }
-    fcntl( connexion, F_SETFL, O_NONBLOCK );     /* Mode non bloquant, ça aide pour une telle application */
+  fcntl( connexion, F_SETFL, O_ASYNC | O_NONBLOCK );/* Mode non bloquant, ça aide pour une telle application */
+  fcntl( connexion, F_SETOWN, getpid() );     /* Mode non bloquant, ça aide pour une telle application */
 
     Socket = connexion;
     return(TRUE);
@@ -108,62 +111,77 @@
     poptFreeContext( context );                                                     /* Liberation memoire */
  }
 /**********************************************************************************************************/
-/* Main: Fonction principale du serveur watchdog                                                          */
+/* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
+/* Entrée: numero du signal à gerer                                                                       */
+/**********************************************************************************************************/
+ static void Traitement_signaux( int num )
+  { gchar reponse[2048];
+    gint taille;
+
+    switch (num)
+     { case SIGQUIT:
+       case SIGINT:  printf( "Recu SIGINT" );  break;
+       case SIGTERM: printf( "Recu SIGTERM" ); break;
+       case SIGCHLD: printf( "Recu SIGCHLD" ); break;
+       case SIGPIPE: printf( "Recu SIGPIPE" ); break;
+       case SIGBUS:  printf( "Recu SIGBUS" );  break;
+       case SIGIO:   while ( (taille = read( Socket, reponse, sizeof(reponse) )) > 0 )
+                      { reponse[taille] = 0;
+                        printf("%s", reponse );
+                      }
+                     fflush(stdout);
+                     break;
+       default: printf ("Recu signal %d ", num ); break;
+     }
+  }
+/**********************************************************************************************************/
+/* Main: Fonction principale de l'outil d'admin Watchdog                                                  */
 /* Entrée: argc, argv                                                                                     */
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[] )
-  { gchar reponse[128], commande[128], commande_hold[128];
-    gint retval, taille;
-    struct timeval tv;
-    fd_set fdselect;
+  { struct sigaction sig;
+    gchar *commande;
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
+    sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
+    sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+    sigaction( SIGPIPE, &sig, NULL );
+    sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
+
+    read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
+
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
 
-    write ( Socket, "ident", 6 );
-    g_snprintf( commande_hold, sizeof(commande_hold), "nocde");
+    write ( Socket, "ident", 6 );             /* Demande l'envoi de la chaine d'identification du serveur */
 
     for ( ; ; )
-     { FD_ZERO(&fdselect);
-       FD_SET(0, &fdselect);
-       FD_SET(Socket, &fdselect );
-       tv.tv_sec = 1;
-       tv.tv_usec= 0;
-       retval = select(Socket+1, &fdselect, NULL, NULL, &tv );            /* Attente d'un caractere */
+     { commande = readline ("# prompt> ");
 
-       if (retval>=0)
-	{ if (FD_ISSET(0, &fdselect))                                             /* Est-ce au clavier ?? */
-           { taille = read( 0, commande, sizeof(commande) );
-             taille--;                                                       /* -1 car caractère "entrée" */
-             commande[taille] = 0;                                           /* Caractère de fin de ligne */
+       if (!commande)
+        { write ( Socket, "nocde", strlen("nocde")+1 );
+          fsync(Socket);                                                             /* Flush la sortie ! */
+          continue;
+        }
 
-             if ( ! strcmp ( commande, "quit" ) ) break;                                 /* On s'arrete ? */
-             else if ( ! strcmp ( commande, "!" ) )
-                  { write ( Socket, commande_hold, strlen(commande_hold) );
-                    fsync(Socket);                                                   /* Flush la sortie ! */
-                  }
-             else 
-                  { if (taille) { memcpy( commande_hold, commande, sizeof(commande_hold) ); }
-                    else  { memcpy( commande, "nocde", sizeof(commande) ); }
-                    write ( Socket, commande, strlen(commande) );
-                    fsync(Socket);                                                   /* Flush la sortie ! */
-                  }
-	   }
-	  else if (FD_ISSET(Socket, &fdselect))                      /* Est-ce sur la ligne d'admin local */
-           { taille = read( Socket, reponse, sizeof(reponse) );
-             reponse[taille] = 0;
-             printf("%s", reponse ); fflush(stdout);
-             if ( !strcmp(reponse, "timeout\n") ) break;                               /* Fin sur Timeout */
+       if ( strlen(commande) )
+        { add_history(commande);
+
+          if ( ! strcmp ( commande, "quit" ) ) break;                                    /* On s'arrete ? */
+          else
+           { write ( Socket, commande, strlen(commande) );
+             fsync(Socket);                                                          /* Flush la sortie ! */
+             sleep(2);
            }
-	} else break;
-       usleep(100);
+        }
+       g_free (commande);
      }
 
     close( Socket );
+    write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
     return(0);
   }
 /*--------------------------------------------------------------------------------------------------------*/

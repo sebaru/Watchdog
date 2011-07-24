@@ -12,6 +12,6 @@ INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 $(GLIB_CFLAGS)
 
-WatchdogdAdmin_LDFLAGS = -lpopt $(GLIB_LIBS)
+WatchdogdAdmin_LDFLAGS = -lpopt -lreadline $(GLIB_LIBS)
 
 MAINTAINERCLEANFILES = Makefile.in
