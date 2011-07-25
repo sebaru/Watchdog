@@ -146,7 +146,9 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[] )
-  { struct sigaction sig;
+  { gint taille, taille_old;
+    gchar commande_old[128];
+    struct sigaction sig;
     gchar *commande;
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
@@ -157,6 +159,8 @@
     sigaction( SIGPIPE, &sig, NULL );
     sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
 
+    memset ( &commande_old, 0, sizeof(commande_old) );
+    taille_old = 0;
     read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
 
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );
@@ -174,12 +178,16 @@
           continue;
         }
 
-       if ( strlen(commande) )
-        { add_history(commande);
+       taille = strlen(commande);
+       if ( taille )
+        { if (strncmp ( commande, commande_old, (taille < taille_old ? taille : taille_old)))
+           { g_snprintf( commande_old, sizeof(commande_old), "%s", commande );
+             add_history(commande);
+           }
 
-          if ( ! strcmp ( commande, "quit" ) ) break;                                    /* On s'arrete ? */
+          if ( ! strncmp ( commande, "quit", taille ) ) break;                           /* On s'arrete ? */
           else
-           { write ( Socket, commande, strlen(commande) );
+           { write ( Socket, commande, taille );
              fsync(Socket);                                                          /* Flush la sortie ! */
              wait_reponse = TRUE;                      /* Précisons que l'on attend la réponse du serveur */
            }
