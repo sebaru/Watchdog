@@ -32,21 +32,8 @@
 
  #define NOM_SOCKET "socket.wdg"
 
- enum
-  { MODE_ADMIN_RUNNING,
-    MODE_ADMIN_MODBUS,
-    MODE_ADMIN_PROCESS,
-    MODE_ADMIN_RS485,
-    MODE_ADMIN_DLS,
-    MODE_ADMIN_ONDULEUR,
-    MODE_ADMIN_TELLSTICK,
-    NBR_MODE_ADMIN
-  };
- extern gchar *Mode_admin[NBR_MODE_ADMIN];
-
  struct CLIENT_ADMIN
   { gint connexion;
-    gint mode;
     gint last_use;
   };
 
@@ -59,7 +46,7 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Run_admin ( void );                                                          /* Dans Audio.c */
+ extern void Run_admin ( void );                                                          /* Dans Admin.c */
  extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_modbus_list ( struct CLIENT_ADMIN *client );
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );

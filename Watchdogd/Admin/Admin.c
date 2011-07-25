@@ -36,9 +36,6 @@
 
  #include "watchdogd.h"
 
- gchar *Mode_admin[NBR_MODE_ADMIN] =
-  { "running", "modbus", "process", "rs485", "dls", "onduleur", "tellstick" };
-
  static GList *Clients = NULL;                                     /* Leste des clients d'admin connectés */
  static gint Fd_ecoute = 0;                                          /* File descriptor de l'ecoute admin */
 
@@ -127,7 +124,6 @@
                     }
 
        client->connexion = id;
-       client->mode = MODE_ADMIN_RUNNING;
        client->last_use = Partage->top;
        fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
 
@@ -162,36 +158,14 @@
        Info_c( Config.log, DEBUG_ADMIN, "Admin : received command", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
-       if ( ! strcmp ( commande, "mode" ) )
-        { gchar mode[128];
-          int i;
-          memset( mode, 0, sizeof(mode) );
-          sscanf ( ligne, "%s %s", commande, mode );                 /* Découpage de la ligne de commande */
-          i = 0;
-          while ( i < NBR_MODE_ADMIN && strcmp ( mode, Mode_admin[i] ) ) i++;
-          if ( i == NBR_MODE_ADMIN ) i = MODE_ADMIN_RUNNING;
-          client->mode = i;
-        } else
-       if ( ! strcmp ( commande, "exit" ) )
-        { client->mode = MODE_ADMIN_RUNNING; }
+            if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + strlen(commande) + 1 ); }
+       else if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + strlen(commande) + 1 ); }
+       else if ( ! strcmp ( commande, "rs485"     ) ) { Admin_rs485    ( client, ligne + strlen(commande) + 1 ); }
+       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + strlen(commande) + 1 ); }
+       else if ( ! strcmp ( commande, "onduleur"  ) ) { Admin_onduleur ( client, ligne + strlen(commande) + 1 ); }
+       else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + strlen(commande) + 1 ); }
+       else                                           { Admin_running  ( client, ligne + strlen(commande) + 1 ); }
 
-       switch ( client->mode )
-        {
-          case MODE_ADMIN_MODBUS   : Admin_modbus   ( client, ligne ); break;
-          case MODE_ADMIN_PROCESS  : Admin_process  ( client, ligne ); break;
-          case MODE_ADMIN_RS485    : Admin_rs485    ( client, ligne ); break;
-          case MODE_ADMIN_DLS      : Admin_dls      ( client, ligne ); break;
-          case MODE_ADMIN_ONDULEUR : Admin_onduleur ( client, ligne ); break;
-          case MODE_ADMIN_TELLSTICK: Admin_tellstick( client, ligne ); break;
-
-          case MODE_ADMIN_RUNNING: Admin_running( client, ligne );
-          default:                 break;
-        }
-
-       if (client->mode == MODE_ADMIN_RUNNING)
-        { g_snprintf( chaine, sizeof(chaine), " #%s> ", Mode_admin[client->mode] ); }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " # - WARNING - %s> ", Mode_admin[client->mode] ); }
        Write_admin ( client->connexion, chaine );
      }
   }

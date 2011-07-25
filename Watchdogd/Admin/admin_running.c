@@ -71,18 +71,9 @@
        Write_admin ( client->connexion, "  ping                  - Ping Watchdog\n" );
        Write_admin ( client->connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
        Write_admin ( client->connexion, "  help                  - This help\n" );
-       Write_admin ( client->connexion, "  mode type_mode        - Change de mode (" );
-       i = 1;
-       while ( i < NBR_MODE_ADMIN )
-        { Write_admin ( client->connexion, Mode_admin[i] );
-          Write_admin ( client->connexion, ", " );
-          i++;
-        }
-       Write_admin ( client->connexion, "running)\n" );
        Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
        Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
        Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,lirc)\n" );
-       Write_admin ( client->connexion, "  exit                  - Revient au mode RUNNING\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
