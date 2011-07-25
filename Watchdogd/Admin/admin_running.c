@@ -423,8 +423,7 @@
      { g_snprintf( chaine, sizeof(chaine), "\n" );
        Write_admin ( client->connexion, chaine );
      } else
-     {
-       g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
        Write_admin ( client->connexion, chaine );
      }
   }

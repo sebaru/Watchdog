@@ -174,7 +174,6 @@
           continue;
         }
 
-       wait_reponse = TRUE;                            /* Précisons que l'on attend la réponse du serveur */
        if ( strlen(commande) )
         { add_history(commande);
 
@@ -182,7 +181,7 @@
           else
            { write ( Socket, commande, strlen(commande) );
              fsync(Socket);                                                          /* Flush la sortie ! */
-             sleep(2);
+             wait_reponse = TRUE;                      /* Précisons que l'on attend la réponse du serveur */
            }
         }
        g_free (commande);
