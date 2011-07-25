@@ -127,7 +127,7 @@
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
        case SIGIO:   while ( (taille = read( Socket, reponse, sizeof(reponse) )) > 0 )
                       { reponse[taille] = 0;
-                        printf("%s", reponse );
+                        printf(" /%s/ ", reponse );
                         if ( !strcmp( reponse, "---\n" ) ) { wait_reponse = FALSE; }
                       }
                      fflush(stdout);
