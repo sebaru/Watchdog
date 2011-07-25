@@ -166,6 +166,7 @@
        else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + 10); }
        else                                           { Admin_running  ( client, ligne ); }
 
+       g_snprintf( chaine, sizeof(chaine), "---\n" );
        Write_admin ( client->connexion, chaine );
      }
   }

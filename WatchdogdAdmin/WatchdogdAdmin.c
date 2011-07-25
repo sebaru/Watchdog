@@ -40,7 +40,7 @@
 
  #include "config.h"
 
- static gint Socket;                                                           /* Socket d'administration */
+ static gint Socket, wait_reponse;                                             /* Socket d'administration */
  static gchar Socket_file[128];
 
 /**********************************************************************************************************/
@@ -128,6 +128,7 @@
        case SIGIO:   while ( (taille = read( Socket, reponse, sizeof(reponse) )) > 0 )
                       { reponse[taille] = 0;
                         printf("%s", reponse );
+                        if ( !strcmp( reponse, "---\n" ) ) { wait_reponse = FALSE; }
                       }
                      fflush(stdout);
                      break;
@@ -159,14 +160,15 @@
     write ( Socket, "ident", 6 );             /* Demande l'envoi de la chaine d'identification du serveur */
 
     for ( ; ; )
-     { commande = readline ("# prompt> ");
-
+     { while (wait_reponse != FALSE);
+       commande = readline ("#Watchdog*CLI> ");
        if (!commande)
         { write ( Socket, "nocde", strlen("nocde")+1 );
           fsync(Socket);                                                             /* Flush la sortie ! */
           continue;
         }
 
+       wait_reponse = TRUE;                            /* Précisons que l'on attend la réponse du serveur */
        if ( strlen(commande) )
         { add_history(commande);
 
