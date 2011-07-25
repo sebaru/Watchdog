@@ -182,7 +182,8 @@
        if ( taille )
         { if (strncmp ( commande, commande_old, (taille < taille_old ? taille : taille_old)))
            { g_snprintf( commande_old, sizeof(commande_old), "%s", commande );
-             add_history(commande);
+             taille_old = taille;                         /* On n'ajoute pas de doublon dans l'historique */
+             add_history(commande);                                  /* Ajoute la commande à l'historique */
            }
 
           if ( ! strncmp ( commande, "quit", taille ) ) break;                           /* On s'arrete ? */
