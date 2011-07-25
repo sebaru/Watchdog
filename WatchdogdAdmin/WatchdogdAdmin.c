@@ -158,6 +158,7 @@
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
 
     write ( Socket, "ident", 6 );             /* Demande l'envoi de la chaine d'identification du serveur */
+    wait_reponse = TRUE;                               /* Précisons que l'on attend la réponse du serveur */
 
     for ( ; ; )
      { while (wait_reponse != FALSE);
