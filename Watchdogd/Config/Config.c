@@ -152,6 +152,7 @@
        Config.taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
        if (!Config.taille_bloc_reseau) Config.taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
 
+/********************************************* Partie RS485 ***********************************************/
        chaine = g_key_file_get_string ( gkf, "RS485", "port_rs485", NULL );
        if (chaine)
         { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", chaine ); g_free(chaine); }
@@ -284,7 +285,11 @@
     Info_c( Config.log, DEBUG_CONFIG, "Config smsbox password      ", Config.smsbox_password );
     Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone1       ", Config.sms_telephone1 );
     Info_c( Config.log, DEBUG_CONFIG, "Config sms_telephone2       ", Config.sms_telephone2 );
+    Info_n( Config.log, DEBUG_CONFIG, "Config sms_min_m            ", Config.sms_m_min );
+    Info_n( Config.log, DEBUG_CONFIG, "Config sms_max_m            ", Config.sms_m_max );
     Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(min)     ", Config.tellstick_a_min );
     Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(max)     ", Config.tellstick_a_max );
+    Info_n( Config.log, DEBUG_CONFIG, "Config asterisk M(min)      ", Config.asterisk_m_min );
+    Info_n( Config.log, DEBUG_CONFIG, "Config asterisk M(max)      ", Config.asterisk_m_max );
   }
 /*--------------------------------------------------------------------------------------------------------*/
