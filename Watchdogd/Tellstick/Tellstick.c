@@ -34,7 +34,7 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
 /**********************************************************************************************************/
-/* Ajouter_tellstick: Ajoute une tellstick dans la liste des envoi tellstick                              */
+/* Ajouter_tellstick: Ajoute une demande d'envoi RF tellstick dans la liste des envoi tellstick           */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
 /**********************************************************************************************************/
  void Ajouter_tellstick( gint id, gint val )
@@ -67,6 +67,9 @@
   { int methods;
     gchar chaine[128];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Envoi de la commande LEARN TellstickS\n" );
+    Write_admin ( client->connexion, chaine );
+
     methods = tdMethods( num, TELLSTICK_LEARN );                                 /* Get methods of device */
 
     if ( methods | TELLSTICK_LEARN )
@@ -85,6 +88,9 @@
  void Admin_tellstick_start ( struct CLIENT_ADMIN *client, gint num )
   { int methods;
     gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Demande d'activation d'un device Tellstick\n" );
+    Write_admin ( client->connexion, chaine );
 
     methods = tdMethods( num, TELLSTICK_TURNON );                                /* Get methods of device */
 
@@ -105,6 +111,9 @@
   { int methods;
     gchar chaine[128];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Demande de desactivation d'un deviece Tellstick\n" );
+    Write_admin ( client->connexion, chaine );
+
     methods = tdMethods( num, TELLSTICK_TURNOFF );                               /* Get methods of device */
 
     if ( methods | TELLSTICK_TURNOFF )
@@ -123,6 +132,9 @@
  void Admin_tellstick_list ( struct CLIENT_ADMIN *client )
   { int nbrDevice, i, supportedMethods, methods;
     gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des device Tellstick\n" );
+    Write_admin ( client->connexion, chaine );
 
     nbrDevice = tdGetNumberOfDevices();
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Number of devices = %d\n", nbrDevice );

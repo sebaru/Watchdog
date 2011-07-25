@@ -67,5 +67,10 @@
        Write_admin ( client->connexion,
                      "  list                 - list all devices\n" );
      }
+    else
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " Unknown TELLSTICK command : %s\n", ligne );
+       Write_admin ( client->connexion, chaine );
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/
