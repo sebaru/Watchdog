@@ -48,6 +48,12 @@
   { GList *liste_modules;
     gchar chaine[128];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des modules RS485\n" );
+    Write_admin ( client->connexion, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+       
     liste_modules = Partage->com_rs485.Modules_RS485;
     while ( liste_modules )
      { struct MODULE_RS485 *module;
@@ -75,6 +81,9 @@
   { gchar chaine[128], requete[128];
     struct DB *db;
 
+    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module RS485\n" );
+    Write_admin ( client->connexion, chaine );
+
     while (Partage->com_rs485.admin_start) sched_yield();
     Partage->com_rs485.admin_start = id;
 
@@ -95,7 +104,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d started\n", id );
+    g_snprintf( chaine, sizeof(chaine), " Module RS485 %d started\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -106,6 +115,9 @@
  static void Admin_rs485_stop ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
+
+    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module RS485\n" );
+    Write_admin ( client->connexion, chaine );
 
     while (Partage->com_rs485.admin_stop) sched_yield();
     Partage->com_rs485.admin_stop = id;
@@ -127,7 +139,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module RS485 %d stopped\n", id );
+    g_snprintf( chaine, sizeof(chaine), " Module RS485 %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -167,6 +179,11 @@
                      "  list                                   - Affiche les status des equipements RS485\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
+     }
+    else
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " Unknown RS485 command : %s\n", ligne );
+       Write_admin ( client->connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
