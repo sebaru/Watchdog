@@ -115,8 +115,10 @@
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
  static void Traitement_signaux( int num )
-  { gchar reponse[2048];
+  { static gint nbr_slash_n = 0;
+    gchar reponse[2];
     gint taille;
+    
 
     switch (num)
      { case SIGQUIT:
@@ -125,10 +127,13 @@
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
-       case SIGIO:   while ( (taille = read( Socket, reponse, sizeof(reponse) )) > 0 )
+       case SIGIO:   while ( (taille = read( Socket, reponse, 1 )) > 0 )
                       { reponse[taille] = 0;
-                        printf(" /%s/ ", reponse );
-                        if ( !strcmp( reponse, "---\n" ) ) { wait_reponse = FALSE; }
+                        printf("%s", reponse );
+                        if (reponse[0] == '\n')
+                         { if (nbr_slash_n == 1) { wait_reponse = FALSE; nbr_slash_n = 0; }
+                           else nbr_slash_n++;
+                         }
                       }
                      fflush(stdout);
                      break;
@@ -162,7 +167,7 @@
 
     for ( ; ; )
      { while (wait_reponse != FALSE);
-       commande = readline ("#Watchdog*CLI> ");
+       commande = readline ("#Watchdogd*CLI> ");
        if (!commande)
         { write ( Socket, "nocde", strlen("nocde")+1 );
           fsync(Socket);                                                             /* Flush la sortie ! */
