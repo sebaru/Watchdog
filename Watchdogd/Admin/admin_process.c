@@ -112,6 +112,10 @@
     if ( ! strcmp ( commande, "list" ) )
      { gchar chaine[128];
        guint i;
+
+       g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
+       Write_admin ( client->connexion, chaine );
+
        g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
 
@@ -212,6 +216,11 @@
                      "  CLEAR-REBOOT         - Restart all processes with no DATA import/export\n" );
        Write_admin ( client->connexion,
                      "  SHUTDOWN             - Stop processes\n" );
+     }
+    else
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " Unknown PROCESS command : %s\n", ligne );
+       Write_admin ( client->connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
