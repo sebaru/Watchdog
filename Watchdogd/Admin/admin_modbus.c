@@ -181,7 +181,7 @@
        Write_admin ( client->connexion,
                      "  stop id                                - Demarre le module id\n" );
        Write_admin ( client->connexion,
-                     "  list                                   - Liste les modules MODBUS+Borne\n" );
+                     "  list                                   - Liste les modules MODBUS\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
      }

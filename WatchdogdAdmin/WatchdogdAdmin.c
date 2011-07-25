@@ -131,6 +131,8 @@
        case SIGIO:   while ( (taille = read( Socket, reponse, 1 )) > 0 )
                       { reponse[taille] = 0;
                         printf("%s", reponse );
+                        if (wait_reponse == FALSE)                  /* message non sollicité du serveur ? */
+                         { _exit(0); }
                         if (reponse[0] == '\n')
                          { if (nbr_slash_n == 1) { wait_reponse = FALSE; nbr_slash_n = 0; }
                            else nbr_slash_n++;
