@@ -51,6 +51,9 @@
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules MODBUS\n" );
     Write_admin ( client->connexion, chaine );
 
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+       
     pthread_mutex_lock( &Partage->com_modbus.synchro );
     liste_modules = Partage->com_modbus.Modules_MODBUS;
     while ( liste_modules )
@@ -184,7 +187,7 @@
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown dls command : %s\n", ligne );
+       g_snprintf( chaine, sizeof(chaine), " Unknown MODBUS command : %s\n", ligne );
        Write_admin ( client->connexion, chaine );
      }
   }

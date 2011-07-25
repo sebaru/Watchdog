@@ -48,6 +48,9 @@
   { GList *liste_modules;
     gchar chaine[512];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des UPS\n" );
+    Write_admin ( client->connexion, chaine );
+
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
@@ -80,11 +83,14 @@
  static void Admin_onduleur_start ( struct CLIENT_ADMIN *client, struct DB *db, gint id )
   { gchar chaine[128];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un UPS\n" );
+    Write_admin ( client->connexion, chaine );
+
     while (Partage->com_onduleur.admin_start) sched_yield();
     Partage->com_onduleur.admin_start = id;
 
     if (Modifier_onduleurDB_set_start( Config.log, db, id, TRUE))
-     { g_snprintf( chaine, sizeof(chaine), "Module ONDULEUR %d started\n", id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module ONDULEUR %d started\n", id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " -- error -- Module ONDULEUR NOT %d started\n", id ); }
     Write_admin ( client->connexion, chaine );
@@ -96,6 +102,9 @@
 /**********************************************************************************************************/
  static void Admin_onduleur_stop ( struct CLIENT_ADMIN *client, struct DB *db, gint id )
   { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un UPS\n" );
+    Write_admin ( client->connexion, chaine );
 
     while (Partage->com_onduleur.admin_stop) sched_yield();
     Partage->com_onduleur.admin_stop = id;
@@ -151,6 +160,11 @@
                      "  list                                   - Liste les modules ONDULEUR\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
+     }
+    else
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " Unknown NUT command : %s\n", ligne );
+       Write_admin ( client->connexion, chaine );
      }
     Libere_DB_SQL( Config.log, &db );
   }

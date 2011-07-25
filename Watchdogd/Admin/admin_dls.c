@@ -51,6 +51,9 @@
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S\n" );
     Write_admin ( client->connexion, chaine );
 
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+       
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
     while ( liste_dls )
@@ -209,7 +212,7 @@
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown dls command : %s\n", ligne );
+       g_snprintf( chaine, sizeof(chaine), " Unknown DLS command : %s\n", ligne );
        Write_admin ( client->connexion, chaine );
      }
   }
