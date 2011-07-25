@@ -159,8 +159,8 @@
     sigaction( SIGPIPE, &sig, NULL );
     sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
 
-    memset ( &commande_old, 0, sizeof(commande_old) );
-    taille_old = 0;
+    g_snprintf( commande_old, sizeof(commande_old), "nocde" );
+    taille_old = 5;
     read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
 
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );
