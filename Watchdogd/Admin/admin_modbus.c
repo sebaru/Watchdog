@@ -48,6 +48,9 @@
   { GList *liste_modules;
     gchar chaine[512];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des modules MODBUS\n" );
+    Write_admin ( client->connexion, chaine );
+
     pthread_mutex_lock( &Partage->com_modbus.synchro );
     liste_modules = Partage->com_modbus.Modules_MODBUS;
     while ( liste_modules )
@@ -80,6 +83,9 @@
   { gchar chaine[128], requete[128];
     struct DB *db;
 
+    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module MODBUS\n" );
+    Write_admin ( client->connexion, chaine );
+
     while (Partage->com_modbus.admin_start) sched_yield();
     Partage->com_modbus.admin_start = id;
 
@@ -100,7 +106,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d started\n", id );
+    g_snprintf( chaine, sizeof(chaine), " Module MODBUS %d started\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -111,6 +117,9 @@
  static void Admin_modbus_stop ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
+
+    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module MODBUS\n" );
+    Write_admin ( client->connexion, chaine );
 
     while (Partage->com_modbus.admin_stop) sched_yield();
     Partage->com_modbus.admin_stop = id;
@@ -132,7 +141,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module MODBUS %d stopped\n", id );
+    g_snprintf( chaine, sizeof(chaine), " Module MODBUS %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -172,6 +181,11 @@
                      "  list                                   - Liste les modules MODBUS+Borne\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
+     }
+    else
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " Unknown dls command : %s\n", ligne );
+       Write_admin ( client->connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

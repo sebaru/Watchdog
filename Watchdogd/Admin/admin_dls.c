@@ -124,7 +124,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module DLS %d started\n", id );
+    g_snprintf( chaine, sizeof(chaine), " Module DLS %d started\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -159,7 +159,7 @@
      }
     Libere_DB_SQL( Config.log, &db );
 
-    g_snprintf( chaine, sizeof(chaine), "Module DLS %d stopped\n", id );
+    g_snprintf( chaine, sizeof(chaine), " Module DLS %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -206,7 +206,8 @@
                      "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
-     } else
+     }
+    else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown dls command : %s\n", ligne );
        Write_admin ( client->connexion, chaine );

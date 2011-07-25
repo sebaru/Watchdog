@@ -122,7 +122,8 @@
 
     switch (num)
      { case SIGQUIT:
-       case SIGINT:  printf( "Recu SIGINT" );  break;
+       case SIGINT:  write_history ( NULL );        /* Ecriture de l'historique des commandes précédentes */
+                     break;
        case SIGTERM: printf( "Recu SIGTERM" ); break;
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
@@ -157,6 +158,7 @@
     sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGPIPE, &sig, NULL );
+    sigaction( SIGINT, &sig, NULL );
     sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
 
     g_snprintf( commande_old, sizeof(commande_old), "nocde" );
