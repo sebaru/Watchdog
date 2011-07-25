@@ -40,12 +40,12 @@
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
-       Write_admin ( client->connexion, "  audit                 - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ident                 - ID du serveur Watchdog\n" );
-       Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
+       Write_admin ( client->connexion, "  ping                  - Ping Watchdog\n" );
+       Write_admin ( client->connexion, "  audit                 - Audit bit/s\n" );
        Write_admin ( client->connexion, "  ssrv                  - SousServers Status\n" );
        Write_admin ( client->connexion, "  client                - Client Status\n" );
-       Write_admin ( client->connexion, "  kick nom machine      - Kick client nom@machine\n" );
+       Write_admin ( client->connexion, "  kick nom_machine      - Kick client nom@machine\n" );
        Write_admin ( client->connexion, "  gete xxx              - Get Exxx\n" );
        Write_admin ( client->connexion, "  sete xxx i            - Set Exxx = i\n" );
        Write_admin ( client->connexion, "  getea xxx             - Get EAxxx\n" );
@@ -61,18 +61,18 @@
        Write_admin ( client->connexion, "  geti xxx              - Get Ixxx\n" );
        Write_admin ( client->connexion, "  seti xxx E R V B C    - Set Ixxx Etat Rouge Vert Bleu Cligno\n" );
        Write_admin ( client->connexion, "  getci xxx             - Get CIxxx\n" );
-       Write_admin ( client->connexion, "  tell message num      - Envoi AUDIO num\n" );
+       Write_admin ( client->connexion, "  tell message_num      - Envoi d'un message audio _num_\n" );
        Write_admin ( client->connexion, "  sms message           - Envoi du message SMS via SMSBOX\n" );
        Write_admin ( client->connexion, "  msgs message          - Envoi d'un message a tous les clients\n" );
-       Write_admin ( client->connexion, "  mbus                  - Liste les modules MODBUS+Borne\n" );
-       Write_admin ( client->connexion, "  rs                    - Affiche les status des equipements RS485\n" );
-       Write_admin ( client->connexion, "  onduleur              - Affiche les status des equipements ONDULEUR\n" );
-       Write_admin ( client->connexion, "  ping                  - Ping Watchdog\n" );
        Write_admin ( client->connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
-       Write_admin ( client->connexion, "  help                  - This help\n" );
+       Write_admin ( client->connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
+       Write_admin ( client->connexion, "  rs485                 - Sous-menu de gestion des equipements RS485\n" );
+       Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
+       Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
        Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
        Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
        Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,lirc)\n" );
+       Write_admin ( client->connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
@@ -96,6 +96,8 @@
      { GList *liste;
        gint i;
         
+       g_snprintf( chaine, sizeof(chaine), " -- Liste des clients connectés au serveur\n" );
+       Write_admin ( client->connexion, chaine );
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
 
@@ -114,18 +116,6 @@
             }
            pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
          }
-     } else
-    if ( ! strcmp ( commande, "mbus" ) )
-     { Admin_modbus_list ( client );
-     } else
-    if ( ! strcmp ( commande, "rs" ) )
-     { Admin_rs485_list ( client );
-     } else
-    if ( ! strcmp ( commande, "onduleur" ) )
-     { Admin_onduleur_list ( client );
-     } else
-    if ( ! strcmp ( commande, "dls" ) )
-     { Admin_dls_list ( client );
      } else
     if ( ! strcmp ( commande, "gettr" ) )
      { int num;
@@ -267,6 +257,8 @@
      { GList *liste;
        gint i;
 
+       g_snprintf( chaine, sizeof(chaine), " -- Liste des clients recevant le message\n" );
+       Write_admin ( client->connexion, chaine );
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
            liste = Partage->Sous_serveur[i].Clients;
@@ -279,7 +271,7 @@
               Envoi_client( client_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
 
-              g_snprintf( chaine, sizeof(chaine), " Envoi du message a %s@%s\n",
+              g_snprintf( chaine, sizeof(chaine), " - %s@%s\n",
                           client_wat->util->nom, client_wat->machine );
               Write_admin ( client->connexion, chaine );
               liste = liste->next;
@@ -319,6 +311,9 @@
      } else
     if ( ! strcmp ( commande, "audit" ) )
      { gint num;
+       g_snprintf( chaine, sizeof(chaine), " -- Audit de performance\n" );
+       Write_admin ( client->connexion, chaine );
+
        g_snprintf( chaine, sizeof(chaine), " Partage->Top : %d\n", Partage->top );
        Write_admin ( client->connexion, chaine );
 

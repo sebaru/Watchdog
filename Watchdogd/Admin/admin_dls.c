@@ -44,9 +44,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_dls_list ( struct CLIENT_ADMIN *client )
+ static void Admin_dls_list ( struct CLIENT_ADMIN *client )
   { GList *liste_dls;
     gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S\n" );
+    Write_admin ( client->connexion, chaine );
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
@@ -54,7 +57,7 @@
      { struct PLUGIN_DLS *dls;
        dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-       g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, conso=%f, nom=%s\n",
+       g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, conso=%4.03f, nom=%s\n",
                            dls->plugindb.id, dls->plugindb.on, dls->conso, dls->plugindb.nom );
        Write_admin ( client->connexion, chaine );
        liste_dls = liste_dls->next;
@@ -66,10 +69,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_dls_gcc ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_dls_gcc ( struct CLIENT_ADMIN *client, gint id )
   { GList *liste_dls;
     gchar chaine[128];
 
+    g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
+    Write_admin ( client->connexion, chaine );
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
     while ( liste_dls )
@@ -95,6 +100,9 @@
  static void Admin_dls_start ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
+
+    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un plugin D.L.S\n" );
+    Write_admin ( client->connexion, chaine );
 
     while (Partage->com_dls.admin_start) sched_yield();
     Partage->com_dls.admin_start = id;
@@ -127,6 +135,9 @@
  static void Admin_dls_stop ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
+
+    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un plugin D.L.S\n" );
+    Write_admin ( client->connexion, chaine );
 
     while (Partage->com_dls.admin_stop) sched_yield();
     Partage->com_dls.admin_stop = id;
@@ -195,6 +206,10 @@
                      "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
        Write_admin ( client->connexion,
                      "  reload                                 - Recharge la configuration\n" );
+     } else
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " Unknown dls command : %s\n", ligne );
+       Write_admin ( client->connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
