@@ -158,13 +158,13 @@
        Info_c( Config.log, DEBUG_ADMIN, "Admin : received command", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + strlen(commande) + 1 ); }
-       else if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + strlen(commande) + 1 ); }
-       else if ( ! strcmp ( commande, "rs485"     ) ) { Admin_rs485    ( client, ligne + strlen(commande) + 1 ); }
-       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + strlen(commande) + 1 ); }
-       else if ( ! strcmp ( commande, "onduleur"  ) ) { Admin_onduleur ( client, ligne + strlen(commande) + 1 ); }
-       else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + strlen(commande) + 1 ); }
-       else                                           { Admin_running  ( client, ligne + strlen(commande) + 1 ); }
+            if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + 7 ); }
+       else if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
+       else if ( ! strcmp ( commande, "rs485"     ) ) { Admin_rs485    ( client, ligne + 6 ); }
+       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 5 ); }
+       else if ( ! strcmp ( commande, "onduleur"  ) ) { Admin_onduleur ( client, ligne + 9 ); }
+       else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + 10); }
+       else                                           { Admin_running  ( client, ligne ); }
 
        Write_admin ( client->connexion, chaine );
      }
