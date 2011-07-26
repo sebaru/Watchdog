@@ -78,7 +78,6 @@
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
     Write_admin ( client->connexion, chaine );
-    pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
     while ( liste_dls )
      { struct PLUGIN_DLS *dls;
@@ -93,7 +92,6 @@
         }
        liste_dls = liste_dls->next;
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
