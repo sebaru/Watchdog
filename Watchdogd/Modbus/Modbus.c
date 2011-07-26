@@ -1000,9 +1000,7 @@
           if (module->nbr_oct_lu >= 
               TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
            { 
-             pthread_mutex_lock( &Partage->com_dls.synchro );
              Processer_trame( module );                         /* Si l'on a trouvé une trame complète !! */
-             pthread_mutex_unlock( &Partage->com_dls.synchro );
              module->nbr_oct_lu = 0;
            }
         }

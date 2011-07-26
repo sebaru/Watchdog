@@ -689,13 +689,11 @@
                    if (crc_recu != Calcul_crc16(&Trame))
                     { Info(Config.log, DEBUG_RS485, "RS485: CRC16 failed !!"); }
                    else
-                    { pthread_mutex_lock( &Partage->com_dls.synchro );
-                      if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
+                    { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;
                          liste = liste->next;
                          SB(module->rs485.bit_comm, 1);
                        }
-                      pthread_mutex_unlock( &Partage->com_dls.synchro );
                     }
                    memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                  }
