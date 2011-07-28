@@ -62,7 +62,8 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_editer_option_cpt_imp ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { g_snprintf( Cpt.cpt_imp.unite, sizeof(Cpt.cpt_imp.unite),
+  { Cpt.type = MNEMO_CPT_IMP;
+    g_snprintf( Cpt.cpt_imp.unite, sizeof(Cpt.cpt_imp.unite),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_unite) ) );
     Cpt.cpt_imp.type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type ) );
     Cpt.cpt_imp.multi = gtk_spin_button_get_value( GTK_SPIN_BUTTON(Spin_multi) );
@@ -84,11 +85,11 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_COMPTEUR_IMP *edit_cpt_imp )
+ void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_cpt_imp )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt, i;
 
-    memcpy( &Cpt, edit_cpt_imp, sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
+    memcpy( &Cpt, edit_cpt_imp, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
 
     F_ajout = gtk_dialog_new_with_buttons( _("Option of cpt_imp"),
                                            GTK_WINDOW(F_client),
@@ -128,10 +129,10 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_unite), NBR_CARAC_UNITE_CPT_IMP );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_unite, 1, 2, i, i+1 );
 
-printf("id_mnemo = %d\n", edit_cpt_imp->id_mnemo );
-printf("unite = %s\n", edit_cpt_imp->unite );
-printf("multi = %f\n", edit_cpt_imp->multi );
-printf("type = %d\n", edit_cpt_imp->type );
+printf("id_mnemo = %d\n", edit_cpt_imp->cpt_imp.id_mnemo );
+printf("unite = %s\n", edit_cpt_imp->cpt_imp.unite );
+printf("multi = %f\n", edit_cpt_imp->cpt_imp.multi );
+printf("type = %d\n", edit_cpt_imp->cpt_imp.type );
     i++;
     texte = gtk_label_new( _("Multi") );                                              /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
@@ -149,12 +150,11 @@ printf("type = %d\n", edit_cpt_imp->type );
 
     if (edit_cpt_imp)                                                          /* Si edition d'un cpt_imp */
      { gchar chaine[32];
-       Cpt.cpt_imp.id_mnemo = edit_cpt_imp->id_mnemo;
-       g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CPT_IMP), edit_cpt_imp->num );
+       g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_CPT_IMP), edit_cpt_imp->cpt_imp.num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
-       gtk_entry_set_text( GTK_ENTRY(Entry_unite), edit_cpt_imp->unite );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), edit_cpt_imp->multi );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  edit_cpt_imp->type  );
+       gtk_entry_set_text( GTK_ENTRY(Entry_unite), edit_cpt_imp->cpt_imp.unite );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), edit_cpt_imp->cpt_imp.multi );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  edit_cpt_imp->cpt_imp.type  );
      }
     else { gtk_widget_grab_focus( Entry_num );
          }

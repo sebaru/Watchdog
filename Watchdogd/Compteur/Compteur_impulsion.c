@@ -153,12 +153,14 @@
     cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
     if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
-     { cpt_imp->id_mnemo = atoi(db->row[0]);
+     { setlocale( LC_NUMERIC, "C" );                 /* Pour le formattage correct des , . dans les float */
+       cpt_imp->id_mnemo = atoi(db->row[0]);
        cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->num      = atoi(db->row[2]);
        cpt_imp->type     = atoi(db->row[3]);
        cpt_imp->multi    = atof(db->row[4]);
-printf("Option_cmp_impt db->row = %s, multi = %s\n", db->row[4], cpt_imp->multi );
+       setlocale( LC_NUMERIC, "" );                                   /* Revient sur la locale habituelle */
+printf("Option_cmp_impt db->row = %s, multi = %f\n", db->row[4], cpt_imp->multi );
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     Liberer_resultat_SQL ( log, db );
