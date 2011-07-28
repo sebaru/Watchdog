@@ -89,7 +89,7 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree )
+ void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_ENTREEANA *edit_entree )
   { GtkWidget *frame, *table, *texte, *hboite;
     gint cpt;
 
@@ -159,14 +159,14 @@
 
     if (edit_entree)                                                       /* Si edition d'un entreeANA */
      { gchar chaine[32];
-       Entree.eana.id_mnemo = edit_entree->eana.id_mnemo;
-       gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_entree->eana.libelle );
-       g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), edit_entree->eana.num );
+       Entree.eana.id_mnemo = edit_entree->id_mnemo;
+       gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_entree->libelle );
+       g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), edit_entree->num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_entree->eana.unite );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_entree->eana.type );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min), edit_entree->eana.min );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max), edit_entree->eana.max );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_entree->unite );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_entree->type );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min), edit_entree->min );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max), edit_entree->max );
        gtk_widget_grab_focus( Entry_lib );
      }
     else { gtk_widget_grab_focus( Entry_num );

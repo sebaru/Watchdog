@@ -75,9 +75,9 @@
              { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
                option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
                switch( option->type )
-                { case MNEMO_ENTREE_ANA : Proto_editer_option_entreeANA( option );
+                { case MNEMO_ENTREE_ANA : Proto_editer_option_entreeANA( &option->eana );
                                           break;
-                  case MNEMO_CPT_IMP    : Proto_editer_option_cpt_imp( option );
+                  case MNEMO_CPT_IMP    : Proto_editer_option_cpt_imp( &option->cpt_imp );
                                           break;
                 }
              }

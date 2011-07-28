@@ -452,11 +452,11 @@
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
 
                                                                                /* Dans option_entreeana.c */
- extern void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree );
+ extern void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_ENTREEANA *edit_entree );
  extern gchar *Type_ea_vers_string ( guint type );
 
                                                                                  /* Dans option_cpt_imp.c */
- extern void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_cpt_imp );
+ extern void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_COMPTEUR_IMP *edit_cpt_imp );
 
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
  extern void Begin_print (GtkPrintOperation *operation,

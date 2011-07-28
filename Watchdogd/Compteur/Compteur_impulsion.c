@@ -158,6 +158,7 @@
        cpt_imp->num      = atoi(db->row[2]);
        cpt_imp->type     = atoi(db->row[3]);
        cpt_imp->multi    = atof(db->row[4]);
+printf("Option_cmp_impt db->row = %s, multi = %s\n", db->row[4], cpt_imp->multi );
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     Liberer_resultat_SQL ( log, db );
