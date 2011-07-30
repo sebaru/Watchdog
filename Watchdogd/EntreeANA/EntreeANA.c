@@ -129,12 +129,12 @@
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.objet"
-                " FROM %s,%s WHERE %s.id_mnemo=%s.id ORDER BY %s.num",
+                " FROM %s,%s WHERE %s.id_mnemo=%s.id AND %s.id_mnemo=%d",
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
-                NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA, id /* WHERE */
+                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, id /* WHERE */
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
