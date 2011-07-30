@@ -63,6 +63,11 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
   };
 
+ struct CMD_TYPE_MNEMONIQUES
+  { guint nbr_mnemos;                                /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
+    struct CMD_TYPE_MNEMONIQUE mnemo[];
+  };
+
  struct CMD_TYPE_NUM_MNEMONIQUE
   { guint type;
     guint num;

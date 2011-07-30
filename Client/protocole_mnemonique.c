@@ -83,13 +83,17 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               Set_progress_plusun();
-
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
-               if (!mnemo) return; 
-               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMONIQUE ) );
-               Arrivee_mnemonique = g_list_append( Arrivee_mnemonique, mnemo );
+             { struct CMD_TYPE_MNEMONIQUES *mnemos;
+               gint i;
+               mnemos = (struct CMD_TYPE_MNEMONIQUES *)connexion->donnees;
+               Set_progress_plus( mnemos->nbr_mnemos);
+               for (i=0; i<mnemos->nbr_mnemos; i ++)
+                { struct CMD_TYPE_MNEMONIQUE *mnemo;
+                  mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+                  if (!mnemo) break;
+                  memcpy( mnemo, &mnemos->mnemo[i], sizeof(struct CMD_TYPE_MNEMONIQUE ) );
+                  Arrivee_mnemonique = g_list_append( Arrivee_mnemonique, mnemo );
+                }
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN:

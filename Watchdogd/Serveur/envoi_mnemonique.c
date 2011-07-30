@@ -307,8 +307,10 @@
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
+    struct CMD_TYPE_MNEMONIQUES *mnemos;
     struct CMD_TYPE_MNEMONIQUE *mnemo;
     struct DB *db;
+    gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
 
@@ -328,21 +330,41 @@
     g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d mnemos", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
-    for( ; ; )
-     { mnemo = Recuperer_mnemoDB_suite( Config.log, db );
-       if (!mnemo)
-        { Libere_DB_SQL( Config.log, &db );
-          Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          return;
+    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMONIQUE);
+    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_malloc0( Config.taille_bloc_reseau );    
+    if (!mnemos)
+     { struct CMD_GTK_MESSAGE erreur;
+       Info( Config.log, DEBUG_INFO, "Envoyer_mnemonisuqes_tag: Pb d'allocation memoire mnemos" );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       return;
+     }
+    mnemos->nbr_mnemos = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
+
+    do
+     { mnemo = Recuperer_mnemoDB_suite( Config.log, db );           /* Récupération d'un mnemo dans la DB */
+       if (mnemo)                                              /* Si enregegistrement, alors on le pousse */
+        { memcpy ( &mnemos->mnemo[mnemos->nbr_mnemos], mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+          mnemos->nbr_mnemos++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
+          g_free(mnemo);
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       if ( (mnemo == NULL) || mnemos->nbr_mnemos == max_enreg ) /* Si depassement de tampon ou plus d'enreg */
+        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
-       Envoi_client ( client, tag, sstag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
-       g_free(mnemo);
+          Envoi_client ( client, tag, sstag, (gchar *)mnemos,
+                         sizeof(struct CMD_TYPE_MNEMONIQUES) + mnemos->nbr_mnemos * sizeof(struct CMD_TYPE_MNEMONIQUE) );
+          mnemos->nbr_mnemos = 0;
+        }
      }
+    while (mnemo);
+    g_free(mnemos);
+    Libere_DB_SQL( Config.log, &db );
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
   }
 /**********************************************************************************************************/
 /* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                         */
