@@ -98,6 +98,8 @@
      { Partage->top++;
        if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info( Config.log, DEBUG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
+       if (!(Partage->top%5))                                          /* Cligno toutes les demi-secondes */
+        { SB(5, !B(5)); }
        if (!(Partage->top%10))                                              /* Cligno toutes les secondes */
         { SB(4, !B(4));
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
@@ -114,7 +116,7 @@
         }
 
        Partage->top_cdg_plugin_dls++;                                        /* Chien de garde plugin DLS */
-       if (Partage->top_cdg_plugin_dls>50)
+       if (Partage->top_cdg_plugin_dls>200)                     /* Si pas de réponse D.L.S en 20 secondes */
         { Info( Config.log, DEBUG_INFO, "Traitement signaux: CDG plugin DLS !!" );
           Partage->top_cdg_plugin_dls = 0;
         }
