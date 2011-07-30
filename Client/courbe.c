@@ -54,7 +54,6 @@
      COLONNE_NUM,
      COLONNE_MIN,
      COLONNE_MAX,
-     COLONNE_UNITE,
      COLONNE_UNITE_STRING,
      COLONNE_LIBELLE,
      NBR_COLONNE
@@ -119,9 +118,7 @@
                      default : valeur = -1.0;
                    }                  
                   g_snprintf( description, sizeof(description),
-                              "EA%d=%8.2f %s",
-                              courbe->eana.num, valeur, 
-                              Unite_vers_string( courbe->eana.unite ) );
+                              "EA%d=%8.2f %s", courbe->eana.num, valeur, courbe->eana.unite );
                   break;
              default: g_snprintf( description, sizeof(description), "type unknown" );
            }
@@ -203,10 +200,10 @@
   { GtkTreeSelection *selection;
     struct COURBE *new_courbe;
     struct CMD_TYPE_COURBE rezo_courbe;
+    gchar *libelle, *unite;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gchar *libelle;
     guint nbr;
 
     if (reponse == GTK_RESPONSE_ACCEPT)
@@ -246,10 +243,12 @@
                gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.type, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_UNITE, &new_courbe->eana.unite, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_UNITE_STRING, &unite, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
                g_snprintf( new_courbe->eana.libelle, sizeof(new_courbe->eana.libelle), "%s", libelle );
+               g_snprintf( new_courbe->eana.unite,   sizeof(new_courbe->eana.unite),   "%s", unite );
                g_free(libelle);
+               g_free(unite);
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
@@ -578,8 +577,7 @@
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, source->min,
                          COLONNE_MAX, source->max,
-                         COLONNE_UNITE, source->unite,
-                         COLONNE_UNITE_STRING, Unite_vers_string(source->unite),
+                         COLONNE_UNITE_STRING, source->unite,
                          COLONNE_LIBELLE, source->libelle,
                          -1
                        );
@@ -610,7 +608,6 @@
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, 0.0,
                          COLONNE_MAX, 1.0,
-                         COLONNE_UNITE, 0,
                          COLONNE_UNITE_STRING, "On/Off",
                          COLONNE_LIBELLE, source->libelle,
                          -1

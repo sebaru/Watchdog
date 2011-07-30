@@ -31,7 +31,6 @@
  #include <glib.h>
  #include <openssl/ssl.h>
  #include "Erreur.h"
- #include "Unite.h"
  #include "Reseaux_gtk_message.h"
  #include "Reseaux_connexion.h"
  #include "Reseaux_icone.h"

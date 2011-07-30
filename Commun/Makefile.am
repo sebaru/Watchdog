@@ -7,7 +7,7 @@
 SUBDIRS = Reseaux
 
 lib_LTLIBRARIES = libwatchdog.la
-libwatchdog_la_SOURCES = Erreur.c Version.c Unite.c
+libwatchdog_la_SOURCES = Erreur.c Version.c
 
 libwatchdog_la_LIBADD  = Reseaux/librezo.la
 # Trame/libtrame.la
