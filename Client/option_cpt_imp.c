@@ -126,13 +126,9 @@
     texte = gtk_label_new( _("Unit") );                                              /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_unite = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_unite), NBR_CARAC_UNITE_CPT_IMP );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_unite), NBR_CARAC_UNITE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_unite, 1, 2, i, i+1 );
 
-printf("id_mnemo = %d\n", edit_cpt_imp->cpt_imp.id_mnemo );
-printf("unite = %s\n", edit_cpt_imp->cpt_imp.unite );
-printf("multi = %f\n", edit_cpt_imp->cpt_imp.multi );
-printf("type = %d\n", edit_cpt_imp->cpt_imp.type );
     i++;
     texte = gtk_label_new( _("Multi") );                                              /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );

@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS `eana` (
   `type` int(11) NOT NULL,
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
-  `unite` int(11) NOT NULL DEFAULT '0',
+  `unite` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

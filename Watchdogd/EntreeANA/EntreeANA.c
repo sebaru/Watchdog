@@ -110,8 +110,8 @@
        entreeana->num      = atoi(db->row[5]);
        entreeana->min      = atof(db->row[0]);
        entreeana->max      = atof(db->row[1]);
-       entreeana->unite    = atoi(db->row[2]);
        entreeana->type     = atoi(db->row[6]);
+       memcpy( &entreeana->unite,   db->row[2], sizeof(entreeana->unite  ) );
        memcpy( &entreeana->libelle, db->row[3], sizeof(entreeana->libelle) );
        memcpy( &entreeana->objet,   db->row[7], sizeof(entreeana->objet  ) );
      }
@@ -151,11 +151,11 @@
      { Info( log, DEBUG_INFO, "Rechercher_entreeanaDB: Mem error" ); }
     else
      { entreeana->id_mnemo = id;;
-       entreeana->num      = atoi(db->row[0]);
-       entreeana->min      = atof(db->row[1]);
-       entreeana->max      = atof(db->row[2]);
-       entreeana->unite    = atoi(db->row[3]);
-       entreeana->type     = atoi(db->row[5]);
+       entreeana->num      = atoi(db->row[5]);
+       entreeana->min      = atof(db->row[0]);
+       entreeana->max      = atof(db->row[1]);
+       entreeana->type     = atoi(db->row[6]);
+       memcpy( &entreeana->unite,   db->row[2], sizeof(entreeana->unite  ) );
        memcpy( &entreeana->libelle, db->row[4], sizeof(entreeana->libelle) );
        memcpy( &entreeana->objet,   db->row[6], sizeof(entreeana->objet  ) );
      }
@@ -170,13 +170,20 @@
 /**********************************************************************************************************/
  gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_ENTREEANA *entreeana )
   { gchar requete[1024];
+    gchar *unite;
+
+    unite = Normaliser_chaine ( log, entreeana->unite );                 /* Formatage correct des chaines */
+    if (!unite)
+     { Info( log, DEBUG_DB, "Modifier_entreeANADB: Normalisation unite impossible" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "min='%f',max='%f',unite=%d,type=%d WHERE id_mnemo=%d",
-                NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max,
-                entreeana->unite, entreeana->type, entreeana->id_mnemo );
-
+                "min='%f',max='%f',unite='%s',type=%d WHERE id_mnemo=%d",
+                NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max, unite, entreeana->type,
+                entreeana->id_mnemo );
+    g_free(unite);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

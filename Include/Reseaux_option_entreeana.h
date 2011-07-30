@@ -28,8 +28,6 @@
 #ifndef _RESEAUX_OPTION_ENTREEANA_H_
  #define _RESEAUX_OPTION_ENTREEANA_H_
 
- #define NBR_VAL_INIT_COURBE          100                   /* Envoyé via 100 points à chaque paquet rezo */
-
  #define COURBE_TEMPS_TOP             5  /* 1 point = 5 secondes sur la grille courbes */
 
  enum
@@ -42,7 +40,6 @@
 
  struct CMD_TYPE_OPTION_ENTREEANA
   { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
-    guint  unite;                                                                         /* Km, h, ° ... */
     gfloat min;
     gfloat max;
     guint  type;                                                               /* Type de gestion de l'EA */
@@ -50,6 +47,7 @@
     guint  num;                                                                         /* Numero de l'EA */
     gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
     gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
+    gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
   };
 
 #endif

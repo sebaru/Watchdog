@@ -47,7 +47,7 @@
  static GtkWidget *Entry_lib;                                                     /* Libelle du entreeANA */
  static GtkWidget *Spin_min;                              /* Numéro du entreeANA en cours d'édition/ajout */
  static GtkWidget *Spin_max;                              /* Numéro du entreeANA en cours d'édition/ajout */
- static GtkWidget *Option_unite;                                   /* Unite correspondante à l'entrée ana */
+ static GtkWidget *Entry_unite;                                    /* Unite correspondante à l'entrée ana */
  static GtkWidget *Option_type;                                                /* Type de gestion de l'ea */
  static struct CMD_TYPE_OPTION_BIT_INTERNE Entree;                               /* EA en cours d'édition */
 
@@ -67,10 +67,11 @@
 /**********************************************************************************************************/
  static gboolean CB_editer_option_entreeANA ( GtkDialog *dialog, gint reponse, gboolean edition )
   { Entree.type = MNEMO_ENTREE_ANA;
+    g_snprintf( Entree.eana.unite, sizeof(Entree.eana.unite),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_unite) ) );
     Entree.eana.min = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_min) );
     Entree.eana.max = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_max) );
     Entree.eana.type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-    Entree.eana.unite = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_unite) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -145,11 +146,9 @@
 
     texte = gtk_label_new( _("Unit") );               /* Id unique du entreeANA en cours d'edition/ajout */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
-    Option_unite = gtk_combo_box_new_text();
-    for ( cpt=0; cpt<NBR_TYPE_UNITE; cpt++ )
-     { gtk_combo_box_insert_text( GTK_COMBO_BOX(Option_unite), cpt, Unite_vers_string(cpt) );
-     }
-    gtk_table_attach_defaults( GTK_TABLE(table), Option_unite, 1, 2, 4, 5 );
+    Entry_unite = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_unite), NBR_CARAC_UNITE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_unite, 1, 2, 4, 5 );
 
     texte = gtk_label_new( _("Description") );                               /* Le entreeANA en lui-meme */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
@@ -162,7 +161,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_entree->eana.libelle );
        g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), edit_entree->eana.num );
        gtk_entry_set_text( GTK_ENTRY(Entry_num), chaine );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_unite), edit_entree->eana.unite );
+       gtk_entry_set_text( GTK_ENTRY(Entry_unite), edit_entree->eana.unite );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_entree->eana.type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min), edit_entree->eana.min );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max), edit_entree->eana.max );
