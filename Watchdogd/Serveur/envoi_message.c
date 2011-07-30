@@ -198,9 +198,11 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_messages_thread ( struct CLIENT *client )
-  { struct CMD_ENREG nbr;
+  { struct CMD_TYPE_MESSAGES *msgs;
     struct CMD_TYPE_MESSAGE *msg;
+    struct CMD_ENREG nbr;
     struct DB *db;
+    gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
 
@@ -223,19 +225,42 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    for( ; ; )
-     { msg = Recuperer_messageDB_suite( Config.log, db );
-       if (!msg)
-        { Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
-        }
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-       Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,
-                      (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
-       g_free(msg);
+    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGES)) / sizeof(struct CMD_TYPE_MESSAGE);
+    msgs = (struct CMD_TYPE_MESSAGES *)g_malloc0( Config.taille_bloc_reseau );    
+    if (!msgs)
+     { struct CMD_GTK_MESSAGE erreur;
+       Info( Config.log, DEBUG_INFO, "Envoyer_messages_tag: Pb d'allocation memoire msgs" );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       return;
      }
+    msgs->nbr_messages = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
+
+    do
+     { msg = Recuperer_messageDB_suite( Config.log, db );         /* Récupération d'un message dans la DB */
+       if (msg)                                                /* Si enregegistrement, alors on le pousse */
+        { memcpy ( &msgs->msg[msgs->nbr_messages], msg, sizeof(struct CMD_TYPE_MESSAGE) );
+          msgs->nbr_messages++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
+          g_free(msg);
+        }
+
+       if ( (msg == NULL) || msgs->nbr_messages == max_enreg )/* Si depassement de tampon ou plus d'enreg */
+        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+
+          Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE, (gchar *)msgs,
+                         sizeof(struct CMD_TYPE_MESSAGES) + msgs->nbr_messages * sizeof(struct CMD_TYPE_MESSAGE) );
+          msgs->nbr_messages = 0;
+        }
+     }
+    while (msg);                                              /* Tant que l'on a des messages e envoyer ! */
+    g_free(msgs);
+    Libere_DB_SQL( Config.log, &db );
+    Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -66,6 +66,10 @@
     guint  time_repeat;                                       /* Temps entre deux répétitions (si non nul */
   };
 
+ struct CMD_TYPE_MESSAGES
+  { guint nbr_messages;                                 /* Nombre de structure CMD_TYPE_MESSAGE suivantes */
+    struct CMD_TYPE_MESSAGE msg[];
+  };
  
  struct CMD_TYPE_MESSAGE_MP3                                   /* Structure pour l'échange du fichier mp3 */
   { guint num;

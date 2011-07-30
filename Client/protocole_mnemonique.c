@@ -86,8 +86,8 @@
              { struct CMD_TYPE_MNEMONIQUES *mnemos;
                gint i;
                mnemos = (struct CMD_TYPE_MNEMONIQUES *)connexion->donnees;
-               Set_progress_plus( mnemos->nbr_mnemos);
-               for (i=0; i<mnemos->nbr_mnemos; i ++)
+               Set_progress_plus( mnemos->nbr_mnemos );
+               for (i=0; i<mnemos->nbr_mnemos; i++)
                 { struct CMD_TYPE_MNEMONIQUE *mnemo;
                   mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
                   if (!mnemo) break;

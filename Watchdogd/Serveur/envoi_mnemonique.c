@@ -306,9 +306,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
-  { struct CMD_ENREG nbr;
-    struct CMD_TYPE_MNEMONIQUES *mnemos;
+  { struct CMD_TYPE_MNEMONIQUES *mnemos;
     struct CMD_TYPE_MNEMONIQUE *mnemo;
+    struct CMD_ENREG nbr;
     struct DB *db;
     gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
 
@@ -334,10 +334,11 @@
     mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_malloc0( Config.taille_bloc_reseau );    
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_INFO, "Envoyer_mnemonisuqes_tag: Pb d'allocation memoire mnemos" );
+       Info( Config.log, DEBUG_INFO, "Envoyer_mnemoniques_tag: Pb d'allocation memoire mnemos" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }

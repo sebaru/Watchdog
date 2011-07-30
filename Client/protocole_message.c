@@ -73,14 +73,17 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MESSAGE:
-             { struct CMD_TYPE_MESSAGE *msg;
-               Set_progress_plusun();
-
-               msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof( struct CMD_TYPE_MESSAGE ) );
-               if (!msg) return; 
-
-               memcpy( msg, connexion->donnees, sizeof(struct CMD_TYPE_MESSAGE ) );
-               Arrivee_message = g_list_append( Arrivee_message, msg );
+             { struct CMD_TYPE_MESSAGES *msgs;
+               gint i;
+               msgs = (struct CMD_TYPE_MESSAGES *)connexion->donnees;
+               Set_progress_plus( msgs->nbr_messages );
+               for (i=0; i<msgs->nbr_messages; i++)
+                { struct CMD_TYPE_MESSAGE *msg;
+                  msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof( struct CMD_TYPE_MESSAGE ) );
+                  if (!msg) break; 
+                  memcpy( msg, &msgs->msg[i], sizeof(struct CMD_TYPE_MESSAGE ) );
+                  Arrivee_message = g_list_append( Arrivee_message, msg );
+                }
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN:
