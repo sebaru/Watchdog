@@ -100,7 +100,7 @@
         { Info( Config.log, DEBUG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
        if (!(Partage->top%5))                                          /* Cligno toutes les demi-secondes */
         { SB(5, !B(5)); }
-       if (!(Partage->top & 0x1))                                         /* Cligno toutes les 2 dixièmes */
+       if (!(Partage->top%3))                                             /* Cligno toutes les 3 dixièmes */
         { SB(6, !B(6)); }
        if (!(Partage->top%10))                                              /* Cligno toutes les secondes */
         { SB(4, !B(4));

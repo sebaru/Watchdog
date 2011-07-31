@@ -614,7 +614,7 @@ INSERT INTO `mnemos` (`type`, `num`, `objet`, `acronyme`, `libelle`) VALUES
 (0, 3, 'WATCHDOG OUTILS', 'SYSTEME', '0 le premier tour programme puis tout le temps 1'),
 (0, 4, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les secondes'),
 (0, 5, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les demi-secondes'),
-(0, 6, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les 2 dixièmes de seconde'),
+(0, 6, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les 3 dixièmes de seconde'),
 (7, 1, 'WATCHDOG OUTILS', 'SYSTEME', 'Motif toujours en mode 1 couleur rouge'),
 (7, 4, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
 (7, 3, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
