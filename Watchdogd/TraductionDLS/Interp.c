@@ -252,7 +252,7 @@
     action->sinon = New_chaine( taille );
 
     g_snprintf( action->alors, taille, "SCI(%d,1,%d,%d);", num, reset, ratio );
-    g_snprintf( action->sinon, taille, "SCI(%d,0,0,1);", num );
+    g_snprintf( action->sinon, taille, "SCI(%d,0,%d,%d);", num, reset, ratio );
     return(action);
   }
 /**********************************************************************************************************/
