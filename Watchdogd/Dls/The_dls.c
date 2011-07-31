@@ -398,7 +398,7 @@
         }
      }
     else
-     { if ( !(reset==-1 || reset == 0) ) Partage->ci[ num ].actif = FALSE; }
+     { if ( reset != 1) Partage->ci[ num ].actif = FALSE; }
 
     switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur réelle du CI */
      { case CI_TOTALISATEUR : if ( Partage->ci[num].last_update + 1 < Partage->top )
