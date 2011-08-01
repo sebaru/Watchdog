@@ -214,7 +214,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
+       pthread_exit ( NULL );
      }
     motifs->nbr_motifs = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
