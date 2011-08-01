@@ -169,9 +169,11 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_motif_supervision_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_MOTIF *motif;
+  { struct CMD_TYPE_MOTIFS *motifs;
+    struct CMD_TYPE_MOTIF *motif;
     struct CMD_ENREG nbr;
     struct DB *db;
+    gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
 
@@ -202,27 +204,53 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    for( ; ; )
-     { motif = Recuperer_motifDB_suite( Config.log, db );
-       if (!motif)                                                                          /* Terminé ?? */
-        { Libere_DB_SQL( Config.log, &db );
-          Client_mode( client, ENVOI_COMMENT_SUPERVISION );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit( NULL );
+    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
+    motifs = (struct CMD_TYPE_MOTIFS *)g_malloc0( Config.taille_bloc_reseau );    
+    if (!motifs)
+     { struct CMD_GTK_MESSAGE erreur;
+       Info( Config.log, DEBUG_INFO, "Envoyer_motif_supervision_thread: Pb d'allocation memoire motifs" );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Libere_DB_SQL( Config.log, &db );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       return;
+     }
+    motifs->nbr_motifs = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
+
+    do
+     { motif = Recuperer_motifDB_suite( Config.log, db );             /* Récupération du motif dans la DB */
+       if (motif)                                              /* Si enregegistrement, alors on le pousse */
+        { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
+          motifs->nbr_motifs++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
+          g_free(motif);
         }
-       if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) ) &&
+
+       if ( motif && (! g_list_find(client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) ) ) &&
             motif->type_gestion != 0 /* TYPE_INERTE */
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
           Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn ", motif->bit_controle );
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
+       if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
+        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-                      (gchar *)motif, sizeof(struct CMD_TYPE_MOTIF) );
-       g_free(motif);
+
+          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+                        (gchar *)motifs,
+                         sizeof(struct CMD_TYPE_MOTIFS) + motifs->nbr_motifs * sizeof(struct CMD_TYPE_MOTIF)
+                       );
+          motifs->nbr_motifs = 0;
+        }
      }
+    while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
+    g_free(motifs);
+
+    Libere_DB_SQL( Config.log, &db );
+    Client_mode( client, ENVOI_COMMENT_SUPERVISION );
+    Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN, NULL, 0 );
+    Unref_client( client );                                     /* Déréférence la structure cliente */
+    pthread_exit( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/

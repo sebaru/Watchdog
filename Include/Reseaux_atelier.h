@@ -60,6 +60,10 @@
     gchar   type_gestion;                                                  /* Statique/dynamique/cyclique */
     gint    layer;
   };
+ struct CMD_TYPE_MOTIFS
+  { guint nbr_motifs;                                     /* Nombre de structure CMD_TYPE_MOTIF suivantes */
+    struct CMD_TYPE_MOTIF motif[];
+  };
 
 /*********************************************** Gestion des commentaires *********************************/
  struct CMD_TYPE_COMMENT

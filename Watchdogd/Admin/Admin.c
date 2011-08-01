@@ -149,6 +149,7 @@
   { gchar ligne[128], commande[128], chaine[128];
     gint taille;
 
+    memset( ligne, 0, sizeof(ligne) );
     taille = read( client->connexion, ligne, sizeof(ligne) );
 
     if (taille > 0)

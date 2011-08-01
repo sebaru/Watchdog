@@ -70,14 +70,18 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF:
-             { struct CMD_TYPE_MOTIF *motif;
-               Set_progress_plusun();
-
-               motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
-               if (!motif) return; 
-               memcpy( motif, connexion->donnees, sizeof(struct CMD_TYPE_MOTIF ) );
-               Arrivee_motif = g_list_append( Arrivee_motif, motif );
-               save_id = motif->syn_id;               
+             { struct CMD_TYPE_MOTIFS *motifs;
+               gint i;
+               motifs = (struct CMD_TYPE_MOTIFS *)connexion->donnees;
+               Set_progress_plus( motifs->nbr_motifs );
+               for (i=0; i<motifs->nbr_motifs; i++)
+                { struct CMD_TYPE_MOTIF *motif;
+                  motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
+                  if (!motif) break; 
+                  memcpy( motif, &motifs->motif[i], sizeof(struct CMD_TYPE_MOTIF ) );
+                  Arrivee_motif = g_list_append( Arrivee_motif, motif );
+                  save_id = motif->syn_id;
+                }
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN:
