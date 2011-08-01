@@ -136,7 +136,7 @@
                         if (reponse[0] == '\n')
                          { if (nbr_slash_n == 1) { wait_reponse = FALSE; nbr_slash_n = 0; }
                            else nbr_slash_n++;
-                         }
+                         } else nbr_slash_n = 0;
                       }
                      fflush(stdout);
                      break;
