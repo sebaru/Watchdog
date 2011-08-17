@@ -330,7 +330,6 @@
                                               G_TYPE_STRING,                 /* Num (id en string "EAxxx" */
                                               G_TYPE_FLOAT,                                       /* min */
                                               G_TYPE_FLOAT,                                       /* max */
-                                              G_TYPE_UINT,                                       /* Unite */
                                               G_TYPE_STRING,                              /* Unite_string */
                                               G_TYPE_STRING                                    /* libelle */
                                );
