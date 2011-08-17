@@ -705,7 +705,7 @@
           gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
           gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
 
-          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left+800,  right+800, top + 0.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
+          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left,  right+200, top + 0.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
           gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
         }
        gtk_widget_queue_draw (infos->Databox);                                  /* Mise à jour du Databox */
