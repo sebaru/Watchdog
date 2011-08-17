@@ -204,7 +204,11 @@
            if (result) 
             { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_MNEMONIQUE) );
-                     g_free(result);
+              switch( result->type )
+               { case MNEMO_ENTREE_ANA :  Charger_eana ();    break;       /* Update de la running config */
+                 case MNEMO_CPT_IMP    :  Charger_cpt_imp (); break;       /* Update de la running config */
+               }
+              g_free(result);
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
