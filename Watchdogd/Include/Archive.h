@@ -28,7 +28,7 @@
 #ifndef _ARCHIVAGE_DB_H_
  #define _ARCHIVAGE_DB_H_
 
- #define ARCHIVE_EA_TEMPS_SI_CONSTANT  6000               /* Si constant, archivage toutes les 10 minutes */
+ #define ARCHIVE_EA_TEMPS_SI_CONSTANT   600                 /* Si constant, archivage toutes les 1 minute */
  #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50               /* Si variable, archivage toutes les 5 secondes */
 
  #define NOM_TABLE_ARCH    "histo_bit"
