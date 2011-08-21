@@ -643,10 +643,40 @@
 /* Entrée: une courbe, et une structure append_courbe                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- gboolean Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe )
-  { append_courbe->date -= COURBE_ORIGINE_TEMPS; 
-    memmove( courbe->X, courbe->X+1, (courbe->taille_donnees-1)*sizeof(gfloat));
-    memmove( courbe->Y, courbe->Y+1, (courbe->taille_donnees-1)*sizeof(gfloat));
+ gboolean Append_courbe ( struct TYPE_INFO_COURBE *infos, struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe )
+  { gfloat *new_X, *new_Y;
+
+    append_courbe->date -= COURBE_ORIGINE_TEMPS; 
+
+    if (courbe->X[0] < append_courbe->date - COURBE_NBR_HEURE_ARCHIVE*3600)/* Si premier enreg trop vieux */
+     { memmove( courbe->X, courbe->X+1, (courbe->taille_donnees-1)*sizeof(gfloat));
+       memmove( courbe->Y, courbe->Y+1, (courbe->taille_donnees-1)*sizeof(gfloat));
+     }
+    else                                     /* Sinon, on garde le premier enreg et on agrandit le tampon */
+     { if (courbe->taille_donnees > 600000)
+        { printf(" Depassement du nombre d'enregistrement \n");
+          return(FALSE);
+        }
+
+       courbe->taille_donnees++;                                            /* Agrandissement du tableau */
+
+       new_X = g_try_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
+       new_Y = g_try_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
+
+       printf(" New taille = %d\n", courbe->taille_donnees * sizeof(gfloat) );
+
+       if (new_X && new_Y)
+        { courbe->X = new_X;
+          courbe->Y = new_Y;
+                                                                         /* Suppression de l'ancien graph */
+          
+          if (courbe->index) gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), courbe->index );
+          courbe->index = gtk_databox_lines_new ( courbe->taille_donnees,
+                                                  courbe->X, courbe->Y,
+                                                  &COULEUR_COURBE[append_courbe->slot_id], 1);
+          gtk_databox_graph_add (GTK_DATABOX (infos->Databox), courbe->index);
+        } else printf("Append_courbe : realloc failed\n");
+     }
                   
     switch(courbe->type)
      { case MNEMO_ENTREE_ANA:
@@ -691,7 +721,7 @@
     courbe = &infos->Courbes[append_courbe->slot_id];
     if ( ! (courbe && courbe->actif) ) return;
 
-    if ( ! Append_courbe(courbe, append_courbe) )
+    if ( ! Append_courbe(infos, courbe, append_courbe) )
      { struct CMD_TYPE_COURBE rezo_courbe;
        rezo_courbe.type    = append_courbe->type;
        rezo_courbe.slot_id = append_courbe->slot_id;/* On demande au serveur de ne plus nous envoyer les infos */
@@ -705,7 +735,7 @@
           gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
           gtk_databox_get_visible_limits (GTK_DATABOX(infos->Databox), &left, &right, &top, &bottom);
 
-          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left,  right+200, top + 0.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
+          gtk_databox_set_total_limits (GTK_DATABOX(infos->Databox),  left,  right+250, top + 0.1*MAX_RESOLUTION, -0.1*MAX_RESOLUTION );
           gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(infos->Check_rescale), TRUE );
         }
        gtk_widget_queue_draw (infos->Databox);                                  /* Mise à jour du Databox */
@@ -825,7 +855,9 @@
 
     courbe->marker_select_x = courbe->X[0];
     courbe->marker_select_y = courbe->Y[0];
-    gtk_widget_queue_draw (infos->Databox);
+/*    gtk_databox_auto_rescale( GTK_DATABOX(infos->Databox), 0.1 );
+      gtk_widget_queue_draw (infos->Databox);
+*/
   }
 /**********************************************************************************************************/
 /* Proto_start_courbe: Appeler lorsque le client recoit un premier bloc de valeur a afficher              */

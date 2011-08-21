@@ -29,6 +29,7 @@
  #define _RESEAUX_COURBE_H_
 
  #define COURBE_ORIGINE_TEMPS    1300000000/* Origine des temps pour que le time_t INT passe dans les float de gtkdatabox */
+ #define COURBE_NBR_HEURE_ARCHIVE          24       /* 24 heures d'archive pour les courbes en temps réel */
 
  struct CMD_APPEND_COURBE
   { guint  slot_id;                               /* Numero du slot de la courbe dans l'interface cliente */

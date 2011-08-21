@@ -479,7 +479,8 @@
  extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );
  extern void Creer_page_histo_courbe ( gchar *libelle );
  extern void Detruire_page_histo_courbe( struct PAGE_NOTEBOOK *page );
- extern gint Append_courbe ( struct COURBE *courbe, struct CMD_APPEND_COURBE *append_courbe );
+ extern gboolean Append_courbe ( struct TYPE_INFO_COURBE *infos, struct COURBE *courbe,
+                                 struct CMD_APPEND_COURBE *append_courbe );
  extern void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe );
 
 
