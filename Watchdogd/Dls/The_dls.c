@@ -186,7 +186,7 @@
         }
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
-               Partage->ea[ num ].val_ech = val_int;               /* Pas d'interprétation !! */
+               Partage->ea[ num ].val_ech = val_int;                           /* Pas d'interprétation !! */
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
@@ -218,6 +218,9 @@
                Partage->ea[ num ].val_ech = (gdouble)
                   (val_int*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
+               break;
+          case ENTREEANA_WAGO_750461:
+               Partage->ea[ num ].val_ech = (gdouble)(val_int/10.0);                /* Valeur à l'echelle */ 
                break;
           default:
                Partage->ea[num].val_ech = 0.0;

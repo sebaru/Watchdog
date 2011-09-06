@@ -862,14 +862,28 @@
           case MODBUS_GET_AI:
                cpt_e = module->modbus.min_e_ana;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                { if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
-                   { int reponse;
-                     reponse = module->response.data[ 2*cpt + 1 ] << 5;
-                     reponse |= module->response.data[ 2*cpt + 2] >> 3;
-                     SEA( cpt_e, reponse );
-                     SEA_range( cpt_e, 1 );
+                { switch(Partage->ea[cpt_e].cmd_type_eana.type)
+                   { case ENTREEANA_WAGO_750455:
+                          if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
+                           { int reponse;
+                             reponse  = module->response.data[ 2*cpt + 1 ] << 5;
+                             reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
+                             SEA( cpt_e, reponse );
+                             SEA_range( cpt_e, 1 );
+                           }
+                          else SEA_range( cpt_e, 0 );
+                          break;
+                     case ENTREEANA_WAGO_750461:
+                           { int reponse;
+                             reponse  = module->response.data[ 2*cpt + 1 ] << 8;
+                             reponse |= module->response.data[ 2*cpt + 2 ];
+                             if (reponse < -2000.0 || reponse >= 8500.0) { SEA_range( cpt_e, 0 ); }
+                             else { SEA( cpt_e, reponse );
+                                    SEA_range( cpt_e, 1 );
+                                  }
+                           }
+                          break;
                    }
-                  else SEA_range( cpt_e, 0 );
                   cpt_e++;
                 }
                module->mode = MODBUS_SET_DO;
