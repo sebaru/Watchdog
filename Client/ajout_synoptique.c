@@ -146,7 +146,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_groupe, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Sous-Groupe") );
+    texte = gtk_label_new( _("Page") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_ssgroupe = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_ssgroupe), NBR_CARAC_LIBELLE_SYNOPTIQUE );
