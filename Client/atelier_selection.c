@@ -343,6 +343,59 @@
      }
   }
 /**********************************************************************************************************/
+/* Dupliquer_selection: Envoi au serveur une demande de création pour chacun des objets selectionnés      */
+/* Entrée: Rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Dupliquer_selection ( void )
+  { struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+    struct TRAME_ITEM_MOTIF      *trame_motif;
+    struct TRAME_ITEM_PASS       *trame_pass;
+    struct TRAME_ITEM_COMMENT    *trame_comm;
+    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    GList *selection;
+
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    selection = infos->Selection.items;
+    while(selection)                                                 /* Pour tous les objets selectionnés */
+     { switch ( *((gint *)selection->data) )
+        { case TYPE_PASSERELLE:
+               trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_PASS,
+                              (gchar *)trame_pass->pass, sizeof( struct CMD_TYPE_PASSERELLE ) );
+               break;
+          case TYPE_COMMENTAIRE:
+               trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_COMMENT,
+                              (gchar *)trame_comm->comment, sizeof( struct CMD_TYPE_COMMENT ) );
+               break;
+          case TYPE_MOTIF:
+               trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_MOTIF,
+                              (gchar *)trame_motif->motif, sizeof( struct CMD_TYPE_MOTIF ) );
+               break;
+          case TYPE_CAPTEUR:
+               trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,
+                              (gchar *)trame_capteur->capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
+               break;
+          case TYPE_CAMERA_SUP:
+               trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
+                              (gchar *)trame_camera_sup->camera_sup, sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               break;
+          default: /*Selection = g_list_remove( Selection, Selection->data );*/
+                   printf("Dupliquer_selection: type inconnu\n" );
+        }
+       selection = selection->next;
+     }
+  }
+/**********************************************************************************************************/
 /* Effacer_selection: Efface tous les elements de la selection en cours                                   */
 /* Entrée: Rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -411,7 +464,6 @@
         }
        selection = selection->next;
      }
-    printf("Fin effacer_groupe\n");
   }
 /**********************************************************************************************************/
 /* Fusionner_selection: Fusionne les elements selectionnés dans un meme groupe                            */

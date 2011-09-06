@@ -316,8 +316,8 @@ printf("Afficher_propriete: debut\n");
        GNOMEUIINFO_SUBTREE(N_("_Raise/Lower"), Popup_raise),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
@@ -371,8 +371,8 @@ printf("Afficher_propriete: debut\n");
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
@@ -418,8 +418,8 @@ printf("Afficher_propriete: debut\n");
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
@@ -466,8 +466,8 @@ printf("Clic sur pass: page trouvée \n");
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
@@ -513,8 +513,8 @@ printf("Clic sur capteur: page trouvée, %p \n", trame_capteur);
     static GnomeUIInfo Popup_camera_sup[]=
      { /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
+       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
        GNOMEUIINFO_SEPARATOR,
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
