@@ -3,7 +3,7 @@ AC_INIT(Watchdogd/Watchdogd.c)
 AC_CONFIG_HEADER(config.h)
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE( Watchdog, 2.6.`svnversion -n` )
+AM_INIT_AUTOMAKE( Watchdog, 2.6.`date +%y%m%H%M` )
 
 dnl Checks for programs.
 AC_PROG_CXX
