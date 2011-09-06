@@ -366,27 +366,27 @@
      { switch ( *((gint *)selection->data) )
         { case TYPE_PASSERELLE:
                trame_pass = ((struct TRAME_ITEM_PASS *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_PASS,
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_PASS,
                               (gchar *)trame_pass->pass, sizeof( struct CMD_TYPE_PASSERELLE ) );
                break;
           case TYPE_COMMENTAIRE:
                trame_comm = ((struct TRAME_ITEM_COMMENT *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_COMMENT,
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_COMMENT,
                               (gchar *)trame_comm->comment, sizeof( struct CMD_TYPE_COMMENT ) );
                break;
           case TYPE_MOTIF:
                trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_MOTIF,
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_MOTIF,
                               (gchar *)trame_motif->motif, sizeof( struct CMD_TYPE_MOTIF ) );
                break;
           case TYPE_CAPTEUR:
                trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAPTEUR,
                               (gchar *)trame_capteur->capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
                               (gchar *)trame_camera_sup->camera_sup, sizeof( struct CMD_TYPE_CAMERA_SUP ) );
                break;
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
