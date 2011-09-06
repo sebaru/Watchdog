@@ -297,15 +297,24 @@ printf("Afficher_propriete: debut\n");
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     static GtkWidget *Popup = NULL;
+    static GnomeUIInfo Popup_scale[]=                                      /*!< Définition du popup scale */
+     { GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:1"), NULL, Mettre_echelle_selection_1_1, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:Y"), NULL, Mettre_echelle_selection_1_Y, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Scale to X:1"), NULL, Mettre_echelle_selection_X_1, GNOME_STOCK_PIXMAP_ALIGN_JUSTIFY ),
+       GNOMEUIINFO_END
+     };
+    static GnomeUIInfo Popup_raise[]=                                      /*!< Définition du popup raise */
+     { GNOMEUIINFO_ITEM_STOCK( N_("Raise to top"), NULL, Raise_to_top, GNOME_STOCK_PIXMAP_TOP ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottom"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
+       GNOMEUIINFO_END
+     };
     static GnomeUIInfo Popup_motif[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("DLS properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
        GNOMEUIINFO_ITEM_STOCK( N_("Default color"), NULL,
                                Changer_couleur_directe, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Scale to 1:1"), NULL, NULL/*Mettre_echelle_un*/, GNOME_STOCK_PIXMAP_NEW ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Raise to top"), NULL, Raise_to_top, GNOME_STOCK_PIXMAP_TOP ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Lower to bottom"), NULL, Lower_to_bottom, GNOME_STOCK_PIXMAP_BOTTOM ),
+       GNOMEUIINFO_SUBTREE(N_("_Scale"), Popup_scale),
+       GNOMEUIINFO_SUBTREE(N_("_Raise/Lower"), Popup_raise),
        GNOMEUIINFO_SEPARATOR,
-       /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
        GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
        GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_COPY ),
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/

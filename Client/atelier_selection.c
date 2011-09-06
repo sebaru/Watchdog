@@ -431,30 +431,30 @@
     selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
     new_groupe = Nouveau_groupe();
     while(selection)
-    { switch ( *((gint *)selection->data) )
-       { case TYPE_PASSERELLE:
-              ((struct TRAME_ITEM_PASS *)selection->data)->groupe_dpl = new_groupe;
-              break;
-         case TYPE_COMMENTAIRE:
-              ((struct TRAME_ITEM_COMMENT *)selection->data)->groupe_dpl = new_groupe;
-              break;
-         case TYPE_MOTIF:
-              ((struct TRAME_ITEM_MOTIF *)selection->data)->groupe_dpl = new_groupe;
-              break;
-         case TYPE_CAPTEUR:
-              ((struct TRAME_ITEM_CAPTEUR *)selection->data)->groupe_dpl = new_groupe;
-              break;
-         case TYPE_CAMERA_SUP:
-              ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
-              break;
-         default: printf("Fusionner_selection: type inconnu\n" );
-       }
-      selection = selection->next;
+     { switch ( *((gint *)selection->data) )
+        { case TYPE_PASSERELLE:
+               ((struct TRAME_ITEM_PASS *)selection->data)->groupe_dpl = new_groupe;
+               break;
+          case TYPE_COMMENTAIRE:
+               ((struct TRAME_ITEM_COMMENT *)selection->data)->groupe_dpl = new_groupe;
+               break;
+          case TYPE_MOTIF:
+               ((struct TRAME_ITEM_MOTIF *)selection->data)->groupe_dpl = new_groupe;
+               break;
+          case TYPE_CAPTEUR:
+               ((struct TRAME_ITEM_CAPTEUR *)selection->data)->groupe_dpl = new_groupe;
+               break;
+          case TYPE_CAMERA_SUP:
+               ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
+               break;
+          default: printf("Fusionner_selection: type inconnu\n" );
+        }
+       selection = selection->next;
      }
     printf("Fin fusionner_selection\n");
   }
 /**********************************************************************************************************/
-/* Fusionner_selection: Fusionne les elements selectionnés dans un meme groupe                            */
+/* Detacher_selection: Detache les elements d'un meme groupe de election                                  */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
@@ -483,7 +483,7 @@
               ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
               break;
          default: printf("Detacher_selection: type inconnu\n" );
-     }
+       }
     printf("Fin detacher_selection\n");
   }
 /**********************************************************************************************************/
@@ -530,6 +530,91 @@
          default: printf("Rotationner_selection: type inconnu\n" );
        }
       selection = selection->next;
+     }
+  }
+/**********************************************************************************************************/
+/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                              */
+/* Entrée: Rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Mettre_echelle_selection_1_1 ( void )
+  { struct TRAME_ITEM_MOTIF *trame_motif;
+    struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+    GList *selection;
+ 
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    while(selection)
+     { switch ( *((gint *)selection->data) )
+        { case TYPE_MOTIF:
+               trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
+               trame_motif->motif->largeur = (gfloat)trame_motif->gif_largeur;
+               trame_motif->motif->hauteur = (gfloat)trame_motif->gif_hauteur;
+               Trame_rafraichir_motif(trame_motif);
+               break;
+          default: printf("Mettre_echelle_selection_1_1: type non inconnu\n" );
+        }
+       selection = selection->next;
+     }
+  }
+/**********************************************************************************************************/
+/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés                              */
+/* Entrée: Rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Mettre_echelle_selection_1_Y ( void )
+  { struct TRAME_ITEM_MOTIF *trame_motif;
+    struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+    GList *selection;
+ 
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    while(selection)
+     { switch ( *((gint *)selection->data) )
+        { case TYPE_MOTIF:
+               trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
+               trame_motif->motif->largeur = (gfloat)trame_motif->gif_largeur;
+               Trame_rafraichir_motif(trame_motif);
+               break;
+          default: printf("Mettre_echelle_selection_1_Y: type non inconnu\n" );
+        }
+       selection = selection->next;
+     }
+  }
+/**********************************************************************************************************/
+/* Mettre_echelle_selection_1_1 : Mise à l'echelle 1 des motifs selectionnés uniquement sur la hauteur    */
+/* Entrée: Rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Mettre_echelle_selection_X_1 ( void )
+  { struct TRAME_ITEM_MOTIF *trame_motif;
+    struct TYPE_INFO_ATELIER *infos;
+    struct PAGE_NOTEBOOK *page;
+    GList *selection;
+ 
+    page = Page_actuelle();                                               /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+
+    selection = infos->Selection.items;                              /* Pour tous les objets selectionnés */
+    while(selection)
+     { switch ( *((gint *)selection->data) )
+        { case TYPE_MOTIF:
+               trame_motif = ((struct TRAME_ITEM_MOTIF *)selection->data);
+               trame_motif->motif->hauteur = (gfloat)trame_motif->gif_hauteur;
+               Trame_rafraichir_motif(trame_motif);
+               break;
+          default: printf("Mettre_echelle_selection_X_1: type non inconnu\n" );
+        }
+       selection = selection->next;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

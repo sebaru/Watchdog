@@ -363,6 +363,9 @@
  extern void Deselectionner ( struct TYPE_INFO_ATELIER *infos, struct TRAME_ITEM *item );
  extern void Fusionner_selection ( void );
  extern void Detacher_selection ( void );
+ extern void Mettre_echelle_selection_1_1 ( void );
+ extern void Mettre_echelle_selection_1_Y ( void );
+ extern void Mettre_echelle_selection_X_1 ( void );
                                                                                /* Dans atelier_agrandir.c */
  extern void Agrandir_bd ( GooCanvasItem *widget, GooCanvasItem *target,
                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
