@@ -115,6 +115,9 @@
                                      (courbe->Y[index_posx]*(courbe->eana.max - courbe->eana.min))/4095.0
                                     + courbe->eana.min;                             /* Valeur à l'echelle */ 
                           break;
+                     case ENTREEANA_WAGO_750461:
+                          valeur = (gdouble)(courbe->Y[index_posx] / 10.0);         /* Valeur à l'echelle */ 
+                          break;
                      default : valeur = -1.0;
                    }                  
                   g_snprintf( description, sizeof(description),

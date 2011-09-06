@@ -883,6 +883,8 @@
                                   }
                            }
                           break;
+                     default : SEA_range( cpt_e, 0 );
+                               SEA( cpt_e, 0 );
                    }
                   cpt_e++;
                 }
