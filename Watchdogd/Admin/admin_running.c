@@ -61,6 +61,7 @@
        Write_admin ( client->connexion, "  geti xxx              - Get Ixxx\n" );
        Write_admin ( client->connexion, "  seti xxx E R V B C    - Set Ixxx Etat Rouge Vert Bleu Cligno\n" );
        Write_admin ( client->connexion, "  getci xxx             - Get CIxxx\n" );
+       Write_admin ( client->connexion, "  getch xxx             - Get CHxxx\n" );
        Write_admin ( client->connexion, "  tell message_num      - Envoi d'un message audio _num_\n" );
        Write_admin ( client->connexion, "  sms message           - Envoi du message SMS via SMSBOX\n" );
        Write_admin ( client->connexion, "  msgs message          - Envoi d'un message a tous les clients\n" );
@@ -222,6 +223,14 @@
                    num, Partage->ci[num].cpt_impdb.valeur, Partage->ci[num].cpt_impdb.type, Partage->ci[num].actif,
                    Partage->ci[num].cpt_impdb.unite, Partage->ci[num].cpt_impdb.multi,
                    Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
+                 );
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "getch" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), " CH%03d = %6d, actif=%d\n",
+                   num, Partage->ch[num].cpthdb.valeur, Partage->ch[num].actif
                  );
        Write_admin ( client->connexion, chaine );
      } else
