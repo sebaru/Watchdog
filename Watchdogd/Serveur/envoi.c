@@ -46,7 +46,11 @@
  gint Envoi_client( struct CLIENT *client, gint tag, gint ss_tag, gchar *buffer, gint taille )
   { gint retour;
 
-    if (!client || client->mode>=DECONNECTE ) { printf("Envoi interdit !! \n"); return(0); }
+    if ( !client ) return(0);
+    if ( client->mode >= DECONNECTE )
+     { Info_n( Config.log, DEBUG_NETWORK, "Envoi_client : envoi interdit", client->connexion->socket);
+       return(0);
+     }
 
     pthread_mutex_lock( &client->mutex_write );
     retour = Envoyer_reseau( Config.log, client->connexion, W_CLIENT, tag, ss_tag, buffer, taille );

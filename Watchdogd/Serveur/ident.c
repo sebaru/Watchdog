@@ -42,6 +42,8 @@
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
+    Info_c( Config.log, DEBUG_CONNEXION, _("Autoriser_autorisation: RAZ login failed"), client->util->id );
+    
     Raz_login_failed( Config.log, client->Db_watchdog, client->util->id );
   }
 /**********************************************************************************************************/
@@ -131,7 +133,9 @@
                      (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        return(ATTENTE_NEW_PASSWORD);
      }
+    Info_c( Config.log, DEBUG_CONNEXION, _("Tester_autorisation: Envoi Autorisation"), client->util->nom );
     Autoriser_client ( Id_serveur, client );
+    Info_c( Config.log, DEBUG_CONNEXION, _("Tester_autorisation: Autorisation sent"), client->util->nom );
     return( ENVOI_DONNEES );
   }
 /*--------------------------------------------------------------------------------------------------------*/
