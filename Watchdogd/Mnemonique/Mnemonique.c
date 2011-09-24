@@ -50,13 +50,18 @@
     if (mnemo_a_virer)
      { switch (mnemo_a_virer->type)
         { case MNEMO_ENTREE_ANA:
-               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_ENTREEANA, mnemo_a_virer->id );
                Lancer_requete_SQL ( log, db, requete );
                break;
           case MNEMO_CPT_IMP:
-               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPT_IMP, mnemo_a_virer->id );
+               Lancer_requete_SQL ( log, db, requete );
+               break;
+          case MNEMO_CPTH:
+               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPTH, mnemo_a_virer->id );
                Lancer_requete_SQL ( log, db, requete );
                break;
           default:

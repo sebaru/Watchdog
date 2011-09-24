@@ -42,7 +42,7 @@
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
-    Info_c( Config.log, DEBUG_CONNEXION, _("Autoriser_autorisation: RAZ login failed"), client->util->id );
+    Info_n( Config.log, DEBUG_CONNEXION, _("Autoriser_autorisation: RAZ 'login failed'"), client->util->id );
     
     Raz_login_failed( Config.log, client->Db_watchdog, client->util->id );
   }

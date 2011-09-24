@@ -151,6 +151,7 @@
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }
+    Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete traite", requete );
     return(TRUE);
   }
 /**********************************************************************************************************/

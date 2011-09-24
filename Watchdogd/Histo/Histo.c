@@ -192,7 +192,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle,objet,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe FROM %s WHERE id=%d", NOM_TABLE_HISTO, id );
+                "date_fixe FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_HISTO, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }

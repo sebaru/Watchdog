@@ -45,6 +45,10 @@
        Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
        return;
      }
+    else
+     { Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: Add Arch a traiter type", type );
+       Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: Add Arch a traiter  num", num );
+     }
 
     arch = (struct ARCHDB *)g_malloc( sizeof(struct ARCHDB) );
     if (!arch) return;
@@ -66,7 +70,7 @@
 /**********************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
-   prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info( Config.log, DEBUG_ARCHIVE, "ARCH: demarrage" );
 
@@ -77,8 +81,9 @@
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    Partage->com_arch.liste_arch = NULL;                                  /* Initialisation des variables */
-    Partage->com_arch.Thread_run = TRUE;                                            /* Le thread tourne ! */
+    Partage->com_arch.liste_arch  = NULL;                                 /* Initialisation des variables */
+    Partage->com_arch.Thread_run  = TRUE;                                           /* Le thread tourne ! */
+    Partage->com_arch.taille_arch = 0;
     while(Partage->com_arch.Thread_run == TRUE)                          /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
@@ -111,6 +116,7 @@
        pthread_mutex_unlock( &Partage->com_arch.synchro );
        Ajouter_archDB ( Config.log, db, arch );
        g_free(arch);
+       Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: archive saved" );
      }
     Libere_DB_SQL( Config.log, &db );
     Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Down", pthread_self() );
