@@ -58,12 +58,12 @@
 /* Sortie: rien ou pas rien                                                                               */
 /**********************************************************************************************************/
  int Heure_apres ( int heure, int minute )
-  { return( (heure>nbr_heure || (heure==nbr_heure && minute>nbr_minute)) ); }
+  { return( (heure<nbr_heure || (heure==nbr_heure && minute<nbr_minute)) ); }
 /**********************************************************************************************************/
 /* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
 /* Entrée: heure et minute attendue                                                                       */
 /* Sortie: rien ou pas rien                                                                               */
 /**********************************************************************************************************/
  int Heure_avant ( int heure, int minute )
-  { return( (heure<nbr_heure || (heure==nbr_heure && minute<nbr_minute)) ); }
+  { return( (heure>nbr_heure || (heure==nbr_heure && minute>nbr_minute)) ); }
 /*--------------------------------------------------------------------------------------------------------*/
