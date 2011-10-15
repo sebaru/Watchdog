@@ -67,6 +67,13 @@ blanc         [\t ]+
 "HEURE"                    { Dls_lval.val = HEURE;       return HEURE;       }
 "APRES"                    { Dls_lval.val = APRES;       return APRES;       }
 "AVANT"                    { Dls_lval.val = AVANT;       return AVANT;       }
+"LUNDI"                    { Dls_lval.val = LUNDI;       return LUNDI;       }
+"MARDI"                    { Dls_lval.val = MARDI;       return MARDI;       }
+"MERCREDI"                 { Dls_lval.val = MERCREDI;    return MERCREDI;    }
+"JEUDI"                    { Dls_lval.val = JEUDI;       return JEUDI;       }
+"VENDREDI"                 { Dls_lval.val = VENDREDI;    return VENDREDI;    }
+"SAMEDI"                   { Dls_lval.val = SAMEDI;      return SAMEDI;      }
+"DIMANCHE"                 { Dls_lval.val = DIMANCHE;    return DIMANCHE;    }
 
  /************************************************ Couleurs ***********************************************/
 "rouge"                    { Dls_lval.val = ROUGE;       return ROUGE;       }

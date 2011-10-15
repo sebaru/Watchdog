@@ -30,7 +30,7 @@
  #include "Module_dls.h"                /* Inclusion des prototypes de fonctions de controle/commande DLS */
 
  static int nbr_heure, nbr_minute;                                 /* Gestion des demarrages à heure fixe */
-
+ static int num_jour_semaine;                                             /* Numéro du jour de la semaine */
 /**********************************************************************************************************/
 /* Prendre_heure: Prend la date/heure actuelle de la machine                                              */
 /* Entrée: rien                                                                                           */
@@ -44,7 +44,15 @@
     tm = localtime( &temps );
     nbr_heure = tm->tm_hour;
     nbr_minute = tm->tm_min;
+    num_jour_semaine = tm->tm_wday;
   }
+/**********************************************************************************************************/
+/* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
+/* Entrée: heure et minute attendue                                                                       */
+/* Sortie: rien ou pas rien                                                                               */
+/**********************************************************************************************************/
+ int Jour_semaine ( int jour )
+  { return( num_jour_semaine == jour ); }
 /**********************************************************************************************************/
 /* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
 /* Entrée: heure et minute attendue                                                                       */

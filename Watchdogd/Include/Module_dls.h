@@ -50,5 +50,6 @@
  extern int Heure( int heure, int minute );                                    /* Tester l'heure actuelle */
  extern int Heure_avant( int heure, int minute );
  extern int Heure_apres( int heure, int minute );
- #endif
+ extern int Jour_semaine( int jour );                 /* Sommes nous le jour de la semaine en parametre ? */
+ #endif 
 /*-------------------------------------------------------------------------------------------------------*/

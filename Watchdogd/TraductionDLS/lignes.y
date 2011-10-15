@@ -62,8 +62,8 @@ int erreur;                                                             /* Compt
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
 %type  <val>    ordre
 
-%token <val>    HEURE APRES AVANT
-%type  <val>    modulateur
+%token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
+%type  <val>    modulateur jour_semaine
 
 %token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H CPT_IMP EANA START
 %type  <val>    alias_bit
@@ -220,6 +220,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case AVANT: g_snprintf( $$, taille, "Heure_avant(%d,%d)", $2, $4 );
                                   break;
                     }
+                }}
+                | jour_semaine
+                {{ int taille;
+                   taille = 18;
+                   $$ = New_chaine(taille);
+                   g_snprintf( $$, taille, "Jour_semaine(%d)", $1 );
                 }}
                 | barre BI ENTIER
                 {{ int taille;
@@ -536,6 +542,14 @@ barre:          BARRE {{ $$=1; }}
 modulateur:     APRES        {{ $$=APRES;  }}
                 | AVANT      {{ $$=AVANT;  }}
                 |            {{ $$=0;      }}
+                ;
+jour_semaine:   LUNDI        {{ $$=1; }}
+                | MARDI      {{ $$=2; }}
+                | MERCREDI   {{ $$=3; }}
+                | JEUDI      {{ $$=4; }}
+                | VENDREDI   {{ $$=5; }}
+                | SAMEDI     {{ $$=6; }}
+                | DIMANCHE   {{ $$=0; }}
                 ;
 ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL
                 ;
