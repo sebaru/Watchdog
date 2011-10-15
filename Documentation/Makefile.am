@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-pkgdata_DATA = Watchdog-install.pdf Watchdog.pdf
-EXTRA_DIST = Watchdog-install.pdf Watchdog.pdf
+pkgdata_DATA = Watchdog-install.pdf Watchdog.pdf Watchdog-DLS.pdf
+EXTRA_DIST = Watchdog-install.pdf Watchdog.pdf Watchdog-DLS.pdf
 
 MAINTAINERCLEANFILES = Makefile.in
