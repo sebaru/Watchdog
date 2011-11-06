@@ -154,8 +154,8 @@
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
-       g_free( plugin );
        Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: Dechargé", plugin->plugindb.id );
+       g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }

@@ -494,6 +494,7 @@
        return(EXIT_OK);
      }
 
+    Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
      { Info( Config.log, DEBUG_INFO, "Shared memory failed to allocate" ); }
@@ -541,6 +542,7 @@
 
        sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
        sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
        sigaction( SIGPIPE, &sig, NULL );
        sigaction( SIGHUP,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
