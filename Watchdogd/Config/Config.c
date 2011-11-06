@@ -250,6 +250,7 @@
        if (!Config.debug_level) Config.debug_level = DEFAUT_DEBUG_LEVEL;                    /* Par défaut */
 
      }
+    else Config.debug_level = DEFAUT_DEBUG_LEVEL;                                           /* Par défaut */
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
