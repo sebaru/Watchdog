@@ -247,6 +247,7 @@
 
     sig.sa_handler = SIG_IGN;
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+    sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
     sigaction( SIGINT, &sig, NULL );                                               /* On ignore le SIGINT */
 
                                                   /* Initialisation de la zone interne et comm du serveur */
