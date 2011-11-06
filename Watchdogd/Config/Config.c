@@ -251,6 +251,7 @@
 
      }
     else Config.debug_level = DEFAUT_DEBUG_LEVEL;                                           /* Par défaut */
+    printf("Debug_level = %d\n", Config.debug_level );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
