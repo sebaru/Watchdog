@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
 --
 
 CREATE TABLE IF NOT EXISTS `dls_cpth` (
-  `id` int(11) NOT NULL DEFAULT '0',
+  `id_mnemo` int(11) NOT NULL DEFAULT '0',
   `val` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
