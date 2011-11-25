@@ -207,6 +207,7 @@
               switch( result->type )
                { case MNEMO_ENTREE_ANA :  Charger_eana ();    break;       /* Update de la running config */
                  case MNEMO_CPT_IMP    :  Charger_cpt_imp (); break;       /* Update de la running config */
+                 case MNEMO_CPTH       :  Charger_cpth ();    break;       /* Update de la running config */
                }
               g_free(result);
             }

@@ -129,6 +129,12 @@
                         "('%d','%d','%d','%f','%s')", NOM_TABLE_CPT_IMP, 0, last_id, 0, 1.0, "n/a" );
             Lancer_requete_SQL ( log, db, requete );
             break;
+       case MNEMO_CPTH:
+            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                        "INSERT INTO %s(val,id_mnemo) VALUES "
+                        "('%d','%d')", NOM_TABLE_CPTH, 0, last_id );
+            Lancer_requete_SQL ( log, db, requete );
+            break;
        default:
             break;
      }

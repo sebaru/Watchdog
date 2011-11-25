@@ -33,8 +33,9 @@
  #define NOM_TABLE_CPTH    "dls_cpth"
 
  struct CPTH_DB
-  { guint  id;                                                                      /* Numero du compteur */
+  { guint  id_mnemo;                                                  /* Référence sur les id mnemoniques */
     guint  valeur;                                                                  /* Valeur du compteur */
+    guint  num;                                                                     /* Numero du compteur */
   };
 
  struct CPT_HORAIRE

@@ -552,9 +552,10 @@
        sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
        sigaction( SIGTERM, &sig, NULL );
 
+#ifdef bouh
        sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sigset, NULL );
-
+#endif
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
        Charger_eana();
        Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
