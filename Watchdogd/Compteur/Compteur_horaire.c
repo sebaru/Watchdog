@@ -48,7 +48,7 @@
                 "SELECT id_mnemo,val,num"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo ORDER BY %s.num",
                 NOM_TABLE_CPTH, NOM_TABLE_MNEMO, /* From */
-                NOM_TABLE_MNEMO, NOM_TABLE_CPT_IMP, /* WHERE */
+                NOM_TABLE_MNEMO, NOM_TABLE_CPTH, /* WHERE */
                 NOM_TABLE_MNEMO /* Order by */
               );
 
@@ -84,14 +84,12 @@
 /**********************************************************************************************************/
  void Charger_cpth ( void )
   { struct DB *db;
-    gint i;
 
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Info( Config.log, DEBUG_INFO, "Charger_cpth: Connexion DB failed" );
        return;
      }                                                                           /* Si pas de histos (??) */
-
 
     if (!Recuperer_cpthDB( Config.log, db ))
      { Libere_DB_SQL( Config.log, &db );
