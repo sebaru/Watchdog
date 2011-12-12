@@ -438,7 +438,6 @@
   { struct sigaction sig;
     gchar strpid[12];
     gint fd_lock, i;
-    sigset_t sigset;
     gint import=0;
     gboolean fg;
 
