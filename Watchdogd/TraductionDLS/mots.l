@@ -39,7 +39,7 @@
  /* Expressions rationnelles de detection */
 digit         [0-9]+
 digitf        [-]?[0-9]+[.[0-9]+]?
-id            [a-zA-Z][a-zA-Z_0-9-]+
+id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z_0-9]
 blanc         [\t ]+
 
  /* Noms des environnements */
