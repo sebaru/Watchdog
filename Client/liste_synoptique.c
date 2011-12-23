@@ -305,20 +305,13 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Page"), renderer,
-                                                         "text", COLONNE_SSGROUPE,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_SSGROUPE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_synoptique), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Titre"), renderer,
                                                          "text", COLONNE_TITRE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TITRE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_synoptique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de synoptique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Libelle"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Name"), renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
