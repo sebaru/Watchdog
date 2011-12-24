@@ -441,7 +441,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du nom de plugin_dls */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Name"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("D.L.S Name"), renderer,
                                                          "text", COLONNE_NOM,
                                                          "background-gdk", COLONNE_COLOR_FOND,
                                                          "foreground-gdk", COLONNE_COLOR_TEXTE,
