@@ -40,8 +40,7 @@
  enum
   {  COLONNE_ID,
      COLONNE_GROUPE,
-     COLONNE_SSGROUPE,
-     COLONNE_TITRE,
+     COLONNE_PAGE,
      COLONNE_LIBELLE,
      NBR_COLONNE
   };
@@ -277,8 +276,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_STRING,                                    /* Groupe */
-                                              G_TYPE_STRING,                                  /* SSGroupe */
-                                              G_TYPE_STRING,                                     /* Titre */
+                                              G_TYPE_STRING,                                      /* Page */
                                               G_TYPE_STRING                                       /* Name */
                                );
 
@@ -305,9 +303,9 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Page"), renderer,
-                                                         "text", COLONNE_TITRE,
+                                                         "text", COLONNE_PAGE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TITRE);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_PAGE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_synoptique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de synoptique */
@@ -375,8 +373,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, synoptique->id,
                          COLONNE_GROUPE, synoptique->groupe,
-                         COLONNE_SSGROUPE, synoptique->ssgroupe,
-                         COLONNE_TITRE, synoptique->titre,
+                         COLONNE_PAGE, synoptique->page,
                          COLONNE_LIBELLE, synoptique->libelle,
                          -1
                        );

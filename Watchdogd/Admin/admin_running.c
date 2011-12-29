@@ -72,7 +72,7 @@
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
        Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
        Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
-       Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,lirc)\n" );
+       Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,asterisk,lirc)\n" );
        Write_admin ( client->connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )

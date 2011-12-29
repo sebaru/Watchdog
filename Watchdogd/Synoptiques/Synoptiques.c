@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Synoptiques/Synoptiques.c       Déclaration des fonctions pour la gestion des synoptiques    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     sam 04 avr 2009 11:28:56 CEST  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     jeu. 29 déc. 2011 14:00:49 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -54,12 +54,9 @@
     if (!syn) return(FALSE);
     if (syn->groupe == GID_TOUTLEMONDE) return(TRUE);
 
-printf(" Groupe syn = %d\n", syn->access_groupe );
-
     cpt=0;
     while( util->gids[cpt] )
-     { printf("utils->gids[%d] = %d\n", cpt, util->gids[cpt] );
-       if( util->gids[cpt] == syn->access_groupe )
+     { if( util->gids[cpt] == syn->access_groupe )
         { g_free(syn);
           return(TRUE);
         }
@@ -134,7 +131,7 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
 /**********************************************************************************************************/
  gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[512];
-    gchar *libelle, *titre, *groupe, *ssgroupe;
+    gchar *libelle, *page, *groupe;
 
     libelle = Normaliser_chaine ( log, syn->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
@@ -142,9 +139,9 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
        return(-1);
      }
 
-    titre = Normaliser_chaine ( log, syn->titre );                       /* Formatage correct des chaines */
-    if (!titre)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible name gateway" );
+    page = Normaliser_chaine ( log, syn->page );                       /* Formatage correct des chaines */
+    if (!page)
+     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible page" );
        g_free(libelle);
        return(-1);
      }
@@ -153,27 +150,17 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
     if (!groupe)
      { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible groupe" );
        g_free(libelle);
-       g_free(titre);
-       return(-1);
-     }
-
-    ssgroupe = Normaliser_chaine ( log, syn->ssgroupe );                 /* Formatage correct des chaines */
-    if (!ssgroupe)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_synoptiqueDB: Normalisation impossible ssgroupe" );
-       g_free(libelle);
-       g_free(titre);
-       g_free(groupe);
+       g_free(page);
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                "INSERT INTO %s(libelle,titre,access_groupe,groupe,ssgroupe) VALUES "
-                "('%s','%s','%d','%s','%s')", NOM_TABLE_SYNOPTIQUE, libelle, titre,
-                syn->access_groupe, groupe, ssgroupe );
+                "INSERT INTO %s(libelle,page,access_groupe,groupe) VALUES "
+                "('%s','%s','%d','%s','%s')", NOM_TABLE_SYNOPTIQUE, libelle, page,
+                syn->access_groupe, groupe );
     g_free(libelle);
-    g_free(titre);
+    g_free(page);
     g_free(groupe);
-    g_free(ssgroupe);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -188,8 +175,8 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,titre,access_groupe,groupe,ssgroupe"
-                " FROM %s ORDER BY groupe,ssgroupe,libelle", NOM_TABLE_SYNOPTIQUE );
+                "SELECT id,libelle,page,access_groupe,groupe"
+                " FROM %s ORDER BY groupe,page,libelle", NOM_TABLE_SYNOPTIQUE );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -211,9 +198,8 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
     if (!syn) Info( log, DEBUG_SERVEUR, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
-       memcpy( &syn->titre,   db->row[2], sizeof(syn->titre  ) );/* Recopie dans la structure */
-       memcpy( &syn->groupe,   db->row[4], sizeof(syn->groupe  ) );          /* Recopie dans la structure */
-       memcpy( &syn->ssgroupe,   db->row[5], sizeof(syn->ssgroupe  ) );      /* Recopie dans la structure */
+       memcpy( &syn->page,    db->row[2], sizeof(syn->page   ) );            /* Recopie dans la structure */
+       memcpy( &syn->groupe,  db->row[4], sizeof(syn->groupe ) );            /* Recopie dans la structure */
        syn->id            = atoi(db->row[0]);
        syn->access_groupe = atoi(db->row[3]);
      }
@@ -229,7 +215,7 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
     gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,titre,access_groupe,groupe,ssgroupe "
+                "SELECT id,libelle,page,access_groupe,groupe"
                 " FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, id );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -247,9 +233,8 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
      { Info( log, DEBUG_SERVEUR, "Rechercher_synoptiqueDB: Mem error" ); }
     else
      { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
-       memcpy( &syn->titre,   db->row[2], sizeof(syn->titre  ) );/* Recopie dans la structure */
-       memcpy( &syn->groupe,   db->row[4], sizeof(syn->groupe  ) );          /* Recopie dans la structure */
-       memcpy( &syn->ssgroupe,   db->row[5], sizeof(syn->ssgroupe  ) );      /* Recopie dans la structure */
+       memcpy( &syn->page,    db->row[2], sizeof(syn->page   ) );            /* Recopie dans la structure */
+       memcpy( &syn->groupe,  db->row[4], sizeof(syn->groupe ) );            /* Recopie dans la structure */
        syn->id            = atoi(db->row[0]);
        syn->access_groupe = atoi(db->row[3]);
      }
@@ -262,7 +247,7 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
 /**********************************************************************************************************/
  gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[1024];
-    gchar *libelle, *titre, *groupe, *ssgroupe;
+    gchar *libelle, *page, *groupe;
 
     libelle = Normaliser_chaine ( log, syn->libelle );
     if (!libelle)
@@ -270,9 +255,9 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
        return(FALSE);
      }
 
-    titre = Normaliser_chaine ( log, syn->titre );
-    if (!titre)
-     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible titre" );
+    page = Normaliser_chaine ( log, syn->page );
+    if (!page)
+     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible page" );
        g_free(libelle);
        return(FALSE);
      }
@@ -281,28 +266,18 @@ printf(" Groupe syn = %d\n", syn->access_groupe );
     if (!groupe)
      { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible groupe" );
        g_free(libelle);
-       g_free(titre);
+       g_free(page);
        return(FALSE);
-     }
-
-    ssgroupe = Normaliser_chaine ( log, syn->ssgroupe );                 /* Formatage correct des chaines */
-    if (!ssgroupe)
-     { Info( log, DEBUG_SERVEUR, "Modifier_synoptiqueDB: Normalisation impossible ssgroupe" );
-       g_free(libelle);
-       g_free(titre);
-       g_free(groupe);
-       return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',titre='%s',access_groupe='%d',groupe='%s',ssgroupe='%s' "
+                "libelle='%s',page='%s',access_groupe='%d',groupe='%s' "
                 "WHERE id='%d'",
-                NOM_TABLE_SYNOPTIQUE, libelle, titre, syn->access_groupe, groupe, ssgroupe, syn->id );
+                NOM_TABLE_SYNOPTIQUE, libelle, page, syn->access_groupe, groupe, syn->id );
     g_free(libelle);
-    g_free(titre);
+    g_free(page);
     g_free(groupe);
-    g_free(ssgroupe);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

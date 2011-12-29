@@ -719,8 +719,7 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `groupe` text COLLATE utf8_unicode_ci NOT NULL,
-  `ssgroupe` text COLLATE utf8_unicode_ci NOT NULL,
-  `titre` text COLLATE utf8_unicode_ci NOT NULL,
+  `page` text COLLATE utf8_unicode_ci NOT NULL,
   `access_groupe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
