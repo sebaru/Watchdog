@@ -108,7 +108,7 @@
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id"
                 " ORDER BY groupe,page,num",
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* From */
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* Where */
               );
 
