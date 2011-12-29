@@ -44,7 +44,7 @@
      COLONNE_NUM,
      COLONNE_TYPE_INT,
      COLONNE_TYPE_STRING,
-     COLONNE_OBJET,
+     COLONNE_GROUPE_PAGE,
      COLONNE_LIBELLE,
      COLONNE_LIBELLE_AUDIO,
      COLONNE_LIBELLE_SMS,
@@ -217,7 +217,7 @@
                         GtkPrintContext   *context,
                         gint               page_nr,
                         GtkTreeIter *iter)
-  { gchar *num, *type_string, *objet, *libelle, *date_create, titre[128], chaine[128];
+  { gchar *num, *type_string, *groupe_page, *libelle, *date_create, titre[128], chaine[128];
     guint enable, type_int, sms;
     GtkTreeModel *store;
     gboolean valide;
@@ -251,11 +251,11 @@
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_message) );
     valide = TRUE;
     y = 2 * PRINT_FONT_SIZE;
-    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les objets du tableau */
+    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */
      { gtk_tree_model_get( store, iter, COLONNE_NOTINHIB, &enable, COLONNE_NUM, &num,
                            COLONNE_SMS, &sms,
                            COLONNE_TYPE_INT, &type_int, COLONNE_TYPE_STRING, &type_string,
-                           COLONNE_OBJET, &objet, COLONNE_LIBELLE, &libelle, -1 );
+                           COLONNE_GROUPE_PAGE, &groupe_page, COLONNE_LIBELLE, &libelle, -1 );
 
        cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
        if (enable) { cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
@@ -288,7 +288,7 @@
 
        cairo_move_to( cr, 17.0*PRINT_FONT_SIZE, y );   /* Objet */
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, objet );
+       cairo_show_text (cr, groupe_page );
 
        cairo_move_to( cr, 38.0*PRINT_FONT_SIZE, y );  /* Libelle */
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -296,7 +296,7 @@
 
        g_free(num);
        g_free(type_string);
-       g_free(objet);
+       g_free(groupe_page);
        g_free(libelle);
 
        valide = gtk_tree_model_iter_next( store, iter );
@@ -403,7 +403,7 @@
                                               G_TYPE_STRING,                                       /* Num */
                                               G_TYPE_UINT,                                 /* Int du type */
                                               G_TYPE_STRING,                            /* String du Type */
-                                              G_TYPE_STRING,                                     /* Objet */
+                                              G_TYPE_STRING,                               /* Groupe Page */
                                               G_TYPE_STRING,                                   /* Libelle */
                                               G_TYPE_STRING,                             /* Libelle_audio */
                                               G_TYPE_STRING,                               /* Libelle_sms */
@@ -464,10 +464,10 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Object"), renderer,
-                                                         "text", COLONNE_OBJET,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
+                                                         "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_OBJET);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
@@ -543,7 +543,7 @@
 /**********************************************************************************************************/
  static void Rafraichir_visu_message( GtkTreeIter *iter, struct CMD_TYPE_MESSAGE *message )
   { GtkTreeModel *store;
-    gchar chaine[10], audio[10];
+    gchar chaine[10], audio[10], groupe_page[512];
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_message) );             /* Acquisition du modele */
 
@@ -552,6 +552,8 @@
      { g_snprintf( audio, sizeof(audio), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), message->bit_voc ); }
     else
      { g_snprintf( audio, sizeof(audio), "- no -"); }
+
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", message->groupe, message->page );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NOTINHIB, message->enable,
@@ -562,7 +564,7 @@
                          COLONNE_AUDIO, audio,
                          COLONNE_TYPE_INT, message->type,
                          COLONNE_TYPE_STRING, Type_vers_string(message->type),
-                         COLONNE_OBJET, message->objet,
+                         COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_LIBELLE, message->libelle,
                          COLONNE_LIBELLE_AUDIO, message->libelle_audio,
                          COLONNE_LIBELLE_SMS, message->libelle_sms,

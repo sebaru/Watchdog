@@ -36,9 +36,9 @@
 
  struct CMD_TYPE_SYNOPTIQUE
   { guint id;                                                      /* Numero du message dans la structure */
-    gchar  libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar  libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     guint  access_groupe;
   };
 

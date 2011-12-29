@@ -30,8 +30,7 @@
 
  #define NBR_CARAC_LIBELLE_MSG    100                                                 /* Attention au SMS */
  #define NBR_CARAC_LIBELLE_MSG_UTF8  (2*NBR_CARAC_LIBELLE_MSG)
- #define NBR_CARAC_OBJET_MSG      30
- #define NBR_CARAC_OBJET_MSG_UTF8    (2*NBR_CARAC_OBJET_MSG)
+
  enum
   { MSG_ETAT,                                                        /* Definitions des types de messages */
     MSG_ALERTE,
@@ -55,7 +54,9 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  objet[NBR_CARAC_OBJET_MSG_UTF8+1];
+    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar  objet[355+1]; /* en cours de refonte */
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean enable;                              /* Flag pour la gestion par exemple de l'inhibition ... */
     guint  sms;                                                                         /* Envoi de sms ? */

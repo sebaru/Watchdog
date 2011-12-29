@@ -47,7 +47,6 @@
  static GtkWidget *Entry_lib;                                                       /* Libelle du message */
  static GtkWidget *Entry_lib_audio;                                           /* Libelle audio du message */
  static GtkWidget *Entry_lib_sms;                                               /* Libelle sms du message */
- static GtkWidget *Entry_objet;                                                       /* Objet du message */
  static GtkWidget *Entry_mp3;                                                       /* nom de fichier mp3 */
  static GtkWidget *Combo_type;                                                  /* Type actuel du message */
  static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
@@ -180,8 +179,7 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
     g_snprintf( Msg.libelle_sms, sizeof(Msg.libelle_sms),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
-    g_snprintf( Msg.objet, sizeof(Msg.objet),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
+
     Msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
     Msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
     Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
@@ -223,8 +221,8 @@
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn )
-  { gchar chaine[256];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s", syn->groupe, syn->libelle );
+  { gchar chaine[512];
+    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
     if (Msg.num_syn == syn->id)
@@ -264,7 +262,7 @@
 /**********************************************************************************************************/
  void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg )
   { GtkWidget *frame, *table, *texte, *hboite;
-    gint cpt;
+    gint cpt, i;
 
     if (edit_msg)
      { memcpy( &Msg, edit_msg, sizeof(struct CMD_TYPE_MESSAGE) );    /* Save pour utilisation future */
@@ -291,106 +289,108 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 10, 4, TRUE );
+    table = gtk_table_new( 9, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
+    i = 0;
     Check_enable = gtk_check_button_new_with_label( _("Enable") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, 0, 1 );
-
-    texte = gtk_label_new( _("MsgID") );                 /* Id unique du message en cours d'edition/ajout */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
-    Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, 1, 2 );
-
-    texte = gtk_label_new( _("Repeat (min)") );                               /* Répétition du message ?? */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 1, 2 );
-    Spin_time_repeat = gtk_spin_button_new_with_range( 0, 60, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_time_repeat, 3, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, i, i+1 );
 
     texte = gtk_label_new( _("Type") );     /* Création de l'option menu pour le choix du type de message */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
 
     Combo_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_MSG; cpt++ )
      { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_vers_string(cpt) ); }
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 3, 4, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 3, 4, i, i+1 );
 
-    texte = gtk_label_new( _("Object") );                                       /* Le message en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
-    Entry_objet = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, 2, 3 );
+    i++;
+    texte = gtk_label_new( _("MsgID") );                 /* Id unique du message en cours d'edition/ajout */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_num = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 1, 2, i, i+1 );
 
+    texte = gtk_label_new( _("Repeat (min)") );                               /* Répétition du message ?? */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_time_repeat = gtk_spin_button_new_with_range( 0, 60, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_time_repeat, 3, 4, i, i+1 );
+
+    i++;
     texte = gtk_label_new( _("Message") );                                      /* Le message en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_lib = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
-    texte = gtk_label_new( _("Synopt.") );                       /* Choix du synoptique cible du messages */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
+    i++;
+    texte = gtk_label_new( _("Groupe/Page/Syn") );               /* Choix du synoptique cible du messages */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Combo_syn = gtk_combo_box_new_text();
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, i, i+1 );
     Liste_index_syn = NULL;
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
 
 /****************************************** Paragraphe Voix ***********************************************/
+    i++;
     texte = gtk_label_new( _("Profil Audio") );                          /* Numéro du bit M a positionner */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );;
     Spin_bit_voc = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
     g_signal_connect( G_OBJECT(Spin_bit_voc), "changed",
                       G_CALLBACK(Afficher_mnemo_voc), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_voc, 1, 2, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_voc, 1, 2, i, i+1 );;
 
     Entry_bit_voc = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_bit_voc), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_voc, 2, 4, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_voc, 2, 4, i, i+1 );
 
+    i++;
     texte = gtk_label_new( _("Type Voix") );   /* Création de l'option menu pour le choix du type de voix */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 6, 7 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
 
     Combo_type_voc = gtk_combo_box_new_text();
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type_voc), "Homme 1" );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type_voc), "Femme 1" );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type_voc), "Homme 2" );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type_voc), "Femme 2" );
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type_voc, 1, 2, 6, 7 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type_voc, 1, 2, i, i+1 );
 
     texte = gtk_label_new( _("Vitesse Voix") );      /* Création du spon pour le choix de la vitesse voix */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 6, 7 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
 
     Spin_vitesse_voc = gtk_spin_button_new_with_range( 50, 500, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_vitesse_voc, 3, 4, 6, 7 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_vitesse_voc, 3, 4, i, i+1 );
 
+    i++;
     texte = gtk_label_new( _("Message Audio") );                                /* Le message en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 7, 8 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_lib_audio = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_audio), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, 7, 8 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, i, i+1 );
 
+    i++;
     Combo_sms = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_MSG_SMS; cpt++ )
      { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_sms), Type_sms_vers_string(cpt) ); }
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_sms, 0, 1, 8, 9 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_sms, 0, 1, i, i+1 );
 
     Entry_lib_sms = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_sms), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, 8, 9 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, i, i+1 );
 
+    i++;
     texte = gtk_label_new( _("Mp3 upload") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 9, 10 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
 
     Entry_mp3 = gnome_file_entry_new("Mp3Filename", _("Select a file for mp3") );
     gnome_file_entry_set_modal( GNOME_FILE_ENTRY(Entry_mp3), TRUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_mp3, 1, 4, 9, 10 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_mp3, 1, 4, i, i+1 );
 
     if (edit_msg)                                                              /* Si edition d'un message */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_msg->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib_audio), edit_msg->libelle_audio );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib_sms), edit_msg->libelle_sms );
-       gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_msg->objet );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_msg->type );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type_voc), edit_msg->type_voc );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_sms), edit_msg->sms );
