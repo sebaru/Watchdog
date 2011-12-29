@@ -103,11 +103,12 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT %s.id,num,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id"
                 " ORDER BY groupe,page,num",
+                NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* Where */
               );
@@ -159,10 +160,11 @@
     struct CMD_TYPE_MESSAGE *msg;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT %s.id,num,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id AND num=%d",
+                NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, num /* Where */
               );
@@ -210,10 +212,11 @@
     struct CMD_TYPE_MESSAGE *msg;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT %s.id,num,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.id=%d",
+                NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, id /* Where */
               );
