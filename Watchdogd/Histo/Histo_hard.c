@@ -161,6 +161,7 @@
        memcpy( &histo_hard->histo.msg.groupe,  db->row[4], sizeof(histo_hard->histo.msg.groupe ) );
        memcpy( &histo_hard->histo.msg.page,    db->row[5], sizeof(histo_hard->histo.msg.page   ) );
        memcpy( &histo_hard->histo.nom_ack,     db->row[6], sizeof(histo_hard->histo.nom_ack    ) );
+       histo_hard->histo.msg.id           = atoi(db->row[0]);
        histo_hard->histo.msg.type         = atoi(db->row[2]);
        histo_hard->histo.msg.num_syn      = atoi(db->row[3]);
        histo_hard->histo.date_create_sec  = atoi(db->row[7]);
