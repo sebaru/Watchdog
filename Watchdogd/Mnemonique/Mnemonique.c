@@ -150,7 +150,7 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                "SELECT %s.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id"
                 " ORDER BY groupe,page,type,num",
@@ -200,7 +200,7 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                "SELECT %s.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.id = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
@@ -246,9 +246,9 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                "SELECT %s.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.type = %d AND %s.num = %d"
+                " WHERE %s.num_syn = %s.id AND %s.type = %d AND %s.num = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
@@ -314,7 +314,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "libelle='%s',acronyme='%s',objet='%s',type=%d,num=%d,num_syn=%d WHERE id=%d",
-                NOM_TABLE_MNEMO, libelle, acronyme, objet,mnemo->type, mnemo->num, mnemo->num_syn, mnemo->id );
+                NOM_TABLE_MNEMO, libelle, acronyme, objet, mnemo->type, mnemo->num, mnemo->num_syn, mnemo->id );
     g_free(libelle);
     g_free(acronyme);
     g_free(objet);
@@ -330,14 +330,14 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                "SELECT %s.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id AND type=%d OR type=%d"
                 " ORDER BY groupe,page,objet,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, MNEMO_ENTREE, MNEMO_SORTIE
+                MNEMO_ENTREE, MNEMO_SORTIE
               );                                                                /* order by test 25/01/06 */
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
