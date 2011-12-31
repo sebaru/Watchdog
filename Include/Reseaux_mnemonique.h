@@ -59,9 +59,10 @@
   };
 
  struct CMD_TYPE_MNEMONIQUE
-  { guint id;                                                      /* Numero du message dans la structure */
-    guint type;
-    guint num;
+  { guint id;                                                /* ID unique du mnemonique dans la structure */
+    guint type;                                                                /* Type du bit interne lié */
+    guint num;                                                         /* Numéro du bit lié au mnemonique */
+    guint num_syn;                                                        /* Numéro du synoptique associé */
     gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];

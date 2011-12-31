@@ -81,26 +81,34 @@
 /**********************************************************************************************************/
  gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar requete[1024];
-    gchar *libelle, *acro;
+    gchar *libelle, *objet, *acro;
     gint last_id;
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible libelle" );
+       return(-1);
+     }
+    objet = Normaliser_chaine ( log, mnemo->objet );                     /* Formatage correct des chaines */
+    if (!objet)
+     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible objet" );
+       g_free(libelle);
        return(-1);
      }
     acro = Normaliser_chaine ( log, mnemo->acronyme );                   /* Formatage correct des chaines */
     if (!acro)
      { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
        g_free(libelle);
+       g_free(objet);
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(type,num,acronyme,libelle) VALUES "
-                "(%d,%d,,'%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                mnemo->num, acro, libelle );
+                "INSERT INTO %s(type,num,num_syn,objet,acronyme,libelle) VALUES "
+                "(%d,%d,%d,'%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                mnemo->num, mnemo->num_syn, objet, acro, libelle );
     g_free(libelle);
+    g_free(objet);
     g_free(acro);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -142,11 +150,11 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %d.id,type,num,objet,acronyme,%s.libelle"
+                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id"
                 " ORDER BY groupe,page,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE  /* WHERE */
               );                                                                /* order by test 25/01/06 */
@@ -173,9 +181,12 @@
      { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
        memcpy( &mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
        memcpy( &mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
+       memcpy( &mnemo->groupe,   db->row[6], sizeof(mnemo->groupe  ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->page,     db->row[7], sizeof(mnemo->page    ) );      /* Recopie dans la structure */
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);
+       mnemo->num_syn     = atoi(db->row[8]);
      }
     return(mnemo);
   }
@@ -189,8 +200,13 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT libelle,acronyme,objet,type,num FROM %s WHERE id=%d ORDER BY acronyme",
-                 NOM_TABLE_MNEMO, id
+                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id AND %s.id = %d",
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
+                NOM_TABLE_MNEMO, id
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -207,12 +223,15 @@
     if (!mnemo)
      { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB: Mem error" ); }
     else
-     { memcpy( &mnemo->libelle,  db->row[0], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
-       memcpy( &mnemo->objet,    db->row[2], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
-       memcpy( &mnemo->acronyme, db->row[1], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
-       mnemo->id          = id;
-       mnemo->type        = atoi(db->row[3]);
-       mnemo->num         = atoi(db->row[4]);
+     { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
+       memcpy( &mnemo->groupe,   db->row[6], sizeof(mnemo->groupe  ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->page,     db->row[7], sizeof(mnemo->page    ) );      /* Recopie dans la structure */
+       mnemo->id          = atoi(db->row[0]);
+       mnemo->type        = atoi(db->row[1]);
+       mnemo->num         = atoi(db->row[2]);
+       mnemo->num_syn     = atoi(db->row[8]);
      }
     return(mnemo);
   }
@@ -227,8 +246,14 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT libelle,acronyme,objet,id FROM %s WHERE type=%d AND num=%d",
-                NOM_TABLE_MNEMO, critere->type, critere->num );
+                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id AND %s.type = %d AND %s.num = %d"
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
+                NOM_TABLE_MNEMO, critere->type, NOM_TABLE_MNEMO, critere->num
+              );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -244,12 +269,15 @@
     if (!mnemo)
      { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB_type_num: Mem error" ); }
     else
-     { memcpy( &mnemo->libelle,  db->row[0], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
-       memcpy( &mnemo->objet,    db->row[2], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
-       memcpy( &mnemo->acronyme, db->row[1], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
-       mnemo->id      = atoi(db->row[3]);
-       mnemo->type    = critere->type;
-       mnemo->num     = critere->num;
+     { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
+       memcpy( &mnemo->groupe,   db->row[6], sizeof(mnemo->groupe  ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->page,     db->row[7], sizeof(mnemo->page    ) );      /* Recopie dans la structure */
+       mnemo->id          = atoi(db->row[0]);
+       mnemo->type        = atoi(db->row[1]);
+       mnemo->num         = atoi(db->row[2]);
+       mnemo->num_syn     = atoi(db->row[8]);
      }
     return(mnemo);
   }
@@ -264,20 +292,20 @@
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible libelle" );
        return(FALSE);
      }
 
     objet = Normaliser_chaine ( log, mnemo->objet );
     if (!objet)
-     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible objet" );
        g_free(libelle);
        return(FALSE);
      }
 
     acronyme = Normaliser_chaine ( log, mnemo->acronyme );
     if (!acronyme)
-     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible" );
+     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible acronyme" );
        g_free(objet);
        g_free(libelle);
        return(FALSE);
@@ -285,8 +313,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',acronyme='%s',objet='%s',type=%d,num=%d WHERE id=%d",
-                NOM_TABLE_MNEMO, libelle, acronyme, objet,mnemo->type, mnemo->num, mnemo->id );
+                "libelle='%s',acronyme='%s',objet='%s',type=%d,num=%d,num_syn=%d WHERE id=%d",
+                NOM_TABLE_MNEMO, libelle, acronyme, objet,mnemo->type, mnemo->num, mnemo->num_syn, mnemo->id );
     g_free(libelle);
     g_free(acronyme);
     g_free(objet);
@@ -294,7 +322,7 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
+/* Recuperer_mnemoDB_for_courbe: Recupération de la liste des ids des mnemos pour les courbes             */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -302,9 +330,13 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,num,objet,acronyme,libelle"
-                " FROM %s WHERE type=%d OR type=%d"
-                " ORDER BY objet,type,num",
+                "SELECT %d.id,type,num,objet,acronyme,%s.libelle,%s.groupe,%s.page,num_syn"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id AND type=%d OR type=%d"
+                " ORDER BY groupe,page,objet,type,num",
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, MNEMO_ENTREE, MNEMO_SORTIE
               );                                                                /* order by test 25/01/06 */
 
@@ -330,9 +362,12 @@
      { memcpy( &mnemo->libelle,  db->row[5], sizeof(mnemo->libelle ) );      /* Recopie dans la structure */
        memcpy( &mnemo->objet,    db->row[3], sizeof(mnemo->objet   ) );      /* Recopie dans la structure */
        memcpy( &mnemo->acronyme, db->row[4], sizeof(mnemo->acronyme) );      /* Recopie dans la structure */
+       memcpy( &mnemo->groupe,   db->row[6], sizeof(mnemo->groupe  ) );      /* Recopie dans la structure */
+       memcpy( &mnemo->page,     db->row[7], sizeof(mnemo->page    ) );      /* Recopie dans la structure */
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);
+       mnemo->num_syn     = atoi(db->row[8]);
      }
     return(mnemo);
   }
