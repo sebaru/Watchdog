@@ -60,7 +60,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(num,libelle,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
+                "INSERT INTO %s(id,libelle,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
                 "date_fixe,date_fin) VALUES "
                 "(%d,'%s',%d,%d,'%s',%d,%d,%d,%d)", NOM_TABLE_HISTO_HARD, histo->histo.msg.num, libelle,
                 histo->histo.msg.type, histo->histo.msg.num_syn, 
@@ -161,7 +161,7 @@
        memcpy( &histo_hard->histo.msg.groupe,  db->row[4], sizeof(histo_hard->histo.msg.groupe ) );
        memcpy( &histo_hard->histo.msg.page,    db->row[5], sizeof(histo_hard->histo.msg.page   ) );
        memcpy( &histo_hard->histo.nom_ack,     db->row[6], sizeof(histo_hard->histo.nom_ack    ) );
-       histo_hard->histo.msg.id           = atoi(db->row[0]);
+       histo_hard->histo.msg.num          = atoi(db->row[0]);
        histo_hard->histo.msg.type         = atoi(db->row[2]);
        histo_hard->histo.msg.num_syn      = atoi(db->row[3]);
        histo_hard->histo.date_create_sec  = atoi(db->row[7]);
