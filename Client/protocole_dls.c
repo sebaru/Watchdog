@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/protocole_dls.c    Gestion du protocole_dls pour la connexion au serveur Watchdog               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 14:07:22 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam. 31 déc. 2011 17:34:09 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -41,6 +41,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_dls ( struct CONNEXION *connexion )
   { static GList *Arrivee_dls = NULL;
+    static GList *Arrivee_syn     = NULL;
                
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_DLS_OK:
@@ -102,6 +103,23 @@
                g_list_free( Arrivee_dls );
                Arrivee_dls = NULL;
                Chercher_page_notebook( TYPE_PAGE_PLUGIN_DLS, 0, TRUE );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS:
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               Set_progress_plusun();
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               if (!syn) return; 
+
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
+               Arrivee_syn = g_list_append( Arrivee_syn, syn );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS_FIN:
+             { g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_syn_for_plugin_dls, NULL );
+               g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_syn );
+               Arrivee_syn = NULL;
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO:

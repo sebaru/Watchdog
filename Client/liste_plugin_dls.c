@@ -40,8 +40,7 @@
   {  COLONNE_ID,
      COLONNE_ACTIVE,
      COLONNE_TYPE,
-     COLONNE_GROUPE,
-     COLONNE_SSGROUPE,
+     COLONNE_GROUPE_PAGE,
      COLONNE_NOM,
      COLONNE_COLOR_FOND,
      COLONNE_COLOR_TEXTE,
@@ -226,7 +225,7 @@
                         GtkPrintContext   *context,
                         gint               page_nr,
                         GtkTreeIter *iter)
-  { gchar *nom, chaine[20], *groupe, *ssgroupe, *date_create, titre[128];
+  { gchar *nom, chaine[20], *groupe_page, *date_create, titre[128];
     GtkTreeModel *store;
     struct tm *temps;
     gboolean valide;
@@ -262,7 +261,7 @@
     while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les objets du tableau */
      { gtk_tree_model_get( store, iter, COLONNE_ID, &id, COLONNE_ACTIVE, &active,
                                          COLONNE_NOM, &nom,
-                                         COLONNE_GROUPE, &groupe, COLONNE_SSGROUPE, &ssgroupe,
+                                         COLONNE_GROUPE_PAGE, &groupe_page,
                            -1 );
        cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
        if (active) { cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
@@ -279,19 +278,14 @@
 
        cairo_move_to( cr, 9.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, groupe );
-
-       cairo_move_to( cr, 15.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, ssgroupe );
+       cairo_show_text (cr, groupe_page );
 
        cairo_move_to( cr, 30.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
        cairo_show_text (cr, nom );
 
        g_free(nom);
-       g_free(groupe);
-       g_free(ssgroupe);
+       g_free(groupe_page);
 
        valide = gtk_tree_model_iter_next( store, iter );
        y += PRINT_FONT_SIZE;
@@ -393,8 +387,7 @@
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                /* Id du plugin */
                                               G_TYPE_BOOLEAN,                                 /* Activé ? */
                                               G_TYPE_UINT,                                        /* Type */
-                                              G_TYPE_STRING,                                    /* Groupe */
-                                              G_TYPE_STRING,                                  /* SSGroupe */
+                                              G_TYPE_STRING,                               /* Groupe/Page */
                                               G_TYPE_STRING,                                       /* Nom */
                                               GDK_TYPE_COLOR,                               /* Color_fond */
                                               GDK_TYPE_COLOR                               /* Color_texte */
@@ -421,23 +414,13 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du nom de plugin_dls */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe"), renderer,
-                                                         "text", COLONNE_GROUPE,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
+                                                         "text", COLONNE_GROUPE_PAGE,
                                                          "background-gdk", COLONNE_COLOR_FOND,
                                                          "foreground-gdk", COLONNE_COLOR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                   /* On peut deplacer la colonne */
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE);                 /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                              /* Colonne du nom de plugin_dls */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Page"), renderer,
-                                                         "text", COLONNE_SSGROUPE,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
-                                                         NULL);
-    gtk_tree_view_column_set_reorderable(colonne, TRUE);                   /* On peut deplacer la colonne */
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SSGROUPE);               /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE);            /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du nom de plugin_dls */
@@ -501,16 +484,18 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Rafraichir_visu_plugin_dls( GtkTreeIter *iter, struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
-  { GtkTreeModel *store;
+  { gchar groupe_page[512];
+    GtkTreeModel *store;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) );          /* Acquisition du modele */
+
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", plugin_dls->groupe, plugin_dls->page );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, plugin_dls->id,
                          COLONNE_ACTIVE, plugin_dls->on,
                          COLONNE_TYPE, plugin_dls->type,
-                         COLONNE_GROUPE, plugin_dls->groupe,
-                         COLONNE_SSGROUPE, plugin_dls->ssgroupe,
+                         COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
                          COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],

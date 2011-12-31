@@ -59,7 +59,7 @@
 /**********************************************************************************************************/
  gint Ajouter_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[1024];
-    gchar *nom, *groupe, *ssgroupe;
+    gchar *nom;
 
     nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
@@ -67,29 +67,12 @@
        return(-1);
      }
 
-    groupe = Normaliser_chaine ( log, dls->groupe );                     /* Formatage correct des chaines */
-    if (!groupe)
-     { Info( log, DEBUG_DB, "Ajouter_dlsDB: Normalisation groupe impossible" );
-       g_free(nom);
-       return(-1);
-     }
-
-    ssgroupe = Normaliser_chaine ( log, dls->ssgroupe );                 /* Formatage correct des chaines */
-    if (!ssgroupe)
-     { Info( log, DEBUG_DB, "Ajouter_dlsDB: Normalisation ssgroupe impossible" );
-       g_free(groupe);
-       g_free(nom);
-       return(-1);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,actif,type,groupe,ssgroupe)"
-                   "VALUES ('%s','%s','%d','%s','%s');",
-                   NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, groupe, ssgroupe );
+                   "(name,actif,type,num_syn)"
+                   "VALUES ('%s','%s','%d',%d);",
+                   NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, dls->num_syn );
     g_free(nom);
-    g_free(groupe);
-    g_free(ssgroupe);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -105,9 +88,14 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                         /* Requete SQL */
-                "SELECT name,id,actif,type,groupe,ssgroupe "
-                "FROM %s ORDER BY groupe,ssgroupe,type DESC,name", NOM_TABLE_DLS );
-
+                "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id"
+                " ORDER BY groupe,page,num",
+                NOM_TABLE_DLS, NOM_TABLE_DLS,
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* Where */
+              );
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
@@ -127,12 +115,13 @@
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &dls->nom,      db->row[0], sizeof(dls->nom     ) );          /* Recopie dans la structure */
-       memcpy( &dls->groupe,   db->row[4], sizeof(dls->groupe  ) );
-       memcpy( &dls->ssgroupe, db->row[5], sizeof(dls->ssgroupe) );
-       dls->id   = atoi(db->row[1]);
-       dls->on   = atoi(db->row[2]);
-       dls->type = atoi(db->row[3]);
+     { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */
+       memcpy( &dls->groupe,   db->row[5], sizeof(dls->groupe) );
+       memcpy( &dls->page,     db->row[6], sizeof(dls->page  ) );
+       dls->id      = atoi(db->row[0]);
+       dls->on      = atoi(db->row[2]);
+       dls->type    = atoi(db->row[3]);
+       dls->num_syn = atoi(db->row[4]);
      }
     return( dls );
   }
@@ -146,8 +135,14 @@
     struct CMD_TYPE_PLUGIN_DLS *dls;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,actif,type,groupe,ssgroupe "
-                "FROM %s WHERE id=%d", NOM_TABLE_DLS, id );
+                "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id AND %s.id = %d",
+                NOM_TABLE_DLS, NOM_TABLE_DLS,
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* Where */
+                NOM_TABLE_DLS, id
+              );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -162,12 +157,13 @@
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info( log, DEBUG_DLS, "Rechercher_dlsDB: Erreur allocation mémoire" );
     else
-     { memcpy( &dls->nom,      db->row[0], sizeof(dls->nom     ) );          /* Recopie dans la structure */
-       memcpy( &dls->groupe,   db->row[4], sizeof(dls->groupe  ) );
-       memcpy( &dls->ssgroupe, db->row[5], sizeof(dls->ssgroupe) );
-       dls->id   = atoi(db->row[1]);
-       dls->on   = atoi(db->row[2]);
-       dls->type = atoi(db->row[3]);
+     { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */
+       memcpy( &dls->groupe,   db->row[5], sizeof(dls->groupe) );
+       memcpy( &dls->page,     db->row[6], sizeof(dls->page  ) );
+       dls->id      = atoi(db->row[0]);
+       dls->on      = atoi(db->row[2]);
+       dls->type    = atoi(db->row[3]);
+       dls->num_syn = atoi(db->row[4]);
      }
     return( dls );
   }
@@ -178,7 +174,7 @@
 /**********************************************************************************************************/
  gboolean Modifier_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[1024];
-    gchar *nom, *groupe, *ssgroupe;
+    gchar *nom;
 
     nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
@@ -186,28 +182,11 @@
        return(-1);
      }
 
-    groupe = Normaliser_chaine ( log, dls->groupe );                       /* Formatage correct des chaines */
-    if (!groupe)
-     { Info( log, DEBUG_DB, "Modifier_plugin_dlsDB: Normalisation groupe impossible" );
-       g_free(nom);
-       return(-1);
-     }
-
-    ssgroupe = Normaliser_chaine ( log, dls->ssgroupe );                 /* Formatage correct des chaines */
-    if (!ssgroupe)
-     { Info( log, DEBUG_DB, "Modifier_plugin_dlsDB: Normalisation ssgroupe impossible" );
-       g_free(groupe);
-       g_free(nom);
-       return(-1);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "name='%s',actif='%d',type='%d',groupe='%s',ssgroupe='%s' WHERE id=%d",
-                NOM_TABLE_DLS, nom, dls->on, dls->type, groupe, ssgroupe, dls->id );
+                "name='%s',actif='%d',type='%d',num_syn=%d WHERE id=%d",
+                NOM_TABLE_DLS, nom, dls->on, dls->type, dls->num_syn, dls->id );
     g_free(nom);
-    g_free(groupe);
-    g_free(ssgroupe);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

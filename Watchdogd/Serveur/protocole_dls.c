@@ -105,6 +105,11 @@
                pthread_detach( tid );
              }
             break;
+       case SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS:
+             { pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_plugin_dls_thread, client );
+               pthread_detach( tid );
+             }
+            break;
        case SSTAG_CLIENT_WANT_TYPE_NUM_MNEMO:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;

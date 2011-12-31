@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/ajout_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 20:49:38 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     sam. 31 déc. 2011 17:34:23 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -37,10 +37,11 @@
  static GtkWidget *F_ajout;               /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du plugin en cours d'edition */
  static GtkWidget *Entry_groupe;                       /* Le groupe en clair du plugin en cours d'edition */
- static GtkWidget *Entry_ssgroupe;                   /* Le ssgroupe en clair du plugin en cours d'edition */
+ static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
  static GtkWidget *Combo_type;                                  /* Type du plugin (module, ssgrpupe, ...) */
  static GtkWidget *Check_actif;                                  /* Le plugin est-il activé dans le dls ? */
  static struct CMD_TYPE_PLUGIN_DLS Edit_dls;                                /* Message en cours d'édition */
+ static GList *Liste_index_syn;
 
 /**********************************************************************************************************/
 /* Type_vers_string: renvoie le type string associé                                                       */
@@ -63,14 +64,16 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_plugin_dls ( GtkDialog *dialog, gint reponse,
                                                 gboolean edition )
-  { g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
+  { gint index;
+
+    g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
                 "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_dls.groupe, sizeof(Edit_dls.groupe),
                 "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
-    g_snprintf( Edit_dls.ssgroupe, sizeof(Edit_dls.ssgroupe),
-                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_ssgroupe) ) );
-    Edit_dls.on   = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
-    Edit_dls.type = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
+    index             = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
+    Edit_dls.num_syn  = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
+    Edit_dls.on       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
+    Edit_dls.type     = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -82,8 +85,25 @@
        case GTK_RESPONSE_CANCEL:
        default:                  break;
      }
+    g_list_free( Liste_index_syn );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
+/* Entrée: rien                                                                                           */
+/* sortie: kedal                                                                                          */
+/**********************************************************************************************************/
+ void Proto_afficher_un_syn_for_plugin_dls ( struct CMD_TYPE_SYNOPTIQUE *syn )
+  { gchar chaine[512];
+    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
+    Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
+    if (Edit_dls.num_syn == syn->id)
+     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
+                                  g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
+                                );
+     }
   }
 /**********************************************************************************************************/
 /* Menu_ajouter_plugin_dls: Ajoute un plugin_dls au systeme                                               */
@@ -118,7 +138,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres du plugin_dls ************************************/
-    table = gtk_table_new( 4, 3, TRUE );
+    table = gtk_table_new( 3, 3, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -136,18 +156,12 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Groupe") );
+    texte = gtk_label_new( _("Groupe/Page/Syn") );               /* Choix du synoptique cible du messages */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_groupe = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_groupe), NBR_CARAC_PLUGIN_DLS );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_groupe, 1, 3, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Page") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_ssgroupe = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_ssgroupe), NBR_CARAC_PLUGIN_DLS );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ssgroupe, 1, 3, i, i+1 );
+    Combo_syn = gtk_combo_box_new_text();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 3, i, i+1 );
+    Liste_index_syn = NULL;
+    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Name") );
@@ -158,7 +172,6 @@
 
     if (edit_dls)                                                              /* Si edition d'un message */
      { gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_dls->groupe );
-       gtk_entry_set_text( GTK_ENTRY(Entry_ssgroupe), edit_dls->ssgroupe );
        gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );

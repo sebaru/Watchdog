@@ -142,6 +142,7 @@
  extern void *Envoyer_synoptiques_pour_atelier_palette_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_message_thread ( struct CLIENT *client );
  extern void *Envoyer_synoptiques_pour_mnemo_thread ( struct CLIENT *client );
+ extern void *Envoyer_synoptiques_pour_plugin_dls_thread ( struct CLIENT *client );
  extern void Proto_editer_synoptique_thread ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
  extern void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
  extern void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );

@@ -260,6 +260,7 @@
  extern void Creer_page_plugin_dls( void );
 
  extern void Menu_ajouter_editer_plugin_dls ( struct CMD_TYPE_PLUGIN_DLS *edit_dls );/* ajout_plugin_dls.c */
+ extern void Proto_afficher_un_syn_for_plugin_dls ( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
  extern void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer );

@@ -156,7 +156,7 @@
 
     g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                 "INSERT INTO %s(libelle,page,access_groupe,groupe) VALUES "
-                "('%s','%s','%d','%s','%s')", NOM_TABLE_SYNOPTIQUE, libelle, page,
+                "('%s','%s','%d','%s')", NOM_TABLE_SYNOPTIQUE, libelle, page,
                 syn->access_groupe, groupe );
     g_free(libelle);
     g_free(page);

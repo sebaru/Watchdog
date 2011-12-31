@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Include/Reseaux_dls.h:   Sous_tag de dls utilisé pour watchdog 2.0   par lefevre Sebastien             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam. 31 déc. 2011 17:34:34 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -50,8 +50,9 @@
 
  struct CMD_TYPE_PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar groupe[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar ssgroupe[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    guint num_syn;                      /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint id;
     guint on;
     guint type;                                                       /* Module, Sous groupe, groupe, ... */
@@ -92,6 +93,10 @@
     SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,                     /* Le client renvoie les données editées */
     SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,                         /* Le client renvoie les données editées */
     SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN,                     /* Le client renvoie les données editées */
+
+    SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS,                       /* Envoi des synoptiques pour les plugins */
+    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS,
+    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS_FIN,
 
     SSTAG_CLIENT_WANT_TYPE_NUM_MNEMO,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO,
