@@ -81,7 +81,7 @@
 /**********************************************************************************************************/
  gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo )
   { gchar requete[1024];
-    gchar *libelle, *objet, *acro;
+    gchar *libelle, *acro;
     gint last_id;
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );                 /* Formatage correct des chaines */
@@ -89,27 +89,19 @@
      { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
        return(-1);
      }
-    objet = Normaliser_chaine ( log, mnemo->objet );                     /* Formatage correct des chaines */
-    if (!objet)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
-       g_free(libelle);
-       return(-1);
-     }
     acro = Normaliser_chaine ( log, mnemo->acronyme );                   /* Formatage correct des chaines */
     if (!acro)
      { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
-       g_free(objet);
        g_free(libelle);
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(type,num,objet,acronyme,libelle) VALUES "
-                "(%d,%d,'%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                mnemo->num, objet, acro, libelle );
+                "INSERT INTO %s(type,num,acronyme,libelle) VALUES "
+                "(%d,%d,,'%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                mnemo->num, acro, libelle );
     g_free(libelle);
     g_free(acro);
-    g_free(objet);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -150,8 +142,14 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,num,objet,acronyme,libelle"
-                " FROM %s ORDER BY objet,type,num", NOM_TABLE_MNEMO );          /* order by test 25/01/06 */
+                "SELECT %d.id,type,num,objet,acronyme,%s.libelle"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id"
+                " ORDER BY groupe,page,type,num",
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, /* FROM */
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE  /* WHERE */
+              );                                                                /* order by test 25/01/06 */
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

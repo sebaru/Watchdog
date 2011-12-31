@@ -43,6 +43,7 @@
   {  COLONNE_ID,
      COLONNE_TYPE_INT,
      COLONNE_TYPE,
+     COLONNE_GROUPE_PAGE,
      COLONNE_OBJET,
      COLONNE_ACRONYME,
      COLONNE_LIBELLE,
@@ -317,7 +318,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
                         GtkPrintContext   *context,
                         gint               page_nr,
                         GtkTreeIter *iter)
-  { gchar *type_string, *objet, *libelle, *acronyme, *date_create, titre[128], chaine[128];
+  { gchar *type_string, *groupe_page, *libelle, *acronyme, *date_create, titre[128], chaine[128];
     GtkTreeModel *store;
     struct tm *temps;
     time_t timet;
@@ -351,8 +352,8 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
     valide = TRUE;
     y = 2 * PRINT_FONT_SIZE;
-    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les objets du tableau */
-     { gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_OBJET, &objet,
+    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */
+     { gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_GROUPE_PAGE, &groupe_page,
                            COLONNE_ACRONYME, &acronyme, COLONNE_LIBELLE, &libelle,
                            COLONNE_COULEUR, &color, -1 );
 
@@ -362,7 +363,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 
        cairo_move_to( cr, 5.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, objet );
+       cairo_show_text (cr, groupe_page );
 
        cairo_move_to( cr, 23.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -373,7 +374,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
        cairo_show_text (cr, libelle );
 
        g_free(type_string);
-       g_free(objet);
+       g_free(groupe_page);
        g_free(acronyme);
        g_free(libelle);
 
@@ -476,6 +477,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_UINT,                               /* Type (entier) */
                                               G_TYPE_STRING,                     /* Type ("bistable"... ) */
+                                              G_TYPE_STRING,                               /* Groupe_page */
                                               G_TYPE_STRING,                                     /* Objet */
                                               G_TYPE_STRING,                                  /* Acronyme */
                                               G_TYPE_STRING,                                   /* libellé */
@@ -498,7 +500,13 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe / Page / Module"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe / Page"), renderer,
+                                                         "text", COLONNE_GROUPE_PAGE,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE);            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Objet"), renderer,
                                                          "text", COLONNE_OBJET,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_OBJET);                  /* On peut la trier */
@@ -570,20 +578,23 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 /**********************************************************************************************************/
  static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_TYPE_MNEMONIQUE *mnemonique )
   { GtkTreeModel *store;
-    gchar chaine[60];
+    gchar chaine[60], groupe_page[512];
        
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_mnemonique) );          /* Acquisition du modele */
     g_snprintf( chaine, sizeof(chaine), "%s%04d",
                 Type_bit_interne_court( mnemonique->type ), mnemonique->num );
 
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", mnemonique->groupe, mnemonique->page );
+
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID,       mnemonique->id,
-                         COLONNE_TYPE_INT, mnemonique->type,
-                         COLONNE_TYPE,     chaine,
-                         COLONNE_OBJET,    mnemonique->objet,
-                         COLONNE_ACRONYME, mnemonique->acronyme,
-                         COLONNE_LIBELLE,  mnemonique->libelle,
-                         COLONNE_COULEUR,  Couleur_bit_interne( mnemonique->type ),
+                         COLONNE_ID,          mnemonique->id,
+                         COLONNE_TYPE_INT,    mnemonique->type,
+                         COLONNE_TYPE,        chaine,
+                         COLONNE_GROUPE_PAGE, groupe_page,
+                         COLONNE_OBJET,       mnemonique->objet,
+                         COLONNE_ACRONYME,    mnemonique->acronyme,
+                         COLONNE_LIBELLE,     mnemonique->libelle,
+                         COLONNE_COULEUR,     Couleur_bit_interne( mnemonique->type ),
                          COLONNE_COULEUR_TEXTE, Couleur_texte_bit_interne( mnemonique->type ),
                          -1
                        );

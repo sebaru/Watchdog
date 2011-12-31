@@ -464,7 +464,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe / Page"), renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);

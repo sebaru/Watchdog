@@ -31,10 +31,11 @@
  #define NBR_CARAC_LIBELLE_MNEMONIQUE        70
  #define NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8   (2*NBR_CARAC_LIBELLE_MNEMONIQUE)
 
+#warning a virer !
  #define NBR_CARAC_OBJET_MNEMONIQUE          30
  #define NBR_CARAC_OBJET_MNEMONIQUE_UTF8     (2*NBR_CARAC_OBJET_MNEMONIQUE)
  
- #define NBR_CARAC_ACRONYME_MNEMONIQUE       14
+ #define NBR_CARAC_ACRONYME_MNEMONIQUE       15
  #define NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8  (2*NBR_CARAC_ACRONYME_MNEMONIQUE)
 
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
@@ -61,6 +62,8 @@
   { guint id;                                                      /* Numero du message dans la structure */
     guint type;
     guint num;
+    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];

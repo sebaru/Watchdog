@@ -299,7 +299,6 @@
        unconnu.id = 0;
        unconnu.type = critere->type;
        unconnu.num = critere->num;
-       g_snprintf( unconnu.objet, sizeof(unconnu.objet), "Unknown" );
        g_snprintf( unconnu.libelle, sizeof(unconnu.libelle), "Unknown" );
        Envoi_client ( client, tag, ss_tag,
                       (gchar *)&unconnu, sizeof(struct CMD_TYPE_MNEMONIQUE) );
