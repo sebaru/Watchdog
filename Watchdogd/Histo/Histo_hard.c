@@ -81,7 +81,7 @@
     gchar critereSQL[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,num_syn,%s.groupe,%s.page,"
+                "SELECT %s.id,%s.libelle,type,num_syn,%s.groupe,%s.page,"
                 "nom_ack,date_create_sec,date_create_usec,"
                 "date_fixe,date_fin"
                 " FROM %s,%s"
@@ -157,17 +157,16 @@
     histo_hard = (struct HISTO_HARDDB *)g_malloc0( sizeof(struct HISTO_HARDDB) );
     if (!histo_hard) Info( log, DEBUG_SERVEUR, "Recuperer_histo_hardDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */
-     { memcpy( &histo_hard->histo.msg.libelle, db->row[2], sizeof(histo_hard->histo.msg.libelle) );
-       memcpy( &histo_hard->histo.msg.groupe,  db->row[5], sizeof(histo_hard->histo.msg.groupe ) );
-       memcpy( &histo_hard->histo.msg.page,    db->row[6], sizeof(histo_hard->histo.msg.page   ) );
-       memcpy( &histo_hard->histo.nom_ack,     db->row[7], sizeof(histo_hard->histo.nom_ack    ) );
-       histo_hard->histo.msg.num          = atoi(db->row[1]);
-       histo_hard->histo.msg.type         = atoi(db->row[3]);
-       histo_hard->histo.msg.num_syn      = atoi(db->row[4]);
-       histo_hard->histo.date_create_sec  = atoi(db->row[8]);
-       histo_hard->histo.date_create_usec = atoi(db->row[9]);
-       histo_hard->histo.date_fixe        = atoi(db->row[10]);
-       histo_hard->date_fin               = atoi(db->row[11]);
+     { memcpy( &histo_hard->histo.msg.libelle, db->row[1], sizeof(histo_hard->histo.msg.libelle) );
+       memcpy( &histo_hard->histo.msg.groupe,  db->row[4], sizeof(histo_hard->histo.msg.groupe ) );
+       memcpy( &histo_hard->histo.msg.page,    db->row[5], sizeof(histo_hard->histo.msg.page   ) );
+       memcpy( &histo_hard->histo.nom_ack,     db->row[6], sizeof(histo_hard->histo.nom_ack    ) );
+       histo_hard->histo.msg.type         = atoi(db->row[2]);
+       histo_hard->histo.msg.num_syn      = atoi(db->row[3]);
+       histo_hard->histo.date_create_sec  = atoi(db->row[7]);
+       histo_hard->histo.date_create_usec = atoi(db->row[8]);
+       histo_hard->histo.date_fixe        = atoi(db->row[9]);
+       histo_hard->date_fin               = atoi(db->row[10]);
 /*printf("Recup histo: %d %s %s %s\n", histo_hard->histo.msg.num, objet, libelle, histo_hard->histo.nom_ack );*/
      }
     return(histo_hard);
