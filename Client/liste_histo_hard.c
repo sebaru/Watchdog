@@ -46,7 +46,7 @@
     COLONNE_ACK,
     COLONNE_DATE_FIN,
     COLONNE_DUREE,
-    COLONNE_OBJET,
+    COLONNE_GROUPE_PAGE,
     COLONNE_LIBELLE,
     COLONNE_COULEUR_FOND,
     COLONNE_COULEUR_TEXTE,
@@ -101,13 +101,15 @@
     else
      { memset( requete.libelle, 0, sizeof(requete.libelle) ); }
   
+#ifdef bouh
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_objet) ) )         /* Tri par objet */
      { g_snprintf( requete.objet, sizeof(requete.objet), "%s",
                    gtk_entry_get_text( GTK_ENTRY(infos->Entry_objet) ) );
      }
     else
      { memset( requete.objet, 0, sizeof(requete.objet) ); }
-   
+#endif
+
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_debut) ) )         /* Tri par debut */
      { requete.date_create_min = gnome_date_edit_get_time( GNOME_DATE_EDIT(infos->Date_debut) ); }
     else
@@ -309,7 +311,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_histo_hard( struct CMD_TYPE_HISTO_HARD *histo )
-  { gchar chaine[50], date[128], ack[128], *date_create, *date_fin, *duree;
+  { gchar chaine[50], date[128], ack[128], *date_create, *date_fin, *duree, groupe_page[512];
     struct TYPE_INFO_HISTO_HARD *infos;
     struct PAGE_NOTEBOOK *page;
     GtkListStore *store;
@@ -363,6 +365,8 @@ printf("Proto_afficher_histo_hard 1\n");
               temps->tm_hour, temps->tm_min, temps->tm_sec );
     duree = g_strdup( chaine );
 
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->groupe, histo->page );
+
     gtk_list_store_set ( store, &iter,
                          COLONNE_ID, histo->num,
                          COLONNE_TYPE, Type_vers_string(histo->type),
@@ -370,7 +374,7 @@ printf("Proto_afficher_histo_hard 1\n");
                          COLONNE_DATE_FIN, date_fin,
                          COLONNE_DUREE, duree,
                          COLONNE_ACK, ack,
-                         COLONNE_OBJET, histo->objet,
+                         COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_LIBELLE, histo->libelle,
                          COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->type],
                          COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->type],
@@ -474,10 +478,10 @@ printf("Proto_afficher_histo_hard 1\n");
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Object"), renderer,
-                                                         "text", COLONNE_OBJET,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
+                                                         "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_OBJET);                  /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE);            /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */

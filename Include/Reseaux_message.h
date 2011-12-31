@@ -56,7 +56,6 @@
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  objet[355+1]; /* en cours de refonte */
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean enable;                              /* Flag pour la gestion par exemple de l'inhibition ... */
     guint  sms;                                                                         /* Envoi de sms ? */

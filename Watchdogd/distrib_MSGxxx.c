@@ -103,7 +103,8 @@
        new_histo->num_syn          = msg->num_syn;
        new_histo->id               = msg->num;
        memcpy( &new_histo->libelle, msg->libelle, sizeof(msg->libelle) );
-       memcpy( &new_histo->objet,   msg->objet,   sizeof(msg->objet  ) );
+       memcpy( &new_histo->groupe,  msg->groupe,  sizeof(msg->groupe ) );
+       memcpy( &new_histo->page,    msg->page,    sizeof(msg->page   ) );
 
        for (i=0; i<Config.max_serveur; i++)
         { struct CMD_TYPE_HISTO *histo_ssrv;

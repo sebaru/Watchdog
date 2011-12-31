@@ -49,8 +49,9 @@
     rezo_histo->date_fixe   = histo->histo.date_fixe;
     rezo_histo->date_fin    = histo->date_fin;
     memcpy( &rezo_histo->nom_ack, histo->histo.nom_ack, sizeof(rezo_histo->nom_ack) );
+    memcpy( &rezo_histo->groupe,  histo->histo.msg.groupe,  sizeof(rezo_histo->groupe ) );
+    memcpy( &rezo_histo->page,    histo->histo.msg.page,    sizeof(rezo_histo->page   ) );
     memcpy( &rezo_histo->libelle, histo->histo.msg.libelle, sizeof(rezo_histo->libelle) );
-    memcpy( &rezo_histo->objet,   histo->histo.msg.objet, sizeof(rezo_histo->objet) );
     return( rezo_histo );
   }
 /**********************************************************************************************************/

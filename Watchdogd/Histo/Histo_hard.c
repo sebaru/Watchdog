@@ -44,7 +44,7 @@
 /**********************************************************************************************************/
  gboolean Ajouter_histo_hardDB ( struct LOG *log, struct DB *db, struct HISTO_HARDDB *histo )
   { gchar requete[1024];
-    gchar *libelle, *nom_ack, *objet;
+    gchar *libelle, *nom_ack;
 
     libelle = Normaliser_chaine ( log, histo->histo.msg.libelle );       /* Formatage correct des chaines */
     if (!libelle)
@@ -59,24 +59,15 @@
        return(FALSE);
      }
 
-    objet = Normaliser_chaine ( log, histo->histo.msg.objet );           /* Formatage correct des chaines */
-    if (!objet)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_histoDB: Normalisation impossible" );
-       g_free(libelle);
-       g_free(nom_ack);
-       return(FALSE);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(num,libelle,objet,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
+                "INSERT INTO %s(num,libelle,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
                 "date_fixe,date_fin) VALUES "
-                "(%d,'%s','%s',%d,%d,'%s',%d,%d,%d,%d)", NOM_TABLE_HISTO_HARD, histo->histo.msg.num, libelle,
-                objet, histo->histo.msg.type, histo->histo.msg.num_syn, 
+                "(%d,'%s',%d,%d,'%s',%d,%d,%d,%d)", NOM_TABLE_HISTO_HARD, histo->histo.msg.num, libelle,
+                histo->histo.msg.type, histo->histo.msg.num_syn, 
                 nom_ack, histo->histo.date_create_sec, histo->histo.date_create_usec,
                 (gint)histo->histo.date_fixe, (gint)histo->date_fin );
     g_free(libelle);
     g_free(nom_ack);
-    g_free(objet);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );
   }
@@ -90,9 +81,15 @@
     gchar critereSQL[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,libelle,objet,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe,date_fin FROM %s WHERE num<>-1",
-                NOM_TABLE_HISTO_HARD );
+                "SELECT %s.id,num,%s.libelle,type,num_syn,%s.groupe,%s.page,"
+                "nom_ack,date_create_sec,date_create_usec,"
+                "date_fixe,date_fin"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id ",
+                NOM_TABLE_HISTO_HARD, NOM_TABLE_HISTO_HARD, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_HISTO_HARD, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_HISTO_HARD, NOM_TABLE_SYNOPTIQUE /* Where */
+              );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
     if (critere->id != -1)
@@ -127,6 +124,7 @@
           g_free(norm);
         }
      }
+#ifdef bouh
     if ( *(critere->objet) )
      { gchar *norm;
        critere->objet[sizeof(critere->objet)-1] = 0;                              /* Anti buffer overflow */
@@ -137,6 +135,7 @@
           g_free(norm);
         }
      }
+#endif
     g_strlcat( requete, " ORDER BY date_create_sec,date_create_usec LIMIT 500;", sizeof(requete) );
  
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -158,16 +157,17 @@
     histo_hard = (struct HISTO_HARDDB *)g_malloc0( sizeof(struct HISTO_HARDDB) );
     if (!histo_hard) Info( log, DEBUG_SERVEUR, "Recuperer_histo_hardDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */
-     { memcpy( &histo_hard->histo.msg.libelle, db->row[1], sizeof(histo_hard->histo.msg.libelle) );
-       memcpy( &histo_hard->histo.msg.objet,   db->row[2], sizeof(histo_hard->histo.msg.objet  ) );
-       memcpy( &histo_hard->histo.nom_ack,     db->row[5], sizeof(histo_hard->histo.nom_ack    ) );
-       histo_hard->histo.msg.num          = atoi(db->row[0]);
+     { memcpy( &histo_hard->histo.msg.libelle, db->row[2], sizeof(histo_hard->histo.msg.libelle) );
+       memcpy( &histo_hard->histo.msg.groupe,  db->row[5], sizeof(histo_hard->histo.msg.groupe ) );
+       memcpy( &histo_hard->histo.msg.page,    db->row[6], sizeof(histo_hard->histo.msg.page   ) );
+       memcpy( &histo_hard->histo.nom_ack,     db->row[7], sizeof(histo_hard->histo.nom_ack    ) );
+       histo_hard->histo.msg.num          = atoi(db->row[1]);
        histo_hard->histo.msg.type         = atoi(db->row[3]);
        histo_hard->histo.msg.num_syn      = atoi(db->row[4]);
-       histo_hard->histo.date_create_sec  = atoi(db->row[6]);
-       histo_hard->histo.date_create_usec = atoi(db->row[7]);
-       histo_hard->histo.date_fixe        = atoi(db->row[8]);
-       histo_hard->date_fin               = atoi(db->row[9]);
+       histo_hard->histo.date_create_sec  = atoi(db->row[8]);
+       histo_hard->histo.date_create_usec = atoi(db->row[9]);
+       histo_hard->histo.date_fixe        = atoi(db->row[10]);
+       histo_hard->date_fin               = atoi(db->row[11]);
 /*printf("Recup histo: %d %s %s %s\n", histo_hard->histo.msg.num, objet, libelle, histo_hard->histo.nom_ack );*/
      }
     return(histo_hard);

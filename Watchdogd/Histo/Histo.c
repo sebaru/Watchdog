@@ -78,7 +78,7 @@
 /**********************************************************************************************************/
  gboolean Ajouter_histoDB ( struct LOG *log, struct DB *db, struct HISTODB *histo )
   { gchar requete[1024];
-    gchar *libelle, *nom_ack, *objet;
+    gchar *libelle, *nom_ack;
 
     libelle = Normaliser_chaine ( log, histo->msg.libelle );             /* Formatage correct des chaines */
     if (!libelle)
@@ -86,32 +86,23 @@
        return(FALSE);
      }
 
-    objet = Normaliser_chaine ( log, histo->msg.objet );                 /* Formatage correct des chaines */
-    if (!objet)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_histoDB: Normalisation impossible" );
-       g_free(libelle);
-       return(FALSE);
-     }
-
     nom_ack = Normaliser_chaine ( log, histo->nom_ack );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info( log, DEBUG_SERVEUR, "Ajouter_histoDB: Normalisation impossible" );
        g_free(libelle);
-       g_free(objet);
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(id,libelle,objet,type,num_syn,nom_ack,"
+                "INSERT INTO %s(id,libelle,type,num_syn,nom_ack,"
                 "date_create_sec,date_create_usec,"
                 "date_fixe) VALUES "
-                "(%d,'%s','%s',%d,%d,'%s',%d,%d,0)", NOM_TABLE_HISTO, histo->msg.num, libelle, 
-                objet, histo->msg.type,
+                "(%d,'%s',%d,%d,'%s',%d,%d,0)", NOM_TABLE_HISTO, histo->msg.num, libelle, 
+                histo->msg.type,
                 histo->msg.num_syn, nom_ack,
                 histo->date_create_sec, histo->date_create_usec );
     g_free(libelle);
     g_free(nom_ack);
-    g_free(objet);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );
   }
@@ -146,9 +137,15 @@
   { gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,objet,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe FROM %s ORDER by date_create_sec,date_create_usec", NOM_TABLE_HISTO );
-
+                "SELECT %s.id,%s.libelle,%s.groupe,%s.page,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
+                "date_fixe"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id"
+                " ORDER by date_create_sec,date_create_usec",
+                NOM_TABLE_HISTO, NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE /* Where */
+              );
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
@@ -169,15 +166,16 @@
     if (!histo) Info( log, DEBUG_SERVEUR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );/* Recopie dans la structure */
-       memcpy( &histo->msg.objet,   db->row[2], sizeof(histo->msg.objet  ) );/* Recopie dans la structure */
-       memcpy( &histo->nom_ack,     db->row[5], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
+       memcpy( &histo->msg.groupe,  db->row[2], sizeof(histo->msg.groupe ) );/* Recopie dans la structure */
+       memcpy( &histo->msg.page,    db->row[3], sizeof(histo->msg.page   ) );/* Recopie dans la structure */
+       memcpy( &histo->nom_ack,     db->row[6], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
        histo->msg.id           = 0;                                /* l'id n'est pas dans la base histo ! */
        histo->msg.num          = atoi(db->row[0]);
-       histo->msg.type         = atoi(db->row[3]);
-       histo->msg.num_syn      = atoi(db->row[4]);
-       histo->date_create_sec  = atoi(db->row[6]);
-       histo->date_create_usec = atoi(db->row[7]);
-       histo->date_fixe        = atoi(db->row[8]);
+       histo->msg.type         = atoi(db->row[4]);
+       histo->msg.num_syn      = atoi(db->row[5]);
+       histo->date_create_sec  = atoi(db->row[7]);
+       histo->date_create_usec = atoi(db->row[8]);
+       histo->date_fixe        = atoi(db->row[9]);
      }
     return(histo);
   }
@@ -191,8 +189,15 @@
     gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT libelle,objet,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_HISTO, id );
+                "SELECT %s.id,%s.libelle,%s.groupe,%s.page,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
+                "date_fixe"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id AND %s.id=%d LIMIT 1",
+                NOM_TABLE_HISTO, NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, /* Where */
+                NOM_TABLE_HISTO, id
+              );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
@@ -207,16 +212,17 @@
     histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
     if (!histo) Info( log, DEBUG_SERVEUR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &histo->msg.libelle, db->row[0], sizeof(histo->msg.libelle) );/* Recopie dans la structure */
-       memcpy( &histo->msg.objet,   db->row[1], sizeof(histo->msg.objet  ) );/* Recopie dans la structure */
-       memcpy( &histo->nom_ack,     db->row[4], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
-       histo->msg.num          = id;
-       histo->msg.id           = 0;                  /* L'ID msg en histo n'est pas porteur d'information */
-       histo->msg.type         = atoi(db->row[2]);
-       histo->msg.num_syn      = atoi(db->row[3]);
-       histo->date_create_sec  = atoi(db->row[5]);
-       histo->date_create_usec = atoi(db->row[6]);
-       histo->date_fixe        = atoi(db->row[7]);
+     { memcpy( &histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );/* Recopie dans la structure */
+       memcpy( &histo->msg.groupe,  db->row[2], sizeof(histo->msg.groupe ) );/* Recopie dans la structure */
+       memcpy( &histo->msg.page,    db->row[3], sizeof(histo->msg.page   ) );/* Recopie dans la structure */
+       memcpy( &histo->nom_ack,     db->row[6], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
+       histo->msg.id           = 0;                                /* l'id n'est pas dans la base histo ! */
+       histo->msg.num          = atoi(db->row[0]);
+       histo->msg.type         = atoi(db->row[4]);
+       histo->msg.num_syn      = atoi(db->row[5]);
+       histo->date_create_sec  = atoi(db->row[7]);
+       histo->date_create_usec = atoi(db->row[8]);
+       histo->date_fixe        = atoi(db->row[9]);
      }
     return(histo);
   }

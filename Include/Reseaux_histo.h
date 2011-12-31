@@ -31,7 +31,8 @@
  struct CMD_TYPE_HISTO
   { guint  id;                                                                /* Numero unique historique */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  objet[355+1]; /* en cours de refonte */
+    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     guint  type;                                                       /* Etat, prealarme, defaut, alarme */
     guint  num_syn;                                                /* Numéro du fichier syn correspondant */
     guint date_create_sec;
@@ -42,8 +43,9 @@
 
  struct CMD_TYPE_HISTO_HARD
   { guint num;                                           /* Numero du message correspondant (pas son id) */
-    gchar  objet[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     guint  type;                                                       /* Etat, prealarme, defaut, alarme */
     guint  date_create_sec;
     guint  date_create_usec;

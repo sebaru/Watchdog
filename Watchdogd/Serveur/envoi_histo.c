@@ -52,7 +52,8 @@
     rezo_histo->date_create_usec = histo->date_create_usec;
     rezo_histo->date_fixe        = histo->date_fixe;
     memcpy( &rezo_histo->nom_ack, histo->nom_ack, sizeof(rezo_histo->nom_ack) );
-    memcpy( &rezo_histo->objet, histo->msg.objet, sizeof(rezo_histo->objet) );
+    memcpy( &rezo_histo->groupe,  histo->msg.groupe, sizeof(rezo_histo->groupe  ) );
+    memcpy( &rezo_histo->page,    histo->msg.page, sizeof(rezo_histo->page      ) );
     memcpy( &rezo_histo->libelle, histo->msg.libelle, sizeof(rezo_histo->libelle) );
     return( rezo_histo );
   }

@@ -43,7 +43,7 @@
 
  enum
   { COLONNE_NUM,
-    COLONNE_OBJET,
+    COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
     COLONNE_NUM_SYN,
     COLONNE_DATE_CREATE,
@@ -183,7 +183,7 @@
 /**********************************************************************************************************/
  static void Rafraichir_visu_histo( GtkTreeIter *iter, struct CMD_TYPE_HISTO *histo )
   { GtkTreeModel *store;
-    gchar chaine[128], date[128], ack[128], *date_create;
+    gchar chaine[128], date[128], ack[128], *date_create, groupe_page[512];
     struct tm *temps;
     time_t time;
 
@@ -195,6 +195,8 @@
 
     g_snprintf( date, sizeof(date), "%s.%03d", date_create, (histo->date_create_usec/1000) );
     g_free( date_create );
+
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->groupe, histo->page );
 
     if (histo->date_fixe)
      { gchar *date_fixe;
@@ -215,7 +217,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_NUM, histo->id,
                          COLONNE_NUM_SYN, histo->num_syn,
-                         COLONNE_OBJET, histo->objet,
+                         COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_TYPE, Type_vers_string(histo->type),
                          COLONNE_DATE_CREATE, date,
                          COLONNE_ACK, ack,
@@ -336,7 +338,7 @@
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,
                                               G_TYPE_STRING,
-                                              G_TYPE_STRING,
+                                              G_TYPE_STRING,                               /* Groupe page */
                                               G_TYPE_UINT,                                     /* Num_syn */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
@@ -359,10 +361,10 @@
 
 printf("5\n");
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Object"), renderer,
-                                                         "text", COLONNE_OBJET,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
+                                                         "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_OBJET);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
 printf("6\n");
