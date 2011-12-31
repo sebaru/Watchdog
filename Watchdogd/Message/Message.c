@@ -212,7 +212,7 @@
     struct CMD_TYPE_MESSAGE *msg;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s,libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,"
+                "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,"
                 "libelle_sms,type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.id=%d",
