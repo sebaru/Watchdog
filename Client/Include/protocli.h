@@ -273,13 +273,13 @@
  extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );       /* Dans liste_message.c */
  extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
  extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
- extern void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn );
  extern void Creer_page_message( void );
  extern gchar *Type_vers_string ( guint type );
  extern gchar *Type_sms_vers_string ( guint type );
 
  extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );   /* Dans ajout_message.c */
  extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
@@ -299,7 +299,8 @@
  extern gint Type_bit_interne_int ( gchar *type );
  extern void Creer_page_mnemonique( void );
 
- extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo );/* ajout_synoptique.c*/
+ extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo );/* ajout_mnemonique.c*/
+ extern void Proto_afficher_un_syn_for_mnemonique ( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern void Proto_cacher_un_icone( struct CMD_TYPE_ICONE *icone );                   /* Dans liste_icone.c */
  extern void Proto_afficher_un_icone( struct CMD_TYPE_ICONE *icone );

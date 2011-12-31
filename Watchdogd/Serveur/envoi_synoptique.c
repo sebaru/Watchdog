@@ -244,4 +244,16 @@
     pthread_exit( NULL );
     return(NULL);
   }
+/**********************************************************************************************************/
+/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_synoptiques_pour_mnemo_thread ( struct CLIENT *client )
+  { Envoyer_synoptiques_tag( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE,
+                                                     SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit( NULL );
+    return(NULL);
+  }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -79,6 +79,11 @@
                Proto_valider_editer_mnemonique( client, mnemo );
              }
             break;
+       case SSTAG_CLIENT_WANT_SYN_FOR_MNEMO:
+             { pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_mnemo_thread, client );
+               pthread_detach( tid );
+             }
+            break;
        case SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE:
              { struct CMD_TYPE_MNEMONIQUE *rezo_mnemo;
                rezo_mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;

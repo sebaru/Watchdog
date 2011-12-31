@@ -41,6 +41,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_mnemonique ( struct CONNEXION *connexion )
   { static GList *Arrivee_mnemonique = NULL;
+    static GList *Arrivee_syn     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK:
@@ -102,6 +103,23 @@
                g_list_free( Arrivee_mnemonique );
                Arrivee_mnemonique = NULL;
                Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, 0, TRUE );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO:
+             { struct CMD_TYPE_SYNOPTIQUE *syn;
+               Set_progress_plusun();
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               if (!syn) return; 
+
+               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
+               Arrivee_syn = g_list_append( Arrivee_syn, syn );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO_FIN:
+             { g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_syn_for_mnemonique, NULL );
+               g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_syn );
+               Arrivee_syn = NULL;
              }
             break;
      }

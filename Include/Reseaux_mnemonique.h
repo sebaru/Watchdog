@@ -31,7 +31,6 @@
  #define NBR_CARAC_LIBELLE_MNEMONIQUE        70
  #define NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8   (2*NBR_CARAC_LIBELLE_MNEMONIQUE)
 
-#warning a virer !
  #define NBR_CARAC_OBJET_MNEMONIQUE          30
  #define NBR_CARAC_OBJET_MNEMONIQUE_UTF8     (2*NBR_CARAC_OBJET_MNEMONIQUE)
  
@@ -101,6 +100,10 @@
     SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,          /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,                         /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                   /* Le serveur valide les nouvelles données */
+
+    SSTAG_CLIENT_WANT_SYN_FOR_MNEMO,                             /* Envoi des synoptiques pour les mnemos */
+    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO,
+    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO_FIN,
 
     SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,             /* Le client demande l'edition des options d'un bit */
     SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,  /* Le serveur accepte et envoi les données correspondantes */
