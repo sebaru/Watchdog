@@ -215,7 +215,7 @@
     Combo_syn = gtk_combo_box_new_text();
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, i, i+1 );
     Liste_index_syn = NULL;
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
+    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Objet") );
