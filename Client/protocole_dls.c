@@ -110,7 +110,7 @@
                Set_progress_plusun();
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
-
+printf("recu un syn\n");
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_syn = g_list_append( Arrivee_syn, syn );
              }

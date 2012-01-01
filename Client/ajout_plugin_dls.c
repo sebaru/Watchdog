@@ -36,7 +36,6 @@
 
  static GtkWidget *F_ajout;               /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                             /* Le nom en clair du plugin en cours d'edition */
- static GtkWidget *Entry_groupe;                       /* Le groupe en clair du plugin en cours d'edition */
  static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
  static GtkWidget *Combo_type;                                  /* Type du plugin (module, ssgrpupe, ...) */
  static GtkWidget *Check_actif;                                  /* Le plugin est-il activé dans le dls ? */
@@ -68,8 +67,6 @@
 
     g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
                 "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-    g_snprintf( Edit_dls.groupe, sizeof(Edit_dls.groupe),
-                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
     index             = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
     Edit_dls.num_syn  = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
     Edit_dls.on       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
@@ -161,7 +158,7 @@
     Combo_syn = gtk_combo_box_new_text();
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 3, i, i+1 );
     Liste_index_syn = NULL;
-    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS, NULL, 0 );
+    Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Name") );
@@ -171,8 +168,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, i, i+1 );
 
     if (edit_dls)                                                              /* Si edition d'un message */
-     { gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_dls->groupe );
-       gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );
      }
