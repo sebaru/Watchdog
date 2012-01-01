@@ -90,8 +90,7 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL,
-  `groupe` text COLLATE utf8_unicode_ci NOT NULL,
-  `ssgroupe` text COLLATE utf8_unicode_ci NOT NULL,
+  `num_syn` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
   `actif` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
@@ -222,7 +221,6 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 CREATE TABLE IF NOT EXISTS `histo` (
   `id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `objet` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `nom_ack` text COLLATE utf8_unicode_ci,
@@ -254,12 +252,11 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
 --
 
 CREATE TABLE IF NOT EXISTS `histo_hard` (
-  `num` int(11) NOT NULL DEFAULT '0',
+  `id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `objet` text COLLATE utf8_unicode_ci,
   `date_create_sec` int(11) NOT NULL DEFAULT '0',
   `date_create_usec` int(11) DEFAULT '0',
   `date_fixe` int(11) NOT NULL DEFAULT '0',
@@ -601,7 +598,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
-  `objet` text COLLATE utf8_unicode_ci NOT NULL,
+  `num_syn` int(11) NOT NULL DEFAULT '0',
   `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
@@ -658,7 +655,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `bit_voc` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `objet` text COLLATE utf8_unicode_ci NOT NULL,
+  `num_syn` int(11) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
   `type_voc` int(11) NOT NULL DEFAULT '4',
   `vitesse_voc` int(11) NOT NULL DEFAULT '150',
