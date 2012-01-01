@@ -91,7 +91,7 @@
                 "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id"
-                " ORDER BY groupe,page,num",
+                " ORDER BY groupe,page,name",
                 NOM_TABLE_DLS, NOM_TABLE_DLS,
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* Where */
