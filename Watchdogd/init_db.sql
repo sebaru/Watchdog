@@ -604,21 +604,21 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
-INSERT INTO `mnemos` (`type`, `num`, `objet`, `acronyme`, `libelle`) VALUES
-(0, 0, 'WATCHDOG OUTILS', 'SYSTEME', 'Change d''Ã©tat tous les tours programme'),
-(0, 1, 'WATCHDOG OUTILS', 'SYSTEME', 'Toujours Ã  0'),
-(0, 2, 'WATCHDOG OUTILS', 'SYSTEME', 'Toujours Ã  1'),
-(0, 3, 'WATCHDOG OUTILS', 'SYSTEME', '0 le premier tour programme puis tout le temps 1'),
-(0, 4, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les secondes'),
-(0, 5, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les demi-secondes'),
-(0, 6, 'WATCHDOG OUTILS', 'SYSTEME', 'Cligno toutes les 3 dixièmes de seconde'),
-(7, 1, 'WATCHDOG OUTILS', 'SYSTEME', 'Motif toujours en mode 1 couleur rouge'),
-(7, 4, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
-(7, 3, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
-(7, 0, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
-(7, 2, 'WATCHDOG OUTILS', 'SYSTEME', 'rÃ©servÃ©'),
-(1, 4, 'WATCHDOG OUTILS', 'AUDIO_START', 'Emission de message Audio.'),
-(1, 5, 'WATCHDOG OUTILS', 'AUDIO_END', 'Fin d''emission de message Audio.');
+INSERT INTO `mnemos` (`type`, `num`, `num_syn`, `acronyme`, `libelle`) VALUES
+(0, 0, 1, 'SYSTEME', 'Change d''Ã©tat tous les tours programme'),
+(0, 1, 1, 'SYSTEME', 'Toujours Ã  0'),
+(0, 2, 1, 'SYSTEME', 'Toujours Ã  1'),
+(0, 3, 1, 'SYSTEME', '0 le premier tour programme puis tout le temps 1'),
+(0, 4, 1, 'SYSTEME', 'Cligno toutes les secondes'),
+(0, 5, 1, 'SYSTEME', 'Cligno toutes les demi-secondes'),
+(0, 6, 1, 'SYSTEME', 'Cligno toutes les 3 dixièmes de seconde'),
+(7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge'),
+(7, 4, 1, 'SYSTEME', 'rÃ©servÃ©'),
+(7, 3, 1, 'SYSTEME', 'rÃ©servÃ©'),
+(7, 0, 1, 'SYSTEME', 'rÃ©servÃ©'),
+(7, 2, 1, 'SYSTEME', 'rÃ©servÃ©'),
+(1, 4, 1, 'AUDIO_START', 'Emission de message Audio.'),
+(1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.');
 -- --------------------------------------------------------
 
 --
