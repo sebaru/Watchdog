@@ -78,7 +78,7 @@
   { gchar requete[2048];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.titre,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
+                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
                 "%s.posx,%s.posy,%s.angle"
                 " FROM %s,%s WHERE %s.syn_id=%d AND %s.id=%s.syn_cible_id",
                 NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
@@ -130,7 +130,7 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.syn_id,%s.syn_cible_id,%s.titre,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
+                "SELECT %s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
                 "%s.posx,%s.posy,%s.angle "
                 "FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id", 
                 NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE, NOM_TABLE_SYNOPTIQUE,
