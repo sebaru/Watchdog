@@ -85,7 +85,9 @@
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
  void Emettre_init_alias( void )
-  { GList *liste;
+  {
+#ifdef bouh
+    GList *liste;
     char *chaine;
     char *Tab;
     int taille;
@@ -111,6 +113,7 @@
        free(chaine);
        liste = liste->next;
      }
+#endif
   }
 /**********************************************************************************************************/
 /* New_option: Alloue une certaine quantité de mémoire pour les options                                   */
@@ -211,10 +214,10 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    if (alias) g_snprintf( action->alors, taille, "SM(%d,1);%s=1;", num, alias->nom );
-          else g_snprintf( action->alors, taille, "SM(%d,1);", num );
-    if (alias) g_snprintf( action->sinon, taille, "SM(%d,0);%s=0;", num, alias->nom );
-          else g_snprintf( action->sinon, taille, "SM(%d,0);", num );
+   /* if (alias) g_snprintf( action->alors, taille, "SM(%d,1);%s=1;", num, alias->nom );
+          else*/ g_snprintf( action->alors, taille, "SM(%d,1);", num );
+   /* if (alias) g_snprintf( action->sinon, taille, "SM(%d,0);%s=0;", num, alias->nom );
+          else*/ g_snprintf( action->sinon, taille, "SM(%d,0);", num );
     return(action);
   }
 /**********************************************************************************************************/
@@ -323,8 +326,8 @@
     action = New_action();
     action->alors = New_chaine( taille );
 
-    if (alias) g_snprintf( action->alors, taille, "SB(%d,%d);%s=%d;", num, !barre, alias->nom, !barre );
-          else g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
+    /*if (alias) g_snprintf( action->alors, taille, "SB(%d,%d);%s=%d;", num, !barre, alias->nom, !barre );
+          else*/ g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
     return(action);
   }
 /**********************************************************************************************************/
