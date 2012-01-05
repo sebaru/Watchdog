@@ -62,6 +62,7 @@
        Write_admin ( client->connexion, "  seti xxx E R V B C    - Set Ixxx Etat Rouge Vert Bleu Cligno\n" );
        Write_admin ( client->connexion, "  getci xxx             - Get CIxxx\n" );
        Write_admin ( client->connexion, "  getch xxx             - Get CHxxx\n" );
+       Write_admin ( client->connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
        Write_admin ( client->connexion, "  tell message_num      - Envoi d'un message audio _num_\n" );
        Write_admin ( client->connexion, "  sms message           - Envoi du message SMS via SMSBOX\n" );
        Write_admin ( client->connexion, "  msgs message          - Envoi d'un message a tous les clients\n" );

@@ -165,6 +165,7 @@
        else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
        else if ( ! strcmp ( commande, "onduleur"  ) ) { Admin_onduleur ( client, ligne + 9 ); }
        else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + 10); }
+       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else                                           { Admin_running  ( client, ligne ); }
 
        g_snprintf( chaine, sizeof(chaine), "\n" );
