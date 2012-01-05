@@ -89,6 +89,27 @@
    return(0);
   }
 /**********************************************************************************************************/
+/* Charger_config_bit_interne: Chargement des configs bit interne depius la base de données               */
+/* Entrée: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Charger_config_bit_interne( void )
+  { Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
+    Charger_eana();
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
+
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
+    Charger_scenario();
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
+
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
+    Charger_cpth();
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
+
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion" );
+    Charger_cpt_imp();
+    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion fait" );
+  }
+/**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
@@ -236,7 +257,8 @@
           Lire_config( NULL );                              /* Lecture sur le fichier /etc/watchdogd.conf */
           Print_config();
           Info_change_debug ( Config.log, Config.debug_level );
-          Partage->com_msrv.Thread_reload      = FALSE;
+          Charger_config_bit_interne();                         /* Rechargement des configs bits internes */
+          Partage->com_msrv.Thread_reload      = FALSE;                             /* signal traité. RAZ */
         }
 
        if (Partage->com_msrv.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
@@ -555,27 +577,13 @@
        sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sigset, NULL );
 #endif
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
-       Charger_eana();
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
-
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
-       Charger_scenario();
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
-
        if (!import)
         { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
           Clear_histoDB ();                            /* Clear de la table histo au boot */
           Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
         } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
-       Charger_cpth();
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
-
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion" );
-       Charger_cpt_imp();
-       Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion fait" );
+       Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
 
        Ssl_ctx = Init_ssl();                                                        /* Initialisation SSL */
        if (!Ssl_ctx)

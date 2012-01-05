@@ -64,8 +64,12 @@
           return;
         }
 
-       memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
-       Partage->ea[entree->num].last_arch = 0;    /* Mise à zero du champ de la derniere date d'archivage */
+       if (entree->num < NBR_ENTRE_ANA)
+        { memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
+          Partage->ea[entree->num].last_arch = 0;    /* Mise à zero du champ de la derniere date d'archivage */
+        }
+       else
+        { Info_n( Config.log, DEBUG_INFO, "Charger_eana: entree->num out of range", entree->num ); }
        g_free(entree);
      }
   }

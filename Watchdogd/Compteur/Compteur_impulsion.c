@@ -61,8 +61,12 @@
         { Libere_DB_SQL( Config.log, &db );
           return;
         }
-       memcpy ( &Partage->ci[cpt_imp->num].cpt_impdb, cpt_imp, sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
-       Partage->ci[cpt_imp->num].val_en_cours2 = Partage->ci[cpt_imp->num].cpt_impdb.valeur;      /* Init */
+       if (cpt_imp->num < NBR_COMPTEUR_IMP)
+        { memcpy ( &Partage->ci[cpt_imp->num].cpt_impdb, cpt_imp, sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
+          Partage->ci[cpt_imp->num].val_en_cours2 = Partage->ci[cpt_imp->num].cpt_impdb.valeur;   /* Init */
+        }
+       else
+        { Info_n( Config.log, DEBUG_INFO, "Charger_cpt_imp: cpt_imp->num out of range", cpt_imp->num ); }
        g_free(cpt_imp);
      }
   }

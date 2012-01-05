@@ -103,7 +103,10 @@
         { Libere_DB_SQL( Config.log, &db );
           return;
         }
-       memcpy ( &Partage->ch[cpth->num].cpthdb, cpth, sizeof(struct CPTH_DB) );
+       if (cpth->num < NBR_COMPTEUR_H)
+        { memcpy ( &Partage->ch[cpth->num].cpthdb, cpth, sizeof(struct CPTH_DB) ); }
+       else
+        { Info_n( Config.log, DEBUG_INFO, "Charger_cpth: cpth->num out of range", cpth->num ); }
        g_free(cpth);
      }
     Libere_DB_SQL( Config.log, &db );
