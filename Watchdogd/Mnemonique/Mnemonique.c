@@ -142,7 +142,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.nom"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " ORDER BY groupe,page,libelle,type,num",
@@ -194,7 +194,7 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.nom"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.id = %d",
@@ -243,7 +243,7 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.nom"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.type = %d AND %s.num = %d",
@@ -321,7 +321,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.nom"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND type=%d OR type=%d"
