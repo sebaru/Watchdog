@@ -31,6 +31,7 @@
  #define NBR_CARAC_LIBELLE_MNEMONIQUE        70
  #define NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8   (2*NBR_CARAC_LIBELLE_MNEMONIQUE)
 
+#warning a virer
  #define NBR_CARAC_OBJET_MNEMONIQUE          30
  #define NBR_CARAC_OBJET_MNEMONIQUE_UTF8     (2*NBR_CARAC_OBJET_MNEMONIQUE)
  
@@ -61,10 +62,10 @@
   { guint id;                                                /* ID unique du mnemonique dans la structure */
     guint type;                                                                /* Type du bit interne lié */
     guint num;                                                         /* Numéro du bit lié au mnemonique */
-    guint num_syn;                                                        /* Numéro du synoptique associé */
+    guint num_plugin;                                                     /* Numéro du plugin DLS associé */
     gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
+    gchar  plugin_dls[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
   };
@@ -101,9 +102,9 @@
     SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,                         /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                   /* Le serveur valide les nouvelles données */
 
-    SSTAG_CLIENT_WANT_SYN_FOR_MNEMO,                             /* Envoi des synoptiques pour les mnemos */
-    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO,
-    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO_FIN,
+    SSTAG_CLIENT_WANT_DLS_FOR_MNEMO,                             /* Envoi des synoptiques pour les mnemos */
+    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
+    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN,
 
     SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,             /* Le client demande l'edition des options d'un bit */
     SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,  /* Le serveur accepte et envoi les données correspondantes */

@@ -291,6 +291,7 @@
  extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_TYPE_GROUPE *groupe );
  extern void Proto_fin_affichage_groupes_pour_synoptique ( void );
  extern void Proto_afficher_les_groupes_pour_synoptique ( GList *liste );
+ extern void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls );
 
  extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique );/* Dans liste_mnemonique.c*/
  extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique );

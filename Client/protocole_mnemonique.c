@@ -105,7 +105,7 @@
                Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, 0, TRUE );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO:
+       case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
@@ -115,8 +115,8 @@
                Arrivee_syn = g_list_append( Arrivee_syn, syn );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MNEMO_FIN:
-             { g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_syn_for_mnemonique, NULL );
+       case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN:
+             { g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_dls_for_mnemonique, NULL );
                g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
                g_list_free( Arrivee_syn );
                Arrivee_syn = NULL;

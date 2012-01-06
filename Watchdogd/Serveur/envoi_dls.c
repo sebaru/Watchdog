@@ -375,7 +375,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_plugins_dls_thread ( struct CLIENT *client )
+ static void *Envoyer_plugins_dls_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_PLUGIN_DLS *dls;
     struct DB *db;
@@ -402,7 +402,7 @@
     for( ; ; )
      { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
        if (!dls)
-        { Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN, NULL, 0 );
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Libere_DB_SQL( Config.log, &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
@@ -410,10 +410,30 @@
 
        while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
-       Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
+       Envoi_client ( client, tag, sstag,
                       (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
        g_free(dls);
      }
+  }
+/**********************************************************************************************************/
+/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_plugins_dls_thread ( struct CLIENT *client )
+  { Envoyer_plugins_dls_thread_tag ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
+                                                      SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN
+                                   );
+  }
+/**********************************************************************************************************/
+/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_plugins_dls_pour_mnemo_thread ( struct CLIENT *client )
+  { Envoyer_plugins_dls_thread_tag ( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
+                                                             SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN
+                                   );
   }
 /**********************************************************************************************************/
 /* Envoyer_source_dls: Envoi d'un programme D.L.S                                                         */

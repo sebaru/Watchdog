@@ -534,7 +534,7 @@ printf("Envoie want page source for histo courbe\n");
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
-    gchar chaine[20];
+    gchar chaine[20], groupe_page[512];
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_HISTO_COURBE) return;                                      /* Bon type ?? */
@@ -543,11 +543,15 @@ printf("Envoie want page source for histo courbe\n");
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(source->type), source->num );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
+                source->groupe, source->page, source->plugin_dls );
+
+
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, source->type,
                          COLONNE_TYPE_EA, 0,
-                         COLONNE_OBJET, source->objet,
+                         COLONNE_OBJET, groupe_page,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, 0.0,
                          COLONNE_MAX, 1.0,

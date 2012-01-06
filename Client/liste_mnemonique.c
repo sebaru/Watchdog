@@ -43,8 +43,8 @@
   {  COLONNE_ID,
      COLONNE_TYPE_INT,
      COLONNE_TYPE,
-     COLONNE_GROUPE_PAGE,
-     COLONNE_OBJET,
+     COLONNE_GROUPE_PAGE_DLS,
+     COLONNE_NUM_PLUGIN,
      COLONNE_ACRONYME,
      COLONNE_LIBELLE,
      COLONNE_COULEUR,
@@ -353,7 +353,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     valide = TRUE;
     y = 2 * PRINT_FONT_SIZE;
     while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */
-     { gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_GROUPE_PAGE, &groupe_page,
+     { gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_GROUPE_PAGE_DLS, &groupe_page,
                            COLONNE_ACRONYME, &acronyme, COLONNE_LIBELLE, &libelle,
                            COLONNE_COULEUR, &color, -1 );
 
@@ -478,7 +478,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
                                               G_TYPE_UINT,                               /* Type (entier) */
                                               G_TYPE_STRING,                     /* Type ("bistable"... ) */
                                               G_TYPE_STRING,                               /* Groupe_page */
-                                              G_TYPE_STRING,                                     /* Objet */
+                                              G_TYPE_UINT,                                  /* Num_plugin */
                                               G_TYPE_STRING,                                  /* Acronyme */
                                               G_TYPE_STRING,                                   /* libellé */
                                               GDK_TYPE_COLOR,                             /* couleur fond */
@@ -500,16 +500,10 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe / Page"), renderer,
-                                                         "text", COLONNE_GROUPE_PAGE,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page/Plugin"), renderer,
+                                                         "text", COLONNE_GROUPE_PAGE_DLS,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE);            /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
-
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Objet"), renderer,
-                                                         "text", COLONNE_OBJET,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_OBJET);                  /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE_DLS);        /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
@@ -584,17 +578,17 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     g_snprintf( chaine, sizeof(chaine), "%s%04d",
                 Type_bit_interne_court( mnemonique->type ), mnemonique->num );
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", mnemonique->groupe, mnemonique->page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
+                mnemonique->groupe, mnemonique->page, mnemonique->plugin_dls );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID,          mnemonique->id,
-                         COLONNE_TYPE_INT,    mnemonique->type,
-                         COLONNE_TYPE,        chaine,
-                         COLONNE_GROUPE_PAGE, groupe_page,
-                         COLONNE_OBJET,       mnemonique->objet,
-                         COLONNE_ACRONYME,    mnemonique->acronyme,
-                         COLONNE_LIBELLE,     mnemonique->libelle,
-                         COLONNE_COULEUR,     Couleur_bit_interne( mnemonique->type ),
+                         COLONNE_ID,              mnemonique->id,
+                         COLONNE_TYPE_INT,        mnemonique->type,
+                         COLONNE_TYPE,            chaine,
+                         COLONNE_GROUPE_PAGE_DLS, groupe_page,
+                         COLONNE_ACRONYME,        mnemonique->acronyme,
+                         COLONNE_LIBELLE,         mnemonique->libelle,
+                         COLONNE_COULEUR,         Couleur_bit_interne( mnemonique->type ),
                          COLONNE_COULEUR_TEXTE, Couleur_texte_bit_interne( mnemonique->type ),
                          -1
                        );

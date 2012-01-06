@@ -40,10 +40,9 @@
  static GtkWidget *Spin_num;
  static GtkWidget *Entry_lib;                                                    /* Libelle du mnemonique */
  static GtkWidget *Entry_acro;                                                  /* Acronyme du mnemonique */
- static GtkWidget *Entry_objet;                                                    /* Objet du mnemonique */
- static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
+ static GtkWidget *Combo_dls;                                                       /* Synoptique associé */
  static struct CMD_TYPE_MNEMONIQUE Edit_mnemo;                              /* Message en cours d'édition */
- static GList *Liste_index_syn;
+ static GList *Liste_index_dls;
 
 /**********************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
@@ -54,14 +53,12 @@
   { gint index;
     g_snprintf( Edit_mnemo.libelle, sizeof(Edit_mnemo.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    g_snprintf( Edit_mnemo.objet, sizeof(Edit_mnemo.objet),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_objet) ) );
     g_snprintf( Edit_mnemo.acronyme, sizeof(Edit_mnemo.acronyme),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-    index              = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-    Edit_mnemo.num_syn = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-    Edit_mnemo.type    = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-    Edit_mnemo.num     = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+    index                 = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
+    Edit_mnemo.num_plugin = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
+    Edit_mnemo.type       = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
+    Edit_mnemo.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -77,7 +74,7 @@
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }
-    g_list_free( Liste_index_syn );
+    g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
   }
@@ -86,14 +83,14 @@
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_syn_for_mnemonique ( struct CMD_TYPE_SYNOPTIQUE *syn )
+ void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
-    Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-    if (Edit_mnemo.num_syn == syn->id)
-     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
-                                  g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
+    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->groupe, dls->page, dls->nom );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_dls), chaine );
+    Liste_index_dls = g_list_append( Liste_index_dls, GINT_TO_POINTER(dls->id) );
+    if (Edit_mnemo.num_plugin == dls->id)
+     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_dls),
+                                  g_list_index(Liste_index_dls, GINT_TO_POINTER(dls->id))
                                 );
      }
   }
@@ -190,7 +187,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 5, 4, FALSE );
+    table = gtk_table_new( 4, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -210,19 +207,12 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 3, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Groupe / Page / Syn") );
+    texte = gtk_label_new( _("Groupe/Page/Plugin DLS") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Combo_syn = gtk_combo_box_new_text();
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, i, i+1 );
-    Liste_index_syn = NULL;
-    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
-
-    i++;
-    texte = gtk_label_new( _("Objet") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_objet = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, i, i+1 );
+    Combo_dls = gtk_combo_box_new_text();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_dls, 1, 4, i, i+1 );
+    Liste_index_dls = NULL;
+    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_DLS_FOR_MNEMO, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Acronyme") );
@@ -243,7 +233,6 @@
     if (edit_mnemo)                                                          /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_mnemo->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro), edit_mnemo->acronyme );
-       gtk_entry_set_text( GTK_ENTRY(Entry_objet), edit_mnemo->objet );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_mnemo->type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)edit_mnemo->num );
      }

@@ -41,6 +41,8 @@
  gboolean Retirer_plugin_dlsDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar requete[200];
 
+    if (dls->id == 1) return(FALSE);                            /* On ne peut pas effacer le plugin n°1 ! */
+
     g_snprintf( (gchar *)requete, sizeof(requete),                                           /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d",
                 NOM_TABLE_DLS, dls->id );

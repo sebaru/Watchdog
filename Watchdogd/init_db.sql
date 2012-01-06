@@ -95,6 +95,8 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `actif` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `actif` ) VALUES
+(1, 0, 1, 'Systeme', FALSE);
 
 -- --------------------------------------------------------
 
