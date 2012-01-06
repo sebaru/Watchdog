@@ -139,7 +139,7 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  gboolean Recuperer_mnemoDB ( struct LOG *log, struct DB *db )
-  { gchar requete[200];
+  { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.nom"
@@ -190,7 +190,7 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[200];
+  { gchar requete[512];
     struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -239,7 +239,7 @@
 /**********************************************************************************************************/
  struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct LOG *log, struct DB *db,
                                                     struct CMD_TYPE_NUM_MNEMONIQUE *critere )
-  { gchar requete[200];
+  { gchar requete[512];
     struct CMD_TYPE_MNEMONIQUE *mnemo;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -318,7 +318,7 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  gboolean Recuperer_mnemoDB_for_courbe ( struct LOG *log, struct DB *db )
-  { gchar requete[200];
+  { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.nom"
