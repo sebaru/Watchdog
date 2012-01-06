@@ -46,9 +46,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,val,num"
-                " FROM %s,%s WHERE %s.id=%s.id_mnemo ORDER BY %s.num",
+                " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.type=%d ORDER BY %s.num",
                 NOM_TABLE_CPTH, NOM_TABLE_MNEMO, /* From */
                 NOM_TABLE_MNEMO, NOM_TABLE_CPTH, /* WHERE */
+                NOM_TABLE_MNEMO, MNEMO_CPTH,
                 NOM_TABLE_MNEMO /* Order by */
               );
 
