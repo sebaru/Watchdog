@@ -142,11 +142,11 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " ORDER BY groupe,page,libelle,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
@@ -194,11 +194,11 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.id = %d",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
@@ -243,11 +243,11 @@
     struct CMD_TYPE_MNEMONIQUE *mnemo;
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.type = %d AND %s.num = %d",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
@@ -321,12 +321,12 @@
   { gchar requete[200];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.libelle"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND type=%d OR type=%d"
                 " ORDER BY groupe,page,libelle,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */

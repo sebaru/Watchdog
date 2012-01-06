@@ -546,7 +546,6 @@ printf("Envoie want page source for histo courbe\n");
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
                 source->groupe, source->page, source->plugin_dls );
 
-
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, source->type,
