@@ -40,8 +40,14 @@
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
-       Write_admin ( client->connexion, "  ch num val            - Set CH[num] = val\n" );
-       Write_admin ( client->connexion, "  ci num val            - Set CI[num] = val\n" );
+       Write_admin ( client->connexion, "  e num val             - Set E[num]   = val\n" );
+       Write_admin ( client->connexion, "  m num val             - Set M[num]   = val\n" );
+       Write_admin ( client->connexion, "  b num val             - Set B[num]   = val\n" );
+       Write_admin ( client->connexion, "  a num val             - Set A[num]   = val\n" );
+       Write_admin ( client->connexion, "  msg num val           - Set MSG[num] = val\n" );
+       Write_admin ( client->connexion, "  i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno\n" );
+       Write_admin ( client->connexion, "  ch num val            - Set CH[num]  = val\n" );
+       Write_admin ( client->connexion, "  ci num val            - Set CI[num]  = val\n" );
        Write_admin ( client->connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
@@ -62,6 +68,73 @@
           g_snprintf( chaine, sizeof(chaine), " CI%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CI -> num '%d' out of range\n", num ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "i" ) )
+     { int num, etat, rouge, vert, bleu, cligno;                     /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d %d %d %d %d", commande, &num, &etat, &rouge, &vert, &bleu, &cligno );
+       if (num<NBR_BIT_CONTROLE)
+        { SI(num, etat, rouge, vert, bleu, cligno, -1);
+          sleep(1);
+          g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
+                                              "changes=%d, last_change=%d, top=%d\n",
+                      num, Partage->i[num].etat,
+                      Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
+                      Partage->i[num].cligno, Partage->i[num].changes, Partage->i[num].last_change,
+                      Partage->top );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " I -> num '%d' out of range\n", num ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "msg" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       if (num<NBR_MESSAGE_ECRITS)
+        { MSG ( num, val );
+          g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d\n", num, val );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range\n", num ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "e" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       if (num<NBR_ENTRE_TOR)
+        { SE(num, val );
+          g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, val );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " E -> num '%d' out of range\n", num ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "m" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       if (num<NBR_BIT_MONOSTABLE)
+        { if (val) Envoyer_commande_dls( num );
+              else SM ( num, 0 );
+          g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, val );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " M -> num '%d' out of range\n", num ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "b" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       if (num<NBR_BIT_BISTABLE)
+        { SB ( num, val );
+          g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, val );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " B -> num '%d' out of range\n", num ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "a" ) )
+     { int num, val;
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       if (num<NBR_SORTIE_TOR)
+        { SA ( num, val );
+          g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " A -> num '%d' out of range\n", num ); }
        Write_admin ( client->connexion, chaine );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
