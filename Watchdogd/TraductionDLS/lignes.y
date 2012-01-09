@@ -326,7 +326,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = 15;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if (!$1) g_snprintf( $$, taille, "E(%d)", alias->num );
+                                         if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                              g_snprintf( $$, taille, "E(%d)", alias->num );
                                          else g_snprintf( $$, taille, "!E(%d)", alias->num );
                                        }
                                       break;
@@ -342,7 +343,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = 15;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if (!$1) g_snprintf( $$, taille, "B(%d)", alias->num );
+                                         if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                              g_snprintf( $$, taille, "B(%d)", alias->num );
                                          else g_snprintf( $$, taille, "!B(%d)", alias->num );
                                        }
                                       break;
@@ -358,7 +360,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = strlen(alias->nom)+2;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if (!$1) g_snprintf( $$, taille, "M(%d)", alias->num );
+                                         if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                              g_snprintf( $$, taille, "M(%d)", alias->num );
                                          else g_snprintf( $$, taille, "!M(%d)", alias->num );
                                        }
                                       break;
