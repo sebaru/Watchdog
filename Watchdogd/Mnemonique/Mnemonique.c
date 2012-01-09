@@ -324,7 +324,7 @@
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
-                " AND %s.type=%d OR %s.type=%d"
+                " AND (%s.type=%d OR %s.type=%d)"
                 " ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
