@@ -204,20 +204,15 @@
 /**********************************************************************************************************/
  struct ACTION *New_action_mono( int num )
   { struct ACTION *action;
-    struct ALIAS *alias;
     int taille;
 
-    alias = Get_alias_par_bit( MONO, num );
-    if (alias) taille = strlen(alias->nom)+20;
-          else taille = 15;
+    taille = 15;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-   /* if (alias) g_snprintf( action->alors, taille, "SM(%d,1);%s=1;", num, alias->nom );
-          else*/ g_snprintf( action->alors, taille, "SM(%d,1);", num );
-   /* if (alias) g_snprintf( action->sinon, taille, "SM(%d,0);%s=0;", num, alias->nom );
-          else*/ g_snprintf( action->sinon, taille, "SM(%d,0);", num );
+    g_snprintf( action->alors, taille, "SM(%d,1);", num );
+    g_snprintf( action->sinon, taille, "SM(%d,0);", num );
     return(action);
   }
 /**********************************************************************************************************/
@@ -317,17 +312,13 @@
 /**********************************************************************************************************/
  struct ACTION *New_action_bi( int num, int barre )
   { struct ACTION *action;
-    struct ALIAS *alias;
     int taille;
 
-    alias = Get_alias_par_bit( BI, num );
-    if (alias) taille = strlen(alias->nom)+25;
-          else taille = 20;
+    taille = 20;
     action = New_action();
     action->alors = New_chaine( taille );
 
-    /*if (alias) g_snprintf( action->alors, taille, "SB(%d,%d);%s=%d;", num, !barre, alias->nom, !barre );
-          else*/ g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
+    g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
     return(action);
   }
 /**********************************************************************************************************/
@@ -368,23 +359,6 @@
      }
     return(NULL);
   }
-/**********************************************************************************************************/
-/* Get_alias_par_bit: Recherche un alias donné en paramètre par bit interne                               */
-/* Entrées: le bit et numero du bit interne                                                               */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
- struct ALIAS *Get_alias_par_bit( int bit, int num )
-  { struct ALIAS *alias;
-    GList *liste;
-    liste = Alias;
-    while(liste)
-     { alias = (struct ALIAS *)liste->data;
-       if (alias->bit==bit && alias->num==num) return(alias); /* Si deja present, on renvoie la structure */
-       liste = liste->next;
-     }
-    return(NULL);
-  }
-
 /**********************************************************************************************************/
 /* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                         */
 /* Entrées: kedal                                                                                         */

@@ -231,48 +231,24 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
                 | barre BI ENTIER
                 {{ int taille;
-                   struct ALIAS *alias;
-                   alias = Get_alias_par_bit( BI, $3 );
-                   if (!alias) { taille = 10;
-                                 $$ = New_chaine( taille ); /* 10 caractères max */
-                                 if ($1) g_snprintf( $$, taille, "!B(%d)", $3 );
-                                    else g_snprintf( $$, taille, "B(%d)", $3 );
-                               }
-                          else { taille = strlen(alias->nom)+2;
-                                 $$ = New_chaine( taille ); /* 10 caractères max */
-                                 if ($1) g_snprintf( $$, taille, "!%s", alias->nom );
-                                    else g_snprintf( $$, taille, "%s", alias->nom );
-                               }
+                   taille = 10;
+                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   if ($1) g_snprintf( $$, taille, "!B(%d)", $3 );
+                   else g_snprintf( $$, taille, "B(%d)", $3 );
                 }}
                 | barre MONO ENTIER
                 {{ int taille;
-                   struct ALIAS *alias;
-                   alias = Get_alias_par_bit( MONO, $3 );
-                   if (!alias) { taille = 10;
-                                 $$ = New_chaine( taille ); /* 10 caractères max */
-                                 if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
-                                    else g_snprintf( $$, taille, "M(%d)", $3 );
-                               }
-                          else { taille = strlen(alias->nom)+2;
-                                 $$ = New_chaine( taille ); /* 10 caractères max */
-                                 if ($1) g_snprintf( $$, taille, "!%s", alias->nom );
-                                    else g_snprintf( $$, taille, "%s", alias->nom );
-                               }
+                   taille = 10;
+                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
+                   else g_snprintf( $$, taille, "M(%d)", $3 );
                 }}
                 | barre ENTREE ENTIER
                 {{ int taille;
-                   struct ALIAS *alias;
-                   alias = Get_alias_par_bit( ENTREE, $3 );
-                   if (!alias) { taille = 10;
-                                 $$ = New_chaine( taille ); /* 10 caractères max */
-                                 if ($1) g_snprintf( $$, taille, "!E(%d)", $3 );
-                                    else g_snprintf( $$, taille, "E(%d)", $3 );
-                               }
-                          else { taille = strlen(alias->nom)+2;
-                                 $$ = New_chaine( taille ); /* 10 caractères max */
-                                 if ($1) g_snprintf( $$, taille, "!%s", alias->nom );
-                                    else g_snprintf( $$, taille, "%s", alias->nom );
-                               }
+                   taille = 10;
+                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   if ($1) g_snprintf( $$, taille, "!E(%d)", $3 );
+                   else g_snprintf( $$, taille, "E(%d)", $3 );
                 }}
                | EANA ENTIER ordre VALF
                 {{ int taille;

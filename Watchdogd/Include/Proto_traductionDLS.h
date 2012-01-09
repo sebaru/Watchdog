@@ -83,7 +83,6 @@
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );
  extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );
  extern struct ALIAS *Get_alias_par_nom( char *nom );
- extern struct ALIAS *Get_alias_par_bit( int bit, int num );
  extern struct OPTION *New_option( void );
  extern int Get_option_entier( GList *liste_options, gint type );
  extern void Liberer_options ( GList *options );

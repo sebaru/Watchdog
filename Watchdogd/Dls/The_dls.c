@@ -61,46 +61,46 @@
   { return( (num<NBR_ENTRE_TOR) && ((Partage->e[ num>>3 ]) & (1<<(num%8))) ); }
 
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
+/* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                */
 /**********************************************************************************************************/
  int EA_inrange( int num )
   { if (num<NBR_ENTRE_ANA) return(Partage->ea[ num ].inrange);
     else return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
+/* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                       */
 /**********************************************************************************************************/
  double EA_ech( int num )
   { if (num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
     else return (0.0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
+/* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_inf( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) >= val) ) return(0);
-    else return(1);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) < val);
+    else return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
+/* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_inf_egal( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) > val) ) return(0);
-    else return(1);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) <= val);
+    else return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
+/* EA_ech_sup : Teste si la valeur de l'EA est sup à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_sup( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) <= val) ) return(0);
-    else return(1);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) > val);
+    else return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
+/* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_sup_egal( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num) && (EA_ech(num) < val) ) return(0);
-    else return(1);
+  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) >= val);
+    else return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
