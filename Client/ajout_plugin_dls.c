@@ -161,7 +161,7 @@
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS, NULL, 0 );
 
     i++;
-    texte = gtk_label_new( _("Name") );
+    texte = gtk_label_new( _("Module D.L.S") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );

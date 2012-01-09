@@ -207,7 +207,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 3, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Groupe/Page/Plugin DLS") );
+    texte = gtk_label_new( _("Groupe/Page/Module DLS") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Combo_dls = gtk_combo_box_new_text();
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_dls, 1, 4, i, i+1 );
