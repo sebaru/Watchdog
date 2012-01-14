@@ -219,6 +219,7 @@
     retour = Traduire_DLS( Config.log, (client ? TRUE : FALSE), id );
     Info_n( Config.log, DEBUG_DLS, "THRCompil: Compiler_source_dls: fin traduction", retour );
 
+    memset ( &erreur, 0, sizeof(struct CMD_GTK_MESSAGE) );                     /* zeroing de la structure */
     if (retour == TRAD_DLS_ERROR_FILE && client)                  /* Retour de la traduction D.L.S vers C */
      { Info_n( Config.log, DEBUG_DLS,
                "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S", id );
