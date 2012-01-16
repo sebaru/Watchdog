@@ -46,15 +46,16 @@
        Write_admin ( client->connexion, "  a num val             - Set A[num]   = val\n" );
        Write_admin ( client->connexion, "  msg num val           - Set MSG[num] = val\n" );
        Write_admin ( client->connexion, "  i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno\n" );
-       Write_admin ( client->connexion, "  ch num val            - Set CH[num]  = val\n" );
+       Write_admin ( client->connexion, "  ch num val actif      - Set CH[num]  = val, actif\n" );
        Write_admin ( client->connexion, "  ci num val            - Set CI[num]  = val\n" );
        Write_admin ( client->connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
-     { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+     { int num, val, actif;
+       sscanf ( ligne, "%s %d %d %d", commande, &num, &val, &actif );/* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_H)
         { Partage->ch[num].cpthdb.valeur = val;
+          Partage->ch[num].actif = actif;
           g_snprintf( chaine, sizeof(chaine), " CH%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range\n", num ); }
