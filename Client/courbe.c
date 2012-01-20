@@ -562,7 +562,7 @@
   { struct TYPE_INFO_COURBE *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
-    gchar chaine[20];
+    gchar chaine[20], groupe[128];
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_COURBE) return;                                            /* Bon type ?? */
@@ -571,11 +571,12 @@
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
     g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
+    g_snprintf( groupe, sizeof(groupe), "%s/%s/%s", source->groupe, source->page, source->plugin_dls );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, source->num,
                          COLONNE_TYPE, MNEMO_ENTREE_ANA,
                          COLONNE_TYPE_EA, source->type,
-                         COLONNE_OBJET, source->objet,
+                         COLONNE_OBJET, groupe,
                          COLONNE_NUM, chaine,
                          COLONNE_MIN, source->min,
                          COLONNE_MAX, source->max,

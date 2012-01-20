@@ -82,13 +82,16 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.objet"
-                " FROM %s,%s WHERE %s.id_mnemo=%s.id AND %s.type=%d ORDER BY %s.num",
+                "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.groupe,%s.page,%s.name"
+                " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
+                " AND %s.type=%d ORDER BY %s.num",
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
+                NOM_TABLE_MNEMO,
+                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,
+                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
                 NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* Where */
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MNEMO, NOM_TABLE_DLS,
                 NOM_TABLE_MNEMO, MNEMO_ENTREE_ANA,
                 NOM_TABLE_MNEMO /* Order by */
               );
@@ -117,9 +120,11 @@
        entreeana->min      = atof(db->row[2]);
        entreeana->max      = atof(db->row[3]);
        entreeana->type     = atoi(db->row[4]);
-       memcpy( &entreeana->unite,   db->row[5], sizeof(entreeana->unite  ) );
-       memcpy( &entreeana->libelle, db->row[6], sizeof(entreeana->libelle) );
-       memcpy( &entreeana->objet,   db->row[7], sizeof(entreeana->objet  ) );
+       memcpy( &entreeana->unite,      db->row[5], sizeof(entreeana->unite  ) );
+       memcpy( &entreeana->libelle,    db->row[6], sizeof(entreeana->libelle) );
+       memcpy( &entreeana->groupe,     db->row[7], sizeof(entreeana->groupe ) );
+       memcpy( &entreeana->page,       db->row[8], sizeof(entreeana->page   ) );
+       memcpy( &entreeana->plugin_dls, db->row[9], sizeof(entreeana->plugin_dls) );
      }
     return(entreeana);
   }
@@ -133,13 +138,17 @@
     gchar requete[512];
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.objet"
-                " FROM %s,%s WHERE %s.id_mnemo=%s.id AND %s.id_mnemo=%d",
+                "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.groupe,%s.page,%s.name"
+                " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
+                " AND %s.id_mnemo=%d",
                 NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
                 NOM_TABLE_ENTREEANA, NOM_TABLE_ENTREEANA,
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* From */
-                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_ENTREEANA, id /* WHERE */
+                NOM_TABLE_MNEMO, 
+                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,
+                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
+                NOM_TABLE_ENTREEANA, NOM_TABLE_MNEMO, /* Where */
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MNEMO, NOM_TABLE_DLS,
+                NOM_TABLE_ENTREEANA, id
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -161,9 +170,11 @@
        entreeana->min      = atof(db->row[2]);
        entreeana->max      = atof(db->row[3]);
        entreeana->type     = atoi(db->row[4]);
-       memcpy( &entreeana->unite,   db->row[5], sizeof(entreeana->unite  ) );
-       memcpy( &entreeana->libelle, db->row[6], sizeof(entreeana->libelle) );
-       memcpy( &entreeana->objet,   db->row[7], sizeof(entreeana->objet  ) );
+       memcpy( &entreeana->unite,      db->row[5], sizeof(entreeana->unite  ) );
+       memcpy( &entreeana->libelle,    db->row[6], sizeof(entreeana->libelle) );
+       memcpy( &entreeana->groupe,     db->row[7], sizeof(entreeana->groupe ) );
+       memcpy( &entreeana->page,       db->row[8], sizeof(entreeana->page   ) );
+       memcpy( &entreeana->plugin_dls, db->row[9], sizeof(entreeana->plugin_dls) );
      }
     Liberer_resultat_SQL ( log, db );
 

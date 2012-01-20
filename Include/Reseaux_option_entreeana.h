@@ -47,7 +47,9 @@
                                                                                         /* Vient du mnemo */
     guint  num;                                                                         /* Numero de l'EA */
     gchar  libelle[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
-    gchar  objet[ NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1 ];
+    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar  plugin_dls[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
   };
 

@@ -123,7 +123,7 @@
     gint  position_x;
     gint  position_y;
     gint  type;
-    gchar objet[NBR_CARAC_OBJET_MNEMONIQUE_UTF8+1];
+    gchar objet[128];
     gint  bit;                        /* Numéro du bistable a positioner en cas de detection de mouvement */
 
   };

@@ -224,6 +224,7 @@
        histo->date_create_usec = atoi(db->row[8]);
        histo->date_fixe        = atoi(db->row[9]);
      }
+    Liberer_resultat_SQL ( log, db );                                         /* Libération des résultats */
     return(histo);
   }
 /*--------------------------------------------------------------------------------------------------------*/

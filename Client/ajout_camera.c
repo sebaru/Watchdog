@@ -162,7 +162,7 @@
     texte = gtk_label_new( _("Objet") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
     Entry_objet = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), NBR_CARAC_OBJET_MNEMONIQUE );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_objet), 128/*NBR_CARAC_OBJET_MNEMONIQUE*/ );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_objet, 1, 4, ligne, ligne+1 );
 
     ligne++;
