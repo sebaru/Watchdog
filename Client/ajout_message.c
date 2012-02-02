@@ -186,6 +186,7 @@
     Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
     index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
     Msg.num_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
+    if (Msg.num_syn == 0) Msg.num_syn = 1;                /* Par défaut, pointe sur le premier synoptique */
     Msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
     Msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
     Msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
@@ -229,6 +230,9 @@
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
                                   g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
                                 );
+     }
+    else if (Msg.num_syn == 0)
+     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn), 0 );
      }
   }
 /**********************************************************************************************************/
