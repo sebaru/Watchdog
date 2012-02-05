@@ -60,7 +60,7 @@
      { struct MODULE_ONDULEUR *module;
        module = (struct MODULE_ONDULEUR *)liste_modules->data;
 
-       g_snprintf( chaine, sizeof(chaine), "\n"
+       g_snprintf( chaine, sizeof(chaine),
                    " ONDULEUR[%02d] -> Host=%s, UPS=%s, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
                    "                   bit_comm=%d, ea_min=%d\n",
                    module->onduleur.id, module->onduleur.host, module->onduleur.ups,
