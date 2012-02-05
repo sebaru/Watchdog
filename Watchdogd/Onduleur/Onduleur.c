@@ -542,7 +542,7 @@
            SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
          }
 
-    query[2] = "output_voltage";
+    query[2] = "output.voltage";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
      { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
