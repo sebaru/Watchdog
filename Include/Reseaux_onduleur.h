@@ -44,10 +44,7 @@
     gchar ups[NBR_CARAC_UPS_ONDULEUR_UTF8+1];                                 /* Nom de l'UPS sur le HOST */
     gchar libelle[NBR_CARAC_LIBELLE_ONDULEUR_UTF8+1];                                  /* Libelle associé */
     guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
-    guint ea_ups_load;                                                     /* Numéro de l'EA pour le load */
-    guint ea_ups_real_power;                                         /* Numéro de l'EA pour le real power */
-    guint ea_battery_charge;                                    /* Numéro de l'EA pour la charge batterie */
-    guint ea_input_voltage;                                        /* Numéro de l'EA pour l'input voltage */
+    guint ea_min;                                                    /* Numéro de la premiere EA impactée */
   };
 
  enum 
@@ -69,14 +66,8 @@
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_BIT_COMM,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM,
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_LOAD,
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_LOAD,
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER,
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER,
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE,
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE,
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE,
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE,
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_MIN,
+    SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_MIN,
   };
 
 #endif

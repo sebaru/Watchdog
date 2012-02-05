@@ -38,14 +38,8 @@
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Spin_bit_comm;                              /* Numéro du bit bistable de communication */
  static GtkWidget *Entry_bit_comm;                                                   /* Mnemo du bistable */
- static GtkWidget *Spin_real_power;                                                     /* Numéro de l'EA */
- static GtkWidget *Entry_real_power;                                                     /* Mnemo de l'EA */
- static GtkWidget *Spin_input_voltage;                                                  /* Numéro de l'EA */
- static GtkWidget *Entry_input_voltage;                                                  /* Mnemo de l'EA */
- static GtkWidget *Spin_load;                                                           /* Numéro de l'EA */
- static GtkWidget *Entry_load;                                                           /* Mnemo de l'EA */
- static GtkWidget *Spin_battery_charge;                                                 /* Numéro de l'EA */
- static GtkWidget *Entry_battery_charge;                                                 /* Mnemo de l'EA */
+ static GtkWidget *Spin_ea_min;                                                         /* Numéro de l'EA */
+ static GtkWidget *Entry_ea_min;                                                         /* Mnemo de l'EA */
  static GtkWidget *Entry_lib;                                                    /* Libelle de l'onduleur */
  static GtkWidget *Entry_host;                                              /* Host hébergeant l'onduleur */
  static GtkWidget *Entry_ups;                                                             /* Nom de l'UPS */
@@ -65,21 +59,9 @@
      { mnemo.type = MNEMO_BISTABLE;
        sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_BIT_COMM;
      }
-    else if ( widget == Spin_load )
+    else if ( widget == Spin_ea_min )
      { mnemo.type = MNEMO_ENTREE_ANA;
-       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_LOAD;
-     }
-    else if ( widget == Spin_real_power )
-     { mnemo.type = MNEMO_ENTREE_ANA;
-       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER;
-     }
-    else if ( widget == Spin_battery_charge )
-     { mnemo.type = MNEMO_ENTREE_ANA;
-       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE;
-     }
-    else if ( widget == Spin_input_voltage )
-     { mnemo.type = MNEMO_ENTREE_ANA;
-       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE;
+       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_MIN;
      }
     else return;
 
@@ -98,17 +80,8 @@
      { case SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM:
             gtk_entry_set_text( GTK_ENTRY(Entry_bit_comm), chaine );
             break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_LOAD:
-            gtk_entry_set_text( GTK_ENTRY(Entry_load), chaine );
-            break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER:
-            gtk_entry_set_text( GTK_ENTRY(Entry_real_power), chaine );
-            break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE:
-            gtk_entry_set_text( GTK_ENTRY(Entry_input_voltage), chaine );
-            break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE:
-            gtk_entry_set_text( GTK_ENTRY(Entry_battery_charge), chaine );
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_MIN:
+            gtk_entry_set_text( GTK_ENTRY(Entry_ea_min), chaine );
             break;
      }
   }
@@ -126,10 +99,7 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ups) ) );
     Edit_onduleur.actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Edit_onduleur.bit_comm = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_comm) );
-    Edit_onduleur.ea_input_voltage  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_input_voltage) );
-    Edit_onduleur.ea_ups_load       = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_load) );
-    Edit_onduleur.ea_ups_real_power = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_real_power) );
-    Edit_onduleur.ea_battery_charge = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_battery_charge) );
+    Edit_onduleur.ea_min   = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ea_min  ) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -178,7 +148,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 9, 4, TRUE );
+    table = gtk_table_new( 6, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -220,48 +190,15 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_comm, 2, 4, ligne, ligne+1 );
 
     ligne ++;
-    texte = gtk_label_new( _("EA Load") );
+    texte = gtk_label_new( _("EA Min") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
-    Spin_load = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
-    g_signal_connect( G_OBJECT(Spin_load), "changed",
-                      G_CALLBACK(Afficher_mnemo), Spin_load );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_load, 1, 2, ligne, ligne+1 );
-    Entry_load = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_load), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_load, 2, 4, ligne, ligne+1 );
-
-    ligne ++;
-    texte = gtk_label_new( _("EA Real Power") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
-    Spin_real_power = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
-    g_signal_connect( G_OBJECT(Spin_real_power), "changed",
-                      G_CALLBACK(Afficher_mnemo), Spin_real_power );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_real_power, 1, 2, ligne, ligne+1 );
-    Entry_real_power = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_real_power), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_real_power, 2, 4, ligne, ligne+1 );
-
-    ligne ++;
-    texte = gtk_label_new( _("EA Battery Charge") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
-    Spin_battery_charge = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
-    g_signal_connect( G_OBJECT(Spin_battery_charge), "changed",
-                      G_CALLBACK(Afficher_mnemo), Spin_battery_charge );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_battery_charge, 1, 2, ligne, ligne+1 );
-    Entry_battery_charge = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_battery_charge), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_battery_charge, 2, 4, ligne, ligne+1 );
-
-    ligne ++;
-    texte = gtk_label_new( _("EA Input Voltage") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
-    Spin_input_voltage = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
-    g_signal_connect( G_OBJECT(Spin_input_voltage), "changed",
-                      G_CALLBACK(Afficher_mnemo), Spin_input_voltage );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_input_voltage, 1, 2, ligne, ligne+1 );
-    Entry_input_voltage = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_input_voltage), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_input_voltage, 2, 4, ligne, ligne+1 );
+    Spin_ea_min = gtk_spin_button_new_with_range( 0, NBR_ENTRE_ANA, 1 );
+    g_signal_connect( G_OBJECT(Spin_ea_min), "changed",
+                      G_CALLBACK(Afficher_mnemo), Spin_ea_min );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ea_min, 1, 2, ligne, ligne+1 );
+    Entry_ea_min = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_ea_min), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ea_min, 2, 4, ligne, ligne+1 );
 
     if (edit_onduleur)                                                        /* Si edition d'un onduleur */
      { Edit_onduleur.id = edit_onduleur->id;
@@ -269,18 +206,11 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_host), edit_onduleur->host );
        gtk_entry_set_text( GTK_ENTRY(Entry_ups),  edit_onduleur->ups );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_comm), edit_onduleur->bit_comm );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_load), edit_onduleur->ea_ups_load );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_real_power), edit_onduleur->ea_ups_real_power );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_battery_charge), edit_onduleur->ea_battery_charge );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_input_voltage), edit_onduleur->ea_input_voltage );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ea_min), edit_onduleur->ea_min );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_onduleur->actif );
      }
 
     Afficher_mnemo(Spin_bit_comm);                                /* Demande l'affichage du mnemo associé */
-    Afficher_mnemo(Spin_load);                                    /* Demande l'affichage du mnemo associé */
-    Afficher_mnemo(Spin_real_power);                              /* Demande l'affichage du mnemo associé */
-    Afficher_mnemo(Spin_battery_charge);                          /* Demande l'affichage du mnemo associé */
-    Afficher_mnemo(Spin_input_voltage);                           /* Demande l'affichage du mnemo associé */
 
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */

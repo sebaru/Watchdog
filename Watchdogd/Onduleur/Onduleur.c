@@ -80,12 +80,10 @@
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s"
-                "(host,ups,libelle,bit_comm,actif,ea_ups_load,"
-                "ea_ups_real_power,ea_battery_charge,ea_input_voltage) "
-                "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,%d)",
+                "(host,ups,libelle,bit_comm,actif,ea_min) "
+                "VALUES ('%s','%s','%s',%d,%d,%d)",
                 NOM_TABLE_ONDULEUR, host, ups, libelle, onduleur->bit_comm, onduleur->actif,
-                onduleur->ea_ups_load, onduleur->ea_ups_real_power,
-                onduleur->ea_battery_charge, onduleur->ea_input_voltage
+                onduleur->ea_min
               );
     g_free(host);
     g_free(ups);
@@ -104,8 +102,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,actif,ea_ups_load,"
-                "ea_ups_real_power,ea_battery_charge,ea_input_voltage,libelle "
+                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -129,14 +126,11 @@
     else
      { memcpy( &onduleur->host,    db->row[1], sizeof(onduleur->host   ) );
        memcpy( &onduleur->ups,     db->row[2], sizeof(onduleur->ups    ) );
-       memcpy( &onduleur->libelle, db->row[9], sizeof(onduleur->libelle) );
+       memcpy( &onduleur->libelle, db->row[6], sizeof(onduleur->libelle) );
        onduleur->id                = atoi(db->row[0]);
        onduleur->bit_comm          = atoi(db->row[3]);
        onduleur->actif             = atoi(db->row[4]);
-       onduleur->ea_ups_load       = atoi(db->row[5]);
-       onduleur->ea_ups_real_power  = atoi(db->row[6]);
-       onduleur->ea_battery_charge = atoi(db->row[7]);
-       onduleur->ea_input_voltage  = atoi(db->row[8]);
+       onduleur->ea_min            = atoi(db->row[5]);
      }
     return(onduleur);
   }
@@ -150,8 +144,7 @@
     struct CMD_TYPE_ONDULEUR *onduleur;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT host,ups,bit_comm,actif,ea_ups_load,"
-                "ea_ups_real_power,ea_battery_charge,ea_input_voltage,libelle "
+                "SELECT host,ups,bit_comm,actif,ea_min,libelle "
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_ONDULEUR, id );
 
@@ -171,13 +164,10 @@
     else
      { memcpy( &onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
        memcpy( &onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
-       memcpy( &onduleur->libelle, db->row[8], sizeof(onduleur->libelle) );
+       memcpy( &onduleur->libelle, db->row[5], sizeof(onduleur->libelle) );
        onduleur->bit_comm          = atoi(db->row[2]);
        onduleur->actif             = atoi(db->row[3]);
-       onduleur->ea_ups_load       = atoi(db->row[4]);
-       onduleur->ea_ups_real_power = atoi(db->row[5]);
-       onduleur->ea_battery_charge = atoi(db->row[6]);
-       onduleur->ea_input_voltage  = atoi(db->row[7]);
+       onduleur->ea_min            = atoi(db->row[4]);
        onduleur->id                = id;
      }
     Liberer_resultat_SQL ( log, db );
@@ -229,12 +219,11 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "host='%s',ups='%s',bit_comm=%d,actif=%d,"
-                "ea_ups_load=%d,ea_ups_real_power=%d,ea_battery_charge=%d,ea_input_voltage=%d,"
+                "ea_min=%d,"
                 "libelle='%s' "
                 "WHERE id=%d",
                 NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
-                                    onduleur->ea_ups_load, onduleur->ea_ups_real_power,
-                                    onduleur->ea_battery_charge, onduleur->ea_input_voltage,
+                                    onduleur->ea_min,
                                     libelle,
                 onduleur->id );
     g_free(host);
@@ -429,57 +418,143 @@
   { const char *query[3];
     guint numa, valeur;
     char **answer;
-    int retour;
+    int retour, num_ea;;
 
 
-    query[0] = "VAR";
+    query[0] = "VAR";                      /* Initialisation des variables communes à toutes les demandes */
     query[1] = module->onduleur.ups;
+    num_ea = module->onduleur.ea_min;
 
     query[2] = "ups.load";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER load",
-               upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER ups.load",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_ups_load, valeur );                    /* Numéro de l'EA pour le load */
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
          }
 
     query[2] = "ups.realpower";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER real_power",
-               upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER ups.realpower",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_ups_real_power, valeur );        /* Numéro de l'EA pour le real power */
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
          }
 
     query[2] = "battery.charge";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery_charge",
-               upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery.charge",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_battery_charge, valeur );   /* Numéro de l'EA pour la charge batterie */
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
          }
 
     query[2] = "input.voltage";
     retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
     if (retour == -1)
-     { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER input_voltage",
-               upscli_upserror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP) return(FALSE);
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER input_voltage",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
      }
     else { valeur = atoi (answer[3]);
-           SEA( module->onduleur.ea_input_voltage, valeur );  
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
          }
 
-    SB( module->onduleur.bit_comm, 1 );                          /* Mise a 1 du bit interne lié au module */
+    query[2] = "battery.runtime";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery.runtime",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
+     }
+    else { valeur = atoi (answer[3]);
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
+         }
+
+    query[2] = "battery.voltage";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery.voltage",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
+     }
+    else { valeur = atoi (answer[3]);
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
+         }
+
+    query[2] = "input.frequency";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER input.frequency",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
+     }
+    else { valeur = atoi (answer[3]);
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
+         }
+
+    query[2] = "output.current";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER output.current",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
+     }
+    else { valeur = atoi (answer[3]);
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
+         }
+
+    query[2] = "output.frequency";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER output.frequency",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
+     }
+    else { valeur = atoi (answer[3]);
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
+         }
+
+    query[2] = "output_voltage";
+    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
+    if (retour == -1)
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER output.voltage",
+                  upscli_upserror(&module->upsconn) );
+          return(FALSE);
+        }
+     }
+    else { valeur = atoi (answer[3]);
+           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
+         }
+
     return(TRUE);
   }
 /**********************************************************************************************************/

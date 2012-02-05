@@ -62,13 +62,11 @@
 
        g_snprintf( chaine, sizeof(chaine), "\n"
                    " ONDULEUR[%02d] -> Host=%s, UPS=%s, actif=%d, started=%d nbr_deconnect=%d date_retente=%d\n"
-                   "                   bit_comm=%d, ea_ups_load=%d, ea_ups_real_power=%d\n"
-                   "                   ea_battery_charge=%d, ea_input_voltage=%d\n",
+                   "                   bit_comm=%d, ea_min=%d\n",
                    module->onduleur.id, module->onduleur.host, module->onduleur.ups,
                    module->onduleur.actif, module->started,
                    module->nbr_deconnect, (int)module->date_retente, module->onduleur.bit_comm,
-                   module->onduleur.ea_ups_load, module->onduleur.ea_ups_real_power,
-                   module->onduleur.ea_battery_charge, module->onduleur.ea_input_voltage 
+                   module->onduleur.ea_min
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;

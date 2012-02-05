@@ -90,10 +90,7 @@
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM:
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_LOAD:
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_UPS_REAL_POWER:
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_INPUT_VOLTAGE:
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_BATTERY_CHARGE:
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_MIN:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_afficher_mnemo_onduleur( Reseau_ss_tag ( connexion ), mnemo );

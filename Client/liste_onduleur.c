@@ -505,20 +505,14 @@
 /**********************************************************************************************************/
  static void Rafraichir_visu_onduleur( GtkTreeIter *iter, struct CMD_TYPE_ONDULEUR *onduleur )
   { GtkTreeModel *store;
-    gchar bit_comm[10], load[10], real_power[10], battery_charge[10], input_voltage[10];
+    gchar bit_comm[10], ea_min[10];
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_onduleur) );            /* Acquisition du modele */
 
     g_snprintf( bit_comm, sizeof(bit_comm), "%s%04d",
                 Type_bit_interne_court(MNEMO_BISTABLE), onduleur->bit_comm );
-    g_snprintf( load, sizeof(load), "%s%04d",
-                Type_bit_interne_court(MNEMO_ENTREE_ANA), onduleur->ea_ups_load );
-    g_snprintf( real_power, sizeof(real_power), "%s%04d",
-                Type_bit_interne_court(MNEMO_ENTREE_ANA), onduleur->ea_ups_real_power );
-    g_snprintf( battery_charge, sizeof(battery_charge), "%s%04d",
-                Type_bit_interne_court(MNEMO_ENTREE_ANA), onduleur->ea_battery_charge );
-    g_snprintf( input_voltage, sizeof(input_voltage), "%s%04d",
-                Type_bit_interne_court(MNEMO_ENTREE_ANA), onduleur->ea_input_voltage );
+    g_snprintf( ea_min, sizeof(ea_min), "%s%04d",
+                Type_bit_interne_court(MNEMO_ENTREE_ANA), onduleur->ea_min );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, onduleur->id,
@@ -526,10 +520,7 @@
                          COLONNE_HOST, onduleur->host,
                          COLONNE_UPS, onduleur->ups,
                          COLONNE_BIT_COMM, bit_comm,
-                         COLONNE_EA_UPS_LOAD, load,
-                         COLONNE_EA_UPS_REAL_POWER, real_power,
-                         COLONNE_EA_BATTERY_CHARGE, battery_charge,
-                         COLONNE_EA_INPUT_VOLTAGE, input_voltage,
+                         COLONNE_EA_UPS_LOAD, ea_min,
                          COLONNE_LIBELLE, onduleur->libelle,
                          -1
                        );
