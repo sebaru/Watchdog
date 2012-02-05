@@ -477,6 +477,7 @@
 
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Plugins D.L.S") ) );
+
   }
 /**********************************************************************************************************/
 /* Rafraichir_visu_plugin_dls: Rafraichissement d'un plugin_dls la liste à l'écran                        */
