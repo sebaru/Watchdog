@@ -42,7 +42,7 @@
      COLONNE_HOST,
      COLONNE_UPS,
      COLONNE_BIT_COMM,
-     COLONNE_EA_UPS_LOAD,
+     COLONNE_EA_MIN,
      COLONNE_EA_UPS_REAL_POWER,
      COLONNE_EA_BATTERY_CHARGE,
      COLONNE_EA_INPUT_VOLTAGE,
@@ -419,34 +419,10 @@
 
     renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EA Load"), renderer,
-                                                         "text", COLONNE_EA_UPS_LOAD,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("EA min"), renderer,
+                                                         "text", COLONNE_EA_MIN,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_UPS_LOAD);            /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EA Real Power"), renderer,
-                                                         "text", COLONNE_EA_UPS_REAL_POWER,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_UPS_REAL_POWER);      /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EA Batt.Charge"), renderer,
-                                                         "text", COLONNE_EA_BATTERY_CHARGE,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_BATTERY_CHARGE);      /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("EA Input Volt."), renderer,
-                                                         "text", COLONNE_EA_INPUT_VOLTAGE,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_INPUT_VOLTAGE);       /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_MIN);            /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
 
     renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
@@ -520,7 +496,7 @@
                          COLONNE_HOST, onduleur->host,
                          COLONNE_UPS, onduleur->ups,
                          COLONNE_BIT_COMM, bit_comm,
-                         COLONNE_EA_UPS_LOAD, ea_min,
+                         COLONNE_EA_MIN, ea_min,
                          COLONNE_LIBELLE, onduleur->libelle,
                          -1
                        );
