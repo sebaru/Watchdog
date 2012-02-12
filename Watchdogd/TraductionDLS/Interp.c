@@ -432,14 +432,17 @@
     else { retour = TRAD_DLS_ERROR; }
 
     if (retour==TRAD_DLS_OK)                                  /* Si pas d'erreur, on regarde les warnings */
-     { liste = Alias;
+     { int i;
+       i = 0;
+       liste = Alias;
        while(liste)
         { alias = (struct ALIAS *)liste->data;
-          if (!alias->used)
+          if ( (!alias->used) && i<10 )
            { gchar chaine[128];
              g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
              Emettre_erreur( chaine ); 
              retour = TRAD_DLS_WARNING;
+             i++;
            }
           liste = liste->next;
         }
