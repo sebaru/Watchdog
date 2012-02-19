@@ -43,8 +43,8 @@
      COLONNE_UPS,
      COLONNE_BIT_COMM,
      COLONNE_EA_MIN,
-     COLONNE_EA_UPS_REAL_POWER,
-     COLONNE_EA_BATTERY_CHARGE,
+     COLONNE_E_MIN,
+     COLONNE_A_MIN,
      COLONNE_EA_INPUT_VOLTAGE,
      COLONNE_LIBELLE,
      NBR_COLONNE
@@ -368,9 +368,9 @@
                                               G_TYPE_STRING,                                      /* host */
                                               G_TYPE_STRING,                                       /* ups */
                                               G_TYPE_STRING,                                  /* bit_comm */
-                                              G_TYPE_STRING,                                      /* load */
-                                              G_TYPE_STRING,                                 /* real powa */
-                                              G_TYPE_STRING,                            /* battery charge */
+                                              G_TYPE_STRING,                                    /* ea_min */
+                                              G_TYPE_STRING,                                     /* e_min */
+                                              G_TYPE_STRING,                                     /* a_min */
                                               G_TYPE_STRING,                             /* input voltage */
                                               G_TYPE_STRING                                    /* libelle */
                                );
@@ -424,6 +424,23 @@
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EA_MIN);            /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
+    g_object_set( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("E min"), renderer,
+                                                         "text", COLONNE_E_MIN,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_E_MIN);            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
+    g_object_set( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("A min"), renderer,
+                                                         "text", COLONNE_A_MIN,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_A_MIN);            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
+
 
     renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Libelle"), renderer,
@@ -481,7 +498,7 @@
 /**********************************************************************************************************/
  static void Rafraichir_visu_onduleur( GtkTreeIter *iter, struct CMD_TYPE_ONDULEUR *onduleur )
   { GtkTreeModel *store;
-    gchar bit_comm[10], ea_min[10];
+    gchar bit_comm[10], ea_min[10], e_min[10], a_min[10];
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_onduleur) );            /* Acquisition du modele */
 
@@ -489,6 +506,10 @@
                 Type_bit_interne_court(MNEMO_BISTABLE), onduleur->bit_comm );
     g_snprintf( ea_min, sizeof(ea_min), "%s%04d",
                 Type_bit_interne_court(MNEMO_ENTREE_ANA), onduleur->ea_min );
+    g_snprintf( e_min, sizeof(e_min), "%s%04d",
+                Type_bit_interne_court(MNEMO_ENTREE), onduleur->e_min );
+    g_snprintf( a_min, sizeof(a_min), "%s%04d",
+                Type_bit_interne_court(MNEMO_SORTIE), onduleur->a_min );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, onduleur->id,
@@ -497,6 +518,8 @@
                          COLONNE_UPS, onduleur->ups,
                          COLONNE_BIT_COMM, bit_comm,
                          COLONNE_EA_MIN, ea_min,
+                         COLONNE_E_MIN, e_min,
+                         COLONNE_A_MIN, a_min,
                          COLONNE_LIBELLE, onduleur->libelle,
                          -1
                        );

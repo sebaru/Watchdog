@@ -91,6 +91,8 @@
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_MIN:
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_E_MIN:
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_A_MIN:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
                Proto_afficher_mnemo_onduleur( Reseau_ss_tag ( connexion ), mnemo );

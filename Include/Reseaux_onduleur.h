@@ -45,6 +45,8 @@
     gchar libelle[NBR_CARAC_LIBELLE_ONDULEUR_UTF8+1];                                  /* Libelle associé */
     guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
     guint ea_min;                                                    /* Numéro de la premiere EA impactée */
+    guint e_min;                                                      /* Numéro de la premiere E impactée */
+    guint a_min;                                                      /* Numéro de la premiere A impactée */
   };
 
  enum 
@@ -68,6 +70,10 @@
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_BIT_COMM,
     SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_MIN,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_MIN,
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_E_MIN,
+    SSTAG_SERVEUR_TYPE_NUM_MNEMO_E_MIN,
+    SSTAG_CLIENT_TYPE_NUM_MNEMO_A_MIN,
+    SSTAG_SERVEUR_TYPE_NUM_MNEMO_A_MIN,
   };
 
 #endif

@@ -40,6 +40,10 @@
  static GtkWidget *Entry_bit_comm;                                                   /* Mnemo du bistable */
  static GtkWidget *Spin_ea_min;                                                         /* Numéro de l'EA */
  static GtkWidget *Entry_ea_min;                                                         /* Mnemo de l'EA */
+ static GtkWidget *Spin_e_min;                                                           /* Numéro de l'E */
+ static GtkWidget *Entry_e_min;                                                           /* Mnemo de l'E */
+ static GtkWidget *Spin_a_min;                                                           /* Numéro de l'A */
+ static GtkWidget *Entry_a_min;                                                           /* Mnemo de l'A */
  static GtkWidget *Entry_lib;                                                    /* Libelle de l'onduleur */
  static GtkWidget *Entry_host;                                              /* Host hébergeant l'onduleur */
  static GtkWidget *Entry_ups;                                                             /* Nom de l'UPS */
@@ -63,6 +67,14 @@
      { mnemo.type = MNEMO_ENTREE_ANA;
        sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_EA_MIN;
      }
+    else if ( widget == Spin_e_min )
+     { mnemo.type = MNEMO_ENTREE;
+       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_E_MIN;
+     }
+    else if ( widget == Spin_a_min )
+     { mnemo.type = MNEMO_SORTIE;
+       sstag      = SSTAG_CLIENT_TYPE_NUM_MNEMO_A_MIN;
+     }
     else return;
 
     Envoi_serveur( TAG_ONDULEUR, sstag, (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
@@ -83,6 +95,12 @@
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_EA_MIN:
             gtk_entry_set_text( GTK_ENTRY(Entry_ea_min), chaine );
             break;
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_E_MIN:
+            gtk_entry_set_text( GTK_ENTRY(Entry_e_min), chaine );
+            break;
+       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_A_MIN:
+            gtk_entry_set_text( GTK_ENTRY(Entry_a_min), chaine );
+            break;
      }
   }
 /**********************************************************************************************************/
@@ -100,6 +118,8 @@
     Edit_onduleur.actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Edit_onduleur.bit_comm = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_comm) );
     Edit_onduleur.ea_min   = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ea_min  ) );
+    Edit_onduleur.e_min    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_e_min   ) );
+    Edit_onduleur.a_min    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_a_min   ) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -148,7 +168,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 6, 4, TRUE );
+    table = gtk_table_new( 8, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -200,6 +220,28 @@
     gtk_entry_set_editable( GTK_ENTRY(Entry_ea_min), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_ea_min, 2, 4, ligne, ligne+1 );
 
+    ligne ++;
+    texte = gtk_label_new( _("E Min") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
+    Spin_e_min = gtk_spin_button_new_with_range( 0, NBR_ENTRE_TOR, 1 );
+    g_signal_connect( G_OBJECT(Spin_e_min), "changed",
+                      G_CALLBACK(Afficher_mnemo), Spin_e_min );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_e_min, 1, 2, ligne, ligne+1 );
+    Entry_e_min = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_e_min), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_e_min, 2, 4, ligne, ligne+1 );
+
+    ligne ++;
+    texte = gtk_label_new( _("A Min") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
+    Spin_a_min = gtk_spin_button_new_with_range( 0, NBR_SORTIE_TOR, 1 );
+    g_signal_connect( G_OBJECT(Spin_a_min), "changed",
+                      G_CALLBACK(Afficher_mnemo), Spin_a_min );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_a_min, 1, 2, ligne, ligne+1 );
+    Entry_a_min = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_a_min), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_a_min, 2, 4, ligne, ligne+1 );
+
     if (edit_onduleur)                                                        /* Si edition d'un onduleur */
      { Edit_onduleur.id = edit_onduleur->id;
        gtk_entry_set_text( GTK_ENTRY(Entry_lib),  edit_onduleur->libelle);
@@ -207,6 +249,8 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_ups),  edit_onduleur->ups );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_comm), edit_onduleur->bit_comm );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ea_min), edit_onduleur->ea_min );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_min),  edit_onduleur->e_min );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_a_min),  edit_onduleur->a_min );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_onduleur->actif );
      }
 

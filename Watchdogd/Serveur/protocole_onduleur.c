@@ -93,6 +93,20 @@
                                                  client, mnemo );
              }
             break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_E_MIN:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_E_MIN,
+                                                 client, mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_TYPE_NUM_MNEMO_A_MIN:
+             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
+               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
+               Proto_envoyer_type_num_mnemo_tag( TAG_ONDULEUR, SSTAG_SERVEUR_TYPE_NUM_MNEMO_A_MIN,
+                                                 client, mnemo );
+             }
+            break;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

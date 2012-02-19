@@ -80,10 +80,10 @@
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s"
-                "(host,ups,libelle,bit_comm,actif,ea_min) "
-                "VALUES ('%s','%s','%s',%d,%d,%d)",
+                "(host,ups,libelle,bit_comm,actif,ea_min,e_min,a_min) "
+                "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d)",
                 NOM_TABLE_ONDULEUR, host, ups, libelle, onduleur->bit_comm, onduleur->actif,
-                onduleur->ea_min
+                onduleur->ea_min, onduleur->e_min, onduleur->a_min
               );
     g_free(host);
     g_free(ups);
@@ -102,7 +102,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle "
+                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min_a_min "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -131,6 +131,8 @@
        onduleur->bit_comm          = atoi(db->row[3]);
        onduleur->actif             = atoi(db->row[4]);
        onduleur->ea_min            = atoi(db->row[5]);
+       onduleur->e_min             = atoi(db->row[7]);
+       onduleur->a_min             = atoi(db->row[8]);
      }
     return(onduleur);
   }
@@ -144,7 +146,7 @@
     struct CMD_TYPE_ONDULEUR *onduleur;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT host,ups,bit_comm,actif,ea_min,libelle "
+                "SELECT host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min "
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_ONDULEUR, id );
 
@@ -168,6 +170,8 @@
        onduleur->bit_comm          = atoi(db->row[2]);
        onduleur->actif             = atoi(db->row[3]);
        onduleur->ea_min            = atoi(db->row[4]);
+       onduleur->e_min             = atoi(db->row[6]);
+       onduleur->a_min             = atoi(db->row[7]);
        onduleur->id                = id;
      }
     Liberer_resultat_SQL ( log, db );
@@ -219,11 +223,11 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "host='%s',ups='%s',bit_comm=%d,actif=%d,"
-                "ea_min=%d,"
+                "ea_min=%d,e_min=%d,a_min=%d,"
                 "libelle='%s' "
                 "WHERE id=%d",
                 NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
-                                    onduleur->ea_min,
+                                    onduleur->ea_min, onduleur->e_min, onduleur->a_min,
                                     libelle,
                 onduleur->id );
     g_free(host);
