@@ -385,18 +385,17 @@
  void SCI( int num, int etat, int reset, int ratio )
   { if (num>=NBR_COMPTEUR_IMP) return;
     if (etat)
-     { if ( ! Partage->ci[ num ].actif )                                              /* Passage en actif */
+     { if (reset)                                                   /* Le compteur doit-il etre resetté ? */
+        { Partage->ci[num].val_en_cours1 = 0.0;                /* Valeur transitoire pour gérer les ratio */
+          Partage->ci[num].val_en_cours2 = 0.0;                /* Valeur transitoire pour gérer les ratio */
+        }
+
+       if ( ! Partage->ci[ num ].actif )                                              /* Passage en actif */
         { Partage->ci[num].actif = TRUE;
-          if (reset)                                                /* Le compteur doit-il etre resetté ? */
-           { Partage->ci[num].val_en_cours1 = 0.0;             /* Valeur transitoire pour gérer les ratio */
-             Partage->ci[num].val_en_cours2 = 0.0;             /* Valeur transitoire pour gérer les ratio */
-           }
-          else
-           { Partage->ci[num].val_en_cours1++;
-             if (Partage->ci[num].val_en_cours1>=ratio)
-              { Partage->ci[num].val_en_cours2++;
-                Partage->ci[num].val_en_cours1=0.0;                       /* RAZ de la valeur de calcul 1 */
-              }
+          Partage->ci[num].val_en_cours1++;
+          if (Partage->ci[num].val_en_cours1>=ratio)
+           { Partage->ci[num].val_en_cours2++;
+             Partage->ci[num].val_en_cours1=0.0;                          /* RAZ de la valeur de calcul 1 */
            }
         }
      }
