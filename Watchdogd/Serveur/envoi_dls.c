@@ -425,6 +425,7 @@
   { Envoyer_plugins_dls_thread_tag ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
                                                       SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN
                                    );
+    pthread_exit ( NULL );
   }
 /**********************************************************************************************************/
 /* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
@@ -435,6 +436,7 @@
   { Envoyer_plugins_dls_thread_tag ( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
                                                              SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN
                                    );
+    pthread_exit ( NULL );
   }
 /**********************************************************************************************************/
 /* Envoyer_source_dls: Envoi d'un programme D.L.S                                                         */

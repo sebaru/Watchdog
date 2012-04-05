@@ -102,7 +102,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min_a_min "
+                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
