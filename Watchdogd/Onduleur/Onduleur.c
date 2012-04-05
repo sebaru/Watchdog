@@ -400,12 +400,12 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s", module->onduleur.ups );
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending ", buffer );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) )
+    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending GET UPSDESC failed",
                (char *)upscli_strerror(&module->upsconn) );
      }
     else
-     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) )
+     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading GET UPSDESC failed",
                   (char *)upscli_strerror(&module->upsconn) );
         }
