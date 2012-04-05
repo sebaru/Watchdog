@@ -512,6 +512,24 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
+/* Onduleur_set_instcmd: Envoi d'une instant commande à l'onduleur                                        */
+/* Entrée : l'onduleur, le nom de la commande                                                             */
+/* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
+/**********************************************************************************************************/
+ gboolean Onduleur_set_instcmd ( struct MODULE_ONDULEUR *module, gchar *nom_cmd )
+  { gchar buffer[80];
+
+    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->onduleur.ups, nom_cmd );
+    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed", nom_cmd );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed",
+               (char *)upscli_strerror(&module->upsconn) );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+
+/**********************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                      */
 /* Entrée : l'onduleur, le nom de variable, la variable a renseigner                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
@@ -542,14 +560,36 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
+/* Envoyer_sortie_onduleur: Envoi des sorties/InstantCommand à l'onduleur                                 */
+/* Entrée: identifiants des modules onduleur                                                              */
+/* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
+/**********************************************************************************************************/
+ static gboolean Envoyer_sortie_onduleur( struct MODULE_ONDULEUR *module )
+  { gchar buffer[80];
+    gint valeur;
+    gint num_a;
+
+    num_a = module->onduleur.a_min;
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test" /*load.off"*/ ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test" /*"load.on"*/ ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.on" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test.battery.start.deep" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test.battery.start.quick" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test.battery.stop" ) == FALSE) return(FALSE); }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
 /* Interroger_onduleur: Interrogation d'un onduleur                                                       */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
+/* Entrée: identifiants des modules onduleur                                                              */
+/* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
  static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
   { gchar buffer[80];
     gint valeur;
-    gint num_ea;;
+    gint num_ea;
 
     num_ea = module->onduleur.ea_min;
 
@@ -668,16 +708,15 @@
        liste = Partage->com_onduleur.Modules_ONDULEUR;
        while (liste)
         { module = (struct MODULE_ONDULEUR *)liste->data;
-          if ( module->onduleur.actif != TRUE || 
+          if ( module->onduleur.actif != TRUE ||     /* si le module n'est pas actif, on ne le traite pas */
                Partage->top < module->date_retente )           /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
            }
-
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
-           { if ( Connecter_module( module ) )
-              { module->date_retente = 0;;
+           { if ( Connecter_module( module ) )                       /* Demande de connexion a l'onduleur */
+              { module->date_retente = 0;
                 module->started = TRUE;
               }
              else
@@ -688,12 +727,19 @@
            }
           else
            { Info_n( Config.log, DEBUG_ONDULEUR,
-                     "ONDULEUR: Run_onduleur: Interrogation onduleur ID", module->onduleur.id );
-             if ( Interroger_onduleur ( module ) )
-              { module->date_retente = Partage->top + ONDULEUR_POLLING; }/* Update toutes les xx secondes */
-             else
+                     "ONDULEUR: Run_onduleur: Envoi des sorties onduleur ID", module->onduleur.id );
+             if ( Envoyer_sortie_onduleur ( module ) == FALSE )
               { Deconnecter_module ( module );
                 module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On retente dans longtemps */
+              }
+             else
+              { Info_n( Config.log, DEBUG_ONDULEUR,
+                        "ONDULEUR: Run_onduleur: Interrogation onduleur ID", module->onduleur.id );
+                if ( Interroger_onduleur ( module ) == FALSE )
+                 { Deconnecter_module ( module );
+                   module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On retente dans longtemps */
+                 }
+                else module->date_retente = Partage->top + ONDULEUR_POLLING;/* Update toutes les xx secondes */
               }
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */

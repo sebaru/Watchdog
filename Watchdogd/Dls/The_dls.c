@@ -345,7 +345,7 @@
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
         { Ajouter_arch( MNEMO_SORTIE, num, etat );
-          if (Partage->com_tellstick.Ajouter_tellstick)
+          if (Partage->com_tellstick.Ajouter_tellstick) /* A revoir. Le polling est a faire par le thread tellstick ?? */
            { Partage->com_tellstick.Ajouter_tellstick( num, etat ); }
           Partage->a[num].changes++;                                              /* Un change de plus !! */
         } else if (Partage->top % 600)                   /* Si persistence on prévient toutes les minutes */
