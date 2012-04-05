@@ -434,150 +434,77 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
+/* Onduleur_get_var: Recupere une valeur de la variable en parametre                                      */
+/* Entrée : l'onduleur, le nom de variable, la variable a renseigner                                      */
+/* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
+/**********************************************************************************************************/
+ gboolean Onduleur_get_var ( struct MODULE_ONDULEUR *module, gchar *nom_var, gint *retour )
+  { gchar buffer[80];
+
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->onduleur.ups, nom_var );
+    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed", nom_var );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed",
+               (char *)upscli_strerror(&module->upsconn) );
+       return(FALSE);
+     }
+
+    if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed", nom_var );
+          Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed",
+                  (char *)upscli_strerror(&module->upsconn) );
+          return(FALSE);
+        }
+       *retour = 0;
+       return(TRUE);                                     /* Variable not supported... is not an error ... */
+     }
+
+    *retour = atoi ( buffer + 2+ strlen(module->onduleur.ups) + strlen(nom_var));
+    return(TRUE);
+  }
+/**********************************************************************************************************/
 /* Interroger_onduleur: Interrogation d'un onduleur                                                       */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
 /**********************************************************************************************************/
  static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
-  { const char *query[3];
-    guint numa, valeur;
-    char **answer;
-    int retour, num_ea;;
+  { gchar buffer[80];
+    gint valeur;
+    gint num_ea;;
 
 
-    query[0] = "VAR";                      /* Initialisation des variables communes à toutes les demandes */
-    query[1] = module->onduleur.ups;
     num_ea = module->onduleur.ea_min;
 
-    query[2] = "ups.load";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER ups.load",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "ups.load", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    
+    if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "ups.realpower";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER ups.realpower",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "battery.charge", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "battery.charge";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery.charge",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "input.voltage", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "input.voltage";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER input_voltage",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "battery.runtime";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery.runtime",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "battery.voltage";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER battery.voltage",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "input.frequency", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "input.frequency";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER input.frequency",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "output.current", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "output.current";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER output.current",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "output.frequency", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
-    query[2] = "output.frequency";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER output.frequency",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
-
-    query[2] = "output.voltage";
-    retour = upscli_get( &module->upsconn, 3, query, &numa, &answer);
-    if (retour == -1)
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Interroger_onduleur: Wrong ANSWER output.voltage",
-                  upscli_upserror(&module->upsconn) );
-          return(FALSE);
-        }
-     }
-    else { valeur = atoi (answer[3]);
-           SEA( num_ea++, valeur );                                      /* Numéro de l'EA pour la valeur */
-         }
+    if ( Onduleur_get_var ( module, "output.voltage", &valeur ) == FALSE ) return(FALSE);
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     return(TRUE);
   }
