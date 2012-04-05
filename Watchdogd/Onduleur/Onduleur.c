@@ -384,7 +384,8 @@
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
  static gboolean Connecter_module ( struct MODULE_ONDULEUR *module )
-  { int connexion;
+  { gchar buffer[80];
+    int connexion;
 
     if ( (connexion = upscli_connect( &module->upsconn, module->onduleur.host,
                                       ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
@@ -394,6 +395,23 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->onduleur.host );
+
+    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s", module->onduleur.ups );
+    if ( upscli_sendline( &module->upsconn, buffer, sizeof(buffer) ) )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending GET UPSDESC failed",
+               (char *)upscli_strerror(&module->upsconn) );
+     }
+    else
+     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) )
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading GET UPSDESC failed",
+                  (char *)upscli_strerror(&module->upsconn) );
+        }
+       else
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading GET UPSDESC",
+                  buffer + strlen(module->onduleur.ups) + 9 );
+        }
+     }
+
     return(TRUE);
   }
 /**********************************************************************************************************/
