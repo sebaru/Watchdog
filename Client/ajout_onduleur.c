@@ -45,6 +45,8 @@
  static GtkWidget *Spin_a_min;                                                           /* Numéro de l'A */
  static GtkWidget *Entry_a_min;                                                           /* Mnemo de l'A */
  static GtkWidget *Entry_lib;                                                    /* Libelle de l'onduleur */
+ static GtkWidget *Entry_username;                                              /* Username de l'onduleur */
+ static GtkWidget *Entry_password;                                              /* Password de l'onduleur */
  static GtkWidget *Entry_host;                                              /* Host hébergeant l'onduleur */
  static GtkWidget *Entry_ups;                                                             /* Nom de l'UPS */
  static GtkWidget *Check_actif;                                               /* Doit-il etre supervisé ? */
@@ -115,6 +117,10 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
     g_snprintf( Edit_onduleur.ups, sizeof(Edit_onduleur.ups),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ups) ) );
+    g_snprintf( Edit_onduleur.username, sizeof(Edit_onduleur.username),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_username) ) );
+    g_snprintf( Edit_onduleur.password, sizeof(Edit_onduleur.password),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_password) ) );
     Edit_onduleur.actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Edit_onduleur.bit_comm = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_comm) );
     Edit_onduleur.ea_min   = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ea_min  ) );
@@ -168,7 +174,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_container_add( GTK_CONTAINER(frame), hboite );
 
-    table = gtk_table_new( 8, 4, TRUE );
+    table = gtk_table_new( 2, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -197,6 +203,19 @@
     Entry_ups = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_ups), NBR_CARAC_UPS_ONDULEUR );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_ups, 1, 4, ligne, ligne+1 );
+
+    ligne ++;
+    texte = gtk_label_new( _("Username") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, ligne, ligne+1 );
+    Entry_username = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_username), NBR_CARAC_USERNAME_ONDULEUR );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_username, 1, 2, ligne, ligne+1 );
+    texte = gtk_label_new( _("Password") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, ligne, ligne+1 );
+    Entry_password = gtk_entry_new();
+    gtk_entry_set_visibility( GTK_ENTRY(Entry_password), FALSE );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_password), NBR_CARAC_PASSWORD_ONDULEUR );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_password, 3, 4, ligne, ligne+1 );
 
     ligne ++;
     texte = gtk_label_new( _("Bit comm") );
@@ -247,6 +266,8 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_lib),  edit_onduleur->libelle);
        gtk_entry_set_text( GTK_ENTRY(Entry_host), edit_onduleur->host );
        gtk_entry_set_text( GTK_ENTRY(Entry_ups),  edit_onduleur->ups );
+       gtk_entry_set_text( GTK_ENTRY(Entry_username),  edit_onduleur->username );
+       gtk_entry_set_text( GTK_ENTRY(Entry_password),  edit_onduleur->password );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_comm), edit_onduleur->bit_comm );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ea_min), edit_onduleur->ea_min );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_e_min),  edit_onduleur->e_min );

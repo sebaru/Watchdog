@@ -47,6 +47,8 @@
      COLONNE_A_MIN,
      COLONNE_EA_INPUT_VOLTAGE,
      COLONNE_LIBELLE,
+     COLONNE_USERNAME,
+     COLONNE_PASSWORD,
      NBR_COLONNE
   };
 /********************************* Définitions des prototypes programme ***********************************/
@@ -372,7 +374,9 @@
                                               G_TYPE_STRING,                                     /* e_min */
                                               G_TYPE_STRING,                                     /* a_min */
                                               G_TYPE_STRING,                             /* input voltage */
-                                              G_TYPE_STRING                                    /* libelle */
+                                              G_TYPE_STRING,                                   /* libelle */
+                                              G_TYPE_STRING,                                  /* username */
+                                              G_TYPE_STRING                                   /* password */
                                );
 
     Liste_onduleur = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );        /* Creation de la vue */
@@ -396,14 +400,14 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
 
     renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Host"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("UPS Host"), renderer,
                                                          "text", COLONNE_HOST,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_HOST);                   /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
 
     renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Name"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("UPS Name"), renderer,
                                                          "text", COLONNE_UPS,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_UPS);                    /* On peut la trier */
@@ -411,7 +415,7 @@
 
     renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Comm."), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Bit Comm."), renderer,
                                                          "text", COLONNE_BIT_COMM,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_BIT_COMM);               /* On peut la trier */
@@ -447,6 +451,13 @@
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                            /* Colonne du libelle de onduleur */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Username"), renderer,
+                                                         "text", COLONNE_USERNAME,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_USERNAME);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_onduleur), colonne );
 
     g_signal_connect( G_OBJECT(Liste_onduleur), "button_press_event",            /* Gestion du menu popup */
@@ -521,6 +532,8 @@
                          COLONNE_E_MIN, e_min,
                          COLONNE_A_MIN, a_min,
                          COLONNE_LIBELLE, onduleur->libelle,
+                         COLONNE_USERNAME, onduleur->username,
+                         COLONNE_PASSWORD, onduleur->password,
                          -1
                        );
   }
