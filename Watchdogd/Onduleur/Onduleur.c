@@ -370,12 +370,13 @@
 /**********************************************************************************************************/
  static void Deconnecter_module ( struct MODULE_ONDULEUR *module )
   { if (!module) return;
-    if (module->started == FALSE) return;
 
-    upscli_disconnect( &module->upsconn );
-    module->started = FALSE;
-    module->nbr_deconnect++;
-    module->date_retente = 0;
+    if (module->started == TRUE)
+     { upscli_disconnect( &module->upsconn );
+       module->started = FALSE;
+       module->nbr_deconnect++;
+     }
+
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->onduleur.id );
     SB( module->onduleur.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
   }
@@ -648,6 +649,7 @@
           module = Chercher_module_by_id ( Partage->com_onduleur.admin_stop );
           if (module) { module->onduleur.actif = 0;
                         Deconnecter_module  ( module );
+                        module->date_retente = 0;                            /* RAZ de la date de retente */
                       }
           else { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: UPS id not found",
                          Partage->com_onduleur.admin_stop );
