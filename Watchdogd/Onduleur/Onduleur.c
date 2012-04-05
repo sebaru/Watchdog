@@ -398,8 +398,8 @@
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->onduleur.host );
 
-    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s", module->onduleur.ups );
-    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer)+1 ) == -1 )
+    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->onduleur.ups );
+    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending GET UPSDESC failed",
                (char *)upscli_strerror(&module->upsconn) );
      }
