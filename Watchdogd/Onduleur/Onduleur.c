@@ -250,6 +250,7 @@
        if (module->onduleur.id == id) return(module);
        liste = liste->next;
      }
+    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Chercher_module_by_id: UPS not found", id );
     return(NULL);
   }
 /**********************************************************************************************************/
@@ -635,15 +636,22 @@
                   Partage->com_onduleur.admin_start );
           module = Chercher_module_by_id ( Partage->com_onduleur.admin_start );
           if (module) module->onduleur.actif = 1;
+          else { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: UPS id not found",
+                         Partage->com_onduleur.admin_start );
+               }
           Partage->com_onduleur.admin_start = 0;
         }
 
        if (Partage->com_onduleur.admin_stop)
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Stoping module",
+        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Stopping module",
                   Partage->com_onduleur.admin_stop );
           module = Chercher_module_by_id ( Partage->com_onduleur.admin_stop );
-          if (module) module->onduleur.actif = 0;
-          Deconnecter_module  ( module );
+          if (module) { module->onduleur.actif = 0;
+                        Deconnecter_module  ( module );
+                      }
+          else { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: UPS id not found",
+                         Partage->com_onduleur.admin_stop );
+               }
           Partage->com_onduleur.admin_stop = 0;
         }
 
