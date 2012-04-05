@@ -440,6 +440,7 @@
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->onduleur.host );
 
+/********************************************* UPSDESC ****************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->onduleur.ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending GET UPSDESC failed",
@@ -455,6 +456,41 @@
                   buffer + strlen(module->onduleur.ups) + 9 );
         }
      }
+
+/********************************************* USERNAME ***************************************************/
+    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->onduleur.username );
+    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending USERNAME failed",
+               (char *)upscli_strerror(&module->upsconn) );
+     }
+    else
+     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading USERNAME failed",
+                  (char *)upscli_strerror(&module->upsconn) );
+        }
+       else
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading USERNAME",
+                  buffer );
+        }
+     }
+
+/********************************************* PASSWORD ***************************************************/
+    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->onduleur.password );
+    if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending PASSWORD failed",
+               (char *)upscli_strerror(&module->upsconn) );
+     }
+    else
+     { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading PASSWORD failed",
+                  (char *)upscli_strerror(&module->upsconn) );
+        }
+       else
+        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading PASSWORD",
+                  buffer );
+        }
+     }
+
 
     return(TRUE);
   }
@@ -514,7 +550,6 @@
   { gchar buffer[80];
     gint valeur;
     gint num_ea;;
-
 
     num_ea = module->onduleur.ea_min;
 
