@@ -56,7 +56,7 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gint Ajouter_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar *host, *ups, *libelle;
+  { gchar *host, *ups, *libelle,*username,*password;
     gchar requete[2048];
     
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
@@ -77,17 +77,36 @@
        Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation libelle impossible" );
        return(-1);
      }
+    username = Normaliser_chaine ( log, onduleur->username );            /* Formatage correct des chaines */
+    if (!username)
+     { g_free(host);
+       g_free(ups);
+       g_free(libelle);
+       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation username impossible" );
+       return(-1);
+     }
+    password = Normaliser_chaine ( log, onduleur->password );            /* Formatage correct des chaines */
+    if (!password)
+     { g_free(host);
+       g_free(ups);
+       g_free(libelle);
+       g_free(username);
+       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation password impossible" );
+       return(-1);
+     }
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s"
                 "(host,ups,libelle,bit_comm,actif,ea_min,e_min,a_min) "
-                "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d)",
+                "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
                 NOM_TABLE_ONDULEUR, host, ups, libelle, onduleur->bit_comm, onduleur->actif,
-                onduleur->ea_min, onduleur->e_min, onduleur->a_min
+                onduleur->ea_min, onduleur->e_min, onduleur->a_min, username,password
               );
     g_free(host);
     g_free(ups);
     g_free(libelle);
+    g_free(username);
+    g_free(password);
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(-1); }
@@ -102,7 +121,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min "
+                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min,username,password "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -124,9 +143,11 @@
     onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur) Info( log, DEBUG_ONDULEUR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &onduleur->host,    db->row[1], sizeof(onduleur->host   ) );
-       memcpy( &onduleur->ups,     db->row[2], sizeof(onduleur->ups    ) );
-       memcpy( &onduleur->libelle, db->row[6], sizeof(onduleur->libelle) );
+     { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
+       memcpy( &onduleur->ups,      db->row[2],  sizeof(onduleur->ups    ) );
+       memcpy( &onduleur->libelle,  db->row[6],  sizeof(onduleur->libelle) );
+       memcpy( &onduleur->username, db->row[9],  sizeof(onduleur->username) );
+       memcpy( &onduleur->password, db->row[10], sizeof(onduleur->password) );
        onduleur->id                = atoi(db->row[0]);
        onduleur->bit_comm          = atoi(db->row[3]);
        onduleur->actif             = atoi(db->row[4]);
@@ -146,7 +167,7 @@
     struct CMD_TYPE_ONDULEUR *onduleur;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min "
+                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min,username,password "
                 " FROM %s WHERE id=%d",
                 NOM_TABLE_ONDULEUR, id );
 
@@ -164,15 +185,17 @@
     if (!onduleur)
      { Info( log, DEBUG_ONDULEUR, "Rechercher_onduleurDB: Mem error" ); }
     else
-     { memcpy( &onduleur->host,    db->row[0], sizeof(onduleur->host   ) );
-       memcpy( &onduleur->ups,     db->row[1], sizeof(onduleur->ups    ) );
-       memcpy( &onduleur->libelle, db->row[5], sizeof(onduleur->libelle) );
-       onduleur->bit_comm          = atoi(db->row[2]);
-       onduleur->actif             = atoi(db->row[3]);
-       onduleur->ea_min            = atoi(db->row[4]);
-       onduleur->e_min             = atoi(db->row[6]);
-       onduleur->a_min             = atoi(db->row[7]);
-       onduleur->id                = id;
+     { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
+       memcpy( &onduleur->ups,      db->row[2],  sizeof(onduleur->ups    ) );
+       memcpy( &onduleur->libelle,  db->row[6],  sizeof(onduleur->libelle) );
+       memcpy( &onduleur->username, db->row[9],  sizeof(onduleur->username) );
+       memcpy( &onduleur->password, db->row[10], sizeof(onduleur->password) );
+       onduleur->id                = atoi(db->row[0]);
+       onduleur->bit_comm          = atoi(db->row[3]);
+       onduleur->actif             = atoi(db->row[4]);
+       onduleur->ea_min            = atoi(db->row[5]);
+       onduleur->e_min             = atoi(db->row[7]);
+       onduleur->a_min             = atoi(db->row[8]);
      }
     Liberer_resultat_SQL ( log, db );
     return(onduleur);
@@ -198,7 +221,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gboolean Modifier_onduleurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar *host, *ups, *libelle;
+  { gchar *host, *ups, *libelle,*username,*password;
     gchar requete[2048];
 
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
@@ -219,20 +242,39 @@
        Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation libelle impossible" );
        return(-1);
      }
+    username = Normaliser_chaine ( log, onduleur->username );            /* Formatage correct des chaines */
+    if (!username)
+     { g_free(host);
+       g_free(ups);
+       g_free(libelle);
+       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation username impossible" );
+       return(-1);
+     }
+    password = Normaliser_chaine ( log, onduleur->password );            /* Formatage correct des chaines */
+    if (!password)
+     { g_free(host);
+       g_free(ups);
+       g_free(libelle);
+       g_free(username);
+       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation password impossible" );
+       return(-1);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "host='%s',ups='%s',bit_comm=%d,actif=%d,"
                 "ea_min=%d,e_min=%d,a_min=%d,"
-                "libelle='%s' "
+                "libelle='%s',username='%s',password='%s' "
                 "WHERE id=%d",
                 NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
                                     onduleur->ea_min, onduleur->e_min, onduleur->a_min,
-                                    libelle,
+                                    libelle, username, password,
                 onduleur->id );
     g_free(host);
     g_free(ups);
     g_free(libelle);
+    g_free(username);
+    g_free(password);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

@@ -674,14 +674,16 @@ CREATE TABLE IF NOT EXISTS `msgs` (
 CREATE TABLE IF NOT EXISTS `onduleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `actif` tinyint(1) NOT NULL,
-  `host` varchar(32) NOT NULL,
-  `ups` varchar(32) NOT NULL,
+  `host` text NOT NULL,
+  `ups` text NOT NULL,
+  `username` text NOT NULL,
+  `password` text NOT NULL,
+  `libelle` text NOT NULL,
   `bit_comm` int(11) NOT NULL,
   `ea_ups_load` int(11) NOT NULL,
   `ea_ups_real_power` int(11) NOT NULL,
   `ea_battery_charge` int(11) NOT NULL,
   `ea_input_voltage` int(11) NOT NULL,
-  `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 

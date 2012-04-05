@@ -37,12 +37,20 @@
  #define NBR_CARAC_LIBELLE_ONDULEUR        60
  #define NBR_CARAC_LIBELLE_ONDULEUR_UTF8   (2*NBR_CARAC_LIBELLE_ONDULEUR)
 
+ #define NBR_CARAC_USERNAME_ONDULEUR        20
+ #define NBR_CARAC_USERNAME_ONDULEUR_UTF8   (2*NBR_CARAC_USERNAME_ONDULEUR)
+
+ #define NBR_CARAC_PASSWORD_ONDULEUR        20
+ #define NBR_CARAC_PASSWORD_ONDULEUR_UTF8   (2*NBR_CARAC_PASSWORD_ONDULEUR)
+
  struct CMD_TYPE_ONDULEUR
   { gint id;                                                  /* Numéro du module dans la base de données */
     gboolean actif;                                                        /* Le module doit-il tourner ? */
     gchar host[NBR_CARAC_HOST_ONDULEUR_UTF8+1];                         /* Adresses IP du module ONDULEUR */
     gchar ups[NBR_CARAC_UPS_ONDULEUR_UTF8+1];                                 /* Nom de l'UPS sur le HOST */
     gchar libelle[NBR_CARAC_LIBELLE_ONDULEUR_UTF8+1];                                  /* Libelle associé */
+    gchar username[NBR_CARAC_USERNAME_ONDULEUR_UTF8+1];                               /* Username associé */
+    gchar password[NBR_CARAC_PASSWORD_ONDULEUR_UTF8+1];                               /* Password associé */
     guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
     guint ea_min;                                                    /* Numéro de la premiere EA impactée */
     guint e_min;                                                      /* Numéro de la premiere E impactée */
