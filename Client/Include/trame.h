@@ -114,6 +114,7 @@
     GooCanvasItem *item_texte;
     GooCanvasItem *item_rectangle_1;
     GooCanvasItem *item_rectangle_2;
+    GooCanvasItem *item_triangle_1;
     GooCanvasItem *item_fond;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
@@ -132,6 +133,13 @@
     guchar en_cours_rouge2;                                                  /* Couleur actuelle du motif */
     guchar en_cours_vert2;
     guchar en_cours_bleu2;
+    gint   cligno3;                                                                /* Etat cligno du motif */
+    guchar rouge3;                                                            /* Couleur attendue du motif */
+    guchar vert3;
+    guchar bleu3;
+    guchar en_cours_rouge3;                                                  /* Couleur actuelle du motif */
+    guchar en_cours_vert3;
+    guchar en_cours_bleu3;
     gint   groupe_dpl;                                                  /* Groupe de deplacement du motif */
     gint selection;
   };

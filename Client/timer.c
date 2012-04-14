@@ -79,6 +79,25 @@
                                         trame_pass->bleu2 );
      }
 
+/***************************************** Gestion de la vignette Sécurité des Personnes ******************/
+    if (trame_pass->cligno3 == 1 && !cligno &&                                     /* Gestion clignotement */
+        (trame_pass->en_cours_rouge3 != 100 ||
+         trame_pass->en_cours_vert3  != 100 ||
+         trame_pass->en_cours_bleu3  != 100
+        )
+       )
+     { Trame_peindre_pass_3 ( trame_pass, 0, 0, 0 ); }
+
+    if ( cligno && (trame_pass->en_cours_rouge3 != trame_pass->rouge3 ||
+                    trame_pass->en_cours_vert3  != trame_pass->vert3  ||
+                    trame_pass->en_cours_bleu3  != trame_pass->bleu3
+                   )
+       )
+     { Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3,
+                                        trame_pass->vert3,
+                                        trame_pass->bleu3 );
+     }
+
   }
 /**********************************************************************************************************/
 /* Timer_motif: gestion des échéances temporelles des motifs.                                             */

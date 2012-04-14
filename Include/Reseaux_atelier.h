@@ -84,11 +84,12 @@
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
     gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                     /* Libelle du synoptique cible */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
+    gint    bit_controle;                                                        /* Ixxx, Cxxx A virer ?? */
     guint   position_x;                                                      /* en abscisses et ordonnées */
     guint   position_y;
     guint   bit_controle_1;                                       /* Numéro Ixxx du premier bit de retour */
     guint   bit_controle_2;                                        /* Numéro Ixxx du second bit de retour */
+    guint   bit_controle_3;                                         /* Numéro Ixxx du 3ieme bit de retour */
     gfloat  angle;
   };
 

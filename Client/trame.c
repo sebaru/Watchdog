@@ -294,6 +294,22 @@
     trame_pass->en_cours_bleu2  = b;
   }
 /**********************************************************************************************************/
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
+/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b )
+  { guint couleur;
+
+    if (!(trame_pass && trame_pass->pass)) return;
+    couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
+    g_object_set( G_OBJECT(trame_pass->item_triangle_1), "fill_color_rgba", couleur, NULL );
+
+    trame_pass->en_cours_rouge3 = r;                        /* Sauvegarde de la couleur actuelle du motif */
+    trame_pass->en_cours_vert3  = v;
+    trame_pass->en_cours_bleu3  = b;
+  }
+/**********************************************************************************************************/
 /* Trame_rafraichir_capteur: remet à jour la position, rotation, echelle du capteur en parametre              */
 /* Entrée: la structure graphique TRAME_ITEM_CAPTEUR                                                        */
 /* Sortie: néant                                                                                          */
@@ -723,25 +739,31 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                   NULL);
 
     trame_pass->item_rectangle_1 = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                        -24.0, -8.0, 12.0, 16.0,
+                                                        -41.0, -8.0, 12.0, 16.0,
                                                         "fill-color", "red",
                                                         "stroke-color", "yellow",
                                                         NULL);
 
     trame_pass->item_rectangle_2 = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                        -7.0, -8.0, 12.0, 16.0,
+                                                        -24.0, -8.0, 12.0, 16.0,
                                                         "fill-color", "green",
                                                         "stroke-color", "yellow",
                                                         NULL);
 
-/*    g_object_get( G_OBJECT(trame_pass->item_texte), "height", &tailley, "width", &taillex, NULL );
-printf(" dX = %d dY = %d \n", taillex, tailley );*/
+    trame_pass->item_triangle_1 =  goo_canvas_polyline_new( trame_pass->item_groupe, TRUE, 3,
+                                                            -7.0, +8.0,
+                                                            +1.0, -8.0,
+                                                            +9.0, +8.0,
+                                                            "fill-color", "green",
+                                                            "stroke-color", "yellow",
+                                                            NULL);
+
     tailley = 15;
     taillex = strlen(pass->libelle) * 11;
     trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                 (double)-30.0,
+                                                 (double)-47.0,
                                                  (double)-(tailley/2+5.0),
-                                                 (double)+taillex+45.0,
+                                                 (double)+taillex+62.0,
                                                  (double)(tailley+10),
                                                  "stroke-color", "yellow",
                                                  "fill-color", "blue",
