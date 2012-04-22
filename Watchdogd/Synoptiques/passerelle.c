@@ -59,10 +59,10 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(syn_id,syn_cible_id,bitctrl,bitctrl1,bitctrl2,posx,posy,angle)"
+                "INSERT INTO %s(syn_id,syn_cible_id,bitctrl,bitctrl1,bitctrl2,bitctrl3,posx,posy,angle)"
                 " VALUES (%d,%d,%d,%d,%d,%d,%d,'%f')", NOM_TABLE_PASSERELLE,
                 passerelle->syn_id, passerelle->syn_cible_id, passerelle->bit_controle,
-                passerelle->bit_controle_1, passerelle->bit_controle_2,
+                passerelle->bit_controle_1, passerelle->bit_controle_2, passerelle->bit_controle_3,
                 passerelle->position_x, passerelle->position_y, passerelle->angle );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
@@ -79,10 +79,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
-                "%s.posx,%s.posy,%s.angle"
+                "%s.bitctrl3,%s.posx,%s.posy,%s.angle"
                 " FROM %s,%s WHERE %s.syn_id=%d AND %s.id=%s.syn_cible_id",
                 NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
-                NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,
                 NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
                 NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,                                       /* From */
@@ -113,9 +113,10 @@
        passerelle->bit_controle   = atoi(db->row[4]);                                       /* Ixxx, Cxxx */
        passerelle->bit_controle_1 = atoi(db->row[5]);                                       /* Ixxx, Cxxx */
        passerelle->bit_controle_2 = atoi(db->row[6]);                                       /* Ixxx, Cxxx */
-       passerelle->position_x     = atoi(db->row[7]);                        /* en abscisses et ordonnées */
-       passerelle->position_y     = atoi(db->row[8]);
-       passerelle->angle          = atof(db->row[9]);
+       passerelle->bit_controle_3 = atoi(db->row[7]);                                       /* Ixxx, Cxxx */
+       passerelle->position_x     = atoi(db->row[8]);                        /* en abscisses et ordonnées */
+       passerelle->position_y     = atoi(db->row[9]);
+       passerelle->angle          = atof(db->row[10]);
        memcpy ( &passerelle->libelle, db->row[3], sizeof(passerelle->libelle) );
      }
     return(passerelle);
@@ -130,12 +131,13 @@
     gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
-                "%s.posx,%s.posy,%s.angle "
+                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
+                "%s.bitctrl3,%s.posx,%s.posy,%s.angle"
                 "FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id", 
-                NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE, 
-                NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE, 
+                NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
+                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,
+                NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
+                NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
                 NOM_TABLE_PASSERELLE, NOM_TABLE_SYNOPTIQUE,                                       /* From */
                 NOM_TABLE_PASSERELLE, id, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE );
 
@@ -152,16 +154,17 @@
     passerelle = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!passerelle) Info( log, DEBUG_SERVEUR, "Rechercher_paserelleDB: Erreur allocation mémoire" );
     else
-     { passerelle->id             = id;
-       passerelle->syn_id         = atoi(db->row[0]);           /* Synoptique ou est placée la passerelle */
-       passerelle->syn_cible_id   = atoi(db->row[1]);                /* Synoptique cible de la passerelle */
-       passerelle->bit_controle   = atoi(db->row[3]);                                       /* Ixxx, Cxxx */
-       passerelle->bit_controle_1 = atoi(db->row[4]);                                       /* Ixxx, Cxxx */
-       passerelle->bit_controle_2 = atoi(db->row[5]);                                       /* Ixxx, Cxxx */
-       passerelle->position_x     = atoi(db->row[6]);                        /* en abscisses et ordonnées */
-       passerelle->position_y     = atoi(db->row[7]);
-       passerelle->angle          = atof(db->row[8]);
-       memcpy ( &passerelle->libelle, db->row[2], sizeof(passerelle->libelle) );
+     { passerelle->id             = atoi(db->row[0]);
+       passerelle->syn_id         = atoi(db->row[1]);           /* Synoptique ou est placée la passerelle */
+       passerelle->syn_cible_id   = atoi(db->row[2]);                /* Synoptique cible de la passerelle */
+       passerelle->bit_controle   = atoi(db->row[4]);                                       /* Ixxx, Cxxx */
+       passerelle->bit_controle_1 = atoi(db->row[5]);                                       /* Ixxx, Cxxx */
+       passerelle->bit_controle_2 = atoi(db->row[6]);                                       /* Ixxx, Cxxx */
+       passerelle->bit_controle_3 = atoi(db->row[7]);                                       /* Ixxx, Cxxx */
+       passerelle->position_x     = atoi(db->row[8]);                        /* en abscisses et ordonnées */
+       passerelle->position_y     = atoi(db->row[9]);
+       passerelle->angle          = atof(db->row[10]);
+       memcpy ( &passerelle->libelle, db->row[3], sizeof(passerelle->libelle) );
      }
     return(passerelle);
   }
@@ -175,9 +178,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "bitctrl=%d,bitctrl1=%d,bitctrl2=%d,posx=%d,posy=%d,angle='%f'"
+                "bitctrl=%d,bitctrl1=%d,bitctrl2=%d,bitctrl3=%d,posx=%d,posy=%d,angle='%f'"
                 " WHERE id=%d;", NOM_TABLE_PASSERELLE,
                 passerelle->bit_controle, passerelle->bit_controle_1, passerelle->bit_controle_2,
+                passerelle->bit_controle_3,
                 passerelle->position_x, passerelle->position_y, passerelle->angle,
                 passerelle->id );
 

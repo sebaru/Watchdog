@@ -222,6 +222,12 @@
           Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_2 );
         }
 
+       if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) )
+          )
+        { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) );
+          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_3 );
+        }
+
        while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
 
