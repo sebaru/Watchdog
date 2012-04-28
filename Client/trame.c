@@ -738,8 +738,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                   "fill-color", "white",
                                                   NULL);
 
-    trame_pass->item_rectangle_1 = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                        -41.0, -8.0, 12.0, 16.0,
+    trame_pass->item_rectangle_1 = goo_canvas_ellipse_new( trame_pass->item_groupe,
+                                                        -35.0, 0.0, 8.0, 8.0,
                                                         "fill-color", "red",
                                                         "stroke-color", "yellow",
                                                         NULL);
