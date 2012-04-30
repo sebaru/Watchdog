@@ -271,7 +271,7 @@
 
     if (!(trame_pass && trame_pass->pass)) return;
     couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
-    g_object_set( G_OBJECT(trame_pass->item_rectangle_1), "fill_color_rgba", couleur, NULL );
+    g_object_set( G_OBJECT(trame_pass->item_1), "fill_color_rgba", couleur, NULL );
 
     trame_pass->en_cours_rouge1 = r;                        /* Sauvegarde de la couleur actuelle du motif */
     trame_pass->en_cours_vert1  = v;
@@ -287,7 +287,7 @@
 
     if (!(trame_pass && trame_pass->pass)) return;
     couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
-    g_object_set( G_OBJECT(trame_pass->item_rectangle_2), "fill_color_rgba", couleur, NULL );
+    g_object_set( G_OBJECT(trame_pass->item_2), "fill_color_rgba", couleur, NULL );
 
     trame_pass->en_cours_rouge2 = r;                        /* Sauvegarde de la couleur actuelle du motif */
     trame_pass->en_cours_vert2  = v;
@@ -303,15 +303,15 @@
 
     if (!(trame_pass && trame_pass->pass)) return;
     couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
-    g_object_set( G_OBJECT(trame_pass->item_triangle_1), "fill_color_rgba", couleur, NULL );
+    g_object_set( G_OBJECT(trame_pass->item_3), "fill_color_rgba", couleur, NULL );
 
     trame_pass->en_cours_rouge3 = r;                        /* Sauvegarde de la couleur actuelle du motif */
     trame_pass->en_cours_vert3  = v;
     trame_pass->en_cours_bleu3  = b;
   }
 /**********************************************************************************************************/
-/* Trame_rafraichir_capteur: remet à jour la position, rotation, echelle du capteur en parametre              */
-/* Entrée: la structure graphique TRAME_ITEM_CAPTEUR                                                        */
+/* Trame_rafraichir_capteur: remet à jour la position, rotation, echelle du capteur en parametre          */
+/* Entrée: la structure graphique TRAME_ITEM_CAPTEUR                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Trame_rafraichir_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur )
@@ -738,19 +738,19 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                   "fill-color", "white",
                                                   NULL);
 
-    trame_pass->item_rectangle_1 = goo_canvas_ellipse_new( trame_pass->item_groupe,
+    trame_pass->item_1 = goo_canvas_ellipse_new( trame_pass->item_groupe,
                                                         -35.0, 0.0, 8.0, 8.0,
                                                         "fill-color", "red",
                                                         "stroke-color", "yellow",
                                                         NULL);
 
-    trame_pass->item_rectangle_2 = goo_canvas_rect_new( trame_pass->item_groupe,
+    trame_pass->item_2 = goo_canvas_rect_new( trame_pass->item_groupe,
                                                         -24.0, -8.0, 12.0, 16.0,
                                                         "fill-color", "green",
                                                         "stroke-color", "yellow",
                                                         NULL);
 
-    trame_pass->item_triangle_1 =  goo_canvas_polyline_new( trame_pass->item_groupe, TRUE, 3,
+    trame_pass->item_3 =  goo_canvas_polyline_new( trame_pass->item_groupe, TRUE, 3,
                                                             -7.0, +8.0,
                                                             +1.0, -8.0,
                                                             +9.0, +8.0,

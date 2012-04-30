@@ -112,9 +112,9 @@
   { gint type;                                                                          /* Type de l'item */
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
-    GooCanvasItem *item_rectangle_1;
-    GooCanvasItem *item_rectangle_2;
-    GooCanvasItem *item_triangle_1;
+    GooCanvasItem *item_1;
+    GooCanvasItem *item_2;
+    GooCanvasItem *item_3;
     GooCanvasItem *item_fond;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
