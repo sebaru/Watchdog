@@ -553,7 +553,9 @@
         { return(FALSE); }
        return(TRUE);                                     /* Variable not supported... is not an error ... */
      }
-
+Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR", nom_var );
+Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var:           value", buffer );
+       
     *retour = atoi ( buffer + 2 + strlen(module->onduleur.ups) + strlen(nom_var));
     return(TRUE);
   }
