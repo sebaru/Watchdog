@@ -546,17 +546,15 @@
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed", nom_var );
-          Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed",
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed", nom_var );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed",
                   (char *)upscli_strerror(&module->upsconn) );
-          return(FALSE);
-        }
-       *retour = 0;
+       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
+        { return(FALSE); }
        return(TRUE);                                     /* Variable not supported... is not an error ... */
      }
 
-    *retour = atoi ( buffer + 2+ strlen(module->onduleur.ups) + strlen(nom_var));
+    *retour = atoi ( buffer + 2 + strlen(module->onduleur.ups) + strlen(nom_var));
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -565,9 +563,7 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
  static gboolean Envoyer_sortie_onduleur( struct MODULE_ONDULEUR *module )
-  { gchar buffer[80];
-    gint valeur;
-    gint num_a;
+  { gint num_a;
 
     num_a = module->onduleur.a_min;
     if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test" /*load.off"*/ ) == FALSE) return(FALSE); }
@@ -587,8 +583,7 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
  static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
-  { gchar buffer[80];
-    gint valeur;
+  { gint valeur;
     gint num_ea;
 
     num_ea = module->onduleur.ea_min;
