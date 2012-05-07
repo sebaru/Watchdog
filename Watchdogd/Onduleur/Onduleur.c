@@ -556,8 +556,8 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR value", buffer );
-    *retour = atof ( buffer + 5 + strlen(module->onduleur.ups) + strlen(nom_var) );
-printf("Onduleur : retour = %f buffer=%s atof=%s\n", *retour, buffer, buffer + 5 + strlen(module->onduleur.ups) + strlen(nom_var) );
+    *retour = atof ( buffer + 6 + strlen(module->onduleur.ups) + strlen(nom_var) );
+printf("Onduleur : retour = %f buffer=%s atof=%s\n", *retour, buffer, buffer + 6 + strlen(module->onduleur.ups) + strlen(nom_var) );
     return(TRUE);
   }
 /**********************************************************************************************************/
