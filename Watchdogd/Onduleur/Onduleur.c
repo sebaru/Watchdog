@@ -534,7 +534,7 @@
 /* Entrée : l'onduleur, le nom de variable, la variable a renseigner                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
 /**********************************************************************************************************/
- gboolean Onduleur_get_var ( struct MODULE_ONDULEUR *module, gchar *nom_var, gint *retour )
+ gboolean Onduleur_get_var ( struct MODULE_ONDULEUR *module, gchar *nom_var, gfloat *retour )
   { gchar buffer[80];
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->onduleur.ups, nom_var );
@@ -553,10 +553,10 @@
         { return(FALSE); }
        return(TRUE);                                     /* Variable not supported... is not an error ... */
      }
-Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR", nom_var );
-Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var:           value", buffer );
+
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR value", nom_var );
        
-    *retour = atoi ( buffer + 2 + strlen(module->onduleur.ups) + strlen(nom_var));
+    *retour = atof ( buffer + 5 + strlen(module->onduleur.ups) + strlen(nom_var) );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -585,40 +585,40 @@ Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var:           value
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
  static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
-  { gint valeur;
+  { gfloat valeur;
     gint num_ea;
 
     num_ea = module->onduleur.ea_min;
 
     if ( Onduleur_get_var ( module, "ups.load", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
     
     if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "battery.charge", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "input.voltage", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "input.frequency", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "output.current", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "output.frequency", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "output.voltage", &valeur ) == FALSE ) return(FALSE);
-    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, (gint)valeur );                                       /* Numéro de l'EA pour la valeur */
 
     return(TRUE);
   }
