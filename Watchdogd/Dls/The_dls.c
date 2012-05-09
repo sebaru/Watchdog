@@ -166,76 +166,68 @@
      { Partage->e[ num>>3 ] &= ~(1<<(num%8)); }
   }
 /**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_int sur 12 bits !!                                           */
+/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
   { if (num>=NBR_ENTRE_ANA) return;
     Partage->ea[num].inrange = range;
   }
 /**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_int sur 12 bits !!                                           */
+/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
 /**********************************************************************************************************/
- void SEA_ech( int num, float val_ech )
-  { if (num>=NBR_ENTRE_ANA) return;
-    Partage->ea[num].val_ech = val_ech;
-    Partage->ea[num].inrange = 1;
-  }
-/**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_int sur 12 bits !!                                           */
-/**********************************************************************************************************/
- void SEA( int num, int val_int )
+ void SEA( int num, double val_avant_ech )
   { if (num>=NBR_ENTRE_ANA) return;
 
-    if (Partage->ea[ num ].val_int != val_int)
-     { Partage->ea[ num ].val_int = val_int;                    /* Archive au mieux toutes les 5 secondes */
+    if (Partage->ea[ num ].val_avant_ech != val_avant_ech)
+     { Partage->ea[ num ].val_avant_ech = val_avant_ech;        /* Archive au mieux toutes les 5 secondes */
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
-        { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );
+        { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );
           Partage->ea[ num ].last_arch = Partage->top;   
         }
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
-               Partage->ea[ num ].val_ech = val_int;                           /* Pas d'interprétation !! */
+               Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
-               if (val_int < 204)
+               if (val_avant_ech < 204)
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
                else
                 { Partage->ea[ num ].val_ech = (gdouble)
-                  ((val_int-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
+                  ((val_avant_ech-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
                   + Partage->ea[num].cmd_type_eana.min;                             /* Valeur à l'echelle */ 
 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_4_20_MA_12BITS:
-               if (val_int < 816)
+               if (val_avant_ech < 816)
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
                else
                 { Partage->ea[ num ].val_ech = (gdouble)
-                  ((val_int-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
+                  ((val_avant_ech-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_WAGO_750455:
                Partage->ea[ num ].val_ech = (gdouble)
-                  (val_int*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
+                  (val_avant_ech*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                break;
           case ENTREEANA_WAGO_750461:
-               Partage->ea[ num ].val_ech = (gdouble)(val_int/10.0);                /* Valeur à l'echelle */ 
+               Partage->ea[ num ].val_ech = (gdouble)(val_avant_ech/10.0);                /* Valeur à l'echelle */ 
                break;
           default:
                Partage->ea[num].val_ech = 0.0;
         }
      }
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_int );               /* Archive au pire toutes les 10 min */
+     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );               /* Archive au pire toutes les 10 min */
        Partage->ea[ num ].last_arch = Partage->top;   
      }
                                                                      /* Gestion historique interne Valana */

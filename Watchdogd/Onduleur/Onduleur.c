@@ -534,7 +534,7 @@
 /* Entrée : l'onduleur, le nom de variable, la variable a renseigner                                      */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
 /**********************************************************************************************************/
- gboolean Onduleur_get_var ( struct MODULE_ONDULEUR *module, gchar *nom_var, gfloat *retour )
+ gboolean Onduleur_get_var ( struct MODULE_ONDULEUR *module, gchar *nom_var, gdouble *retour )
   { gchar buffer[80];
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->onduleur.ups, nom_var );
@@ -585,40 +585,40 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
  static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
-  { gfloat valeur;
+  { gdouble valeur;
     gint num_ea;
 
     num_ea = module->onduleur.ea_min;
 
     if ( Onduleur_get_var ( module, "ups.load", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
     
     if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "battery.charge", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "input.voltage", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "input.frequency", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "output.current", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "output.frequency", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     if ( Onduleur_get_var ( module, "output.voltage", &valeur ) == FALSE ) return(FALSE);
-    SEA_ech( num_ea++, valeur );                                         /* Numéro de l'EA pour la valeur */
+    SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
 
     return(TRUE);
   }

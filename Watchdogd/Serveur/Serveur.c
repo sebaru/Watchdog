@@ -504,17 +504,17 @@
                               
                       switch (courbe->type)
                        { case MNEMO_SORTIE:
-                              envoi_courbe.val_int = A(courbe->num);
+                              envoi_courbe.val_avant_ech = 1.0*A(courbe->num);
                               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                               break;
                          case MNEMO_ENTREE:
-                              envoi_courbe.val_int = E(courbe->num);
+                              envoi_courbe.val_avant_ech = 1.0*E(courbe->num);
                               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                               break;
                          case MNEMO_ENTREE_ANA:
-                              envoi_courbe.val_int = Partage->ea[courbe->num].val_int;
+                              envoi_courbe.val_avant_ech = Partage->ea[courbe->num].val_avant_ech;
                               Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
                                             (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
                               break;

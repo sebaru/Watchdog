@@ -77,7 +77,7 @@
  extern int A( int num );
  extern char *TRdetail( int num );
  extern void SE( int num, int etat );
- extern void SEA( int num, int val_int );
+ extern void SEA( int num, double val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
  extern void Envoyer_commande_dls ( int num );

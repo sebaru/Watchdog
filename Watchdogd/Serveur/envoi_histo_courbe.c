@@ -91,8 +91,8 @@
     do
      { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend le premier enreg. */
        if (arch)                                               /* Si enregegistrement, alors on le pousse */
-        { envoi_courbe->valeurs[envoi_courbe->taille_donnees].date    = arch->date_sec;
-          envoi_courbe->valeurs[envoi_courbe->taille_donnees].val_int = arch->valeur;
+        { envoi_courbe->valeurs[envoi_courbe->taille_donnees].date          = arch->date_sec;
+          envoi_courbe->valeurs[envoi_courbe->taille_donnees].val_avant_ech = arch->valeur;
           envoi_courbe->taille_donnees++;/* Nous avons 1 enregistrement de plus dans la structure d'envoi */
           g_free(arch);
         }

@@ -687,16 +687,16 @@
                   
     switch(courbe->type)
      { case MNEMO_ENTREE_ANA:
-                { courbe->X[courbe->taille_donnees-1] = 1.0*append_courbe->date;
-                  courbe->Y[courbe->taille_donnees-1] = 1.0*append_courbe->val_int;
+                { courbe->X[courbe->taille_donnees-1] = append_courbe->date*1.0;
+                  courbe->Y[courbe->taille_donnees-1] = append_courbe->val_avant_ech;
                   printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
        case MNEMO_SORTIE:
        case MNEMO_ENTREE:
-                { courbe->X[courbe->taille_donnees-1] = 1.0*append_courbe->date;
+                { courbe->X[courbe->taille_donnees-1] = append_courbe->date*1.0;
                   courbe->Y[courbe->taille_donnees-1] = 1.0*(append_courbe->slot_id*ENTREAXE_Y_TOR +
-                                                          (append_courbe->val_int ? HAUTEUR_Y_TOR : 0));
+                                                            (append_courbe->val_avant_ech ? HAUTEUR_Y_TOR : 0));
                   printf("3 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
@@ -849,7 +849,7 @@
 
        for ( i=0; cpt < courbe->taille_donnees; cpt++, i++ )
         { courbe->X[cpt] = start_courbe->valeurs[i].date - COURBE_ORIGINE_TEMPS;
-          courbe->Y[cpt] = start_courbe->valeurs[i].val_int;
+          courbe->Y[cpt] = start_courbe->valeurs[i].val_avant_ech;
         }
                                                                          /* Suppression de l'ancien graph */
           
