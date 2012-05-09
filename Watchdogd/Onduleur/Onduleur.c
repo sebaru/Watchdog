@@ -34,6 +34,7 @@
  #include <stdlib.h>
  #include <signal.h>
  #include <upsclient.h>
+ #include <locale.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
@@ -556,7 +557,9 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR value", buffer );
+    setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
     *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
+    setlocale( LC_NUMERIC, "" );                     /* Pour le formattage correct des , . dans les float */
     return(TRUE);
   }
 /**********************************************************************************************************/
