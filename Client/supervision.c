@@ -315,6 +315,24 @@
     
   }
 /**********************************************************************************************************/
+/* Changer_etat_pass_3: Changement d'etat d'une passerelle (vignette help)                                */
+/* Entrée: une reference sur la passerelle, l'etat attendu                                                */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Changer_etat_pass_3( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
+  { printf("Changer_etat_pass !\n");
+    trame_pass->rouge3  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
+    trame_pass->vert3   = etat_motif->vert;                                      /* Sauvegarde etat motif */
+    trame_pass->bleu3   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
+    trame_pass->cligno3 = etat_motif->cligno;                                    /* Sauvegarde etat motif */
+
+    Trame_peindre_pass_3 ( trame_pass, etat_motif->rouge,
+                                       etat_motif->vert,
+                                       etat_motif->bleu );
+    printf("Changer_etat_pass_3: sortie\n");
+    
+  }
+/**********************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
@@ -355,6 +373,10 @@ printf("Recu changement etat motif: %d = r%d v%d b%d\n", etat_motif->num, etat_m
                                      }
                                     else if (trame_pass->pass->bit_controle_2 == etat_motif->num)
                                      { Changer_etat_pass_2( trame_pass, etat_motif );
+                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
+                                     }
+                                    else if (trame_pass->pass->bit_controle_3 == etat_motif->num)
+                                     { Changer_etat_pass_3( trame_pass, etat_motif );
                                        cpt++;                         /* Nous updatons un motif de plus ! */ 
                                      }
                                     break;
