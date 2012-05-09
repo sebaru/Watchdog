@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Archive/Archive.c  Gestion des archivages bit_internes Watchdog 2.0                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 08 jui 2006 11:56:48 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 09 mai 2012 12:44:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -36,7 +36,7 @@
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
 /**********************************************************************************************************/
- void Ajouter_arch( gint type, gint num, gint valeur )
+ void Ajouter_arch( gint type, gint num, gfloat valeur )
   { struct timeval tv;
     struct ARCHDB *arch;
 

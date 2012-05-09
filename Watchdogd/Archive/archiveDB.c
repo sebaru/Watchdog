@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/Archive/archiveDB.c       Déclaration des fonctions pour la gestion des valeurs analogiques  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 19 avr 2009 14:42:09 CEST */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 09 mai 2012 12:45:53 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -38,7 +38,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(date_sec,date_usec,type,num,valeur) VALUES "
-                "(%d,%d,%d,%d,%d)", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
+                "(%d,%d,%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
                 arch->type, arch->num, arch->valeur );
 
     Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
@@ -58,14 +58,6 @@
                 " ORDER BY `date_sec`,`date_usec` ASC",
                 NOM_TABLE_ARCH, type, num, (gint)date_deb, (gint)date_fin );
 
-/*    g_snprintf( requete, sizeof(requete),
-                "SELECT `type`,`num`,`date_sec`,`date_usec`,`valeur` FROM"
-                " (SELECT `type`,`num`,`date_sec`,`date_usec`,`valeur`"
-                "  FROM %s WHERE `type`=%d AND `num`=%d ORDER BY `date_sec`,`date_usec` DESC"
-                "  LIMIT %d) AS `result`"
-                " ORDER BY `date_sec`,`date_usec`",
-                NOM_TABLE_ARCH, type, num, TAILLEBUF_HISTO_EANA );
-*/
    Info_c( log, DEBUG_ARCHIVE, "Recuperer_archDB: Requete SQL", requete );
 
    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -91,7 +83,7 @@
        arch->date_usec = atoi(db->row[3]);
        arch->type      = atoi(db->row[0]);
        arch->num       = atoi(db->row[1]);
-       arch->valeur    = atoi(db->row[4]);
+       arch->valeur    = atof(db->row[4]);
      }
     return(arch);
   }

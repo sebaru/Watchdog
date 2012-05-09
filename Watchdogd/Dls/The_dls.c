@@ -158,7 +158,7 @@
   { if (num>=NBR_ENTRE_TOR) return;
 
     if ( (E(num) && !etat) || (!E(num) && etat) )
-     { Ajouter_arch( MNEMO_ENTREE, num, etat ); } 
+     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat ); } 
 
     if (etat)
      { Partage->e[ num>>3 ] |=  (1<<(num%8)); }
@@ -344,7 +344,7 @@
         { Partage->a[num].changes = 0; }
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
-        { Ajouter_arch( MNEMO_SORTIE, num, etat );
+        { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );
           if (Partage->com_tellstick.Ajouter_tellstick) /* A revoir. Le polling est a faire par le thread tellstick ?? */
            { Partage->com_tellstick.Ajouter_tellstick( num, etat ); }
           Partage->a[num].changes++;                                              /* Un change de plus !! */

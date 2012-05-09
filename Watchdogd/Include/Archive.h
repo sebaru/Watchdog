@@ -38,7 +38,7 @@
     guint  date_usec;                                                                 /* Date de la photo */
     guint  type;                                                             /* Type de bit: E ? B ? EA ? */
     guint  num;                                            /* Numero de l'entrée analogique photographiée */
-    guint  valeur;                                                       /* Valeur de l'entrée analogique */
+    gfloat valeur;                                                       /* Valeur de l'entrée analogique */
   };
 
  struct COM_ARCH                                                               /* Communication vers ARCH */
@@ -53,7 +53,7 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_arch ( void );                                                         /* Dans Archive.c */
- extern void Ajouter_arch( gint type, gint num, gint valeur );
+ extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_archDB ( struct LOG *log, struct DB *db, struct ARCHDB *arch );
  extern gboolean Recuperer_archDB ( struct LOG *log, struct DB *db, guint type, guint num,
                                     time_t date_deb, time_t date_fin );
