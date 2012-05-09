@@ -84,12 +84,13 @@
 /**********************************************************************************************************/
  gchar *Type_vers_string ( guint32 type )
   { switch (type)
-     { case MSG_ETAT     : return( _("Info") );
-       case MSG_ALERTE   : return( _("Alerte") );
-       case MSG_ALARME   : return( _("Alarme") );
-       case MSG_DEFAUT   : return( _("Trouble") );
-       case MSG_VEILLE   : return( _("Veille") );
-       case MSG_ATTENTE  : return( _("Attente") );
+     { case MSG_ETAT     : return( _("Info    (I)") );
+       case MSG_ALERTE   : return( _("Alerte  (AK)") );
+       case MSG_ALARME   : return( _("Alarme  (AL)") );
+       case MSG_DEFAUT   : return( _("Trouble (T)") );
+       case MSG_VEILLE   : return( _("Veille  (V)") );
+       case MSG_ATTENTE  : return( _("Attente (A)") );
+       case MSG_DANGER   : return( _("Danger  (D)") );
      }
     return( _("Unknown") );
   }
