@@ -73,7 +73,7 @@
  gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[200];
     
-    if (syn->id == 0) return(TRUE);                                 /* Le synoptique 0 est indestructible */
+    if (syn->id == 1) return(TRUE);                                 /* Le synoptique 1 est indestructible */
 /****************************************** Retrait de la base SYN ****************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, syn->id );
@@ -121,6 +121,14 @@
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
          { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination passerelle failed", requete ); }
     else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: elimination passerelle ok" ); }
+
+/******************************** Re-affectation des modules D.L.S ****************************************/
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET num_syn=1 WHERE num_syn=%d", NOM_TABLE_PLUGIN_DLS, syn->id );
+
+    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+         { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: re-affectation plugin D.L.S failed", requete ); }
+    else { Info( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: re-affectation plugin D.L.S passerelle ok" ); }
 
     return(TRUE);
   }

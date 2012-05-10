@@ -43,10 +43,16 @@
 
     if (dls->id == 1) return(FALSE);                            /* On ne peut pas effacer le plugin n°1 ! */
 
-    g_snprintf( (gchar *)requete, sizeof(requete),                                           /* Requete SQL */
+    g_snprintf( (gchar *)requete, sizeof(requete),                                         /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d",
                 NOM_TABLE_DLS, dls->id );
     Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+
+/*************************************** Re-affectation des mnémoniques ***********************************/
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MNEMONIQUE, dls->id );
+
+    Lancer_requete_SQL ( log, db, requete );
 
     g_snprintf( (gchar *)requete, sizeof(requete), "%d.dls", dls->id );
     unlink( (gchar *)requete );
