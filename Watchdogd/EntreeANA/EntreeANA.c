@@ -200,11 +200,13 @@
        return(FALSE);
      }
 
+    setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "min='%f',max='%f',unite='%s',type=%d WHERE id_mnemo=%d",
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max, unite, entreeana->type,
                 entreeana->id_mnemo );
+    setlocale( LC_NUMERIC, "" );                     /* Pour le formattage correct des , . dans les float */
     g_free(unite);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

@@ -26,25 +26,28 @@
  */
  
  #include <glib.h>
+ #include <locale.h>
 
  #include "watchdogd.h"
 /**********************************************************************************************************/
-/* Ajouter_archDB: Ajout ou edition d'un entreeANA                                                        */
+/* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                     */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                          */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  void Ajouter_archDB ( struct LOG *log, struct DB *db, struct ARCHDB *arch )
   { gchar requete[512];
 
+    setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(date_sec,date_usec,type,num,valeur) VALUES "
                 "(%d,%d,%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
                 arch->type, arch->num, arch->valeur );
+    setlocale( LC_NUMERIC, "" );                     /* Pour le formattage correct des , . dans les float */
 
     Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_archDB: Recupération de la liste des ids des entreeANAs                           */
+/* Recuperer_archDB: Initialise la récupération des archives bases de données                             */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -63,7 +66,7 @@
    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_archDB: Recupération de la liste des ids des entreeANAs                           */
+/* Recuperer_archDB_suite: Envoi un nouvel enregistrement archivé dans la Base de données                 */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -79,11 +82,13 @@
     arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
     if (!arch) Info( log, DEBUG_ARCHIVE, "Recuperer_archDB_suite: Erreur allocation mémoire" );
     else
-     { arch->date_sec  = atoi(db->row[2]);
+     { setlocale( LC_NUMERIC, "C" );                /* Pour le formattage correct des , . dans les float */
+       arch->date_sec  = atoi(db->row[2]);
        arch->date_usec = atoi(db->row[3]);
        arch->type      = atoi(db->row[0]);
        arch->num       = atoi(db->row[1]);
        arch->valeur    = atof(db->row[4]);
+       setlocale( LC_NUMERIC, "" );                 /* Pour le formattage correct des , . dans les float */
      }
     return(arch);
   }
