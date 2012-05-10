@@ -94,10 +94,10 @@
             { struct CLIENT *client_srv;
               client_srv = (struct CLIENT *)liste->data;
 
-              g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s\n",
+              g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s",
                           i, client_srv->ident.version, client_srv->util->nom, client_srv->machine,
                           client_srv->mode, client_srv->defaut, ctime(&client_srv->date_connexion) );
-              Write_admin ( client->connexion, chaine );
+              Write_admin ( client->connexion, chaine );                /* ctime ajoute un \n à la fin !! */
 
               liste = liste->next;
             }
