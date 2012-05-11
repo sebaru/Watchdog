@@ -527,6 +527,8 @@
                (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
+    else
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", nom_cmd ); }
     return(TRUE);
   }
 
@@ -571,8 +573,8 @@
   { gint num_a;
 
     num_a = module->onduleur.a_min;
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test" /*load.off"*/ ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test" /*"load.on"*/ ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); }
+    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); }
     if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); }
     if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); }
     if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); }

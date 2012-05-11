@@ -124,7 +124,7 @@
 
 /******************************** Re-affectation des modules D.L.S ****************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET num_syn=1 WHERE num_syn=%d", NOM_TABLE_PLUGIN_DLS, syn->id );
+                "UPDATE %s SET num_syn=1 WHERE num_syn=%d", NOM_TABLE_DLS, syn->id );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ) )
          { Info_c( log, DEBUG_SERVEUR, "Retirer_synoptiqueDB: re-affectation plugin D.L.S failed", requete ); }

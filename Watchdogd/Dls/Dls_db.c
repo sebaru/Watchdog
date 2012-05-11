@@ -50,7 +50,7 @@
 
 /*************************************** Re-affectation des mnémoniques ***********************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MNEMONIQUE, dls->id );
+                "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MNEMO, dls->id );
 
     Lancer_requete_SQL ( log, db, requete );
 
