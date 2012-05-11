@@ -522,13 +522,20 @@
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->onduleur.ups, nom_cmd );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed", nom_cmd );
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed", buffer );
        Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed",
                (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
+
+    if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Reading INSTCMD result failed", buffer );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Reading INSTCMD result failed",
+                  (char *)upscli_strerror(&module->upsconn) );
+       return(FALSE);
+     }
     else
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", nom_cmd ); }
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", buffer ); }
     return(TRUE);
   }
 
@@ -542,15 +549,15 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->onduleur.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed", nom_var );
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed", buffer );
        Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed",
                (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed", nom_var );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR failed",
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR result failed", buffer );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR result failed",
                   (char *)upscli_strerror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
         { return(FALSE); }
@@ -558,7 +565,7 @@
        return(TRUE);                                     /* Variable not supported... is not an error ... */
      }
 
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR value", buffer );
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer );
     setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
     *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
     setlocale( LC_NUMERIC, "" );                     /* Pour le formattage correct des , . dans les float */
