@@ -438,7 +438,7 @@
        if ( Partage->g[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
         { Partage->g[num].changes = 0; }
 
-       if ( Partage->a[num].changes <= 5 ) 
+       if ( Partage->g[num].changes <= 5 ) 
         { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
           if (etat) 
            { Partage->com_msrv.liste_msg_on  = g_list_append( Partage->com_msrv.liste_msg_on,
