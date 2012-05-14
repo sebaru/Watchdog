@@ -56,8 +56,7 @@
        config_cli->taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
        if (!config_cli->taille_bloc_reseau) config_cli->taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
 
-       config_cli->ssl_crypt          = g_key_file_get_integer ( gkf, "SERVER", "ssl_crypt", NULL );
-       if (!config_cli->ssl_crypt) config_cli->ssl_crypt = DEFAUT_SSL_CRYPT;
+       config_cli->ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "host", NULL );
        if (chaine)
