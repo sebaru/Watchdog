@@ -32,7 +32,6 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
- #include <locale.h>
 
  #include "watchdogd.h"
  #include "EntreeANA_DB.h"
@@ -116,13 +115,11 @@
     entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana) Info( log, DEBUG_INFO, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
-     { setlocale( LC_NUMERIC, "C" );                 /* Pour le formattage correct des , . dans les float */
-       entreeana->id_mnemo = atoi(db->row[0]);
+     { entreeana->id_mnemo = atoi(db->row[0]);
        entreeana->num      = atoi(db->row[1]);
        entreeana->min      = atof(db->row[2]);
        entreeana->max      = atof(db->row[3]);
        entreeana->type     = atoi(db->row[4]);
-       setlocale( LC_NUMERIC, "" );                  /* Pour le formattage correct des , . dans les float */
        memcpy( &entreeana->unite,      db->row[5], sizeof(entreeana->unite  ) );
        memcpy( &entreeana->libelle,    db->row[6], sizeof(entreeana->libelle) );
        memcpy( &entreeana->groupe,     db->row[7], sizeof(entreeana->groupe ) );
@@ -168,13 +165,11 @@
     if (!entreeana)
      { Info( log, DEBUG_INFO, "Rechercher_entreeanaDB: Mem error" ); }
     else
-     { setlocale( LC_NUMERIC, "C" );                 /* Pour le formattage correct des , . dans les float */
-       entreeana->id_mnemo = id;
+     { entreeana->id_mnemo = id;
        entreeana->num      = atoi(db->row[1]);
        entreeana->min      = atof(db->row[2]);
        entreeana->max      = atof(db->row[3]);
        entreeana->type     = atoi(db->row[4]);
-       setlocale( LC_NUMERIC, "" );                  /* Pour le formattage correct des , . dans les float */
        memcpy( &entreeana->unite,      db->row[5], sizeof(entreeana->unite  ) );
        memcpy( &entreeana->libelle,    db->row[6], sizeof(entreeana->libelle) );
        memcpy( &entreeana->groupe,     db->row[7], sizeof(entreeana->groupe ) );
@@ -200,13 +195,11 @@
        return(FALSE);
      }
 
-    setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "min='%f',max='%f',unite='%s',type=%d WHERE id_mnemo=%d",
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max, unite, entreeana->type,
                 entreeana->id_mnemo );
-    setlocale( LC_NUMERIC, "" );                     /* Pour le formattage correct des , . dans les float */
     g_free(unite);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

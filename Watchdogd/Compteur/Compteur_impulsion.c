@@ -32,7 +32,6 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
- #include <locale.h>
 
  #include "watchdogd.h"
 /**********************************************************************************************************/
@@ -120,13 +119,11 @@
     cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
     if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
-     { setlocale( LC_NUMERIC, "C" );                 /* Pour le formattage correct des , . dans les float */
-       cpt_imp->id_mnemo = atoi(db->row[0]);
+     { cpt_imp->id_mnemo = atoi(db->row[0]);
        cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->num      = atoi(db->row[2]);
        cpt_imp->type     = atoi(db->row[3]);
        cpt_imp->multi    = atof(db->row[4]);
-       setlocale( LC_NUMERIC, "" );                  /* Pour le formattage correct des , . dans les float */
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     return(cpt_imp);
@@ -160,13 +157,11 @@
     cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
     if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
-     { setlocale( LC_NUMERIC, "C" );                 /* Pour le formattage correct des , . dans les float */
-       cpt_imp->id_mnemo = atoi(db->row[0]);
+     { cpt_imp->id_mnemo = atoi(db->row[0]);
        cpt_imp->valeur   = atof(db->row[1]);
        cpt_imp->num      = atoi(db->row[2]);
        cpt_imp->type     = atoi(db->row[3]);
        cpt_imp->multi    = atof(db->row[4]);
-       setlocale( LC_NUMERIC, "" );                                   /* Revient sur la locale habituelle */
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     Liberer_resultat_SQL ( log, db );
@@ -185,12 +180,10 @@
      { Info( log, DEBUG_SERVEUR, "Modifier_cpt_impDB: Normalisation unite impossible" );
        return(FALSE);
      }
-    setlocale( LC_NUMERIC, "C" );                                      /* Pour le formatage du %f correct */
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "unite='%s',multi='%f',type_ci='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_CPT_IMP, unite, cpt_imp->multi, cpt_imp->type, cpt_imp->id_mnemo );
-    setlocale( LC_NUMERIC, "" );
     g_free(unite);
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

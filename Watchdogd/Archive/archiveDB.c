@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <locale.h>
 
  #include "watchdogd.h"
 /**********************************************************************************************************/
@@ -37,12 +36,10 @@
  void Ajouter_archDB ( struct LOG *log, struct DB *db, struct ARCHDB *arch )
   { gchar requete[512];
 
-    setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(date_sec,date_usec,type,num,valeur) VALUES "
                 "(%d,%d,%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
                 arch->type, arch->num, arch->valeur );
-    setlocale( LC_NUMERIC, "" );                     /* Pour le formattage correct des , . dans les float */
 
     Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
   }
@@ -82,13 +79,11 @@
     arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
     if (!arch) Info( log, DEBUG_ARCHIVE, "Recuperer_archDB_suite: Erreur allocation mémoire" );
     else
-     { setlocale( LC_NUMERIC, "C" );                /* Pour le formattage correct des , . dans les float */
-       arch->date_sec  = atoi(db->row[2]);
+     { arch->date_sec  = atoi(db->row[2]);
        arch->date_usec = atoi(db->row[3]);
        arch->type      = atoi(db->row[0]);
        arch->num       = atoi(db->row[1]);
        arch->valeur    = atof(db->row[4]);
-       setlocale( LC_NUMERIC, "" );                 /* Pour le formattage correct des , . dans les float */
      }
     return(arch);
   }

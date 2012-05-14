@@ -34,7 +34,6 @@
  #include <unistd.h>
  #include <stdlib.h>
  #include <string.h>
- #include <locale.h>
 
  #include "Erreur.h"
  #include "lignes.h"
@@ -402,7 +401,6 @@
     GList *liste;
 
     prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
-    setlocale( LC_NUMERIC, "C" );
     g_snprintf( source,    sizeof(source),    "%d.dls.new", id );
     g_snprintf( source_ok, sizeof(source_ok), "%d.dls", id );
     g_snprintf( cible,     sizeof(cible),     "%d.c",   id );
@@ -456,7 +454,6 @@
      { unlink ( source_ok );                               /* Recopie sur le fichier "officiel" du plugin */
        rename( source, source_ok );
      }
-    setlocale( LC_NUMERIC, "" );
     return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

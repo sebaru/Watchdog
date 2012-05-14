@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include <locale.h>
 #include "Proto_traductionDLS.h"
 #include "lignes.h"
 
@@ -247,27 +246,23 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ int taille;
                    taille = 40;
                    $$ = New_chaine( taille );
-                   setlocale( LC_NUMERIC, "C" );
                    switch( $3 )
                     { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
                       case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
                       case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
                     }
-                   setlocale( LC_NUMERIC, "" );
                 }}
                 | CPT_IMP ordre VALF
                 {{ int taille;
                    taille = 30;
                    $$ = New_chaine( taille ); /* 10 caractères max */
-                   setlocale( LC_NUMERIC, "C" );
                    switch( $1 )
                     { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", $1, $3 );  break;
                       case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", $1, $3 );  break;
                       case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", $1, $3 ); break;
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
                     }
-                   setlocale( LC_NUMERIC, "" );
                 }}
                 | barre POUV expr PFERM
                 {{ int taille;
@@ -374,14 +369,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = 50;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         setlocale( LC_NUMERIC, "C" );
                                          switch($3->type)
                                           { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $3->valf, alias->num ); break;
                                             case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $3->valf, alias->num ); break;
                                             case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $3->valf, alias->num ); break;
                                             case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $3->valf, alias->num ); break;
                                           }
-                                         setlocale( LC_NUMERIC, "" );
                                        }
                                       break;
                          case CPT_IMP:if (!$3)
@@ -396,14 +389,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = 30;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         setlocale( LC_NUMERIC, "C" );
                                          switch($3->type)
                                           { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $3->valf );  break;
                                             case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $3->valf );  break;
                                             case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $3->valf ); break;
                                             case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $3->valf ); break;
                                           }
-                                         setlocale( LC_NUMERIC, "" );
                                        }
                                       break;
                          default:     taille = strlen($2) + strlen(INTERDIT_GAUCHE) + 1;
