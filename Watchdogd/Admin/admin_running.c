@@ -46,6 +46,7 @@
        Write_admin ( client->connexion, "  ssrv                  - SousServers Status\n" );
        Write_admin ( client->connexion, "  client                - Client Status\n" );
        Write_admin ( client->connexion, "  kick nom_machine      - Kick client nom@machine\n" );
+       Write_admin ( client->connexion, "  clear_histo           - Clear Histo DB\n" );
        Write_admin ( client->connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Write_admin ( client->connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
        Write_admin ( client->connexion, "  tell message_num      - Envoi d'un message audio _num_\n" );
@@ -173,6 +174,11 @@
           Write_admin ( client->connexion, chaine );
           Libere_DB_SQL( Config.log, &db );
         }
+     } else
+    if ( ! strcmp ( commande, "clear_histo" ) )
+     { Clear_histoDB ();                                            /* Clear de la table histo au boot */
+       g_snprintf( chaine, sizeof(chaine), " HistoDB cleared\n" );
+       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "audit" ) )
      { gint num;

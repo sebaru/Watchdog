@@ -48,7 +48,6 @@
  #define DEFAUT_USER                    "supervision"
  #define DEFAUT_SERVEUR                 "localhost"
  #define DEFAUT_PORT                    5558
- #define DEFAUT_SSL_CRYPT               0
  #define DEFAUT_DEBUG_LEVEL             (~0)
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
  #define DEFAUT_MAX_LOGIN_FAILED        3

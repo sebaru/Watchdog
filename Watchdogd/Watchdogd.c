@@ -580,7 +580,7 @@
 #endif
        if (!import)
         { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
-          Clear_histoDB ();                            /* Clear de la table histo au boot */
+          Clear_histoDB ();                                            /* Clear de la table histo au boot */
           Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
         } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
 
