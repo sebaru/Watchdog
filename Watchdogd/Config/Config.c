@@ -122,6 +122,8 @@
        if (!Config.sms_m_max) Config.sms_m_max = DEFAUT_SMS_M_MAX;
 
 /********************************************* Partie SERVER **********************************************/
+       Config.ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
+
        Config.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!Config.port) Config.port = DEFAUT_PORT;
 

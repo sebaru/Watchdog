@@ -460,6 +460,7 @@
   { struct sigaction sig;
     gchar strpid[12];
     gint fd_lock, i;
+    pthread_t TID;
     gint import=0;
     gboolean fg;
 
@@ -585,52 +586,52 @@
 
        Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
 
-       Ssl_ctx = Init_ssl();                                                        /* Initialisation SSL */
-       if (!Ssl_ctx)
-        { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
-       else
-        { pthread_t TID;
-          if (Config.single == FALSE)                                          /* Si demarrage des thread */
-           { if (!Demarrer_arch())                                         /* Demarrage gestion Archivage */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb ARCH" ); }
+       if (Config.ssl_crypt) { Ssl_ctx = Init_ssl();                                /* Initialisation SSL */
+                               if (!Ssl_ctx)
+                                { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
+                             }
+                        else { Ssl_ctx = NULL; }
 
-             if (!Demarrer_rs485())                                     /* Demarrage gestion module RS485 */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb RS485" ); }
+       if (Config.single == FALSE)                                             /* Si demarrage des thread */
+        { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb ARCH" ); }
 
-             if (!Demarrer_modbus())                                   /* Demarrage gestion module MODBUS */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb MODBUS" ); }
+          if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb RS485" ); }
 
-             if (!Demarrer_sms())                                                     /* Démarrage S.M.S. */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb SMS" ); }
+          if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb MODBUS" ); }
 
-             if (!Demarrer_audio())                                                /* Démarrage A.U.D.I.O */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb AUDIO" ); }
+          if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb SMS" ); }
 
-             if (!Demarrer_dls())                                                     /* Démarrage D.L.S. */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb DLS" ); }
+          if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb AUDIO" ); }
 
-             if (!Demarrer_onduleur())                                              /* Démarrage Onduleur */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb ONDULEUR" ); }
+          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb DLS" ); }
 
-             if (!Demarrer_tellstick())                                            /* Démarrage Tellstick */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb TELLSTICK" ); }
+          if (!Demarrer_onduleur())                                                 /* Démarrage Onduleur */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb ONDULEUR" ); }
 
-             if (!Demarrer_lirc())                                                      /* Démarrage Lirc */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb LIRC" ); }
+          if (!Demarrer_tellstick())                                               /* Démarrage Tellstick */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb TELLSTICK" ); }
 
-             if (!Demarrer_motion_detect())                           /* Démarrage Detection de mouvement */
-              { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
-           }
+          if (!Demarrer_lirc())                                                         /* Démarrage Lirc */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb LIRC" ); }
 
-          if (!Demarrer_admin())                                                       /* Démarrage ADMIN */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb Admin -> Arret" ); }
-
-          pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
-          pthread_join( TID, NULL );
-          Stopper_fils(TRUE);                                          /* Arret de tous les fils watchdog */
-          SSL_CTX_free( Ssl_ctx );                                                  /* Libération mémoire */
+          if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
+           { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
         }
-      }
+
+       if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
+        { Info( Config.log, DEBUG_INFO, "MSRV: Pb Admin -> Arret" ); }
+
+       pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
+       pthread_join( TID, NULL );
+       Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
+       if (Config.ssl_crypt) SSL_CTX_free( Ssl_ctx );                               /* Libération mémoire */
+     }
 
     pthread_mutex_destroy( &Partage->com_rs485.synchro );
     pthread_mutex_destroy( &Partage->com_modbus.synchro );

@@ -224,8 +224,9 @@
           pthread_mutex_unlock( &Partage->Sous_serveur[ss_id].synchro );
           Info_n( Config.log, DEBUG_CONNEXION, "SSRV: Connexion acceptée ID", id);
           Info_c( Config.log, DEBUG_CONNEXION, "SSRV: ------------- Machine", client->machine );
-          Partage->Sous_serveur[ss_id].nb_client++;                      /* Nous gerons un client de plus !! */
-          Client_mode( client, ATTENTE_CONNEXION_SSL );     /* On attend que le client demande crypté ou non */
+          Partage->Sous_serveur[ss_id].nb_client++;                   /* Nous gerons un client de plus !! */
+          if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
+                           else Client_mode( client, ATTENTE_IDENT );
         }
        return(TRUE);
      }
