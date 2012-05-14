@@ -141,6 +141,7 @@
 
        if (!config_cli->debug_level) config_cli->debug_level = DEFAUT_DEBUG_LEVEL;          /* Par défaut */
      }
+    else { config_cli->debug_level = DEFAUT_DEBUG_LEVEL; }                                  /* Par défaut */
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/

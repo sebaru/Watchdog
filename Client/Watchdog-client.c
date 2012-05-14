@@ -289,10 +289,11 @@
     Info( Config_cli.log, DEBUG_INFO, _("Start") );
     Print_config_cli( &Config_cli );
 
-    Ssl_ctx = Init_ssl();
-    if (!Ssl_ctx)
-     { Info( Config_cli.log, DEBUG_CRYPTO, _("Can't initialise SSL") );
-     }
+    if (Config_cli.ssl_crypt)
+     { Ssl_ctx = Init_ssl();
+       if (!Ssl_ctx)
+        { Info( Config_cli.log, DEBUG_CRYPTO, _("Can't initialise SSL") ); }
+     } else Ssl_ctx = NULL;
     
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
@@ -313,7 +314,7 @@
      }
 
     if (Client_en_cours.gids) g_list_free(Client_en_cours.gids);
-    SSL_CTX_free(Ssl_ctx);
+    if (Config_cli.ssl_crypt) SSL_CTX_free(Ssl_ctx);
     Info( Config_cli.log, DEBUG_INFO, _("Stopped") );
     exit(0);
   }

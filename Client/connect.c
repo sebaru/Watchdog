@@ -207,10 +207,15 @@ one_again:
        return(FALSE);       
      }
 
-    Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
-    Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
+    if ( Config_cli.ssl_crypt ) 
+     { Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
+       Info( Config_cli.log, DEBUG_CONNEXION,
+              _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
+       if ( ! Connecter_ssl() ) return(FALSE);                                 /* Gere les parametres SSL */
+     }
 
-    if ( ! Connecter_ssl() ) return(FALSE);                                    /* Gere les parametres SSL */
+    Client_en_cours.mode = ENVOI_IDENT;
+    Info( Config_cli.log, DEBUG_CONNEXION, "client en mode ENVOI_IDENT" );
     Envoyer_identification();                                        /* Envoi l'identification au serveur */
 
     return(TRUE);
@@ -291,7 +296,9 @@ one_again:
 
            gtk_widget_destroy( F_ident );                                      /* Fermeture de la fenetre */
            if (Connecter_au_serveur())                          /* Essai de connexion au serveur Watchdog */
-            { Log( _("Waiting for SSL handshake") ); }
+            { if (Config_cli.ssl_crypt) Log( _("Waiting for SSL handshake") );
+                                   else Log( _("Waiting for connexion....") );
+            }
          }
   }
 /*--------------------------------------------------------------------------------------------------------*/

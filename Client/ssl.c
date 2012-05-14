@@ -178,9 +178,6 @@ encore:
 
     Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: partenaire", Nom_certif ( certif ) );
     Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: signataire", Nom_certif_signataire ( certif ) );
-    
-    Client_en_cours.mode = ENVOI_IDENT;
-    Info( Config_cli.log, DEBUG_CONNEXION, "client en mode ENVOI_IDENT" );
-    return(TRUE);
+        return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/
