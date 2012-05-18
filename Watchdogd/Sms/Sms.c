@@ -142,8 +142,7 @@
           gn_sms_delete (&data, state);                               /* On l'a traité, on peut l'effacer */
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
-       else if (error != GN_ERR_UNKNOWN)
-             { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: error", gn_error_print(error) );
+       else  { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: error", gn_error_print(error) );
                Info_n ( Config.log, DEBUG_SMS, "              sms.number", sms.number );
                break;
              }
