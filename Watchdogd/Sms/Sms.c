@@ -71,13 +71,34 @@
   { struct CMD_TYPE_MESSAGE *msg;
 
     msg = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) { Info( Config.log, DEBUG_SMS, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
+    if (!msg) { Info( Config.log, DEBUG_SMS, "Envoyer_sms_smsbox_text: pas assez de mémoire pour copie" ); return; }
 
     g_snprintf(msg->libelle_sms, sizeof(msg->libelle_sms), "%s", texte );
     msg->id  = 0;
     msg->num = 0;
     msg->enable = TRUE;
     msg->sms = MSG_SMS_SMSBOX;
+
+    pthread_mutex_lock( &Partage->com_sms.synchro );
+    Partage->com_sms.liste_sms = g_list_append ( Partage->com_sms.liste_sms, msg );
+    pthread_mutex_unlock( &Partage->com_sms.synchro );
+  }
+/**********************************************************************************************************/
+/* Envoyer_sms: Envoi un sms                                                                              */
+/* Entrée: un client et un utilisateur                                                                    */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Envoyer_sms_gsm_text ( gchar *texte )
+  { struct CMD_TYPE_MESSAGE *msg;
+
+    msg = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    if (!msg) { Info( Config.log, DEBUG_SMS, "Envoyer_sms_gsm_text: pas assez de mémoire pour copie" ); return; }
+
+    g_snprintf(msg->libelle_sms, sizeof(msg->libelle_sms), "%s", texte );
+    msg->id  = 0;
+    msg->num = 0;
+    msg->enable = TRUE;
+    msg->sms = MSG_SMS_GSM;
 
     pthread_mutex_lock( &Partage->com_sms.synchro );
     Partage->com_sms.liste_sms = g_list_append ( Partage->com_sms.liste_sms, msg );

@@ -56,6 +56,7 @@
  extern void Admin_tellstick ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_set ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_get ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_sms ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Write_admin ( gint fd, gchar *chaine );
 
 #endif

@@ -50,12 +50,12 @@
        Write_admin ( client->connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Write_admin ( client->connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
        Write_admin ( client->connexion, "  tell message_num      - Envoi d'un message audio _num_\n" );
-       Write_admin ( client->connexion, "  sms message           - Envoi du message SMS via SMSBOX\n" );
        Write_admin ( client->connexion, "  msgs message          - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
        Write_admin ( client->connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Write_admin ( client->connexion, "  rs485                 - Sous-menu de gestion des equipements RS485\n" );
        Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
+       Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
        Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
        Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
@@ -110,13 +110,6 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Ajouter_audio ( num );
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
-       Write_admin ( client->connexion, chaine );
-     } else
-    if ( ! strcmp ( commande, "sms" ) )
-     { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
-       Envoyer_sms_smsbox_text ( ligne + 4 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
