@@ -41,7 +41,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_mnemonique ( struct CONNEXION *connexion )
   { static GList *Arrivee_mnemonique = NULL;
-    static GList *Arrivee_syn     = NULL;
+    static GList *Arrivee_dls     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK:
@@ -106,20 +106,20 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO:
-             { struct CMD_TYPE_SYNOPTIQUE *syn;
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plusun();
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
-               if (!syn) return; 
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
+               if (!dls) return; 
 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
-               Arrivee_syn = g_list_append( Arrivee_syn, syn );
+               memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
+               Arrivee_dls = g_list_append( Arrivee_dls, dls );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN:
-             { g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_dls_for_mnemonique, NULL );
-               g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_syn );
-               Arrivee_syn = NULL;
+             { g_list_foreach( Arrivee_dls, (GFunc)Proto_afficher_un_dls_for_mnemonique, NULL );
+               g_list_foreach( Arrivee_dls, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_dls );
+               Arrivee_dls = NULL;
              }
             break;
      }
