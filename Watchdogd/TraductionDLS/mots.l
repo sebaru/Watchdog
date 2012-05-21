@@ -84,6 +84,7 @@ blanc         [\t ]+
 "orange"                   { Dls_lval.val = ORANGE;      return ORANGE;      }
 "gris"                     { Dls_lval.val = GRIS;        return GRIS;        }
 "blanc"                    { Dls_lval.val = BLANC;       return BLANC;       }
+"kaki"                     { Dls_lval.val = KAKI;        return KAKI;        }
  /************************************************* Options ************************************************/
 "mode"                     { Dls_lval.val = MODE;        return MODE;        }
 "consigne"                 { Dls_lval.val = CONSIGNE;    return CONSIGNE;    }

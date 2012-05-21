@@ -276,6 +276,7 @@
        case ORANGE  : rouge = 255; vert = 190; bleu =   0; break;
        case BLANC   : rouge = 255; vert = 255; bleu = 255; break;
        case GRIS    : rouge = 127; vert = 127; bleu = 127; break;
+       case KAKI    : rouge =   0; vert = 100; bleu =   0; break;
        default      : rouge = vert = bleu = 0;
      }
     g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d,%d);",

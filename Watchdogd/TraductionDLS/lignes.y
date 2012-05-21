@@ -68,7 +68,7 @@ int erreur;                                                             /* Compt
 %token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H CPT_IMP EANA START
 %type  <val>    alias_bit
 
-%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS
+%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
 %type  <val>    couleur
 
 %token <chaine> ID
@@ -635,7 +635,7 @@ une_option:     MODE EGAL ENTIER
                 ;
 
 
-couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE
+couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
                 ;
 %%
 /**********************************************************************************************************/
