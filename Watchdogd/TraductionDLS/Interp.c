@@ -259,12 +259,11 @@
 /**********************************************************************************************************/
  struct ACTION *New_action_icone( int num, GList *options )
   { struct ACTION *action;
-    int taille, rouge, vert, bleu, val, coul, cligno, slave;
+    int taille, rouge, vert, bleu, val, coul, cligno;
 
     val    = Get_option_entier ( options, MODE   ); if (val    == -1) val = 0;
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
-    slave  = Get_option_entier ( options, SLAVE  );
     taille = 40;
     action = New_action();
     action->alors = New_chaine( taille );
@@ -279,8 +278,8 @@
        case KAKI    : rouge =   0; vert = 100; bleu =   0; break;
        default      : rouge = vert = bleu = 0;
      }
-    g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d,%d);",
-                num, val, rouge, vert, bleu, cligno, slave );
+    g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d);",
+                num, val, rouge, vert, bleu, cligno );
     return(action);
   }
 

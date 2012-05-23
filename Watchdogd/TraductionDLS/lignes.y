@@ -57,7 +57,7 @@ int erreur;                                                             /* Compt
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
-%token <val>    MODE CONSIGNE COLOR CLIGNO SLAVE RESET RATIO
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
 %type  <val>    ordre
@@ -596,41 +596,6 @@ une_option:     MODE EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RATIO;
                    $$->entier = $3;
-                }}
-                | SLAVE EGAL BI ENTIER
-                {{ $$=New_option();
-                   $$->type = SLAVE;
-                   $$->entier = $4;
-                }}
-                | SLAVE EGAL ID
-                {{ struct ALIAS *alias;                               /* Definition des actions via alias */
-                   $$=New_option();
-                   $$->type = SLAVE;
-                   int taille;
-                   alias = Get_alias_par_nom( $3 );
-                   if (!alias)
-                    { char *chaine;
-                      taille = strlen($3) + strlen(NON_DEFINI) + 1;
-                      chaine = New_chaine(taille);
-                      g_snprintf( chaine, taille, NON_DEFINI, ligne_source_dls, $3 );
-                      Emettre_erreur(chaine); g_free(chaine);
-                      erreur++;
-                      $$->entier = 0;
-                    }
-                   else
-                    { switch(alias->bit)
-                       { case BI  : $$->entier = alias->num; break;
-                         default: { char *chaine;
-                                    taille = strlen(alias->nom) + strlen(INTERDIT_DROITE) + 1;
-                                    chaine = New_chaine(taille);
-                                    g_snprintf( chaine, taille, INTERDIT_DROITE, ligne_source_dls, alias->nom );
-                                    Emettre_erreur(chaine); g_free(chaine);
-                                    erreur++;
-                                    $$->entier = 0;
-                                  } 
-                       }
-                    }
-                   g_free($3);
                 }}
                 ;
 

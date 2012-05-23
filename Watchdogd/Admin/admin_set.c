@@ -77,7 +77,7 @@
      { int num, etat, rouge, vert, bleu, cligno;                     /* Découpage de la ligne de commande */
        sscanf ( ligne, "%s %d %d %d %d %d %d", commande, &num, &etat, &rouge, &vert, &bleu, &cligno );
        if (num<NBR_BIT_CONTROLE)
-        { SI(num, etat, rouge, vert, bleu, cligno, -1);
+        { SI(num, etat, rouge, vert, bleu, cligno);
           sleep(1);
           g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
                                               "changes=%d, last_change=%d, top=%d\n",
