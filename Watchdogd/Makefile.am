@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           Compteur EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
-	  Synoptiques Camera Onduleur Tellstick Lirc Asterisk
+	  Synoptiques Camera Onduleur Tellstick Lirc Asterisk Rfxcom
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \

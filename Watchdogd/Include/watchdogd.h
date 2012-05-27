@@ -41,6 +41,7 @@
  #include "Cpth_DB.h"
  #include "Cpt_imp_DB.h"
  #include "Modbus.h"
+ #include "Rfxcom.h"
  #include "Onduleur.h"
  #include "Rs485.h"
  #include "Tellstick.h"
@@ -138,6 +139,7 @@
     struct COM_ONDULEUR com_onduleur;                                      /* Com avec le thread ONDULEUR */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
     struct COM_LIRC com_lirc;                                                  /* Com avec le thread LIRC */
+    struct COM_RFXCOM com_rfxcom;                                            /* Com avec le thread RFXCOM */
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
