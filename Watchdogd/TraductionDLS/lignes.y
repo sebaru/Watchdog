@@ -30,7 +30,6 @@
 #include <string.h>
 #include <glib.h>
 #include "Proto_traductionDLS.h"
-#include "lignes.h"
 
 extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
 int erreur;                                                             /* Compteur d'erreur du programme */
