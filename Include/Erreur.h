@@ -61,6 +61,7 @@
  #define  DEBUG_TELLSTICK           (1<<20) /* Debug des echanges TELLSTICK */
  #define  DEBUG_LIRC                (1<<21) /* Debug des echanges LIRC */
  #define  DEBUG_ASTERISK            (1<<22) /* Debug des echanges ASTERISK */
+ #define  DEBUG_RFXCOM              (1<<23) /* Debug des echanges ASTERISK */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );
