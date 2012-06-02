@@ -133,9 +133,9 @@
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          if (Partage->audit_tour_dls_per_sec_hold > 200)                       /* Moyennage tour DLS/sec */
+          if (Partage->audit_tour_dls_per_sec_hold > 100)                       /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
-          else if (Partage->audit_tour_dls_per_sec_hold < 100)
+          else if (Partage->audit_tour_dls_per_sec_hold < 50)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
         }
 
