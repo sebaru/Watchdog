@@ -412,7 +412,8 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Deconnecter_module ( struct MODULE_ONDULEUR *module )
-  { if (!module) return;
+  { gint num_ea;
+    if (!module) return;
 
     if (module->started == TRUE)
      { upscli_disconnect( &module->upsconn );
@@ -422,6 +423,19 @@
 
     Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->onduleur.id );
     SB( module->onduleur.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
+
+    num_ea = module->onduleur.ea_min;
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
