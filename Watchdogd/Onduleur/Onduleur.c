@@ -565,6 +565,7 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", nom_var );
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
     *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
     return(TRUE);
   }
