@@ -492,7 +492,9 @@
         }
      }
 
-
+    module->date_retente = 0;
+    module->started = TRUE;
+    SB( module->onduleur.bit_comm, 1 );                         /* Mise a un du bit interne lié au module */
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -567,7 +569,6 @@
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", nom_var );
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
-    setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
     return(TRUE);
   }
@@ -653,6 +654,7 @@
      }
 
     Partage->com_onduleur.Thread_run = TRUE;                     /* On dit au maitre que le thread tourne */
+    setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     while(Partage->com_onduleur.Thread_run == TRUE)                   /* On tourne tant que l'on a besoin */
      { sleep(1);
        sched_yield();
@@ -724,11 +726,7 @@
            }
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
-           { if ( Connecter_module( module ) )                       /* Demande de connexion a l'onduleur */
-              { module->date_retente = 0;
-                module->started = TRUE;
-              }
-             else
+           { if ( ! Connecter_module( module ) )                     /* Demande de connexion a l'onduleur */
               { Info_n( Config.log, DEBUG_ONDULEUR,
                         "ONDULEUR: Run_onduleur: Module DOWN", module->onduleur.id );
                 module->date_retente = Partage->top + ONDULEUR_RETRY;
