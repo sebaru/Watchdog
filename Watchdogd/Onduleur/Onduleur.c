@@ -435,7 +435,6 @@
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
-    SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
   }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
