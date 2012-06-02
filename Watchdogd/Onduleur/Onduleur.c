@@ -443,6 +443,7 @@
 /**********************************************************************************************************/
  static gboolean Connecter_module ( struct MODULE_ONDULEUR *module )
   { gchar buffer[80];
+    gint num_ea;
     int connexion;
 
     if ( (connexion = upscli_connect( &module->upsconn, module->onduleur.host,
@@ -508,6 +509,17 @@
     module->date_retente = 0;
     module->started = TRUE;
     SB( module->onduleur.bit_comm, 1 );                         /* Mise a un du bit interne lié au module */
+    num_ea = module->onduleur.ea_min;
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
+    SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
     return(TRUE);
   }
 /**********************************************************************************************************/
