@@ -517,7 +517,7 @@
        return(EXIT_OK);
      }
 
-    setlocale( LC_NUMERIC, "C" );                    /* Pour le formattage correct des , . dans les float */
+    setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
