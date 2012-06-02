@@ -44,8 +44,7 @@
        case MNEMO_BISTABLE:
             return( capteur->val_ech != B(capteur->bit_controle) );
        case MNEMO_ENTREE_ANA:
-            return( (capteur->val_ech != Partage->ea[capteur->bit_controle].val_ech) ||
-                    (Partage->ea[capteur->bit_controle].inrange == 0)
+            return( TRUE
                   );
        case MNEMO_CPTH:
             return( capteur->val_ech != Partage->ch[capteur->bit_controle].cpthdb.valeur );
