@@ -177,6 +177,8 @@
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : SHUTDOWN demandé" );
        Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
+       Ajouter_audio( 9998 ); /* Message audio avant reboot */
+       sleep(2);
        Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
