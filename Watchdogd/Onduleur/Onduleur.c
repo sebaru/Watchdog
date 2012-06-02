@@ -608,15 +608,23 @@
   { gint num_a;
 
     num_a = module->onduleur.a_min;
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.on" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test.battery.start.deep" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test.battery.start.quick" ) == FALSE) return(FALSE); }
-    if (A(num_a++)) { if (Onduleur_set_instcmd ( module, "test.battery.stop" ) == FALSE) return(FALSE); }
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.off" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "outlet.1.load.on" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.off" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "outlet.2.load.on" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "test.battery.start.deep" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "test.battery.start.quick" ) == FALSE) return(FALSE); SA(num_a,0); }
+    num_a++;
+    if (A(num_a)) { if (Onduleur_set_instcmd ( module, "test.battery.stop" ) == FALSE) return(FALSE); SA(num_a,0); }
     return(TRUE);
   }
 /**********************************************************************************************************/
