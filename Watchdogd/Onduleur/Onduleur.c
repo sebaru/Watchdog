@@ -562,7 +562,9 @@
        return(FALSE);
      }
     else
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", nom_cmd ); }
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", nom_cmd );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", buffer );
+     }
     return(TRUE);
   }
 
@@ -593,7 +595,7 @@
      }
 
     Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", nom_var );
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer );
     *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
     return(TRUE);
   }
