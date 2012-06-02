@@ -594,6 +594,14 @@
 
        if (Partage->com_rs485.admin_start)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
+          if (Rs485_is_actif() == FALSE)                     /* Si aucun module actif, on restart la comm RS */
+           { fd_rs485 = Init_rs485();
+             if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
+              { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
+                pthread_exit(GINT_TO_POINTER(-1));
+              }
+             Info( Config.log, DEBUG_RS485, "RS485: Restart Accès RS485 OK");
+           }
           module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
           if (module) { module->rs485.actif = 1; }
           Partage->com_rs485.admin_start = 0;
@@ -604,20 +612,14 @@
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
           if (module) module->rs485.actif = 0;
           Partage->com_rs485.admin_stop = 0;
+          if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
+           { close(fd_rs485);
+             Info( Config.log, DEBUG_RS485, "RS485: Restart Fermeture FileDescriptor sur tout module disable");
+           }
         }
 
        if (Partage->com_rs485.Modules_RS485 == NULL )           /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
-
-       if (Rs485_is_actif() == FALSE)                     /* Si aucun module actif, on restart la comm RS */
-        { close(fd_rs485);
-          fd_rs485 = Init_rs485();
-          if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
-           { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
-             pthread_exit(GINT_TO_POINTER(-1));
-           }
-          continue;
-        }
 
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
