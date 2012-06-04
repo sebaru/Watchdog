@@ -29,7 +29,7 @@
  #define _RFXCOM_H_
 
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
-  { unsigned char dest;
+  { unsigned char buffer[80];
   };
 
  struct COM_RFXCOM                                                           /* Communication vers RFXCOM */

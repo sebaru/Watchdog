@@ -168,10 +168,13 @@
        retval = select(fd_rfxcom+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
        if (retval>=0 && FD_ISSET(fd_rfxcom, &fdselect) )
         { int bute, cpt;
+#ifdef bouh
           if (nbr_oct_lu<TAILLE_ENTETE)
            { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
- 
-          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
+#endif
+ nbr_oct_lu=0;
+          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, 1 ); /*bute-nbr_oct_lu );*/
+          printf(" recu rfxcom = %d nbr_lu = %d\n", (unsigned char *)&Trame + nbr_oct_lu, nbr_oct_lu );
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
