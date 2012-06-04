@@ -42,7 +42,9 @@
 /* Sortie: l'identifiant de la connexion                                                                  */
 /**********************************************************************************************************/
  static int Init_rfxcom ( void )
-  { struct termios oldtio;
+  { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+    gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+    struct termios oldtio;
     int fd;
 
     fd = open( Config.port_rfxcom, O_RDWR | O_NOCTTY | O_NONBLOCK );
@@ -65,6 +67,9 @@
        Info_c( Config.log, DEBUG_RFXCOM,
                "RFXCOM: Init_rfxcom: Ouverture port rfxcom okay", Config.port_rfxcom);
      }
+    write (fd, &trame_reset, sizeof(trame_reset) );
+    sleep(5);
+    write (fd, &trame_reset, sizeof(trame_get_status) );
     return(fd);
   }
 
@@ -172,7 +177,7 @@
           if (nbr_oct_lu<TAILLE_ENTETE_RFXCOM)
            { bute = TAILLE_ENTETE_RFXCOM; } else { bute = sizeof(Trame); }
 
-          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
+          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, 1 ); /*bute-nbr_oct_lu );*/
 printf(" rfxcom recu %2X nbr_oct_lu = %d  trame.taille = %d\n", *((unsigned char *)&Trame + nbr_oct_lu), nbr_oct_lu,
          Trame.taille );
           if (cpt>0)
