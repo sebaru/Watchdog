@@ -54,6 +54,10 @@
         { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RS485 -> Arret" ); }
         } else
+       if ( ! strcmp ( thread, "rfxcom" ) )
+        { if (!Demarrer_rfxcom())                                        /* Demarrage gestion module RS485 */
+           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RFXCOM -> Arret" ); }
+        } else
        if ( ! strcmp ( thread, "modbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb MODBUS -> Arret" ); }
@@ -100,6 +104,7 @@
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
        if ( ! strcmp ( thread, "rs485"     ) ) { Partage->com_rs485.Thread_run     = FALSE; } else
+       if ( ! strcmp ( thread, "rfxcom"    ) ) { Partage->com_rfxcom.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "sms"       ) ) { Partage->com_sms.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
@@ -173,6 +178,13 @@
                  );
        Write_admin ( client->connexion, chaine );
 
+
+       g_snprintf( chaine, sizeof(chaine), " Library RFXCOM    -> loaded = %s, running = %s, TID = %d\n",
+                   (Partage->com_rfxcom.dl_handle ? "YES" : " NO"),
+                   (Partage->com_rfxcom.Thread_run ? "YES" : " NO"), (gint)Partage->com_rfxcom.TID
+                 );
+       Write_admin ( client->connexion, chaine );
+
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info( Config.log, DEBUG_INFO, "Admin_process : SHUTDOWN demandé" );
@@ -205,9 +217,9 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv)\n" );
+                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv,rfxcom)\n" );
        Write_admin ( client->connexion,
-                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv)\n" );
+                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv,rfxcom)\n" );
        Write_admin ( client->connexion,
                      "  list                 - Liste les statut des threads\n" );
        Write_admin ( client->connexion,

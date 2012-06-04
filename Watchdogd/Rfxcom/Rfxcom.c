@@ -28,207 +28,185 @@
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
+ #include <termios.h>
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
  #include <unistd.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
 /**********************************************************************************************************/
-/* Ajouter_rfxcom: Ajoute une demande d'envoi RF rfxcom dans la liste des envoi rfxcom                    */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
+/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                           */
+/* Sortie: l'identifiant de la connexion                                                                  */
 /**********************************************************************************************************/
- void Ajouter_rfxcom( gint id, gint val )
-  { struct RFXCOMDB *tell;
-#ifdef bouh
-    if (id < Config.rfxcom_a_min || Config.rfxcom_a_max < id) return;             /* Test d'echelle */
-     
-    if (Partage->com_rfxcom.taille_tell > 150)
-     { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Ajouter_tell: DROP tell (taille>150)  id", id );
-       return;
+ static int Init_rfxcom ( void )
+  { struct termios oldtio;
+    int fd;
+
+    fd = open( Config.port_rfxcom, O_RDWR | O_NOCTTY | O_NONBLOCK );
+    if (fd<0)
+     { Info_c( Config.log, DEBUG_RFXCOM,
+               "RFXCOM: Init_rfxcom: Impossible d'ouvrir le port rfxcom", Config.port_rfxcom );
+       Info_n( Config.log, DEBUG_RFXCOM,
+               "RFXCOM: Init_rfxcom: Code retour                      ", fd );
      }
-
-    tell = (struct RFXCOMDB *)g_malloc( sizeof(struct RFXCOMDB) );
-    if (!tell) return;
-
-    tell->id  = id;
-    tell->val = val;
-
-    pthread_mutex_lock( &Partage->com_rfxcom.synchro );       /* Ajout dans la liste de tell a traiter */
-    Partage->com_rfxcom.liste_tell = g_list_append( Partage->com_rfxcom.liste_tell, tell );
-    Partage->com_rfxcom.taille_tell++;
-    pthread_mutex_unlock( &Partage->com_rfxcom.synchro );
-#endif
+    else
+     { memset(&oldtio, 0, sizeof(oldtio) );
+       oldtio.c_cflag = B19200 | CS8 | CREAD | CLOCAL;
+       oldtio.c_oflag = 0;
+       oldtio.c_iflag = 0;
+       oldtio.c_lflag = 0;
+       oldtio.c_cc[VTIME]    = 0;
+       oldtio.c_cc[VMIN]     = 0;
+       tcsetattr(fd, TCSANOW, &oldtio);
+       tcflush(fd, TCIOFLUSH);
+       Info_c( Config.log, DEBUG_RFXCOM,
+               "RFXCOM: Init_rfxcom: Ouverture port rfxcom okay", Config.port_rfxcom);
+     }
+    return(fd);
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom_learn: Envoi une commande de LEARN rfxcom                                           */
-/* Entrée: Le client admin et le numéro ID du rfxcom                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_rfxcom_learn ( struct CLIENT_ADMIN *client, gint num )
-  { int methods;
-    gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Envoi de la commande LEARN RfxcomS\n" );
-    Write_admin ( client->connexion, chaine );
+/**********************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
+/* Entrée: la trame a recue                                                                               */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static int Processer_trame( struct TRAME_RFXCOM *trame )
+  { 
+
 #ifdef bouh
-    methods = tdMethods( num, RFXCOM_LEARN );                                 /* Get methods of device */
+    switch( trame->fonction )
+     { case RFXCOM_FCT_IDENT: printf("bouh\n");
+	               trame_ident = (struct TRAME_RFXCOM_IDENT *)trame->donnees;
+                       printf("Recu Ident de %d: version %d.%d, nbr ana %d, nbr tor %d (%d choc), sortie %d\n",
+                              trame->source, trame_ident->version_major, trame_ident->version_minor,
+                              trame_ident->nbr_entre_ana, trame_ident->nbr_entre_tor,
+                              trame_ident->nbr_entre_choc, trame_ident->nbr_sortie_tor );
+                       break;
+       case RFXCOM_FCT_ENTRE_TOR:
+             { int e, cpt, nbr_e;
+               nbr_e = module->rfxcom.e_max - module->rfxcom.e_min + 1;
+               for( cpt = 0; cpt<nbr_e; cpt++)
+                { e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
+                  SE( module->rfxcom.e_min + cpt, e );
+                }
+             }
+	    break;
+       case RFXCOM_FCT_ENTRE_ANA:
+             { int cpt, nbr_ea;
+               if (module->rfxcom.ea_min == -1) nbr_ea = 0;
+               else nbr_ea = module->rfxcom.ea_max - module->rfxcom.ea_min + 1;
+               for( cpt = 0; cpt<nbr_ea; cpt++)
+                { gint num_ea, val_int, ajout1, ajout2, ajout3, ajout4, ajout5;
 
-    if ( methods | RFXCOM_LEARN )
-     { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Learning", num );
-       tdLearn ( num );
+                  val_int =   trame->donnees[cpt] << 2;
+                  ajout1  =   trame->donnees[nbr_ea + (cpt >> 2)];
+                  ajout2 = 0xC0>>((cpt & 0x03)<<1);
+                  ajout3 = (3-(cpt & 0x03))<<1;
+                  ajout4 = ajout1  & ajout2;
+                  ajout5 = ajout4 >> ajout3;
+                  val_int += ajout5;
+                  num_ea = module->rfxcom.ea_min + cpt;
+
+                  SEA( num_ea, val_int );
+                }
+             }
+	    break;
+       default: printf("Trame non traitée\n"); return(FALSE);
      }
 #endif
-    g_snprintf( chaine, sizeof(chaine), "   Rfxcom -> Learning of device = %d\n", num );
-    Write_admin ( client->connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Admin_rfxcom_start: Envoi une commande de START rfxcom                                                 */
-/* Entrée: Le client admin et le numéro ID du rfxcom                                                      */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_rfxcom_start ( struct CLIENT_ADMIN *client, gint num )
-  { int methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Demande d'activation d'un device Rfxcom\n" );
-    Write_admin ( client->connexion, chaine );
-#ifdef bouh
-    methods = tdMethods( num, RFXCOM_TURNON );                                /* Get methods of device */
-
-    if ( methods | RFXCOM_TURNON )
-     { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Starting", num );
-       tdTurnOn ( num );
-     }
-
-    g_snprintf( chaine, sizeof(chaine), "   Rfxcom -> Starting device = %d\n", num );
-    Write_admin ( client->connexion, chaine );
-#endif
-  }
-/**********************************************************************************************************/
-/* Admin_rfxcom_stop : Envoi une commande de STOP  rfxcom                                           */
-/* Entrée: Le client admin et le numéro ID du rfxcom                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_rfxcom_stop ( struct CLIENT_ADMIN *client, gint num )
-  { int methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Demande de desactivation d'un deviece Rfxcom\n" );
-    Write_admin ( client->connexion, chaine );
-#ifdef bouh
-    methods = tdMethods( num, RFXCOM_TURNOFF );                               /* Get methods of device */
-
-    if ( methods | RFXCOM_TURNOFF )
-     { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Stopping", num );
-       tdTurnOff ( num );
-     }
-
-    g_snprintf( chaine, sizeof(chaine), "   Rfxcom -> Stoppping device = %d\n", num );
-    Write_admin ( client->connexion, chaine );
-#endif
-  }
-/**********************************************************************************************************/
-/* Admin_rfxcom_list: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- void Admin_rfxcom_list ( struct CLIENT_ADMIN *client )
-  { int nbrDevice, i, supportedMethods, methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des device Rfxcom\n" );
-    Write_admin ( client->connexion, chaine );
-#ifdef bouh
-    nbrDevice = tdGetNumberOfDevices();
-    g_snprintf( chaine, sizeof(chaine), "   Rfxcom -> Number of devices = %d\n", nbrDevice );
-    Write_admin ( client->connexion, chaine );
-
-    for (i= 0; i<nbrDevice; i++)
-     { char *name, *proto, *house, *unit;
-       int id;
-       id    = tdGetDeviceId( i );
-       name  = tdGetName( id );
-       proto = tdGetProtocol( id );
-       house = tdGetDeviceParameter( id, "house", "NULL" );
-       unit  = tdGetDeviceParameter( id, "unit", "NULL" );
-       supportedMethods = RFXCOM_TURNON | RFXCOM_TURNOFF | RFXCOM_BELL | RFXCOM_LEARN;
-       methods = tdMethods( id, supportedMethods );
-
-       g_snprintf( chaine, sizeof(chaine),
-                   "   Rfxcom [%d] -> proto=%s, house=%s, unit=%s, methods=%s-%s-%s-%s, name=%s\n",
-                   id, proto, house, unit,
-                   ( methods & RFXCOM_TURNON  ? "ON"    : "  "     ),
-                   ( methods & RFXCOM_TURNOFF ? "OFF"   : "   "    ),
-                   ( methods & RFXCOM_BELL    ? "BELL"  : "    "   ),
-                   ( methods & RFXCOM_LEARN   ? "LEARN" : "      " ),
-                   name
-                 );
-       Write_admin ( client->connexion, chaine );
-       tdReleaseString(name);
-       tdReleaseString(proto);
-       tdReleaseString(house);
-       tdReleaseString(unit);
-     }
-#endif
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Rfxcom                                                          */
 /**********************************************************************************************************/
  void Run_rfxcom ( void )
-  { guint methods;
-    prctl(PR_SET_NAME, "W-Rfxcom", 0, 0, 0 );
+  { gint retval, nbr_oct_lu, id_en_cours, attente_reponse;
+    struct MODULE_RFXCOM *module;
+    struct TRAME_RFXCOM Trame;
+    struct timeval tv;
+    fd_set fdselect;
+    gint fd_rfxcom;
+    GList *liste;
 
+    prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
 
-#ifdef bouh
-    Partage->com_rfxcom.liste_tell = NULL;                             /* Initialisation des variables */
-    tdInit();
+    fd_rfxcom = Init_rfxcom();
+    if (fd_rfxcom<0)                                                        /* On valide l'acces aux ports */
+     { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM impossible, terminé");
+       Partage->com_rfxcom.TID = 0;                        /* On indique au master que le thread est mort. */
+       pthread_exit(GINT_TO_POINTER(-1));
+     }
+    else { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM FD", fd_rfxcom ); }
 
-    Partage->com_rfxcom.Thread_run = TRUE;                    /* On dit au maitre que le thread tourne */
-    while(Partage->com_rfxcom.Thread_run == TRUE)                  /* On tourne tant que l'on a besoin */
-     { struct RFXCOMDB *tell;
-       if (Partage->com_rfxcom.Thread_reload)                                      /* On a recu reload */
-        { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: RELOAD" );
+    Partage->com_rfxcom.Thread_run    = TRUE;                                        /* Le thread tourne ! */
+
+    nbr_oct_lu = 0;
+    attente_reponse = FALSE;
+
+    while(Partage->com_rfxcom.Thread_run == TRUE)                         /* On tourne tant que necessaire */
+     { usleep(1);
+       sched_yield();
+
+       if (Partage->com_rfxcom.Thread_reload == TRUE)
+        { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reloading conf" );
           Partage->com_rfxcom.Thread_reload = FALSE;
         }
 
-       if (Partage->com_rfxcom.Thread_sigusr1)                                 /* On a recu sigusr1 ?? */
+       if (Partage->com_rfxcom.Thread_sigusr1 == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: SIGUSR1" );
-          Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reste a traiter",
-                  Partage->com_rfxcom.taille_tell );
           Partage->com_rfxcom.Thread_sigusr1 = FALSE;
         }
 
-       if (!Partage->com_rfxcom.liste_tell)                            /* Si pas de message, on tourne */
-        { sched_yield();
-          usleep(10000);
-          continue;
-        }
+       FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RFXCOM */
+       FD_SET(fd_rfxcom, &fdselect );
+       tv.tv_sec = 1;
+       tv.tv_usec= 0;
+       retval = select(fd_rfxcom+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
+       if (retval>=0 && FD_ISSET(fd_rfxcom, &fdselect) )
+        { int bute, cpt;
+          if (nbr_oct_lu<TAILLE_ENTETE)
+           { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
+ 
+          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
+          if (cpt>0)
+           { nbr_oct_lu = nbr_oct_lu + cpt;
 
-       pthread_mutex_lock( &Partage->com_rfxcom.synchro );                            /* lockage futex */
-       tell = Partage->com_rfxcom.liste_tell->data;                            /* Recuperation du tell */
-       Partage->com_rfxcom.liste_tell = g_list_remove ( Partage->com_rfxcom.liste_tell, tell );
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reste a traiter",
-                                       g_list_length(Partage->com_rfxcom.liste_tell) );
-       Partage->com_rfxcom.taille_tell--;
-       pthread_mutex_unlock( &Partage->com_rfxcom.synchro );
-
-       methods = tdMethods( tell->id, RFXCOM_TURNON | RFXCOM_TURNOFF );    /* Get methods of device */
-
-       if ( tell->val == 1 && (methods | RFXCOM_TURNON) )
-        { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Turning ON", tell->id );
-          tdTurnOn ( tell->id );
-        }
-       else if ( tell->val == 0 && (methods | RFXCOM_TURNOFF) )
-        { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Turning OFF", tell->id );
-          tdTurnOff ( tell->id );
-        }
-
-       g_free(tell);
-     }
-    tdClose();
+#ifdef bouh
+             if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
+              { int crc_recu;
+                nbr_oct_lu = 0;
+                for (cpt=0; cpt<sizeof(Trame); cpt++)
+                  { printf("%02X ",(unsigned char)*((unsigned char *)&Trame +cpt) ); }
+                printf(" entete   = %d nbr_lu = %d\n", TAILLE_ENTETE, nbr_oct_lu );
+                printf(" dest     = %d\n", Trame.dest );
+                printf(" source   = %d\n", Trame.source );
+                printf(" fonction = %d\n", Trame.fonction );
+                printf(" taille   = %d\n", Trame.taille );
+                crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
+                crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
+                if (crc_recu != Calcul_crc16(&Trame))
+                 { Info(Config.log, DEBUG_RFXCOM, "RFXCOM: CRC16 failed !!"); }
+                else
+                 { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
+                    { attente_reponse = FALSE;
+                      liste = liste->next;
+                      SB(module->rfxcom.bit_comm, 1);
+                    }
+                 }
+                memset (&Trame, 0, sizeof(struct TRAME_RFXCOM) );
+              }
 #endif
+           }
+        }
+     }                                                                     /* Fin du while partage->arret */
+
+    close(fd_rfxcom);
     Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
-    Partage->com_rfxcom.TID = 0;                       /* On indique au master que le thread est mort. */
+    Partage->com_rfxcom.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

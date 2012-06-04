@@ -42,8 +42,6 @@
 
  #define TEMPS_RETENTE   50               /* Tente de se raccrocher au module banni toutes les 5 secondes */
 
- static gint fd_rs485;
-
 /**********************************************************************************************************/
 /* Retirer_rs485DB: Elimination d'un module rs485                                                         */
 /* Entrée: un log et une database                                                                         */
@@ -541,6 +539,7 @@
     struct TRAME_RS485 Trame;
     struct timeval tv;
     fd_set fdselect;
+    gint fd_rs485;
     GList *liste;
 
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );

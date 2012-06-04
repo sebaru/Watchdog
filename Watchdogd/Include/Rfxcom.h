@@ -28,27 +28,15 @@
 #ifndef _RFXCOM_H_
  #define _RFXCOM_H_
 
-#ifdef bouh
- struct RFXCOMDB
-  { guint  id;                                                       /* Numero de la sortie a positionner */
-    guint  val;                                                                /* Valeur de la sortie TOR */
+ struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
+  { unsigned char dest;
   };
-#endif
 
  struct COM_RFXCOM                                                           /* Communication vers RFXCOM */
   { pthread_t TID;                                                               /* Identifiant du thread */
     void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
     void (*Run_rfxcom)(void);                                 /* Fonction principale de gestion du thread */
-#ifdef bouh
-
     void (*Ajouter_rfxcom)( gint, gint );    /* Fonction d'ajout d'une sortie rfxcom dans le tampon */
-    void (*Admin_rfxcom_list)( struct CLIENT_ADMIN * );       /* List des modules rfxcom configurés */
-    void (*Admin_rfxcom_learn)( struct CLIENT_ADMIN *, gint );          /* Envoie d'un learn au module */
-    void (*Admin_rfxcom_start)( struct CLIENT_ADMIN *, gint );          /* Envoie d'un start au module */
-    void (*Admin_rfxcom_stop) ( struct CLIENT_ADMIN *, gint );          /* Envoie d'un stop  au module */
-    GList *liste_tell;                                             /* liste de struct MSGDB msg a envoyer */
-    gint taille_tell;
-#endif
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
