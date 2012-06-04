@@ -71,7 +71,7 @@
     write (fd, &trame_reset, sizeof(trame_reset) );
     sleep(5);
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending GET STATUS" );
-    write (fd, &trame_reset, sizeof(trame_get_status) );
+    write (fd, &trame_get_status, sizeof(trame_get_status) );
     return(fd);
   }
 
@@ -82,6 +82,12 @@
 /**********************************************************************************************************/
  static int Processer_trame( struct TRAME_RFXCOM *trame )
   { 
+
+    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame     taille: ", trame->taille );
+    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame       type: ", trame->type );
+    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame  sous_type: ", trame->sous_type );
+    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame      seqno: ", trame->seqno );
+
 
 #ifdef bouh
     switch( trame->fonction )
@@ -179,33 +185,14 @@
           if (nbr_oct_lu<TAILLE_ENTETE_RFXCOM)
            { bute = TAILLE_ENTETE_RFXCOM; } else { bute = sizeof(Trame); }
 
-          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, 1 ); /*bute-nbr_oct_lu );*/
-printf(" rfxcom recu %2X nbr_oct_lu = %d  trame.taille = %d\n", *((unsigned char *)&Trame + nbr_oct_lu), nbr_oct_lu,
-         Trame.taille );
+          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
              if (nbr_oct_lu >= TAILLE_ENTETE_RFXCOM + Trame.taille)                   /* traitement trame */
-              { int crc_recu;
-                nbr_oct_lu = 0;
-                printf(" taille    = %d\n", Trame.taille );
-                printf(" type      = %d\n", Trame.type );
-                printf(" sous_type = %d\n", Trame.sous_type );
-                printf(" seqno     = %d\n", Trame.seqno );
-#ifdef bouh
-                crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
-                crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
-                if (crc_recu != Calcul_crc16(&Trame))
-                 { Info(Config.log, DEBUG_RFXCOM, "RFXCOM: CRC16 failed !!"); }
-                else
-                 { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
-                    { attente_reponse = FALSE;
-                      liste = liste->next;
-                      SB(module->rfxcom.bit_comm, 1);
-                    }
-                 }
+              { nbr_oct_lu = 0;
+                Processer_trame( &Trame );
                 memset (&Trame, 0, sizeof(struct TRAME_RFXCOM) );
-#endif
               }
            }
         }
