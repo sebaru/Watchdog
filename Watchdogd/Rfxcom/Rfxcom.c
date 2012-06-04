@@ -173,7 +173,8 @@
            { bute = TAILLE_ENTETE_RFXCOM; } else { bute = sizeof(Trame); }
 
           cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
-printf(" rfxcom recu %2X \n", *((unsigned char *)&Trame + nbr_oct_lu) );
+printf(" rfxcom recu %2X nbr_oct_lu = %d  trame.taille = %d\n", *((unsigned char *)&Trame + nbr_oct_lu), nbr_oct_lu,
+         Trame.taille );
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
