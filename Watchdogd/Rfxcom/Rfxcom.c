@@ -132,10 +132,10 @@
                                          "RFXCOM: Processer_trame get_status proto X10" );   
 
      }
-    else if (trame->type == 0x82 && trame->sous_type == 0x01)
+    else if (trame->type == 0x52 && trame->sous_type == 0x01)
      {
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id1", trame->data[0] );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id1", trame->data[1] );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id2", trame->data[1] );   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status high", trame->data[2] >> 1 );   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status signe", trame->data[2] & 1);   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status low", trame->data[3] );   
