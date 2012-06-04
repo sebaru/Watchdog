@@ -70,9 +70,10 @@
      }
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending INIT" );
     write (fd, &trame_reset, sizeof(trame_reset) );
-    sleep(5);
+    sleep(2);
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending SET ALL PROTO" );
     write (fd, &trame_set_all_proto, sizeof(trame_set_all_proto) );
+    sllep(2);
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending GET STATUS" );
     write (fd, &trame_get_status, sizeof(trame_get_status) );
     return(fd);
@@ -130,6 +131,18 @@
        if (trame->data[4] & 0x01) Info( Config.log, DEBUG_RFXCOM,
                                          "RFXCOM: Processer_trame get_status proto X10" );   
 
+     }
+    else if (trame->type == 0x82 && trame->sous_type == 0x01)
+     {
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id1", trame->data[0] );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id1", trame->data[1] );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status high", trame->data[2] >> 1 );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status signe", trame->data[2] & 1);   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status low", trame->data[3] );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status hum", trame->data[4] );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status humstatus", trame->data[5] );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status battery", trame->data[6] >> 4 );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status rssi", trame->data[6] & 0x0F );   
      }
     else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame unkown packet type", trame->type );
 #ifdef bouh
