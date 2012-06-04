@@ -88,7 +88,47 @@
     Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame  sous_type: ", trame->sous_type );
     Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame      seqno: ", trame->seqno );
 
+    if (trame->type == 0x01 && trame->sous_type == 0x00)
+     { if (trame->data[0] == 0x52) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status 433MHz receiver only" );   
+       if (trame->data[0] == 0x53) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status 433MHz transceiver" );   
+       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status firmware", trame->data[1] );   
+       if (trame->data[3] & 0x80) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto RFU" );   
+       if (trame->data[3] & 0x40) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto Rollertroll" );   
+       if (trame->data[3] & 0x20) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto Proguard" );   
+       if (trame->data[3] & 0x10) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto FS20" );   
+       if (trame->data[3] & 0x08) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto LaCrosse" );   
+       if (trame->data[3] & 0x04) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto Hideki" );   
+       if (trame->data[3] & 0x02) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto LightwaveRF" );   
+       if (trame->data[3] & 0x01) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto Mertik" );   
+       if (trame->data[4] & 0x80) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto Visonic" );   
+       if (trame->data[4] & 0x40) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto ATI" );   
+       if (trame->data[4] & 0x20) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto OregonScientific" );   
+       if (trame->data[4] & 0x10) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto IkeaKoppla" );   
+       if (trame->data[4] & 0x08) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto HomeEasy" );   
+       if (trame->data[4] & 0x04) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto AC" );   
+       if (trame->data[4] & 0x02) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto ARC" );   
+       if (trame->data[4] & 0x01) Info( Config.log, DEBUG_RFXCOM,
+                                         "RFXCOM: Processer_trame get_status proto X10" );   
 
+     }
+    else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame unkown packet type", trame->type );
 #ifdef bouh
     switch( trame->fonction )
      { case RFXCOM_FCT_IDENT: printf("bouh\n");
