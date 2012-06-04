@@ -28,7 +28,7 @@
 #ifndef _RFXCOM_H_
  #define _RFXCOM_H_
 
- #define TAILLE_ENTETE_RFXCOM    4
+ #define TAILLE_ENTETE_RFXCOM    1
 
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
   { unsigned char taille;
