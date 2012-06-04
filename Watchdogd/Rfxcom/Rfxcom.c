@@ -56,7 +56,7 @@
      }
     else
      { memset(&oldtio, 0, sizeof(oldtio) );
-       oldtio.c_cflag = B19200 | CS8 | CREAD | CLOCAL;
+       oldtio.c_cflag = B38400 | CS8 | CREAD | CLOCAL;
        oldtio.c_oflag = 0;
        oldtio.c_iflag = 0;
        oldtio.c_lflag = 0;
@@ -67,8 +67,10 @@
        Info_c( Config.log, DEBUG_RFXCOM,
                "RFXCOM: Init_rfxcom: Ouverture port rfxcom okay", Config.port_rfxcom);
      }
+    Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending INIT" );
     write (fd, &trame_reset, sizeof(trame_reset) );
     sleep(5);
+    Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending GET STATUS" );
     write (fd, &trame_reset, sizeof(trame_get_status) );
     return(fd);
   }
