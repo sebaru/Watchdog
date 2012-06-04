@@ -72,7 +72,7 @@
     write (fd, &trame_reset, sizeof(trame_reset) );
     sleep(5);
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending SET ALL PROTO" );
-    write (fd, &trame_get_status, sizeof(trame_set_all_proto) );
+    write (fd, &trame_set_all_proto, sizeof(trame_set_all_proto) );
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending GET STATUS" );
     write (fd, &trame_get_status, sizeof(trame_get_status) );
     return(fd);
