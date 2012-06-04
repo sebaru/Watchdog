@@ -28,8 +28,14 @@
 #ifndef _RFXCOM_H_
  #define _RFXCOM_H_
 
+ #define TAILLE_ENTETE_RFXCOM    4
+
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
-  { unsigned char buffer[80];
+  { unsigned char taille;
+    unsigned char type;
+    unsigned char sous_type;
+    unsigned char seqno;
+    unsigned char data[40];
   };
 
  struct COM_RFXCOM                                                           /* Communication vers RFXCOM */

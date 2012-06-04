@@ -161,34 +161,29 @@
           Partage->com_rfxcom.Thread_sigusr1 = FALSE;
         }
 
-       FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RFXCOM */
+       FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
        FD_SET(fd_rfxcom, &fdselect );
        tv.tv_sec = 1;
        tv.tv_usec= 0;
-       retval = select(fd_rfxcom+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
+       retval = select(fd_rfxcom+1, &fdselect, NULL, NULL, &tv );               /* Attente d'un caractere */
        if (retval>=0 && FD_ISSET(fd_rfxcom, &fdselect) )
         { int bute, cpt;
-#ifdef bouh
-          if (nbr_oct_lu<TAILLE_ENTETE)
-           { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
-#endif
- nbr_oct_lu=0;
-          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, 1 ); /*bute-nbr_oct_lu );*/
-          printf(" recu rfxcom = %d nbr_lu = %d\n", (unsigned char *)&Trame + nbr_oct_lu, nbr_oct_lu );
+
+          if (nbr_oct_lu<TAILLE_ENTETE_RFXCOM)
+           { bute = TAILLE_ENTETE_RFXCOM; } else { bute = sizeof(Trame); }
+
+          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
-#ifdef bouh
-             if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
+             if (nbr_oct_lu >= TAILLE_ENTETE_RFXCOM + Trame.taille)                   /* traitement trame */
               { int crc_recu;
                 nbr_oct_lu = 0;
-                for (cpt=0; cpt<sizeof(Trame); cpt++)
-                  { printf("%02X ",(unsigned char)*((unsigned char *)&Trame +cpt) ); }
-                printf(" entete   = %d nbr_lu = %d\n", TAILLE_ENTETE, nbr_oct_lu );
-                printf(" dest     = %d\n", Trame.dest );
-                printf(" source   = %d\n", Trame.source );
-                printf(" fonction = %d\n", Trame.fonction );
-                printf(" taille   = %d\n", Trame.taille );
+                printf(" taille    = %d\n", Trame.taille );
+                printf(" type      = %d\n", Trame.type );
+                printf(" sous_type = %d\n", Trame.sous_type );
+                printf(" seqno     = %d\n", Trame.seqno );
+#ifdef bouh
                 crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
                 crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
                 if (crc_recu != Calcul_crc16(&Trame))
@@ -201,8 +196,8 @@
                     }
                  }
                 memset (&Trame, 0, sizeof(struct TRAME_RFXCOM) );
-              }
 #endif
+              }
            }
         }
      }                                                                     /* Fin du while partage->arret */
