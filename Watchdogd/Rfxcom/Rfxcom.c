@@ -247,7 +247,7 @@
 
              if (nbr_oct_lu >= TAILLE_ENTETE_RFXCOM + Trame.taille)                   /* traitement trame */
               { nbr_oct_lu = 0;
-                Processer_trame( &Trame );
+                if (Trame.taille > 0) Processer_trame( &Trame );
                 memset (&Trame, 0, sizeof(struct TRAME_RFXCOM) );
               }
            }
