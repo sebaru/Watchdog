@@ -217,7 +217,7 @@
     texte = gtk_label_new( _("Libelle") );                                        /* Le rs485 en lui-meme */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_lib = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MSG );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8 );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
     if (edit_rs485)                                                              /* Si edition d'un rs485 */

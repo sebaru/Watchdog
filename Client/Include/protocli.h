@@ -63,6 +63,7 @@
     TYPE_PAGE_ONDULEUR,                                        /* Page affichant la liste des onduleurs ! */
     TYPE_PAGE_RS485,                                                  /* Page affichant les modules RS485 */
     TYPE_PAGE_MODBUS,                                                /* Page affichant les modules MODBUS */
+    TYPE_PAGE_RFXCOM,                                                /* Page affichant les modules RFXCOM */
   };
 
  struct PAGE_NOTEBOOK
