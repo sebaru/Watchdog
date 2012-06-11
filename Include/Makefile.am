@@ -7,7 +7,7 @@
 noinst_HEADERS =  Erreur.h Reseaux.h Version.h \
                   Reseaux_gtk_message.h Reseaux_connexion.h Reseaux_icone.h \
                   Reseaux_dls.h Reseaux_utilisateur.h Reseaux_camera.h Reseaux_synoptique.h \
-                  Reseaux_message.h Reseaux_scenario.h \
+                  Reseaux_message.h Reseaux_scenario.h Reseaux_rfxcom.h \
                   Reseaux_mnemonique.h Reseaux_option_entreeana.h Reseaux_option_compteur_imp.h \
 		  Reseaux_supervision.h Reseaux_histo.h Reseaux_atelier.h \
                   Reseaux_courbe.h Reseaux_histo_courbe.h Reseaux_fichier.h \
