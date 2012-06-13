@@ -130,7 +130,8 @@
      { Connexion->ssl = SSL_new( Ssl_ctx );                                  /* Instanciation du contexte */
 
        if (Connexion->ssl)                                                    /* Si réussite d'allocation */
-        { SSL_set_fd( Connexion->ssl, Connexion->socket );
+        { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_new OK" );
+          SSL_set_fd( Connexion->ssl, Connexion->socket );
           SSL_set_connect_state( Connexion->ssl );                               /* Nous sommes un client */
         }
        else
@@ -145,7 +146,8 @@ encore:
     if (retour<=0)
      { retour = SSL_get_error( Connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
-        { /*Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_connect need more data" );*/
+        { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_connect need more data" );
+          sleep(1);
           goto encore;
         }
        

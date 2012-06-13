@@ -180,6 +180,8 @@ one_again:
                _("Connecter_au_serveur: DNS failed"), Client_en_cours.serveur );
        return(FALSE);
      }
+    else Info( Config_cli.log, DEBUG_CONNEXION,
+               _("Connecter_au_serveur: DNS Request OK") );
 
     src.sin_family = host->h_addrtype;
     memcpy( (char*)&src.sin_addr, host->h_addr, host->h_length );                 /* On recopie les infos */
@@ -190,6 +192,8 @@ one_again:
        Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: Socket creation failed") );
        return(FALSE);
      }
+    else Info( Config_cli.log, DEBUG_CONNEXION,
+               _("Connecter_au_serveur: Socket creation OK") );
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
      { Info_c( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: connexion refused by server"),
@@ -198,6 +202,8 @@ one_again:
        close(connexion);
        return(FALSE);
      }
+    else Info( Config_cli.log, DEBUG_CONNEXION,
+               _("Connecter_au_serveur: Connect OK") );
 
     Connexion = Nouvelle_connexion( Config_cli.log, connexion,
                                     W_CLIENT, Config_cli.taille_bloc_reseau );

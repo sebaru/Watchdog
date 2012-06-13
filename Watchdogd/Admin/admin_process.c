@@ -91,8 +91,9 @@
            { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
              Write_admin ( client->connexion, chaine );
            }
-          else if (!Demarrer_sous_serveur(num))                                         /* Démarrage d'un SSRV */
+          else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SSRV -> Arret" ); }
+          else Gerer_jeton();                              /* Affectation du jeton a un des sous-serveurs */
         } 
 
      } else
