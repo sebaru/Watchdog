@@ -95,7 +95,6 @@
           case TAG_ONDULEUR    : Gerer_protocole_onduleur     ( connexion ); break;
           case TAG_RS485       : Gerer_protocole_rs485        ( connexion ); break;
           case TAG_MODBUS      : Gerer_protocole_modbus       ( connexion ); break;
-          case TAG_RFXCOM      : Gerer_protocole_rfxcom       ( connexion ); break;
           case TAG_CONNEXION   : if ( Reseau_ss_tag( connexion ) == SSTAG_SERVEUR_PULSE ) 
                                   { Set_progress_pulse(); }
                                  break;

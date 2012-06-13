@@ -52,7 +52,7 @@
     void (*Run_rfxcom)(void);                                 /* Fonction principale de gestion du thread */
     gint     (*Ajouter_rfxcomDB)   ( struct CMD_TYPE_RFXCOM *rfxcom );
     gboolean (*Retirer_rfxcomDB)   ( gint id );
-    gboolean (*Modifier_rfxcomDB)  ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom );
+    gboolean (*Modifier_rfxcomDB)  ( struct CMD_TYPE_RFXCOM *rfxcom );
 
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_RFXCOM;                                                   /* Listes des modules RFXCOM */

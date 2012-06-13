@@ -123,6 +123,31 @@
      }
   }
 /**********************************************************************************************************/
+/* Admin_rfxcom_change: Modifie la configuration d'un capteur RFXCOM                                      */
+/* Entrée: le client et la structure de reference du capteur                                              */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_rfxcom_change ( struct CLIENT_ADMIN *client, struct CMD_TYPE_RFXCOM *rfxcom )
+  { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rfxcom\n" );
+    Write_admin ( client->connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+
+    if (Partage->com_rfxcom.Modifier_rfxcomDB)
+     { if ( Partage->com_rfxcom.Modifier_rfxcomDB( rfxcom ) )
+        { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n You should reload configuration...\n", rfxcom->id ); }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
+       Write_admin ( client->connexion, chaine );
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
+       Write_admin ( client->connexion, chaine );
+     }
+  }
+/**********************************************************************************************************/
 /* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom          */
 /* Entrée: le client d'admin et la ligne de commande                                                      */
 /* Sortie: néant                                                                                          */
@@ -138,6 +163,14 @@
        sscanf ( ligne, "%s %d %d %d %d %d %s", commande,             /* Découpage de la ligne de commande */
                 (gint *)&rfxcom.type, (gint *)&rfxcom.canal, &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_add ( client, &rfxcom );
+     }
+    else if ( ! strcmp ( commande, "change" ) )
+     { struct CMD_TYPE_RFXCOM rfxcom;
+       memset( &rfxcom, 0, sizeof(struct CMD_TYPE_RFXCOM) );
+       sscanf ( ligne, "%s %d %d %d %d %d %d %s", commande,          /* Découpage de la ligne de commande */
+                &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.canal,
+                &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
+       Admin_rfxcom_change ( client, &rfxcom );
      }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
@@ -157,7 +190,10 @@
                      "  add type canal e_min ea_min a_min libelle\n"
                      "                                         - Ajoute un module\n" );
        Write_admin ( client->connexion,
-                     "  del id                                 - Retire le module id\n" );
+                     "  change ID type canal e_min ea_min a_min libelle\n"
+                     "                                         - Edite le module ID\n" );
+       Write_admin ( client->connexion,
+                     "  del ID                                 - Retire le module ID\n" );
        Write_admin ( client->connexion,
                      "  list                                   - Affiche les status des equipements RFXCOM\n" );
        Write_admin ( client->connexion,

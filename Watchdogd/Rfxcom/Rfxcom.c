@@ -137,17 +137,23 @@
     return(rfxcom);
   }
 /**********************************************************************************************************/
-/* Modifier_rfxcomDB: Modification d'un rfxcom Watchdog                                                     */
+/* Modifier_rfxcomDB: Modification d'un rfxcom Watchdog                                                   */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_rfxcomDB( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom )
-  { gchar *libelle;
-    gchar requete[2048];
+ gboolean Modifier_rfxcomDB( struct CMD_TYPE_RFXCOM *rfxcom )
+  { gchar requete[2048];
+    gboolean retour;
+    gchar *libelle;
+    struct DB *db;
 
-    libelle = Normaliser_chaine ( log, rfxcom->libelle );              /* Formatage correct des chaines */
+    db = Init_DB_SQL( Config.log );
+    if (!db) return(FALSE);
+
+    libelle = Normaliser_chaine ( Config.log, rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_rfxcomDB: Normalisation libelle impossible" );
+     { Info( Config.log, DEBUG_DB, "Modifier_rfxcomDB: Normalisation libelle impossible" );
+       Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
 
@@ -161,7 +167,10 @@
                 rfxcom->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( Config.log, &db );
+                            
+    return( retour );
   }
 /**********************************************************************************************************/
 /* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                       */

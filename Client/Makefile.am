@@ -27,7 +27,6 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  liste_scenario.c ajout_scenario.c protocole_scenario.c \
 			  liste_onduleur.c ajout_onduleur.c protocole_onduleur.c \
 			  liste_rs485.c ajout_rs485.c protocole_rs485.c \
-			  liste_rfxcom.c ajout_rfxcom.c protocole_rfxcom.c \
 			  liste_modbus.c ajout_modbus.c protocole_modbus.c \
 			  atelier.c atelier_clic_trame.c atelier_selection.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \
