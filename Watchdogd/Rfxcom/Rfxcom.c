@@ -67,6 +67,7 @@
     gboolean retour;
     gchar *libelle;
     struct DB *db;
+    gint last_id;
 
     db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
@@ -87,16 +88,19 @@
     g_free(libelle);
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    if (retour == FALSE)  { Libere_DB_SQL( Config.log, &db );
+                            return(-1);
+                          }
+    last_id = Recuperer_last_ID_SQL( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
-    if (retour == FALSE)  { return(-1); }
-    return( Recuperer_last_ID_SQL( Config.log, db ) );
+    return( last_id );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rfxcomDB: Recupération de la liste des ids des rfxcoms                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_rfxcomDB ( struct LOG *log, struct DB *db )
+ static gboolean Recuperer_rfxcomDB ( struct LOG *log, struct DB *db )
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -110,7 +114,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_RFXCOM *Recuperer_rfxcomDB_suite( struct LOG *log, struct DB *db )
+ static struct CMD_TYPE_RFXCOM *Recuperer_rfxcomDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_RFXCOM *rfxcom;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -130,46 +134,6 @@
        rfxcom->ea_min            = atoi(db->row[5]);
        rfxcom->a_min             = atoi(db->row[6]);
      }
-    return(rfxcom);
-  }
-/**********************************************************************************************************/
-/* Rechercher_rfxcomDB: Recupération du rfxcom dont le id est en parametre                                  */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_RFXCOM *Rechercher_rfxcomDB ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[512];
-    struct CMD_TYPE_RFXCOM *rfxcom;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,canal,libelle,e_min,ea_min,a_min"
-                " FROM %s WHERE id=%d",
-                NOM_TABLE_MODULE_RFXCOM, id );
-       
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(NULL); }
-       
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_rfxcomDB: RFXCOM non trouvé dans la BDD", id );
-       return(NULL);
-     }
-       
-    rfxcom = g_malloc0( sizeof(struct CMD_TYPE_RFXCOM) );
-    if (!rfxcom)
-     { Info( log, DEBUG_RFXCOM, "Rechercher_rfxcomDB: Mem error" ); }
-    else
-     { memcpy( &rfxcom->libelle, db->row[3], sizeof(rfxcom->libelle) );
-       rfxcom->id                = atoi(db->row[0]);
-       rfxcom->type              = atoi(db->row[1]);
-       rfxcom->canal             = atoi(db->row[2]);
-       rfxcom->e_min             = atoi(db->row[4]);
-       rfxcom->ea_min            = atoi(db->row[5]);
-       rfxcom->a_min             = atoi(db->row[6]);
-     }
-
-    Liberer_resultat_SQL ( log, db );
     return(rfxcom);
   }
 /**********************************************************************************************************/
@@ -198,60 +162,6 @@
     g_free(libelle);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
-/**********************************************************************************************************/
- static struct MODULE_RFXCOM *Chercher_module_by_id ( gint id )
-  { GList *liste;
-    liste = Partage->com_rfxcom.Modules_RFXCOM;
-    while ( liste )
-     { struct MODULE_RFXCOM *module;
-       module = ((struct MODULE_RFXCOM *)liste->data);
-       if (module->rfxcom.id == id) return(module);
-       liste = liste->next;
-     }
-    return(NULL);
-  }
-/**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static gboolean Charger_un_rfxcom ( gint id )
-  { struct MODULE_RFXCOM *module;
-    struct CMD_TYPE_RFXCOM *rfxcom;
-    struct DB *db;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
-
-    module = (struct MODULE_RFXCOM *)g_malloc0(sizeof(struct MODULE_RFXCOM));
-    if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_RFXCOM,
-             "Charger_un_rfxcom: Erreur allocation mémoire struct MODULE_RFXCOM" );
-       Libere_DB_SQL( Config.log, &db );
-       return(FALSE);
-     }
-
-    rfxcom = Rechercher_rfxcomDB ( Config.log, db, id );
-    Libere_DB_SQL( Config.log, &db );
-    if (!rfxcom)                                                 /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_RFXCOM,
-             "Charger_un_rfxcom: Erreur allocation mémoire struct CMD_TYPE_RFXCOM" );
-       g_free(module);
-       return(FALSE);
-     }
-
-    memcpy( &module->rfxcom, rfxcom, sizeof(struct CMD_TYPE_RFXCOM) );
-    g_free(rfxcom);
-
-    Partage->com_rfxcom.Modules_RFXCOM = g_list_append ( Partage->com_rfxcom.Modules_RFXCOM, module );
-
-    Info_n( Config.log, DEBUG_RFXCOM, "Charger_un_rfxcom:  id      = ", module->rfxcom.id    );
-    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                       */

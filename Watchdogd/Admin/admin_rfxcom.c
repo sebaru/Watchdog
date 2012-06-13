@@ -85,7 +85,7 @@
 
     if (Partage->com_rfxcom.Retirer_rfxcomDB)
      { if (Partage->com_rfxcom.Retirer_rfxcomDB( id ))
-        { g_snprintf( chaine, sizeof(chaine), " Module erased.\n" ); }
+        { g_snprintf( chaine, sizeof(chaine), " Module erased.\n You should reload configuration...\n" ); }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT erased.\n" ); }
        Write_admin ( client->connexion, chaine );
@@ -112,7 +112,7 @@
      { gint last_id;
        last_id = Partage->com_rfxcom.Ajouter_rfxcomDB( rfxcom );
        if ( last_id != -1 )
-        { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d\n", last_id ); }
+        { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n You should reload configuration...\n", last_id ); }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
        Write_admin ( client->connexion, chaine );

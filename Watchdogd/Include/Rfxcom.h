@@ -50,9 +50,6 @@
     void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
 
     void (*Run_rfxcom)(void);                                 /* Fonction principale de gestion du thread */
-    struct CMD_TYPE_RFXCOM *(*Rechercher_rfxcomDB) ( struct LOG *log, struct DB *db, guint id );
-    struct CMD_TYPE_RFXCOM *(*Recuperer_rfxcomDB_suite) ( struct LOG *log, struct DB *db );
-    gboolean (*Recuperer_rfxcomDB) ( struct LOG *log, struct DB *db );
     gint     (*Ajouter_rfxcomDB)   ( struct CMD_TYPE_RFXCOM *rfxcom );
     gboolean (*Retirer_rfxcomDB)   ( gint id );
     gboolean (*Modifier_rfxcomDB)  ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom );

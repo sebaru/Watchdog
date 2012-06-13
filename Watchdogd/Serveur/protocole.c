@@ -71,7 +71,6 @@
                case TAG_ONDULEUR    : Gerer_protocole_onduleur     ( Id_serveur, client ); break;
                case TAG_RS485       : Gerer_protocole_rs485        ( Id_serveur, client ); break;
                case TAG_MODBUS      : Gerer_protocole_modbus       ( Id_serveur, client ); break;
-               case TAG_RFXCOM      : Gerer_protocole_rfxcom       ( Id_serveur, client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_UTIL_SETPASSWORD *util;
                                          util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;

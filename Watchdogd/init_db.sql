@@ -719,7 +719,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
 CREATE TABLE IF NOT EXISTS `rfxcom` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL DEFAULT '0',
-  `cancal` tinyint(1) NOT NULL DEFAULT '0',
+  `canal` tinyint(1) NOT NULL DEFAULT '0',
   `e_min` int(11) NOT NULL DEFAULT '-1',
   `ea_min` int(11) NOT NULL DEFAULT '-1',
   `a_min` int(11) NOT NULL DEFAULT '-1',
