@@ -28,10 +28,11 @@
 #ifndef _RESEAUX_RFXCOM_H_
  #define _RESEAUX_RFXCOM_H_
 
-/********************************************* Gestion des rfxcom ******************************************/
+/******************************************** Gestion des rfxcom ******************************************/
  struct CMD_TYPE_RFXCOM
-  { guint id;                                                                    /* ID unique de la rfxcom */
-    guint type;                                                                      /* Numéro de la rfxcom */
+  { guint id;                                                                   /* ID unique de la rfxcom */
+    guchar type;                                                                   /* Numéro de la rfxcom */
+    guchar canal;                                                                  /* Numéro de la rfxcom */
     gint e_min, ea_min, a_min;
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rfxcom */
   };

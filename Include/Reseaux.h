@@ -108,6 +108,7 @@
     TAG_ONDULEUR,                                                                /* Gestion des onduleurs */
     TAG_RS485,                                                               /* Gestion des modules RS485 */
     TAG_MODBUS,                                                             /* Gestion des modules MODBUS */
+    TAG_RFXCOM,                                                            /* Gestion des capteurs RFXCOM */
   };
 /************************************* Définitions des prototypes *****************************************/
  extern gint Recevoir_reseau( struct LOG *Log, struct CONNEXION *Connexion );

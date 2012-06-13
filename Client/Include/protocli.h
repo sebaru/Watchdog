@@ -232,6 +232,7 @@
  extern void Gerer_protocole_onduleur ( struct CONNEXION *connexion );
  extern void Gerer_protocole_rs485 ( struct CONNEXION *connexion );
  extern void Gerer_protocole_modbus ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_rfxcom ( struct CONNEXION *connexion );
 
 
  extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
@@ -332,6 +333,7 @@
  extern void Menu_want_scenario ( void );
  extern void Menu_want_onduleur ( void );
  extern void Menu_want_rs485 ( void );
+ extern void Menu_want_rfxcom ( void );
  extern void Menu_want_modbus ( void );
 
 
@@ -535,6 +537,14 @@
                                                                                     /* Dans ajout_rs485.c */
  extern void Menu_ajouter_editer_rs485 ( struct CMD_TYPE_RS485 *edit_rs485);
  extern void Proto_afficher_mnemo_rs485 ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+
+ extern void Proto_afficher_un_rfxcom( struct CMD_TYPE_RFXCOM *rfxcom );           /* Dans liste_rfxcom.c */
+ extern void Proto_cacher_un_rfxcom( struct CMD_TYPE_RFXCOM *rfxcom );
+ extern void Proto_rafraichir_un_rfxcom( struct CMD_TYPE_RFXCOM *rfxcom );
+ extern void Creer_page_rfxcom( void );
+                                                                                   /* Dans ajout_rfxcom.c */
+ extern void Menu_ajouter_editer_rfxcom ( struct CMD_TYPE_RFXCOM *edit_rfxcom);
+ extern void Proto_afficher_mnemo_rfxcom ( struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  extern void Proto_afficher_un_modbus( struct CMD_TYPE_MODBUS *modbus );           /* Dans liste_modbus.c */
  extern void Proto_cacher_un_modbus( struct CMD_TYPE_MODBUS *modbus );
