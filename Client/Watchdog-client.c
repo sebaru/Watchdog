@@ -90,6 +90,8 @@
                             Menu_want_rs485, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
     GNOMEUIINFO_ITEM_STOCK( N_("_MODBUS"), N_("Edit MODBUS"),
                             Menu_want_modbus, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
+    GNOMEUIINFO_ITEM_STOCK( N_("_RFXCOM"), N_("Edit RFXCOM"),
+                            Menu_want_rfxcom, GNOME_STOCK_PIXMAP_BOOK_RED ),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_synoptique[]=                                        /*!< Définition du menu synoptique */
