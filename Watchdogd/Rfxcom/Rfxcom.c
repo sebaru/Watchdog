@@ -66,9 +66,6 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "SELECT id,type,canal,libelle,e_min,ea_min,a_min"
-                " FROM %s WHERE id=%d",
-
                 "INSERT INTO %s(type,canal,libelle,e_min,ea_min,a_min) "
                 " VALUES ('%d','%d','%s','%d','%d','%d')",
                 NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->canal, libelle,
@@ -90,7 +87,6 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,type,canal,libelle,e_min,ea_min,a_min"
-                " FROM %s WHERE id=%d",
                 " FROM %s ORDER BY type,canal", NOM_TABLE_MODULE_RFXCOM );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -458,7 +454,7 @@
        if (Partage->com_rfxcom.Thread_reload == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reloading conf" );
           Decharger_tous_rfxcom();
-          Charger_tous_rsfxcom();
+          Charger_tous_rfxcom();
           Partage->com_rfxcom.Thread_reload = FALSE;
         }
 
