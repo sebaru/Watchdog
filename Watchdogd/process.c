@@ -334,10 +334,58 @@
      { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: dlopen failed"), dlerror() );
        return(FALSE);
      }
-                                                              /* Recherche de la fonction 'Run_tellstick' */
+                                                                              /* Recherche de la fonction */
     Partage->com_rfxcom.Run_rfxcom = dlsym( Partage->com_rfxcom.dl_handle, "Run_rfxcom" );
     if (!Partage->com_rfxcom.Run_rfxcom)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Run_rfxcom does not exist") );
+       dlclose( Partage->com_rfxcom.dl_handle );
+       Partage->com_rfxcom.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Recuperer_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Recuperer_rfxcomDB" );
+    if (!Partage->com_rfxcom.Recuperer_rfxcomDB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Recuperer_rfxcomDB does not exist") );
+       dlclose( Partage->com_rfxcom.dl_handle );
+       Partage->com_rfxcom.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Rechercher_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Rechercher_rfxcomDB" );
+    if (!Partage->com_rfxcom.Rechercher_rfxcomDB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Rechercher_rfxcomDB does not exist") );
+       dlclose( Partage->com_rfxcom.dl_handle );
+       Partage->com_rfxcom.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Recuperer_rfxcomDB_suite = dlsym( Partage->com_rfxcom.dl_handle, "Recuperer_rfxcomDB_suite" );
+    if (!Partage->com_rfxcom.Recuperer_rfxcomDB_suite)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Recuperer_rfxcomDB_suite does not exist") );
+       dlclose( Partage->com_rfxcom.dl_handle );
+       Partage->com_rfxcom.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Ajouter_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Ajouter_rfxcomDB" );
+    if (!Partage->com_rfxcom.Ajouter_rfxcomDB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Ajouter_rfxcomDB does not exist") );
+       dlclose( Partage->com_rfxcom.dl_handle );
+       Partage->com_rfxcom.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Retirer_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Retirer_rfxcomDB" );
+    if (!Partage->com_rfxcom.Retirer_rfxcomDB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Retirer_rfxcomDB does not exist") );
+       dlclose( Partage->com_rfxcom.dl_handle );
+       Partage->com_rfxcom.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Modifier_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Modifier_rfxcomDB" );
+    if (!Partage->com_rfxcom.Modifier_rfxcomDB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Modifier_rfxcomDB does not exist") );
        dlclose( Partage->com_rfxcom.dl_handle );
        Partage->com_rfxcom.dl_handle = NULL;
        return(FALSE);

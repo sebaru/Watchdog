@@ -713,6 +713,23 @@ CREATE TABLE IF NOT EXISTS `rs485` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `rfxcom`
+--
+
+CREATE TABLE IF NOT EXISTS `rfxcom` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` int(11) NOT NULL DEFAULT '0',
+  `cancal` tinyint(1) NOT NULL DEFAULT '0',
+  `e_min` int(11) NOT NULL DEFAULT '-1',
+  `ea_min` int(11) NOT NULL DEFAULT '-1',
+  `a_min` int(11) NOT NULL DEFAULT '-1',
+  `libelle` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `syns`
 --
 

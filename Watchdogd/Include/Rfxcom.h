@@ -28,6 +28,13 @@
 #ifndef _RFXCOM_H_
  #define _RFXCOM_H_
 
+ #define NOM_TABLE_MODULE_RFXCOM   "rfxcom"
+
+ struct MODULE_RFXCOM
+  { struct CMD_TYPE_RFXCOM rfxcom;
+    time_t date_last_view;
+  };
+
  #define TAILLE_ENTETE_RFXCOM    1
 
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
@@ -41,9 +48,17 @@
  struct COM_RFXCOM                                                           /* Communication vers RFXCOM */
   { pthread_t TID;                                                               /* Identifiant du thread */
     void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
+
     void (*Run_rfxcom)(void);                                 /* Fonction principale de gestion du thread */
-    void (*Ajouter_rfxcom)( gint, gint );    /* Fonction d'ajout d'une sortie rfxcom dans le tampon */
+    struct CMD_TYPE_RFXCOM *(*Rechercher_rfxcomDB) ( struct LOG *log, struct DB *db, guint id );
+    struct CMD_TYPE_RFXCOM *(*Recuperer_rfxcomDB_suite) ( struct LOG *log, struct DB *db );
+    gboolean (*Recuperer_rfxcomDB) ( struct LOG *log, struct DB *db );
+    gint     (*Ajouter_rfxcomDB)   ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom );
+    gboolean (*Retirer_rfxcomDB)   ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom );
+    gboolean (*Modifier_rfxcomDB)  ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom );
+
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    GList *Modules_RFXCOM;                                                   /* Listes des modules RFXCOM */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
