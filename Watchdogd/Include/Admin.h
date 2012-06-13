@@ -51,6 +51,7 @@
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_rs485 ( struct CLIENT_ADMIN *client, gchar *ligne );
+ extern void Admin_rfxcom ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_dls ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_tellstick ( struct CLIENT_ADMIN *client, gchar *ligne );
