@@ -87,7 +87,11 @@
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb LIRC -> Arret" ); }
         }  else
        if ( ! strcmp ( thread, "ssrv" ) )
-        { if (!Demarrer_sous_serveur(num))                                         /* Démarrage d'un SSRV */
+        { if (num<0 || num>Config.max_serveur)
+           { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
+             Write_admin ( client->connexion, chaine );
+           }
+          else if (!Demarrer_sous_serveur(num))                                         /* Démarrage d'un SSRV */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SSRV -> Arret" ); }
         } 
 
@@ -217,7 +221,7 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv,rfxcom)\n" );
+                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv num,rfxcom)\n" );
        Write_admin ( client->connexion,
                      "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv,rfxcom)\n" );
        Write_admin ( client->connexion,

@@ -614,8 +614,7 @@
  void Gerer_jeton ( void )
   { gint i;
 /*************************************** Calcul du nouveau jeton ******************************************/
-    if (Partage->jeton == -1 && Nb_clients() < Config.max_client &&            /* Calcul du nouveau jeton */
-        Ssl_ctx && Socket_ecoute )                                 /* Si on ecoute le reseau, et ssl okay */
+    if (Partage->jeton == -1 && Nb_clients() < Config.max_client )             /* Calcul du nouveau jeton */
      { i = Rechercher_serveur_inactif();                           /* A la recherche d'un serveur inactif */
        if (i!=-1)                                             /* Si c'est le cas, on lui assigne le jeton */
         { Partage->jeton = i;
@@ -645,9 +644,7 @@
               }
            }
         }
-
        Info_n( Config.log, DEBUG_INFO, _("MSRV:     Gerer_jeton: jeton to server"), i );
-       
      }
   }
 /**********************************************************************************************************/
