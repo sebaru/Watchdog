@@ -75,6 +75,7 @@
  extern void Gerer_protocole_onduleur( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_rs485( gint Id_serveur, struct CLIENT *client );
  extern void Gerer_protocole_modbus( gint Id_serveur, struct CLIENT *client );
+ extern void Gerer_protocole_rfxcom( gint Id_serveur, struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
  extern void Envoi_clients( gint ss_id, gint tag, gint sstag, gchar *buffer, gint taille );
@@ -289,5 +290,12 @@ extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNE
  extern void Proto_editer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
  extern void Proto_valider_editer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
  extern void *Envoyer_modbus_thread ( struct CLIENT *client );
+
+                                                                                    /* Dans envoi_rs485.c */
+ extern void Proto_ajouter_rfxcom ( struct CLIENT *client, struct CMD_TYPE_RFXCOM *rezo_rfxcom );
+ extern void Proto_effacer_rfxcom ( struct CLIENT *client, struct CMD_TYPE_RFXCOM *rezo_rfxcom );
+ extern void Proto_editer_rfxcom ( struct CLIENT *client, struct CMD_TYPE_RFXCOM *rezo_rfxcom );
+ extern void Proto_valider_editer_rfxcom ( struct CLIENT *client, struct CMD_TYPE_RFXCOM *rezo_rfxcom );
+ extern void *Envoyer_rfxcom_thread ( struct CLIENT *client );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

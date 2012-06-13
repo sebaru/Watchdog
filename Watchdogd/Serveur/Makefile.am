@@ -13,6 +13,7 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         protocole_icone.c protocole_histo.c protocole_courbe.c  \
 			protocole_scenario.c protocole_synoptique.c protocole_camera.c \
 			protocole_onduleur.c protocole_rs485.c protocole_modbus.c \
+			protocole_rfxcom.c envoi_rfxcom.c \
                         envoi_groupe.c envoi_util.c envoi_dls.c envoi_histo.c envoi_message.c \
                         envoi_synoptique.c envoi_synoptique_motifs.c envoi_synoptique_palettes.c \
                         envoi_synoptique_comments.c envoi_synoptique_passerelles.c \
