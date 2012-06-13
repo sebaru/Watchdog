@@ -147,7 +147,7 @@ encore:
      { retour = SSL_get_error( Connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
         { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_connect need more data" );
-          sleep(1);
+          /*sleep(1);*/
           goto encore;
         }
        

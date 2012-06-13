@@ -385,11 +385,11 @@
 
     Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
 
-    if (single)          Config.single      = 1;                           /* Demarrage en mode single ?? */
+    if (single)          Config.single      = TRUE;                        /* Demarrage en mode single ?? */
     if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
     if (debug_level!=-1) Config.debug_level = debug_level;
     if (max_client!=-1)  Config.max_client  = max_client;
-    if (compil)          Config.compil      = 1;
+    if (compil)          Config.compil      = 1;               /* Compilation de tous les plugins D.L.S ? */
     if (home)            g_snprintf( Config.home, sizeof(Config.home), "%s", home );
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */

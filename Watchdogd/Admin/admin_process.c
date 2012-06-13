@@ -87,7 +87,7 @@
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb LIRC -> Arret" ); }
         }  else
        if ( ! strcmp ( thread, "ssrv" ) )
-        { if (num<0 || num>Config.max_serveur)
+        { if (num<0 || num>=Config.max_serveur)
            { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
              Write_admin ( client->connexion, chaine );
            }
