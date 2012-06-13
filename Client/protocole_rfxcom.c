@@ -44,7 +44,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_RFXCOM_OK:
-             { if (!Tester_page_notebook(TYPE_PAGE_RFXCOM)) { Creer_page_rfxcom(); }
+             { if (!Tester_page_notebook(TYPE_PAGE_RFXCOM))
+                { Creer_page_rfxcom(); }
+               Chercher_page_notebook (TYPE_PAGE_RFXCOM, 0, TRUE);
              }
             break;
        case SSTAG_SERVEUR_ADD_RFXCOM_OK:
