@@ -38,30 +38,43 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
 /**********************************************************************************************************/
-/* Retirer_rfxcomDB: Elimination d'un module rfxcom                                                         */
+/* Retirer_rfxcomDB: Elimination d'un module rfxcom                                                       */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_rfxcomDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom )
+ gboolean Retirer_rfxcomDB ( gint id )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db) return(FALSE);
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RFXCOM, rfxcom->id );
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RFXCOM, id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( Config.log, &db );
+    return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_rfxcomDB: Ajout ou edition d'un rfxcom                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure rfxcom                         */
+/* Ajouter_rfxcomDB: Ajout ou edition d'un rfxcom                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure rfxcom                        */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_rfxcomDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RFXCOM *rfxcom )
+ gint Ajouter_rfxcomDB ( struct CMD_TYPE_RFXCOM *rfxcom )
   { gchar requete[2048];
+    gboolean retour;
     gchar *libelle;
+    struct DB *db;
 
-    libelle = Normaliser_chaine ( log, rfxcom->libelle );                 /* Formatage correct des chaines */
+    db = Init_DB_SQL( Config.log );
+    if (!db) return(FALSE);
+
+    libelle = Normaliser_chaine ( Config.log, rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_rfxcomDB: Normalisation libelle impossible" );
+     { Info( Config.log, DEBUG_DB, "Ajouter_rfxcomDB: Normalisation libelle impossible" );
+       Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
 
@@ -73,12 +86,13 @@
               );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL( log, db ) );
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( Config.log, &db );
+    if (retour == FALSE)  { return(-1); }
+    return( Recuperer_last_ID_SQL( Config.log, db ) );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_rfxcomDB: Recupération de la liste des ids des rfxcoms                                */
+/* Recuperer_liste_id_rfxcomDB: Recupération de la liste des ids des rfxcoms                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -186,7 +200,7 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                         */
+/* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -240,7 +254,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                         */
+/* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -423,13 +437,11 @@
 /* Main: Fonction principale du thread Rfxcom                                                          */
 /**********************************************************************************************************/
  void Run_rfxcom ( void )
-  { gint retval, nbr_oct_lu, id_en_cours, attente_reponse;
-    struct MODULE_RFXCOM *module;
-    struct TRAME_RFXCOM Trame;
+  { struct TRAME_RFXCOM Trame;
+    gint retval, nbr_oct_lu;
     struct timeval tv;
     fd_set fdselect;
     gint fd_rfxcom;
-    GList *liste;
 
     prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
@@ -445,8 +457,6 @@
     Partage->com_rfxcom.Thread_run    = TRUE;                                        /* Le thread tourne ! */
 
     nbr_oct_lu = 0;
-    attente_reponse = FALSE;
-
     while(Partage->com_rfxcom.Thread_run == TRUE)                         /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();

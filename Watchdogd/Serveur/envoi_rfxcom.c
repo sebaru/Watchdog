@@ -107,7 +107,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    retour = Partage->com_rfxcom.Retirer_rfxcomDB( Config.log, Db_watchdog, rezo_rfxcom );
+/*    retour = Partage->com_rfxcom.Retirer_rfxcomDB( Config.log, Db_watchdog, rezo_rfxcom );*/
 
     if (retour)
      { Envoi_client( client, TAG_RFXCOM, SSTAG_SERVEUR_DEL_RFXCOM_OK,
@@ -134,7 +134,7 @@
     gint id;
     Db_watchdog = client->Db_watchdog;
 
-    id = Partage->com_rfxcom.Ajouter_rfxcomDB ( Config.log, Db_watchdog, rezo_rfxcom );
+/*    id = Partage->com_rfxcom.Ajouter_rfxcomDB ( Config.log, Db_watchdog, rezo_rfxcom );*/
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
