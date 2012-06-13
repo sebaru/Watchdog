@@ -30,11 +30,6 @@
 
  #define NOM_TABLE_MODULE_RFXCOM   "rfxcom"
 
- struct MODULE_RFXCOM
-  { struct CMD_TYPE_RFXCOM rfxcom;
-    time_t date_last_view;
-  };
-
  #define TAILLE_ENTETE_RFXCOM    1
 
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
@@ -45,14 +40,27 @@
     unsigned char data[40];
   };
 
+ struct RFXCOMDB
+  { guint id;                                                                   /* ID unique de la rfxcom */
+    guchar type;                                                                   /* Numéro de la rfxcom */
+    guchar canal;                                                                  /* Numéro de la rfxcom */
+    gint e_min, ea_min, a_min;
+    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rfxcom */
+  };
+
+ struct MODULE_RFXCOM
+  { struct RFXCOMDB rfxcom;
+    time_t date_last_view;
+  };
+
  struct COM_RFXCOM                                                           /* Communication vers RFXCOM */
   { pthread_t TID;                                                               /* Identifiant du thread */
     void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
 
     void (*Run_rfxcom)(void);                                 /* Fonction principale de gestion du thread */
-    gint     (*Ajouter_rfxcomDB)   ( struct CMD_TYPE_RFXCOM *rfxcom );
+    gint     (*Ajouter_rfxcomDB)   ( struct RFXCOMDB *rfxcom );
     gboolean (*Retirer_rfxcomDB)   ( gint id );
-    gboolean (*Modifier_rfxcomDB)  ( struct CMD_TYPE_RFXCOM *rfxcom );
+    gboolean (*Modifier_rfxcomDB)  ( struct RFXCOMDB *rfxcom );
 
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_RFXCOM;                                                   /* Listes des modules RFXCOM */

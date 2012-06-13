@@ -62,7 +62,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure rfxcom                        */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_rfxcomDB ( struct CMD_TYPE_RFXCOM *rfxcom )
+ gint Ajouter_rfxcomDB ( struct RFXCOMDB *rfxcom )
   { gchar requete[2048];
     gboolean retour;
     gchar *libelle;
@@ -114,8 +114,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static struct CMD_TYPE_RFXCOM *Recuperer_rfxcomDB_suite( struct LOG *log, struct DB *db )
-  { struct CMD_TYPE_RFXCOM *rfxcom;
+ static struct RFXCOMDB *Recuperer_rfxcomDB_suite( struct LOG *log, struct DB *db )
+  { struct RFXCOMDB *rfxcom;
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -123,7 +123,7 @@
        return(NULL);
      }
 
-    rfxcom = (struct CMD_TYPE_RFXCOM *)g_malloc0( sizeof(struct CMD_TYPE_RFXCOM) );
+    rfxcom = (struct RFXCOMDB *)g_malloc0( sizeof(struct RFXCOMDB) );
     if (!rfxcom) Info( log, DEBUG_RFXCOM, "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &rfxcom->libelle, db->row[3], sizeof(rfxcom->libelle) );
@@ -141,7 +141,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_rfxcomDB( struct CMD_TYPE_RFXCOM *rfxcom )
+ gboolean Modifier_rfxcomDB( struct RFXCOMDB *rfxcom )
   { gchar requete[2048];
     gboolean retour;
     gchar *libelle;
@@ -194,7 +194,7 @@
     cpt = 0;
     for ( ; ; )
      { struct MODULE_RFXCOM *module;
-       struct CMD_TYPE_RFXCOM *rfxcom;
+       struct RFXCOMDB *rfxcom;
 
        rfxcom = Recuperer_rfxcomDB_suite( Config.log, db );
        if (!rfxcom) break;
@@ -207,7 +207,7 @@
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
         }
-       memcpy( &module->rfxcom, rfxcom, sizeof(struct CMD_TYPE_RFXCOM) );
+       memcpy( &module->rfxcom, rfxcom, sizeof(struct RFXCOMDB) );
        g_free(rfxcom);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */

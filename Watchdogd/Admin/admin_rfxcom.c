@@ -100,7 +100,7 @@
 /* Entrée: le client et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_add ( struct CLIENT_ADMIN *client, struct CMD_TYPE_RFXCOM *rfxcom )
+ static void Admin_rfxcom_add ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rfxcom\n" );
@@ -127,7 +127,7 @@
 /* Entrée: le client et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_change ( struct CLIENT_ADMIN *client, struct CMD_TYPE_RFXCOM *rfxcom )
+ static void Admin_rfxcom_change ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rfxcom\n" );
@@ -158,15 +158,15 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "add" ) )
-     { struct CMD_TYPE_RFXCOM rfxcom;
-       memset( &rfxcom, 0, sizeof(struct CMD_TYPE_RFXCOM) );
+     { struct RFXCOMDB rfxcom;
+       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
        sscanf ( ligne, "%s %d %d %d %d %d %s", commande,             /* Découpage de la ligne de commande */
                 (gint *)&rfxcom.type, (gint *)&rfxcom.canal, &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_add ( client, &rfxcom );
      }
     else if ( ! strcmp ( commande, "change" ) )
-     { struct CMD_TYPE_RFXCOM rfxcom;
-       memset( &rfxcom, 0, sizeof(struct CMD_TYPE_RFXCOM) );
+     { struct RFXCOMDB rfxcom;
+       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
        sscanf ( ligne, "%s %d %d %d %d %d %d %s", commande,          /* Découpage de la ligne de commande */
                 &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.canal,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
