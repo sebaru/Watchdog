@@ -374,7 +374,7 @@
         }
        else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame No matching module for packet received", trame->type );
      }
-    else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame unkown packet type", trame->type );
+    else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame unknown packet type", trame->type );
     return(TRUE);
   }
 /**********************************************************************************************************/

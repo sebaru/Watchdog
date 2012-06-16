@@ -511,18 +511,17 @@
                if (module->rs485.ea_min == -1) nbr_ea = 0;
                else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
                for( cpt = 0; cpt<nbr_ea; cpt++)
-                { gint num_ea, val_int, ajout1, ajout2, ajout3, ajout4, ajout5;
+                { gint val_avant_ech, ajout1, ajout2, ajout3, ajout4, ajout5;
 
-                  val_int =   trame->donnees[cpt] << 2;
-                  ajout1  =   trame->donnees[nbr_ea + (cpt >> 2)];
-                  ajout2 = 0xC0>>((cpt & 0x03)<<1);
-                  ajout3 = (3-(cpt & 0x03))<<1;
-                  ajout4 = ajout1  & ajout2;
-                  ajout5 = ajout4 >> ajout3;
-                  val_int += ajout5;
-                  num_ea = module->rs485.ea_min + cpt;
+                  val_avant_ech =   trame->donnees[cpt] << 2;
+                  ajout1        =   trame->donnees[nbr_ea + (cpt >> 2)];
+                  ajout2        = 0xC0>>((cpt & 0x03)<<1);
+                  ajout3        = (3-(cpt & 0x03))<<1;
+                  ajout4        = ajout1  & ajout2;
+                  ajout5        = ajout4 >> ajout3;
+                  val_avant_ech += ajout5;
 
-                  SEA( num_ea, val_int );
+                  SEA( module->rs485.ea_min + cpt, 1.0*val_avant_ech );
                 }
              }
 	    break;
@@ -647,10 +646,15 @@
            }
           else
            { if ( Partage->top - module->date_requete > 20 )                       /* Si la comm est niet */
-              { module->date_retente = Partage->top + TEMPS_RETENTE;
+              { gint nbr_ea, cpt;
+                module->date_retente = Partage->top + TEMPS_RETENTE;
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
+                if (module->rs485.ea_min == -1) nbr_ea = 0;
+                else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
+                for( cpt = 0; cpt<nbr_ea; cpt++)
+                 { SEA_range( module->rs485.ea_min + cpt, 0 ); }
                 Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: module down", module->rs485.id );
                 SB(module->rs485.bit_comm, 0);
                 liste = liste->next;
