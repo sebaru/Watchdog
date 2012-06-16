@@ -190,12 +190,13 @@
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
-               if (val_avant_ech < 190)                            /* 204) Modification du range pour 4mA */
+               if (val_avant_ech < 100)                            /* 204) Modification du range pour 4mA */
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
                else
-                { Partage->ea[ num ].val_ech = (gdouble)
+                { if (val_avant_ech < 204) val_avant_ech = 0;
+                  Partage->ea[ num ].val_ech = (gdouble)
                   ((val_avant_ech-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
                   + Partage->ea[num].cmd_type_eana.min;                             /* Valeur à l'echelle */ 
 
@@ -203,12 +204,13 @@
                 }
                break;
           case ENTREEANA_4_20_MA_12BITS:
-               if (val_avant_ech < 816)
+               if (val_avant_ech < 400)
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
                else
-                { Partage->ea[ num ].val_ech = (gdouble)
+                { if (val_avant_ech < 816) val_avant_ech = 0;
+                  Partage->ea[ num ].val_ech = (gdouble)
                   ((val_avant_ech-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
