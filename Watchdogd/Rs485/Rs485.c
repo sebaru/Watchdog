@@ -352,6 +352,22 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
+/* Deconnecter_rs485: Deconnecte un module RS485 de la liste des modules interrogés                       */
+/* Entrée: le module                                                                                      */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Deconnecter_rs485 ( struct MODULE_RS485 *module )
+  { gint nbr_ea, cpt;
+                
+    if (!module) return;
+    module->rs485.actif = 0;
+    if (module->rs485.ea_min == -1) nbr_ea = 0;
+    else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
+    for( cpt = 0; cpt<nbr_ea; cpt++)
+     { SEA_range( module->rs485.ea_min + cpt, 0 ); }
+    SB(module->rs485.bit_comm, 0);
+  }
+/**********************************************************************************************************/
 /* Calcul_crc16: renvoie le CRC16 de la trame en parametre                                                */
 /* Entrée: la trame a tester                                                                              */
 /* Sortie: le crc 16 bits                                                                                 */
@@ -608,7 +624,7 @@
        if (Partage->com_rs485.admin_stop)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stopping module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
-          if (module) module->rs485.actif = 0;
+          Deconnecter_rs485 ( module );
           Partage->com_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
            { close(fd_rs485);
@@ -623,8 +639,7 @@
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->rs485.actif != TRUE)           /* Le le module est administravely down, on le zappe */
-           { SB(module->rs485.bit_comm, 0);
-             liste = liste->next;
+           { liste = liste->next;
              continue;
            }
 
@@ -646,17 +661,12 @@
            }
           else
            { if ( Partage->top - module->date_requete > 20 )                       /* Si la comm est niet */
-              { gint nbr_ea, cpt;
-                module->date_retente = Partage->top + TEMPS_RETENTE;
+              { module->date_retente = Partage->top + TEMPS_RETENTE;
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
-                if (module->rs485.ea_min == -1) nbr_ea = 0;
-                else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
-                for( cpt = 0; cpt<nbr_ea; cpt++)
-                 { SEA_range( module->rs485.ea_min + cpt, 0 ); }
+                Deconnecter_rs485 ( module );
                 Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: module down", module->rs485.id );
-                SB(module->rs485.bit_comm, 0);
                 liste = liste->next;
                 continue;
               }
