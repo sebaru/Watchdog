@@ -195,7 +195,7 @@
                   Partage->ea[ num ].inrange = 0;
                 }
                else
-                { if (val_avant_ech < 204) val_avant_ech = 0;
+                { if (val_avant_ech < 204) val_avant_ech = 204;
                   Partage->ea[ num ].val_ech = (gdouble)
                   ((val_avant_ech-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
                   + Partage->ea[num].cmd_type_eana.min;                             /* Valeur à l'echelle */ 
@@ -209,7 +209,7 @@
                   Partage->ea[ num ].inrange = 0;
                 }
                else
-                { if (val_avant_ech < 816) val_avant_ech = 0;
+                { if (val_avant_ech < 816) val_avant_ech = 816;
                   Partage->ea[ num ].val_ech = (gdouble)
                   ((val_avant_ech-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
