@@ -282,7 +282,23 @@
     write (fd, &trame_get_status, sizeof(trame_get_status) );
     return(fd);
   }
+/**********************************************************************************************************/
+/* Chercher_rfxcom: Retrouve un module/capteur dans la liste gérée en fonction des paramètres             */
+/* Entrée: les paramètres de critères de recherche                                                        */
+/* Sortie: le module, ou NULL si erreur                                                                   */
+/**********************************************************************************************************/
+ static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint canal )
+  { GList *liste_modules;
+    liste_modules = Partage->com_rfxcom.Modules_RFXCOM;
+    while ( liste_modules )
+     { struct MODULE_RFXCOM *module;
+       module = (struct MODULE_RFXCOM *)liste_modules->data;
 
+       if (module->rfxcom.type == type && module->rfxcom.canal == canal) return(module);
+       liste_modules = liste_modules->next;
+     }
+    return(NULL);
+  }
 /**********************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
 /* Entrée: la trame a recue                                                                               */
@@ -337,7 +353,7 @@
 
      }
     else if (trame->type == 0x52 && trame->sous_type == 0x01)
-     {
+     { struct MODULE_RFXCOM *module;
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id1", trame->data[0] );   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id2", trame->data[1] );   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status high", trame->data[2] >> 1 );   
@@ -347,7 +363,16 @@
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status humstatus", trame->data[5] );   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status battery", trame->data[6] >> 4 );   
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status rssi", trame->data[6] & 0x0F );   
-       /*module->date_last_view = Partage->top;*/
+       module = Chercher_rfxcom( trame->type, trame->data[1] );
+       if (module)
+        { SEA( module->rfxcom.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)*trame->data[3] / 10.0 );     /* Temp */
+          SEA( module->rfxcom.ea_min + 1,  trame->data[4] );                                         /* Humidity */
+          SEA( module->rfxcom.ea_min + 2,  trame->data[6] >> 4);                                      /* Battery */
+          SEA( module->rfxcom.ea_min + 3,  trame->data[6] & 0x0F );                                      /* RSSI */
+
+          module->date_last_view = Partage->top;
+        }
+       else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame No matching module for packet received", trame->type );
      }
     else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame unkown packet type", trame->type );
     return(TRUE);
