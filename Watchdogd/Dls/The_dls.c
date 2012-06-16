@@ -190,7 +190,7 @@
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
-               if (val_avant_ech < 204)
+               if (val_avant_ech < 190)                            /* 204) Modification du range pour 4mA */
                 { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
