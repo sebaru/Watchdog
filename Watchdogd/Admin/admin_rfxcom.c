@@ -172,6 +172,19 @@
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_change ( client, &rfxcom );
      }
+    else if ( ! strcmp ( commande, "cmd" ) )
+     { sscanf ( ligne, "%s %d %d %d %d %d %d %d", commande,          /* Découpage de la ligne de commande */
+                &Partage->com_rfxcom.learn.id1, &Partage->com_rfxcom.learn.id2,
+                &Partage->com_rfxcom.learn.id3, &Partage->com_rfxcom.learn.id4,
+                &Partage->com_rfxcom.learn.unitcode,
+                &Partage->com_rfxcom.learn.cmd,
+                &Partage->com_rfxcom.learn.level
+               );
+       Partage->com_rfxcom.Thread_commande = TRUE;
+       Write_admin ( client->connexion, " RFXCOM Sending CMD....\n" );
+       while (Partage->com_rfxcom.Thread_commande) sched_yield();
+       Write_admin ( client->connexion, " RFXCOM Done.\n" );
+     }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
@@ -194,6 +207,8 @@
                      "                                         - Edite le module ID\n" );
        Write_admin ( client->connexion,
                      "  del ID                                 - Retire le module ID\n" );
+       Write_admin ( client->connexion,
+                     "  cmd id1 id2 id3 id4 unitcode cmdnumber - Envoie une commande RFXCOM\n" );
        Write_admin ( client->connexion,
                      "  list                                   - Affiche les status des equipements RFXCOM\n" );
        Write_admin ( client->connexion,

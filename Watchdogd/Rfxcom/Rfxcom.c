@@ -220,7 +220,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Decharger_un_rfxcom: Dechargement d'un RFXCOM                                                            */
+/* Decharger_un_rfxcom: Dechargement d'un RFXCOM                                                          */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -379,7 +379,28 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du thread Rfxcom                                                          */
+/* Rfxcom_send: Envoi la commande dans Partage                                                            */
+/* Entrée: le file descriptor de la connexion rfxcom                                                      */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Rfxcom_send ( gint fd_rfxcom )
+  { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+    trame_send_AC[0]  = 0x0B; /* Taille */
+    trame_send_AC[1]  = 0x11; /* lightning 2 */
+    trame_send_AC[2]  = 0x00; /* AC */
+    trame_send_AC[3]  = 0x01; /* Seqnbr */
+    trame_send_AC[4]  = Partage->com_rfxcom.learn.id1 << 6;
+    trame_send_AC[5]  = Partage->com_rfxcom.learn.id2;
+    trame_send_AC[6]  = Partage->com_rfxcom.learn.id3;
+    trame_send_AC[7]  = Partage->com_rfxcom.learn.id4;
+    trame_send_AC[8]  = Partage->com_rfxcom.learn.unitcode;
+    trame_send_AC[9]  = Partage->com_rfxcom.learn.cmd;
+    trame_send_AC[10] = Partage->com_rfxcom.learn.level;
+    trame_send_AC[11] = 0x0;
+    write ( fd_rfxcom, &trame_send_AC, trame_send_AC[0] );
+  }
+/**********************************************************************************************************/
+/* Main: Fonction principale du thread Rfxcom                                                             */
 /**********************************************************************************************************/
  void Run_rfxcom ( void )
   { struct TRAME_RFXCOM Trame;
@@ -416,6 +437,12 @@
        if (Partage->com_rfxcom.Thread_sigusr1 == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: SIGUSR1" );
           Partage->com_rfxcom.Thread_sigusr1 = FALSE;
+        }
+
+       if (Partage->com_rfxcom.Thread_commande == TRUE)
+        { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Sending CMD" );
+          Rfxcom_send( fd_rfxcom );
+          Partage->com_rfxcom.Thread_commande = FALSE;
         }
 
        FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
