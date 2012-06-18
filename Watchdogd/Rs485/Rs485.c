@@ -360,7 +360,6 @@
   { gint nbr_ea, cpt;
                 
     if (!module) return;
-    module->rs485.actif = FALSE;
     if (module->rs485.ea_min == -1) nbr_ea = 0;
     else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
     for( cpt = 0; cpt<nbr_ea; cpt++)
@@ -624,6 +623,7 @@
        if (Partage->com_rs485.admin_stop)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stopping module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
+          if (module) module->rs485.actif = 0;
           Deconnecter_rs485 ( module );
           Partage->com_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
@@ -667,7 +667,6 @@
                 nbr_oct_lu = 0;
                 Deconnecter_rs485 ( module );
                 Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: module down", module->rs485.id );
-                module->rs485.actif = TRUE;          /* Par contre, on laisse actif a un pour raccrochage */
                 liste = liste->next;
                 continue;
               }
