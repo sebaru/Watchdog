@@ -365,7 +365,8 @@
        Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status rssi", trame->data[6] & 0x0F );   
        module = Chercher_rfxcom( trame->type, trame->data[1] );
        if (module)
-        { SEA( module->rfxcom.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)*trame->data[3] / 10.0 );     /* Temp */
+        { SEA( module->rfxcom.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)* ( (trame->data[2] >> 1) + trame->data[3])
+                                           / 10.0 );                                                     /* Temp */
           SEA( module->rfxcom.ea_min + 1,  trame->data[4] );                                         /* Humidity */
           SEA( module->rfxcom.ea_min + 2,  trame->data[6] >> 4);                                      /* Battery */
           SEA( module->rfxcom.ea_min + 3,  trame->data[6] & 0x0F );                                      /* RSSI */
