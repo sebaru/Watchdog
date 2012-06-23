@@ -347,7 +347,7 @@
           if (Partage->com_tellstick.Ajouter_tellstick) /* A revoir. Le polling est a faire par le thread tellstick ?? */
            { Partage->com_tellstick.Ajouter_tellstick( num, etat ); }
           Partage->a[num].changes++;                                              /* Un change de plus !! */
-        } else if (Partage->top % 600)                   /* Si persistence on prévient toutes les minutes */
+        } else if ( ! (Partage->top % 600 ))             /* Si persistence on prévient toutes les minutes */
         { Info_n( Config.log, DEBUG_INFO, "DLS: SA: last_change trop tôt !", num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
