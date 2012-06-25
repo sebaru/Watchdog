@@ -24,10 +24,10 @@ Fichier de spécification pour la création des packages RPM server, client et p
 
 %build
 ./configure --prefix=%{buildroot} --exec-prefix=%{buildroot}/usr --includedir=%{buildroot}/usr/include --datarootdir=%{buildroot}/usr/share
-make -j 2
+make -j 4
 
 %install
-make -j 2 install
+make -j 4 install
 
 #---------------------------- Package Commun ---------------------------------
 %package common
@@ -75,6 +75,18 @@ This is the server side of Watchdog
 %doc /usr/share/Watchdog/Watchdog*pdf
 %doc /usr/share/Watchdog/Delete_old_avi.sh
 %doc /usr/share/Watchdog/Programmateur_mysql.sql
+
+#----------------------------- Package Server-rfxcom -------------------------------
+%package server-rfxcom
+Summary: The Watchdogd Server - Module RFXCom
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-rfxcom
+This is the server side of Watchdog - RFXCOM Module
+
+%files server-rfxcom
+%defattr(644,root,root)
+/usr/lib/libwatchdog-rfxcom*
 
 #----------------------------- Package Server-tellstick -------------------------------
 %package server-tellstick
