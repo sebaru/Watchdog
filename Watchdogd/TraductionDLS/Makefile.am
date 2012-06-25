@@ -19,5 +19,5 @@ INCLUDES= -I$(top_srcdir) -I$(includedir) \
 	  -I../Include \
           $(GLIB_CFLAGS)
 
-#EXTRA_DIST = lignes.h
+EXTRA_DIST = lignes.h
 CLEANFILES = lignes.h lignes.c mots.c
