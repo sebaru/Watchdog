@@ -43,6 +43,7 @@
  #include <fcntl.h>
  #include <string.h>
  #include <pthread.h>
+ #include <locale.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -246,6 +247,7 @@
     g_snprintf(nom, sizeof(nom), "W-SRV%03d", id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
+    setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     sig.sa_handler = SIG_IGN;
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */

@@ -333,7 +333,8 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Deconnecter_module ( struct MODULE_MODBUS *module )
-  { if (!module) return;
+  { gint cpt;
+    if (!module) return;
     if (module->started == FALSE) return;
 
     close ( module->connexion );
@@ -342,6 +343,8 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = 0;
+    for ( cpt = module->modbus.min_e_ana; cpt<module->nbr_entree_ana; cpt++)
+     { SEA_range( cpt, 0 ); }
     Info_n( Config.log, DEBUG_MODBUS, "MODBUS: Deconnecter_module", module->modbus.id );
     SB( module->modbus.bit, 0 );                              /* Mise a zero du bit interne lié au module */
   }
