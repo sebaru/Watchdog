@@ -413,17 +413,18 @@
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
 
     fd_rfxcom = Init_rfxcom();
-    if (fd_rfxcom<0)                                                        /* On valide l'acces aux ports */
+    if (fd_rfxcom<0)                                                       /* On valide l'acces aux ports */
      { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM impossible, terminé");
-       Partage->com_rfxcom.TID = 0;                        /* On indique au master que le thread est mort. */
+       Partage->com_rfxcom.TID = 0;                       /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
     else { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM FD", fd_rfxcom ); }
 
     Partage->com_rfxcom.Thread_run    = TRUE;                                        /* Le thread tourne ! */
 
+    Charger_tous_rfxcom();                          /* Chargement de tous les capteurs/actionneurs RFXCOM */
     nbr_oct_lu = 0;
-    while(Partage->com_rfxcom.Thread_run == TRUE)                         /* On tourne tant que necessaire */
+    while(Partage->com_rfxcom.Thread_run == TRUE)                        /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
