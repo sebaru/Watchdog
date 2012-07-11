@@ -288,6 +288,7 @@
     PangoFontDescription *font;
     GtkWidget *text, *buffer;
     gchar titre[NBR_CARAC_PLUGIN_DLS_UTF8 + 10];
+    GdkColor color;
 
     if ( Chercher_page_notebook ( TYPE_PAGE_SOURCE_DLS, rezo_dls->id, TRUE ) ) return; /* Page deja créé ? */
 
@@ -360,8 +361,12 @@
 
     gtk_widget_show_all( hboite );
     g_snprintf( titre, sizeof(titre), "Dls: %s", rezo_dls->nom );
-    label = gtk_label_new ( titre );
-    g_object_set( label, "background-color", "green", NULL );
+    label = gtk_event_box_new ();
+    gtk_container_add( GTK_CONTAINER(label), gtk_label_new(titre) );
+    gdk_color_parse ("darkred", &color);
+    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
+    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
+    gtk_widget_show_all( label );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, label );
   }
 /*--------------------------------------------------------------------------------------------------------*/

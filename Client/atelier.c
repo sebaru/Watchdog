@@ -216,13 +216,14 @@ printf("fin Detruire page atelier\n");
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Creer_page_atelier( gint syn_id, gchar *libelle_syn )
-  { GtkWidget *separateur, *frame, *bouton, *boite, *hboite, *table;
+  { GtkWidget *separateur, *frame, *bouton, *boite, *hboite, *table, *label;
     GtkWidget *vboite, *capteur, *spin, *boite1, *scroll;
     GtkWidget *menu_bar, *menu_main, *menu_bouton, *ssmenu;
     GtkAdjustment *adj;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     gchar libelle[50];
+    GdkColor color;
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -391,7 +392,13 @@ printf("fin Detruire page atelier\n");
     gtk_widget_show_all( page->child );
     g_snprintf( libelle, sizeof(libelle), "Atelier/%s", libelle_syn );
 
-    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( libelle ) );
+    label = gtk_event_box_new ();
+    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( libelle ) );
+    gdk_color_parse ("darkgreen", &color);
+    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
+    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
+    gtk_widget_show_all( label );
+    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, label );
     Creer_fenetre_propriete_TOR ( infos );
   }
 /**********************************************************************************************************/
