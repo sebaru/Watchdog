@@ -594,10 +594,16 @@
        return(TRUE);                                     /* Variable not supported... is not an error ... */
      }
 
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", nom_var );
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer );
-    *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
-    return(TRUE);
+    if ( ! strncmp ( buffer, "VAR", 3 ) )
+     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", nom_var );
+       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer );
+       *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
+       return(TRUE);
+     }
+
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR NOK", nom_var );
+    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR NOK", buffer );
+    return(FALSE);
   }
 /**********************************************************************************************************/
 /* Envoyer_sortie_onduleur: Envoi des sorties/InstantCommand à l'onduleur                                 */
