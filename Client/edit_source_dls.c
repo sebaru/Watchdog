@@ -282,7 +282,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
-  { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur;
+  { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur, *label;
     struct TYPE_INFO_SOURCE_DLS *infos;
     struct PAGE_NOTEBOOK *page;
     PangoFontDescription *font;
@@ -360,6 +360,8 @@
 
     gtk_widget_show_all( hboite );
     g_snprintf( titre, sizeof(titre), "Dls: %s", rezo_dls->nom );
-    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( titre ) );
+    label = gtk_label_new ( titre );
+    g_object_set( label, "background-color", "green", NULL );
+    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, label );
   }
 /*--------------------------------------------------------------------------------------------------------*/

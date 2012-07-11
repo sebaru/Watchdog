@@ -316,6 +316,7 @@
     gtk_box_pack_start( GTK_BOX(vboite), Notebook, TRUE, TRUE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER(Notebook), 6 );
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(Notebook), TRUE );
+    gtk_notebook_popup_enable  ( GTK_NOTEBOOK(Notebook) );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(vboite), hboite, FALSE, FALSE, 0 );
