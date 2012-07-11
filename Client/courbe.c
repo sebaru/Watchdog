@@ -829,6 +829,10 @@
     courbe = &infos->Courbes[start_courbe->slot_id];
 
     printf(" Recu %d enreg pour le slot %d old enreg = %d\n", start_courbe->taille_donnees, start_courbe->slot_id, courbe->taille_donnees );
+    if (!start_courbe->taille_donnees)
+     { printf(" Recu aucun enregistrement, on sort \n");
+       return;
+     }
 
     if (courbe->taille_donnees > 600000)
      { printf(" Depassement du nombre d'enregistrement \n");
