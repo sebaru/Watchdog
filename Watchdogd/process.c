@@ -151,6 +151,36 @@
     return(TRUE);          
   }
 /**********************************************************************************************************/
+/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
+/* Entrée: rien                                                                                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Demarrer_motion_detect ( void )
+  { gchar chaine[80];
+    gint id;
+    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
+
+    if (!Creer_config_file_motion()) return(FALSE);
+
+    g_snprintf(chaine, sizeof(chaine), "%s/Camera/motion.pid", Config.home);
+    id = open ( chaine, O_RDONLY, 0 );
+    if (id<0) { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
+                return(FALSE);
+              }
+
+    if (read ( id, chaine, sizeof(chaine) )<0)
+              { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: erreur lecture pid file", id );
+                close(id);
+                return(FALSE);
+              }
+    close(id);
+    PID_motion = atoi (chaine);
+    kill( PID_motion, SIGHUP );                                                   /* Envoie reload conf a motion */
+    Info_n( Config.log, DEBUG_INFO,
+           "MSRV: Demarrer_motion_detect: process motion seems to be running", PID_motion );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
 /* Demarrer_sous_serveur: Fork un sous_serveur                                                            */
 /* Entrée: l'id du fils                                                                                   */
 /* Sortie: false si probleme                                                                              */
