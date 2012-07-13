@@ -75,6 +75,8 @@ This is the server side of Watchdog
 %doc /usr/share/Watchdog/Watchdog*pdf
 %doc /usr/share/Watchdog/Delete_old_avi.sh
 %doc /usr/share/Watchdog/Programmateur_mysql.sql
+%doc /usr/share/Watchdog/motion.conf
+%doc /usr/share/Watchdog/cam0001.conf
 
 #----------------------------- Package Server-rfxcom -------------------------------
 %package server-rfxcom
