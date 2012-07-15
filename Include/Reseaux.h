@@ -48,7 +48,6 @@
  #include "Reseaux_fichier.h"
  #include "Reseaux_scenario.h"
  #include "Reseaux_onduleur.h"
- #include "Reseaux_rs485.h"
  #include "Reseaux_modbus.h"
 
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */

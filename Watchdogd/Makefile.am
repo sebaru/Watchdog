@@ -17,7 +17,6 @@ Watchdogd_LDADD   = Config/libconfig.la \
 		    Serveur/libserveur.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
-		    Rs485/librs485.la \
 		    Modbus/libmodbus.la \
 		    Sms/libsms.la \
 		    Archive/libarchive.la \

@@ -77,9 +77,9 @@
     db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
-    libelle = Normaliser_chaine ( log, rs485->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( Config.log, rs485->libelle );          /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Ajouter_rs485DB: Normalisation libelle impossible" );
+     { Info( Config.log, DEBUG_DB, "Ajouter_rs485DB: Normalisation libelle impossible" );
        Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
@@ -132,7 +132,7 @@
      }
 
     rs485 = (struct RS485DB *)g_malloc0( sizeof(struct RS485DB) );
-    if (!rs485) Info( log, DEBUG_RS485, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
+    if (!rs485) Info( Config.log, DEBUG_RS485, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
        rs485->id                = atoi(db->row[0]);
@@ -164,9 +164,9 @@
     db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
-    libelle = Normaliser_chaine ( log, rs485->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( Config.log, rs485->libelle );              /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_DB, "Modifier_rs485DB: Normalisation libelle impossible" );
+     { Info( Config.log, DEBUG_DB, "Modifier_rs485DB: Normalisation libelle impossible" );
        Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
@@ -205,45 +205,6 @@
     return(NULL);
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static gboolean Charger_un_rs485 ( gint id )
-  { struct MODULE_RS485 *module;
-    struct RS485DB *rs485;
-    struct DB *db;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
-
-    module = (struct MODULE_RS485 *)g_malloc0(sizeof(struct MODULE_RS485));
-    if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_RS485,
-             "Charger_un_rs485: Erreur allocation mémoire struct MODULE_RS485" );
-       Libere_DB_SQL( Config.log, &db );
-       return(FALSE);
-     }
-
-    rs485 = Rechercher_rs485DB ( Config.log, db, id );
-    Libere_DB_SQL( Config.log, &db );
-    if (!rs485)                                                 /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_RS485,
-             "Charger_un_rs485: Erreur allocation mémoire struct RS485DB" );
-       g_free(module);
-       return(FALSE);
-     }
-
-    memcpy( &module->rs485, rs485, sizeof(struct RS485DB) );
-    g_free(rs485);
-
-    Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
-
-    Info_n( Config.log, DEBUG_RS485, "Charger_un_rs485:  id      = ", module->rs485.id    );
-    Info_n( Config.log, DEBUG_RS485, "                -  actif   = ", module->rs485.actif );
-   return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
@@ -256,7 +217,7 @@
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
-    if ( ! Recuperer_rs485DB( Config.log, db ) )
+    if ( ! Recuperer_rs485DB( db ) )
      { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
@@ -267,7 +228,7 @@
      { struct MODULE_RS485 *module;
        struct RS485DB *rs485;
 
-       rs485 = Recuperer_rs485DB_suite( Config.log, db );
+       rs485 = Recuperer_rs485DB_suite( db );
        if (!rs485) break;
 
        module = (struct MODULE_RS485 *)g_malloc0( sizeof(struct MODULE_RS485) );

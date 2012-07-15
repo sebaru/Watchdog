@@ -277,13 +277,6 @@ extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNE
  extern void Proto_valider_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
  extern void *Envoyer_onduleurs_thread ( struct CLIENT *client );
 
-                                                                                    /* Dans envoi_rs485.c */
- extern void Proto_ajouter_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
- extern void Proto_effacer_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
- extern void Proto_editer_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
- extern void Proto_valider_editer_rs485 ( struct CLIENT *client, struct CMD_TYPE_RS485 *rezo_rs485 );
- extern void *Envoyer_rs485_thread ( struct CLIENT *client );
-
                                                                                    /* Dans envoi_modbus.c */
  extern void Proto_ajouter_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
  extern void Proto_effacer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );

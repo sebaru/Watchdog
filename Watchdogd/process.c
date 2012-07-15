@@ -437,14 +437,14 @@
      }
                                                                               /* Recherche de la fonction */
     Partage->com_rs485.Ajouter_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Ajouter_rs485DB" );
-    if (!Partage->com_rfxcom.Ajouter_rs485DB)
+    if (!Partage->com_rs485.Ajouter_rs485DB)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Ajouter_rs485DB does not exist") );
        dlclose( Partage->com_rs485.dl_handle );
        Partage->com_rs485.dl_handle = NULL;
        return(FALSE);
      }
                                                                               /* Recherche de la fonction */
-    Partage->com_rfxcom.Retirer_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Retirer_rs485DB" );
+    Partage->com_rs485.Retirer_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Retirer_rs485DB" );
     if (!Partage->com_rs485.Retirer_rs485DB)
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Retirer_rs485DB does not exist") );
        dlclose( Partage->com_rs485.dl_handle );

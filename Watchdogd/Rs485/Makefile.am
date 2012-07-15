@@ -1,16 +1,18 @@
 #**********************************************************************************************************/
-#* Watchdogd/Rs485/Makefile.am          Profil de compilation de l'interface Rs485 Watchdog               */
-#* Projet WatchDog version 2.0       Gestion d'habitat                      mar 22 jun 2004 15:48:08 CEST */
+#* Watchdogd/Rs485/Makefile.am          Profil de compilation de l'interface RS485 pour Watchdog        */
+#* Projet WatchDog version 2.0       Gestion d'habitat                           dim 25 mai 2012 18:13:27 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 
 
-noinst_LTLIBRARIES     = librs485.la
-librs485_la_SOURCES    = Rs485.c
+lib_LTLIBRARIES     = libwatchdog-rs485.la
+libwatchdog_rs485_la_SOURCES    = Rs485.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
-	  -I../Include \
-          $(MYSQL_CFLAGS)
+          $(MYSQL_CFLAGS) \
+          -I../Include
+
+libwatchdog_rs485_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

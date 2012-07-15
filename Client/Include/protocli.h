@@ -530,14 +530,6 @@
  extern void Menu_ajouter_editer_onduleur ( struct CMD_TYPE_ONDULEUR *edit_onduleur );/* Dans ajout_onduleur.c */
  extern void Proto_afficher_mnemo_onduleur ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
 
- extern void Proto_afficher_un_rs485( struct CMD_TYPE_RS485 *rs485 );               /* Dans liste_rs485.c */
- extern void Proto_cacher_un_rs485( struct CMD_TYPE_RS485 *rs485 );
- extern void Proto_rafraichir_un_rs485( struct CMD_TYPE_RS485 *rs485 );
- extern void Creer_page_rs485( void );
-                                                                                    /* Dans ajout_rs485.c */
- extern void Menu_ajouter_editer_rs485 ( struct CMD_TYPE_RS485 *edit_rs485);
- extern void Proto_afficher_mnemo_rs485 ( struct CMD_TYPE_MNEMONIQUE *mnemo );
-
  extern void Proto_afficher_un_modbus( struct CMD_TYPE_MODBUS *modbus );           /* Dans liste_modbus.c */
  extern void Proto_cacher_un_modbus( struct CMD_TYPE_MODBUS *modbus );
  extern void Proto_rafraichir_un_modbus( struct CMD_TYPE_MODBUS *modbus );
