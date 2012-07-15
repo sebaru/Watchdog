@@ -146,12 +146,6 @@
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Library RS485     -> loaded = %s, running = %s, TID = %d\n",
-                   (Partage->com_rs485.dl_handle ? "YES" : " NO"),
-                   (Partage->com_rs485.Thread_run ? "YES" : " NO"), (gint)Partage->com_rs485.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
        g_snprintf( chaine, sizeof(chaine), " Built-in MODBUS   -> ------------- running = %s, TID = %d\n",
                    (Partage->com_modbus.Thread_run ? "YES" : " NO"), (gint)Partage->com_modbus.TID
                  );
@@ -169,6 +163,12 @@
 
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
+                 );
+       Write_admin ( client->connexion, chaine );
+
+       g_snprintf( chaine, sizeof(chaine), " Library RS485     -> loaded = %s, running = %s, TID = %d\n",
+                   (Partage->com_rs485.dl_handle ? "YES" : " NO"),
+                   (Partage->com_rs485.Thread_run ? "YES" : " NO"), (gint)Partage->com_rs485.TID
                  );
        Write_admin ( client->connexion, chaine );
 
