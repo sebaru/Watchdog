@@ -60,12 +60,15 @@
        module = (struct MODULE_RS485 *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " RS485[%02d] -> num=%d,actif=%d,bit=%d,ea=%03d-%03d,e=%03d-%03d,s=%03d-%03d,"
-                   "sa=%03d-%03d,req=%d,ret=%d,next_get_ana=%d\n",
-                   module->rs485.id, module->rs485.num, module->rs485.actif, module->rs485.bit_comm,
+                   " RS485[%02d] -> num=%d,enable=%s,bit=%d,ea=%03d-%03d,e=%03d-%03d,s=%03d-%03d,sa=%03d-%03d\n"
+                   "                started=%s,req=%d,ret=%d,next_get_ana=%d\n",
+                   module->rs485.id, module->rs485.num,
+                   (module->rs485.enable ? "TRUE" : "FALSE"),
+                   module->rs485.bit_comm,
                    module->rs485.ea_min, module->rs485.ea_max,
                    module->rs485.e_min, module->rs485.e_max,
                    module->rs485.s_min, module->rs485.s_max, module->rs485.sa_min, module->rs485.sa_max,
+                   (module->started      ? "TRUE" : "FALSE"),
                    (gint)module->date_requete, (gint)module->date_retente, (gint)module->date_next_get_ana
                  );
        Write_admin ( client->connexion, chaine );
@@ -197,7 +200,7 @@
      { struct RS485DB rs485;
        memset( &rs485, 0, sizeof(struct RS485DB) );
        sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d %s", commande,/* Découpage de la ligne de commande */
-                &rs485.num, &rs485.bit_comm, (gint *)&rs485.actif,
+                &rs485.num, &rs485.bit_comm, (gint *)&rs485.enable,
                 &rs485.ea_min, &rs485.ea_max,
                 &rs485.e_min, &rs485.e_max,
                 &rs485.s_min, &rs485.s_max,
@@ -214,7 +217,7 @@
      { struct RS485DB rs485;
        memset( &rs485, 0, sizeof(struct RS485DB) );
        sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d %d %s", commande,/* Découpage de la ligne de commande */
-                &rs485.id, &rs485.num, &rs485.bit_comm, (gint *)&rs485.actif,
+                &rs485.id, &rs485.num, &rs485.bit_comm, (gint *)&rs485.enable,
                 &rs485.ea_min, &rs485.ea_max,
                 &rs485.e_min, &rs485.e_max,
                 &rs485.s_min, &rs485.s_max,
@@ -241,6 +244,16 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
+       Write_admin ( client->connexion,
+                     "  add num bit_comm enable ea_min ea_max e_min e_max s_min s_max sa_min sa_max libelle\n" );
+       Write_admin ( client->connexion,
+                     "                                         - Ajoute un module RS485\n" );
+       Write_admin ( client->connexion,
+                     "  del id                                 - Retire le module id\n" );
+       Write_admin ( client->connexion,
+                     "  change id num bit_comm enable ea_min ea_max e_min e_max s_min s_max sa_min sa_max libelle\n" );
+       Write_admin ( client->connexion,
+                     "                                         - Modifie le module id\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,

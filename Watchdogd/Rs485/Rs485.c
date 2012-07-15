@@ -85,10 +85,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
+                "INSERT INTO %s(num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
                 " VALUES ('%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
-                NOM_TABLE_MODULE_RS485, rs485->num, rs485->bit_comm, libelle, rs485->actif,
+                NOM_TABLE_MODULE_RS485, rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
               );
@@ -111,7 +111,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
+                "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
 
@@ -138,7 +138,7 @@
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);
-       rs485->actif             = atoi(db->row[4]);
+       rs485->enable            = atoi(db->row[4]);
        rs485->ea_min            = atoi(db->row[5]);
        rs485->ea_max            = atoi(db->row[6]);
        rs485->e_min             = atoi(db->row[7]);
@@ -173,12 +173,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num='%d',bit_comm='%d',libelle='%s',actif='%d',"
+                "num='%d',bit_comm='%d',libelle='%s',enable='%d',"
                 "ea_min='%d',ea_max='%d',e_min='%d',e_max='%d',"
                 "sa_min='%d',sa_max='%d',s_min='%d',s_max='%d'"
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_RS485,
-                rs485->num, rs485->bit_comm, libelle, rs485->actif,
+                rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max,
                 rs485->id );
@@ -240,12 +240,13 @@
           return(FALSE);
         }
        memcpy( &module->rs485, rs485, sizeof(struct RS485DB) );
+       if (module->rs485.enable) module->started = TRUE;          /* Si enable at boot... et bien Start ! */
        g_free(rs485);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
        Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
        Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id    = ", module->rs485.id    );
-       Info_n( Config.log, DEBUG_RS485, "                  -  actif = ", module->rs485.actif );
+       Info_n( Config.log, DEBUG_RS485, "                  -  enable = ", module->rs485.enable );
      }
     Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485: module RS485 found  !", cpt );
 
@@ -275,7 +276,7 @@
      }
   }
 /**********************************************************************************************************/
-/* RS485_is_actif: Renvoi TRUE si au moins un des modules rs est actif                                    */
+/* RS485_is_enable: Renvoi TRUE si au moins un des modules rs est actif                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
@@ -286,7 +287,7 @@
      { struct MODULE_RS485 *module;
        module = ((struct MODULE_RS485 *)liste->data);
 
-       if (module->rs485.actif) return(TRUE);
+       if (module->started) return(TRUE);
        liste = liste->next;
      }
     return(FALSE);
@@ -547,7 +548,7 @@
 
        if (Partage->com_rs485.admin_start)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
-          if (Rs485_is_actif() == FALSE)                     /* Si aucun module actif, on restart la comm RS */
+          if (Rs485_is_actif() == FALSE)                /* Si aucun module started, on restart la comm RS */
            { fd_rs485 = Init_rs485();
              if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
               { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
@@ -556,14 +557,14 @@
              Info( Config.log, DEBUG_RS485, "RS485: Restart Accès RS485 OK");
            }
           module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
-          if (module) { module->rs485.actif = 1; }
+          if (module) { module->started = 1; }
           Partage->com_rs485.admin_start = 0;
         }
 
        if (Partage->com_rs485.admin_stop)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stopping module" );
           module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
-          if (module) module->rs485.actif = 0;
+          if (module) module->started = 0;
           Deconnecter_rs485 ( module );
           Partage->com_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
@@ -578,7 +579,7 @@
        liste = Partage->com_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
-          if (module->rs485.actif != TRUE)           /* Le le module est administravely down, on le zappe */
+          if (module->started != TRUE)                           /* Si le module est stopped, on le zappe */
            { liste = liste->next;
              continue;
            }

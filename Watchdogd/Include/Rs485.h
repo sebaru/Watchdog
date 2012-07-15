@@ -63,7 +63,7 @@
   { guint id;                                                                    /* ID unique de la rs485 */
     guint num;                                                                      /* Numéro de la rs485 */
     guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
-    gboolean actif;
+    gboolean enable;                                                            /* Module Start at boot ? */
     gint ea_min, ea_max;
     gint e_min, e_max;
     gint s_min, s_max;
@@ -74,6 +74,7 @@
  struct MODULE_RS485
   { struct RS485DB rs485;
 
+    gboolean started;                                                           /* Module Start at boot ? */
     time_t date_requete;
     time_t date_retente;
     time_t date_next_get_ana;
