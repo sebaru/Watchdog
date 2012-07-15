@@ -146,7 +146,8 @@
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in RS485    -> ------------- running = %s, TID = %d\n",
+       g_snprintf( chaine, sizeof(chaine), " Library RS485     -> loaded = %s, running = %s, TID = %d\n",
+                   (Partage->com_rs485.dl_handle ? "YES" : " NO"),
                    (Partage->com_rs485.Thread_run ? "YES" : " NO"), (gint)Partage->com_rs485.TID
                  );
        Write_admin ( client->connexion, chaine );
