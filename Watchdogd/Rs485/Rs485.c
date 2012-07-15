@@ -47,26 +47,40 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_rs485DB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 )
+ gboolean Retirer_rs485DB ( struct RS485DB *rs485 )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db) return(FALSE);
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RS485, rs485->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( Config.log, &db );
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_rs485DB: Ajout ou edition d'un rs485                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure rs485                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_rs485DB ( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 )
+ gint Ajouter_rs485DB ( struct RS485DB *rs485 )
   { gchar requete[2048];
+    gboolean retour;
     gchar *libelle;
+    struct DB *db;
+    gint last_id;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db) return(FALSE);
 
     libelle = Normaliser_chaine ( log, rs485->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info( log, DEBUG_DB, "Ajouter_rs485DB: Normalisation libelle impossible" );
+       Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
 
@@ -80,16 +94,20 @@
               );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL( log, db ) );
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    if (retour == FALSE)  { Libere_DB_SQL( Config.log, &db );
+                            return(-1);
+                          }
+    last_id = Recuperer_last_ID_SQL( Config.log, db );
+    Libere_DB_SQL( Config.log, &db );
+    return( last_id );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_rs485DB ( struct LOG *log, struct DB *db )
+ gboolean Recuperer_rs485DB ( struct DB *db )
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -97,23 +115,23 @@
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_RS485 *Recuperer_rs485DB_suite( struct LOG *log, struct DB *db )
-  { struct CMD_TYPE_RS485 *rs485;
+ struct RS485DB *Recuperer_rs485DB_suite( struct DB *db )
+  { struct RS485DB *rs485;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL ( Config.log, db );
        return(NULL);
      }
 
-    rs485 = (struct CMD_TYPE_RS485 *)g_malloc0( sizeof(struct CMD_TYPE_RS485) );
+    rs485 = (struct RS485DB *)g_malloc0( sizeof(struct RS485DB) );
     if (!rs485) Info( log, DEBUG_RS485, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
@@ -133,64 +151,23 @@
     return(rs485);
   }
 /**********************************************************************************************************/
-/* Rechercher_rs485DB: Recupération du rs485 dont le id est en parametre                                  */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_RS485 *Rechercher_rs485DB ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[512];
-    struct CMD_TYPE_RS485 *rs485;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,bit_comm,libelle,actif,ea_min,ea_max,e_min,e_max,"
-                "sa_min,sa_max,s_min,s_max"
-                " FROM %s WHERE id=%d",
-                NOM_TABLE_MODULE_RS485, id );
-       
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(NULL); }
-       
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_rs485DB: RS485 non trouvé dans la BDD", id );
-       return(NULL);
-     }
-       
-    rs485 = g_malloc0( sizeof(struct CMD_TYPE_RS485) );
-    if (!rs485)
-     { Info( log, DEBUG_RS485, "Rechercher_rs485DB: Mem error" ); }
-    else
-     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
-       rs485->id                = atoi(db->row[0]);
-       rs485->num               = atoi(db->row[1]);
-       rs485->bit_comm          = atoi(db->row[2]);
-       rs485->actif             = atoi(db->row[4]);
-       rs485->ea_min            = atoi(db->row[5]);
-       rs485->ea_max            = atoi(db->row[6]);
-       rs485->e_min             = atoi(db->row[7]);
-       rs485->e_max             = atoi(db->row[8]);
-       rs485->sa_min            = atoi(db->row[9]);
-       rs485->sa_max            = atoi(db->row[10]);
-       rs485->s_min             = atoi(db->row[11]);
-       rs485->s_max             = atoi(db->row[12]);
-     }
-
-    Liberer_resultat_SQL ( log, db );
-    return(rs485);
-  }
-/**********************************************************************************************************/
 /* Modifier_rs485DB: Modification d'un rs485 Watchdog                                                     */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_rs485DB( struct LOG *log, struct DB *db, struct CMD_TYPE_RS485 *rs485 )
-  { gchar *libelle;
-    gchar requete[2048];
+ gboolean Modifier_rs485DB( struct RS485DB *rs485 )
+  { gchar requete[2048];
+    gboolean retour;
+    gchar *libelle;
+    struct DB *db;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db) return(FALSE);
 
     libelle = Normaliser_chaine ( log, rs485->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { Info( log, DEBUG_DB, "Modifier_rs485DB: Normalisation libelle impossible" );
+       Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
 
@@ -206,8 +183,10 @@
                 rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max,
                 rs485->id );
     g_free(libelle);
-
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( Config.log, &db );
+                            
+    return( retour );
   }
 /**********************************************************************************************************/
 /* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
@@ -232,7 +211,7 @@
 /**********************************************************************************************************/
  static gboolean Charger_un_rs485 ( gint id )
   { struct MODULE_RS485 *module;
-    struct CMD_TYPE_RS485 *rs485;
+    struct RS485DB *rs485;
     struct DB *db;
 
     db = Init_DB_SQL( Config.log );
@@ -250,12 +229,12 @@
     Libere_DB_SQL( Config.log, &db );
     if (!rs485)                                                 /* Si probleme d'allocation mémoire */
      { Info( Config.log, DEBUG_RS485,
-             "Charger_un_rs485: Erreur allocation mémoire struct CMD_TYPE_RS485" );
+             "Charger_un_rs485: Erreur allocation mémoire struct RS485DB" );
        g_free(module);
        return(FALSE);
      }
 
-    memcpy( &module->rs485, rs485, sizeof(struct CMD_TYPE_RS485) );
+    memcpy( &module->rs485, rs485, sizeof(struct RS485DB) );
     g_free(rs485);
 
     Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
@@ -286,7 +265,7 @@
     cpt = 0;
     for ( ; ; )
      { struct MODULE_RS485 *module;
-       struct CMD_TYPE_RS485 *rs485;
+       struct RS485DB *rs485;
 
        rs485 = Recuperer_rs485DB_suite( Config.log, db );
        if (!rs485) break;
@@ -299,7 +278,7 @@
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
         }
-       memcpy( &module->rs485, rs485, sizeof(struct CMD_TYPE_RS485) );
+       memcpy( &module->rs485, rs485, sizeof(struct RS485DB) );
        g_free(rs485);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */

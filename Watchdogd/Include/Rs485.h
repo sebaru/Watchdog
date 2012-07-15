@@ -59,8 +59,20 @@
     unsigned char nbr_sortie_tor;
   };
 
+ struct RS485DB
+  { guint id;                                                                    /* ID unique de la rs485 */
+    guint num;                                                                      /* Numéro de la rs485 */
+    guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
+    gboolean actif;
+    gint ea_min, ea_max;
+    gint e_min, e_max;
+    gint s_min, s_max;
+    gint sa_min, sa_max;
+    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
+  };
+
  struct MODULE_RS485
-  { struct CMD_TYPE_RS485 rs485;
+  { struct RS485DB rs485;
 
     time_t date_requete;
     time_t date_retente;
@@ -69,6 +81,13 @@
 
  struct COM_RS485                                                 /* Communication entre DLS et la RS485 */
   { pthread_t TID;                                                               /* Identifiant du thread */
+    void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
+
+    void (*Run_rs485)(void);                                 /* Fonction principale de gestion du thread */
+    gint     (*Ajouter_rs485DB)   ( struct RS485DB *rs485 );
+    gboolean (*Retirer_rs485DB)   ( gint id );
+    gboolean (*Modifier_rs485DB)  ( struct RS485DB *rs485 );
+
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GList *Modules_RS485;
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */

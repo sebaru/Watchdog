@@ -73,36 +73,95 @@
      }
   }
 /**********************************************************************************************************/
+/* Admin_rs485_del: Retire le capteur/module rs485 dont l'id est en parametre                           */
+/* Entrée: le client et l'id                                                                              */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_rs485_del ( struct CLIENT_ADMIN *client, gint id )
+  { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rs485 %d\n", id );
+    Write_admin ( client->connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+
+    if (Partage->com_rs485.Retirer_rs485DB)
+     { if (Partage->com_rs485.Retirer_rs485DB( id ))
+        { g_snprintf( chaine, sizeof(chaine), " Module erased.\n You should reload configuration...\n" ); }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT erased.\n" ); }
+       Write_admin ( client->connexion, chaine );
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
+       Write_admin ( client->connexion, chaine );
+     }
+  }
+/**********************************************************************************************************/
+/* Admin_rs485_add: Ajoute un capteur/module RS485                                                      */
+/* Entrée: le client et la structure de reference du capteur                                              */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_rs485_add ( struct CLIENT_ADMIN *client, struct RS485DB *rs485 )
+  { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rs485\n" );
+    Write_admin ( client->connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+
+    if (Partage->com_rs485.Ajouter_rs485DB)
+     { gint last_id;
+       last_id = Partage->com_rs485.Ajouter_rs485DB( rs485 );
+       if ( last_id != -1 )
+        { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n You should reload configuration...\n", last_id ); }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
+       Write_admin ( client->connexion, chaine );
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
+       Write_admin ( client->connexion, chaine );
+     }
+  }
+/**********************************************************************************************************/
+/* Admin_rs485_change: Modifie la configuration d'un capteur RS485                                        */
+/* Entrée: le client et la structure de reference du capteur                                              */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_rs485_change ( struct CLIENT_ADMIN *client, struct RS485DB *rs485 )
+  { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rs485\n" );
+    Write_admin ( client->connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
+    Write_admin ( client->connexion, chaine );
+
+    if (Partage->com_rs485.Modifier_rs485DB)
+     { if ( Partage->com_rs485.Modifier_rs485DB( rs485 ) )
+        { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n You should reload configuration...\n", rs485->id ); }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
+       Write_admin ( client->connexion, chaine );
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
+       Write_admin ( client->connexion, chaine );
+     }
+  }
+/**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_rs485_start ( struct CLIENT_ADMIN *client, gint id )
-  { gchar chaine[128], requete[128];
-    struct DB *db;
+  { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module RS485\n" );
     Write_admin ( client->connexion, chaine );
 
     while (Partage->com_rs485.admin_start) sched_yield();
     Partage->com_rs485.admin_start = id;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_start: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=1 WHERE id=%d",
-                NOM_TABLE_MODULE_RS485, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-    Libere_DB_SQL( Config.log, &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module RS485 %d started\n", id );
     Write_admin ( client->connexion, chaine );
@@ -113,31 +172,13 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_rs485_stop ( struct CLIENT_ADMIN *client, gint id )
-  { gchar chaine[128], requete[128];
-    struct DB *db;
+  { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module RS485\n" );
     Write_admin ( client->connexion, chaine );
 
     while (Partage->com_rs485.admin_stop) sched_yield();
     Partage->com_rs485.admin_stop = id;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_rs485_stop: impossible d'ouvrir la Base de données",
-               Config.db_database );
-       return;
-     }
-
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=0 WHERE id=%d",
-                NOM_TABLE_MODULE_RS485, id
-              );
-
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-    Libere_DB_SQL( Config.log, &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module RS485 %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
@@ -152,7 +193,36 @@
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
-    if ( ! strcmp ( commande, "start" ) )
+    if ( ! strcmp ( commande, "add" ) )
+     { struct RS485DB rs485;
+       memset( &rs485, 0, sizeof(struct RS485DB) );
+       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d %s", commande,/* Découpage de la ligne de commande */
+                &rs485.num, &rs485.bit_comm, (gint *)&rs485.actif,
+                &rs485.ea_min, &rs485.ea_max,
+                &rs485.e_min, &rs485.e_max,
+                &rs485.s_min, &rs485.s_max,
+                &rs485.sa_min, &rs485.sa_max,
+                rs485.libelle );
+       Admin_rs485_add ( client, &rs485 );
+     }
+    else if ( ! strcmp ( commande, "del" ) )
+     { gint num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_rs485_del ( client, num );
+     }
+    else if ( ! strcmp ( commande, "change" ) )
+     { struct RS485DB rs485;
+       memset( &rs485, 0, sizeof(struct RS485DB) );
+       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d %d %s", commande,/* Découpage de la ligne de commande */
+                &rs485.id, &rs485.num, &rs485.bit_comm, (gint *)&rs485.actif,
+                &rs485.ea_min, &rs485.ea_max,
+                &rs485.e_min, &rs485.e_max,
+                &rs485.s_min, &rs485.s_max,
+                &rs485.sa_min, &rs485.sa_max,
+                rs485.libelle );
+       Admin_rs485_change ( client, &rs485 );
+     }
+    else if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_rs485_start ( client, num );

@@ -415,17 +415,56 @@
 /**********************************************************************************************************/
  gboolean Demarrer_rs485 ( void )
   { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Demande de demarrage"), getpid() );
+
     if (Partage->com_rs485.Thread_run == TRUE)
      { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: An instance is already running"),
                Partage->com_rs485.TID );
        return(FALSE);
      }
-    if (pthread_create( &Partage->com_rs485.TID, NULL, (void *)Run_rs485, NULL ))
+
+    Partage->com_rs485.dl_handle = dlopen( "libwatchdog-rs485.so", RTLD_LAZY );
+    if (!Partage->com_rs485.dl_handle)
+     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: dlopen failed"), dlerror() );
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rs485.Run_rs485 = dlsym( Partage->com_rs485.dl_handle, "Run_rs485" );
+    if (!Partage->com_rs485.Run_rs485)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Run_rs485 does not exist") );
+       dlclose( Partage->com_rs485.dl_handle );
+       Partage->com_rs485.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rs485.Ajouter_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Ajouter_rs485DB" );
+    if (!Partage->com_rfxcom.Ajouter_rs485DB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Ajouter_rs485DB does not exist") );
+       dlclose( Partage->com_rs485.dl_handle );
+       Partage->com_rs485.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rfxcom.Retirer_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Retirer_rs485DB" );
+    if (!Partage->com_rs485.Retirer_rs485DB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Retirer_rs485DB does not exist") );
+       dlclose( Partage->com_rs485.dl_handle );
+       Partage->com_rs485.dl_handle = NULL;
+       return(FALSE);
+     }
+                                                                              /* Recherche de la fonction */
+    Partage->com_rs485.Modifier_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Modifier_rs485DB" );
+    if (!Partage->com_rs485.Modifier_rs485DB)
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Modifier_rs485DB does not exist") );
+       dlclose( Partage->com_rs485.dl_handle );
+       Partage->com_rs485.dl_handle = NULL;
+       return(FALSE);
+     }
+
+    if ( pthread_create( &Partage->com_rs485.TID, NULL, (void *)Partage->com_rs485.Run_rs485, NULL ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rs485: thread rs485 seems to be running",
-                   Partage->com_rs485.TID ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running", Partage->com_rfxcom.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/

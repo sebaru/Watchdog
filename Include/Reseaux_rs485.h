@@ -29,17 +29,7 @@
  #define _RESEAUX_RS485_H_
 
 /********************************************* Gestion des rs485 ******************************************/
- struct CMD_TYPE_RS485
-  { guint id;                                                                    /* ID unique de la rs485 */
-    guint num;                                                                      /* Numéro de la rs485 */
-    guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
-    gboolean actif;
-    gint ea_min, ea_max;
-    gint e_min, e_max;
-    gint s_min, s_max;
-    gint sa_min, sa_max;
-    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
-  };
+
 
 /************************************************* Tag de communication ***********************************/
  enum 
