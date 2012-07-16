@@ -394,7 +394,7 @@ printf("fin Detruire page atelier\n");
 
     label = gtk_event_box_new ();
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( libelle ) );
-    gdk_color_parse ("darkgreen", &color);
+    gdk_color_parse ("green", &color);
     gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
     gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
     gtk_widget_show_all( label );

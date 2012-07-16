@@ -363,7 +363,7 @@
     g_snprintf( titre, sizeof(titre), "Dls: %s", rezo_dls->nom );
     label = gtk_event_box_new ();
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new(titre) );
-    gdk_color_parse ("darkred", &color);
+    gdk_color_parse ("red", &color);
     gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
     gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
     gtk_widget_show_all( label );
