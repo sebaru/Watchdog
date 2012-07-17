@@ -58,81 +58,98 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int E( int num )
-  { return( (num<NBR_ENTRE_TOR) && ((Partage->e[ num>>3 ]) & (1<<(num%8))) ); }
-
+  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ((Partage->e[ num>>3 ]) & (1<<(num%8)));
+    else Info_n (Config.log, DEBUG_INFO, "DLS: E : num out of range", num );
+    return(0);
+  }
 /**********************************************************************************************************/
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                */
 /**********************************************************************************************************/
  int EA_inrange( int num )
-  { if (num<NBR_ENTRE_ANA) return(Partage->ea[ num ].inrange);
-    else return(0);
+  { if (num>=0 && num<NBR_ENTRE_ANA) return(Partage->ea[ num ].inrange);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: EA_range : num out of range", num );
+    return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                       */
 /**********************************************************************************************************/
  double EA_ech( int num )
-  { if (num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
-    else return (0.0);
+  { if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech : num out of range", num );
+    return(0.0);
   }
 /**********************************************************************************************************/
 /* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_inf( double val, int num )
   { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) < val);
-    else return(0);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_inf : num out of range", num );
+    return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_inf_egal( double val, int num )
   { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) <= val);
-    else return(0);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_inf_egal : num out of range", num );
+    return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech_sup : Teste si la valeur de l'EA est sup à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_sup( double val, int num )
   { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) > val);
-    else return(0);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_sup : num out of range", num );
+    return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_sup_egal( double val, int num )
   { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) >= val);
-    else return(0);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_sup_egal : num out of range", num );
+    return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  float CI( int num )
   { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
-    else return (0.0);
+    else Info_n (Config.log, DEBUG_INFO, "DLS: CI : num out of range", num );
+    return(0.0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int A( int num )
-  { return( num<NBR_SORTIE_TOR && Partage->a[ num ].etat ); }
-  
+  { if ( num>=0 && num<NBR_SORTIE_TOR ) return (Partage->a[ num ].etat );
+    else Info_n (Config.log, DEBUG_INFO, "DLS: A : num out of range", num );
+    return(0);
+  }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'un bistable                                                                        */
 /**********************************************************************************************************/
  int B( int num )
-  { return( (gint)((num<NBR_BIT_BISTABLE) && ((Partage->b[ num>>3 ]) & (1<<(num%8)))) ); }
-
+  { if (num>=0 && num<NBR_BIT_BISTABLE) return( (Partage->b[ num>>3 ]) & (1<<(num%8)));
+    else Info_n (Config.log, DEBUG_INFO, "DLS: B : num out of range", num );
+    return(0);
+  }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'un monostable                                                                      */
 /**********************************************************************************************************/
  int M( int num )
-  { return( (num<NBR_BIT_MONOSTABLE) && ((Partage->m[ num>>3 ]) & (1<<(num%8))) ); }
-
+  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( (Partage->m[ num>>3 ]) & (1<<(num%8)));
+    else Info_n (Config.log, DEBUG_INFO, "DLS: M : num out of range", num );
+    return(0);
+  }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
  int TR( int num )
-  { return( (num<NBR_TEMPO) && Partage->Tempo_R[num].consigne &&
-                              (Partage->Tempo_R[num].consigne<=Partage->top) );
+  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].consigne &&
+                                         (Partage->Tempo_R[num].consigne<=Partage->top) );
+    else Info_n (Config.log, DEBUG_INFO, "DLS: TR : num out of range", num );
+    return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une tempo retard                                                                   */
@@ -147,15 +164,19 @@
 /* Renvoie la valeur complementée d'une tempo retard                                                      */
 /**********************************************************************************************************/
  int TRbarre( int num )
-  { return( (num<NBR_TEMPO) && Partage->Tempo_R[num].consigne &&
-                              (Partage->top<Partage->Tempo_R[num].consigne) );
+  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].consigne &&
+                                         (Partage->top<Partage->Tempo_R[num].consigne) );
+    else Info_n (Config.log, DEBUG_INFO, "DLS: TRbarre : num out of range", num );
+    return(0);
   }
-
 /**********************************************************************************************************/
 /* Met à jour l'entrée num                                                                                */
 /**********************************************************************************************************/
  void SE( int num, int etat )
-  { if (num>=NBR_ENTRE_TOR) return;
+  { if (num<0 || num>=NBR_ENTRE_TOR)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SE : num out of range", num );
+       return;
+     }
 
     if ( (E(num) && !etat) || (!E(num) && etat) )
      { Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat ); } 
@@ -169,14 +190,20 @@
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
-  { if (num>=NBR_ENTRE_ANA) return;
+  { if (num<0 || num>=NBR_ENTRE_ANA)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SEA_range : num out of range", num );
+       return;
+     }
     Partage->ea[num].inrange = range;
   }
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
 /**********************************************************************************************************/
  void SEA( int num, double val_avant_ech )
-  { if (num>=NBR_ENTRE_ANA) return;
+  { if (num<0 || num>=NBR_ENTRE_ANA)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SEA : num out of range", num );
+       return;
+     }
 
     if (Partage->ea[ num ].val_avant_ech != val_avant_ech)
      { Partage->ea[ num ].val_avant_ech = val_avant_ech;        /* Archive au mieux toutes les 5 secondes */
@@ -241,7 +268,10 @@
 /**********************************************************************************************************/
  void SB( int num, int etat )
   { gint numero, bit;
-    if (num>=NBR_BIT_BISTABLE) return;
+    if (num<0 || num>=NBR_BIT_BISTABLE)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SB : num out of range", num );
+       return;
+     }
     numero = num>>3;
     bit = 1<<(num & 0x07);
     if (etat)                                                                       /* Mise a jour du bit */
@@ -260,7 +290,10 @@
 /**********************************************************************************************************/
  void SM( int num, int etat )
   { gint numero, bit;
-    if (num>=NBR_BIT_MONOSTABLE) return;
+    if (num<0 || num>=NBR_BIT_MONOSTABLE)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SM : num out of range", num );
+       return;
+     }
     numero = num>>3;
     bit = 1<<(num & 0x07);
     if (etat)                                                                       /* Mise a jour du bit */
@@ -279,7 +312,10 @@
 /**********************************************************************************************************/
  void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
   { gint nbr;
-    if ( num>=NBR_BIT_CONTROLE ) return;
+    if ( num<0 || num>=NBR_BIT_CONTROLE )
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SI : num out of range", num );
+       return;
+     }
 
     if (Partage->i[num].etat   != etat || Partage->i[num].rouge!=rouge || 
         Partage->i[num].vert   != vert || Partage->i[num].bleu!=bleu ||
@@ -323,7 +359,11 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void STR( int num, int cons )
-  { if (num>=NBR_TEMPO) return;                                              /* Si pas deja en decomptage */
+  { if (num<0 || num>=NBR_TEMPO)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: STR: num out of range", num );
+       return;
+     }
+                                                                             /* Si pas deja en decomptage */
     if (!cons) Partage->Tempo_R[num].consigne = 0;                                     /* Raz de la tempo */
     else                                               /* Initialisation tempo, si elle ne l'est pas deja */
     if (!Partage->Tempo_R[num].consigne) Partage->Tempo_R[num].consigne = Partage->top + cons;
@@ -334,7 +374,10 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
-  { if (num>=NBR_SORTIE_TOR) return;
+  { if (num<0 || num>=NBR_SORTIE_TOR)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SA : num out of range", num );
+       return;
+     }
 
     if ( Partage->a[num].etat != etat )
      { Partage->a[num].etat = etat;
@@ -358,7 +401,10 @@
 /* Le compteur compte les MINUTES !!                                                                      */
 /**********************************************************************************************************/
  void SCH( int num, int etat )
-  { if (num>=NBR_COMPTEUR_H) return;
+  { if (num<0 || num>=NBR_COMPTEUR_H)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: SCH : num out of range", num );
+       return;
+     }
     if (etat)
      { if ( ! Partage->ch[ num ].actif )
         { Partage->ch[num].actif = TRUE;
@@ -382,7 +428,10 @@
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
  void SCI( int num, int etat, int reset, int ratio )
-  { if (num>=NBR_COMPTEUR_IMP) return;
+  { if (num<0 || num>=NBR_COMPTEUR_IMP)
+     { Info_n (Config.log, DEBUG_INFO, "DLS: CI : num out of range", num );
+       return;
+     }
     if (etat)
      { if (reset)                                                   /* Le compteur doit-il etre resetté ? */
         { Partage->ci[num].val_en_cours1 = 0.0;                /* Valeur transitoire pour gérer les ratio */
@@ -429,7 +478,10 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
-  { if ( num>=NBR_MESSAGE_ECRITS ) return;
+  { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
+     { Info_n (Config.log, DEBUG_INFO, "DLS: MSG : num out of range", num );
+       return;
+     }
 
     if ( Partage->g[num].etat != etat )
      { Partage->g[num].etat = etat;
@@ -473,7 +525,10 @@
   { GList *liste;
     liste = Cde_exterieure;
     while( liste )                                                               /* Reset des monostables */
-     { SM( GPOINTER_TO_INT(liste->data), 0 );
+     { gint num;
+       num = GPOINTER_TO_INT(liste->data);
+       Info_n( Config.log, DEBUG_INFO, "DLS: Raz_cde_exterieure : Mise a zero du bit M", num );
+       SM( num, 0 );
        liste = liste->next;
      }
     g_list_free( Cde_exterieure );
@@ -527,6 +582,7 @@
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
+          Info_n( Config.log, DEBUG_INFO, "DLS: Run_dls: Mise a un du bit M", num );
           Partage->com_dls.liste_m = g_list_remove ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           SM( num, 1 );                                                    /* Mise a un du bit monostable */
