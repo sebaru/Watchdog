@@ -90,6 +90,18 @@ This is the server side of Watchdog - RFXCOM Module
 %defattr(644,root,root)
 /usr/lib/libwatchdog-rfxcom*
 
+#----------------------------- Package Server-rs485 -------------------------------
+%package server-rs485
+Summary: The Watchdogd Server - Module RS485
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-rs485
+This is the server side of Watchdog - RS485 Module
+
+%files server-rs485
+%defattr(644,root,root)
+/usr/lib/libwatchdog-rs485*
+
 #----------------------------- Package Server-tellstick -------------------------------
 %package server-tellstick
 Summary: The Watchdogd Server - Module tellstick
