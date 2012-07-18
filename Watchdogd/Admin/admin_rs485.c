@@ -46,7 +46,7 @@
 /**********************************************************************************************************/
  void Admin_rs485_list ( struct CLIENT_ADMIN *client )
   { GList *liste_modules;
-    gchar chaine[128];
+    gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules RS485\n" );
     Write_admin ( client->connexion, chaine );

@@ -696,7 +696,7 @@ CREATE TABLE IF NOT EXISTS `onduleurs` (
 CREATE TABLE IF NOT EXISTS `rs485` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0',
-  `actif` tinyint(1) NOT NULL DEFAULT '0',
+  `enable` tinyint(1) NOT NULL DEFAULT '0',
   `ea_min` int(11) NOT NULL DEFAULT '-1',
   `ea_max` int(11) NOT NULL DEFAULT '-1',
   `e_min` int(11) NOT NULL DEFAULT '-1',
