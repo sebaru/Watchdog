@@ -140,7 +140,6 @@
 /**********************************************************************************************************/
  static void Deconnecter ( struct CLIENT *client )
   {
-    Libere_DB_SQL( Config.log, &client->Db_watchdog );
     client->mode = VALIDE;                            /* Envoi un dernier paquet "OFF" avant deconnexion" */
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
@@ -153,7 +152,7 @@
     pthread_mutex_destroy( &client->mutex_write );
     pthread_mutex_destroy( &client->mutex_struct_used );
     Info_n( Config.log, DEBUG_NETWORK, "SSRV: Deconnecter: Connexion stopped", client->connexion->socket );
-    if (client->util) { g_free( client->util ); }
+    if (client->util)         { g_free( client->util ); }
     if (client->bit_syns)     { g_list_free(client->bit_syns); }
     if (client->bit_init_syn) { g_list_free(client->bit_init_syn); }
     if (client->bit_capteurs) { g_list_foreach( client->bit_capteurs, (GFunc) g_free, NULL );
@@ -608,7 +607,6 @@
        Info_c( Config.log, DEBUG_SERVEUR, "SSRV: Run_serveur: deconnexion client", client->machine );
        Deconnecter(client);
      }
-    g_list_free(Partage->Sous_serveur[id].Clients);
 
     Partage->Sous_serveur[id].nb_client = -1;
     Partage->Sous_serveur[id].Clients   = NULL;
