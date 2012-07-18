@@ -61,7 +61,7 @@
 
        g_snprintf( chaine, sizeof(chaine),
                    " RS485[%02d] -> num=%d,enable=%s,bit=%d,ea=%03d-%03d,e=%03d-%03d,s=%03d-%03d,sa=%03d-%03d\n"
-                   "                started=%s,req=%d,ret=%d,next_get_ana=%d\n",
+                   "              started=%s,req=%d,ret=%d,next_get_ana=%d\n",
                    module->rs485.id, module->rs485.num,
                    (module->rs485.enable ? "TRUE" : "FALSE"),
                    module->rs485.bit_comm,
