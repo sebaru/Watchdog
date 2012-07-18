@@ -82,7 +82,7 @@
 /* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_inf( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) < val);
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
     else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_inf : num out of range", num );
     return(0);
   }
@@ -90,7 +90,7 @@
 /* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_inf_egal( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) <= val);
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
     else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_inf_egal : num out of range", num );
     return(0);
   }
@@ -98,7 +98,7 @@
 /* EA_ech_sup : Teste si la valeur de l'EA est sup à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_sup( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) > val);
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
     else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_sup : num out of range", num );
     return(0);
   }
@@ -106,7 +106,7 @@
 /* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_sup_egal( double val, int num )
-  { if (num<NBR_ENTRE_ANA && EA_inrange(num)) return (EA_ech(num) >= val);
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
     else Info_n (Config.log, DEBUG_INFO, "DLS: EA_ech_sup_egal : num out of range", num );
     return(0);
   }
