@@ -58,7 +58,7 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int E( int num )
-  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ((Partage->e[ num>>3 ]) & (1<<(num%8)));
+  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( ((Partage->e[ num>>3 ]) & (1<<(num%8)) ? 1 : 0) );
     else Info_n (Config.log, DEBUG_INFO, "DLS: E : num out of range", num );
     return(0);
   }
@@ -66,7 +66,7 @@
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                */
 /**********************************************************************************************************/
  int EA_inrange( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) return(Partage->ea[ num ].inrange);
+  { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
     else Info_n (Config.log, DEBUG_INFO, "DLS: EA_range : num out of range", num );
     return(0);
   }
@@ -122,7 +122,7 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int A( int num )
-  { if ( num>=0 && num<NBR_SORTIE_TOR ) return (Partage->a[ num ].etat );
+  { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
     else Info_n (Config.log, DEBUG_INFO, "DLS: A : num out of range", num );
     return(0);
   }
@@ -130,7 +130,7 @@
 /* Renvoie la valeur d'un bistable                                                                        */
 /**********************************************************************************************************/
  int B( int num )
-  { if (num>=0 && num<NBR_BIT_BISTABLE) return( (Partage->b[ num>>3 ]) & (1<<(num%8)));
+  { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
     else Info_n (Config.log, DEBUG_INFO, "DLS: B : num out of range", num );
     return(0);
   }
@@ -138,7 +138,7 @@
 /* Renvoie la valeur d'un monostable                                                                      */
 /**********************************************************************************************************/
  int M( int num )
-  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( (Partage->m[ num>>3 ]) & (1<<(num%8)));
+  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
     else Info_n (Config.log, DEBUG_INFO, "DLS: M : num out of range", num );
     return(0);
   }
