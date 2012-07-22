@@ -120,11 +120,12 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Creer_page_supervision ( gchar *libelle, guint syn_id )
-  { GtkWidget *bouton, *boite, *hboite, *scroll, *frame;
+  { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     GtkAdjustment *adj;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     static gint init_timer;
+    GdkColor color;
 
     page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -191,8 +192,14 @@
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
 
     gtk_widget_show_all( page->child );
-    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, gtk_label_new ( libelle ) );
- /*   infos->timer_id = g_timeout_add( 500, Timer, NULL );*/
+
+    label = gtk_event_box_new ();
+    gtk_container_add( GTK_CONTAINER(label), gtk_label_new ( libelle ) );
+    gdk_color_parse ("cyan", &color);
+    gtk_widget_modify_bg ( label, GTK_STATE_NORMAL, &color );
+    gtk_widget_modify_bg ( label, GTK_STATE_ACTIVE, &color );
+    gtk_widget_show_all( label );
+    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, label );
   }
 /**********************************************************************************************************/
 /* Proto_afficher_un_motif_supervision: Ajoute un motif sur la trame de supervision                       */
