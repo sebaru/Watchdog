@@ -55,16 +55,18 @@
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- static gboolean Charger_une_librairie ( gchar *nom )
+ static gboolean Charger_une_librairie ( gchar *path, gchar *nom )
   { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
+    gchar nom_absolu[128];
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
     if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: MemoryAlloc failed" );
                 return(FALSE);
               }
 
-    lib->dl_handle = dlopen( nom, RTLD_LAZY );
+    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom );
+    lib->dl_handle = dlopen( nom_absolu, RTLD_LAZY );
     if (!lib->dl_handle)
      { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté ", nom );
        Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: -- sur ouverture", dlerror() );
@@ -139,15 +141,15 @@
   { struct dirent *fichier;
     DIR *repertoire;
 
-    repertoire = opendir ( "/usr/include" );                    /* Ouverture du répertoire des librairies */
+    repertoire = opendir ( "/usr/local/lib" );                    /* Ouverture du répertoire des librairies */
     if (!repertoire)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", "/usr/include" );
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", "/usr/local/lib" );
        return;
      }
 
     while( (fichier = readdir( repertoire )) )                  /* Pour chacun des fichiers du répertoire */
      { if ( strncmp( fichier->d_name, "libwatchdog-server-", 19 ))
-        { Charger_une_librairie( fichier->d_name ); }              /* Chargement unitaire d'une librairie */
+        { Charger_une_librairie( "/usr/local/lib", fichier->d_name ); }/* Chargement unitaire d'une librairie */
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
 
