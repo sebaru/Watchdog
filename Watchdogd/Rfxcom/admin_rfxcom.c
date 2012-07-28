@@ -26,6 +26,7 @@
  */
  
  #include <glib.h>
+ #include "Rfxcom.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
@@ -34,10 +35,10 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_rfxcom_reload ( struct CLIENT_ADMIN *client )
-  { Partage->com_rfxcom.Thread_reload = TRUE;
+  { /*Partage->com_rfxcom.Thread_reload = TRUE;
     Write_admin ( client->connexion, " RFXCOM Reloading in progress\n" );
     while (Partage->com_rfxcom.Thread_reload) sched_yield();
-    Write_admin ( client->connexion, " RFXCOM Reloading done\n" );
+    Write_admin ( client->connexion, " RFXCOM Reloading done\n" );*/
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                           */
@@ -47,7 +48,7 @@
  static void Admin_rfxcom_list ( struct CLIENT_ADMIN *client )
   { GList *liste_modules;
     gchar chaine[512];
-
+/*
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules/capteurs RFXCOM\n" );
     Write_admin ( client->connexion, chaine );
 
@@ -68,7 +69,7 @@
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
-     }
+     }*/
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_del: Retire le capteur/module rfxcom dont l'id est en parametre                           */
@@ -77,7 +78,7 @@
 /**********************************************************************************************************/
  static void Admin_rfxcom_del ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128];
-
+/*
     g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rfxcom %d\n", id );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
@@ -93,7 +94,7 @@
     else
      { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
        Write_admin ( client->connexion, chaine );
-     }
+     }*/
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_add: Ajoute un capteur/module RFXCOM                                                      */
@@ -102,7 +103,7 @@
 /**********************************************************************************************************/
  static void Admin_rfxcom_add ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
-
+/*
     g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rfxcom\n" );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
@@ -120,7 +121,7 @@
     else
      { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
        Write_admin ( client->connexion, chaine );
-     }
+     }*/
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_change: Modifie la configuration d'un capteur RFXCOM                                      */
@@ -129,7 +130,7 @@
 /**********************************************************************************************************/
  static void Admin_rfxcom_change ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
-
+/*
     g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rfxcom\n" );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
@@ -145,7 +146,7 @@
     else
      { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
        Write_admin ( client->connexion, chaine );
-     }
+     }*/
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom          */
@@ -173,8 +174,8 @@
        Admin_rfxcom_change ( client, &rfxcom );
      }
     else if ( ! strcmp ( commande, "cmd" ) )
-     { sscanf ( ligne, "%s %d %d %d %d %d %d %d", commande,          /* Découpage de la ligne de commande */
-                &Partage->com_rfxcom.learn.id1, &Partage->com_rfxcom.learn.id2,
+     { /*sscanf ( ligne, "%s %d %d %d %d %d %d %d", commande,          /* Découpage de la ligne de commande */
+         /*       &Partage->com_rfxcom.learn.id1, &Partage->com_rfxcom.learn.id2,
                 &Partage->com_rfxcom.learn.id3, &Partage->com_rfxcom.learn.id4,
                 &Partage->com_rfxcom.learn.unitcode,
                 &Partage->com_rfxcom.learn.cmd,
@@ -182,7 +183,7 @@
                );
        Partage->com_rfxcom.Thread_commande = TRUE;
        Write_admin ( client->connexion, " RFXCOM Sending CMD....\n" );
-       while (Partage->com_rfxcom.Thread_commande) sched_yield();
+       while (Partage->com_rfxcom.Thread_commande) sched_yield();*/
        Write_admin ( client->connexion, " RFXCOM Done.\n" );
      }
     else if ( ! strcmp ( commande, "del" ) )

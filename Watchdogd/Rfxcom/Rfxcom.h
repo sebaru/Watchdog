@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Include/Rfxcom.h        Déclaration structure internes des communication RFXCOM              */
+/* Watchdogd/Rfxcom/Rfxcom.h        Déclaration structure internes des communication RFXCOM               */
 /* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 27 mai 2012 13:02:55 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -29,7 +29,7 @@
  #define _RFXCOM_H_
 
  #define NOM_TABLE_MODULE_RFXCOM   "rfxcom"
-
+ #define NBR_CARAC_LIBELLE_RFXCOM  32
  #define TAILLE_ENTETE_RFXCOM    1
 
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
@@ -45,7 +45,7 @@
     guchar type;                                                                   /* Numéro de la rfxcom */
     guchar canal;                                                                  /* Numéro de la rfxcom */
     gint e_min, ea_min, a_min;
-    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rfxcom */
+    gchar libelle[NBR_CARAC_LIBELLE_RFXCOM];                                      /* Libelle de la rfxcom */
   };
 
  struct MODULE_RFXCOM
@@ -53,26 +53,7 @@
     time_t date_last_view;
   };
 
-
- struct COM_RFXCOM                                                           /* Communication vers RFXCOM */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
-
-    void (*Run_rfxcom)(void);                                 /* Fonction principale de gestion du thread */
-    gint     (*Ajouter_rfxcomDB)   ( struct RFXCOMDB *rfxcom );
-    gboolean (*Retirer_rfxcomDB)   ( gint id );
-    gboolean (*Modifier_rfxcomDB)  ( struct RFXCOMDB *rfxcom );
-
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *Modules_RFXCOM;                                                   /* Listes des modules RFXCOM */
-    struct RFXCOM_SEND_LEARN
-     { gint id1, id2, id3, id4, unitcode, cmd, level;
-     } learn;
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-    gboolean Thread_commande;                         /* TRUE si le thread doit enoyer une commande learn */
-  };
+ GList *Modules_RFXCOM;                                                      /* Listes des modules RFXCOM */
 
 /*************************************** Définitions des prototypes ***************************************/
 #endif

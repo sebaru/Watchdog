@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 lib_LTLIBRARIES                         = libwatchdog-server-rfxcom.la
-libwatchdog_server_rfxcom_la_SOURCES    = Rfxcom.c admin_rfxcom.c
+libwatchdog_server_rfxcom_la_SOURCES    = Rfxcom.c Rfxcom.h admin_rfxcom.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \

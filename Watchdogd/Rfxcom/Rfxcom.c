@@ -35,9 +35,8 @@
  #include <fcntl.h>
  #include <unistd.h>
 
+ #include "Rfxcom.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
-
- static GList *Modules_RFXCOM;                                  /* Liste des actionneurs/capteurs RFXCOM */
 
 /**********************************************************************************************************/
 /* Retirer_rfxcomDB: Elimination d'un module rfxcom                                                       */

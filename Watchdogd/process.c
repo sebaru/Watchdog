@@ -517,7 +517,7 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running", Partage->com_rfxcom.TID ); }
+    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running", Partage->com_rs485.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/

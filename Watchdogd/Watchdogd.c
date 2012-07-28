@@ -538,7 +538,6 @@
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
        memset( &Partage->com_lirc,     0, sizeof(Partage->com_lirc) );
        memset( &Partage->com_tellstick,0, sizeof(Partage->com_tellstick) );
-       memset( &Partage->com_rfxcom,   0, sizeof(Partage->com_rfxcom) );
 
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        
@@ -555,7 +554,6 @@
        pthread_mutex_init( &Partage->com_tellstick.synchro, &attr );
        pthread_mutex_init( &Partage->com_lirc.synchro, &attr );
        pthread_mutex_init( &Partage->com_modbus.synchro, &attr );
-       pthread_mutex_init( &Partage->com_rfxcom.synchro, &attr );
  
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)

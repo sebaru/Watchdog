@@ -34,7 +34,9 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne )
-  { gchar commande[128];
+  { struct LIBRAIRIE *lib;
+    GSList *liste;
+    gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
@@ -105,7 +107,6 @@
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
        if ( ! strcmp ( thread, "rs485"     ) ) { Partage->com_rs485.Thread_run     = FALSE; } else
-       if ( ! strcmp ( thread, "rfxcom"    ) ) { Partage->com_rfxcom.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "sms"       ) ) { Partage->com_sms.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
@@ -181,11 +182,14 @@
        Write_admin ( client->connexion, chaine );
 
 
-       g_snprintf( chaine, sizeof(chaine), " Library RFXCOM    -> loaded = %s, running = %s, TID = %d\n",
-                   (Partage->com_rfxcom.dl_handle ? "YES" : " NO"),
-                   (Partage->com_rfxcom.Thread_run ? "YES" : " NO"), (gint)Partage->com_rfxcom.TID
-                 );
-       Write_admin ( client->connexion, chaine );
+       liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
+       while(liste)
+        { lib = (struct LIBRAIRIE *)liste->data;
+          g_snprintf( chaine,    sizeof(chaine),    "  Library %s -> running = %s, TID = %d\n",
+                      lib->nom, (lib->Thread_run == TRUE ? "YES" : " NO"), lib->TID );
+          Write_admin ( client->connexion, chaine );
+          liste = liste->next;
+        }
 
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
