@@ -35,7 +35,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne )
-  { gchar commande[128], chaine[128];
+  { struct LIBRAIRIE *lib;
+    GSList *liste;
+    gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
@@ -60,6 +62,17 @@
        Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
        Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
        Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,asterisk,lirc)\n" );
+
+       liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
+       while(liste)
+        { lib = (struct LIBRAIRIE *)liste->data;
+          memset( chaine, ' ', sizeof(chaine) );
+          g_snprintf( chaine,    sizeof(chaine),    "  %s", lib->admin_prompt );
+          g_snprintf( chaine+26, sizeof(chaine)-26, "- %s\n", lib->admin_help );
+          Write_admin ( client->connexion, chaine );
+          liste = liste->next;
+        }
+
        Write_admin ( client->connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )

@@ -82,6 +82,7 @@
     void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
     gchar nom[128];
     gchar admin_prompt[32];                                        /* Prompt auquel va répondre le thread */
+    gchar admin_help[64];                                          /* Designation de l'activité du thread */
 
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */

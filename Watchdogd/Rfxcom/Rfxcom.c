@@ -413,6 +413,7 @@
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "rfxcom" );
+    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage RFXCOM sensors" );
 
     fd_rfxcom = Init_rfxcom();
     if (fd_rfxcom<0)                                                       /* On valide l'acces aux ports */
