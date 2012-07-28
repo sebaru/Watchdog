@@ -127,3 +127,15 @@ This is the server side of Watchdog - Lirc Module
 /usr/share/Watchdog/lircrc
 /usr/lib/libwatchdog-lirc*
 
+#----------------------------- Package Server-rfxcom ----------------------------------
+%package server-rfxcom
+Summary: The Watchdogd Server - Module RFXCOM
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-rfxcom
+This is the server side of Watchdog - RFXCOM Module
+
+%files server-rfxcom
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-rfxcom*
+
