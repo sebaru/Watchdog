@@ -258,6 +258,7 @@
                "RFXCOM: Init_rfxcom: Impossible d'ouvrir le port rfxcom", Config.port_rfxcom );
        Info_n( Config.log, DEBUG_RFXCOM,
                "RFXCOM: Init_rfxcom: Code retour                      ", fd );
+       return(-1);
      }
     else
      { memset(&oldtio, 0, sizeof(oldtio) );
@@ -417,7 +418,7 @@
 
     fd_rfxcom = Init_rfxcom();
     if (fd_rfxcom<0)                                                       /* On valide l'acces aux ports */
-     { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM impossible, terminé");
+     { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
        Partage->com_rfxcom.TID = 0;                       /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
