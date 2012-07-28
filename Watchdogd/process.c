@@ -136,7 +136,6 @@
  void Charger_librairies ( void )
   { struct dirent *fichier;
     DIR *repertoire;
-    gint cpt;
 
     repertoire = opendir ( "/usr/include" );                    /* Ouverture du répertoire des librairies */
     if (!repertoire)
@@ -793,7 +792,7 @@
   }
 /**********************************************************************************************************/
 /* Stopper_fils: arret de tous les fils Watchdog                                                          */
-/* Entrée/Sortie: rien                                                                                    */
+/* Entrée/Sortie: flag = TRUE si on demande aussi l'arret du thread Admin                                 */
 /**********************************************************************************************************/
  void Stopper_fils ( gint flag )
   { gint i;

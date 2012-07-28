@@ -635,9 +635,12 @@
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
         { Info( Config.log, DEBUG_INFO, "MSRV: Pb Admin -> Arret" ); }
 
+       Charger_librairies();
+
        pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
        pthread_join( TID, NULL );
        Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
+       Decharger_librairies();
        if (Config.ssl_crypt) SSL_CTX_free( Ssl_ctx );                               /* Libération mémoire */
      }
 
