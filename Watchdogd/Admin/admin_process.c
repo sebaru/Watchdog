@@ -54,10 +54,6 @@
         { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RS485 -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "rfxcom" ) )
-        { if (!Demarrer_rfxcom())                                        /* Demarrage gestion module RS485 */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RFXCOM -> Arret" ); }
-        } else
        if ( ! strcmp ( thread, "modbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb MODBUS -> Arret" ); }

@@ -402,7 +402,7 @@
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Rfxcom                                                             */
 /**********************************************************************************************************/
- void Run_rfxcom ( void )
+ void Run_thread ( struct LIBRAIRIE *lib )
   { struct TRAME_RFXCOM Trame;
     gint retval, nbr_oct_lu;
     struct timeval tv;
@@ -411,6 +411,8 @@
 
     prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
+
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "rfxcom" );
 
     fd_rfxcom = Init_rfxcom();
     if (fd_rfxcom<0)                                                       /* On valide l'acces aux ports */

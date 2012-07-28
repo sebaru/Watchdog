@@ -625,9 +625,6 @@
           if (!Demarrer_lirc())                                                         /* Démarrage Lirc */
            { Info( Config.log, DEBUG_INFO, "MSRV: Pb LIRC" ); }
 
-          if (!Demarrer_rfxcom())                                                         /* Démarrage Lirc */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb RFXCOM" ); }
-
           if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
            { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
         }

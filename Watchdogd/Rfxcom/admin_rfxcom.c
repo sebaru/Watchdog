@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Admin/admin_rfxcom.c        Gestion des connexions Admin RFXCOM au serveur watchdog          */
+/* Watchdogd/Rfxcom/admin_rfxcom.c        Gestion des connexions Admin RFXCOM au serveur watchdog         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                    mer. 13 juin 2012 23:02:08 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -152,7 +152,7 @@
 /* Entrée: le client d'admin et la ligne de commande                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_rfxcom ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */

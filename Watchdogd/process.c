@@ -56,7 +56,8 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  static gboolean Charger_une_librairie ( gchar *nom )
-  { struct LIBRAIRIE *lib;
+  { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
+    struct LIBRAIRIE *lib;
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
     if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: MemoryAlloc failed" );
@@ -91,6 +92,10 @@
 
     Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: loaded", nom );
 
+    pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
+    pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
+    pthread_mutex_init( &lib->synchro, &attr );
+
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
@@ -120,6 +125,7 @@
         { lib->Thread_run = FALSE;
           pthread_join( lib->TID, NULL );                                           /* Attente fin thread */
         }
+       pthread_mutex_destroy( &lib->synchro );
        dlclose( lib->dl_handle );
        Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
                                                          /* Destruction de l'entete associé dans la GList */
@@ -421,65 +427,6 @@
        return(FALSE);
      }
     else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running", Partage->com_tellstick.TID ); }
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Demarrer_rfxcom: Thread un process RFXCOM                                                              */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_rfxcom ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Demande de demarrage"), getpid() );
-
-    if (Partage->com_rfxcom.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: An instance is already running"),
-               Partage->com_rfxcom.TID );
-       return(FALSE);
-     }
-
-    Partage->com_rfxcom.dl_handle = dlopen( "libwatchdog-rfxcom.so", RTLD_LAZY );
-    if (!Partage->com_rfxcom.dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: dlopen failed"), dlerror() );
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rfxcom.Run_rfxcom = dlsym( Partage->com_rfxcom.dl_handle, "Run_rfxcom" );
-    if (!Partage->com_rfxcom.Run_rfxcom)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Run_rfxcom does not exist") );
-       dlclose( Partage->com_rfxcom.dl_handle );
-       Partage->com_rfxcom.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rfxcom.Ajouter_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Ajouter_rfxcomDB" );
-    if (!Partage->com_rfxcom.Ajouter_rfxcomDB)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Ajouter_rfxcomDB does not exist") );
-       dlclose( Partage->com_rfxcom.dl_handle );
-       Partage->com_rfxcom.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rfxcom.Retirer_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Retirer_rfxcomDB" );
-    if (!Partage->com_rfxcom.Retirer_rfxcomDB)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Retirer_rfxcomDB does not exist") );
-       dlclose( Partage->com_rfxcom.dl_handle );
-       Partage->com_rfxcom.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rfxcom.Modifier_rfxcomDB = dlsym( Partage->com_rfxcom.dl_handle, "Modifier_rfxcomDB" );
-    if (!Partage->com_rfxcom.Modifier_rfxcomDB)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: Modifier_rfxcomDB does not exist") );
-       dlclose( Partage->com_rfxcom.dl_handle );
-       Partage->com_rfxcom.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    if ( pthread_create( &Partage->com_rfxcom.TID, NULL, (void *)Partage->com_rfxcom.Run_rfxcom, NULL ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rfxcom: pthread_create failed") );
-       return(FALSE);
-     }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running", Partage->com_rfxcom.TID ); }
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -828,13 +775,6 @@
        pthread_join( Partage->com_rs485.TID, NULL );                                 /* Attente fin RS485 */
      }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), Partage->com_rs485.TID );
-
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RFXCOM to finish"), Partage->com_rfxcom.TID );
-    if (Partage->com_rfxcom.Thread_run == TRUE)
-     { Partage->com_rfxcom.Thread_run = FALSE;
-       pthread_join( Partage->com_rfxcom.TID, NULL );                               /* Attente fin RFXCOM */
-     }
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RFXCOM is down"), Partage->com_rfxcom.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
     if (Partage->com_tellstick.Thread_run == TRUE)

@@ -81,13 +81,14 @@
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
     gchar nom[128];
+    gchar admin_prompt[32];                                        /* Prompt auquel va répondre le thread */
 
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );              /* Fonction principale de gestion du thread */
-    void (*Admin_command)( gint fd );                        /* Fonction de gestion des commandes d'admin */
+    void (*Admin_command)( struct CLIENT_ADMIN *client, gchar *ligne );/* Fonction de gestion des commandes d'admin */
   };
 
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
@@ -193,7 +194,6 @@
  extern gboolean Demarrer_motion_detect ( void );
  extern gboolean Demarrer_tellstick ( void );
  extern gboolean Demarrer_lirc ( void );
- extern gboolean Demarrer_rfxcom ( void );
  extern gboolean Demarrer_sous_serveur ( int id );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
