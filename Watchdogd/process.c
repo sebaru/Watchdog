@@ -26,15 +26,19 @@
  */
 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
- #include <sys/wait.h>
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <unistd.h>
+ #include <stdlib.h>
+ #include <dirent.h>
+ #include <string.h>
+ #include <stdio.h>
+
+ #include <bonobo/bonobo-i18n.h>
+ #include <sys/wait.h>
  #include <fcntl.h>
  #include <errno.h>
  #include <openssl/ssl.h>
- #include <string.h>
  #include <dlfcn.h>
 
 /******************************************** Prototypes de fonctions *************************************/
@@ -46,6 +50,116 @@
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
 
+/**********************************************************************************************************/
+/* Charger_une_librarie: Ouverture d'une librairie par son nom                                            */
+/* Entrée: Le nom de fichier correspondant                                                                */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ static gboolean Charger_une_librairie ( struct PLUGIN_DLS *dls )
+  { gchar nom_fichier_absolu[60];
+    void (*Go)(int);
+    void *handle;
+
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
+
+    handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
+    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté ", dls->plugindb.id );
+                   Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: -- sur ouverture", dlerror() );
+                   return(FALSE);
+                 }
+    Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
+    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté sur absence GO", dls->plugindb.id ); 
+               dlclose( handle );
+               return(FALSE);
+             }
+
+    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: id", dls->plugindb.id );
+    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
+    dls->handle   = handle;
+    dls->go       = Go;
+    dls->starting = 1;
+    dls->conso    = 0.0;
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, dls );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Decharger_une_librairie_par_nom: Retire une librairie et libere la mémoire                             */
+/* Entrée: Le nom de la librairie a terminer                                                              */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Decharger_une_librarie_par_nom ( gint id )
+  { struct PLUGIN_DLS *plugin;
+    GList *plugins;
+
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    plugins = Partage->com_dls.Plugins;
+    while(plugins)                                                       /* Liberation mémoire des modules */
+     { plugin = (struct PLUGIN_DLS *)plugins->data;
+
+       if ( plugin->plugindb.id == id )
+        { dlclose( plugin->handle );
+          Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
+          g_free( plugin );
+          Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_un_plugin_by_id: Dechargé", plugin->plugindb.id );
+          break;
+        }
+       plugins = plugins->next;
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/**********************************************************************************************************/
+/* Decharger_librairies: Decharge toutes les librairies                                                   */
+/* Entrée: Rien                                                                                           */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Decharger_librairies ( void )
+  { struct LIBRAIRIE *lib;
+
+    pthread_mutex_lock( &Partage->com_msrv.synchro );
+    while(Partage->msrv.Librairies)                                     /* Liberation mémoire des modules */
+     { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
+       Info_n( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: trying to unload", lib->nom );
+       if (lib->Thread_run == TRUE)
+        { lib->Thread_run = FALSE;
+          pthread_join( lib>Thread_ID, NULL );                                      /* Attente fin thread */
+        }
+       dlclose( lib->handle );
+       Partage->com_msrv.Librairies = g_list_remove( Partage->com_dls.Librairies, lib );
+                                                         /* Destruction de l'entete associé dans la GList */
+       Info_n( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: library unloaded", lib->nom );
+       g_free( lib );
+     }
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                         */
+/* Entrée: Rien                                                                                           */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Charger_librairies ( void )
+  { struct dirent *fichier;
+    DIR *repertoire;
+    gint cpt;
+
+    repertoire = opendir ( Config.library_dir );                /* Ouverture du répertoire des librairies */
+    if (!repertoire)
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", Config.library_dir );
+       return;
+     }
+
+    while( (fichier = readdir( repertoire )) )                  /* Pour chacun des fichiers du répertoire */
+     { if ( strncmp( fichier->d_name, "libwatchdog-server-", 19 ))
+        { Charger_une_librairie( fichier->d_name ); }              /* Chargement unitaire d'une librairie */
+     }
+    closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
+
+    pthread_mutex_lock( &Partage->com_msrv.synchro );
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Number of Library loaded",
+            g_list_length( Partage->com_msrv.Librairies ) );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+  }
 /**********************************************************************************************************/
 /* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
 /* Entrée: rien                                                                                           */

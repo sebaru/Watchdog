@@ -140,7 +140,7 @@
     Charger_un_plugin_by_id ( id );
   }
 /**********************************************************************************************************/
-/* Retirer_plugins: Decharge toutes les librairies                                                        */
+/* Decharger_plugins: Decharge tous les plugins DLS                                                       */
 /* Entrée: Rien                                                                                           */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
@@ -148,7 +148,7 @@
   { struct PLUGIN_DLS *plugin;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    while(Partage->com_dls.Plugins)                                                       /* Liberation mémoire des modules */
+    while(Partage->com_dls.Plugins)                                     /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)Partage->com_dls.Plugins->data;
        Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: tentative dechargement:", plugin->plugindb.id );
        dlclose( plugin->handle );
