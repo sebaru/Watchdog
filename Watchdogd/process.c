@@ -148,8 +148,10 @@
      }
 
     while( (fichier = readdir( repertoire )) )                  /* Pour chacun des fichiers du répertoire */
-     { if ( strncmp( fichier->d_name, "libwatchdog-server-", 19 ))
-        { Charger_une_librairie( "/usr/local/lib", fichier->d_name ); }/* Chargement unitaire d'une librairie */
+     { if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 )) /* Chargement unitaire d'une librairie */
+        { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
+           { Charger_une_librairie( "/usr/local/lib", fichier->d_name ); }
+        }
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
 
