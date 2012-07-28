@@ -96,9 +96,7 @@
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &lib->synchro, &attr );
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
      { Info( Config.log, DEBUG_INFO, _("MSRV: Charger_une_librairie: pthread_create failed") );
@@ -117,7 +115,6 @@
  void Decharger_librairies ( void )
   { struct LIBRAIRIE *lib;
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );
     while(Partage->com_msrv.Librairies)                                 /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
        Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: trying to unload", lib->nom );
@@ -132,7 +129,6 @@
        Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: library unloaded", lib->nom );
        g_free( lib );
      }
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
 /* Charger_librairies: Ouverture de toutes les librairies possibles pour Watchdog                         */
@@ -155,10 +151,8 @@
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );
     Info_n( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Number of Library loaded",
             g_slist_length( Partage->com_msrv.Librairies ) );
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
 /* Demarrer_onduleur: Thread un process ONDULEUR                                                          */

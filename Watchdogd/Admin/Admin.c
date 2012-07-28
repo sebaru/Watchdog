@@ -147,6 +147,8 @@
 /**********************************************************************************************************/
  static void Ecouter_admin ( struct CLIENT_ADMIN *client )
   { gchar ligne[128], commande[128], chaine[128];
+    struct LIBRAIRIE *lib;
+    GSList *liste;
     gint taille;
 
     memset( ligne, 0, sizeof(ligne) );
@@ -169,6 +171,15 @@
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "sms"       ) ) { Admin_sms      ( client, ligne + 4);  }
        else                                           { Admin_running  ( client, ligne ); }
+
+
+       liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
+       while(liste)
+        { lib = (struct LIBRAIRIE *)liste->data;
+          if ( ! strcmp( commande, lib->admin_prompt ) )
+           { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 ); }
+          liste = liste->next;
+        }
 
        g_snprintf( chaine, sizeof(chaine), "\n" );
        Write_admin ( client->connexion, chaine );
