@@ -76,6 +76,20 @@
  #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
  #define FICHIER_EXPORT              "export.wdg"
 
+ struct LIBRAIRIE
+  { pthread_t TID;                                                               /* Identifiant du thread */
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
+    void *dl_handle;                                          /* handle de gestion de la librairie rfxcom */
+    gchar nom[128];
+
+    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
+
+    void (*Run_thread)( struct LIBRAIRIE *lib );              /* Fonction principale de gestion du thread */
+    void (*Admin_command)( gint fd );                        /* Fonction de gestion des commandes d'admin */
+  };
+
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
   { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
@@ -88,6 +102,7 @@
     GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
     GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
     gboolean reset_motion_detect;
+    GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
   };
 
  struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */
@@ -180,6 +195,8 @@
  extern gboolean Demarrer_lirc ( void );
  extern gboolean Demarrer_rfxcom ( void );
  extern gboolean Demarrer_sous_serveur ( int id );
+ extern void Charger_librairies ( void );
+ extern void Decharger_librairies ( void );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

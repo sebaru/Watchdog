@@ -55,59 +55,54 @@
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- static gboolean Charger_une_librairie ( struct PLUGIN_DLS *dls )
-  { gchar nom_fichier_absolu[60];
-    void (*Go)(int);
-    void *handle;
+ static gboolean Charger_une_librairie ( gchar *nom )
+  { struct LIBRAIRIE *lib;
 
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
+    lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
+    if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: MemoryAlloc failed" );
+                return(FALSE);
+              }
 
-    handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
-    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté ", dls->plugindb.id );
-                   Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: -- sur ouverture", dlerror() );
-                   return(FALSE);
-                 }
-    Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté sur absence GO", dls->plugindb.id ); 
-               dlclose( handle );
-               return(FALSE);
-             }
-
-    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: id", dls->plugindb.id );
-    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
-    dls->handle   = handle;
-    dls->go       = Go;
-    dls->starting = 1;
-    dls->conso    = 0.0;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, dls );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Decharger_une_librairie_par_nom: Retire une librairie et libere la mémoire                             */
-/* Entrée: Le nom de la librairie a terminer                                                              */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
- void Decharger_une_librarie_par_nom ( gint id )
-  { struct PLUGIN_DLS *plugin;
-    GList *plugins;
-
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    plugins = Partage->com_dls.Plugins;
-    while(plugins)                                                       /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
-
-       if ( plugin->plugindb.id == id )
-        { dlclose( plugin->handle );
-          Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
-          g_free( plugin );
-          Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_un_plugin_by_id: Dechargé", plugin->plugindb.id );
-          break;
-        }
-       plugins = plugins->next;
+    lib->dl_handle = dlopen( nom, RTLD_LAZY );
+    if (!lib->dl_handle)
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté ", nom );
+       Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: -- sur ouverture", dlerror() );
+       g_free(lib);
+       return(FALSE);
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+
+    lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
+    if (!lib->Run_thread)
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté sur absence Run_thread", nom ); 
+       dlclose( lib->dl_handle );
+       g_free(lib);
+       return(FALSE);
+     }
+
+    lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
+    if (!lib->Admin_command)
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté sur absence Admin_command", nom ); 
+       dlclose( lib->dl_handle );
+       g_free(lib);
+       return(FALSE);
+     }
+
+    g_snprintf( lib->nom, sizeof(lib->nom), "%s", nom );
+
+    Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: loaded", nom );
+
+    pthread_mutex_lock( &Partage->com_msrv.synchro );
+    Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+    if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Charger_une_librairie: pthread_create failed") );
+       return(FALSE);
+     }
+    else
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: thread seems to be running", nom ); }
+    
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                   */
@@ -118,17 +113,17 @@
   { struct LIBRAIRIE *lib;
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
-    while(Partage->msrv.Librairies)                                     /* Liberation mémoire des modules */
+    while(Partage->com_msrv.Librairies)                                 /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
-       Info_n( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: trying to unload", lib->nom );
+       Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: trying to unload", lib->nom );
        if (lib->Thread_run == TRUE)
         { lib->Thread_run = FALSE;
-          pthread_join( lib>Thread_ID, NULL );                                      /* Attente fin thread */
+          pthread_join( lib->TID, NULL );                                           /* Attente fin thread */
         }
-       dlclose( lib->handle );
-       Partage->com_msrv.Librairies = g_list_remove( Partage->com_dls.Librairies, lib );
+       dlclose( lib->dl_handle );
+       Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
                                                          /* Destruction de l'entete associé dans la GList */
-       Info_n( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: library unloaded", lib->nom );
+       Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: library unloaded", lib->nom );
        g_free( lib );
      }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
@@ -143,9 +138,9 @@
     DIR *repertoire;
     gint cpt;
 
-    repertoire = opendir ( Config.library_dir );                /* Ouverture du répertoire des librairies */
+    repertoire = opendir ( "/usr/include" );                    /* Ouverture du répertoire des librairies */
     if (!repertoire)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", Config.library_dir );
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", "/usr/include" );
        return;
      }
 
@@ -157,7 +152,7 @@
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     Info_n( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Number of Library loaded",
-            g_list_length( Partage->com_msrv.Librairies ) );
+            g_slist_length( Partage->com_msrv.Librairies ) );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
