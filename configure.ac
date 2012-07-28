@@ -136,6 +136,7 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \
 Watchdogd/Tellstick/Makefile \
 Watchdogd/Rfxcom/Makefile \
+Watchdogd/Imsg/Makefile \
 Watchdogd/Lirc/Makefile \
 Watchdogd/EntreeANA/Makefile \
 Watchdogd/Message/Makefile \
