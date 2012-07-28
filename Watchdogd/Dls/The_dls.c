@@ -548,8 +548,6 @@
     timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                /* = 10 fois par secondes */
     setitimer( ITIMER_REAL, &timer, NULL );                                            /* Active le timer */
 
-    sleep(10);/* attente 10 secondes pour initialisation des bit internes et collection des infos modules */
-
     Info( Config.log, DEBUG_DLS, "DLS: demarrage" );                                        /* Log Start */
              
     Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
@@ -558,6 +556,9 @@
     Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
+
+    sleep(10);/* attente 10 secondes pour initialisation des bit internes et collection des infos modules */
+
     while(Partage->com_dls.Thread_run == TRUE)                           /* On tourne tant que necessaire */
      { struct timeval tv_avant, tv_apres;
 

@@ -754,76 +754,56 @@
      }
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), Partage->com_dls.TID );
-    if (Partage->com_dls.Thread_run == TRUE)
-     { Partage->com_dls.Thread_run = FALSE;
-       pthread_join( Partage->com_dls.TID, NULL );                                     /* Attente fin DLS */
-     }
+    Partage->com_dls.Thread_run = FALSE;
+    pthread_join( Partage->com_dls.TID, NULL );                                        /* Attente fin DLS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
-    if (Partage->com_onduleur.Thread_run == TRUE)
-     { Partage->com_onduleur.Thread_run = FALSE;
-       pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
-     }
+    Partage->com_onduleur.Thread_run = FALSE;
+    pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
-    if (Partage->com_rs485.Thread_run == TRUE)
-     { Partage->com_rs485.Thread_run = FALSE;
-       pthread_join( Partage->com_rs485.TID, NULL );                                 /* Attente fin RS485 */
-     }
+    Partage->com_rs485.Thread_run = FALSE;
+    pthread_join( Partage->com_rs485.TID, NULL );                                 /* Attente fin RS485 */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), Partage->com_rs485.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
-    if (Partage->com_tellstick.Thread_run == TRUE)
-     { Partage->com_tellstick.Thread_run = FALSE;
-       pthread_join( Partage->com_tellstick.TID, NULL );                         /* Attente fin TELLSTICK */
-     }
+    Partage->com_tellstick.Thread_run = FALSE;
+    pthread_join( Partage->com_tellstick.TID, NULL );                         /* Attente fin TELLSTICK */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), Partage->com_tellstick.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), Partage->com_lirc.TID );
-    if (Partage->com_lirc.Thread_run == TRUE)
-     { Partage->com_lirc.Thread_run = FALSE;
-       pthread_join( Partage->com_lirc.TID, NULL );                                   /* Attente fin LIRC */
-     }
+    Partage->com_lirc.Thread_run = FALSE;
+    pthread_join( Partage->com_lirc.TID, NULL );                                   /* Attente fin LIRC */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), Partage->com_lirc.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), Partage->com_modbus.TID );
-    if (Partage->com_modbus.Thread_run == TRUE)
-     { Partage->com_modbus.Thread_run = FALSE;
-       pthread_join( Partage->com_modbus.TID, NULL );                               /* Attente fin MODBUS */
-     }
+    Partage->com_modbus.Thread_run = FALSE;
+    pthread_join( Partage->com_modbus.TID, NULL );                               /* Attente fin MODBUS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), Partage->com_modbus.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), Partage->com_sms.TID );
-    if (Partage->com_sms.Thread_run == TRUE)
-     { Partage->com_sms.Thread_run = FALSE;
-       pthread_join( Partage->com_sms.TID, NULL );                                     /* Attente fin SMS */
-     }
+    Partage->com_sms.Thread_run = FALSE;
+    pthread_join( Partage->com_sms.TID, NULL );                                     /* Attente fin SMS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), Partage->com_sms.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), Partage->com_arch.TID );
-    if (Partage->com_arch.Thread_run == TRUE)
-     { Partage->com_arch.Thread_run = FALSE;
-       pthread_join( Partage->com_arch.TID, NULL );                                   /* Attente fin ARCH */
-     }
+    Partage->com_arch.Thread_run = FALSE;
+    pthread_join( Partage->com_arch.TID, NULL );                                   /* Attente fin ARCH */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), Partage->com_arch.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), Partage->com_audio.TID );
-    if (Partage->com_audio.Thread_run == TRUE)
-     { Partage->com_audio.Thread_run = FALSE;
-       pthread_join( Partage->com_audio.TID, NULL );                                 /* Attente fin AUDIO */
-     }
+    Partage->com_audio.Thread_run = FALSE;
+    pthread_join( Partage->com_audio.TID, NULL );                                 /* Attente fin AUDIO */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), Partage->com_audio.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
 
     if (flag)
      { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), Partage->com_admin.TID );
-        if (Partage->com_admin.Thread_run == TRUE)
-         { Partage->com_admin.Thread_run = FALSE;
-           pthread_join( Partage->com_admin.TID, NULL );                                     /* Attente fin ADMIN */
-         }
+       Partage->com_admin.Thread_run = FALSE;
+       pthread_join( Partage->com_admin.TID, NULL );                                     /* Attente fin ADMIN */
        Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), Partage->com_admin.TID );
      }
 

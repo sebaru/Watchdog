@@ -37,6 +37,8 @@
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
+ static GList *Modules_RFXCOM;                                  /* Liste des actionneurs/capteurs RFXCOM */
+
 /**********************************************************************************************************/
 /* Retirer_rfxcomDB: Elimination d'un module rfxcom                                                       */
 /* Entrée: un log et une database                                                                         */
@@ -190,7 +192,7 @@
        return(FALSE);
      }
 
-    Partage->com_rfxcom.Modules_RFXCOM = NULL;
+    Modules_RFXCOM = NULL;
     cpt = 0;
     for ( ; ; )
      { struct MODULE_RFXCOM *module;
@@ -211,7 +213,7 @@
        g_free(rfxcom);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
-       Partage->com_rfxcom.Modules_RFXCOM = g_list_append ( Partage->com_rfxcom.Modules_RFXCOM, module );
+       Modules_RFXCOM = g_list_append ( Modules_RFXCOM, module );
        Info_n( Config.log, DEBUG_RFXCOM, "Charger_tous_RFXCOM:  id    = ", module->rfxcom.id    );
      }
     Info_n( Config.log, DEBUG_RFXCOM, "Charger_tous_RFXCOM: module RFXCOM found  !", cpt );
@@ -226,7 +228,7 @@
 /**********************************************************************************************************/
  static void Decharger_un_rfxcom ( struct MODULE_RFXCOM *module )
   { if (!module) return;
-    Partage->com_rfxcom.Modules_RFXCOM = g_list_remove ( Partage->com_rfxcom.Modules_RFXCOM, module );
+    Modules_RFXCOM = g_list_remove ( Modules_RFXCOM, module );
     g_free(module);
   }
 /**********************************************************************************************************/
@@ -236,8 +238,8 @@
 /**********************************************************************************************************/
  static void Decharger_tous_rfxcom ( void  )
   { struct MODULE_RFXCOM *module;
-    while ( Partage->com_rfxcom.Modules_RFXCOM )
-     { module = (struct MODULE_RFXCOM *)Partage->com_rfxcom.Modules_RFXCOM->data;
+    while ( Modules_RFXCOM )
+     { module = (struct MODULE_RFXCOM *)Modules_RFXCOM->data;
        Decharger_un_rfxcom ( module );
      }
   }
@@ -290,7 +292,7 @@
 /**********************************************************************************************************/
  static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint canal )
   { GList *liste_modules;
-    liste_modules = Partage->com_rfxcom.Modules_RFXCOM;
+    liste_modules = Modules_RFXCOM;
     while ( liste_modules )
      { struct MODULE_RFXCOM *module;
        module = (struct MODULE_RFXCOM *)liste_modules->data;
@@ -390,13 +392,13 @@
     trame_send_AC[1]  = 0x11; /* lightning 2 */
     trame_send_AC[2]  = 0x00; /* AC */
     trame_send_AC[3]  = 0x01; /* Seqnbr */
-    trame_send_AC[4]  = Partage->com_rfxcom.learn.id1 << 6;
-    trame_send_AC[5]  = Partage->com_rfxcom.learn.id2;
-    trame_send_AC[6]  = Partage->com_rfxcom.learn.id3;
-    trame_send_AC[7]  = Partage->com_rfxcom.learn.id4;
-    trame_send_AC[8]  = Partage->com_rfxcom.learn.unitcode;
-    trame_send_AC[9]  = Partage->com_rfxcom.learn.cmd;
-    trame_send_AC[10] = Partage->com_rfxcom.learn.level;
+/*    trame_send_AC[4]  = liblearn.id1 << 6;
+    trame_send_AC[5]  = liblearn.id2;
+    trame_send_AC[6]  = liblearn.id3;
+    trame_send_AC[7]  = liblearn.id4;
+    trame_send_AC[8]  = liblearn.unitcode;
+    trame_send_AC[9]  = liblearn.cmd;
+    trame_send_AC[10] = liblearn.level;*/
     trame_send_AC[11] = 0x0;
     write ( fd_rfxcom, &trame_send_AC, trame_send_AC[0] );
   }
@@ -410,8 +412,9 @@
     fd_set fdselect;
     gint fd_rfxcom;
 
-    prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
+   prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
+    lib->Thread_run = TRUE;                                                         /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "rfxcom" );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage RFXCOM sensors" );
@@ -419,35 +422,28 @@
     fd_rfxcom = Init_rfxcom();
     if (fd_rfxcom<0)                                                       /* On valide l'acces aux ports */
      { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
-       Partage->com_rfxcom.TID = 0;                       /* On indique au master que le thread est mort. */
+       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
+       lib->TID = 0;                                      /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
     else { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM FD", fd_rfxcom ); }
 
-    Partage->com_rfxcom.Thread_run    = TRUE;                                        /* Le thread tourne ! */
-
     Charger_tous_rfxcom();                          /* Chargement de tous les capteurs/actionneurs RFXCOM */
     nbr_oct_lu = 0;
-    while(Partage->com_rfxcom.Thread_run == TRUE)                        /* On tourne tant que necessaire */
+    while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
-       if (Partage->com_rfxcom.Thread_reload == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reloading conf" );
           Decharger_tous_rfxcom();
           Charger_tous_rfxcom();
-          Partage->com_rfxcom.Thread_reload = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
-       if (Partage->com_rfxcom.Thread_sigusr1 == TRUE)
+       if (lib->Thread_sigusr1 == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: SIGUSR1" );
-          Partage->com_rfxcom.Thread_sigusr1 = FALSE;
-        }
-
-       if (Partage->com_rfxcom.Thread_commande == TRUE)
-        { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Sending CMD" );
-          Rfxcom_send( fd_rfxcom );
-          Partage->com_rfxcom.Thread_commande = FALSE;
+          lib->Thread_sigusr1 = FALSE;
         }
 
        FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
@@ -476,7 +472,7 @@
 
     close(fd_rfxcom);
     Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
-    Partage->com_rfxcom.TID = 0;                           /* On indique au master que le thread est mort. */
+    lib->TID = 0;                                         /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
