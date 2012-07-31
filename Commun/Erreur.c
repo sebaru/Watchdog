@@ -33,6 +33,7 @@
  #include <string.h>
  #include <time.h>
  #include <sys/prctl.h>
+ #include <stdarg.h>
 
  #include "Erreur.h"
 
@@ -102,5 +103,24 @@
   { gchar chaine[512];
     g_snprintf( chaine, sizeof(chaine), "%s: %s", texte, texte2 );
     Info( log, niveau, chaine );
+  }
+/**********************************************************************************************************/
+/* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres             */
+/* Entrée: le niveau, le texte, et la chaine à afficher                                                   */
+/**********************************************************************************************************/
+ void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... )
+  { gchar chaine[512], nom_thread[32];
+    va_list ap;
+    if (!log) return;
+
+    if ( override == TRUE || priority > log->debug_level )
+     { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
+       g_snprintf( chaine, sizeof(chaine), "%s -> ", nom_thread );
+       strcat ( chaine, format );
+
+       va_start( ap, format );
+       vsyslog ( priority, chaine, ap );
+       va_end ( ap );
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

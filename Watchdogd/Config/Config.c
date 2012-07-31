@@ -61,6 +61,12 @@
        else
         { g_snprintf( Config.home, sizeof(Config.home), "%s", DEFAUT_HOME  ); }
 
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "librairy_dir", NULL );
+       if (chaine)
+        { g_snprintf( Config.home, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.home, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   ); }
+
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_host", NULL );
        if (chaine)
         { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", chaine ); g_free(chaine); }
@@ -287,6 +293,7 @@
     Info_n( Config.log, DEBUG_CONFIG, "Config timeout connexion    ", Config.timeout_connexion );
     Info_n( Config.log, DEBUG_CONFIG, "Config max login failed     ", Config.max_login_failed );
     Info_c( Config.log, DEBUG_CONFIG, "Config home                 ", Config.home );
+    Info_c( Config.log, DEBUG_CONFIG, "Config librairie_dir        ", Config.librairie_dir );
     Info_c( Config.log, DEBUG_CONFIG, "Config db host              ", Config.db_host );
     Info_c( Config.log, DEBUG_CONFIG, "Config db database          ", Config.db_database );
     Info_c( Config.log, DEBUG_CONFIG, "Config db username          ", Config.db_username );

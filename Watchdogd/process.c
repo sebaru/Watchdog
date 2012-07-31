@@ -102,7 +102,7 @@
     gchar nom_absolu[128];
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
-    if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier MemoryAlloc failed" );
+    if (!lib) { Info( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier MemoryAlloc failed" );
                 return(NULL);
               }
 
@@ -111,8 +111,8 @@
               }
          else { lib->dl_handle = dlopen( nom, RTLD_LAZY ); }
     if (!lib->dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier Candidat rejeté ", nom );
-       Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier -- sur ouverture", dlerror() );
+     { Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier Candidat rejeté ", nom );
+       Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier -- sur ouverture", dlerror() );
        g_free(lib);
        return(NULL);
      }
@@ -120,7 +120,7 @@
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
      { Info_c( Config.log, DEBUG_INFO,
-               "MSRV: Charger_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom ); 
+               "Charger_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -129,7 +129,7 @@
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
      { Info_c( Config.log, DEBUG_INFO,
-               "MSRV: Charger_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom ); 
+               "Charger_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -137,7 +137,7 @@
 
     g_snprintf( lib->nom, sizeof(lib->nom), "%s", nom );
 
-    Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier loaded", nom );
+    Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier loaded", nom );
 
     pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -198,7 +198,7 @@
   { struct dirent *fichier;
     DIR *repertoire;
 
-    repertoire = opendir ( "/usr/local/lib" );                    /* Ouverture du répertoire des librairies */
+    repertoire = opendir ( Config.librairie_dir );                    /* Ouverture du répertoire des librairies */
     if (!repertoire)
      { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", "/usr/local/lib" );
        return;
@@ -208,7 +208,7 @@
      { if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 )) /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
            { struct LIBRAIRIE *lib;
-             lib = Charger_librairie_par_fichier( "/usr/local/lib", fichier->d_name );
+             lib = Charger_librairie_par_fichier( Config.librairie_dir, fichier->d_name );
              Start_librairie( lib );
            }
         }

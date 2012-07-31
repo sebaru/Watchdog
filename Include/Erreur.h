@@ -68,6 +68,7 @@
  extern void Info_n( struct LOG *log, guint niveau, gchar *texte, gint valeur );
  extern void Info_c( struct LOG *log, guint niveau, gchar *texte, gchar *texte2 );
  extern void Info_change_debug( struct LOG *log, guint debug );
+ extern void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

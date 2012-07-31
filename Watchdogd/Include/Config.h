@@ -58,6 +58,7 @@
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
     gchar crypto_key[TAILLE_CRYPTO_KEY+1];            /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
+    gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
     gchar sms_telephone1[TAILLE_NUM_TELEPHONE+1];               /* Numero de telephone pour les envoi SMS */
     gchar sms_telephone2[TAILLE_NUM_TELEPHONE+1];               /* Numero de telephone pour les envoi SMS */
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
@@ -98,6 +99,7 @@
  #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
  #define DEFAUT_HOME                    g_get_home_dir()        /* Ne pas depasser TAILLE_HOME caracteres */
+ #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_MAX_LOGIN_FAILED        3
  #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
  #define DEFAUT_SMSBOX_USERNAME         "user"
