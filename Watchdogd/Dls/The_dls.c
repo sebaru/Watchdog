@@ -543,6 +543,11 @@
     gint Update_heure=0;
     GList *plugins;
 
+    Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
+    Partage->com_dls.liste_m            = NULL;
+    Partage->com_dls.liste_plugin_reset = NULL;
+    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
+
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                   /* Tous les 100 millisecondes */
     timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                /* = 10 fois par secondes */
@@ -550,10 +555,6 @@
 
     Info( Config.log, DEBUG_DLS, "DLS: demarrage" );                                        /* Log Start */
              
-    Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
-    Partage->com_dls.liste_m            = NULL;
-    Partage->com_dls.liste_plugin_reset = NULL;
-    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
 

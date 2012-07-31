@@ -55,28 +55,29 @@
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- static gboolean Charger_une_librairie ( gchar *path, gchar *nom )
+ static gboolean Charger_une_librairie_par_fichier ( gchar *path, gchar *nom )
   { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
-    if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: MemoryAlloc failed" );
+    if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier MemoryAlloc failed" );
                 return(FALSE);
               }
 
     g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom );
     lib->dl_handle = dlopen( nom_absolu, RTLD_LAZY );
     if (!lib->dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté ", nom );
-       Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: -- sur ouverture", dlerror() );
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier Candidat rejeté ", nom );
+       Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier -- sur ouverture", dlerror() );
        g_free(lib);
        return(FALSE);
      }
 
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté sur absence Run_thread", nom ); 
+     { Info_c( Config.log, DEBUG_INFO,
+               "MSRV: Charger_une_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(FALSE);
@@ -84,7 +85,8 @@
 
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: Candidat rejeté sur absence Admin_command", nom ); 
+     { Info_c( Config.log, DEBUG_INFO,
+               "MSRV: Charger_une_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(FALSE);
@@ -92,7 +94,7 @@
 
     g_snprintf( lib->nom, sizeof(lib->nom), "%s", nom );
 
-    Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: loaded", nom );
+    Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier loaded", nom );
 
     pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -101,13 +103,43 @@
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
 
     if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Charger_une_librairie: pthread_create failed") );
+     { Info( Config.log, DEBUG_INFO, _("MSRV: Charger_une_librairie_par_fichier pthread_create failed") );
        return(FALSE);
      }
-    else
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie: thread seems to be running", nom ); }
-    
+    pthread_detach( lib->TID );       /* On le détache pour qu'il puisse se terminer sur erreur tout seul */
+    Info_c( Config.log, DEBUG_INFO,
+            "MSRV: Charger_une_librairie_par_fichier thread seems to be running", nom );
     return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Decharger_librairie_par_nom: Decharge la librairie dont le nom est en paramètre                        */
+/* Entrée: Le nom de la librairie                                                                         */
+/* Sortie: Rien                                                                                           */
+/**********************************************************************************************************/
+ void Decharger_librairie_par_nom ( gchar *nom )
+  { struct LIBRAIRIE *lib;
+    GSList *liste;
+
+    liste = Partage->com_msrv.Librairies;
+    while(liste)                                                        /* Liberation mémoire des modules */
+     { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
+
+       if ( ! strcmp ( lib->nom, nom ) )
+        { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: trying to unload", lib->nom );
+
+          lib->Thread_run = FALSE;                                      /* On demande au thread de s'arreter */
+          while( lib->TID!=0 ) sched_yield();                                          /* Attente fin thread */
+
+          pthread_mutex_destroy( &lib->synchro );
+          dlclose( lib->dl_handle );
+          Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
+                                                         /* Destruction de l'entete associé dans la GList */
+          Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: library unloaded", lib->nom );
+          g_free( lib );
+          return;
+        }
+       liste = liste->next;
+     }
   }
 /**********************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                   */
@@ -119,17 +151,7 @@
 
     while(Partage->com_msrv.Librairies)                                 /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
-       Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: trying to unload", lib->nom );
-       if (lib->Thread_run == TRUE)
-        { lib->Thread_run = FALSE;
-          pthread_join( lib->TID, NULL );                                           /* Attente fin thread */
-        }
-       pthread_mutex_destroy( &lib->synchro );
-       dlclose( lib->dl_handle );
-       Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
-                                                         /* Destruction de l'entete associé dans la GList */
-       Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairies: library unloaded", lib->nom );
-       g_free( lib );
+       Decharger_librairie_par_nom (lib->nom);
      }
   }
 /**********************************************************************************************************/
@@ -150,7 +172,7 @@
     while( (fichier = readdir( repertoire )) )                  /* Pour chacun des fichiers du répertoire */
      { if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 )) /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-           { Charger_une_librairie( "/usr/local/lib", fichier->d_name ); }
+           { Charger_une_librairie_par_fichier( "/usr/local/lib", fichier->d_name ); }
         }
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
@@ -349,7 +371,8 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", Partage->com_dls.TID ); }
+    pthread_detach( Partage->com_dls.TID );      /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", Partage->com_dls.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -755,12 +778,14 @@
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
-    pthread_join( Partage->com_dls.TID, NULL );                                        /* Attente fin DLS */
+    while ( Partage->com_dls.TID != 0 ) sched_yield();                                 /* Attente fin DLS */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
-    Partage->com_onduleur.Thread_run = FALSE;
-    pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
+    if (Partage->com_onduleur.Thread_run == TRUE)
+     { Partage->com_onduleur.Thread_run = FALSE;
+       pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
+     }
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
