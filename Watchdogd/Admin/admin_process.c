@@ -26,12 +26,13 @@
  */
  
  #include <glib.h>
+ #include <unistd.h>
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Activer_process: Appeller lorsque l'admin envoie une commande 'process' dans la ligne de commande      */
+/* Entrée: La connexion cliente et la ligne de commande                                                   */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne )
   { struct LIBRAIRIE *lib;
@@ -92,8 +93,42 @@
           else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SSRV -> Arret" ); }
           else Gerer_jeton();                              /* Affectation du jeton a un des sous-serveurs */
-        } 
-
+        }
+       else
+        { GSList *liste;
+          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { struct LIBRAIRIE *lib;
+             lib = (struct LIBRAIRIE *)liste->data;
+             if ( ! strcmp( lib->nom, thread ) )
+              { if (Start_librairie(lib))
+                 { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->nom ); }
+                else
+                 { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->nom ); }
+                Write_admin ( client->connexion, chaine );
+              }
+             liste = liste->next;
+           }
+        }
+     } else
+    if ( ! strcmp ( commande, "load" ) )
+     { gchar thread[128], chaine[128];
+       sscanf ( ligne, "%s %s", commande, thread );
+       g_snprintf( chaine, sizeof(chaine), "libwatchdog-server-%s.so", thread );
+       if (Charger_librairie_par_fichier( NULL, chaine ))         /* Chargement de la librairie dynamique */
+        { g_snprintf( chaine, sizeof(chaine), " Library %s loaded (but not started)\n", thread ); }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " Error while loading library %s\n", thread ); }
+       Write_admin ( client->connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "unload" ) )
+     { gchar thread[128], chaine[128];
+       sscanf ( ligne, "%s %s", commande, thread );
+       if (Decharger_librairie_par_nom( thread ))               /* Déchargement de la librairie dynamique */
+        { g_snprintf( chaine, sizeof(chaine), " Library %s stopped and unloaded\n", thread ); }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " Error while unloading library %s\n", thread ); }
+       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "stop" ) )
      { gchar thread[128], chaine[128];
@@ -113,7 +148,23 @@
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "onduleur"  ) ) { Partage->com_onduleur.Thread_run  = FALSE; } else
        if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; } else
-       if ( ! strcmp ( thread, "lirc"      ) ) { Partage->com_lirc.Thread_run      = FALSE; } 
+       if ( ! strcmp ( thread, "lirc"      ) ) { Partage->com_lirc.Thread_run      = FALSE; }
+       else
+        { GSList *liste;
+          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { struct LIBRAIRIE *lib;
+             lib = (struct LIBRAIRIE *)liste->data;
+             if ( ! strcmp( lib->nom, thread ) )
+              { if (Stop_librairie(lib))
+                 { g_snprintf( chaine, sizeof(chaine), " Library %s stopped\n", lib->nom ); }
+                else
+                 { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s\n", lib->nom ); }
+                Write_admin ( client->connexion, chaine );
+              }
+             liste = liste->next;
+           }
+        }
 
      } else
     if ( ! strcmp ( commande, "list" ) )
@@ -184,10 +235,18 @@
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
-        { lib = (struct LIBRAIRIE *)liste->data;
-          g_snprintf( chaine,    sizeof(chaine),    "  Library %s -> running = %s, TID = %d\n",
-                      lib->nom, (lib->Thread_run == TRUE ? "YES" : " NO"), lib->TID );
-          Write_admin ( client->connexion, chaine );
+        { gchar result[80], chaine[80];
+          lib = (struct LIBRAIRIE *)liste->data;
+          memset (result, ' ', sizeof(result) );
+          memcpy ( result + 00, "  Library ", 10 );
+          memcpy ( result + 10, lib->nom, strlen(lib->nom) );
+          if (lib->Thread_run == TRUE)
+           { memcpy ( result + 25, "-> running YES, TID = ", 22 ); }
+          else
+           { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
+          g_snprintf( chaine, sizeof(chaine), "%p", (void *)lib->TID );
+          memcpy( result + 40, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
+          Write_admin ( client->connexion, result );
           liste = liste->next;
         }
 

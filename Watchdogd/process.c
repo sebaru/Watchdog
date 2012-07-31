@@ -51,72 +51,107 @@
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
 
 /**********************************************************************************************************/
-/* Charger_une_librarie: Ouverture d'une librairie par son nom                                            */
+/* Start_librairie: Demarre le thread en paremetre                                                        */
+/* Entrée: La structure associée au thread                                                                */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Start_librairie ( struct LIBRAIRIE *lib )
+  { if (!lib) return(FALSE);
+    if (lib->Thread_run == TRUE)
+     { Info_c( Config.log, DEBUG_INFO,
+               "Start_librairie: thread already seems to be running", lib->nom );
+       return(FALSE);
+     }
+    if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
+     { Info( Config.log, DEBUG_INFO, _("Start_librairie: pthread_create failed") );
+       return(FALSE);
+     }
+    pthread_detach( lib->TID );       /* On le détache pour qu'il puisse se terminer sur erreur tout seul */
+    Info_c( Config.log, DEBUG_INFO,
+            "Start_librairie: thread seems to be running", lib->nom );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Stop_librairie: Arrete le thread en paremetre                                                          */
+/* Entrée: La structure associée au thread                                                                */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Stop_librairie ( struct LIBRAIRIE *lib )
+  { if (!lib) return(FALSE);
+    if (lib->Thread_run == FALSE)
+     { Info_c( Config.log, DEBUG_INFO,
+               "Stop_librairie: thread already stopped", lib->nom );
+       return(FALSE);
+     }
+
+    lib->Thread_run = FALSE;                                         /* On demande au thread de s'arreter */
+    while( lib->TID!=0 ) sched_yield();                                             /* Attente fin thread */
+
+    Info_c( Config.log, DEBUG_INFO,
+            "Stop_librairie: thread seems to be stopped", lib->nom );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Charger_librarie_par_fichier: Ouverture d'une librairie par son nom                                    */
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- static gboolean Charger_une_librairie_par_fichier ( gchar *path, gchar *nom )
+ struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom )
   { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
-    if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier MemoryAlloc failed" );
-                return(FALSE);
+    if (!lib) { Info( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier MemoryAlloc failed" );
+                return(NULL);
               }
 
-    g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom );
-    lib->dl_handle = dlopen( nom_absolu, RTLD_LAZY );
+    if (path) { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom );
+                lib->dl_handle = dlopen( nom_absolu, RTLD_LAZY );
+              }
+         else { lib->dl_handle = dlopen( nom, RTLD_LAZY ); }
     if (!lib->dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier Candidat rejeté ", nom );
-       Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier -- sur ouverture", dlerror() );
+     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier Candidat rejeté ", nom );
+       Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier -- sur ouverture", dlerror() );
        g_free(lib);
-       return(FALSE);
+       return(NULL);
      }
 
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
      { Info_c( Config.log, DEBUG_INFO,
-               "MSRV: Charger_une_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom ); 
+               "MSRV: Charger_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom ); 
        dlclose( lib->dl_handle );
        g_free(lib);
-       return(FALSE);
+       return(NULL);
      }
 
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
      { Info_c( Config.log, DEBUG_INFO,
-               "MSRV: Charger_une_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom ); 
+               "MSRV: Charger_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom ); 
        dlclose( lib->dl_handle );
        g_free(lib);
-       return(FALSE);
+       return(NULL);
      }
 
     g_snprintf( lib->nom, sizeof(lib->nom), "%s", nom );
 
-    Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_une_librairie_par_fichier loaded", nom );
+    Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairie_par_fichier loaded", nom );
 
     pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
     pthread_mutex_init( &lib->synchro, &attr );
 
     Partage->com_msrv.Librairies = g_slist_prepend( Partage->com_msrv.Librairies, lib );
-
-    if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Charger_une_librairie_par_fichier pthread_create failed") );
-       return(FALSE);
-     }
-    pthread_detach( lib->TID );       /* On le détache pour qu'il puisse se terminer sur erreur tout seul */
-    Info_c( Config.log, DEBUG_INFO,
-            "MSRV: Charger_une_librairie_par_fichier thread seems to be running", nom );
-    return(TRUE);
+    return(lib);
   }
 /**********************************************************************************************************/
 /* Decharger_librairie_par_nom: Decharge la librairie dont le nom est en paramètre                        */
 /* Entrée: Le nom de la librairie                                                                         */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- void Decharger_librairie_par_nom ( gchar *nom )
+ gboolean Decharger_librairie_par_nom ( gchar *nom )
   { struct LIBRAIRIE *lib;
     GSList *liste;
 
@@ -127,8 +162,7 @@
        if ( ! strcmp ( lib->nom, nom ) )
         { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: trying to unload", lib->nom );
 
-          lib->Thread_run = FALSE;                                      /* On demande au thread de s'arreter */
-          while( lib->TID!=0 ) sched_yield();                                          /* Attente fin thread */
+          Stop_librairie(lib );
 
           pthread_mutex_destroy( &lib->synchro );
           dlclose( lib->dl_handle );
@@ -136,10 +170,11 @@
                                                          /* Destruction de l'entete associé dans la GList */
           Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: library unloaded", lib->nom );
           g_free( lib );
-          return;
+          return(TRUE);
         }
        liste = liste->next;
      }
+   return(FALSE);
   }
 /**********************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                   */
@@ -172,7 +207,10 @@
     while( (fichier = readdir( repertoire )) )                  /* Pour chacun des fichiers du répertoire */
      { if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 )) /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
-           { Charger_une_librairie_par_fichier( "/usr/local/lib", fichier->d_name ); }
+           { struct LIBRAIRIE *lib;
+             lib = Charger_librairie_par_fichier( "/usr/local/lib", fichier->d_name );
+             Start_librairie( lib );
+           }
         }
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
