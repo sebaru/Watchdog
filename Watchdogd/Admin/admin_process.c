@@ -235,17 +235,17 @@
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
-        { gchar result[80], chaine[80];
+        { gchar result[80];
           lib = (struct LIBRAIRIE *)liste->data;
-          memset (result, ' ', sizeof(result) );
-          memcpy ( result + 00, "  Library ", 10 );
-          memcpy ( result + 10, lib->nom, strlen(lib->nom) );
+          memset ( result, ' ', sizeof(result) );
+          memcpy ( result + 0, " Library ", 9 );
+          memcpy ( result + 9, lib->nom, strlen(lib->nom) );
           if (lib->Thread_run == TRUE)
-           { memcpy ( result + 25, "-> running YES, TID = ", 22 ); }
+           { memcpy ( result + 50, "-> running YES, TID = ", 22 ); }
           else
-           { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
-          g_snprintf( chaine, sizeof(chaine), "%p", (void *)lib->TID );
-          memcpy( result + 40, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
+           { memcpy ( result + 50, "-> running  NO, TID = ", 22 ); }
+          g_snprintf( chaine, sizeof(chaine), "%d\n", (gint) lib->TID );
+          memcpy( result + 75, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
           Write_admin ( client->connexion, result );
           liste = liste->next;
         }

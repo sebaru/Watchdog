@@ -197,6 +197,7 @@
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
+ extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom );
  extern gboolean Decharger_librairie_par_nom ( gchar *nom );
 
