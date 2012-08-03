@@ -50,7 +50,7 @@
 
     if ( (fd=lirc_init("Watchdogd",1))==-1)
      { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to open LIRCD... stopping...", pthread_self() );
-       Partage->com_lirc.TID = -1;                        /* On indique au master que le thread est mort. */
+       Partage->com_lirc.TID = 0;                         /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(0));
      }
 
@@ -58,7 +58,7 @@
 
     if (lirc_readconfig ( ".lircrc", &config, NULL)!=0)
      { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
-       Partage->com_lirc.TID = -1;                        /* On indique au master que le thread est mort. */
+       Partage->com_lirc.TID = 0;                         /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(0));
      }
 
@@ -105,7 +105,7 @@
     if (config) lirc_freeconfig(config);
     lirc_deinit();
     Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Down", pthread_self() );
-    Partage->com_lirc.TID = -1;                           /* On indique au master que le thread est mort. */
+    Partage->com_lirc.TID = 0;                            /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
