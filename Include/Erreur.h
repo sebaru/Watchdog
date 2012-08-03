@@ -29,6 +29,7 @@
  #define _ERREUR_H_
 
  #include <glib.h>
+ #include <sys/syslog.h>                                                   /* Pour les niveaux de LOG_xxx */
 
  #define TAILLE_ENTETE_LOG   40
  struct LOG { char entete [TAILLE_ENTETE_LOG+1];

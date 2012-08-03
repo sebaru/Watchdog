@@ -415,7 +415,7 @@
     gint fd_imsg;*/
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
-    Info( Config.log, DEBUG_INFO, "IMSG: demarrage" );
+    Info_new( Config.log, lib->Thread_debug, LOG_INFO, "IMSG: demarrage . . . TID = %d", pthread_self() );
     lib->Thread_run = TRUE;                                                         /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "imsg" );
