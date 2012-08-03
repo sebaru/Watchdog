@@ -176,7 +176,7 @@
     return( retour );
   }
 /**********************************************************************************************************/
-/* Charger_tous_IMSG: Requete la DB pour charger les modules et les bornes imsg                       */
+/* Charger_tous_ Requete la DB pour charger les modules et les bornes imsg                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -205,7 +205,7 @@
        module = (struct MODULE_IMSG *)g_malloc0( sizeof(struct MODULE_IMSG) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info( Config.log, DEBUG_INFO,
-                "Charger_tous_IMSG: Erreur allocation mémoire struct MODULE_IMSG" );
+                "Charger_tous_ Erreur allocation mémoire struct MODULE_IMSG" );
           g_free(imsg);
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
@@ -215,9 +215,9 @@
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
        Modules_IMSG = g_list_append ( Modules_IMSG, module );
-       Info_n( Config.log, DEBUG_INFO, "Charger_tous_IMSG:  id    = ", module->imsg.id    );
+       Info_n( Config.log, DEBUG_INFO, "Charger_tous_  id    = ", module->imsg.id    );
      }
-    Info_n( Config.log, DEBUG_INFO, "Charger_tous_IMSG: module IMSG found  !", cpt );
+    Info_n( Config.log, DEBUG_INFO, "Charger_tous_ module IMSG found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -258,9 +258,9 @@
     fd = open( Config.port_imsg, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
      { Info_c( Config.log, DEBUG_INFO,
-               "IMSG: Init_imsg: Impossible d'ouvrir le port imsg", Config.port_imsg );
+               " Init_imsg: Impossible d'ouvrir le port imsg", Config.port_imsg );
        Info_n( Config.log, DEBUG_INFO,
-               "IMSG: Init_imsg: Code retour                      ", fd );
+               " Init_imsg: Code retour                      ", fd );
        return(-1);
      }
     else
@@ -274,15 +274,15 @@
        tcsetattr(fd, TCSANOW, &oldtio);
        tcflush(fd, TCIOFLUSH);
        Info_c( Config.log, DEBUG_INFO,
-               "IMSG: Init_imsg: Ouverture port imsg okay", Config.port_imsg);
+               " Init_imsg: Ouverture port imsg okay", Config.port_imsg);
      }
-    Info( Config.log, DEBUG_INFO, "IMSG: Init_imsg: Sending INIT" );
+    Info( Config.log, DEBUG_INFO, " Init_imsg: Sending INIT" );
     write (fd, &trame_reset, sizeof(trame_reset) );
     sleep(2);
-    Info( Config.log, DEBUG_INFO, "IMSG: Init_imsg: Sending SET ALL PROTO" );
+    Info( Config.log, DEBUG_INFO, " Init_imsg: Sending SET ALL PROTO" );
     write (fd, &trame_set_all_proto, sizeof(trame_set_all_proto) );
     sleep(2);
-    Info( Config.log, DEBUG_INFO, "IMSG: Init_imsg: Sending GET STATUS" );
+    Info( Config.log, DEBUG_INFO, " Init_imsg: Sending GET STATUS" );
     write (fd, &trame_get_status, sizeof(trame_get_status) );
     return(fd);
   }
@@ -311,62 +311,62 @@
  static int Processer_trame( struct TRAME_IMSG *trame )
   { 
 
-    Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame     taille: ", trame->taille );
-    Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame       type: ", trame->type );
-    Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame  sous_type: ", trame->sous_type );
-    Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame      seqno: ", trame->seqno );
+    Info_n( Config.log, DEBUG_INFO, " Processer_trame     taille: ", trame->taille );
+    Info_n( Config.log, DEBUG_INFO, " Processer_trame       type: ", trame->type );
+    Info_n( Config.log, DEBUG_INFO, " Processer_trame  sous_type: ", trame->sous_type );
+    Info_n( Config.log, DEBUG_INFO, " Processer_trame      seqno: ", trame->seqno );
 
     if (trame->type == 0x01 && trame->sous_type == 0x00)
      { if (trame->data[0] == 0x52) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status 433MHz receiver only" );   
+                                         " Processer_trame get_status 433MHz receiver only" );   
        if (trame->data[0] == 0x53) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status 433MHz transceiver" );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status firmware", trame->data[1] );   
+                                         " Processer_trame get_status 433MHz transceiver" );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status firmware", trame->data[1] );   
        if (trame->data[3] & 0x80) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto RFU" );   
+                                         " Processer_trame get_status proto RFU" );   
        if (trame->data[3] & 0x40) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto Rollertroll" );   
+                                         " Processer_trame get_status proto Rollertroll" );   
        if (trame->data[3] & 0x20) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto Proguard" );   
+                                         " Processer_trame get_status proto Proguard" );   
        if (trame->data[3] & 0x10) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto FS20" );   
+                                         " Processer_trame get_status proto FS20" );   
        if (trame->data[3] & 0x08) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto LaCrosse" );   
+                                         " Processer_trame get_status proto LaCrosse" );   
        if (trame->data[3] & 0x04) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto Hideki" );   
+                                         " Processer_trame get_status proto Hideki" );   
        if (trame->data[3] & 0x02) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto LightwaveRF" );   
+                                         " Processer_trame get_status proto LightwaveRF" );   
        if (trame->data[3] & 0x01) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto Mertik" );   
+                                         " Processer_trame get_status proto Mertik" );   
        if (trame->data[4] & 0x80) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto Visonic" );   
+                                         " Processer_trame get_status proto Visonic" );   
        if (trame->data[4] & 0x40) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto ATI" );   
+                                         " Processer_trame get_status proto ATI" );   
        if (trame->data[4] & 0x20) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto OregonScientific" );   
+                                         " Processer_trame get_status proto OregonScientific" );   
        if (trame->data[4] & 0x10) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto IkeaKoppla" );   
+                                         " Processer_trame get_status proto IkeaKoppla" );   
        if (trame->data[4] & 0x08) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto HomeEasy" );   
+                                         " Processer_trame get_status proto HomeEasy" );   
        if (trame->data[4] & 0x04) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto AC" );   
+                                         " Processer_trame get_status proto AC" );   
        if (trame->data[4] & 0x02) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto ARC" );   
+                                         " Processer_trame get_status proto ARC" );   
        if (trame->data[4] & 0x01) Info( Config.log, DEBUG_INFO,
-                                         "IMSG: Processer_trame get_status proto X10" );   
+                                         " Processer_trame get_status proto X10" );   
 
      }
     else if (trame->type == 0x52 && trame->sous_type == 0x01)
      { struct MODULE_IMSG *module;
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status id1", trame->data[0] );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status id2", trame->data[1] );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status high", trame->data[2] >> 1 );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status signe", trame->data[2] & 1);   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status low", trame->data[3] );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status hum", trame->data[4] );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status humstatus", trame->data[5] );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status battery", trame->data[6] >> 4 );   
-       Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame get_status rssi", trame->data[6] & 0x0F );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status id1", trame->data[0] );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status id2", trame->data[1] );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status high", trame->data[2] >> 1 );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status signe", trame->data[2] & 1);   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status low", trame->data[3] );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status hum", trame->data[4] );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status humstatus", trame->data[5] );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status battery", trame->data[6] >> 4 );   
+       Info_n( Config.log, DEBUG_INFO, " Processer_trame get_status rssi", trame->data[6] & 0x0F );   
        module = Chercher_imsg( trame->type, trame->data[1] );
        if (module)
         { SEA( module->imsg.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)* ( (trame->data[2] >> 1) + trame->data[3])
@@ -377,9 +377,9 @@
 
           module->date_last_view = Partage->top;
         }
-       else Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame No matching module for packet received", trame->type );
+       else Info_n( Config.log, DEBUG_INFO, " Processer_trame No matching module for packet received", trame->type );
      }
-    else Info_n( Config.log, DEBUG_INFO, "IMSG: Processer_trame unknown packet type", trame->type );
+    else Info_n( Config.log, DEBUG_INFO, " Processer_trame unknown packet type", trame->type );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -415,7 +415,7 @@
     gint fd_imsg;*/
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
-    Info_new( Config.log, lib->Thread_debug, LOG_INFO, "IMSG: demarrage . . . TID = %d", pthread_self() );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: Demarrage . . . TID = %d", pthread_self() );
     lib->Thread_run = TRUE;                                                         /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "imsg" );
@@ -424,58 +424,31 @@
 #ifdef bouh
     fd_imsg = Init_imsg();
     if (fd_imsg<0)                                                       /* On valide l'acces aux ports */
-     { Info_n( Config.log, DEBUG_INFO, "IMSG: Run_imsg: Down", pthread_self() );
+     { Info_n( Config.log, DEBUG_INFO, " Run_imsg: Down", pthread_self() );
        lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
        lib->TID = 0;                                      /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else { Info_n( Config.log, DEBUG_INFO, "IMSG: Acces IMSG FD", fd_imsg ); }
+    else { Info_n( Config.log, DEBUG_INFO, " Acces IMSG FD", fd_imsg ); }
 
     Charger_tous_imsg();                          /* Chargement de tous les capteurs/actionneurs IMSG */
     nbr_oct_lu = 0;
+#endif
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
-       if (lib->Thread_reload == TRUE)
-        { Info( Config.log, DEBUG_INFO, "IMSG: Run_imsg: Reloading conf" );
-          Decharger_tous_imsg();
-          Charger_tous_imsg();
-          lib->Thread_reload = FALSE;
-        }
-
        if (lib->Thread_sigusr1 == TRUE)
-        { Info( Config.log, DEBUG_INFO, "IMSG: Run_imsg: SIGUSR1" );
+        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_imsg: recu signal SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
         }
 
-       FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie IMSG */
-       FD_SET(fd_imsg, &fdselect );
-       tv.tv_sec = 1;
-       tv.tv_usec= 0;
-       retval = select(fd_imsg+1, &fdselect, NULL, NULL, &tv );               /* Attente d'un caractere */
-       if (retval>=0 && FD_ISSET(fd_imsg, &fdselect) )
-        { int bute, cpt;
-
-          if (nbr_oct_lu<TAILLE_ENTETE_IMSG)
-           { bute = TAILLE_ENTETE_IMSG; } else { bute = sizeof(Trame); }
-
-          cpt = read( fd_imsg, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
-          if (cpt>0)
-           { nbr_oct_lu = nbr_oct_lu + cpt;
-
-             if (nbr_oct_lu >= TAILLE_ENTETE_IMSG + Trame.taille)                   /* traitement trame */
-              { nbr_oct_lu = 0;
-                if (Trame.taille > 0) Processer_trame( &Trame );
-                memset (&Trame, 0, sizeof(struct TRAME_IMSG) );
-              }
-           }
-        }
      }                                                                     /* Fin du while partage->arret */
 
+#ifdef bouh
     close(fd_imsg);
 #endif
-    Info_n( Config.log, DEBUG_INFO, "IMSG: Run_imsg: Down", pthread_self() );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     lib->TID = 0;                                         /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
