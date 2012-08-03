@@ -100,11 +100,11 @@
           while(liste)
            { struct LIBRAIRIE *lib;
              lib = (struct LIBRAIRIE *)liste->data;
-             if ( ! strcmp( lib->nom, thread ) )
+             if ( ! strcmp( lib->admin_prompt, thread ) )
               { if (Start_librairie(lib))
-                 { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->nom ); }
+                 { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt ); }
                 else
-                 { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->nom ); }
+                 { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
                 Write_admin ( client->connexion, chaine );
               }
              liste = liste->next;
@@ -155,11 +155,15 @@
           while(liste)
            { struct LIBRAIRIE *lib;
              lib = (struct LIBRAIRIE *)liste->data;
-             if ( ! strcmp( lib->nom, thread ) )
+             if ( ! strcmp( lib->admin_prompt, thread ) )
               { if (Stop_librairie(lib))
-                 { g_snprintf( chaine, sizeof(chaine), " Library %s stopped\n", lib->nom ); }
+                 { g_snprintf( chaine, sizeof(chaine), " Library %s (%s) stopped\n",
+                   lib->admin_prompt, lib->nom_fichier );
+                 }
                 else
-                 { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s\n", lib->nom ); }
+                 { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) \n",
+                               lib->admin_prompt, lib->nom_fichier );
+                 }
                 Write_admin ( client->connexion, chaine );
               }
              liste = liste->next;
@@ -244,7 +248,7 @@
            { memcpy ( result + 25, "-> running YES, TID = ", 22 ); }
           else
            { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
-          g_snprintf( chaine, sizeof(chaine), "%d (%s)\n", (gint) lib->TID, lib->nom );
+          g_snprintf( chaine, sizeof(chaine), "%d (%s)\n", (gint) lib->TID, lib->nom_fichier );
           memcpy( result + 47, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
           Write_admin ( client->connexion, result );
           liste = liste->next;

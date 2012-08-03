@@ -59,7 +59,7 @@
   { if (!lib) return(FALSE);
     if (lib->Thread_run == TRUE)
      { Info_c( Config.log, DEBUG_INFO,
-               "Start_librairie: thread already seems to be running", lib->nom );
+               "Start_librairie: thread already seems to be running", lib->nom_fichier );
        return(FALSE);
      }
     if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
@@ -68,7 +68,7 @@
      }
     pthread_detach( lib->TID );       /* On le détache pour qu'il puisse se terminer sur erreur tout seul */
     Info_c( Config.log, DEBUG_INFO,
-            "Start_librairie: thread seems to be running", lib->nom );
+            "Start_librairie: thread seems to be running", lib->nom_fichier );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -80,7 +80,7 @@
   { if (!lib) return(FALSE);
     if (lib->Thread_run == FALSE)
      { Info_c( Config.log, DEBUG_INFO,
-               "Stop_librairie: thread already stopped", lib->nom );
+               "Stop_librairie: thread already stopped", lib->nom_fichier );
        return(FALSE);
      }
 
@@ -88,7 +88,7 @@
     while( lib->TID!=0 ) sched_yield();                                             /* Attente fin thread */
 
     Info_c( Config.log, DEBUG_INFO,
-            "Stop_librairie: thread seems to be stopped", lib->nom );
+            "Stop_librairie: thread seems to be stopped", lib->nom_fichier );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -96,7 +96,7 @@
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom )
+ struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom_fichier )
   { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
@@ -106,12 +106,12 @@
                 return(NULL);
               }
 
-    if (path) { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom );
+    if (path) { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom_fichier );
                 lib->dl_handle = dlopen( nom_absolu, RTLD_LAZY );
               }
-         else { lib->dl_handle = dlopen( nom, RTLD_LAZY ); }
+         else { lib->dl_handle = dlopen( nom_fichier, RTLD_LAZY ); }
     if (!lib->dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier Candidat rejeté ", nom );
+     { Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier Candidat rejeté ", nom_fichier );
        Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier -- sur ouverture", dlerror() );
        g_free(lib);
        return(NULL);
@@ -120,7 +120,7 @@
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
      { Info_c( Config.log, DEBUG_INFO,
-               "Charger_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom ); 
+               "Charger_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom_fichier ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -129,15 +129,15 @@
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
      { Info_c( Config.log, DEBUG_INFO,
-               "Charger_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom ); 
+               "Charger_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom_fichier ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
      }
 
-    g_snprintf( lib->nom, sizeof(lib->nom), "%s", nom );
+    g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_fichier );
 
-    Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier loaded", nom );
+    Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier loaded", nom_fichier );
 
     pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -151,7 +151,7 @@
 /* Entrée: Le nom de la librairie                                                                         */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- gboolean Decharger_librairie_par_nom ( gchar *nom )
+ gboolean Decharger_librairie_par_nom ( gchar *nom_fichier )
   { struct LIBRAIRIE *lib;
     GSList *liste;
 
@@ -159,8 +159,8 @@
     while(liste)                                                        /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
 
-       if ( ! strcmp ( lib->nom, nom ) )
-        { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: trying to unload", lib->nom );
+       if ( ! strcmp ( lib->nom_fichier, nom_fichier ) )
+        { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: trying to unload", lib->nom_fichier );
 
           Stop_librairie(lib );
 
@@ -168,7 +168,7 @@
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
                                                          /* Destruction de l'entete associé dans la GList */
-          Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: library unloaded", lib->nom );
+          Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: library unloaded", lib->nom_fichier );
           g_free( lib );
           return(TRUE);
         }
@@ -186,7 +186,7 @@
 
     while(Partage->com_msrv.Librairies)                                 /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
-       Decharger_librairie_par_nom (lib->nom);
+       Decharger_librairie_par_nom (lib->nom_fichier);
      }
   }
 /**********************************************************************************************************/

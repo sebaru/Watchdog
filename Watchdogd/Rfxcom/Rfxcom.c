@@ -111,7 +111,7 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_rfxcomDB: Recupération de la liste des ids des rfxcoms                                */
+/* Recuperer_liste_id_rfxcomDB: Recupération de la liste des ids des rfxcoms                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/

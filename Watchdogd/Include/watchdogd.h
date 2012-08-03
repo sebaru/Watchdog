@@ -79,12 +79,12 @@
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     void *dl_handle;                                                 /* handle de gestion de la librairie */
-    gchar nom[128];
+    gchar nom_fichier[128];                                             /* Nom de fichier de la librairie */
     gchar admin_prompt[32];                                        /* Prompt auquel va répondre le thread */
     gchar admin_help[64];                                          /* Designation de l'activité du thread */
 
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_debug;                                /* TRUE si le thread doit tourner en mode debug */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );              /* Fonction principale de gestion du thread */
@@ -198,8 +198,8 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom );
- extern gboolean Decharger_librairie_par_nom ( gchar *nom );
+ extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom_fichier );
+ extern gboolean Decharger_librairie_par_nom ( gchar *nom_fichier );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

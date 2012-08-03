@@ -59,9 +59,7 @@
        Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (all,none,signaux,db,config,user,crypto,info,serveur,\n" );
-       Write_admin ( client->connexion, "                                             cdg,network,arch,connexion,dls,modbus,admin,rs485,\n" );
-       Write_admin ( client->connexion, "                                             onduleur,sms,audio,camera,courbe,tellstick,asterisk,lirc)\n" );
+       Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (switch are : all,none, or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -233,9 +231,29 @@
        sscanf ( ligne, "%s %s", commande, debug );
 
        if ( ! strcmp ( debug, "all"       ) )
-        { Info_change_debug ( Config.log, ~0 ); } else
+        { Info_change_debug ( Config.log, ~0 );
+          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { lib = (struct LIBRAIRIE *)liste->data;
+             lib->Thread_debug = TRUE;
+             g_snprintf( chaine, sizeof(chaine), "  -> Debug enabled for library %s (%s)\n",
+                         lib->admin_prompt, lib->nom_fichier );
+             Write_admin ( client->connexion, chaine );
+             liste = liste->next;
+           }
+        } else
        if ( ! strcmp ( debug, "none"      ) )
-        { Info_change_debug ( Config.log,  0 ); } else
+        { Info_change_debug ( Config.log,  0 );
+          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { lib = (struct LIBRAIRIE *)liste->data;
+             lib->Thread_debug = FALSE;
+             g_snprintf( chaine, sizeof(chaine), "  -> Debug disabled for library %s (%s)\n",
+                         lib->admin_prompt, lib->nom_fichier );
+             Write_admin ( client->connexion, chaine );
+             liste = liste->next;
+           }
+        } else
        if ( ! strcmp ( debug, "signaux"   ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
        if ( ! strcmp ( debug, "db"        ) )
@@ -283,7 +301,27 @@
        if ( ! strcmp ( debug, "asterisk"  ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ASTERISK  ); }
        else
-        { g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch\n" );
+        { liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { lib = (struct LIBRAIRIE *)liste->data;
+             if ( ! strcmp ( debug, lib->admin_prompt ) )
+              { if (lib->Thread_debug == TRUE)
+                 { lib->Thread_debug = FALSE;
+                   g_snprintf( chaine, sizeof(chaine), "  -> Debug disabled for library %s (%s)\n",
+                               lib->admin_prompt, lib->nom_fichier );
+                 }
+                else
+                 { lib->Thread_debug = TRUE;
+                   g_snprintf( chaine, sizeof(chaine), "  -> Debug enabled for library %s (%s)\n",
+                               lib->admin_prompt, lib->nom_fichier );
+                 } 
+                Write_admin ( client->connexion, chaine );
+                break;
+              }
+             liste = liste->next;
+           }
+          if ( liste == NULL )                                       /* Si l'on a pas trouve de librairie */
+          g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch\n" );
           Write_admin ( client->connexion, chaine );
         }
        g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", Config.log->debug_level );
