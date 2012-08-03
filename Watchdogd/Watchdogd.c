@@ -263,7 +263,10 @@
         }
 
        if (Partage->com_msrv.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
-        { guint i;
+        { struct LIBRAIRIE *lib;
+          GSList *liste;
+          guint i;
+
           Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: SIGUSR1" );
           Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: jeton", Partage->jeton );
           Partage->com_rs485.Thread_sigusr1     = TRUE;
@@ -278,6 +281,14 @@
           Partage->com_tellstick.Thread_sigusr1 = TRUE;
           for (i=0; i<Config.max_serveur; i++)
            { Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
+
+          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { lib = (struct LIBRAIRIE *)liste->data;
+             lib->Thread_sigusr1 = TRUE;
+             liste = liste->next;
+           }
+
           Traiter_sigusr1();                     /* Appel de la fonction pour traiter le signal pour MSRV */
           Partage->com_msrv.Thread_sigusr1      = FALSE;
         }
