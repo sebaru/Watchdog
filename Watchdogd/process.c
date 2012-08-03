@@ -388,9 +388,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
-                   Partage->com_onduleur.TID );
-         }
+    pthread_detach( Partage->com_onduleur.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
+            Partage->com_onduleur.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -485,7 +485,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running", Partage->com_tellstick.TID ); }
+    pthread_detach( Partage->com_tellstick.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running",
+            Partage->com_tellstick.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -519,7 +521,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread lirc seems to be running", Partage->com_lirc.TID ); }
+    pthread_detach( Partage->com_lirc.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread lirc seems to be running",
+            Partage->com_lirc.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -578,7 +582,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running", Partage->com_rs485.TID ); }
+    pthread_detach( Partage->com_rs485.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running",
+            Partage->com_rs485.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -597,7 +603,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_sms: thread sms seems to be running", Partage->com_sms.TID ); }
+    pthread_detach( Partage->com_sms.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_sms: thread sms seems to be running",
+            Partage->com_sms.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -616,8 +624,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_audio: thread audio seems to be running",
-                   Partage->com_audio.TID ); }
+    pthread_detach( Partage->com_audio.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_audio: thread audio seems to be running",
+            Partage->com_audio.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -636,8 +645,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_admin: thread admin seems to be running",
-                   Partage->com_admin.TID ); }
+    pthread_detach( Partage->com_admin.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_admin: thread admin seems to be running",
+            Partage->com_admin.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -656,7 +666,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_arch: thread arch seems to be running", Partage->com_arch.TID ); }
+    pthread_detach( Partage->com_arch.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_arch: thread arch seems to be running",
+            Partage->com_arch.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -675,8 +687,9 @@
      { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: pthread_create failed") );
        return(FALSE);
      }
-    else { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_modbus: thread modbus seems to be running",
-                   Partage->com_arch.TID ); }
+    pthread_detach( Partage->com_modbus.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
+    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_modbus: thread modbus seems to be running",
+            Partage->com_arch.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -820,45 +833,43 @@
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
-    if (Partage->com_onduleur.Thread_run == TRUE)
-     { Partage->com_onduleur.Thread_run = FALSE;
-       pthread_join( Partage->com_onduleur.TID, NULL );                           /* Attente fin ONDULEUR */
-     }
+    Partage->com_onduleur.Thread_run = FALSE;
+    while ( Partage->com_onduleur.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
     Partage->com_rs485.Thread_run = FALSE;
-    pthread_join( Partage->com_rs485.TID, NULL );                                 /* Attente fin RS485 */
+    while ( Partage->com_rs485.TID != 0 ) sched_yield();                       /* Attente fin RS485 */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), Partage->com_rs485.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
     Partage->com_tellstick.Thread_run = FALSE;
-    pthread_join( Partage->com_tellstick.TID, NULL );                         /* Attente fin TELLSTICK */
+    while ( Partage->com_tellstick.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), Partage->com_tellstick.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), Partage->com_lirc.TID );
     Partage->com_lirc.Thread_run = FALSE;
-    pthread_join( Partage->com_lirc.TID, NULL );                                   /* Attente fin LIRC */
+    while ( Partage->com_lirc.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), Partage->com_lirc.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), Partage->com_modbus.TID );
     Partage->com_modbus.Thread_run = FALSE;
-    pthread_join( Partage->com_modbus.TID, NULL );                               /* Attente fin MODBUS */
+    while ( Partage->com_modbus.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), Partage->com_modbus.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), Partage->com_sms.TID );
     Partage->com_sms.Thread_run = FALSE;
-    pthread_join( Partage->com_sms.TID, NULL );                                     /* Attente fin SMS */
+    while ( Partage->com_sms.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), Partage->com_sms.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;
-    pthread_join( Partage->com_arch.TID, NULL );                                   /* Attente fin ARCH */
+    while ( Partage->com_arch.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), Partage->com_arch.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), Partage->com_audio.TID );
     Partage->com_audio.Thread_run = FALSE;
-    pthread_join( Partage->com_audio.TID, NULL );                                 /* Attente fin AUDIO */
+    while ( Partage->com_audio.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), Partage->com_audio.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
@@ -866,7 +877,7 @@
     if (flag)
      { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), Partage->com_admin.TID );
        Partage->com_admin.Thread_run = FALSE;
-       pthread_join( Partage->com_admin.TID, NULL );                                     /* Attente fin ADMIN */
+       while ( Partage->com_admin.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
        Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), Partage->com_admin.TID );
      }
 
