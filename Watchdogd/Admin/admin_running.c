@@ -321,8 +321,9 @@
              liste = liste->next;
            }
           if ( liste == NULL )                                       /* Si l'on a pas trouve de librairie */
-          g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch\n" );
-          Write_admin ( client->connexion, chaine );
+           { g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch\n" );
+             Write_admin ( client->connexion, chaine );
+           }
         }
        g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", Config.log->debug_level );
        Write_admin ( client->connexion, chaine );
