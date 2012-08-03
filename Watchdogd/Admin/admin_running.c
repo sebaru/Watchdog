@@ -59,7 +59,7 @@
        Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (switch are : all,none, or library name)\n" );
+       Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (switch are : list, all, none, or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -249,6 +249,17 @@
            { lib = (struct LIBRAIRIE *)liste->data;
              lib->Thread_debug = FALSE;
              g_snprintf( chaine, sizeof(chaine), "  -> Debug disabled for library %s (%s)\n",
+                         lib->admin_prompt, lib->nom_fichier );
+             Write_admin ( client->connexion, chaine );
+             liste = liste->next;
+           }
+        } else
+       if ( ! strcmp ( debug, "list"      ) )
+        { liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          while(liste)
+           { lib = (struct LIBRAIRIE *)liste->data;
+             g_snprintf( chaine, sizeof(chaine), "  -> Debug is %s for library %s (%s)\n",
+                         (lib->Thread_debug ? " enabled" : "disabled"),
                          lib->admin_prompt, lib->nom_fichier );
              Write_admin ( client->connexion, chaine );
              liste = liste->next;

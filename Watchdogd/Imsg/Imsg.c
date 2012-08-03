@@ -439,7 +439,7 @@
        sched_yield();
 
        if (lib->Thread_sigusr1 == TRUE)
-        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_imsg: recu signal SIGUSR1" );
+        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
         }
 
