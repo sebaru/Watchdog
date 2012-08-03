@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Imsg/Imsg.c  Gestion des capteurs IMSG Watchdog 2.0                                          */
+/* Watchdogd/Imsg/Imsg.c  Gestion des Instant Messaging IMSG Watchdog 2.0                                 */
 /* Projet WatchDog version 2.0       Gestion d'habitat                   sam. 28 juil. 2012 16:37:38 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -38,6 +38,53 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
  /*static GList *Modules_IMSG;                                  /* Liste des actionneurs/capteurs IMSG */
+ static struct CONFIG_RFXCOM
+  { gchar username[80];
+    gchar password[80];
+  } Cfg_imsg;
+
+/**********************************************************************************************************/
+/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                    */
+/* Entrée: le nom de fichier à lire                                                                       */
+/* Sortie: La structure mémoire est à jour                                                                */
+/**********************************************************************************************************/
+ static void Lire_config_imsg ( struct LIBRAIRIE *lib )
+  { gchar *chaine, *fichier;
+    GKeyFile *gkf;
+
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Lire_config_imsg : unable to load config file %s", Config.config_file );
+       return;
+     }
+
+    lib->Thread_debug = g_key_file_get_boolean ( gkf, "IMSG", "debug", NULL ); /* Positionnement du debug */
+
+    chaine = g_key_file_get_string ( gkf, "IMSG", "username", NULL );
+    if (!chaine)
+     { Info_new ( Config.log, lib->Thread_debug, LOG_ERR,
+                  "Lire_config_imsg: username is missing. Using default." );
+       g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), "defaultuser@defaultserver.org" );
+     }
+    else
+     { g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), "%s", chaine );
+       g_free(chaine);
+     }
+
+    chaine = g_key_file_get_string ( gkf, "IMSG", "password", NULL );
+    if (!chaine)
+     { Info_new ( Config.log, lib->Thread_debug, LOG_ERR,
+                  "Lire_config_imsg: username is missing. Using default." );
+       g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "defaultpassword" );
+     }
+    else
+     { g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "%s", chaine );
+       g_free(chaine);
+     }
+
+    g_key_file_free(gkf);
+  }
 
 #ifdef bouh
 /**********************************************************************************************************/
@@ -176,7 +223,7 @@
     return( retour );
   }
 /**********************************************************************************************************/
-/* Charger_tous_ Requete la DB pour charger les modules et les bornes imsg                       */
+/* Charger_tous_ Requete la DB pour charger les modules et les bornes imsg                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -223,7 +270,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Decharger_un_imsg: Dechargement d'un IMSG                                                          */
+/* Decharger_un_imsg: Dechargement d'un IMSG                                                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -415,11 +462,14 @@
     gint fd_imsg;*/
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
+    Lire_config_imsg ( lib );                         /* Lecture de la configuration logiciel du thread */
+
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: Demarrage . . . TID = %d", pthread_self() );
     lib->Thread_run = TRUE;                                                         /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "imsg" );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage Instant Messaging system" );
+
 
 #ifdef bouh
     fd_imsg = Init_imsg();
