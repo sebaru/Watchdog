@@ -124,7 +124,7 @@
     if ( ! strcmp ( commande, "unload" ) )
      { gchar thread[128], chaine[128];
        sscanf ( ligne, "%s %s", commande, thread );
-       if (Decharger_librairie_par_nom( thread ))               /* Déchargement de la librairie dynamique */
+       if (Decharger_librairie_par_prompt( thread ))               /* Déchargement de la librairie dynamique */
         { g_snprintf( chaine, sizeof(chaine), " Library %s stopped and unloaded\n", thread ); }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while unloading library %s\n", thread ); }
@@ -286,9 +286,13 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv num,rfxcom)\n" );
+                     "  load thread          - Load a library (but not start it !)\n" );
        Write_admin ( client->connexion,
-                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv,rfxcom)\n" );
+                     "  unload thread        - Unload a library\n" );
+       Write_admin ( client->connexion,
+                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv num, or library name)\n" );
+       Write_admin ( client->connexion,
+                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv, or library name)\n" );
        Write_admin ( client->connexion,
                      "  list                 - Liste les statut des threads\n" );
        Write_admin ( client->connexion,

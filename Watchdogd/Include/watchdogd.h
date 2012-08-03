@@ -199,7 +199,7 @@
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom_fichier );
- extern gboolean Decharger_librairie_par_nom ( gchar *nom_fichier );
+ extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );

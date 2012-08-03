@@ -151,7 +151,7 @@
 /* Entrée: Le nom de la librairie                                                                         */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- gboolean Decharger_librairie_par_nom ( gchar *nom_fichier )
+ gboolean Decharger_librairie_par_prompt ( gchar *prompt )
   { struct LIBRAIRIE *lib;
     GSList *liste;
 
@@ -159,8 +159,8 @@
     while(liste)                                                        /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
 
-       if ( ! strcmp ( lib->nom_fichier, nom_fichier ) )
-        { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: trying to unload", lib->nom_fichier );
+       if ( ! strcmp ( lib->admin_prompt, prompt ) )
+        { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: trying to unload", lib->nom_fichier );
 
           Stop_librairie(lib );
 
@@ -168,7 +168,7 @@
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
                                                          /* Destruction de l'entete associé dans la GList */
-          Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_nom: library unloaded", lib->nom_fichier );
+          Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: library unloaded", lib->nom_fichier );
           g_free( lib );
           return(TRUE);
         }
@@ -186,7 +186,7 @@
 
     while(Partage->com_msrv.Librairies)                                 /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
-       Decharger_librairie_par_nom (lib->nom_fichier);
+       Decharger_librairie_par_prompt (lib->admin_prompt);
      }
   }
 /**********************************************************************************************************/

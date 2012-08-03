@@ -75,7 +75,7 @@
     chaine = g_key_file_get_string ( gkf, "IMSG", "password", NULL );
     if (!chaine)
      { Info_new ( Config.log, lib->Thread_debug, LOG_ERR,
-                  "Lire_config_imsg: username is missing. Using default." );
+                  "Lire_config_imsg: password is missing. Using default." );
        g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "defaultpassword" );
      }
     else
