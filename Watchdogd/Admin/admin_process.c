@@ -46,7 +46,7 @@
        guint num;
        sscanf ( ligne, "%s %s %d", commande, thread, &num );
 
-       g_snprintf( chaine, sizeof(chaine), " Starting %s\n", thread );
+       g_snprintf( chaine, sizeof(chaine), " Trying to start %s\n", thread );
        Write_admin ( client->connexion, chaine );
 
        if ( ! strcmp ( thread, "arch" ) )
@@ -113,10 +113,16 @@
      } else
     if ( ! strcmp ( commande, "load" ) )
      { gchar thread[128], chaine[128];
+       struct LIBRAIRIE *lib;
        sscanf ( ligne, "%s %s", commande, thread );
        g_snprintf( chaine, sizeof(chaine), "libwatchdog-server-%s.so", thread );
-       if (Charger_librairie_par_fichier( NULL, chaine ))         /* Chargement de la librairie dynamique */
-        { g_snprintf( chaine, sizeof(chaine), " Library %s loaded (but not started)\n", thread ); }
+       if ( lib = Charger_librairie_par_fichier( NULL, chaine ))  /* Chargement de la librairie dynamique */
+        { g_snprintf( chaine, sizeof(chaine), " Library %s loaded\n", thread );
+          if (Start_librairie(lib))
+           { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt ); }
+           else
+           { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
+        }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while loading library %s\n", thread ); }
        Write_admin ( client->connexion, chaine );
@@ -134,7 +140,7 @@
      { gchar thread[128], chaine[128];
        sscanf ( ligne, "%s %s", commande, thread );
 
-       g_snprintf( chaine, sizeof(chaine), " Stopping %s\n", thread );
+       g_snprintf( chaine, sizeof(chaine), " Trying to stop %s\n", thread );
        Write_admin ( client->connexion, chaine );
 
        if ( ! strcmp ( thread, "all" ) )
