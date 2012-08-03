@@ -65,8 +65,13 @@
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
-        { lib = (struct LIBRAIRIE *)liste->data;
-          g_snprintf( chaine,    sizeof(chaine),    "  %s - %s", lib->admin_prompt, lib->admin_help );
+        { gchar result[256];
+          lib = (struct LIBRAIRIE *)liste->data;
+          memset ( result, ' ', sizeof(result) );
+          memcpy ( result + 2, lib->admin_prompt, strlen(lib->admin_prompt) );
+          memcpy ( result + 24, "-", 1 );
+          memcpy ( result + 26, lib->admin_help, strlen(lib->admin_help) );
+          memcpy ( result + 26 + strlen(lib->admin_help), "\n", 2 );
           Write_admin ( client->connexion, chaine );
           liste = liste->next;
         }
