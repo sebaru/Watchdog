@@ -524,6 +524,13 @@
        if (Partage->com_rs485.Thread_reload == TRUE)
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Reloading conf" );
           Decharger_tous_rs485();
+          close(fd_rs485);
+          fd_rs485 = Init_rs485();
+          if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
+           { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
+             Partage->com_rs485.TID = 0;                  /* On indique au master que le thread est mort. */
+             pthread_exit(GINT_TO_POINTER(-1));
+           }
           Charger_tous_rs485();
           Partage->com_rs485.Thread_reload = FALSE;
         }
@@ -550,11 +557,11 @@
         { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
           if (Rs485_is_actif() == FALSE)                /* Si aucun module started, on restart la comm RS */
            { fd_rs485 = Init_rs485();
-             if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
+             if (fd_rs485<0)                                               /* On valide l'acces aux ports */
               { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
+                Partage->com_rs485.TID = 0;               /* On indique au master que le thread est mort. */
                 pthread_exit(GINT_TO_POINTER(-1));
               }
-             Info( Config.log, DEBUG_RS485, "RS485: Restart Accès RS485 OK");
            }
           module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
           if (module) { module->started = 1; }
@@ -569,7 +576,7 @@
           Partage->com_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
            { close(fd_rs485);
-             Info( Config.log, DEBUG_RS485, "RS485: Restart Fermeture FileDescriptor sur tout module disable");
+             Info( Config.log, DEBUG_RS485, "RS485: Restart FileDescriptor sur All RS down");
            }
         }
 

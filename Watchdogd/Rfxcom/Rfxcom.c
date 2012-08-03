@@ -411,7 +411,7 @@
     fd_set fdselect;
     gint fd_rfxcom;
 
-   prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
     Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
     lib->Thread_run = TRUE;                                                         /* Le thread tourne ! */
 
@@ -433,12 +433,23 @@
      { usleep(1);
        sched_yield();
 
+#ifdef bouh
        if (lib->Thread_reload == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reloading conf" );
           Decharger_tous_rfxcom();
+          close(fd_rfxcom);
+          fd_rfxcom = Init_rfxcom();
+          if (fd_rfxcom<0)                                                 /* On valide l'acces aux ports */
+           { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
+             lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
+             lib->TID = 0;                                /* On indique au master que le thread est mort. */
+             pthread_exit(GINT_TO_POINTER(-1));
+           }
+          else { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM FD", fd_rfxcom ); }
           Charger_tous_rfxcom();
           lib->Thread_reload = FALSE;
         }
+#endif
 
        if (lib->Thread_sigusr1 == TRUE)
         { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: SIGUSR1" );

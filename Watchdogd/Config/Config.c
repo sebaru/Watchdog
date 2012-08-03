@@ -61,11 +61,11 @@
        else
         { g_snprintf( Config.home, sizeof(Config.home), "%s", DEFAUT_HOME  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "librairy_dir", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
        if (chaine)
-        { g_snprintf( Config.home, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
+        { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.home, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   ); }
+        { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   ); }
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_host", NULL );
        if (chaine)
