@@ -41,7 +41,8 @@
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
   struct CONFIG
-  { gint  port;                                                    /* Port d'ecoute des requetes clientes */
+  { gchar config_file[80];                    /* Nom du fichier dont est issu les informations ci dessous */
+    gint  port;                                                    /* Port d'ecoute des requetes clientes */
     gchar port_RS485 [ TAILLE_PORT_RS485+1 ];                                        /* Nom du port RS485 */
     gchar port_rfxcom[ TAILLE_PORT_RS485+1 ];                                        /* Nom du port RS485 */
     gint  max_client;                  /* Nombre maximum de client qui peuvent se connecter en meme temps */

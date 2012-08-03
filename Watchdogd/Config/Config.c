@@ -51,6 +51,7 @@
 
     if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, NULL))
      {
+       g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier );
 /********************************************** Partie GLOBAL *********************************************/
        Config.db_port            = g_key_file_get_integer ( gkf, "GLOBAL", "db_port", NULL );
        if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
@@ -279,6 +280,7 @@
  void Print_config ( void )
   { 
     if (!Config.log) return;
+    Info_c( Config.log, DEBUG_CONFIG, "Config file                 ", Config.config_file );
     Info_n( Config.log, DEBUG_CONFIG, "Config port                 ", Config.port );
     Info_c( Config.log, DEBUG_CONFIG, "Config port rs485           ", Config.port_RS485  );
     Info_n( Config.log, DEBUG_CONFIG, "Config max client           ", Config.max_client );
