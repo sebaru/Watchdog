@@ -108,8 +108,9 @@
   { LmMessageNode *node;
     node = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "Reception_message : recu un msg xmpp : value = %s", 
-              lm_message_node_get_value ( node )
+              "Reception_message : recu un msg xmpp : value = %s attr = %s", 
+              lm_message_node_get_value ( node ),
+              lm_message_node_get_attribute ( node, "body" )
             );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
@@ -123,8 +124,9 @@
   { LmMessageNode *node;
     node = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "Reception_presence : recu un msg xmpp : value = %s", 
-              lm_message_node_get_value ( node )
+              "Reception_presence : recu un msg xmpp : value = %s, presence= %s", 
+              lm_message_node_get_value ( node ),
+              lm_message_node_get_attribute ( node, "presence" )
             );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
@@ -138,8 +140,9 @@
   { LmMessageNode *node;
     node = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "Reception_contact : recu un msg xmpp : value = %s", 
-              lm_message_node_get_value ( node )
+              "Reception_contact : recu un msg xmpp : value = %s, contact = %s", 
+              lm_message_node_get_value ( node ),
+              lm_message_node_get_attribute ( node, "contact" )
             );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
