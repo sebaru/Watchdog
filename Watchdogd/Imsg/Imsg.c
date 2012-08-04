@@ -121,36 +121,32 @@
 /**********************************************************************************************************/
  LmHandlerResult Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
                                       LmMessage *message, struct LIBRAIRIE *lib )
-  { LmMessageNode *node, *node_type, *node_from;
+  { LmMessageNode *node, *node_presence;
     const gchar *type, *from;
+    LmMessage *m;
+    GError *error;
+
     node = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
               "Reception_presence : recu un msg xmpp : string= %s", 
               lm_message_node_to_string (node)
             );
 
-    node_type = lm_message_node_find_child ( node, "type" );
-    node_from = lm_message_node_find_child ( node, "from" );
+    node_presence = lm_message_node_find_child ( node, "presence" );
+    type = lm_message_node_get_attribute ( node_presence, "type" );
+    from = lm_message_node_get_attribute ( node_presence, "from" );
 
-    if (node_type && node_from)
-     { LmMessage *m;
-       GError *error;
+    Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+              "Reception_presence: Recu %s from %s", type, from );
 
-       type = lm_message_node_get_value ( node_type );
-       from = lm_message_node_get_value ( node_from );
-
-       Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-                 "Reception_presence: Recu %s from %s", type, from );
-
-       if ( type && ( ! strcmp ( type, "subscribe" ) ) )
-        { m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
-          lm_message_node_add_child (m->node, "type", "subscribed");
-          if (!lm_connection_send (connection, m, &error)) 
-           { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
-                       "Reception_presence: Unable send subscribed to %s -> %s", from, error->message );
-           }
-          lm_message_unref (m);
+    if ( type && ( ! strcmp ( type, "subscribe" ) ) )
+     { m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
+       lm_message_node_add_child (m->node, "type", "subscribed");
+       if (!lm_connection_send (connection, m, &error)) 
+        { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                    "Reception_presence: Unable send subscribed to %s -> %s", from, error->message );
         }
+       lm_message_unref (m);
      }
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
