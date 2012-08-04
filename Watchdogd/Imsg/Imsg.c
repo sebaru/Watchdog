@@ -125,10 +125,10 @@
     const gchar *type, *from;
     node = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "Reception_presence : recu un msg xmpp : value = %s, string= %s", 
-              lm_message_node_get_value ( node ),
+              "Reception_presence : recu un msg xmpp : string= %s", 
               lm_message_node_to_string (node)
             );
+
     node_type = lm_message_node_find_child ( node, "type" );
     node_from = lm_message_node_find_child ( node, "from" );
 
@@ -138,6 +138,9 @@
 
        type = lm_message_node_get_value ( node_type );
        from = lm_message_node_get_value ( node_from );
+
+       Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                 "Reception_presence: Recu %s from %s", type, from );
 
        if ( type && ( ! strcmp ( type, "subscribe" ) ) )
         { m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
