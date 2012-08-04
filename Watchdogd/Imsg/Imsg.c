@@ -121,13 +121,34 @@
 /**********************************************************************************************************/
  LmHandlerResult Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
                                       LmMessage *message, struct LIBRAIRIE *lib )
-  { LmMessageNode *node;
+  { LmMessageNode *node, *node_type, *node_from;
+    const gchar *type, *from;
     node = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
               "Reception_presence : recu un msg xmpp : value = %s, string= %s", 
               lm_message_node_get_value ( node ),
               lm_message_node_to_string (node)
             );
+    node_type = lm_message_node_find_child ( node, "type" );
+    node_from = lm_message_node_find_child ( node, "from" );
+
+    if (node_type && node_from)
+     { LmMessage *m;
+       GError *error;
+
+       type = lm_message_node_get_value ( node_type );
+       from = lm_message_node_get_value ( node_from );
+
+       if ( type && ( ! strcmp ( type, "subscribe" ) ) )
+        { m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
+          lm_message_node_add_child (m->node, "type", "subscribed");
+          if (!lm_connection_send (connection, m, &error)) 
+           { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                       "Reception_presence: Unable send subscribed to %s -> %s", from, error->message );
+           }
+          lm_message_unref (m);
+        }
+     }
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
 /**********************************************************************************************************/
