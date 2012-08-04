@@ -99,6 +99,51 @@
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
+/* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ LmHandlerResult Reception_message ( LmMessageHandler *handler, LmConnection *connection,
+                                     LmMessage *message, struct LIBRAIRIE *lib )
+  { LmMessageNode *node;
+    node = lm_message_get_node ( message );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "Reception_message : recu un msg xmpp : value = %s", 
+              lm_message_node_get_value ( node )
+            );
+    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+  }
+/**********************************************************************************************************/
+/* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ LmHandlerResult Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
+                                      LmMessage *message, struct LIBRAIRIE *lib )
+  { LmMessageNode *node;
+    node = lm_message_get_node ( message );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "Reception_presence : recu un msg xmpp : value = %s", 
+              lm_message_node_get_value ( node )
+            );
+    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+  }
+/**********************************************************************************************************/
+/* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ LmHandlerResult Reception_contact ( LmMessageHandler *handler, LmConnection *connection,
+                                     LmMessage *message, struct LIBRAIRIE *lib )
+  { LmMessageNode *node;
+    node = lm_message_get_node ( message );
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "Reception_contact : recu un msg xmpp : value = %s", 
+              lm_message_node_get_value ( node )
+            );
+    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+  }
+/**********************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                               */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
@@ -131,22 +176,42 @@
           lib->Thread_run = FALSE;                                                        /* Arret du thread */
         }
        else
-        { LmMessage *m;
-Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+        { LmMessageHandler *lmMsgHandler;
+          LmMessage *m;
+          Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                     "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
 
-    m = lm_message_new ("lefevre.seb@jabber.fr", LM_MESSAGE_TYPE_MESSAGE);
-    lm_message_node_add_child (m->node, "body", "message");
-    if (!lm_connection_send (connection, m, &error)) {
-       Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
+                                               /* Set up message handler to handle incoming text messages */
+          lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Reception_message, lib, NULL );
+          lm_connection_register_message_handler( connection, lmMsgHandler, 
+                                                  LM_MESSAGE_TYPE_MESSAGE, LM_HANDLER_PRIORITY_NORMAL);
+          lm_message_handler_unref(lmMsgHandler);
+
+                                           /* Set up message handler to handle incoming presence messages */
+          lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Reception_presence, lib, NULL );
+          lm_connection_register_message_handler( connection, lmMsgHandler, 
+                                                  LM_MESSAGE_TYPE_PRESENCE, LM_HANDLER_PRIORITY_NORMAL);
+          lm_message_handler_unref(lmMsgHandler);
+
+                                                /* Set up message handler to handle incoming contact list */
+          lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Reception_contact, lib, NULL );
+          lm_connection_register_message_handler( connection, lmMsgHandler, 
+                                                  LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
+          lm_message_handler_unref(lmMsgHandler);
+
+
+              m = lm_message_new ("lefevre.seb@jabber.fr", LM_MESSAGE_TYPE_MESSAGE);
+                lm_message_node_add_child (m->node, "body", "message");
+                if (!lm_connection_send (connection, m, &error)) {
+                  Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                      "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
+        
+             }
+              else { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                     "Run_thread: Message sent to seb" );
        
-    }
-else { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-                 "Run_thread: Message sent to seb" );
-       
-    }
-    lm_message_unref (m);
+                   }
+          lm_message_unref (m);
 
 
         }
@@ -156,7 +221,7 @@ else { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
 
 
 
-    while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
+    while( lib->Thread_run == TRUE )                                     /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
@@ -164,6 +229,8 @@ else { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
         { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
         }
+
+
 
      }                                                                     /* Fin du while partage->arret */
 
