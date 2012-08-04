@@ -51,7 +51,7 @@
 /* Sortie: La structure mémoire est à jour                                                                */
 /**********************************************************************************************************/
  static void Lire_config_imsg ( struct LIBRAIRIE *lib )
-  { gchar *chaine, *fichier;
+  { gchar *chaine;
     GKeyFile *gkf;
 
     gkf = g_key_file_new();
@@ -104,7 +104,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { LmConnection *connection;
     GError       *error = NULL;
-
+LmMessage    *m;
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
     Lire_config_imsg ( lib );                         /* Lecture de la configuration logiciel du thread */
 
@@ -118,7 +118,7 @@
     connection = lm_connection_new ( Cfg_imsg.server );          /* Preparation de la connexion au server */
     if ( lm_connection_open_and_block (connection, &error) == FALSE )        /* Connexion au serveur XMPP */
      { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Unable to connect to xmpp server -> %s", error->message );
+                 "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
        lib->Thread_run = FALSE;                                                        /* Arret du thread */
      }
     else if ( lm_connection_authenticate_and_block ( connection, Cfg_imsg.username, Cfg_imsg.password,
@@ -127,6 +127,14 @@
                  "Run_thread: Unable to authenticate to xmpp server -> %s", error->message );
        lib->Thread_run = FALSE;                                                        /* Arret du thread */
      }
+
+
+    m = lm_message_new ("lefevre.seb", LM_MESSAGE_TYPE_MESSAGE);
+    lm_message_node_add_child (m->node, "body", "message");
+    if (!lm_connection_send (connection, m, &error)) {
+        g_error ("Send failed: s\n", error->message);
+    }
+    lm_message_unref (m);
 
 
 
