@@ -207,16 +207,23 @@
 
               m = lm_message_new ("lefevre.seb@jabber.fr", LM_MESSAGE_TYPE_MESSAGE);
                 lm_message_node_add_child (m->node, "body", "message");
-                if (!lm_connection_send (connection, m, &error)) {
+                if (!lm_connection_send (connection, m, &error)) 
+                 {
                   Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
                       "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
         
-             }
-              else { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
-                     "Run_thread: Message sent to seb" );
-       
-                   }
-          lm_message_unref (m);
+                 }
+               lm_message_unref (m);
+
+              m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE);
+                lm_message_node_add_child (m->node, "status", "Waiting for commands");
+                if (!lm_connection_send (connection, m, &error)) 
+                 {
+                  Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                      "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
+        
+                 }
+               lm_message_unref (m);
 
 
         }
@@ -238,6 +245,23 @@
        g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
+
+
+        { LmMessage *m;
+          
+              m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE);
+                lm_message_node_add_child (m->node, "status", "Server is down");
+                lm_message_node_add_child (m->node, "type", "unavailable");
+                if (!lm_connection_send (connection, m, &error)) 
+                 {
+                  Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                      "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
+        
+                 }
+               lm_message_unref (m);
+
+         }
+
 
     lm_connection_close (connection, NULL);                                 /* Fermeture de la connection */
     lm_connection_unref (connection);                             /* Destruction de la structure associée */
