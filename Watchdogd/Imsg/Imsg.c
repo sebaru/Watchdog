@@ -147,7 +147,8 @@
 /* Main: Fonction principale du thread Imsg                                                               */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { LmConnection *connection;
+  { GMainContext *MainLoop;
+    LmConnection *connection;
     GError       *error = NULL;
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
@@ -159,8 +160,9 @@
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "imsg" );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage Instant Messaging system" );
 
-
-    connection = lm_connection_new ( Cfg_imsg.server );          /* Preparation de la connexion au server */
+    MainLoop = g_main_context_new();
+                                                                 /* Preparation de la connexion au server */
+    connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
     if ( lm_connection_open_and_block (connection, &error) == FALSE )        /* Connexion au serveur XMPP */
      { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
@@ -230,12 +232,13 @@
           lib->Thread_sigusr1 = FALSE;
         }
 
-
+       g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
 
     lm_connection_close (connection, NULL);                                 /* Fermeture de la connection */
     lm_connection_unref (connection);                             /* Destruction de la structure associée */
+    g_main_context_unref (MainLoop);
 
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     lib->TID = 0;                                         /* On indique au master que le thread est mort. */
