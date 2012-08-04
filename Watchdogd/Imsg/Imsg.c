@@ -121,20 +121,33 @@ LmMessage    *m;
                  "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
        lib->Thread_run = FALSE;                                                        /* Arret du thread */
      }
-    else if ( lm_connection_authenticate_and_block ( connection, Cfg_imsg.username, Cfg_imsg.password,
-                                                     "resource", &error) == FALSE )
-     { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Unable to authenticate to xmpp server -> %s", error->message );
-       lib->Thread_run = FALSE;                                                        /* Arret du thread */
-     }
-
+    else
+     { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                 "Run_thread: Connection to xmpp server %s OK", Cfg_imsg.server );
+       if ( lm_connection_authenticate_and_block ( connection, Cfg_imsg.username, Cfg_imsg.password,
+                                                        "resource", &error) == FALSE )
+        { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                    "Run_thread: Unable to authenticate to xmpp server -> %s", error->message );
+          lib->Thread_run = FALSE;                                                        /* Arret du thread */
+        }
+       else
+        { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                    "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
 
     m = lm_message_new ("lefevre.seb", LM_MESSAGE_TYPE_MESSAGE);
     lm_message_node_add_child (m->node, "body", "message");
     if (!lm_connection_send (connection, m, &error)) {
-        g_error ("Send failed: s\n", error->message);
+       Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                 "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
+       
     }
     lm_message_unref (m);
+
+
+        }
+     }
+
+
 
 
 
