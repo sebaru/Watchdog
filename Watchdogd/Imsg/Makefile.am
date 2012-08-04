@@ -8,11 +8,10 @@ SUBDIRS=
 lib_LTLIBRARIES                         = libwatchdog-server-imsg.la
 libwatchdog_server_imsg_la_SOURCES    = Imsg.c admin_imsg.c
 
-INCLUDES= $(GNOME2_CFLAGS) \
+INCLUDES= `pkg-config --cflags glib loudmouth-1.0` \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
           $(MYSQL_CFLAGS) \
           -I../Include
 
-libwatchdog_server_imsg_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
+libwatchdog_server_imsg_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) `pkg-config --libs loudmouth-1.0`
