@@ -104,7 +104,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { LmConnection *connection;
     GError       *error = NULL;
-LmMessage    *m;
+
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
     Lire_config_imsg ( lib );                         /* Lecture de la configuration logiciel du thread */
 
@@ -131,14 +131,19 @@ LmMessage    *m;
           lib->Thread_run = FALSE;                                                        /* Arret du thread */
         }
        else
-        { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+        { LmMessage *m;
+Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                     "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
 
-    m = lm_message_new ("lefevre.seb", LM_MESSAGE_TYPE_MESSAGE);
+    m = lm_message_new ("lefevre.seb@jabber.fr", LM_MESSAGE_TYPE_MESSAGE);
     lm_message_node_add_child (m->node, "body", "message");
     if (!lm_connection_send (connection, m, &error)) {
        Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
+       
+    }
+else { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                 "Run_thread: Message sent to seb" );
        
     }
     lm_message_unref (m);
