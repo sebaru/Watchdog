@@ -112,7 +112,7 @@
               lm_message_node_get_value ( node ),
               lm_message_node_to_string (node)
             );
-    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
 /**********************************************************************************************************/
 /* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
@@ -146,12 +146,13 @@
                     "Reception_presence: Unable send subscribed to %s -> %s", from, error->message );
         }
        else
-        { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+        { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                     "Reception_presence: Sending Subscribed OK to %s", from );
         }
        lm_message_unref (m);
+       return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
-    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
 /**********************************************************************************************************/
 /* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
@@ -160,14 +161,13 @@
 /**********************************************************************************************************/
  LmHandlerResult Reception_contact ( LmMessageHandler *handler, LmConnection *connection,
                                      LmMessage *message, struct LIBRAIRIE *lib )
-  { LmMessageNode *node;
-    node = lm_message_get_node ( message );
+  { LmMessageNode *node_iq;
+    node_iq = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "Reception_contact : recu un msg xmpp : value = %s, contact = %s", 
-              lm_message_node_get_value ( node ),
-              lm_message_node_to_string (node)
+              "Reception_contact : recu un msg xmpp : iq = %s", 
+              lm_message_node_to_string (node_iq)
             );
-    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                               */
