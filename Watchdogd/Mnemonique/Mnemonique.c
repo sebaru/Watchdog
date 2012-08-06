@@ -152,12 +152,12 @@
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id AND"
-                " MATCH (libelle) AGAINST ('%s')",
+                " MATCH (%s.libelle) AGAINST ('%s')",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, libelle
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO, libelle
               );                                                                /* order by test 25/01/06 */
     g_free(libelle);
 
