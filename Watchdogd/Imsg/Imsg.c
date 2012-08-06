@@ -105,13 +105,21 @@
 /**********************************************************************************************************/
  LmHandlerResult Reception_message ( LmMessageHandler *handler, LmConnection *connection,
                                      LmMessage *message, struct LIBRAIRIE *lib )
-  { LmMessageNode *node;
+  { LmMessageNode *node, *body;
     node = lm_message_get_node ( message );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
               "Reception_message : recu un msg xmpp : value = %s attr = %s", 
               lm_message_node_get_value ( node ),
               lm_message_node_to_string (node)
             );
+    body = lm_message_node_find_child ( node, "body" );
+    if (body)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "Reception_message : recu un msg xmpp body = %s", 
+              lm_message_node_get_value ( body )
+            );
+       return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+     }
     return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
 /**********************************************************************************************************/
@@ -127,7 +135,7 @@
     GError *error;
 
     node_presence = lm_message_get_node ( message );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
               "Reception_presence : recu un msg xmpp : string= %s", 
               lm_message_node_to_string (node_presence)
             );
@@ -163,7 +171,7 @@
                                      LmMessage *message, struct LIBRAIRIE *lib )
   { LmMessageNode *node_iq;
     node_iq = lm_message_get_node ( message );
-    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
               "Reception_contact : recu un msg xmpp : iq = %s", 
               lm_message_node_to_string (node_iq)
             );
@@ -273,8 +281,8 @@
         { LmMessage *m;
           
               m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE);
-                lm_message_node_add_child (m->node, "status", "Server is down");
-                lm_message_node_add_child (m->node, "type", "unavailable");
+              lm_message_node_set_attribute (m->node, "type", "unavailable");
+              lm_message_node_add_child (m->node, "status", "Server is down");
                 if (!lm_connection_send (connection, m, &error)) 
                  {
                   Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
@@ -282,7 +290,7 @@
         
                  }
                lm_message_unref (m);
-
+              sleep(2);
          }
 
 
