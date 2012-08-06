@@ -139,11 +139,15 @@
               "Reception_presence: Recu %s from %s", type, from );
 
     if ( type && ( ! strcmp ( type, "subscribe" ) ) )
-     { m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
-       lm_message_node_add_child (m->node, "type", "subscribed");
+     { m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
+       lm_message_node_set_attribute ( m->node, "type", "subscribed" );
        if (!lm_connection_send (connection, m, &error)) 
         { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
                     "Reception_presence: Unable send subscribed to %s -> %s", from, error->message );
+        }
+       else
+        { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                    "Reception_presence: Sending Subscribed OK to %s", from );
         }
        lm_message_unref (m);
      }
