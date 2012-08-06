@@ -121,18 +121,17 @@
 /**********************************************************************************************************/
  LmHandlerResult Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
                                       LmMessage *message, struct LIBRAIRIE *lib )
-  { LmMessageNode *node, *node_presence;
+  { LmMessageNode *node_presence;
     const gchar *type, *from;
     LmMessage *m;
     GError *error;
 
-    node = lm_message_get_node ( message );
+    node_presence = lm_message_get_node ( message );
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
               "Reception_presence : recu un msg xmpp : string= %s", 
-              lm_message_node_to_string (node)
+              lm_message_node_to_string (node_presence)
             );
 
-    node_presence = lm_message_node_find_child ( node, "presence" );
     type = lm_message_node_get_attribute ( node_presence, "type" );
     from = lm_message_node_get_attribute ( node_presence, "from" );
 
