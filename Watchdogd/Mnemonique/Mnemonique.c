@@ -138,6 +138,36 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
+ gboolean Recuperer_mnemoDB_by_fulltext_libelle ( struct LOG *log, struct DB *db, gchar *libelle_pur )
+  { gchar requete[1024];
+    gchar *libelle;
+
+    libelle = Normaliser_chaine ( log, libelle_pur );
+    if (!libelle)
+     { Info( log, DEBUG_SERVEUR, "Recuperer_mnemo_by_fulltext_libelle: Normalisation impossible libelle" );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.groupe,%s.page,%s.name"
+                " FROM %s,%s,%s"
+                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id AND"
+                " MATCH (libelle) AGAINST ('%s')",
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_DLS,
+                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, libelle
+              );                                                                /* order by test 25/01/06 */
+    g_free(libelle);
+
+    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
  gboolean Recuperer_mnemoDB ( struct LOG *log, struct DB *db )
   { gchar requete[512];
 

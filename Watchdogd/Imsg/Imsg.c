@@ -106,21 +106,62 @@
  LmHandlerResult Reception_message ( LmMessageHandler *handler, LmConnection *connection,
                                      LmMessage *message, struct LIBRAIRIE *lib )
   { LmMessageNode *node, *body;
+    const gchar *from;
+    struct DB *db;
+    GError *error;
+    LmMessage *m;
+
     node = lm_message_get_node ( message );
+
     Info_new( Config.log, lib->Thread_debug, LOG_DEBUG,
               "Reception_message : recu un msg xmpp : value = %s attr = %s", 
               lm_message_node_get_value ( node ),
-              lm_message_node_to_string (node)
+              lm_message_node_to_string ( node )
             );
+
     body = lm_message_node_find_child ( node, "body" );
-    if (body)
-     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
-              "Reception_message : recu un msg xmpp body = %s", 
-              lm_message_node_get_value ( body )
+    if (!body) return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+
+    from = lm_message_node_get_attribute ( node, "from" );
+
+    Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+              "Reception_message : recu un msg xmpp de %s : %s", 
+              from, lm_message_node_get_value ( body )
             );
+
+    db = Init_DB_SQL( Config.log );
+    if (!db)
+     { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                 "Reception_message : Connexion DB failed. imsg not handled" );
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
-    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+    if ( ! Recuperer_mnemoDB_by_fulltext_libelle ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
+     { m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
+       lm_message_node_add_child ( m->node, "body", "No match found .. Sorry .." );
+       if (!lm_connection_send (connection, m, &error)) 
+        { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                    "Reception_message: Unable to send message %s -> No match found", from );
+        }
+       lm_message_unref (m);
+     }   
+    else
+     { for ( ; ; )
+        { struct CMD_TYPE_MNEMONIQUE *mnemo;
+          mnemo = Recuperer_mnemoDB_suite( Config.log, db );
+          if (!mnemo) break;
+
+          m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
+          lm_message_node_add_child ( m->node, "body", mnemo->libelle );
+          if (!lm_connection_send (connection, m, &error)) 
+           { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                       "Reception_message: Unable to send message %s -> %s", from, mnemo->libelle );
+           }
+          lm_message_unref (m);
+          g_free(mnemo);
+        }
+     }
+    Libere_DB_SQL( Config.log, &db );
+    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
 /**********************************************************************************************************/
 /* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
