@@ -43,12 +43,13 @@
   { gchar username[80];
     gchar server  [80];
     gchar password[80];
+    gchar **recipients;
   } Cfg_imsg;
 
 /**********************************************************************************************************/
-/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                    */
-/* Entrée: le nom de fichier à lire                                                                       */
-/* Sortie: La structure mémoire est à jour                                                                */
+/* Lire_config_imsg : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Lire_config_imsg ( struct LIBRAIRIE *lib )
   { gchar *chaine;
@@ -96,7 +97,56 @@
        g_free(chaine);
      }
 
+    Cfg_imsg.recipients = g_key_file_get_string_list ( gkf, "IMSG", "recipients", NULL, NULL );
+    if (!Cfg_imsg.recipients)
+     { Info_new ( Config.log, lib->Thread_debug, LOG_ERR,
+                  "Lire_config_imsg: recipients are is missing." );
+     }
+
     g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Liberer_config_imsg : Libere la mémoire allouer précédemment pour lire la config imsg                  */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Liberer_config_imsg ( struct LIBRAIRIE *lib )
+  { g_strfreev ( Cfg_imsg.recipients );
+  }
+/**********************************************************************************************************/
+/* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
+/* Entrée: la connexion xmpp                                                                              */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Mode_presence_imsg ( struct LIBRAIRIE *lib, LmConnection *connection, gchar *type, gchar *presence )
+  { LmMessage *m;
+    GError *error;
+
+    m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
+    lm_message_node_set_attribute (m->node, "type", type );
+    lm_message_node_add_child (m->node, "status", presence );
+    if (!lm_connection_send (connection, m, &error)) 
+     { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                 "Mode_presence_imsg: Unable to send presence %s / %s -> %s", type, presence, error->message );
+     }
+    lm_message_unref (m);
+  }
+/**********************************************************************************************************/
+/* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
+/* Entrée: la connexion xmpp                                                                              */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Envoi_message_to_imsg ( struct LIBRAIRIE *lib, LmConnection *connection, gchar *dest, gchar *message )
+  { GError *error;
+    LmMessage *m;
+
+    m = lm_message_new ( dest, LM_MESSAGE_TYPE_MESSAGE );
+    lm_message_node_add_child (m->node, "body", message );
+    if (!lm_connection_send (connection, m, &error)) 
+     { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                 "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
+     }
+    lm_message_unref (m);
   }
 /**********************************************************************************************************/
 /* Reception_message : CB appellé lorsque l'on recoit un message xmpp                                     */
@@ -265,7 +315,6 @@
         }
        else
         { LmMessageHandler *lmMsgHandler;
-          LmMessage *m;
           Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                     "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
 
@@ -287,34 +336,10 @@
                                                   LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
           lm_message_handler_unref(lmMsgHandler);
 
-
-              m = lm_message_new ("lefevre.seb@jabber.fr", LM_MESSAGE_TYPE_MESSAGE);
-                lm_message_node_add_child (m->node, "body", "message");
-                if (!lm_connection_send (connection, m, &error)) 
-                 {
-                  Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                      "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
-        
-                 }
-               lm_message_unref (m);
-
-              m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE);
-                lm_message_node_add_child (m->node, "status", "Waiting for commands");
-                if (!lm_connection_send (connection, m, &error)) 
-                 {
-                  Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                      "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
-        
-                 }
-               lm_message_unref (m);
-
-
+          Mode_presence_imsg ( lib, connection, "available", "Waiting for commands" );
+          Envoi_message_to_imsg ( lib, connection, "lefevre.seb@jabber.fr", "Server is Up and Running" );
         }
      }
-
-
-
-
 
     while( lib->Thread_run == TRUE )                                     /* On tourne tant que necessaire */
      { usleep(1);
@@ -329,26 +354,15 @@
 
      }                                                                     /* Fin du while partage->arret */
 
-
-        { LmMessage *m;
-          
-              m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE);
-              lm_message_node_set_attribute (m->node, "type", "unavailable");
-              lm_message_node_add_child (m->node, "status", "Server is down");
-                if (!lm_connection_send (connection, m, &error)) 
-                 {
-                  Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                      "Run_thread: Unable to send message %s -> %s", Cfg_imsg.server, error->message );
-        
-                 }
-               lm_message_unref (m);
-              sleep(2);
-         }
+    Envoi_message_to_imsg ( lib, connection, "lefevre.seb@jabber.fr", "Server is stopping.." );
+    Mode_presence_imsg( lib, connection, "unavailable", "Server is down" );
+    sleep(2);
 
 
     lm_connection_close (connection, NULL);                                 /* Fermeture de la connection */
     lm_connection_unref (connection);                             /* Destruction de la structure associée */
     g_main_context_unref (MainLoop);
+    Liberer_config_imsg( lib );                   /* Liberation de la configuration de l'InstantMessaging */
 
     Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     lib->TID = 0;                                         /* On indique au master que le thread est mort. */
