@@ -137,15 +137,16 @@
      }
     if ( ! Recuperer_mnemoDB_by_fulltext_libelle ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
      { m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
-       lm_message_node_add_child ( m->node, "body", "No match found .. Sorry .." );
+       lm_message_node_add_child ( m->node, "body", "Error searching Database .. Sorry .." );
        if (!lm_connection_send (connection, m, &error)) 
-        { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
-                    "Reception_message: Unable to send message %s -> No match found", from );
+        { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                    "Reception_message: Unable to send message %s -> Error Database", from );
         }
        lm_message_unref (m);
      }   
     else
-     { for ( ; ; )
+     { gboolean none;
+       for ( none = TRUE; ; )
         { struct CMD_TYPE_MNEMONIQUE *mnemo;
           mnemo = Recuperer_mnemoDB_suite( Config.log, db );
           if (!mnemo) break;
@@ -158,7 +159,17 @@
            }
           lm_message_unref (m);
           g_free(mnemo);
+          none = FALSE;
         }
+       if (none == TRUE)
+        { m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
+          lm_message_node_add_child ( m->node, "body", "Error... No result found .. Sorry .." );
+          if (!lm_connection_send (connection, m, &error)) 
+           { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                       "Reception_message: Unable to send message %s -> No Result", from );
+           }
+          lm_message_unref (m);
+        }   
      }
     Libere_DB_SQL( Config.log, &db );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
