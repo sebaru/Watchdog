@@ -136,7 +136,7 @@
 /* Entrée: la connexion xmpp                                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Envoi_message_to_imsg ( struct LIBRAIRIE *lib, LmConnection *connection, gchar *dest, gchar *message )
+ static void Envoi_message_to_imsg ( struct LIBRAIRIE *lib, LmConnection *connection, const gchar *dest, gchar *message )
   { GError *error;
     LmMessage *m;
 
@@ -158,8 +158,6 @@
   { LmMessageNode *node, *body;
     const gchar *from;
     struct DB *db;
-    GError *error;
-    LmMessage *m;
 
     node = lm_message_get_node ( message );
 
@@ -186,14 +184,7 @@
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
     if ( ! Recuperer_mnemoDB_by_fulltext_libelle ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
-     { m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
-       lm_message_node_add_child ( m->node, "body", "Error searching Database .. Sorry .." );
-       if (!lm_connection_send (connection, m, &error)) 
-        { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
-                    "Reception_message: Unable to send message %s -> Error Database", from );
-        }
-       lm_message_unref (m);
-     }   
+     { Envoi_message_to_imsg( lib, connection, from, "Error searching Database .. Sorry .." ); }   
     else
      { gboolean none;
        for ( none = TRUE; ; )
@@ -201,25 +192,12 @@
           mnemo = Recuperer_mnemoDB_suite( Config.log, db );
           if (!mnemo) break;
 
-          m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
-          lm_message_node_add_child ( m->node, "body", mnemo->libelle );
-          if (!lm_connection_send (connection, m, &error)) 
-           { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
-                       "Reception_message: Unable to send message %s -> %s", from, mnemo->libelle );
-           }
-          lm_message_unref (m);
+          Envoi_message_to_imsg( lib, connection, from, mnemo->libelle );
           g_free(mnemo);
           none = FALSE;
         }
        if (none == TRUE)
-        { m = lm_message_new ( from, LM_MESSAGE_TYPE_MESSAGE);
-          lm_message_node_add_child ( m->node, "body", "Error... No result found .. Sorry .." );
-          if (!lm_connection_send (connection, m, &error)) 
-           { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
-                       "Reception_message: Unable to send message %s -> No Result", from );
-           }
-          lm_message_unref (m);
-        }   
+        { Envoi_message_to_imsg( lib, connection, from, "Error... No result found .. Sorry .." ); }   
      }
     Libere_DB_SQL( Config.log, &db );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
