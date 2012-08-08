@@ -118,8 +118,10 @@
 /* Entrée: les infos de reference                                                                         */
 /* Sortie: STOP                                                                                           */
 /**********************************************************************************************************/
- static LmSSLResponse Failed_SSL_connexion_CB ( LmSSL *ssl, LmSSLStatus status, struct LIBRAIRIE *lib )
-  { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+ static LmSSLResponse Failed_SSL_connexion_CB ( LmSSL *ssl, LmSSLStatus status, gpointer data )
+  { struct LIBRAIRIE *lib;
+    lib = data;
+    Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
                  "Failed_SSL_connexion_CB: Connexion SSL unsuccessful Status = %d", status );
     return ( LM_SSL_RESPONSE_STOP );
   }
@@ -310,15 +312,15 @@
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
     connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
-    ssl = lm_ssl_new ( NULL, Failed_SSL_connexion_CB, lib, NULL );
-    lm_connection_set_ssl ( connection, ssl );
     if ( lm_connection_open_and_block (connection, &error) == FALSE )        /* Connexion au serveur XMPP */
      { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
        lib->Thread_run = FALSE;                                                        /* Arret du thread */
      }
     else
-     { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+     { ssl = lm_ssl_new ( NULL, Failed_SSL_connexion_CB, lib, NULL );
+       lm_connection_set_ssl ( connection, ssl );
+       Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                  "Run_thread: Connection to xmpp server %s OK", Cfg_imsg.server );
        if ( lm_connection_authenticate_and_block ( connection, Cfg_imsg.username, Cfg_imsg.password,
                                                         "resource", &error) == FALSE )
