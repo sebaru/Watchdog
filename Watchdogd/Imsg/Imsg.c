@@ -114,6 +114,16 @@
   { g_strfreev ( Cfg_imsg.recipients );
   }
 /**********************************************************************************************************/
+/* Failed_SSL_connexion_CB : Fonction appellée lorsque la connexion SSL ne peut pas se faire              */
+/* Entrée: les infos de reference                                                                         */
+/* Sortie: STOP                                                                                           */
+/**********************************************************************************************************/
+ static LmSSLResponse Failed_SSL_connexion_CB ( LmSSL *ssl, LmSSLStatus status, struct LIBRAIRIE *lib )
+  { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
+                 "Failed_SSL_connexion_CB: Connexion SSL unsuccessful Status = %d", status );
+    return ( LM_SSL_RESPONSE_STOP );
+  }
+/**********************************************************************************************************/
 /* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
 /* Entrée: la connexion xmpp                                                                              */
 /* Sortie: Néant                                                                                          */
@@ -286,6 +296,7 @@
   { GMainContext *MainLoop;
     LmConnection *connection;
     GError       *error = NULL;
+    LmSSL        *ssl = NULL;
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
     Lire_config_imsg ( lib );                         /* Lecture de la configuration logiciel du thread */
@@ -299,6 +310,8 @@
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
     connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
+    ssl = lm_ssl_new ( NULL, Failed_SSL_connexion_CB, lib, NULL );
+    lm_connection_set_ssl ( connection, ssl );
     if ( lm_connection_open_and_block (connection, &error) == FALSE )        /* Connexion au serveur XMPP */
      { Info_new( Config.log, lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
@@ -360,6 +373,7 @@
 
 
     lm_connection_close (connection, NULL);                                 /* Fermeture de la connection */
+    lm_ssl_unref ( ssl );                                     /* Libération mémoire pour la connexion SSL */
     lm_connection_unref (connection);                             /* Destruction de la structure associée */
     g_main_context_unref (MainLoop);
     Liberer_config_imsg( lib );                   /* Liberation de la configuration de l'InstantMessaging */
