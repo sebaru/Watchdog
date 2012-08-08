@@ -319,6 +319,7 @@
      }
     else
      { ssl = lm_ssl_new ( NULL, Failed_SSL_connexion_CB, lib, NULL );
+       lm_ssl_use_starttls ( ssl, TRUE, TRUE );
        lm_connection_set_ssl ( connection, ssl );
        Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                  "Run_thread: Connection to xmpp server %s OK", Cfg_imsg.server );
