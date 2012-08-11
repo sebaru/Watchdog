@@ -292,7 +292,7 @@
 
     node_presence = lm_message_get_node ( message );
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
-              "Imsg_Reception_presence : recu un msg xmpp : string= %s", 
+              "Imsg_Reception_presence : recu un msg presence : string= %s", 
               lm_message_node_to_string (node_presence)
             );
 

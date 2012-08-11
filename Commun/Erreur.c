@@ -61,7 +61,7 @@
     log->debug_level = debug;
     on_exit( Info_stop, log );
     
-    openlog( log->entete, LOG_CONS | LOG_PID | LOG_PERROR, LOG_LOCAL3 );
+    openlog( log->entete, LOG_CONS | LOG_PID | LOG_PERROR, LOG_USER );
     return(log);
   }
 /**********************************************************************************************************/
