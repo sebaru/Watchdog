@@ -107,6 +107,22 @@
   { g_strfreev ( Cfg_imsg.recipients );
   }
 /**********************************************************************************************************/
+/* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */
+/* Entrée: le nom du destinataire                                                                         */
+/* Sortie : booléen, TRUE/FALSE                                                                           */
+/**********************************************************************************************************/
+ static gboolean Imsg_recipient_authorized ( const gchar *nom )
+  { gchar **liste;
+    gint cpt;
+    cpt = 0;
+    liste = Cfg_imsg.recipients;
+    while (liste[cpt])
+     { if ( ! strcmp ( nom, liste[cpt] ) ) return(TRUE);
+       cpt++;
+     }
+    return(FALSE);
+  }
+/**********************************************************************************************************/
 /* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
 /* Entrée: la connexion xmpp                                                                              */
 /* Sortie: Néant                                                                                          */
@@ -134,7 +150,12 @@
     LmMessage *m;
 
     m = lm_message_new ( dest, LM_MESSAGE_TYPE_MESSAGE );
-    lm_message_node_add_child (m->node, "body", message );
+
+    if( Imsg_recipient_authorized ( dest ) )
+     { lm_message_node_add_child (m->node, "body", message ); }
+    else
+     { lm_message_node_add_child (m->node, "body", "Not authorized..." ); }
+
     if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
                  "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
