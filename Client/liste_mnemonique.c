@@ -47,6 +47,7 @@
      COLONNE_NUM_PLUGIN,
      COLONNE_ACRONYME,
      COLONNE_LIBELLE,
+     COLONNE_COMMAND_TEXT,
      COLONNE_COULEUR,
      COLONNE_COULEUR_TEXTE,
      NBR_COLONNE
@@ -481,6 +482,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
                                               G_TYPE_UINT,                                  /* Num_plugin */
                                               G_TYPE_STRING,                                  /* Acronyme */
                                               G_TYPE_STRING,                                   /* libellé */
+                                              G_TYPE_STRING,                              /* Command_text */
                                               GDK_TYPE_COLOR,                             /* couleur fond */
                                               GDK_TYPE_COLOR                             /* couleur texte */
                                );
@@ -518,6 +520,13 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Command text"), renderer,
+                                                         "text", COLONNE_COMMAND_TEXT,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMMAND_TEXT);           /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_mnemonique), TRUE );*/
@@ -588,6 +597,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
                          COLONNE_GROUPE_PAGE_DLS, groupe_page,
                          COLONNE_ACRONYME,        mnemonique->acronyme,
                          COLONNE_LIBELLE,         mnemonique->libelle,
+                         COLONNE_COMMAND_TEXT,    mnemonique->command_text,
                          COLONNE_COULEUR,         Couleur_bit_interne( mnemonique->type ),
                          COLONNE_COULEUR_TEXTE, Couleur_texte_bit_interne( mnemonique->type ),
                          -1
