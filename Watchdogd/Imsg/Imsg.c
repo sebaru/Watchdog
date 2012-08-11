@@ -127,16 +127,18 @@
 /* Entrée: la connexion xmpp                                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Imsg_Mode_presence ( gchar *type, gchar *presence )
+ void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status )
   { LmMessage *m;
     GError *error;
 
     m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
-    lm_message_node_set_attribute (m->node, "type", type );
-    lm_message_node_add_child (m->node, "status", presence );
+    if (type)   lm_message_node_set_attribute (m->node, "type", type );
+    if (show)   lm_message_node_add_child (m->node, "show", show );
+    if (status) lm_message_node_add_child (m->node, "status", status );
     if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                 "Imsg_Mode_presence: Unable to send presence %s / %s -> %s", type, presence, error->message );
+                 "Imsg_Mode_presence: Unable to send presence %s / %s / %s -> %s",
+                 type, show, status, error->message );
      }
     lm_message_unref (m);
   }
@@ -354,7 +356,7 @@
                                                   LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
           lm_message_handler_unref(lmMsgHandler);
 
-          Imsg_Mode_presence ( "available", "Waiting for commands" );
+          Imsg_Mode_presence ( NULL, "chat", "Waiting for commands" );
           Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is Up and Running" );
         }
      }
@@ -373,7 +375,7 @@
      }                                                                     /* Fin du while partage->arret */
 
     if (Cfg_imsg.connection) Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is stopping.." );
-    if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "Server is down" );
+    if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
     sleep(2);
 
 
