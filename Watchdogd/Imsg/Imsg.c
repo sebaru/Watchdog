@@ -113,36 +113,46 @@
 /**********************************************************************************************************/
  static void Imsg_Liberer_liste_contacts ( void )
   { 
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
     while(Cfg_imsg.contacts)
      { struct IMSG_CONTACT *contact;
        contact  =(struct IMSG_CONTACT *)Cfg_imsg.contacts->data;
        Cfg_imsg.contacts = g_slist_remove ( Cfg_imsg.contacts, contact );             /* Ajout a la liste */
        g_free(contact);
      }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Imsg_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en paremetre              */
 /* Entrée: le contact et le statut                                                                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Imsg_Sauvegarder_statut_contact ( gchar *nom, gboolean available )
+ static void Imsg_Sauvegarder_statut_contact ( const gchar *nom, gboolean available )
   { struct IMSG_CONTACT *contact;
+    gboolean found;
     GSList *liste;
+    found = FALSE;
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
     liste = Cfg_imsg.contacts;
     while(liste)
      { contact  =(struct IMSG_CONTACT *)liste->data;
        if ( ! strcmp( contact->nom, nom ) )
-        { contact->available = available;
-          return;
+        { contact->available = available; 
+          found = TRUE;
+          break;
         }
        liste = liste->next;
      }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+    if (found) return;
                                        /* Si on arrive la, c'est que le contact n'est pas dans la liste ! */
     contact = (struct IMSG_CONTACT *)g_malloc0( sizeof(struct IMSG_CONTACT) );
     if (!contact) return;
     g_snprintf( contact->nom, sizeof(contact->nom), "%s", nom );
     contact->available = available;
-    Cfg_imsg.contacts = g_slist_preprend ( Cfg_imsg.contacts, contact );              /* Ajout a la liste */
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    Cfg_imsg.contacts = g_slist_prepend ( Cfg_imsg.contacts, contact );               /* Ajout a la liste */
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */

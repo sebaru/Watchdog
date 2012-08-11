@@ -161,6 +161,22 @@
        Imsg_Envoi_message_to ( to, ligne + strlen (to) + 6 );
        Write_admin ( client->connexion, " Message sent.\n" );
      }
+    else if ( ! strcmp ( commande, "list" ) )
+     { gchar chaine[128];
+       GSList *liste;
+       pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+       liste = Cfg_imsg.contacts;
+       while(liste)
+        { struct IMSG_CONTACT *contact;
+          contact  =(struct IMSG_CONTACT *)liste->data;
+          g_snprintf( chaine, sizeof(chaine), " User %s is %s\n",
+                      contact->nom, (contact->available ? "available" : "UNavailable") 
+                    );
+          Write_admin ( client->connexion, chaine );
+          liste = liste->next;
+        }
+       pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+     }
 #ifdef bouh
     else if ( ! strcmp ( commande, "change" ) )
      { struct IMSGDB imsg;
@@ -188,9 +204,6 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_imsg_del ( client, num );
      }
-    else if ( ! strcmp ( commande, "list" ) )
-     { Admin_imsg_list ( client );
-     }
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_imsg_reload(client);
      }
@@ -200,6 +213,8 @@
                      "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
        Write_admin ( client->connexion,
                      "  send user@domain/resource message      - Send a message to user\n" );
+       Write_admin ( client->connexion,
+                     "  list                                   - List contact and availability\n" );
      }
     else
      { gchar chaine[128];
