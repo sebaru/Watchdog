@@ -268,7 +268,6 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { GMainContext *MainLoop;
     GError       *error = NULL;
-    LmSSL        *ssl;
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
     Cfg_imsg.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
@@ -284,9 +283,18 @@
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
     Cfg_imsg.connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
-    ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
-    lm_connection_set_ssl ( Cfg_imsg.connection, ssl );
-    lm_ssl_unref ( ssl );
+    if ( lm_ssl_is_supported () == TRUE )
+     { LmSSL *ssl;
+       ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
+       lm_ssl_use_starttls ( ssl, TRUE, TRUE );
+       lm_connection_set_ssl ( Cfg_imsg.connection, ssl );
+       lm_ssl_unref ( ssl );
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                 "Run_thread: SSL is available" );
+     }
+    else { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                     "Run_thread: SSL is _Not_ available" );
+         }
                                                                              /* Connexion au serveur XMPP */
     if ( lm_connection_open_and_block (Cfg_imsg.connection, &error) == FALSE )
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
@@ -343,8 +351,8 @@
 
      }                                                                     /* Fin du while partage->arret */
 
-    Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is stopping.." );
-    Imsg_Mode_presence( "unavailable", "Server is down" );
+    if (Cfg_imsg.connection) Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is stopping.." );
+    if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "Server is down" );
     sleep(2);
 
 
