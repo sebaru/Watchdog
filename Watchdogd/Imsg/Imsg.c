@@ -117,7 +117,7 @@
     cpt = 0;
     liste = Cfg_imsg.recipients;
     while (liste[cpt])
-     { if ( ! strcmp ( nom, liste[cpt] ) ) return(TRUE);
+     { if ( ! strncmp ( nom, liste[cpt], strlen(liste[cpt]) ) ) return(TRUE);
        cpt++;
      }
     return(FALSE);
@@ -225,8 +225,8 @@
 /**********************************************************************************************************/
  static LmHandlerResult Imsg_Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
                                                   LmMessage *message, gpointer data )
-  { LmMessageNode *node_presence;
-    const gchar *type, *from;
+  { LmMessageNode *node_presence, *node_show, *node_status;
+    const gchar *type, *from, *show, *status;
     LmMessage *m;
     GError *error;
 
@@ -239,8 +239,16 @@
     type = lm_message_node_get_attribute ( node_presence, "type" );
     from = lm_message_node_get_attribute ( node_presence, "from" );
 
+    node_show = lm_message_node_get_child( node_presence, "show" );
+    if (node_show) show = lm_message_node_get_value( node_show );
+              else show = NULL;
+
+    node_status = lm_message_node_get_child( node_presence, "status" );
+    if (node_status) status = lm_message_node_get_value( node_status );
+                else status = NULL;
+
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
-              "Imsg_Reception_presence: Recu %s from %s", type, from );
+              "Imsg_Reception_presence: Recu type=%s, show=%s, status=%s from %s", type, show, status, from );
 
     if ( type && ( ! strcmp ( type, "subscribe" ) ) )  /* Demande de subscription à notre status presence */
      { m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
@@ -357,11 +365,10 @@
           lm_message_handler_unref(lmMsgHandler);
 
           Imsg_Mode_presence ( NULL, "chat", "Waiting for commands" );
-          Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is Up and Running" );
         }
      }
 
-    while( Cfg_imsg.lib->Thread_run == TRUE )                                     /* On tourne tant que necessaire */
+    while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
