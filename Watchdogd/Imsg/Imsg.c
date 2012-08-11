@@ -132,6 +132,8 @@
     gboolean found;
     GSList *liste;
     found = FALSE;
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : searching for user %s", nom );
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
     liste = Cfg_imsg.contacts;
     while(liste)
@@ -144,15 +146,25 @@
        liste = liste->next;
      }
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-    if (found) return;
+    if (found==TRUE) return;
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : user %s not found in list. Prepeding..", nom );
                                        /* Si on arrive la, c'est que le contact n'est pas dans la liste ! */
     contact = (struct IMSG_CONTACT *)g_malloc0( sizeof(struct IMSG_CONTACT) );
     if (!contact) return;
     g_snprintf( contact->nom, sizeof(contact->nom), "%s", nom );
     contact->available = available;
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : 1" );
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : 2" );
     Cfg_imsg.contacts = g_slist_prepend ( Cfg_imsg.contacts, contact );               /* Ajout a la liste */
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : 3" );
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : 4" );
   }
 /**********************************************************************************************************/
 /* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */
