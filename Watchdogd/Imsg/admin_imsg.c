@@ -33,11 +33,8 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_imsg_reload ( struct CLIENT_ADMIN *client )
-  { /*Partage->com_imsg.Thread_reload = TRUE;
-    Write_admin ( client->connexion, " IMSG Reloading in progress\n" );
-    while (Partage->com_imsg.Thread_reload) sched_yield();
-    Write_admin ( client->connexion, " IMSG Reloading done\n" );*/
+ static void Admin_imsg_send ( struct CLIENT_ADMIN *client, gchar *to, gchar message )
+  { 
   }
 /**********************************************************************************************************/
 /* Admin_imsg_list: Liste l'ensemble des capteurs imsg présent dans la conf                           */

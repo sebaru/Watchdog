@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 lib_LTLIBRARIES                         = libwatchdog-server-imsg.la
-libwatchdog_server_imsg_la_SOURCES    = Imsg.c admin_imsg.c
+libwatchdog_server_imsg_la_SOURCES    = Imsg.c Imsg.h admin_imsg.c 
 
 INCLUDES= `pkg-config --cflags glib-2.0 loudmouth-1.0` \
           -I$(top_srcdir) -I$(includedir) \
