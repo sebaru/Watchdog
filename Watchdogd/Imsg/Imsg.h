@@ -39,6 +39,8 @@
     struct LIBRAIRIE *lib;
     
  } Cfg_imsg;
+/****************************************** Déclarations des prototypes ***********************************/
+ extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

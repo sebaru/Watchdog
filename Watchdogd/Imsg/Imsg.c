@@ -129,7 +129,7 @@
 /* Entrée: la connexion xmpp                                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Imsg_Envoi_message_to ( const gchar *dest, gchar *message )
+ void Imsg_Envoi_message_to ( const gchar *dest, gchar *message )
   { GError *error;
     LmMessage *m;
 

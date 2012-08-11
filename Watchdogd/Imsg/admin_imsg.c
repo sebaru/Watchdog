@@ -27,6 +27,7 @@
  
  #include <glib.h>
  #include "watchdogd.h"
+ #include "Imsg.h"
 
 /**********************************************************************************************************/
 /* Admin_imsg_reload: Demande le rechargement des conf IMSG                                               */
@@ -145,22 +146,22 @@
      }*/
   }
 /**********************************************************************************************************/
-/* Admin_imsg: Fonction gerant les différentes commandes possible pour l'administration imsg          */
+/* Admin_imsg: Fonction gerant les différentes commandes possible pour l'administration imsg              */
 /* Entrée: le client d'admin et la ligne de commande                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
-#ifdef bouh
+
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
-    if ( ! strcmp ( commande, "add" ) )
-     { struct IMSGDB imsg;
-       memset( &imsg, 0, sizeof(struct IMSGDB) );
-       sscanf ( ligne, "%s %d %d %d %d %d %s", commande,             /* Découpage de la ligne de commande */
-                (gint *)&imsg.type, (gint *)&imsg.canal, &imsg.e_min, &imsg.ea_min, &imsg.a_min, imsg.libelle );
-       Admin_imsg_add ( client, &imsg );
+    if ( ! strcmp ( commande, "send" ) )
+     { gchar to[256];
+       sscanf ( ligne, "%s %s", commande, to );                      /* Découpage de la ligne de commande */
+       Imsg_Envoi_message_to ( to, ligne + strlen (to) + 6 );
+       Write_admin ( client->connexion, " Message sent.\n" );
      }
+#ifdef bouh
     else if ( ! strcmp ( commande, "change" ) )
      { struct IMSGDB imsg;
        memset( &imsg, 0, sizeof(struct IMSGDB) );
@@ -193,29 +194,17 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_imsg_reload(client);
      }
+#endif
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
        Write_admin ( client->connexion,
-                     "  add type canal e_min ea_min a_min libelle\n"
-                     "                                         - Ajoute un module\n" );
-       Write_admin ( client->connexion,
-                     "  change ID type canal e_min ea_min a_min libelle\n"
-                     "                                         - Edite le module ID\n" );
-       Write_admin ( client->connexion,
-                     "  del ID                                 - Retire le module ID\n" );
-       Write_admin ( client->connexion,
-                     "  cmd id1 id2 id3 id4 unitcode cmdnumber - Envoie une commande IMSG\n" );
-       Write_admin ( client->connexion,
-                     "  list                                   - Affiche les status des equipements IMSG\n" );
-       Write_admin ( client->connexion,
-                     "  reload                                 - Recharge la configuration\n" );
+                     "  send user@domain/resource message      - Send a message to user\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown IMSG command : %s\n", ligne );
        Write_admin ( client->connexion, chaine );
      }
-#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
