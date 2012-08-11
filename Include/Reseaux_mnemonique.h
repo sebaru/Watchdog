@@ -64,6 +64,7 @@
     gchar  plugin_dls[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+    gchar  command_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
   };
 
  struct CMD_TYPE_MNEMONIQUES

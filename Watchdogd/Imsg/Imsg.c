@@ -183,7 +183,7 @@
                  "Reception_message : Connexion DB failed. imsg not handled" );
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
-    if ( ! Recuperer_mnemoDB_by_fulltext_libelle ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
+    if ( ! Recuperer_mnemoDB_by_command_text ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
      { Envoi_message_to_imsg( lib, connection, from, "Error searching Database .. Sorry .." ); }   
     else
      { gboolean none;
@@ -236,6 +236,17 @@
        else
         { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
                     "Reception_presence: Sending Subscribed OK to %s", from );
+        }
+       lm_message_unref (m);
+       m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
+       lm_message_node_set_attribute (m->node, "type", "subscribe" );
+       if (!lm_connection_send (connection, m, &error)) 
+        { Info_new( Config.log, lib->Thread_debug, LOG_WARNING,
+                    "Reception_presence: Unable send subscribe to %s -> %s", from, error->message );
+        }
+       else
+        { Info_new( Config.log, lib->Thread_debug, LOG_INFO,
+                    "Reception_presence: Sending Subscribe OK to %s", from );
         }
        lm_message_unref (m);
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);

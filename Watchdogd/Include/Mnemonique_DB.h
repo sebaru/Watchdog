@@ -45,8 +45,8 @@
  extern gboolean Modifier_mnemoDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo );
  extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct LOG *log, struct DB *db,
                                                          struct CMD_TYPE_NUM_MNEMONIQUE *critere );
- extern gboolean Recuperer_mnemoDB_by_fulltext_libelle ( struct LOG *log, struct DB *db,
-                                                         gchar *libelle_pur );
+ extern gboolean Recuperer_mnemoDB_by_command_text ( struct LOG *log, struct DB *db,
+                                                     gchar *commande_pure );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

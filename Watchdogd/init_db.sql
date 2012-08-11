@@ -603,7 +603,8 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
+  `command_text` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`), FULLTEXT('command_text')
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 INSERT INTO `mnemos` (`type`, `num`, `num_syn`, `acronyme`, `libelle`) VALUES
