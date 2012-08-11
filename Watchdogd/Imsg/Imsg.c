@@ -310,7 +310,7 @@
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
               "Imsg_Reception_presence: Recu type=%s, show=%s, status=%s from %s", type, show, status, from );
 
-    if ( ! strcmp ( type, "subscribe" ) )              /* Demande de subscription à notre status presence */
+    if ( type &&  ( ! strcmp ( type, "subscribe" ) ) ) /* Demande de subscription à notre status presence */
      { m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
        lm_message_node_set_attribute ( m->node, "type", "subscribed" );
        if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
@@ -338,7 +338,7 @@
        Imsg_Sauvegarder_statut_contact ( from, FALSE );         /* Par défaut, le contact est unavailable */
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
-    else if ( ! strcmp ( type, "unavailable" ) )                /* Gestion de la deconnexion des contacts */
+    else if ( type && ( ! strcmp ( type, "unavailable" ) ) )    /* Gestion de la deconnexion des contacts */
      { Imsg_Sauvegarder_statut_contact ( from, FALSE );                     /* Le contact est unavailable */
      }
     else if ( ! type )                                            /* Gestion de la connexion des contacts */
