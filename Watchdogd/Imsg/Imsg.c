@@ -107,6 +107,44 @@
   { g_strfreev ( Cfg_imsg.recipients );
   }
 /**********************************************************************************************************/
+/* Imsg_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en paremetre              */
+/* Entrée: le contact et le statut                                                                        */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Imsg_Liberer_liste_contacts ( void )
+  { 
+    while(Cfg_imsg.contacts)
+     { struct IMSG_CONTACT *contact;
+       contact  =(struct IMSG_CONTACT *)Cfg_imsg.contacts->data;
+       Cfg_imsg.contacts = g_slist_remove ( Cfg_imsg.contacts, contact );             /* Ajout a la liste */
+       g_free(contact);
+     }
+  }
+/**********************************************************************************************************/
+/* Imsg_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en paremetre              */
+/* Entrée: le contact et le statut                                                                        */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Imsg_Sauvegarder_statut_contact ( gchar *nom, gboolean available )
+  { struct IMSG_CONTACT *contact;
+    GSList *liste;
+    liste = Cfg_imsg.contacts;
+    while(liste)
+     { contact  =(struct IMSG_CONTACT *)liste->data;
+       if ( ! strcmp( contact->nom, nom ) )
+        { contact->available = available;
+          return;
+        }
+       liste = liste->next;
+     }
+                                       /* Si on arrive la, c'est que le contact n'est pas dans la liste ! */
+    contact = (struct IMSG_CONTACT *)g_malloc0( sizeof(struct IMSG_CONTACT) );
+    if (!contact) return;
+    g_snprintf( contact->nom, sizeof(contact->nom), "%s", nom );
+    contact->available = available;
+    Cfg_imsg.contacts = g_slist_preprend ( Cfg_imsg.contacts, contact );              /* Ajout a la liste */
+  }
+/**********************************************************************************************************/
 /* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */
 /* Entrée: le nom du destinataire                                                                         */
 /* Sortie : booléen, TRUE/FALSE                                                                           */
@@ -250,7 +288,7 @@
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
               "Imsg_Reception_presence: Recu type=%s, show=%s, status=%s from %s", type, show, status, from );
 
-    if ( type && ( ! strcmp ( type, "subscribe" ) ) )  /* Demande de subscription à notre status presence */
+    if ( ! strcmp ( type, "subscribe" ) )              /* Demande de subscription à notre status presence */
      { m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
        lm_message_node_set_attribute ( m->node, "type", "subscribed" );
        if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
@@ -274,7 +312,15 @@
                     "Imsg_Reception_presence: Sending Subscribe OK to %s", from );
         }
        lm_message_unref (m);
+
+       Imsg_Sauvegarder_statut_contact ( from, FALSE );         /* Par défaut, le contact est unavailable */
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+     }
+    else if ( ! strcmp ( type, "unavailable" ) )                /* Gestion de la deconnexion des contacts */
+     { Imsg_Sauvegarder_statut_contact ( from, FALSE );                     /* Le contact est unavailable */
+     }
+    else if ( ! type )                                            /* Gestion de la connexion des contacts */
+     { Imsg_Sauvegarder_statut_contact ( from, TRUE );                      /* Le contact est unavailable */
      }
     return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
@@ -301,6 +347,7 @@
     GError       *error = NULL;
 
     prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
+    memset( &Cfg_imsg, 0, sizeof(Cfg_imsg) );                   /* Mise a zero de la structure de travail */
     Cfg_imsg.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
     Imsg_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
@@ -390,6 +437,7 @@
     lm_connection_unref (Cfg_imsg.connection);           /* Destruction de la structure associée */
     g_main_context_unref (MainLoop);
     Imsg_Liberer_config();                        /* Liberation de la configuration de l'InstantMessaging */
+    Imsg_Liberer_liste_contacts();                                     /* Liberation de la liste contacts */
 
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     Cfg_imsg.lib->TID = 0;                                         /* On indique au master que le thread est mort. */

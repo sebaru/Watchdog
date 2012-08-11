@@ -30,14 +30,19 @@
 
  #include <loudmouth/loudmouth.h>
 
- struct CONFIG_IMSG
+ struct IMSG_CONTACT
+  { gchar nom[80];
+    gboolean available;
+  };
+
+ struct IMSG_CONFIG
   { gchar username[80];
     gchar server  [80];
     gchar password[80];
     gchar **recipients;
     LmConnection *connection;
     struct LIBRAIRIE *lib;
-    
+    GSList *contacts;
  } Cfg_imsg;
 /****************************************** Déclarations des prototypes ***********************************/
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
