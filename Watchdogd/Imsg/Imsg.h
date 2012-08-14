@@ -43,6 +43,7 @@
     LmConnection *connection;
     struct LIBRAIRIE *lib;
     GSList *contacts;
+    GSList *Messages;
  } Cfg_imsg;
 /****************************************** Déclarations des prototypes ***********************************/
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );

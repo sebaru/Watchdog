@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Watchdogd/distrib.c        Distribution des messages DLS aux clients                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       jeu 22 jan 2009 20:01:50 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -35,6 +35,8 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
 
+ static GSList *Liste_clients_msg  = NULL;
+
 /**********************************************************************************************************/
 /* Gerer_message_repeat: Gestion de la répétition des messages                                            */
 /* Entrée/Sortie: rien                                                                                    */
@@ -61,6 +63,26 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
+/* Abonner_distribution_histo: Abonnement d'un thread aux diffusions d'un histo                           */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    Liste_clients_msg = g_slist_prepend( Liste_clients_msg, Gerer_histo );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Desabonner_distribution_histo: Desabonnement d'un thread aux diffusions d'un histo                     */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Desabonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    Liste_clients_msg = g_slist_remove( Liste_clients_msg, Gerer_histo );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
@@ -68,6 +90,7 @@
   { struct CMD_TYPE_HISTO *new_histo;
     struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
+    GSList *liste;
 
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
@@ -106,6 +129,20 @@
        memcpy( &new_histo->groupe,  msg->groupe,  sizeof(msg->groupe ) );
        memcpy( &new_histo->page,    msg->page,    sizeof(msg->page   ) );
 
+/********************************************* Envoi du message aux librairies abonnées *******************/
+       liste = Liste_clients_msg;
+       while (liste)
+        { void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo);
+          struct CMD_TYPE_HISTO *dup_histo;
+          dup_histo = (struct CMD_TYPE_HISTO *)g_malloc(sizeof(struct CMD_TYPE_HISTO));
+          if (dup_histo)
+           { Gerer_histo = liste->data;
+             memcpy ( dup_histo, new_histo, sizeof(struct CMD_TYPE_HISTO) );
+             Gerer_histo (dup_histo);
+           }
+          liste = liste->next;
+        }
+/********************************************* Envoi du message aux sous serveurs *************************/
        for (i=0; i<Config.max_serveur; i++)
         { struct CMD_TYPE_HISTO *histo_ssrv;
           if (Partage->Sous_serveur[i].Thread_run == TRUE)

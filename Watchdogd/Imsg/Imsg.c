@@ -107,6 +107,17 @@
   { g_strfreev ( Cfg_imsg.recipients );
   }
 /**********************************************************************************************************/
+/* Imsg_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                        */
+/* Entrée: une structure CMD_TYPE_HISTO                                                                   */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Imsg_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
+  {
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    Cfg_imsg.Messages = g_slist_prepend ( Cfg_imsg.Messages, histo );                 /* Ajout a la liste */
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+  }
+/**********************************************************************************************************/
 /* Imsg_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en paremetre              */
 /* Entrée: le contact et le statut                                                                        */
 /* Sortie: Néant                                                                                          */
@@ -433,6 +444,8 @@
         }
      }
 
+    Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
+
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
@@ -442,9 +455,21 @@
           Cfg_imsg.lib->Thread_sigusr1 = FALSE;
         }
 
+       if ( Cfg_imsg.Messages )                            /* Gestion de la listes des messages a traiter */
+        { struct CMD_TYPE_HISTO *histo;
+          pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+          histo = Cfg_imsg.Messages->data;
+          Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, histo );         /* Retrait de la liste */
+          pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+          Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", histo->libelle );
+          g_free(histo);                     /* Fin d'utilisation de la structure donc liberation memoire */
+        }
+
        g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
+
+    Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
 
     if (Cfg_imsg.connection) Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is stopping.." );
     if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
