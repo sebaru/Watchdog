@@ -210,8 +210,8 @@
     lm_message_unref (m);
   }
 /**********************************************************************************************************/
-/* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
-/* Entrée: la connexion xmpp                                                                              */
+/* Imsg_Envoi_message_to : Envoi un message a un contact xmpp                                             */
+/* Entrée: le nom du destinataire et le message                                                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Imsg_Envoi_message_to ( const gchar *dest, gchar *message )
@@ -230,6 +230,24 @@
                  "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
      }
     lm_message_unref (m);
+  }
+/**********************************************************************************************************/
+/* Imsg_Envoi_message_to_all_available : Envoi un message aux contacts disponible                         */
+/* Entrée: le message                                                                                     */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Imsg_Envoi_message_to_all_available ( gchar *message )
+  { GSList *liste;
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    liste = Cfg_imsg.contacts;
+    while(liste)
+     { struct IMSG_CONTACT *contact;
+       contact = (struct IMSG_CONTACT *)liste->data;
+       if ( contact->available == TRUE )
+        { Imsg_Envoi_message_to ( contact->nom, message ); }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Imsg_Reception_message : CB appellé lorsque l'on recoit un message xmpp                                */
@@ -461,7 +479,7 @@
           histo = Cfg_imsg.Messages->data;
           Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, histo );         /* Retrait de la liste */
           pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-          Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", histo->libelle );
+          Imsg_Envoi_message_to_all_available ( histo->libelle );
           g_free(histo);                     /* Fin d'utilisation de la structure donc liberation memoire */
         }
 
