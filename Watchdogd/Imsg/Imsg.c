@@ -142,6 +142,7 @@
   { struct IMSG_CONTACT *contact;
     gboolean found;
     GSList *liste;
+
     found = FALSE;
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
               "Imsg_Sauvegarder_statut_contact : searching for user %s", nom );
@@ -161,6 +162,7 @@
      }
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
     if (found==TRUE) return;
+
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
               "Imsg_Sauvegarder_statut_contact : user %s(availability=%d) not found in list. Prepending...",
               nom, available );
@@ -218,13 +220,10 @@
   { GError *error;
     LmMessage *m;
 
+    if( ! Imsg_recipient_authorized ( dest ) ) return;
+
     m = lm_message_new ( dest, LM_MESSAGE_TYPE_MESSAGE );
-
-    if( Imsg_recipient_authorized ( dest ) )
-     { lm_message_node_add_child (m->node, "body", message ); }
-    else
-     { lm_message_node_add_child (m->node, "body", "Not authorized..." ); }
-
+    lm_message_node_add_child (m->node, "body", message );
     if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
                  "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
@@ -272,11 +271,12 @@
     if (!body) return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
 
     from = lm_message_node_get_attribute ( node, "from" );
-
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
               "Imsg_Reception_message : recu un msg xmpp de %s : %s", 
               from, lm_message_node_get_value ( body )
             );
+    if ( (!from) || (!strncmp ( from, Cfg_imsg.username, strlen(Cfg_imsg.username) )) )
+     { return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS); }
 
     db = Init_DB_SQL( Config.log );
     if (!db)
@@ -430,7 +430,7 @@
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
                  "Run_thread: Connection to xmpp server %s OK", Cfg_imsg.server );
        if ( lm_connection_authenticate_and_block ( Cfg_imsg.connection, Cfg_imsg.username, Cfg_imsg.password,
-                                                            "server", &error) == FALSE )
+                                                   "server", &error) == FALSE )
         { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
                     "Run_thread: Unable to authenticate to xmpp server -> %s", error->message );
           Cfg_imsg.lib->Thread_run = FALSE;                                                        /* Arret du thread */
