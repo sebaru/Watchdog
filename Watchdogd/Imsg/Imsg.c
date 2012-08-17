@@ -304,12 +304,24 @@
         }
        if (result_mnemo)
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), "Mise a un du bit:%d %d", result_mnemo->type, result_mnemo->num );
-          Imsg_Envoi_message_to( from, chaine );
-          if (result_mnemo->type == MNEMO_MONOSTABLE)                    /* Positionnement du bit interne */
-           { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                   "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
-             SM(result_mnemo->num, 1); 
+          switch ( result_mnemo->type )
+           { case MNEMO_MONOSTABLE:
+                  g_snprintf( chaine, sizeof(chaine), "Mise a un du bit M%03d", result_mnemo->num );
+                  Imsg_Envoi_message_to( from, chaine );
+                  if (result_mnemo->type == MNEMO_MONOSTABLE)            /* Positionnement du bit interne */
+                   { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                               "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
+                     SM(result_mnemo->num, 1); 
+                   }
+                  break;
+             case MNEMO_ENTREE:
+                  g_snprintf( chaine, sizeof(chaine), " Result = %d", E(result_mnemo->num) );
+                  Imsg_Envoi_message_to( from, chaine );
+                  break;
+             case MNEMO_ENTREE_ANA:
+                  g_snprintf( chaine, sizeof(chaine), " Result = %f", EA_ech(result_mnemo->num) );
+                  Imsg_Envoi_message_to( from, chaine );
+                  break;
            }
           g_free(result_mnemo);
         }
