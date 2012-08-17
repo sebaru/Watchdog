@@ -304,7 +304,7 @@
         }
        if (result_mnemo)
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), "Mise a un du bit:%d %%d", result_mnemo->type, result_mnemo->num );
+          g_snprintf( chaine, sizeof(chaine), "Mise a un du bit:%d %d", result_mnemo->type, result_mnemo->num );
           Imsg_Envoi_message_to( from, chaine );
           g_free(result_mnemo);
         }
@@ -498,7 +498,6 @@
 
     Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
 
-    if (Cfg_imsg.connection) Imsg_Envoi_message_to ( "lefevre.seb@jabber.fr", "Server is stopping.." );
     if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
     sleep(2);
 
