@@ -311,7 +311,7 @@
                   if (result_mnemo->type == MNEMO_MONOSTABLE)            /* Positionnement du bit interne */
                    { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
                                "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
-                     SM(result_mnemo->num, 1); 
+                     Envoyer_commande_dls(result_mnemo->num); 
                    }
                   break;
              case MNEMO_ENTREE:
@@ -519,8 +519,10 @@
     sleep(2);
 
 
-    lm_connection_close (Cfg_imsg.connection, NULL);      /* Fermeture de la Cfg_imsg.connection */
-    lm_connection_unref (Cfg_imsg.connection);           /* Destruction de la structure associée */
+                                                                   /* Fermeture de la Cfg_imsg.connection */
+    if (Cfg_imsg.connection) lm_connection_close (Cfg_imsg.connection, NULL);
+                                                                  /* Destruction de la structure associée */
+    if (Cfg_imsg.connection) lm_connection_unref (Cfg_imsg.connection);
     g_main_context_unref (MainLoop);
     Imsg_Liberer_config();                        /* Liberation de la configuration de l'InstantMessaging */
     Imsg_Liberer_liste_contacts();                                     /* Liberation de la liste contacts */
