@@ -286,26 +286,28 @@
      }
     if ( ! Recuperer_mnemoDB_by_command_text ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
      { Imsg_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
-    else if ( db->nbr_result == 0 )                       /* Si pas d'enregistrement, demande de préciser */
-     { Imsg_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }   
-    else if ( db->nbr_result > 1 )                    /* Si plus d'un enregistrement, demande de préciser */
-     { Imsg_Envoi_message_to( from, " Need to choose ... :" );
-       for ( ; ; )
-        { struct CMD_TYPE_MNEMONIQUE *mnemo;
-          mnemo = Recuperer_mnemoDB_suite( Config.log, db );
+    else 
+     { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo;
+          
+       if ( db->nbr_result == 0 )                         /* Si pas d'enregistrement, demande de préciser */
+        { Imsg_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }   
+       if ( db->nbr_result > 1 )                         /* Si trop d'enregistrement, demande de préciser */
+        { Imsg_Envoi_message_to( from, " Need to choose ... :" ); }
+
+       for ( result_mnemo = NULL ; ; )
+        { mnemo = Recuperer_mnemoDB_suite( Config.log, db );
           if (!mnemo) break;
 
-          Imsg_Envoi_message_to( from, mnemo->command_text );
-          g_free(mnemo);
+          if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->command_text );
+          if (db->nbr_result!=1) g_free(mnemo);
+                            else result_mnemo = mnemo;
         }
-     }
-    else                                           /* Si result = 1, on va positionner le bit en question */
-     { struct CMD_TYPE_MNEMONIQUE *mnemo;
-       gchar chaine[80];
-       mnemo = Recuperer_mnemoDB_suite( Config.log, db );
-       g_snprintf( chaine, sizeof(chaine), "Mise a un du bit:%d %%d", mnemo->type, mnemo->num );
-       Imsg_Envoi_message_to( from, chaine );
-       g_free(mnemo);
+       if (result_mnemo)
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), "Mise a un du bit:%d %%d", result_mnemo->type, result_mnemo->num );
+          Imsg_Envoi_message_to( from, chaine );
+          g_free(result_mnemo);
+        }
      }
     Libere_DB_SQL( Config.log, &db );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
