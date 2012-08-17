@@ -306,6 +306,11 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Mise a un du bit:%d %d", result_mnemo->type, result_mnemo->num );
           Imsg_Envoi_message_to( from, chaine );
+          if (result_mnemo->type == MNEMO_MONOSTABLE)                    /* Positionnement du bit interne */
+           { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                   "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
+             SM(result_mnemo->num, 1); 
+           }
           g_free(result_mnemo);
         }
      }
