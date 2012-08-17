@@ -53,8 +53,18 @@
     time_t date_last_view;
   };
 
- GList *Modules_RFXCOM;                                                      /* Listes des modules RFXCOM */
+ struct RFXCOM_CONFIG
+  { struct LIBRAIRIE *lib;
+    gchar port[80];
+    gint fd;                                                /* File descripteur de la connexion au RFXCOM */
+    gboolean reload;
+    GSList *Modules_RFXCOM;                                                  /* Listes des modules RFXCOM */
+ } Cfg_rfxcom;
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Retirer_rfxcomDB ( gint id );
+ extern gint Ajouter_rfxcomDB ( struct RFXCOMDB *rfxcom );
+ extern gboolean Modifier_rfxcomDB( struct RFXCOMDB *rfxcom );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

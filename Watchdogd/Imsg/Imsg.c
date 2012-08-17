@@ -100,7 +100,7 @@
   }
 /**********************************************************************************************************/
 /* Imsg_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Imsg_Liberer_config ( void )
@@ -535,7 +535,7 @@
     Imsg_Liberer_liste_contacts();                                     /* Liberation de la liste contacts */
 
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
-    Cfg_imsg.lib->TID = 0;                                         /* On indique au master que le thread est mort. */
+    Cfg_imsg.lib->TID = 0;                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

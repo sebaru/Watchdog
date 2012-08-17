@@ -35,9 +35,49 @@
  #include <fcntl.h>
  #include <unistd.h>
 
- #include "Rfxcom.h"
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "Rfxcom.h"
 
+/**********************************************************************************************************/
+/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Rfxcom_Lire_config ( void )
+  { gchar *chaine;
+    GKeyFile *gkf;
+
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Rfxcom_Lire_config : unable to load config file %s", Config.config_file );
+       return;
+     }
+                                                                               /* Positionnement du debug */
+    Cfg_rfxcom.lib->Thread_debug = g_key_file_get_boolean ( gkf, "RFXCOM", "debug", NULL ); 
+                                                                 /* Recherche des champs de configuration */
+
+    chaine = g_key_file_get_string ( gkf, "RFXCOM", "port", NULL );
+    if (!chaine)
+     { Info_new ( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                  "Rfxcom_Lire_config: port is missing. Using default." );
+       g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "defaultuser" );
+     }
+    else
+     { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "/dev/watchdog_RFXCOM" );
+       g_free(chaine);
+     }
+
+    g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Rfxcom_Liberer_config : Libere la mémoire allouer précédemment pour lire la config rfxcom              */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Rfxcom_Liberer_config ( void )
+  { 
+  }
 /**********************************************************************************************************/
 /* Retirer_rfxcomDB: Elimination d'un module rfxcom                                                       */
 /* Entrée: un log et une database                                                                         */
@@ -56,6 +96,7 @@
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( Config.log, &db );
+    Cfg_rfxcom.reload = TRUE;
     return(retour);
   }
 /**********************************************************************************************************/
@@ -71,13 +112,17 @@
     gint last_id;
 
     db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
+    if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+                         "Ajouter_rfxcomDB: Erreur connexion Database" );
+               return(FALSE);
+             }
 
     libelle = Normaliser_chaine ( Config.log, rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
-     { Info( Config.log, DEBUG_DB, "Ajouter_rfxcomDB: Normalisation libelle impossible" );
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                 "Ajouter_rfxcomDB: Normalisation libelle impossible" );
        Libere_DB_SQL( Config.log, &db );
-       return(-1);
+       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),
@@ -94,6 +139,7 @@
                           }
     last_id = Recuperer_last_ID_SQL( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
+    Cfg_rfxcom.reload = TRUE;
     return( last_id );
   }
 /**********************************************************************************************************/
@@ -125,7 +171,8 @@
      }
 
     rfxcom = (struct RFXCOMDB *)g_malloc0( sizeof(struct RFXCOMDB) );
-    if (!rfxcom) Info( log, DEBUG_RFXCOM, "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
+    if (!rfxcom) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                           "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &rfxcom->libelle, db->row[3], sizeof(rfxcom->libelle) );
        rfxcom->id                = atoi(db->row[0]);
@@ -140,7 +187,7 @@
 /**********************************************************************************************************/
 /* Modifier_rfxcomDB: Modification d'un rfxcom Watchdog                                                   */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
+/* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Modifier_rfxcomDB( struct RFXCOMDB *rfxcom )
   { gchar requete[2048];
@@ -149,13 +196,17 @@
     struct DB *db;
 
     db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
+    if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+                         "Modifier_rfxcomDB: Erreur connexion Database" );
+               return(FALSE);
+             }
 
     libelle = Normaliser_chaine ( Config.log, rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
-     { Info( Config.log, DEBUG_DB, "Modifier_rfxcomDB: Normalisation libelle impossible" );
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                 "Modifier_rfxcomDB: Normalisation libelle impossible" );
        Libere_DB_SQL( Config.log, &db );
-       return(-1);
+       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -170,29 +221,31 @@
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( Config.log, &db );
-                            
+    Cfg_rfxcom.reload = TRUE;
     return( retour );
   }
 /**********************************************************************************************************/
-/* Charger_tous_RFXCOM: Requete la DB pour charger les modules et les bornes rfxcom                       */
+/* Charger_tous_rfxcom: Requete la DB pour charger les modules et les bornes rfxcom                       */
 /* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
+/* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static gboolean Charger_tous_rfxcom ( void  )
   { struct DB *db;
-    gint cpt;
 
     db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
-
+    if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+               "Charger_tous_rfxcom: Erreur connexion Database" );
+               return(FALSE);
+             }
 /********************************************** Chargement des modules ************************************/
     if ( ! Recuperer_rfxcomDB( Config.log, db ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+                "Charger_tous_rfxcom: Erreur de requete SQL" );
+       Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
 
-    Modules_RFXCOM = NULL;
-    cpt = 0;
+    Cfg_rfxcom.Modules_RFXCOM = NULL;
     for ( ; ; )
      { struct MODULE_RFXCOM *module;
        struct RFXCOMDB *rfxcom;
@@ -202,20 +255,21 @@
 
        module = (struct MODULE_RFXCOM *)g_malloc0( sizeof(struct MODULE_RFXCOM) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_RFXCOM,
-                "Charger_tous_RFXCOM: Erreur allocation mémoire struct MODULE_RFXCOM" );
+        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                    "Charger_tous_Erreur allocation mémoire struct MODULE_RFXCOM" );
           g_free(rfxcom);
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
         }
        memcpy( &module->rfxcom, rfxcom, sizeof(struct RFXCOMDB) );
        g_free(rfxcom);
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
-       Modules_RFXCOM = g_list_append ( Modules_RFXCOM, module );
-       Info_n( Config.log, DEBUG_RFXCOM, "Charger_tous_RFXCOM:  id    = ", module->rfxcom.id    );
+       Cfg_rfxcom.Modules_RFXCOM = g_slist_prepend ( Cfg_rfxcom.Modules_RFXCOM, module );
+       Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+                 "Charger_tous_rfxcom. Module loaded id = %02d", module->rfxcom.id    );
      }
-    Info_n( Config.log, DEBUG_RFXCOM, "Charger_tous_RFXCOM: module RFXCOM found  !", cpt );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+              "Charger_tous_module : %d RFXCOM found !", g_slist_length( Cfg_rfxcom.Modules_RFXCOM ) );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -227,7 +281,7 @@
 /**********************************************************************************************************/
  static void Decharger_un_rfxcom ( struct MODULE_RFXCOM *module )
   { if (!module) return;
-    Modules_RFXCOM = g_list_remove ( Modules_RFXCOM, module );
+    Cfg_rfxcom.Modules_RFXCOM = g_slist_remove ( Cfg_rfxcom.Modules_RFXCOM, module );
     g_free(module);
   }
 /**********************************************************************************************************/
@@ -237,8 +291,8 @@
 /**********************************************************************************************************/
  static void Decharger_tous_rfxcom ( void  )
   { struct MODULE_RFXCOM *module;
-    while ( Modules_RFXCOM )
-     { module = (struct MODULE_RFXCOM *)Modules_RFXCOM->data;
+    while ( Cfg_rfxcom.Modules_RFXCOM )
+     { module = (struct MODULE_RFXCOM *)Cfg_rfxcom.Modules_RFXCOM->data;
        Decharger_un_rfxcom ( module );
      }
   }
@@ -253,12 +307,10 @@
     struct termios oldtio;
     int fd;
 
-    fd = open( Config.port_rfxcom, O_RDWR | O_NOCTTY | O_NONBLOCK );
+    fd = open( Cfg_rfxcom.port, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
-     { Info_c( Config.log, DEBUG_RFXCOM,
-               "RFXCOM: Init_rfxcom: Impossible d'ouvrir le port rfxcom", Config.port_rfxcom );
-       Info_n( Config.log, DEBUG_RFXCOM,
-               "RFXCOM: Init_rfxcom: Code retour                      ", fd );
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+               "Init_rfxcom: Impossible d'ouvrir le port rfxcom %s, erreur %d", Cfg_rfxcom.port, fd );
        return(-1);
      }
     else
@@ -271,16 +323,16 @@
        oldtio.c_cc[VMIN]     = 0;
        tcsetattr(fd, TCSANOW, &oldtio);
        tcflush(fd, TCIOFLUSH);
-       Info_c( Config.log, DEBUG_RFXCOM,
-               "RFXCOM: Init_rfxcom: Ouverture port rfxcom okay", Config.port_rfxcom);
+       Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
+                 "Init_rfxcom: Ouverture port rfxcom okay %s", Cfg_rfxcom.port );
      }
-    Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending INIT" );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending INIT" );
     write (fd, &trame_reset, sizeof(trame_reset) );
     sleep(2);
-    Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending SET ALL PROTO" );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending SET ALL PROTO" );
     write (fd, &trame_set_all_proto, sizeof(trame_set_all_proto) );
     sleep(2);
-    Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Init_rfxcom: Sending GET STATUS" );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending GET STATUS" );
     write (fd, &trame_get_status, sizeof(trame_get_status) );
     return(fd);
   }
@@ -290,8 +342,8 @@
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
  static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint canal )
-  { GList *liste_modules;
-    liste_modules = Modules_RFXCOM;
+  { GSList *liste_modules;
+    liste_modules = Cfg_rfxcom.Modules_RFXCOM;
     while ( liste_modules )
      { struct MODULE_RFXCOM *module;
        module = (struct MODULE_RFXCOM *)liste_modules->data;
@@ -308,76 +360,78 @@
 /**********************************************************************************************************/
  static int Processer_trame( struct TRAME_RFXCOM *trame )
   { 
-
-    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame     taille: ", trame->taille );
-    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame       type: ", trame->type );
-    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame  sous_type: ", trame->sous_type );
-    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame      seqno: ", trame->seqno );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+              "Processer_trame     taille: %d", trame->taille );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+              "Processer_trame       type: %02d(0x%02X)", trame->type );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+              "Processer_trame  sous_type: %02d(0x%02X)", trame->sous_type );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+              "Processer_trame      seqno: %d", trame->seqno );
 
     if (trame->type == 0x01 && trame->sous_type == 0x00)
-     { if (trame->data[0] == 0x52) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status 433MHz receiver only" );   
-       if (trame->data[0] == 0x53) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status 433MHz transceiver" );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status firmware", trame->data[1] );   
-       if (trame->data[3] & 0x80) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto RFU" );   
-       if (trame->data[3] & 0x40) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto Rollertroll" );   
-       if (trame->data[3] & 0x20) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto Proguard" );   
-       if (trame->data[3] & 0x10) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto FS20" );   
-       if (trame->data[3] & 0x08) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto LaCrosse" );   
-       if (trame->data[3] & 0x04) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto Hideki" );   
-       if (trame->data[3] & 0x02) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto LightwaveRF" );   
-       if (trame->data[3] & 0x01) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto Mertik" );   
-       if (trame->data[4] & 0x80) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto Visonic" );   
-       if (trame->data[4] & 0x40) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto ATI" );   
-       if (trame->data[4] & 0x20) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto OregonScientific" );   
-       if (trame->data[4] & 0x10) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto IkeaKoppla" );   
-       if (trame->data[4] & 0x08) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto HomeEasy" );   
-       if (trame->data[4] & 0x04) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto AC" );   
-       if (trame->data[4] & 0x02) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto ARC" );   
-       if (trame->data[4] & 0x01) Info( Config.log, DEBUG_RFXCOM,
-                                         "RFXCOM: Processer_trame get_status proto X10" );   
-
+     { if (trame->data[0] == 0x52) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                             "Processer_trame get_status 433MHz receiver only" );   
+       if (trame->data[0] == 0x53) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                             "Processer_trame get_status 433MHz transceiver" );   
+       Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                 "Processer_trame get_status firmware %d", trame->data[1] );   
+       if (trame->data[3] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto RFU" );   
+       if (trame->data[3] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto Rollertroll" );   
+       if (trame->data[3] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto Proguard" );   
+       if (trame->data[3] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto FS20" );   
+       if (trame->data[3] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto LaCrosse" );   
+       if (trame->data[3] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto Hideki" );   
+       if (trame->data[3] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto LightwaveRF" );   
+       if (trame->data[3] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto Mertik" );   
+       if (trame->data[4] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto Visonic" );   
+       if (trame->data[4] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto ATI" );   
+       if (trame->data[4] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto OregonScientific" );   
+       if (trame->data[4] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto IkeaKoppla" );   
+       if (trame->data[4] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto HomeEasy" );   
+       if (trame->data[4] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto AC" );   
+       if (trame->data[4] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto ARC" );   
+       if (trame->data[4] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                           "Processer_trame get_status proto X10" );   
      }
     else if (trame->type == 0x52 && trame->sous_type == 0x01)
      { struct MODULE_RFXCOM *module;
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id1", trame->data[0] );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status id2", trame->data[1] );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status high", trame->data[2] >> 1 );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status signe", trame->data[2] & 1);   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status low", trame->data[3] );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status hum", trame->data[4] );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status humstatus", trame->data[5] );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status battery", trame->data[6] >> 4 );   
-       Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame get_status rssi", trame->data[6] & 0x0F );   
+       Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                 "Processer_trame : get status id1=%02d, id2=%02d, high=%02d, signe=%02d, low=%02d, hum=%02d, "
+                 "humstatus=%02d, battery=%02d, rssi=%02d", trame->data[0], trame->data[1],
+                 trame->data[2] >> 1, trame->data[2] & 1, trame->data[3], trame->data[4], trame->data[5],
+                 trame->data[6] >> 4, trame->data[6] & 0x0F
+               );   
        module = Chercher_rfxcom( trame->type, trame->data[1] );
        if (module)
         { SEA( module->rfxcom.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)* ( (trame->data[2] >> 1) + trame->data[3])
-                                           / 10.0 );                                                     /* Temp */
-          SEA( module->rfxcom.ea_min + 1,  trame->data[4] );                                         /* Humidity */
-          SEA( module->rfxcom.ea_min + 2,  trame->data[6] >> 4);                                      /* Battery */
-          SEA( module->rfxcom.ea_min + 3,  trame->data[6] & 0x0F );                                      /* RSSI */
+                                           / 10.0 );                                              /* Temp */
+          SEA( module->rfxcom.ea_min + 1,  trame->data[4] );                                  /* Humidity */
+          SEA( module->rfxcom.ea_min + 2,  trame->data[6] >> 4);                               /* Battery */
+          SEA( module->rfxcom.ea_min + 3,  trame->data[6] & 0x0F );                               /* RSSI */
 
           module->date_last_view = Partage->top;
         }
-       else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame No matching module for packet received", trame->type );
+       else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                      "Processer_trame No matching module for packet received type=%02d", trame->type );
      }
-    else Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Processer_trame unknown packet type", trame->type );
+    else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                   "Processer_trame unknown packet type %02d", trame->type );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -385,7 +439,7 @@
 /* Entrée: le file descriptor de la connexion rfxcom                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Rfxcom_send ( gint fd_rfxcom )
+ static void Rfxcom_send ( void )
   { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     trame_send_AC[0]  = 0x0B; /* Taille */
     trame_send_AC[1]  = 0x11; /* lightning 2 */
@@ -399,7 +453,7 @@
     trame_send_AC[9]  = liblearn.cmd;
     trame_send_AC[10] = liblearn.level;*/
     trame_send_AC[11] = 0x0;
-    write ( fd_rfxcom, &trame_send_AC, trame_send_AC[0] );
+    write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] );
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Rfxcom                                                             */
@@ -409,23 +463,29 @@
     gint retval, nbr_oct_lu;
     struct timeval tv;
     fd_set fdselect;
-    gint fd_rfxcom;
 
     prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
-    Info( Config.log, DEBUG_RFXCOM, "RFXCOM: demarrage" );
-    lib->Thread_run = TRUE;                                                         /* Le thread tourne ! */
+    memset( &Cfg_rfxcom, 0, sizeof(Cfg_rfxcom) );               /* Mise a zero de la structure de travail */
+    Cfg_rfxcom.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
+    Rfxcom_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
+
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+    Cfg_rfxcom.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "rfxcom" );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage RFXCOM sensors" );
 
-    fd_rfxcom = Init_rfxcom();
-    if (fd_rfxcom<0)                                                       /* On valide l'acces aux ports */
-     { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
+    Cfg_rfxcom.fd = Init_rfxcom();
+    if (Cfg_rfxcom.fd<0)                                                   /* On valide l'acces aux ports */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+                 "Run_thread: Init RFXCOM failed. exiting..." );
+       Rfxcom_Liberer_config ();
        lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
        lib->TID = 0;                                      /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM FD", fd_rfxcom ); }
+    else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,"Acces RFXCOM FD", Cfg_rfxcom.fd ); }
 
     Charger_tous_rfxcom();                          /* Chargement de tous les capteurs/actionneurs RFXCOM */
     nbr_oct_lu = 0;
@@ -433,41 +493,29 @@
      { usleep(1);
        sched_yield();
 
-#ifdef bouh
-       if (lib->Thread_reload == TRUE)
-        { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Reloading conf" );
-          Decharger_tous_rfxcom();
-          close(fd_rfxcom);
-          fd_rfxcom = Init_rfxcom();
-          if (fd_rfxcom<0)                                                 /* On valide l'acces aux ports */
-           { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
-             lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
-             lib->TID = 0;                                /* On indique au master que le thread est mort. */
-             pthread_exit(GINT_TO_POINTER(-1));
-           }
-          else { Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Acces RFXCOM FD", fd_rfxcom ); }
-          Charger_tous_rfxcom();
-          lib->Thread_reload = FALSE;
-        }
-#endif
-
        if (lib->Thread_sigusr1 == TRUE)
-        { Info( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: SIGUSR1" );
+        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
         }
 
+       if (Cfg_rfxcom.reload == TRUE)
+        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
+          Decharger_tous_rfxcom();
+          Charger_tous_rfxcom();
+        }
+
        FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
-       FD_SET(fd_rfxcom, &fdselect );
+       FD_SET(Cfg_rfxcom.fd, &fdselect );
        tv.tv_sec = 1;
        tv.tv_usec= 0;
-       retval = select(fd_rfxcom+1, &fdselect, NULL, NULL, &tv );               /* Attente d'un caractere */
-       if (retval>=0 && FD_ISSET(fd_rfxcom, &fdselect) )
+       retval = select(Cfg_rfxcom.fd+1, &fdselect, NULL, NULL, &tv );               /* Attente d'un caractere */
+       if (retval>=0 && FD_ISSET(Cfg_rfxcom.fd, &fdselect) )
         { int bute, cpt;
 
           if (nbr_oct_lu<TAILLE_ENTETE_RFXCOM)
            { bute = TAILLE_ENTETE_RFXCOM; } else { bute = sizeof(Trame); }
 
-          cpt = read( fd_rfxcom, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
+          cpt = read( Cfg_rfxcom.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
@@ -480,9 +528,13 @@
         }
      }                                                                     /* Fin du while partage->arret */
 
-    close(fd_rfxcom);
-    Info_n( Config.log, DEBUG_RFXCOM, "RFXCOM: Run_rfxcom: Down", pthread_self() );
-    lib->TID = 0;                                         /* On indique au master que le thread est mort. */
+    Decharger_tous_rfxcom ();
+    close(Cfg_rfxcom.fd);                                                 /* Fermeture de la connexion FD */
+
+    Rfxcom_Liberer_config();                                  /* Liberation de la configuration du thread */
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_rfxcom.lib->TID = 0;                              /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

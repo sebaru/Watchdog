@@ -26,36 +26,26 @@
  */
  
  #include <glib.h>
- #include "Rfxcom.h"
  #include "watchdogd.h"
+ #include "Rfxcom.h"
 
-/**********************************************************************************************************/
-/* Admin_rfxcom_reload: Demande le rechargement des conf RFXCOM                                           */
-/* Entrée: le client                                                                                      */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Admin_rfxcom_reload ( struct CLIENT_ADMIN *client )
-  { /*Partage->com_rfxcom.Thread_reload = TRUE;
-    Write_admin ( client->connexion, " RFXCOM Reloading in progress\n" );
-    while (Partage->com_rfxcom.Thread_reload) sched_yield();
-    Write_admin ( client->connexion, " RFXCOM Reloading done\n" );*/
-  }
 /**********************************************************************************************************/
 /* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                           */
 /* Entrée: le client                                                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_rfxcom_list ( struct CLIENT_ADMIN *client )
-  { GList *liste_modules;
+  { GSList *liste_modules;
     gchar chaine[512];
-/*
+
+
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules/capteurs RFXCOM\n" );
     Write_admin ( client->connexion, chaine );
 
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
-    liste_modules = Partage->com_rfxcom.Modules_RFXCOM;
+    liste_modules = Cfg_rfxcom.Modules_RFXCOM;
     while ( liste_modules )
      { struct MODULE_RFXCOM *module;
        module = (struct MODULE_RFXCOM *)liste_modules->data;
@@ -69,7 +59,7 @@
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
-     }*/
+     }
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_del: Retire le capteur/module rfxcom dont l'id est en parametre                           */
@@ -78,23 +68,17 @@
 /**********************************************************************************************************/
  static void Admin_rfxcom_del ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128];
-/*
+
     g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rfxcom %d\n", id );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
 
-    if (Partage->com_rfxcom.Retirer_rfxcomDB)
-     { if (Partage->com_rfxcom.Retirer_rfxcomDB( id ))
-        { g_snprintf( chaine, sizeof(chaine), " Module erased.\n You should reload configuration...\n" ); }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT erased.\n" ); }
-       Write_admin ( client->connexion, chaine );
-     }
+    if ( Retirer_rfxcomDB( id ) )
+     { g_snprintf( chaine, sizeof(chaine), " Module %d erased.\n", id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
-       Write_admin ( client->connexion, chaine );
-     }*/
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT erased.\n" ); }
+    Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_add: Ajoute un capteur/module RFXCOM                                                      */
@@ -103,25 +87,19 @@
 /**********************************************************************************************************/
  static void Admin_rfxcom_add ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
-/*
+    gint last_id;
+
     g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rfxcom\n" );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
 
-    if (Partage->com_rfxcom.Ajouter_rfxcomDB)
-     { gint last_id;
-       last_id = Partage->com_rfxcom.Ajouter_rfxcomDB( rfxcom );
-       if ( last_id != -1 )
-        { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n You should reload configuration...\n", last_id ); }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
-       Write_admin ( client->connexion, chaine );
-     }
+    last_id = Ajouter_rfxcomDB( rfxcom );
+    if ( last_id != -1 )
+     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n", last_id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
-       Write_admin ( client->connexion, chaine );
-     }*/
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
+    Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_change: Modifie la configuration d'un capteur RFXCOM                                      */
@@ -130,23 +108,17 @@
 /**********************************************************************************************************/
  static void Admin_rfxcom_change ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
-/*
+
     g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rfxcom\n" );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
 
-    if (Partage->com_rfxcom.Modifier_rfxcomDB)
-     { if ( Partage->com_rfxcom.Modifier_rfxcomDB( rfxcom ) )
-        { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n You should reload configuration...\n", rfxcom->id ); }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
-       Write_admin ( client->connexion, chaine );
-     }
+    if ( Modifier_rfxcomDB( rfxcom ) )
+     { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n", rfxcom->id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error, thread not loaded.\n" );
-       Write_admin ( client->connexion, chaine );
-     }*/
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
+    Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom          */
@@ -194,9 +166,6 @@
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_rfxcom_list ( client );
      }
-    else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_rfxcom_reload(client);
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
@@ -212,8 +181,6 @@
                      "  cmd id1 id2 id3 id4 unitcode cmdnumber - Envoie une commande RFXCOM\n" );
        Write_admin ( client->connexion,
                      "  list                                   - Affiche les status des equipements RFXCOM\n" );
-       Write_admin ( client->connexion,
-                     "  reload                                 - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];

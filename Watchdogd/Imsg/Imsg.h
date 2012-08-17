@@ -36,12 +36,12 @@
   };
 
  struct IMSG_CONFIG
-  { gchar username[80];
+  { struct LIBRAIRIE *lib;
+    gchar username[80];
     gchar server  [80];
     gchar password[80];
     gchar **recipients;
     LmConnection *connection;
-    struct LIBRAIRIE *lib;
     GSList *contacts;
     GSList *Messages;
  } Cfg_imsg;

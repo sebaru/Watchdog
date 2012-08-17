@@ -175,13 +175,6 @@
        Config.tellstick_a_max    = g_key_file_get_integer ( gkf, "TELLSTICK", "max_a", NULL );
        if (!Config.tellstick_a_max) Config.tellstick_a_max = DEFAUT_TELLSTICK_A_MAX;
 
-/********************************************** Partie RFXCOM *********************************************/
-       chaine = g_key_file_get_string ( gkf, "RFXCOM", "port", NULL );
-       if (chaine)
-        { g_snprintf( Config.port_rfxcom, sizeof(Config.port_rfxcom), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.port_rfxcom, sizeof(Config.port_rfxcom), "%s", DEFAUT_PORT_RFXCOM  ); }
-
 /********************************************** Partie ASTERISK *******************************************/
        Config.asterisk_m_min    = g_key_file_get_integer ( gkf, "ASTERISK", "min_m", NULL );
        if (!Config.asterisk_m_min) Config.asterisk_m_min = DEFAUT_ASTERISK_M_MIN;
@@ -260,9 +253,6 @@
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ASTERISK", NULL );
        if (debug) Config.debug_level = DEBUG_ASTERISK;
 
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_RFXCOM", NULL );
-       if (debug) Config.debug_level = DEBUG_RFXCOM;
-
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ALL", NULL );
        if (debug) Config.debug_level = ~0;
 
@@ -314,6 +304,5 @@
     Info_n( Config.log, DEBUG_CONFIG, "Config tellstick A(max)     ", Config.tellstick_a_max );
     Info_n( Config.log, DEBUG_CONFIG, "Config asterisk M(min)      ", Config.asterisk_m_min );
     Info_n( Config.log, DEBUG_CONFIG, "Config asterisk M(max)      ", Config.asterisk_m_max );
-    Info_c( Config.log, DEBUG_CONFIG, "Config port rfxcom          ", Config.port_rfxcom  );
   }
 /*--------------------------------------------------------------------------------------------------------*/
