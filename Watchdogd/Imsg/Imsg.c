@@ -496,6 +496,13 @@
 
        if (Cfg_imsg.lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
+          pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+          Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: USR1 -> Nbr of IMSG to send= %d, Number of contacts=%d",
+                    g_slist_length ( Cfg_imsg.Messages ),
+                    g_slist_length ( Cfg_imsg.contacts )
+                  );
+          pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
           Cfg_imsg.lib->Thread_sigusr1 = FALSE;
         }
 
