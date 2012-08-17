@@ -147,8 +147,10 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  gboolean Recuperer_mnemoDB_by_command_text ( struct LOG *log, struct DB *db, gchar *commande_pure )
-  { gchar requete[1024];
+  { gchar requete[1024], commande_finale[1024];
     gchar *commande;
+    gboolean space;
+    gint i, j;
 
     commande = Normaliser_chaine ( log, commande_pure );
     if (!commande)
@@ -156,11 +158,22 @@
        return(FALSE);
      }
 
+    i = 0; j = 0; space = TRUE;
+    while ( commande[i] )
+     { if ( commande[i] == ' ') { commande_finale[j++] = ' '; space = TRUE; }
+       else if (space == TRUE) { commande_finale[j++] = '+'; commande_finale[j++] = commande[i]; space = FALSE; }
+                          else { commande_finale[j++] = commande[i]; space = FALSE; }
+       if(i<strlen(commande_pure) && j<sizeof(commande_finale)) 
+        { i++; } else break;
+     }
+    commande_finale[j] = '\0';
+    g_free(commande);
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id AND"
-                " MATCH (%s.command_text) AGAINST ('%s') LIMIT 10",
+                " MATCH (%s.command_text) AGAINST ('%s' IN BOOLEAN MODE) LIMIT 10",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS,
@@ -168,7 +181,6 @@
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO, commande
               );                                                                /* order by test 25/01/06 */
-    g_free(commande);
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
