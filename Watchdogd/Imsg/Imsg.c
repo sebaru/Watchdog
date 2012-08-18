@@ -466,7 +466,7 @@
           Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
                     "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
 
-          lm_connection_set_keep_alive_rate ( Cfg_imsg.connection, 360 );    /* Ping toutes les 4 minutes */
+          lm_connection_set_keep_alive_rate ( Cfg_imsg.connection, 300 );    /* Ping toutes les 5 minutes */
                                                /* Set up message handler to handle incoming text messages */
           lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_message, NULL, NULL );
           lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
