@@ -161,13 +161,6 @@
        Config.taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
        if (!Config.taille_bloc_reseau) Config.taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
 
-/********************************************* Partie RS485 ***********************************************/
-       chaine = g_key_file_get_string ( gkf, "RS485", "port_rs485", NULL );
-       if (chaine)
-        { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.port_RS485, sizeof(Config.port_RS485), "%s", DEFAUT_PORT_RS485  ); }
-
 /********************************************** Partie TELLSTICK ******************************************/
        Config.tellstick_a_min    = g_key_file_get_integer ( gkf, "TELLSTICK", "min_a", NULL );
        if (!Config.tellstick_a_min) Config.tellstick_a_min = DEFAUT_TELLSTICK_A_MIN;
@@ -226,9 +219,6 @@
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ADMIN", NULL );
        if (debug) Config.debug_level += DEBUG_ADMIN;
 
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_RS485", NULL );
-       if (debug) Config.debug_level += DEBUG_RS485;
-
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ONDULEUR", NULL );
        if (debug) Config.debug_level += DEBUG_ONDULEUR;
 
@@ -272,7 +262,6 @@
     if (!Config.log) return;
     Info_c( Config.log, DEBUG_CONFIG, "Config file                 ", Config.config_file );
     Info_n( Config.log, DEBUG_CONFIG, "Config port                 ", Config.port );
-    Info_c( Config.log, DEBUG_CONFIG, "Config port rs485           ", Config.port_RS485  );
     Info_n( Config.log, DEBUG_CONFIG, "Config max client           ", Config.max_client );
     Info_n( Config.log, DEBUG_CONFIG, "Config min serveur          ", Config.min_serveur );
     Info_n( Config.log, DEBUG_CONFIG, "Config max serveur          ", Config.max_serveur );

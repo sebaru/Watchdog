@@ -242,7 +242,6 @@
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { guint i;
           Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: RELOAD" );
-          Partage->com_rs485.Thread_reload     = TRUE;
           Partage->com_modbus.Thread_reload    = TRUE;
           Partage->com_sms.Thread_reload       = TRUE;
           Partage->com_dls.Thread_reload       = TRUE;
@@ -269,7 +268,6 @@
 
           Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: SIGUSR1" );
           Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: jeton", Partage->jeton );
-          Partage->com_rs485.Thread_sigusr1     = TRUE;
           Partage->com_modbus.Thread_sigusr1    = TRUE;
           Partage->com_sms.Thread_sigusr1       = TRUE;
           Partage->com_dls.Thread_sigusr1       = TRUE;
@@ -539,7 +537,6 @@
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 
        memset( &Partage->com_msrv,     0, sizeof(Partage->com_msrv) );
-       memset( &Partage->com_rs485,    0, sizeof(Partage->com_rs485) );
        memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
        memset( &Partage->com_sms,      0, sizeof(Partage->com_sms) );
        memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
@@ -554,7 +551,6 @@
        
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
-       pthread_mutex_init( &Partage->com_rs485.synchro, &attr );
        pthread_mutex_init( &Partage->com_sms.synchro, &attr );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
@@ -610,9 +606,6 @@
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info( Config.log, DEBUG_INFO, "MSRV: Pb ARCH" ); }
 
-          if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb RS485" ); }
-
           if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_INFO, "MSRV: Pb MODBUS" ); }
 
@@ -651,7 +644,6 @@
        if (Config.ssl_crypt) SSL_CTX_free( Ssl_ctx );                               /* Libération mémoire */
      }
 
-    pthread_mutex_destroy( &Partage->com_rs485.synchro );
     pthread_mutex_destroy( &Partage->com_modbus.synchro );
     pthread_mutex_destroy( &Partage->com_sms.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );

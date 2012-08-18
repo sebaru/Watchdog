@@ -61,7 +61,7 @@
     if (!chaine)
      { Info_new ( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
                   "Imsg_Lire_config: username is missing. Using default." );
-       g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), "defaultuser" );
+       g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), DEFAUT_USERNAME_IMSG );
      }
     else
      { g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), "%s", chaine );
@@ -72,7 +72,7 @@
     if (!chaine)
      { Info_new ( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
                   "Imsg_Lire_config: server is missing. Using default." );
-       g_snprintf( Cfg_imsg.server, sizeof(Cfg_imsg.username), "defaultserver.org" );
+       g_snprintf( Cfg_imsg.server, sizeof(Cfg_imsg.username), DEFAUT_SERVER_IMSG );
      }
     else
      { g_snprintf( Cfg_imsg.server, sizeof(Cfg_imsg.username), "%s", chaine );
@@ -83,7 +83,7 @@
     if (!chaine)
      { Info_new ( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
                   "Imsg_Lire_config: password is missing. Using default." );
-       g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "defaultpassword" );
+       g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), DEFAUT_PASSWORD_IMSG );
      }
     else
      { g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "%s", chaine );
@@ -434,7 +434,13 @@
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
     Cfg_imsg.connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
-    if ( lm_ssl_is_supported () == TRUE )
+    if ( Cfg_imsg.connection == NULL )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Run_thread: Error creating connection" );
+       Cfg_imsg.lib->Thread_run = FALSE;                                               /* Arret du thread */
+     }
+
+    if ( Cfg_imsg.connection && (lm_ssl_is_supported () == TRUE) )
      { LmSSL *ssl;
        ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
        lm_ssl_use_starttls ( ssl, TRUE, TRUE );
@@ -447,10 +453,10 @@
                      "Run_thread: SSL is _Not_ available" );
          }
                                                                              /* Connexion au serveur XMPP */
-    if ( lm_connection_open_and_block (Cfg_imsg.connection, &error) == FALSE )
+    if ( Cfg_imsg.connection == FALSE || lm_connection_open_and_block (Cfg_imsg.connection, &error) == FALSE )
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
-       Cfg_imsg.lib->Thread_run = FALSE;                                                        /* Arret du thread */
+       Cfg_imsg.lib->Thread_run = FALSE;                                               /* Arret du thread */
      }
     else
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
@@ -525,7 +531,6 @@
 
     if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
     sleep(2);
-
 
                                                                    /* Fermeture de la Cfg_imsg.connection */
     if (Cfg_imsg.connection) lm_connection_close (Cfg_imsg.connection, NULL);

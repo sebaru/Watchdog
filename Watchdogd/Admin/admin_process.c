@@ -53,10 +53,6 @@
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ARCH -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "rs485" ) )
-        { if (!Demarrer_rs485())                                        /* Demarrage gestion module RS485 */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb RS485 -> Arret" ); }
-        } else
        if ( ! strcmp ( thread, "modbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info( Config.log, DEBUG_ADMIN, "Admin: Pb MODBUS -> Arret" ); }
@@ -116,7 +112,7 @@
        struct LIBRAIRIE *lib;
        sscanf ( ligne, "%s %s", commande, thread );
        g_snprintf( chaine, sizeof(chaine), "libwatchdog-server-%s.so", thread );
-       if ( lib = Charger_librairie_par_fichier( NULL, chaine ))  /* Chargement de la librairie dynamique */
+       if ( (lib = Charger_librairie_par_fichier( NULL, chaine )) )/* Chargement de la librairie dynamique */
         { g_snprintf( chaine, sizeof(chaine), " Library %s loaded\n", thread );
           if (Start_librairie(lib))
            { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt ); }
@@ -147,7 +143,6 @@
         { Stopper_fils(FALSE);                           /* Termine tous les process sauf le thread ADMIN */
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
-       if ( ! strcmp ( thread, "rs485"     ) ) { Partage->com_rs485.Thread_run     = FALSE; } else
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "sms"       ) ) { Partage->com_sms.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
@@ -221,12 +216,6 @@
 
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
-       g_snprintf( chaine, sizeof(chaine), " Library RS485     -> loaded = %s, running = %s, TID = %d\n",
-                   (Partage->com_rs485.dl_handle ? "YES" : " NO"),
-                   (Partage->com_rs485.Thread_run ? "YES" : " NO"), (gint)Partage->com_rs485.TID
                  );
        Write_admin ( client->connexion, chaine );
 

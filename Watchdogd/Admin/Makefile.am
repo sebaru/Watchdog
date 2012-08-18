@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 noinst_LTLIBRARIES     = libadmin.la
-libadmin_la_SOURCES    = Admin.c admin_running.c admin_modbus.c admin_process.c admin_rs485.c admin_dls.c \
+libadmin_la_SOURCES    = Admin.c admin_running.c admin_modbus.c admin_process.c admin_dls.c \
 			 admin_onduleur.c admin_tellstick.c admin_set.c admin_get.c admin_sms.c
 
 INCLUDES= $(GNOME2_CFLAGS) \

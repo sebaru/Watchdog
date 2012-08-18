@@ -100,7 +100,7 @@ This is the server side of Watchdog - RS485 Module
 
 %files server-rs485
 %defattr(644,root,root)
-/usr/lib/libwatchdog-rs485*
+/usr/lib/libwatchdog-server-rs485*
 
 #----------------------------- Package Server-tellstick -------------------------------
 %package server-tellstick

@@ -43,8 +43,6 @@
   struct CONFIG
   { gchar config_file[80];                    /* Nom du fichier dont est issu les informations ci dessous */
     gint  port;                                                    /* Port d'ecoute des requetes clientes */
-    gchar port_RS485 [ TAILLE_PORT_RS485+1 ];                                        /* Nom du port RS485 */
-    gchar port_rfxcom[ TAILLE_PORT_RS485+1 ];                                        /* Nom du port RS485 */
     gint  max_client;                  /* Nombre maximum de client qui peuvent se connecter en meme temps */
     gint  min_serveur;                                     /* Nombre de server min à lancer en même temps */
     gint  max_serveur;                                     /* Nombre de server max à lancer en même temps */
@@ -82,8 +80,6 @@
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
  #define DEFAUT_PORT                    5558
- #define DEFAUT_PORT_RS485              "/dev/watchdog_RS485"
- #define DEFAUT_PORT_RFXCOM             "/dev/watchdog_RFXCOM"
  #define DEFAUT_MAX_CLIENT              100
  #define DEFAUT_MIN_SERVEUR             1
  #define DEFAUT_MAX_SERVEUR             3

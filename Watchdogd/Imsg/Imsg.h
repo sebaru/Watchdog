@@ -30,6 +30,10 @@
 
  #include <loudmouth/loudmouth.h>
 
+ #define DEFAUT_USERNAME_IMSG      "defaultuser"
+ #define DEFAUT_SERVER_IMSG        "defaultserver.org"
+ #define DEFAUT_PASSWORD_IMSG      "defaultpassword"
+
  struct IMSG_CONTACT
   { gchar nom[80];
     gboolean available;

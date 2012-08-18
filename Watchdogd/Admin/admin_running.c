@@ -293,8 +293,6 @@
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_MODBUS    ); } else
        if ( ! strcmp ( debug, "admin"     ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ADMIN     ); } else
-       if ( ! strcmp ( debug, "rs485"     ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_RS485     ); } else
        if ( ! strcmp ( debug, "onduleur"  ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ONDULEUR  ); } else
        if ( ! strcmp ( debug, "sms"       ) )

@@ -42,7 +42,6 @@
  #include "Cpt_imp_DB.h"
  #include "Modbus.h"
  #include "Onduleur.h"
- #include "Rs485.h"
  #include "Tellstick.h"
  #include "Lirc.h"
  #include "Scenario_DB.h"
@@ -145,7 +144,6 @@
     guint audit_tour_dls_per_sec_hold;
                                                                                 /* Interfacage avec D.L.S */
     struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
-    struct COM_RS485 com_rs485;                                                             /* Comm rs485 */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
     struct COM_TELLSTICK com_tellstick;                         /* Communication avec le thread tellstick */
     struct COM_SMS com_sms;                                                              /* Comm msrv/sms */

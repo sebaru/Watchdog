@@ -30,8 +30,8 @@
  #include "Imsg.h"
 
 /**********************************************************************************************************/
-/* Admin_imsg: Fonction gerant les différentes commandes possible pour l'administration imsg              */
-/* Entrée: le client d'admin et la ligne de commande                                                      */
+/* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
+/* Entrée: Le client d'admin, la ligne a traiter                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command( struct CLIENT_ADMIN *client, gchar *ligne )

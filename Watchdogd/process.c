@@ -527,67 +527,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_dls: Thread un process rs485                                                                  */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_rs485 ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Demande de demarrage"), getpid() );
-
-    if (Partage->com_rs485.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: An instance is already running"),
-               Partage->com_rs485.TID );
-       return(FALSE);
-     }
-
-    Partage->com_rs485.dl_handle = dlopen( "libwatchdog-rs485.so", RTLD_LAZY );
-    if (!Partage->com_rs485.dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: dlopen failed"), dlerror() );
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rs485.Run_rs485 = dlsym( Partage->com_rs485.dl_handle, "Run_rs485" );
-    if (!Partage->com_rs485.Run_rs485)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Run_rs485 does not exist") );
-       dlclose( Partage->com_rs485.dl_handle );
-       Partage->com_rs485.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rs485.Ajouter_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Ajouter_rs485DB" );
-    if (!Partage->com_rs485.Ajouter_rs485DB)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Ajouter_rs485DB does not exist") );
-       dlclose( Partage->com_rs485.dl_handle );
-       Partage->com_rs485.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rs485.Retirer_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Retirer_rs485DB" );
-    if (!Partage->com_rs485.Retirer_rs485DB)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Retirer_rs485DB does not exist") );
-       dlclose( Partage->com_rs485.dl_handle );
-       Partage->com_rs485.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                                              /* Recherche de la fonction */
-    Partage->com_rs485.Modifier_rs485DB = dlsym( Partage->com_rs485.dl_handle, "Modifier_rs485DB" );
-    if (!Partage->com_rs485.Modifier_rs485DB)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: Modifier_rs485DB does not exist") );
-       dlclose( Partage->com_rs485.dl_handle );
-       Partage->com_rs485.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    if ( pthread_create( &Partage->com_rs485.TID, NULL, (void *)Partage->com_rs485.Run_rs485, NULL ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_rs485: pthread_create failed") );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_rs485.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_rfxcom: thread rfxcom seems to be running",
-            Partage->com_rs485.TID );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Demarrer_sms: Thread un process sms                                                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
@@ -836,11 +775,6 @@
     Partage->com_onduleur.Thread_run = FALSE;
     while ( Partage->com_onduleur.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
-
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for RS485 to finish"), Partage->com_rs485.TID );
-    Partage->com_rs485.Thread_run = FALSE;
-    while ( Partage->com_rs485.TID != 0 ) sched_yield();                       /* Attente fin RS485 */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, RS485 is down"), Partage->com_rs485.TID );
 
     Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
     Partage->com_tellstick.Thread_run = FALSE;

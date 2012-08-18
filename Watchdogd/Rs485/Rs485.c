@@ -39,9 +39,48 @@
  #include <signal.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "Rs485.h"
 
- #define TEMPS_RETENTE   50               /* Tente de se raccrocher au module banni toutes les 5 secondes */
+/**********************************************************************************************************/
+/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Rs485_Lire_config ( void )
+  { gchar *chaine;
+    GKeyFile *gkf;
 
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Rs485_Lire_config : unable to load config file %s", Config.config_file );
+       return;
+     }
+                                                                               /* Positionnement du debug */
+    Cfg_rs485.lib->Thread_debug = g_key_file_get_boolean ( gkf, "RS485", "debug", NULL ); 
+                                                                 /* Recherche des champs de configuration */
+
+
+    chaine = g_key_file_get_string ( gkf, "RS485", "port", NULL );
+    if (!chaine)
+     { Info_new ( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
+                  "Rs485_Lire_config: port is missing. Using default." );
+       g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), DEFAUT_PORT_RS485 );
+     }
+    else
+     { g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", chaine );
+       g_free(chaine);
+     }
+    g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Rs485_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                  */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Rs485_Liberer_config ( void )
+  {
+  }
 /**********************************************************************************************************/
 /* Retirer_rs485DB: Elimination d'un module rs485                                                         */
 /* Entrée: un log et une database                                                                         */
@@ -79,7 +118,8 @@
 
     libelle = Normaliser_chaine ( Config.log, rs485->libelle );          /* Formatage correct des chaines */
     if (!libelle)
-     { Info( Config.log, DEBUG_DB, "Ajouter_rs485DB: Normalisation libelle impossible" );
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
+                 "Ajouter_rs485DB: Normalisation libelle impossible" );
        Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
@@ -103,54 +143,6 @@
     return( last_id );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_rs485DB ( struct DB *db )
-  { gchar requete[256];
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
-                "sa_min,sa_max,s_min,s_max"
-                " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
-
-    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct RS485DB *Recuperer_rs485DB_suite( struct DB *db )
-  { struct RS485DB *rs485;
-
-    Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( Config.log, db );
-       return(NULL);
-     }
-
-    rs485 = (struct RS485DB *)g_malloc0( sizeof(struct RS485DB) );
-    if (!rs485) Info( Config.log, DEBUG_RS485, "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
-    else
-     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
-       rs485->id                = atoi(db->row[0]);
-       rs485->num               = atoi(db->row[1]);
-       rs485->bit_comm          = atoi(db->row[2]);
-       rs485->enable            = atoi(db->row[4]);
-       rs485->ea_min            = atoi(db->row[5]);
-       rs485->ea_max            = atoi(db->row[6]);
-       rs485->e_min             = atoi(db->row[7]);
-       rs485->e_max             = atoi(db->row[8]);
-       rs485->sa_min            = atoi(db->row[9]);
-       rs485->sa_max            = atoi(db->row[10]);
-       rs485->s_min             = atoi(db->row[11]);
-       rs485->s_max             = atoi(db->row[12]);
-     }
-    return(rs485);
-  }
-/**********************************************************************************************************/
 /* Modifier_rs485DB: Modification d'un rs485 Watchdog                                                     */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
@@ -166,7 +158,8 @@
 
     libelle = Normaliser_chaine ( Config.log, rs485->libelle );              /* Formatage correct des chaines */
     if (!libelle)
-     { Info( Config.log, DEBUG_DB, "Modifier_rs485DB: Normalisation libelle impossible" );
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
+                 "Modifier_rs485DB: Normalisation libelle impossible" );
        Libere_DB_SQL( Config.log, &db );
        return(-1);
      }
@@ -189,19 +182,72 @@
     return( retour );
   }
 /**********************************************************************************************************/
+/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static gboolean Recuperer_rs485DB ( struct DB *db )
+  { gchar requete[256];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
+                "sa_min,sa_max,s_min,s_max"
+                " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
+
+    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static struct RS485DB *Recuperer_rs485DB_suite( struct DB *db )
+  { struct RS485DB *rs485;
+
+    Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( Config.log, db );
+       return(NULL);
+     }
+
+    rs485 = (struct RS485DB *)g_malloc0( sizeof(struct RS485DB) );
+    if (!rs485) Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
+                          "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
+    else
+     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+       rs485->id                = atoi(db->row[0]);
+       rs485->num               = atoi(db->row[1]);
+       rs485->bit_comm          = atoi(db->row[2]);
+       rs485->enable            = atoi(db->row[4]);
+       rs485->ea_min            = atoi(db->row[5]);
+       rs485->ea_max            = atoi(db->row[6]);
+       rs485->e_min             = atoi(db->row[7]);
+       rs485->e_max             = atoi(db->row[8]);
+       rs485->sa_min            = atoi(db->row[9]);
+       rs485->sa_max            = atoi(db->row[10]);
+       rs485->s_min             = atoi(db->row[11]);
+       rs485->s_max             = atoi(db->row[12]);
+     }
+    return(rs485);
+  }
+/**********************************************************************************************************/
 /* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
  static struct MODULE_RS485 *Chercher_module_by_id ( gint id )
-  { GList *liste;
-    liste = Partage->com_rs485.Modules_RS485;
+  { struct MODULE_RS485 *module;
+    GSList *liste;
+    liste = Cfg_rs485.Modules_RS485;
+    module = NULL;
+    pthread_mutex_lock ( &Cfg_rs485.synchro );
     while ( liste )
-     { struct MODULE_RS485 *module;
-       module = ((struct MODULE_RS485 *)liste->data);
-       if (module->rs485.id == id) return(module);
+     { module = ((struct MODULE_RS485 *)liste->data);
+       if (module->rs485.id == id) break;
        liste = liste->next;
      }
+    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    if (liste) return(module);
     return(NULL);
   }
 /**********************************************************************************************************/
@@ -222,7 +268,7 @@
        return(FALSE);
      }
 
-    Partage->com_rs485.Modules_RS485 = NULL;
+    Cfg_rs485.Modules_RS485 = NULL;
     cpt = 0;
     for ( ; ; )
      { struct MODULE_RS485 *module;
@@ -233,8 +279,8 @@
 
        module = (struct MODULE_RS485 *)g_malloc0( sizeof(struct MODULE_RS485) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_RS485,
-                "Charger_tous_RS485: Erreur allocation mémoire struct MODULE_RS485" );
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
+                    "Charger_tous_RS485: Erreur allocation mémoire struct MODULE_RS485" );
           g_free(rs485);
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
@@ -242,13 +288,18 @@
        memcpy( &module->rs485, rs485, sizeof(struct RS485DB) );
        if (module->rs485.enable) module->started = TRUE;          /* Si enable at boot... et bien Start ! */
        g_free(rs485);
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
-       Partage->com_rs485.Modules_RS485 = g_list_append ( Partage->com_rs485.Modules_RS485, module );
-       Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485:  id    = ", module->rs485.id    );
-       Info_n( Config.log, DEBUG_RS485, "                  -  enable = ", module->rs485.enable );
+       pthread_mutex_lock ( &Cfg_rs485.synchro );
+       Cfg_rs485.Modules_RS485 = g_slist_prepend ( Cfg_rs485.Modules_RS485, module );
+       pthread_mutex_unlock ( &Cfg_rs485.synchro );
+
+       Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                 "Charger_tous_RS485: id = %d, enable = %d", module->rs485.id, module->rs485.enable );
      }
-    Info_n( Config.log, DEBUG_RS485, "Charger_tous_RS485: module RS485 found  !", cpt );
+    pthread_mutex_lock ( &Cfg_rs485.synchro );
+    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+              "Charger_tous_RS485: %s module RS485 found  !", g_slist_length(Cfg_rs485.Modules_RS485) );
+    pthread_mutex_unlock ( &Cfg_rs485.synchro );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -260,7 +311,9 @@
 /**********************************************************************************************************/
  static void Decharger_un_rs485 ( struct MODULE_RS485 *module )
   { if (!module) return;
-    Partage->com_rs485.Modules_RS485 = g_list_remove ( Partage->com_rs485.Modules_RS485, module );
+    pthread_mutex_lock ( &Cfg_rs485.synchro );
+    Cfg_rs485.Modules_RS485 = g_slist_remove ( Cfg_rs485.Modules_RS485, module );
+    pthread_mutex_unlock ( &Cfg_rs485.synchro );
     g_free(module);
   }
 /**********************************************************************************************************/
@@ -270,8 +323,8 @@
 /**********************************************************************************************************/
  static void Decharger_tous_rs485 ( void  )
   { struct MODULE_RS485 *module;
-    while ( Partage->com_rs485.Modules_RS485 )
-     { module = (struct MODULE_RS485 *)Partage->com_rs485.Modules_RS485->data;
+    while ( Cfg_rs485.Modules_RS485 )
+     { module = (struct MODULE_RS485 *)Cfg_rs485.Modules_RS485->data;
        Decharger_un_rs485 ( module );
      }
   }
@@ -281,15 +334,18 @@
 /* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
  static gboolean Rs485_is_actif ( void )
-  { GList *liste;
-    liste = Partage->com_rs485.Modules_RS485;
+  { GSList *liste;
+    liste = Cfg_rs485.Modules_RS485;
+    pthread_mutex_lock ( &Cfg_rs485.synchro );
     while ( liste )
      { struct MODULE_RS485 *module;
        module = ((struct MODULE_RS485 *)liste->data);
 
-       if (module->started) return(TRUE);
+       if (module->started) break;
        liste = liste->next;
      }
+    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    if (liste) return(TRUE);
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -409,12 +465,10 @@
   { struct termios oldtio;
     int fd;
 
-    fd = open( Config.port_RS485, O_RDWR | O_NOCTTY | O_NONBLOCK );
+    fd = open( Cfg_rs485.port, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
-     { Info_c( Config.log, DEBUG_RS485,
-               "RS485: Init_rs485: Impossible d'ouvrir le port rs485", Config.port_RS485 );
-       Info_n( Config.log, DEBUG_RS485,
-               "RS485: Init_rs485: Code retour                      ", fd );
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
+               "Init_rs485: Impossible d'ouvrir le port %s, retour=%d", Cfg_rs485.port, fd );
      }
     else
      { memset(&oldtio, 0, sizeof(oldtio) );
@@ -426,8 +480,8 @@
        oldtio.c_cc[VMIN]     = 0;
        tcsetattr(fd, TCSANOW, &oldtio);
        tcflush(fd, TCIOFLUSH);
-       Info_c( Config.log, DEBUG_RS485,
-               "RS485: Init_rs485: Ouverture port rs485 okay", Config.port_RS485);
+       Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+               "Init_rs485: Ouverture port rs485 okay %s", Cfg_rs485.port );
      }
     return(fd);
   }
@@ -441,7 +495,8 @@
     if (trame->dest != 0xFF) return(FALSE);                        /* Si c'est pas pour nous, on se casse */
 
     if (module->rs485.id != trame->source)
-     { Info_n( Config.log, DEBUG_RS485, "Processer_trame: Module RS485 unknown", trame->source);
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+                 "Processer_trame: Module RS485 unknown source=%d", trame->source);
        return(TRUE);
      }
 
@@ -488,102 +543,122 @@
 /**********************************************************************************************************/
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
- void Run_rs485 ( void )
+ void Run_thread ( struct LIBRAIRIE *lib )
   { gint retval, nbr_oct_lu, id_en_cours, attente_reponse;
     struct MODULE_RS485 *module;
     struct TRAME_RS485 Trame;
     struct timeval tv;
     fd_set fdselect;
-    gint fd_rs485;
     GList *liste;
 
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );
-    Info( Config.log, DEBUG_RS485, "RS485: demarrage" );
+    memset( &Cfg_rs485, 0, sizeof(Cfg_rs485) );                 /* Mise a zero de la structure de travail */
+    Cfg_rs485.lib = lib;                       /* Sauvegarde de la structure pointant sur cette librairie */
+    Rs485_Lire_config ();                               /* Lecture de la configuration logiciel du thread */
 
-    fd_rs485 = Init_rs485();
-    if (fd_rs485<0)                                                        /* On valide l'acces aux ports */
-     { Info( Config.log, DEBUG_RS485, "RS485: Acces RS485 impossible, terminé");
-       Partage->com_rs485.TID = 0;                        /* On indique au master que le thread est mort. */
+    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+    Cfg_rs485.lib->Thread_run = TRUE;                                               /* Le thread tourne ! */
+
+    g_snprintf( Cfg_rs485.lib->admin_prompt, sizeof(Cfg_rs485.lib->admin_prompt), "rs485" );
+    g_snprintf( Cfg_rs485.lib->admin_help,   sizeof(Cfg_rs485.lib->admin_help),   "Manage RS485 Modules" );
+
+    Cfg_rs485.fd = Init_rs485();
+    if (Cfg_rs485.fd<0)                                                    /* On valide l'acces aux ports */
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
+                 "Run_thread: Acces RS485 impossible, Thread down");
+       Rs485_Liberer_config ();                         /* Lecture de la configuration logiciel du thread */
+       Cfg_rs485.lib->TID = 0;                            /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else { Info_n( Config.log, DEBUG_RS485, "RS485: Acces RS485 FD", fd_rs485 ); }
+    else { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO, 
+                     "Run_thread: Acces RS485 FD=%d", Cfg_rs485.fd );
+         }
 
-    Partage->com_rs485.Modules_RS485 = NULL;                    /* Initialisation des variables du thread */
-    Partage->com_rs485.Thread_run    = TRUE;                                        /* Le thread tourne ! */
-
+    Cfg_rs485.Modules_RS485 = NULL;                             /* Initialisation des variables du thread */
     Charger_tous_rs485();                                                 /* Chargement des modules rs485 */
 
     nbr_oct_lu = 0;
     id_en_cours = 0;
     attente_reponse = FALSE;
 
-    while(Partage->com_rs485.Thread_run == TRUE)                         /* On tourne tant que necessaire */
+    while(Cfg_rs485.Thread_run == TRUE)                         /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
-       if (Partage->com_rs485.Thread_reload == TRUE)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Reloading conf" );
+       if (Cfg_rs485.Thread_reload == TRUE)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: Run_rs485: Reloading conf" );
           Decharger_tous_rs485();
-          close(fd_rs485);
-          fd_rs485 = Init_rs485();
-          if (fd_rs485<0)                                                  /* On valide l'acces aux ports */
-           { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
-             Partage->com_rs485.TID = 0;                  /* On indique au master que le thread est mort. */
+          close(Cfg_rs485.fd);
+          Cfg_rs485.fd = Init_rs485();
+          if (Cfg_rs485.fd<0)                                              /* On valide l'acces aux ports */
+           { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
+                       "Run_thread: Restart Acces RS485 impossible, terminé");
+             Rs485_Liberer_config ();                   /* Lecture de la configuration logiciel du thread */
+             Cfg_rs485.lib->TID = 0;                      /* On indique au master que le thread est mort. */
              pthread_exit(GINT_TO_POINTER(-1));
            }
           Charger_tous_rs485();
-          Partage->com_rs485.Thread_reload = FALSE;
+          Cfg_rs485.Thread_reload = FALSE;
         }
 
-       if (Partage->com_rs485.Thread_sigusr1 == TRUE)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: SIGUSR1" );
-          Partage->com_rs485.Thread_sigusr1 = FALSE;
+       if (Cfg_rs485.Thread_sigusr1 == TRUE)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: Run_rs485: SIGUSR1" );
+          Cfg_rs485.Thread_sigusr1 = FALSE;
         }
 
-       if (Partage->com_rs485.admin_del)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Deleting module" );
-          module = Chercher_module_by_id ( Partage->com_rs485.admin_del );
+       if (Cfg_rs485.admin_del)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                    "Run_thread: Run_rs485: Deleting module" );
+          module = Chercher_module_by_id ( Cfg_rs485.admin_del );
           Decharger_un_rs485 ( module );
-          Partage->com_rs485.admin_del = 0;
+          Cfg_rs485.admin_del = 0;
         }
 
-       if (Partage->com_rs485.admin_add)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Adding module" );
-          Charger_un_rs485 ( Partage->com_rs485.admin_add );
-          Partage->com_rs485.admin_add = 0;
+       if (Cfg_rs485.admin_add)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                    "Run_thread: Run_rs485: Adding module" );
+          /*Charger_un_rs485 ( Cfg_rs485.admin_add );*/
+          Cfg_rs485.admin_add = 0;
         }
 
-       if (Partage->com_rs485.admin_start)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Starting module" );
+       if (Cfg_rs485.admin_start)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                    "Run_thread: Run_rs485: Starting module" );
           if (Rs485_is_actif() == FALSE)                /* Si aucun module started, on restart la comm RS */
-           { fd_rs485 = Init_rs485();
-             if (fd_rs485<0)                                               /* On valide l'acces aux ports */
-              { Info( Config.log, DEBUG_RS485, "RS485: Restart Acces RS485 impossible, terminé");
-                Partage->com_rs485.TID = 0;               /* On indique au master que le thread est mort. */
+           { Cfg_rs485.fd = Init_rs485();
+             if (Cfg_rs485.fd<0)                                           /* On valide l'acces aux ports */
+              { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
+                          "Run_thread: Restart Acces RS485 impossible, terminé");
+                Cfg_rs485.lib->TID = 0;                   /* On indique au master que le thread est mort. */
                 pthread_exit(GINT_TO_POINTER(-1));
               }
            }
-          module = Chercher_module_by_id ( Partage->com_rs485.admin_start );
+          module = Chercher_module_by_id ( Cfg_rs485.admin_start );
           if (module) { module->started = 1; }
-          Partage->com_rs485.admin_start = 0;
+          Cfg_rs485.admin_start = 0;
         }
 
-       if (Partage->com_rs485.admin_stop)
-        { Info( Config.log, DEBUG_RS485, "RS485: Run_rs485: Stopping module" );
-          module = Chercher_module_by_id ( Partage->com_rs485.admin_stop );
+       if (Cfg_rs485.admin_stop)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                    "Run_thread: Run_rs485: Stopping module" );
+          module = Chercher_module_by_id ( Cfg_rs485.admin_stop );
           if (module) module->started = 0;
           Deconnecter_rs485 ( module );
-          Partage->com_rs485.admin_stop = 0;
+          Cfg_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
-           { close(fd_rs485);
-             Info( Config.log, DEBUG_RS485, "RS485: Restart FileDescriptor sur All RS down");
+           { close(Cfg_rs485.fd);
+             Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+                       "Run_thread: Restart FileDescriptor sur All RS down");
            }
         }
 
-       if (Partage->com_rs485.Modules_RS485 == NULL )           /* Si pas de module référencés, on attend */
+       if (Cfg_rs485.Modules_RS485 == NULL )           /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
-       liste = Partage->com_rs485.Modules_RS485;
+       liste = Cfg_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->started != TRUE)                           /* Si le module est stopped, on le zappe */
@@ -594,10 +669,10 @@
           if ( attente_reponse == FALSE )
            { if ( module->date_retente <= Partage->top )                         /* module banni ou non ? */
               { if (module->date_next_get_ana > Partage->top)               /* Ana toutes les 10 secondes */
-                 { Envoyer_trame_want_inputTOR( module, fd_rs485 );
+                 { Envoyer_trame_want_inputTOR( module, Cfg_rs485.fd );
                  }
                 else
-                 { Envoyer_trame_want_inputANA( module, fd_rs485 );
+                 { Envoyer_trame_want_inputANA( module, Cfg_rs485.fd );
                    module->date_next_get_ana = Partage->top + RS485_TEMPS_UPDATE_IO_ANA;/* Prochain update ana dans 2 secondes */
                  }
 
@@ -609,12 +684,12 @@
            }
           else
            { if ( Partage->top - module->date_requete > 20 )                       /* Si la comm est niet */
-              { module->date_retente = Partage->top + TEMPS_RETENTE;
+              { module->date_retente = Partage->top + RS485_TEMPS_RETENTE;
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
                 Deconnecter_rs485 ( module );
-                Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: module down", module->rs485.id );
+                Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Run_thread: Run_rs485: module down", module->rs485.id );
                 liste = liste->next;
                 continue;
               }
@@ -623,16 +698,16 @@
            }
 
           FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie RS485 */
-          FD_SET(fd_rs485, &fdselect );
+          FD_SET(Cfg_rs485.fd, &fdselect );
           tv.tv_sec = 1;
           tv.tv_usec= 0;
-          retval = select(fd_rs485+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
-          if (retval>=0 && FD_ISSET(fd_rs485, &fdselect) )
+          retval = select(Cfg_rs485.fd+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
+          if (retval>=0 && FD_ISSET(Cfg_rs485.fd, &fdselect) )
 	   { int bute, cpt;
              if (nbr_oct_lu<TAILLE_ENTETE)
 	      { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
  
-             cpt = read( fd_rs485, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
+             cpt = read( Cfg_rs485.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
              if (cpt>0)
               { nbr_oct_lu = nbr_oct_lu + cpt;
    	        if (nbr_oct_lu >= TAILLE_ENTETE + Trame.taille)                       /* traitement trame */
@@ -650,7 +725,9 @@
                    crc_recu =   *((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 1) & 0xFF;
                    crc_recu += (*((unsigned char *)&Trame + TAILLE_ENTETE + Trame.taille - 2) & 0xFF)<<8;
                    if (crc_recu != Calcul_crc16(&Trame))
-                    { Info(Config.log, DEBUG_RS485, "RS485: CRC16 failed !!"); }
+                    { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                                "Run_thread: CRC16 failed !!");
+                    }
                    else
                     { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;
@@ -664,10 +741,11 @@
 	   }
         }                                                                           /* Fin du While liste */
       }                                                                    /* Fin du while partage->arret */
-    close(fd_rs485);
+    close(Cfg_rs485.fd);
     Decharger_tous_rs485();
-    Info_n( Config.log, DEBUG_RS485, "RS485: Run_rs485: Down", pthread_self() );
-    Partage->com_rs485.TID = 0;                           /* On indique au master que le thread est mort. */
+    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_rs485.lib->TID = 0;                               /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

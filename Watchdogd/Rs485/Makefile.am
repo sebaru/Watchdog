@@ -5,14 +5,13 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-lib_LTLIBRARIES     = libwatchdog-rs485.la
-libwatchdog_rs485_la_SOURCES    = Rs485.c
+lib_LTLIBRARIES     = libwatchdog-server-rs485.la
+libwatchdog_server_rs485_la_SOURCES    = Rs485.c Rs485.h admin_rs485.c
 
 INCLUDES= $(GNOME2_CFLAGS) \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
           $(MYSQL_CFLAGS) \
           -I../Include
 
-libwatchdog_rs485_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
+libwatchdog_server_rs485_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

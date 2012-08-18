@@ -28,6 +28,8 @@
 #ifndef _RFXCOM_H_
  #define _RFXCOM_H_
 
+ #define DEFAUT_PORT_RFXCOM             "/dev/watchdog_RFXCOM"
+
  #define NOM_TABLE_MODULE_RFXCOM   "rfxcom"
  #define NBR_CARAC_LIBELLE_RFXCOM  32
  #define TAILLE_ENTETE_RFXCOM    1

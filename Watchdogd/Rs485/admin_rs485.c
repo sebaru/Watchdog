@@ -27,7 +27,8 @@
  
  #include <glib.h>
  #include "watchdogd.h"
-
+ #include "Rs485.h"
+#ifdef bouh
 /**********************************************************************************************************/
 /* Admin_rs485_reload: Demande le rechargement des conf RS485                                             */
 /* Entrée: le client                                                                                      */
@@ -186,12 +187,13 @@
     g_snprintf( chaine, sizeof(chaine), " Module RS485 %d stopped\n", id );
     Write_admin ( client->connexion, chaine );
   }
+#endif
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
+/* Entrée: Le client d'admin, la ligne a traiter                                                          */
+/* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_rs485 ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -206,12 +208,12 @@
                 &rs485.s_min, &rs485.s_max,
                 &rs485.sa_min, &rs485.sa_max,
                 rs485.libelle );
-       Admin_rs485_add ( client, &rs485 );
+       /*Admin_rs485_add ( client, &rs485 );*/
      }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_rs485_del ( client, num );
+       /*Admin_rs485_del ( client, num );*/
      }
     else if ( ! strcmp ( commande, "change" ) )
      { struct RS485DB rs485;
@@ -223,23 +225,23 @@
                 &rs485.s_min, &rs485.s_max,
                 &rs485.sa_min, &rs485.sa_max,
                 rs485.libelle );
-       Admin_rs485_change ( client, &rs485 );
+       /*Admin_rs485_change ( client, &rs485 );*/
      }
     else if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_rs485_start ( client, num );
+       /*Admin_rs485_start ( client, num );*/
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_rs485_stop ( client, num );
+       /*Admin_rs485_stop ( client, num );*/
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_rs485_list ( client );
+     { /*Admin_rs485_list ( client );*/
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_rs485_reload(client);
+     { /*Admin_rs485_reload(client);*/
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
