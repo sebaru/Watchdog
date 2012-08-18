@@ -223,7 +223,8 @@
         
     sms.user_data[0].type = GN_SMS_DATA_Text;
     if (!gn_char_def_alphabet(sms.user_data[0].u.text))
-     { sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2; }
+     { sms.dcs.u.general.alphabet = GN_SMS_DCS_8bit; }
+                                                  /* 18/08/12 Test de passage en '8bit' au lieu de 'UCS2' */
 
     sms.user_data[1].type = GN_SMS_DATA_None;
 /*	sms.delivery_report = true; */
