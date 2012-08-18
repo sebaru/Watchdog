@@ -770,6 +770,7 @@
            { if ( ! Connecter_module( module ) )                     /* Demande de connexion a l'onduleur */
               { Info_n( Config.log, DEBUG_ONDULEUR,
                         "ONDULEUR: Run_onduleur: Module DOWN", module->onduleur.id );
+                Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
                 module->date_retente = Partage->top + ONDULEUR_RETRY;
               }
            }
@@ -777,7 +778,7 @@
            { Info_n( Config.log, DEBUG_ONDULEUR,
                      "ONDULEUR: Run_onduleur: Envoi des sorties onduleur ID", module->onduleur.id );
              if ( Envoyer_sortie_onduleur ( module ) == FALSE )
-              { Deconnecter_module ( module );
+              { Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
                 module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On retente dans longtemps */
               }
              else
