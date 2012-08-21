@@ -251,19 +251,17 @@
        Write_admin ( client->connexion,
                      "                                         - Ajoute un module RS485\n" );
        Write_admin ( client->connexion,
-                     "  del id                                 - Retire le module id\n" );
-       Write_admin ( client->connexion,
                      "  change id num bit_comm enable ea_min ea_max e_min e_max s_min s_max sa_min sa_max libelle\n" );
        Write_admin ( client->connexion,
                      "                                         - Modifie le module id\n" );
+       Write_admin ( client->connexion,
+                     "  del id                                 - Retire le module id\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
                      "  stop id                                - Demarre le module id\n" );
        Write_admin ( client->connexion,
                      "  list                                   - Affiche les status des equipements RS485\n" );
-       Write_admin ( client->connexion,
-                     "  reload                                 - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];

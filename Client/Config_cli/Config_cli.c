@@ -117,9 +117,6 @@
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ADMIN", NULL );
        if (debug) config_cli->debug_level += DEBUG_ADMIN;
 
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_RS485", NULL );
-       if (debug) config_cli->debug_level += DEBUG_RS485;
-
        debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ONDULEUR", NULL );
        if (debug) config_cli->debug_level += DEBUG_ONDULEUR;
 
