@@ -44,8 +44,8 @@
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     liste_modules = Cfg_rs485.Modules_RS485;
-    pthread_mutex_lock ( &Cfg_rs485.synchro );
     while ( liste_modules )
      { struct MODULE_RS485 *module;
        module = (struct MODULE_RS485 *)liste_modules->data;
@@ -67,7 +67,7 @@
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
      }
-    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Admin_rs485_del: Retire le capteur/module rs485 dont l'id est en parametre                             */

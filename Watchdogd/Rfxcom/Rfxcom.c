@@ -264,40 +264,37 @@
        memcpy( &module->rfxcom, rfxcom, sizeof(struct RFXCOMDB) );
        g_free(rfxcom);
                                                                         /* Ajout dans la liste de travail */
+       pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
        Cfg_rfxcom.Modules_RFXCOM = g_slist_prepend ( Cfg_rfxcom.Modules_RFXCOM, module );
+       pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
                  "Charger_tous_rfxcom. Module loaded id = %02d", module->rfxcom.id    );
      }
+    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
               "Charger_tous_module : %d RFXCOM found !", g_slist_length( Cfg_rfxcom.Modules_RFXCOM ) );
+    pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Decharger_un_rfxcom: Dechargement d'un RFXCOM                                                          */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Decharger_un_rfxcom ( struct MODULE_RFXCOM *module )
-  { if (!module) return;
-    Cfg_rfxcom.Modules_RFXCOM = g_slist_remove ( Cfg_rfxcom.Modules_RFXCOM, module );
-    g_free(module);
-  }
-/**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Decharger_tous_rfxcom : Dechargement de tous les capteurs/senseurs/actionneurs RFXCOM                  */
+/* Entrée: néant                                                                                          */
+/* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Decharger_tous_rfxcom ( void  )
   { struct MODULE_RFXCOM *module;
+    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
     while ( Cfg_rfxcom.Modules_RFXCOM )
      { module = (struct MODULE_RFXCOM *)Cfg_rfxcom.Modules_RFXCOM->data;
-       Decharger_un_rfxcom ( module );
+       Cfg_rfxcom.Modules_RFXCOM = g_slist_remove ( Cfg_rfxcom.Modules_RFXCOM, module );
+       g_free(module);
      }
+    pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                           */
+/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                         */
 /* Sortie: l'identifiant de la connexion                                                                  */
 /**********************************************************************************************************/
  static int Init_rfxcom ( void )
@@ -342,15 +339,20 @@
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
  static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint canal )
-  { GSList *liste_modules;
+  { struct MODULE_RFXCOM *module;
+    GSList *liste_modules;
+
+    module = NULL;
+    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
     liste_modules = Cfg_rfxcom.Modules_RFXCOM;
     while ( liste_modules )
-     { struct MODULE_RFXCOM *module;
-       module = (struct MODULE_RFXCOM *)liste_modules->data;
+     { module = (struct MODULE_RFXCOM *)liste_modules->data;
 
-       if (module->rfxcom.type == type && module->rfxcom.canal == canal) return(module);
+       if (module->rfxcom.type == type && module->rfxcom.canal == canal) break;
        liste_modules = liste_modules->next;
      }
+    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
+    if (liste_modules) return(module);
     return(NULL);
   }
 /**********************************************************************************************************/

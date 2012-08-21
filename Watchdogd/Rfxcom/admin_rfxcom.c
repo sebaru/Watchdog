@@ -45,6 +45,8 @@
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
+    
+    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
     liste_modules = Cfg_rfxcom.Modules_RFXCOM;
     while ( liste_modules )
      { struct MODULE_RFXCOM *module;
@@ -52,14 +54,16 @@
 
        g_snprintf( chaine, sizeof(chaine),
                    " RFXCOM[%02d] -> type=%02d,canal=%02d,e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
-                   "                 date_last_view=%d\n",
+                   "                 date_last_view=%03d\n",
                    module->rfxcom.id, module->rfxcom.type, module->rfxcom.canal,
                    module->rfxcom.e_min, module->rfxcom.ea_min, module->rfxcom.a_min,
-                   module->rfxcom.libelle, (gint)module->date_last_view
+                   module->rfxcom.libelle, 
+                   (Partage->top - module->date_last_view)/10
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
      }
+    pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_del: Retire le capteur/module rfxcom dont l'id est en parametre                           */
@@ -69,15 +73,15 @@
  static void Admin_rfxcom_del ( struct CLIENT_ADMIN *client, gint id )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rfxcom %d\n", id );
+    g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rfxcom %03d\n", id );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
 
     if ( Retirer_rfxcomDB( id ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %d erased.\n", id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module %03d erased.\n", id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT erased.\n" ); }
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.\n", id ); }
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -96,7 +100,7 @@
 
     last_id = Ajouter_rfxcomDB( rfxcom );
     if ( last_id != -1 )
-     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n", last_id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%03d.\n", last_id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
     Write_admin ( client->connexion, chaine );
@@ -109,15 +113,15 @@
  static void Admin_rfxcom_change ( struct CLIENT_ADMIN *client, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rfxcom\n" );
+    g_snprintf( chaine, sizeof(chaine), " -- Modification du module rfxcom %03d\n", rfxcom->id );
     Write_admin ( client->connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
 
     if ( Modifier_rfxcomDB( rfxcom ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n", rfxcom->id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module %03d changed.\n", rfxcom->id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.\n", rfxcom->id ); }
     Write_admin ( client->connexion, chaine );
   }
 /**********************************************************************************************************/

@@ -240,15 +240,15 @@
  struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
   { struct MODULE_RS485 *module;
     GSList *liste;
-    liste = Cfg_rs485.Modules_RS485;
     module = NULL;
-    pthread_mutex_lock ( &Cfg_rs485.synchro );
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
+    liste = Cfg_rs485.Modules_RS485;
     while ( liste )
      { module = ((struct MODULE_RS485 *)liste->data);
        if (module->rs485.id == id) break;
        liste = liste->next;
      }
-    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
     if (liste) return(module);
     return(NULL);
   }
@@ -291,17 +291,17 @@
        if (module->rs485.enable) module->started = TRUE;          /* Si enable at boot... et bien Start ! */
        g_free(rs485);
                                                                         /* Ajout dans la liste de travail */
-       pthread_mutex_lock ( &Cfg_rs485.synchro );
+       pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
        Cfg_rs485.Modules_RS485 = g_slist_prepend ( Cfg_rs485.Modules_RS485, module );
-       pthread_mutex_unlock ( &Cfg_rs485.synchro );
+       pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
 
        Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                  "Charger_tous_RS485: id = %d, enable = %d", module->rs485.id, module->rs485.enable );
      }
-    pthread_mutex_lock ( &Cfg_rs485.synchro );
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
               "Charger_tous_RS485: %03d module RS485 found  !", g_slist_length(Cfg_rs485.Modules_RS485) );
-    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -314,13 +314,13 @@
  static void Decharger_tous_rs485 ( void  )
   { struct MODULE_RS485 *module;
 
-    pthread_mutex_lock ( &Cfg_rs485.synchro );
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     while ( Cfg_rs485.Modules_RS485 )
      { module = (struct MODULE_RS485 *)Cfg_rs485.Modules_RS485->data;
        Cfg_rs485.Modules_RS485 = g_slist_remove ( Cfg_rs485.Modules_RS485, module );
        g_free(module);
      }
-    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
   }
 /**********************************************************************************************************/
 /* RS485_is_actif: Renvoi TRUE si au moins un des modules rs est actif                                    */
@@ -330,7 +330,7 @@
  static gboolean Rs485_is_actif ( void )
   { GSList *liste;
     liste = Cfg_rs485.Modules_RS485;
-    pthread_mutex_lock ( &Cfg_rs485.synchro );
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     while ( liste )
      { struct MODULE_RS485 *module;
        module = ((struct MODULE_RS485 *)liste->data);
@@ -338,7 +338,7 @@
        if (module->started) break;
        liste = liste->next;
      }
-    pthread_mutex_unlock ( &Cfg_rs485.synchro );
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
     if (liste) return(TRUE);
     return(FALSE);
   }
@@ -639,7 +639,7 @@
        if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
-       pthread_mutex_lock ( &Cfg_rs485.synchro );                  /* Car utilisation de la liste chainée */
+       pthread_mutex_lock ( &Cfg_rs485.lib->synchro );                  /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
@@ -724,7 +724,7 @@
               }
 	   }
         }                                                                           /* Fin du While liste */
-       pthread_mutex_unlock ( &Cfg_rs485.synchro );                /* Car utilisation de la liste chainée */
+       pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );                /* Car utilisation de la liste chainée */
       }                                                                    /* Fin du while partage->arret */
     close(Cfg_rs485.fd);
     Decharger_tous_rs485();

@@ -86,7 +86,6 @@
 
  struct RS485_CONFIG                                                              /* Structure de travail */
   { struct LIBRAIRIE *lib;
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GSList *Modules_RS485;
     gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                          /* Demande de deconnexion */

@@ -52,7 +52,7 @@
 
  struct MODULE_RFXCOM
   { struct RFXCOMDB rfxcom;
-    time_t date_last_view;
+    guint date_last_view;
   };
 
  struct RFXCOM_CONFIG
