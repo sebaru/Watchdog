@@ -299,10 +299,8 @@
                  "Charger_tous_RS485: id = %d, enable = %d", module->rs485.id, module->rs485.enable );
      }
     pthread_mutex_lock ( &Cfg_rs485.synchro );
-    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_DEBUG,
-              "Charger_tous_RS485: Test !" );
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-              "Charger_tous_RS485: %s module RS485 found  !", g_slist_length(Cfg_rs485.Modules_RS485) );
+              "Charger_tous_RS485: %03d module RS485 found  !", g_slist_length(Cfg_rs485.Modules_RS485) );
     pthread_mutex_unlock ( &Cfg_rs485.synchro );
 
     Libere_DB_SQL( Config.log, &db );
