@@ -60,9 +60,9 @@
                    module->rs485.e_min, module->rs485.e_max,
                    module->rs485.s_min, module->rs485.s_max, module->rs485.sa_min, module->rs485.sa_max,
                    (module->started      ? "TRUE " : "FALSE"),
-                   (Partage->top - (gint)module->date_requete)/10,
-                   (module->date_retente ? (Partage->top - (gint)module->date_retente)/10 : 0),
-                   (Partage->top - (gint)module->date_next_get_ana)/10
+                   (Partage->top - module->date_requete)/10,
+                   (module->date_retente ? (Partage->top - module->date_retente)/10 : 0),
+                   (Partage->top - module->date_next_get_ana)/10
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;

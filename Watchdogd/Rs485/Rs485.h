@@ -79,9 +79,9 @@
   { struct RS485DB rs485;
 
     gboolean started;                                                           /* Module Start at boot ? */
-    time_t date_requete;
-    time_t date_retente;
-    time_t date_next_get_ana;
+    guint  date_requete;
+    guint  date_retente;
+    guint  date_next_get_ana;
   };
 
  struct RS485_CONFIG                                                              /* Structure de travail */
