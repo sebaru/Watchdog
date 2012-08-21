@@ -99,6 +99,7 @@
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( Config.log, &db );
+    Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
 /**********************************************************************************************************/
@@ -140,6 +141,7 @@
                           }
     last_id = Recuperer_last_ID_SQL( Config.log, db );
     Libere_DB_SQL( Config.log, &db );
+    Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( last_id );
   }
 /**********************************************************************************************************/
@@ -178,7 +180,7 @@
     g_free(libelle);
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( Config.log, &db );
-                            
+    Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
   }
 /**********************************************************************************************************/
@@ -235,7 +237,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static struct MODULE_RS485 *Chercher_module_by_id ( gint id )
+ struct MODULE_RS485 *Chercher_module_rs_485_by_id ( gint id )
   { struct MODULE_RS485 *module;
     GSList *liste;
     liste = Cfg_rs485.Modules_RS485;
@@ -305,31 +307,23 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Decharger_un_rs485: Dechargement d'un RS485                                                            */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Decharger_un_rs485 ( struct MODULE_RS485 *module )
-  { if (!module) return;
-    pthread_mutex_lock ( &Cfg_rs485.synchro );
-    Cfg_rs485.Modules_RS485 = g_slist_remove ( Cfg_rs485.Modules_RS485, module );
-    pthread_mutex_unlock ( &Cfg_rs485.synchro );
-    g_free(module);
-  }
-/**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  static void Decharger_tous_rs485 ( void  )
   { struct MODULE_RS485 *module;
+
+    pthread_mutex_lock ( &Cfg_rs485.synchro );
     while ( Cfg_rs485.Modules_RS485 )
      { module = (struct MODULE_RS485 *)Cfg_rs485.Modules_RS485->data;
-       Decharger_un_rs485 ( module );
+       Cfg_rs485.Modules_RS485 = g_slist_remove ( Cfg_rs485.Modules_RS485, module );
+       g_free(module);
      }
+    pthread_mutex_unlock ( &Cfg_rs485.synchro );
   }
 /**********************************************************************************************************/
-/* RS485_is_enable: Renvoi TRUE si au moins un des modules rs est actif                                    */
+/* RS485_is_actif: Renvoi TRUE si au moins un des modules rs est actif                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
@@ -583,11 +577,11 @@
     id_en_cours = 0;
     attente_reponse = FALSE;
 
-    while(Cfg_rs485.Thread_run == TRUE)                         /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE)                                       /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
-       if (Cfg_rs485.Thread_reload == TRUE)
+       if (Cfg_rs485.reload == TRUE)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
                     "Run_thread: Run_rs485: Reloading conf" );
           Decharger_tous_rs485();
@@ -602,28 +596,13 @@
              pthread_exit(GINT_TO_POINTER(-1));
            }
           Charger_tous_rs485();
-          Cfg_rs485.Thread_reload = FALSE;
+          Cfg_rs485.reload = FALSE;
         }
 
-       if (Cfg_rs485.Thread_sigusr1 == TRUE)
+       if (lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
                     "Run_thread: Run_rs485: SIGUSR1" );
-          Cfg_rs485.Thread_sigusr1 = FALSE;
-        }
-
-       if (Cfg_rs485.admin_del)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Run_rs485: Deleting module" );
-          module = Chercher_module_by_id ( Cfg_rs485.admin_del );
-          Decharger_un_rs485 ( module );
-          Cfg_rs485.admin_del = 0;
-        }
-
-       if (Cfg_rs485.admin_add)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Run_rs485: Adding module" );
-          /*Charger_un_rs485 ( Cfg_rs485.admin_add );*/
-          Cfg_rs485.admin_add = 0;
+          lib->Thread_sigusr1 = FALSE;
         }
 
        if (Cfg_rs485.admin_start)
@@ -638,7 +617,7 @@
                 pthread_exit(GINT_TO_POINTER(-1));
               }
            }
-          module = Chercher_module_by_id ( Cfg_rs485.admin_start );
+          module = Chercher_module_rs_485_by_id ( Cfg_rs485.admin_start );
           if (module) { module->started = 1; }
           Cfg_rs485.admin_start = 0;
         }
@@ -646,7 +625,7 @@
        if (Cfg_rs485.admin_stop)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                     "Run_thread: Run_rs485: Stopping module" );
-          module = Chercher_module_by_id ( Cfg_rs485.admin_stop );
+          module = Chercher_module_rs_485_by_id ( Cfg_rs485.admin_stop );
           if (module) module->started = 0;
           Deconnecter_rs485 ( module );
           Cfg_rs485.admin_stop = 0;

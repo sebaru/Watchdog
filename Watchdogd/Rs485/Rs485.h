@@ -88,13 +88,9 @@
   { struct LIBRAIRIE *lib;
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GSList *Modules_RS485;
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-    guint admin_del;                                                            /* Demande de deconnexion */
+    gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
-    guint admin_add;                                                            /* Demande de deconnexion */
     gint  fd;                                         /* File Descriptor de la connexion a la ligne RS485 */
     gchar port[80];                                                            /* Port d'accès a la RS485 */
   } Cfg_rs485;
@@ -102,5 +98,6 @@
  extern gboolean Retirer_rs485DB ( struct RS485DB *rs485 );
  extern gint Ajouter_rs485DB ( struct RS485DB *rs485 );
  extern gboolean Modifier_rs485DB( struct RS485DB *rs485 );
+ extern struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
