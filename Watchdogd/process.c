@@ -100,6 +100,19 @@
   { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
+    GSList *liste;
+
+    liste = Partage->com_msrv.Librairies;
+    while (liste)
+     { struct LIBRAIRIE *lib;
+       lib = (struct LIBRAIRIE *)liste->data;
+       if ( ! strcmp( lib->nom_fichier, nom_fichier ) )
+        { Info_c( Config.log, DEBUG_INFO,
+                  "Charger_librairie_par_fichier : Librairie already loaded", nom_fichier );
+          return(NULL);
+        }
+       liste=liste->next;
+     }
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
     if (!lib) { Info( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier MemoryAlloc failed" );
