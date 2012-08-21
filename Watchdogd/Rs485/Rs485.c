@@ -233,11 +233,11 @@
     return(rs485);
   }
 /**********************************************************************************************************/
-/* Charger_tous_RS485: Requete la DB pour charger les modules et les bornes rs485                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de modules trouvé                                                                    */
+/* Chercher_module_rs485_by_id: Recherche le module dont l'id est en parametre                            */
+/* Entrée: l'id du module                                                                                 */
+/* Sortie: le module, ou NULL si non trouvé                                                               */
 /**********************************************************************************************************/
- struct MODULE_RS485 *Chercher_module_rs_485_by_id ( gint id )
+ struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
   { struct MODULE_RS485 *module;
     GSList *liste;
     liste = Cfg_rs485.Modules_RS485;
@@ -299,6 +299,8 @@
                  "Charger_tous_RS485: id = %d, enable = %d", module->rs485.id, module->rs485.enable );
      }
     pthread_mutex_lock ( &Cfg_rs485.synchro );
+    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_DEBUG,
+              "Charger_tous_RS485: Test !" );
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
               "Charger_tous_RS485: %s module RS485 found  !", g_slist_length(Cfg_rs485.Modules_RS485) );
     pthread_mutex_unlock ( &Cfg_rs485.synchro );
@@ -617,7 +619,7 @@
                 pthread_exit(GINT_TO_POINTER(-1));
               }
            }
-          module = Chercher_module_rs_485_by_id ( Cfg_rs485.admin_start );
+          module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_start );
           if (module) { module->started = 1; }
           Cfg_rs485.admin_start = 0;
         }
@@ -625,7 +627,7 @@
        if (Cfg_rs485.admin_stop)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                     "Run_thread: Run_rs485: Stopping module" );
-          module = Chercher_module_rs_485_by_id ( Cfg_rs485.admin_stop );
+          module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_stop );
           if (module) module->started = 0;
           Deconnecter_rs485 ( module );
           Cfg_rs485.admin_stop = 0;

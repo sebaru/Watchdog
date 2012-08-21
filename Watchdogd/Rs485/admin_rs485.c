@@ -34,7 +34,7 @@
 /* Entrée: Le client destinataire                                                                         */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_rs485_list ( struct CLIENT_ADMIN *client )
+ static void Admin_rs485_list ( struct CLIENT_ADMIN *client )
   { GSList *liste_modules;
     gchar chaine[256];
 
