@@ -670,7 +670,8 @@
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 nbr_oct_lu = 0;
                 Deconnecter_rs485 ( module );
-                Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Run_thread: Run_rs485: module down", module->rs485.id );
+                Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
+                          "Run_thread: Run_rs485: module %03d down", module->rs485.id );
                 liste = liste->next;
                 continue;
               }

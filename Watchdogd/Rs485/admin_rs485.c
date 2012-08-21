@@ -52,7 +52,7 @@
 
        g_snprintf( chaine, sizeof(chaine),
                    " RS485[%02d] -> num=%02d, enable=%s, bit=%d, ea=%03d-%03d, e=%03d-%03d, s=%03d-%03d, sa=%03d-%03d\n"
-                   "              started=%s, requete=%d, retente=%d, next_get_ana=%d\n",
+                   "              started=%s, requete=%03ds ago, retente=in %03ds, next_get_ana=in %03ds\n",
                    module->rs485.id, module->rs485.num,
                    (module->rs485.enable ? "TRUE " : "FALSE"),
                    module->rs485.bit_comm,
@@ -60,7 +60,9 @@
                    module->rs485.e_min, module->rs485.e_max,
                    module->rs485.s_min, module->rs485.s_max, module->rs485.sa_min, module->rs485.sa_max,
                    (module->started      ? "TRUE " : "FALSE"),
-                   (gint)module->date_requete, (gint)module->date_retente, (gint)module->date_next_get_ana
+                   (Partage->top - (gint)module->date_requete)/10,
+                   (module->date_retente ? (Partage->top - (gint)module->date_retente)/10 : 0),
+                   (Partage->top - (gint)module->date_next_get_ana)/10
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
