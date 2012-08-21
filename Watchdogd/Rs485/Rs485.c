@@ -636,9 +636,10 @@
            }
         }
 
-       if (Cfg_rs485.Modules_RS485 == NULL )           /* Si pas de module référencés, on attend */
+       if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
+       pthread_mutex_lock ( &Cfg_rs485.synchro );                  /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
        while (liste)
         { module = (struct MODULE_RS485 *)liste->data;
@@ -654,7 +655,8 @@
                  }
                 else
                  { Envoyer_trame_want_inputANA( module, Cfg_rs485.fd );
-                   module->date_next_get_ana = Partage->top + RS485_TEMPS_UPDATE_IO_ANA;/* Prochain update ana dans 2 secondes */
+                                                                   /* Prochain update ana dans 2 secondes */
+                   module->date_next_get_ana = Partage->top + RS485_TEMPS_UPDATE_IO_ANA;
                  }
 
                 usleep(1);
@@ -664,7 +666,7 @@
               }
            }
           else
-           { if ( Partage->top - module->date_requete > 20 )                       /* Si la comm est niet */
+           { if ( Partage->top - module->date_requete >= 20 )                      /* Si la comm est niet */
               { module->date_retente = Partage->top + RS485_TEMPS_RETENTE;
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );
@@ -683,7 +685,7 @@
           FD_SET(Cfg_rs485.fd, &fdselect );
           tv.tv_sec = 1;
           tv.tv_usec= 0;
-          retval = select(Cfg_rs485.fd+1, &fdselect, NULL, NULL, &tv );             /* Attente d'un caractere */
+          retval = select(Cfg_rs485.fd+1, &fdselect, NULL, NULL, &tv );         /* Attente d'un caractere */
           if (retval>=0 && FD_ISSET(Cfg_rs485.fd, &fdselect) )
 	   { int bute, cpt;
              if (nbr_oct_lu<TAILLE_ENTETE)
@@ -722,6 +724,7 @@
               }
 	   }
         }                                                                           /* Fin du While liste */
+       pthread_mutex_unlock ( &Cfg_rs485.synchro );                /* Car utilisation de la liste chainée */
       }                                                                    /* Fin du while partage->arret */
     close(Cfg_rs485.fd);
     Decharger_tous_rs485();
