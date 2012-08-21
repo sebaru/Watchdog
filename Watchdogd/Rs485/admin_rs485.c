@@ -40,13 +40,14 @@
     while (Partage->com_rs485.Thread_reload) sched_yield();
     Write_admin ( client->connexion, " RS485 Reloading done\n" );
   }
+#endif
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_rs485_list: Envoi la liste des modules chargés au client d'admin                                 */
+/* Entrée: Le client destinataire                                                                         */
+/* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_rs485_list ( struct CLIENT_ADMIN *client )
-  { GList *liste_modules;
+  { GSList *liste_modules;
     gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules RS485\n" );
@@ -55,13 +56,14 @@
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
-    liste_modules = Partage->com_rs485.Modules_RS485;
+    liste_modules = Cfg_rs485.Modules_RS485;
+    pthread_mutex_lock ( &Cfg_rs485.synchro );
     while ( liste_modules )
      { struct MODULE_RS485 *module;
        module = (struct MODULE_RS485 *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " RS485[%02d] -> num=%d, enable=%s, bit=%d, ea=%03d-%03d, e=%03d-%03d, s=%03d-%03d, sa=%03d-%03d\n"
+                   " RS485[%02d] -> num=%02d, enable=%s, bit=%d, ea=%03d-%03d, e=%03d-%03d, s=%03d-%03d, sa=%03d-%03d\n"
                    "              started=%s, requete=%d, retente=%d, next_get_ana=%d\n",
                    module->rs485.id, module->rs485.num,
                    (module->rs485.enable ? "TRUE " : "FALSE"),
@@ -75,7 +77,9 @@
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
      }
+    pthread_mutex_unlock ( &Cfg_rs485.synchro );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Admin_rs485_del: Retire le capteur/module rs485 dont l'id est en parametre                           */
 /* Entrée: le client et l'id                                                                              */

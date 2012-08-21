@@ -549,7 +549,7 @@
     struct TRAME_RS485 Trame;
     struct timeval tv;
     fd_set fdselect;
-    GList *liste;
+    GSList *liste;
 
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );
     memset( &Cfg_rs485, 0, sizeof(Cfg_rs485) );                 /* Mise a zero de la structure de travail */
@@ -568,7 +568,8 @@
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Acces RS485 impossible, Thread down");
        Rs485_Liberer_config ();                         /* Lecture de la configuration logiciel du thread */
-       Cfg_rs485.lib->TID = 0;                            /* On indique au master que le thread est mort. */
+       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
+       lib->TID        = 0;                               /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
     else { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO, 
@@ -596,7 +597,8 @@
            { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
                        "Run_thread: Restart Acces RS485 impossible, terminé");
              Rs485_Liberer_config ();                   /* Lecture de la configuration logiciel du thread */
-             Cfg_rs485.lib->TID = 0;                      /* On indique au master que le thread est mort. */
+             lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
+             lib->TID        = 0;                         /* On indique au master que le thread est mort. */
              pthread_exit(GINT_TO_POINTER(-1));
            }
           Charger_tous_rs485();
