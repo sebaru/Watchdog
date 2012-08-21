@@ -666,7 +666,7 @@
               }
            }
           else
-           { if ( Partage->top - module->date_requete >= 20 )                      /* Si la comm est niet */
+           { if ( Partage->top - module->date_requete >= RS485_TEMPS_SEUIL_DOWN )  /* Si la comm est niet */
               { module->date_retente = Partage->top + RS485_TEMPS_RETENTE;
                 attente_reponse = FALSE;
                 memset (&Trame, 0, sizeof(struct TRAME_RS485) );

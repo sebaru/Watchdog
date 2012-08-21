@@ -38,7 +38,8 @@
  
  #define RS485_TEMPS_UPDATE_IO_ANA  10                                /* Get IO/ANA toutes les secondes ! */
 
- #define RS485_TEMPS_RETENTE        50    /* Tente de se raccrocher au module banni toutes les 5 secondes */
+ #define RS485_TEMPS_SEUIL_DOWN     20                  /* Temps avant de considérer un module comme DOWN */
+ #define RS485_TEMPS_RETENTE       200   /* Tente de se raccrocher au module banni toutes les 20 secondes */
 
  #define NOM_TABLE_MODULE_RS485   "rs485"
  #define TAILLE_ENTETE  6
