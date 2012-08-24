@@ -134,7 +134,7 @@ one_again:
     Connexion = NULL;
     Log ( _("Disconnected") );
     Client_en_cours.mode = INERTE;
-    Info( Config_cli.log, DEBUG_CONNEXION, "client en mode INERTE" );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode INERTE" );
     gnome_appbar_clear_stack( GNOME_APPBAR(Barre_status) );
     Effacer_pages();                                                      /* Efface les pages du notebook */
     Raz_progress();
@@ -155,7 +155,7 @@ one_again:
 /**********************************************************************************************************/
  gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille )
   { if ( Envoyer_reseau( Config_cli.log, Connexion, W_SERVEUR, tag, ss_tag, buffer, taille ) )
-     { Info( Config_cli.log, DEBUG_CONNEXION, "Deconnexion sur erreur envoi au serveur" );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Deconnexion sur erreur envoi au serveur" );
        Deconnecter_sale();
        Log ( _("Disconnected (server offline ?)") );
        return(FALSE);
@@ -176,12 +176,12 @@ one_again:
        
     if ( !(host = gethostbyname( Client_en_cours.serveur )) )                     /* On veut l'adresse IP */
      { Log( _("DNS failed") );
-       Info_c( Config_cli.log, DEBUG_CONNEXION,
-               _("Connecter_au_serveur: DNS failed"), Client_en_cours.serveur );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+                 _("Connecter_au_serveur: DNS failed %s"), Client_en_cours.serveur );
        return(FALSE);
      }
-    else Info( Config_cli.log, DEBUG_CONNEXION,
-               _("Connecter_au_serveur: DNS Request OK") );
+    else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                   _("Connecter_au_serveur: DNS Request OK %s"), Client_en_cours.serveur );
 
     src.sin_family = host->h_addrtype;
     memcpy( (char*)&src.sin_addr, host->h_addr, host->h_length );                 /* On recopie les infos */
@@ -189,39 +189,41 @@ one_again:
 
     if ( (connexion = socket( AF_INET, SOCK_STREAM, 0)) == -1)                          /* Protocol = TCP */
      { Log( _("Socket creation failed") );
-       Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: Socket creation failed") );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
+                 _("Connecter_au_serveur: Socket creation failed") );
        return(FALSE);
      }
-    else Info( Config_cli.log, DEBUG_CONNEXION,
+    else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
                _("Connecter_au_serveur: Socket creation OK") );
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
-     { Info_c( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: connexion refused by server"),
-               Config_cli.serveur );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+                 _("Connecter_au_serveur: connexion refused by server %s"), Config_cli.serveur );
        Log(_("connexion refused by server"));
        close(connexion);
        return(FALSE);
      }
-    else Info( Config_cli.log, DEBUG_CONNEXION,
-               _("Connecter_au_serveur: Connect OK") );
+    else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                   _("Connecter_au_serveur: Connect OK") );
 
     Connexion = Nouvelle_connexion( Config_cli.log, connexion,
                                     W_CLIENT, Config_cli.taille_bloc_reseau );
     if (!Connexion)
-     { Info( Config_cli.log, DEBUG_CONNEXION, _("Connecter_au_serveur: cannot create new connexion") );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
+                 _("Connecter_au_serveur: cannot create new connexion") );
        Deconnecter();
        return(FALSE);       
      }
 
     if ( Config_cli.ssl_crypt ) 
      { Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
-       Info( Config_cli.log, DEBUG_CONNEXION,
-              _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                 _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
        if ( ! Connecter_ssl() ) return(FALSE);                                 /* Gere les parametres SSL */
      }
 
     Client_en_cours.mode = ENVOI_IDENT;
-    Info( Config_cli.log, DEBUG_CONNEXION, "client en mode ENVOI_IDENT" );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ENVOI_IDENT" );
     Envoyer_identification();                                        /* Envoi l'identification au serveur */
 
     return(TRUE);

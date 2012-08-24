@@ -233,7 +233,7 @@
      { { "port", 'p',       POPT_ARG_INT,
          &port,             0, _("Port to listen to"), "PORT" },
        { "debug",'d',       POPT_ARG_INT,
-         &debug_level,      0, _("Debug level"), "LEVEL" },
+         &debug_level,      0, _("log level"), "LEVEL" },
        { "conffile", 'c',   POPT_ARG_STRING,
          &file,             0, _("Configuration file"), "FILE" },
        { "help", 'h',       POPT_ARG_NONE,
@@ -279,10 +279,10 @@
      }
 
     Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
-    if (port!=-1)        Config_cli.port        = port;                /* Priorite à la ligne de commande */
-    if (debug_level!=-1) Config_cli.debug_level = debug_level;
+    if (port!=-1)        Config_cli.port      = port;                  /* Priorite à la ligne de commande */
+    if (debug_level!=-1) Config_cli.log_level = debug_level;
 
-    Config_cli.log = Info_init( "Watchdog_client", Config_cli.debug_level );       /* Init msgs d'erreurs */
+    Config_cli.log = Info_init( "Watchdog_client", Config_cli.log_level );         /* Init msgs d'erreurs */
 
     Info( Config_cli.log, DEBUG_INFO, _("Start") );
     Print_config_cli( &Config_cli );

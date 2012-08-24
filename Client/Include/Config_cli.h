@@ -39,7 +39,8 @@
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
     gchar serveur[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
     gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
-    guint debug_level;                                                    /* Niveau de debug du programme */
+    guint log_override;                                     /* Pour afficher tous les informations de log */
+    guint log_level;                                                      /* Niveau de debug du programme */
     guint max_login_failed;                                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
   };
@@ -48,9 +49,8 @@
  #define DEFAUT_USER                    "supervision"
  #define DEFAUT_SERVEUR                 "localhost"
  #define DEFAUT_PORT                    5558
- #define DEFAUT_DEBUG_LEVEL             (~0)
+ #define DEFAUT_LOG_LEVEL               LOG_INFO
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
- #define DEFAUT_MAX_LOGIN_FAILED        3
 
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config_cli ( struct CONFIG_CLI *config, char *fichier_config );

@@ -39,7 +39,6 @@
 /**********************************************************************************************************/
  void Lire_config_cli ( struct CONFIG_CLI *config_cli, char *fichier_config_cli )
   { gchar *chaine, *fichier;
-    gint debug;
     GKeyFile *gkf;
 
     if (!config_cli) return;
@@ -49,6 +48,8 @@
 
     gkf = g_key_file_new();
 
+    config_cli->log_level = DEFAUT_LOG_LEVEL;                                 /* Niveau de log par défaut */
+    config_cli->log_override = TRUE;
     if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, NULL))
      {
 
@@ -73,71 +74,21 @@
        config_cli->port              = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!config_cli->port) config_cli->port = DEFAUT_PORT;
 
-/********************************************* Partie DEBUG ***********************************************/
-       config_cli->debug_level = 0;
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SIGNAUX", NULL );
-       if (debug) config_cli->debug_level += DEBUG_SIGNAUX;
+/********************************************* Partie LOG *************************************************/
+       chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
+       if (chaine)
+        {      if ( ! strcmp ( chaine, "debug"     ) ) config_cli->log_level = LOG_DEBUG;
+          else if ( ! strcmp ( chaine, "info  "    ) ) config_cli->log_level = LOG_INFO;
+          else if ( ! strcmp ( chaine, "warning"   ) ) config_cli->log_level = LOG_WARNING;
+          else if ( ! strcmp ( chaine, "error"     ) ) config_cli->log_level = LOG_ERR;
+          else if ( ! strcmp ( chaine, "critical"  ) ) config_cli->log_level = LOG_CRIT;
+          else if ( ! strcmp ( chaine, "emergency" ) ) config_cli->log_level = LOG_EMERG;
+          g_free(chaine);
+        }
 
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_DB", NULL );
-       if (debug) config_cli->debug_level += DEBUG_DB;
+       config_cli->log_override = g_key_file_get_boolean ( gkf, "DEBUG", "log_all", NULL );
 
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CONFIG", NULL );
-       if (debug) config_cli->debug_level += DEBUG_CONFIG;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_USER", NULL );
-       if (debug) config_cli->debug_level += DEBUG_USER;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CRYPTO", NULL );
-       if (debug) config_cli->debug_level += DEBUG_CRYPTO;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_INFO", NULL );
-       if (debug) config_cli->debug_level += DEBUG_INFO;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SERVEUR", NULL );
-       if (debug) config_cli->debug_level += DEBUG_SERVEUR;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CDG", NULL );
-       if (debug) config_cli->debug_level += DEBUG_CDG;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_NETWORK", NULL );
-       if (debug) config_cli->debug_level += DEBUG_NETWORK;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ARCHIVE", NULL );
-       if (debug) config_cli->debug_level += DEBUG_ARCHIVE;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CONNEXION", NULL );
-       if (debug) config_cli->debug_level += DEBUG_CONNEXION;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_DLS", NULL );
-       if (debug) config_cli->debug_level += DEBUG_DLS;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_MODBUS", NULL );
-       if (debug) config_cli->debug_level += DEBUG_MODBUS;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ADMIN", NULL );
-       if (debug) config_cli->debug_level += DEBUG_ADMIN;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ONDULEUR", NULL );
-       if (debug) config_cli->debug_level += DEBUG_ONDULEUR;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SMS", NULL );
-       if (debug) config_cli->debug_level += DEBUG_SMS;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_AUDIO", NULL );
-       if (debug) config_cli->debug_level += DEBUG_AUDIO;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CAMERA", NULL );
-       if (debug) config_cli->debug_level += DEBUG_CAMERA;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_COURBE", NULL );
-       if (debug) config_cli->debug_level += DEBUG_COURBE;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ALL", NULL );
-       if (debug) config_cli->debug_level = ~0;
-
-       if (!config_cli->debug_level) config_cli->debug_level = DEFAUT_DEBUG_LEVEL;          /* Par défaut */
      }
-    else { config_cli->debug_level = DEFAUT_DEBUG_LEVEL; }                                  /* Par défaut */
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
@@ -146,11 +97,19 @@
 /**********************************************************************************************************/
  void Print_config_cli ( struct CONFIG_CLI *config_cli )
   { if (!config_cli->log) return;
-    Info_c( config_cli->log, DEBUG_CONFIG, "Config user                 ", config_cli->user );
-    Info_c( config_cli->log, DEBUG_CONFIG, "Config serveur              ", config_cli->serveur );
-    Info_n( config_cli->log, DEBUG_CONFIG, "Config port                 ", config_cli->port );
-    Info_n( config_cli->log, DEBUG_CONFIG, "Config ssl crypt            ", config_cli->ssl_crypt );
-    Info_n( config_cli->log, DEBUG_CONFIG, "Config debug level          ", config_cli->debug_level );
-    Info_n( config_cli->log, DEBUG_CONFIG, "Config taille_bloc_reseau   ", config_cli->taille_bloc_reseau );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config user ------------- %s", config_cli->user );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config serveur ---------- %s", config_cli->serveur );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config port ------------- %d", config_cli->port );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config ssl crypt -------- %d", config_cli->ssl_crypt );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config log_level -------- %d", config_cli->log_level );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config log_override ----- %d", config_cli->log_override );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config taille_bloc_reseau %d", config_cli->taille_bloc_reseau );
   }
 /*--------------------------------------------------------------------------------------------------------*/
