@@ -62,7 +62,7 @@
                    (module->started      ? "TRUE " : "FALSE"),
                    (Partage->top - module->date_requete)/10,
                    (module->date_retente ? (Partage->top - module->date_retente)/10 : 0),
-                   (Partage->top - module->date_next_get_ana)/10
+                   (module->date_next_get_ana - Partage->top)/10
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;
