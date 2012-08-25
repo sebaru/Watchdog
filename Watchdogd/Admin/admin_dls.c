@@ -110,8 +110,9 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_dls_start: impossible d'ouvrir la Base de données",
-               Config.db_database );
+     { Info_new( Config.log, FALSE, LOG_WARNING,
+                 "Admin_dls_start: impossible d'ouvrir la Base de données %s",
+                 Config.db_database );
        return;
      }
 
@@ -145,8 +146,9 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_c( Config.log, DEBUG_ADMIN, "Admin_dls_stop: impossible d'ouvrir la Base de données",
-               Config.db_database );
+     { Info_new( Config.log, FALSE, LOG_WARNING,
+                 "Admin_dls_stop: impossible d'ouvrir la Base de données %s",
+                 Config.db_database );
        return;
      }
 

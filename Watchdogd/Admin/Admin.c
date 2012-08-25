@@ -49,31 +49,31 @@
     gint opt, ecoute;
 
     if ( (ecoute = socket ( AF_UNIX, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
-     { Info_c( Config.log, DEBUG_ADMIN, "Socket failure...", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, FALSE, LOG_ERR, "Socket failure (%s)", strerror(errno) ); return(-1); }
 
     opt = 1;
     if ( setsockopt( ecoute, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE,
                      (char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_ADMIN, "Set option failed", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, FALSE, LOG_ERR, "Set option failed (%s)", strerror(errno) ); return(-1); }
 
     opt = 16834;
     if ( setsockopt( ecoute, SOL_SOCKET, SO_SNDBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_ADMIN, "SO_SNDBUF failed", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, FALSE, LOG_ERR, "SO_SNDBUF failed (%s)", strerror(errno) ); return(-1); }
     if ( setsockopt( ecoute, SOL_SOCKET, SO_RCVBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_c( Config.log, DEBUG_ADMIN, "SO_RCVBUF failed", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, FALSE, LOG_ERR, "SO_RCVBUF failed (%s)", strerror(errno) ); return(-1); }
 
     memset( &local, 0, sizeof(local) );
     unlink(NOM_SOCKET);
     local.sun_family = AF_UNIX;
     g_snprintf( local.sun_path, sizeof(local.sun_path), NOM_SOCKET );
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
-     { Info_c( Config.log, DEBUG_ADMIN, "Bind failure...", strerror(errno) );
+     { Info_new( Config.log, FALSE, LOG_ERR, "Bind failure (%s)", strerror(errno) );
        close(ecoute);
        return(-1);
      }
 
     if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
-     { Info_c( Config.log, DEBUG_ADMIN, "Listen failure...", strerror(errno));
+     { Info_new( Config.log, FALSE, LOG_ERR, "Listen failure (%s)", strerror(errno));
        close(ecoute);
        return(-1);
      }
@@ -88,7 +88,7 @@
  static void Desactiver_ecoute_admin ( void )
   { close (Fd_ecoute);
     Fd_ecoute = 0;
-    Info( Config.log, DEBUG_ADMIN, "Desactivation socket" );
+    Info_new( Config.log, FALSE, LOG_NOTICE, "Desactivation socket" );
   }
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin en parametre                                                  */
@@ -98,7 +98,7 @@
  static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
   { Write_admin( client->connexion, "\n - Disconnected - \n" );
     close ( client->connexion );
-    Info_n( Config.log, DEBUG_ADMIN, "Connexion terminée ID", client->connexion );
+    Info_new( Config.log, FALSE, LOG_INFO, "Connexion terminée ID=%d", client->connexion );
     g_free(client);
     Clients = g_list_remove ( Clients, client );
   }
@@ -114,11 +114,11 @@
  
     taille_distant = sizeof(distant);
     if ( (id=accept( ecoute, (struct sockaddr *)&distant, &taille_distant )) != -1)         /* demande ?? */
-     { Info_n( Config.log, DEBUG_ADMIN, "Accueillir_un_admin: Connexion wanted. ID", id );
+     { Info_new( Config.log, FALSE, LOG_INFO, "Accueillir_un_admin: Connexion wanted. ID=%d", id );
 
        client = g_malloc0( sizeof(struct CLIENT_ADMIN) );/* On alloue donc une nouvelle structure cliente */
-       if (!client) { Info_n ( Config.log, DEBUG_ADMIN,
-                               "SSRV: Accueillir_un_admin: Not enought memory to connect", id );
+       if (!client) { Info_new( Config.log, FALSE, LOG_WARNING, 
+                               "Accueillir_un_admin: Not enought memory to connect id %d", id );
                       close(id);
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
                     }
@@ -128,7 +128,7 @@
        fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
 
        Clients = g_list_append( Clients, client );
-       Info_n( Config.log, DEBUG_ADMIN, "Connexion acceptée ID", id);
+       Info_new( Config.log, FALSE, LOG_INFO, "Connexion acceptée ID=%d", id);
        return(TRUE);
      }
     return(FALSE);
@@ -158,7 +158,7 @@
      { ligne[taille] = 0;
 
        client->last_use = Partage->top;
-       Info_c( Config.log, DEBUG_ADMIN, "Admin : received command", ligne );
+       Info_new( Config.log, FALSE, LOG_NOTICE, "Admin : received command %s", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
             if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + 7 ); }
@@ -192,14 +192,14 @@
  void Run_admin ( void )
   { prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_ADMIN, "Admin: demarrage" );
+    Info_new( Config.log, FALSE, LOG_NOTICE, "Run_admin: demarrage" );
 
     Fd_ecoute = Activer_ecoute_admin ();
     if ( Fd_ecoute < 0 )
-     { Info( Config.log, DEBUG_ADMIN, "ADMIN: Run_admin: Unable to open Socket -> Stop !" );
+     { Info_new( Config.log, FALSE, LOG_ERR, "Run_admin: Unable to open Socket -> Stop !" );
        Partage->com_admin.TID = 0;                        /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
-     } else Info( Config.log, DEBUG_ADMIN, "ADMIN: Run_admin: En ecoute !" );
+     } else Info_new( Config.log, FALSE, LOG_INFO, "Run_admin: En ecoute !" );
 
     Clients = NULL;                                             /* Initialisation des variables du thread */
 
@@ -207,12 +207,12 @@
     while(Partage->com_admin.Thread_run == TRUE)                         /* On tourne tant que necessaire */
      {
        if (Partage->com_admin.Thread_reload)                                        /* On a recu RELOAD ? */
-        { Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: RELOAD" );
+        { Info_new( Config.log, FALSE, LOG_NOTICE, "Run_admin: RELOAD" );
           Partage->com_admin.Thread_reload = FALSE;
         }
 
        if (Partage->com_admin.Thread_sigusr1)                                     /* On a recu sigusr1 ?? */
-        { Info( Config.log, DEBUG_INFO, "ADMIN: Run_admin: SIGUSR1" );
+        { Info_new( Config.log, FALSE, LOG_NOTICE, "Run_admin: SIGUSR1" );
           Partage->com_admin.Thread_sigusr1 = FALSE;
         }
 
@@ -248,7 +248,7 @@
      }
 
     Desactiver_ecoute_admin ();
-    Info_n( Config.log, DEBUG_ADMIN, "Admin: Run_admin: Down", pthread_self() );
+    Info_new( Config.log, FALSE, LOG_NOTICE, "Run_admin: Down", pthread_self() );
     Partage->com_admin.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
