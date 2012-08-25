@@ -175,7 +175,7 @@
        if ( ! strcmp ( lib->admin_prompt, prompt ) )
         { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: trying to unload", lib->nom_fichier );
 
-          Stop_librairie(lib );
+          Stop_librairie(lib);
 
           pthread_mutex_destroy( &lib->synchro );
           dlclose( lib->dl_handle );

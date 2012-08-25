@@ -36,7 +36,7 @@
  #define RS485_FCT_SORTIE_TOR 0x04
  #define RS485_FCT_PING       0xFF
  
- #define RS485_TEMPS_UPDATE_IO_ANA  10                                /* Get IO/ANA toutes les secondes ! */
+ #define RS485_TEMPS_UPDATE_IO_ANA  50                              /* Get IO/ANA toutes les 5 secondes ! */
 
  #define RS485_TEMPS_SEUIL_DOWN     20                  /* Temps avant de considérer un module comme DOWN */
  #define RS485_TEMPS_RETENTE       200   /* Tente de se raccrocher au module banni toutes les 20 secondes */
