@@ -44,7 +44,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "Charger_cpt_imp: Connexion DB failed" );
+     { Info_new( Config.log, FALSE, LOG_ERR, "Charger_cpt_imp: Connexion DB failed" );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -65,7 +65,7 @@
           Partage->ci[cpt_imp->num].val_en_cours2 = Partage->ci[cpt_imp->num].cpt_impdb.valeur;   /* Init */
         }
        else
-        { Info_n( Config.log, DEBUG_INFO, "Charger_cpt_imp: cpt_imp->num out of range", cpt_imp->num ); }
+        { Info_new( Config.log, FALSE, LOG_WARNING, "Charger_cpt_imp: cpt_imp->num (%d) out of range", cpt_imp->num ); }
        g_free(cpt_imp);
      }
   }
@@ -117,7 +117,7 @@
      }
 
     cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
-    if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
+    if (!cpt_imp) Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
      { cpt_imp->id_mnemo = atoi(db->row[0]);
        cpt_imp->valeur   = atof(db->row[1]);
@@ -150,12 +150,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_cpt_impDB: Cpt_imp non trouvé dans la BDD", id );
+       Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cpt_impDB: Cpt_imp (%d) not found", id );
        return(NULL);
      }
 
     cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
-    if (!cpt_imp) Info( log, DEBUG_INFO, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
+    if (!cpt_imp) Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
      { cpt_imp->id_mnemo = atoi(db->row[0]);
        cpt_imp->valeur   = atof(db->row[1]);
@@ -177,7 +177,7 @@
 
     unite = Normaliser_chaine ( log, cpt_imp->unite );                   /* Formatage correct des chaines */
     if (!unite)
-     { Info( log, DEBUG_SERVEUR, "Modifier_cpt_impDB: Normalisation unite impossible" );
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Modifier_cpt_impDB: Normalisation unite impossible" );
        return(FALSE);
      }
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

@@ -70,7 +70,7 @@
      }
 
     cpth = (struct CPTH_DB *)g_malloc0( sizeof(struct CPTH_DB) );
-    if (!cpth) Info( log, DEBUG_INFO, "Rechercher_cpthDB_suite: Erreur allocation mémoire" );
+    if (!cpth) Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cpthDB_suite: Erreur allocation mémoire" );
     else
      { cpth->id_mnemo = atoi(db->row[0]);
        cpth->valeur   = atoi(db->row[1]);
@@ -88,7 +88,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "Charger_cpth: Connexion DB failed" );
+     { Info_new( Config.log, FALSE, LOG_ERR, "Charger_cpth: Connexion DB failed" );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -107,7 +107,7 @@
        if (cpth->num < NBR_COMPTEUR_H)
         { memcpy ( &Partage->ch[cpth->num].cpthdb, cpth, sizeof(struct CPTH_DB) ); }
        else
-        { Info_n( Config.log, DEBUG_INFO, "Charger_cpth: cpth->num out of range", cpth->num ); }
+        { Info_new( Config.log, FALSE, LOG_WARNING, "Charger_cpth: cpth->num (%d) out of range", cpth->num ); }
        g_free(cpth);
      }
     Libere_DB_SQL( Config.log, &db );

@@ -59,20 +59,20 @@
     
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
-       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation objet impossible" );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
-       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -121,7 +121,7 @@
      }
 
     camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
-    if (!camera) Info( log, DEBUG_CAMERA, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
+    if (!camera) Info_new( Config.log, FALSE, LOG_ERR, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &camera->objet,    db->row[4], sizeof(camera->objet    ) );
        memcpy( &camera->location, db->row[5], sizeof(camera->location  ) );
@@ -155,13 +155,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_CAMERA, "Rechercher_cameraDB: CAMERA non trouvé dans la BDD", id );
+       Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cameraDB: CAMERA %d not found", id );
        return(NULL);
      }
 
     camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera)
-     { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB: Mem error" ); }
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cameraDB: Mem error" ); }
     else
      { memcpy( &camera->objet,    db->row[3], sizeof(camera->objet    ) );
        memcpy( &camera->location, db->row[4], sizeof(camera->location  ) );
@@ -185,20 +185,20 @@
 
     location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
     objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
-       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation objet impossible" );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
-       Info( log, DEBUG_CAMERA, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation libelle impossible" );
        return(-1);
      }
 
@@ -240,7 +240,7 @@
 
     camera = Rechercher_cameraDB( log, db, atoi(db->row[0]) );
     if (!camera)
-     { Info( log, DEBUG_CAMERA, "Rechercher_cameraDB_motion: Mem error" );
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cameraDB_motion: Mem error" );
        return(NULL);
      }
 
@@ -261,7 +261,7 @@
 
     do { camera = Rechercher_cameraDB_motion ( log, db );
          if (camera)
-          { Info_n( log, DEBUG_CAMERA, "Camera_check_motion: Mise a un du bit M", camera->bit );
+          { Info_new( Config.log, FALSE, LOG_INFO, "Camera_check_motion: Mise a un du bit M%03d", camera->bit );
             Envoyer_commande_dls ( camera->bit ); 
             g_free(camera);
           }
