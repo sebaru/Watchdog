@@ -115,8 +115,8 @@
        Partage->com_arch.taille_arch--;
        pthread_mutex_unlock( &Partage->com_arch.synchro );
        Ajouter_archDB ( Config.log, db, arch );
-       g_free(arch);
        Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: archive saved" );
+       g_free(arch);
      }
     Libere_DB_SQL( Config.log, &db );
     Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Down", pthread_self() );

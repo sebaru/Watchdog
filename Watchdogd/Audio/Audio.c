@@ -177,6 +177,7 @@
 /**********************************************************************************************************/
  void Run_audio ( void )
   { struct CMD_TYPE_MESSAGE *msg;
+    static gboolean audio_stop = TRUE;
     struct DB *db;
     guint num;
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -210,9 +211,14 @@
         }
 
        if (!Partage->com_audio.liste_audio)                               /* Si pas de message, on tourne */
-        { sched_yield();
+        { if (Partage->com_audio.last_audio + 100 < Partage->top)
+           { if (audio_stop == TRUE)
+              { audio_stop = FALSE;
+                Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );/* Positionné quand il n'y a plus de diffusion audio*/
+              }
+           } else audio_stop = TRUE;
+          sched_yield();
           sleep(1);
-          Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );/* Positionné quand il n'y a plus de diffusion audio*/
           continue;
         }
 
