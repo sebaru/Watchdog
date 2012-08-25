@@ -104,7 +104,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(type,num,num_plugin,acronyme,libelle) VALUES "
+                "INSERT INTO %s(type,num,num_plugin,acronyme,libelle,command_text) VALUES "
                 "(%d,%d,%d,'%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
                 mnemo->num, mnemo->num_plugin, acro, libelle, command_text );
     g_free(libelle);
