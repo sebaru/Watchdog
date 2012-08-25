@@ -115,9 +115,9 @@
        if ( (lib = Charger_librairie_par_fichier( NULL, chaine )) )/* Chargement de la librairie dynamique */
         { g_snprintf( chaine, sizeof(chaine), " Library %s loaded\n", thread );
           if (Start_librairie(lib))
-           { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt ); }
+           { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", thread ); }
            else
-           { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
+           { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", thread ); }
         }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while loading library %s\n", thread ); }
