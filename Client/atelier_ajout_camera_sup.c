@@ -165,8 +165,7 @@
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_camera_sup->syn_id );
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup)
-     { Info( Config_cli.log, DEBUG_INFO, "Afficher_camera_sup_atelier: not enought memory" );
-       return;
+     { return;
      }
 
     memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );

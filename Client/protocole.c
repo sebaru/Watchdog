@@ -105,7 +105,8 @@
        switch ( Reseau_tag(connexion) )
         { case TAG_HISTO    : Gerer_protocole_histo_connecte ( connexion ); break;
           case TAG_CONNEXION: if (Reseau_ss_tag(connexion) == SSTAG_SERVEUR_CLI_VALIDE)
-                               { Info( Config_cli.log, DEBUG_CONNEXION, "Client en VALIDE" );
+                               { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                                           "Gerer_protocole : Client en mode VALIDE" );
                                  Client_en_cours.mode = VALIDE;
                                }
                               break;
@@ -134,7 +135,7 @@
     if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
      { printf("Recu erreur\n");
        switch( recu )
-        { case RECU_ERREUR_CONNRESET: Info( Config_cli.log, DEBUG_NETWORK,
+        { case RECU_ERREUR_CONNRESET: Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                                             "Ecouter_serveur: Reset connexion" );
                                       break;
         }

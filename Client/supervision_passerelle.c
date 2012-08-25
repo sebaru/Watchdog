@@ -83,8 +83,7 @@
     if (!(infos && infos->Trame)) return;
     pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!pass)
-     { Info( Config_cli.log, DEBUG_INFO, "Afficher_pass_supervision: not enought memory" );
-       return;
+     { return;
      }
 
     memcpy( pass, rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );

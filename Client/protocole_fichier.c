@@ -72,7 +72,8 @@
              { struct CMD_VERSION *cmd_version;
                cmd_version = (struct CMD_VERSION *)connexion->donnees;
                Changer_version_donnees( Config_cli.log, cmd_version->version );
-               Info_n( Config_cli.log, DEBUG_CONNEXION, "Nouvelle version données", cmd_version->version );
+               Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                        "Nouvelle version données %d", cmd_version->version );
              }
             break;
      }

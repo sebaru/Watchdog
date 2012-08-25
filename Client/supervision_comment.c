@@ -54,8 +54,7 @@
     if (!(infos && infos->Trame)) { printf("test\n"); return; }
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
-     { Info( Config_cli.log, DEBUG_INFO, "Afficher_comment_supervision: not enought memory" );
-       return;
+     { return;
      }
 
     memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );

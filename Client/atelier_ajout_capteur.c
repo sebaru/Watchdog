@@ -233,8 +233,7 @@
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_capteur->syn_id );
     capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur)
-     { Info( Config_cli.log, DEBUG_INFO, "Afficher_capteur_atelier: not enought memory" );
-       return;
+     { return;
      }
 
     memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );

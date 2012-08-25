@@ -54,8 +54,7 @@
     if (!(infos && infos->Trame)) return;
     capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur)
-     { Info( Config_cli.log, DEBUG_INFO, "Afficher_capteur_supervision: not enought memory" );
-       return;
+     { return;
      }
 
     memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );

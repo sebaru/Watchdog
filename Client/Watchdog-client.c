@@ -203,10 +203,10 @@
      { case SIGINT :
        case SIGTERM: Fermer_client(); break;
        case SIGPIPE: Deconnecter(); break;
-       case SIGIO  : Info_n( Config_cli.log, DEBUG_SIGNAUX, "Signal IO !", num );
+       case SIGIO  : Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Signal IO %d !", num );
                      Ecouter_serveur();
                      break;
-       default: Info_n( Config_cli.log, DEBUG_SIGNAUX, "Signal non gere", num );
+       default: Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Signal non gere %d !", num );
      }
     printf("Fin traitement signaux\n");
   }
@@ -284,13 +284,13 @@
 
     Config_cli.log = Info_init( "Watchdog_client", Config_cli.log_level );         /* Init msgs d'erreurs */
 
-    Info( Config_cli.log, DEBUG_INFO, _("Start") );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
     Print_config_cli( &Config_cli );
 
     if (Config_cli.ssl_crypt)
      { Ssl_ctx = Init_ssl();
        if (!Ssl_ctx)
-        { Info( Config_cli.log, DEBUG_CRYPTO, _("Can't initialise SSL") ); }
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, _("Main : Can't initialise SSL") ); }
      } else Ssl_ctx = NULL;
     
     sig.sa_handler = Traitement_signaux;
@@ -313,7 +313,7 @@
 
     if (Client_en_cours.gids) g_list_free(Client_en_cours.gids);
     if (Config_cli.ssl_crypt) SSL_CTX_free(Ssl_ctx);
-    Info( Config_cli.log, DEBUG_INFO, _("Stopped") );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, _("Main : Stopped") );
     exit(0);
   }
 /*--------------------------------------------------------------------------------------------------------*/

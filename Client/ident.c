@@ -57,6 +57,7 @@
 
     Log ( _("Waiting for authorization") );
     Client_en_cours.mode = ATTENTE_AUTORISATION;
-    Info_c( Config_cli.log, DEBUG_CONNEXION, "client en mode ATTENTE_AUTORISATION version", ident.version );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+              "Client en mode ATTENTE_AUTORISATION version %d", ident.version );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -219,8 +219,7 @@
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_comment->syn_id );
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
-     { Info( Config_cli.log, DEBUG_INFO, "Afficher_comment_atelier: not enought memory" );
-       return;
+     { return;
      }
 
     memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );

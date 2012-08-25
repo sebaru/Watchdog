@@ -95,7 +95,8 @@
                gnome_appbar_push( GNOME_APPBAR(Barre_status), chaine );
                Log( _("Connected") );
                Client_en_cours.mode = CONNECTE;
-               Info( Config_cli.log, DEBUG_CONNEXION, "Client en mode CONNECTE" );
+               Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                         "Gerer_protocole_connexion : Client en mode CONNECTE" );
              }
             break;
      }
