@@ -57,12 +57,13 @@
     SSL_library_init();                                             /* Init SSL et PRNG: number générator */
     while(!RAND_status())
      { RAND_load_file( "/dev/urandom", 256 );
-       Info( Config_cli.log, DEBUG_INFO, "Ajout RandADD" );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Init_ssl : Ajout RandADD" );
      }
 
     ssl_ctx = SSL_CTX_new ( SSLv23_client_method() );                       /* Création d'un contexte SSL */
     if (!ssl_ctx)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "SSL_CTX_new", ERR_error_string( ERR_get_error(), NULL ) );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
+                 "Init_ssl : Error creation SSL_CTX_new %s", ERR_error_string( ERR_get_error(), NULL ) );
        return( NULL );
      }
 
@@ -70,8 +71,9 @@
 
     retour = SSL_CTX_load_verify_locations( ssl_ctx, FICHIER_CERTIF_CA, NULL );
     if (retour != 1)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "load verify locations", ERR_error_string( ERR_get_error(), NULL ) );
-       Info_c( Config_cli.log, DEBUG_CRYPTO, "failed open file certif ca", FICHIER_CERTIF_CA );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Init_ssl : load verify locations error (%s, file %s)",
+                 ERR_error_string( ERR_get_error(), NULL ), FICHIER_CERTIF_CA );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
@@ -81,41 +83,47 @@
                                                                                   /* Certificat du client */
     fd = fopen( FICHIER_CERTIF_CLIENT, "r" );
     if (!fd)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "failed open file certif", FICHIER_CERTIF_CLIENT );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Init_ssl : failed to open file certif %s", FICHIER_CERTIF_CLIENT );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
     certif = PEM_read_X509( fd, NULL, NULL, NULL );                              /* Lecture du certificat */
     fclose(fd);
     if (!certif)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "certif loading failed", FICHIER_CERTIF_CLIENT );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Init_ssl : Certif loading failed %s", FICHIER_CERTIF_CLIENT );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
 
     retour = SSL_CTX_use_certificate( ssl_ctx, certif );
     if (retour != 1)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "use certificate file", ERR_error_string( ERR_get_error(), NULL ) );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                 "Init_ssl : Use certificate error (%s)", ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
-    Info_c( Config_cli.log, DEBUG_CRYPTO, "use certificate", Nom_certif(certif) );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+              "Init_ssl : Use of certificate %s", Nom_certif(certif) );
                                                                                  /* Clef privée du client */
     retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, FICHIER_CERTIF_CLEF_CLIENT, SSL_FILETYPE_PEM );
     if (retour != 1)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "use RSAPrivate key", ERR_error_string( ERR_get_error(), NULL ) );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Init_ssl : Error Use RSAPrivate key (%s)", ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
 
     retour = SSL_CTX_check_private_key( ssl_ctx );                         /* Verification du certif/clef */
     if (retour != 1)
-     { Info_c( Config_cli.log, DEBUG_CRYPTO, "check private key", ERR_error_string( ERR_get_error(), NULL ) );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Init_ssl : check private key failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
 
-    Info( Config_cli.log, DEBUG_INFO, "SSL initialisation ok" );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "SSL initialisation ok" );
     return(ssl_ctx);
   }  
 /**********************************************************************************************************/
@@ -130,12 +138,12 @@
      { Connexion->ssl = SSL_new( Ssl_ctx );                                  /* Instanciation du contexte */
 
        if (Connexion->ssl)                                                    /* Si réussite d'allocation */
-        { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_new OK" );
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new OK" );
           SSL_set_fd( Connexion->ssl, Connexion->socket );
           SSL_set_connect_state( Connexion->ssl );                               /* Nous sommes un client */
         }
        else
-        { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_new failed" );
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new failed" );
           Log( "Impossible de creer le contexte SSL" );
           Deconnecter();
           return(FALSE);
@@ -146,40 +154,38 @@ encore:
     if (retour<=0)
      { retour = SSL_get_error( Connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
-        { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_connect need more data" );
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Connecter_ssl: SSL_connect need more data" );
           /*sleep(1);*/
           goto encore;
         }
        
-       Info_n( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_connect get error", retour );
-       Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: SSL_connect",
-                                             ERR_error_string( ERR_get_error(), NULL ) );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Connecter_ssl: SSL_connect get error %d (%s)",
+                 retour, ERR_error_string( ERR_get_error(), NULL ) );
      }
                           /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats */
     certif = SSL_get_peer_certificate( Connexion->ssl );             /* On prend le certificat du serveur */
     if (!certif)
-     { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: no certificate received" );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Connecter_ssl: no certificate received" );
        Log( "Aucun certificat reçu" );
        Deconnecter();
        return(FALSE);
      }
-    Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: certificate received" );
-
-    Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: algo crypto",
-                                          (gchar *) SSL_get_cipher_name( Connexion->ssl ) );
-    Info_n( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: longueur clef",
-                                          SSL_get_cipher_bits( Connexion->ssl, NULL ) );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
+              "Connecter_ssl: certificate received. Algo=%s, keylength=%s",
+              (gchar *) SSL_get_cipher_name( Connexion->ssl ), SSL_get_cipher_bits( Connexion->ssl, NULL ) );
 
     retour = SSL_get_verify_result( Connexion->ssl );                       /* Verification du certificat */
     if ( retour != X509_V_OK )                                      /* Si erreur, on se deconnecte presto */
-     { Info( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: unauthorized certificate" );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, "Connecter_ssl: unauthorized certificate" );
        Log( "Impossible de vérifier le certificat" );
        Deconnecter();
        return(FALSE);
      }
 
-    Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: partenaire", Nom_certif ( certif ) );
-    Info_c( Config_cli.log, DEBUG_CRYPTO, "Connecter_ssl: signataire", Nom_certif_signataire ( certif ) );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
+              "Connecter_ssl: partenaire %s, signataire %s",
+              Nom_certif ( certif ), Nom_certif_signataire ( certif ) );
         return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/
