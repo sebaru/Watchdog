@@ -47,7 +47,7 @@
     pthread_mutex_unlock( &Partage->com_audio.synchro );
 
     if (taille > 150)
-     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Ajouter_audio: DROP audio (taille>150)", num);
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_audio: DROP audio (taille>150) %d", num);
        return;
      }
 
@@ -63,18 +63,18 @@
  static void Jouer_wav ( gchar *fichier )
   { gint pid;
 
-    Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: Envoi d'un wav", fichier );
+    Info_new( Config.log, FALSE, LOG_INFO, "Jouer_wav: Envoi d'un wav %s", fichier );
     pid = fork();
     if (pid<0)
-     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: Lancement APLAY failed", pid ); }
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Jouer_wav: APLAY fork failed pid=%d", pid ); }
     else if (!pid)
      { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
-       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: Lancement APLAY failed", pid );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Jouer_wav: Lancement APLAY failed pid=%d", pid );
        _exit(0);
      }
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: waiting for APLAY to finish pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "Jouer_wav: waiting for APLAY to finish pid=%d", pid );
     wait4(pid, NULL, 0, NULL );
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_wav: APLAY finished pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "Jouer_wav: APLAY finished pid=%d", pid );
   }
 /**********************************************************************************************************/
 /* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                       */
@@ -87,23 +87,24 @@
 
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
-    if (fd_cible < 0) { Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: fichier non trouve", nom_fichier );
+    if (fd_cible < 0) { Info_new( Config.log, FALSE, LOG_WARNING,
+                                  "Jouer_mp3: fichier %s non trouve", nom_fichier );
                         return(FALSE);
                       }
     else close (fd_cible);
 
-    Info_c( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Envoi d'un mp3", nom_fichier );
+    Info_new( Config.log, FALSE, LOG_INFO, "Jouer_mp3: Envoi du mp3 %s", nom_fichier );
     pid = fork();
     if (pid<0)
-     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Lancement MPG123 failed (fork)", pid ); }
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Jouer_mp3: MPG123 fork failed pid=%d", pid ); }
     else if (!pid)
      { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
-       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: Lancement MPG123 failed (exec)", pid );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Jouer_mp3: Lancement MPG123 failed pid=%d", pid );
        _exit(0);
      }
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: waiting for MPG123 to finish pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "Jouer_mp3: waiting for MPG123 to finish pid=%d", pid );
     wait4(pid, NULL, 0, NULL );
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Jouer_mp3: MPG123 finished pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "Jouer_mp3: MPG123 finished pid=%d", pid );
 
     return(TRUE);
   }
@@ -122,10 +123,10 @@
     unlink( cible );                                                  /* Destruction des anciens fichiers */
 /***************************************** Création du PHO ************************************************/
     num = msg->num;                                /* Attention, on fork donc plus de mémoire partagée !! */
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de ESPEAK", num );
+    Info_new( Config.log, FALSE, LOG_INFO, "Lancement de ESPEAK %d", num );
     pid = fork();
     if (pid<0)
-     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Fabrication .pho failed", num ); }
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Fork Fabrication .pho failed pid=%d", pid ); }
     else if (!pid)                                                 /* Création du .au en passant par .pho */
      { gchar texte[80], chaine[30], chaine2[30];
        switch (msg->type_voc)
@@ -140,18 +141,18 @@
        dup2( fd_cible, 1 );
        g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
        execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
-       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement espeak failed", pid );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Lancement espeak failed pid=%d", pid );
        _exit(0);
      }
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for espeak to finish pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "waiting for espeak to finish pid=%d", pid );
     wait4(pid, NULL, 0, NULL );
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: espeak finished pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "espeak finished pid=%d", pid );
 
 /****************************************** Création du AU ************************************************/
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Lancement de MBROLA", num );
+    Info_new( Config.log, FALSE, LOG_INFO, "Lancement de MBROLA %d", num );
     pid = fork();
     if (pid<0)
-     { Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Fabrication .au failed", num ); }
+     { Info_new( Config.log, FALSE, LOG_WARNING, "Fabrication .au failed pid=%d", pid ); }
     else if (!pid)                                                 /* Création du .au en passant par .pho */
      { gchar chaine[30];
        switch (msg->type_voc)
@@ -162,12 +163,12 @@
           case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
         }
        execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
-       Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Lancement mbrola failed", pid );
+       Info_new( Config.log, FALSE, LOG_WARNING, "Lancement mbrola failed pid=%d", pid );
        _exit(0);
      }
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: waiting for mbrola to finish pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "waiting for mbrola to finish pid", pid );
     wait4(pid, NULL, 0, NULL );
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: mbrola finished pid", pid );
+    Info_new( Config.log, FALSE, LOG_DEBUG, "mbrola finished pid", pid );
 /****************************************** Lancement de l'audio ******************************************/
     Jouer_wav(cible);
   }
@@ -180,11 +181,12 @@
     guint num;
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_AUDIO, "Audio: demarrage" );
+    Info_new( Config.log, FALSE, LOG_NOTICE,
+              "Run_audio: Demarrage . . . TID = %d", pthread_self() );
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_c( Config.log, DEBUG_DB, "AUDIO: Run_audio: Unable to open database", Config.db_database );
+     { Info_new( Config.log, FALSE, LOG_CRIT, "Run_audio: Unable to open database %s", Config.db_database );
        Partage->com_audio.TID = 0;                        /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
@@ -193,15 +195,16 @@
     while(Partage->com_audio.Thread_run == TRUE)                         /* On tourne tant que necessaire */
      {
        if (Partage->com_audio.Thread_reload)                                      /* On a recu sigusr1 ?? */
-        { Info( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: RELOAD" );
+        { Info_new( Config.log, FALSE, LOG_NOTICE, "Run_audio: RELOAD" );
           Partage->com_audio.Thread_reload = FALSE;
         }
 
        if (Partage->com_audio.Thread_sigusr1)                                     /* On a recu sigusr1 ?? */
-        { Info( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: SIGUSR1" );
+        { Info_new( Config.log, FALSE, LOG_NOTICE, "Run_audio: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_audio.synchro );                             /* lockage futex */
-          Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: Reste a traiter",
-                                           g_list_length(Partage->com_audio.liste_audio) );
+          Info_new( Config.log, FALSE, LOG_NOTICE,
+                    "Run_audio: Reste a traiter %d",
+                    g_list_length(Partage->com_audio.liste_audio) );
           pthread_mutex_unlock( &Partage->com_audio.synchro );
           Partage->com_audio.Thread_sigusr1 = FALSE;
         }
@@ -219,7 +222,7 @@
                                                         GINT_TO_POINTER(num) );
        pthread_mutex_unlock( &Partage->com_audio.synchro );
 
-       Info_n( Config.log, DEBUG_AUDIO, "AUDIO : Préparation du message id", num );
+       Info_new( Config.log, FALSE, LOG_INFO, "Préparation du message id %d", num );
 
        msg = Rechercher_messageDB( Config.log, db, num );
        if (msg)
@@ -239,7 +242,8 @@
         }
      }
     Libere_DB_SQL( Config.log, &db );
-    Info_n( Config.log, DEBUG_AUDIO, "AUDIO: Run_audio: Down", pthread_self() );
+    Info_new( Config.log, FALSE, LOG_NOTICE,
+              "Run_audio: Down . . . TID = %d", pthread_self() );
     Partage->com_audio.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

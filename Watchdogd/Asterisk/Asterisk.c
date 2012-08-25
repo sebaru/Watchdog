@@ -79,7 +79,7 @@
      }
 
     asterisk = (struct CMD_TYPE_ASTERISK *)g_malloc0( sizeof(struct CMD_TYPE_ASTERISK) );
-    if (!asterisk) Info( log, DEBUG_ASTERISK, "Recuperer_asteriskDB_suite: Erreur allocation mémoire" );
+    if (!asterisk) Info_new( Config.log, FALSE, LOG_WARNING, "Recuperer_asteriskDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &asterisk->calleridnum,  db->row[1], sizeof(asterisk->calleridnum  ) );
        memcpy( &asterisk->calleridname, db->row[2], sizeof(asterisk->calleridname ) );
@@ -101,15 +101,15 @@
     id = 0;
     while ( (asterisk = Recuperer_asteriskDB_suite ( log, db )) != NULL )
      {
-       Info_c( log, DEBUG_ASTERISK, "Asterisk_check_call:          Call from", asterisk->calleridname );
-       Info_c( log, DEBUG_ASTERISK, "Asterisk_check_call:                Num", asterisk->calleridnum );
+       Info_new( Config.log, FALSE, LOG_NOTICE, "Asterisk_check_call: Call from %s (num=%s)",
+                 asterisk->calleridname, asterisk->calleridnum );
        if ( Config.asterisk_m_min <= asterisk->bit &&
                                      asterisk->bit <= Config.asterisk_m_max )
-        { Info_n( log, DEBUG_ASTERISK, "Asterisk_check_call: Mise a un du bit M", asterisk->bit );
+        { Info_new( Config.log, FALSE, LOG_INFO, "Asterisk_check_call: Mise a un du bit M%03d", asterisk->bit );
           Envoyer_commande_dls ( asterisk->bit );
         }
        else
-        { Info_n( log, DEBUG_ASTERISK, "Asterisk_check_call: Numero de bit hors range", asterisk->bit ); }
+        { Info_new( Config.log, FALSE, LOG_WARNING, "Asterisk_check_call: Numero de bit hors range M%03d", asterisk->bit ); }
        id = asterisk->id;
        g_free(asterisk);
      }
