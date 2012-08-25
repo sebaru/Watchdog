@@ -170,7 +170,7 @@
 
     liste = Partage->com_msrv.Librairies;
     while(liste)                                                        /* Liberation mémoire des modules */
-     { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
+     { lib = (struct LIBRAIRIE *)liste->data;                     /* Récupération des données de la liste */
 
        if ( ! strcmp ( lib->admin_prompt, prompt ) )
         { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: trying to unload", lib->nom_fichier );
@@ -187,6 +187,7 @@
         }
        liste = liste->next;
      }
+   Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: library not found", prompt );
    return(FALSE);
   }
 /**********************************************************************************************************/
