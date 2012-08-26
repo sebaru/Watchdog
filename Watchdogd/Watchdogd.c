@@ -248,7 +248,6 @@
           Partage->com_arch.Thread_reload      = TRUE;
           Partage->com_audio.Thread_reload     = TRUE;
           Partage->com_onduleur.Thread_reload  = TRUE;
-          Partage->com_admin.Thread_reload     = TRUE;
           Partage->com_lirc.Thread_reload      = TRUE;
           Partage->com_tellstick.Thread_reload = TRUE;
           for (i=0; i<Config.max_serveur; i++)

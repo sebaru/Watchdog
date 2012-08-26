@@ -41,7 +41,6 @@
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
   };
 
@@ -50,8 +49,6 @@
  extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_running ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Admin_rs485 ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Admin_rfxcom ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_dls ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_tellstick ( struct CLIENT_ADMIN *client, gchar *ligne );

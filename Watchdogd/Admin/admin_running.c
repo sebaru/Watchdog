@@ -265,6 +265,18 @@
              liste = liste->next;
            }
         } else
+       if ( ! strcmp ( debug, "INFO"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
+       if ( ! strcmp ( debug, "NOTICE"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
+       if ( ! strcmp ( debug, "WARNING"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
+       if ( ! strcmp ( debug, "ERR"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
+       if ( ! strcmp ( debug, "CRIT"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
+       if ( ! strcmp ( debug, "EMERG"   ) )
+        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
        if ( ! strcmp ( debug, "signaux"   ) )
         { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
        if ( ! strcmp ( debug, "db"        ) )
