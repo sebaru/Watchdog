@@ -498,7 +498,7 @@
     Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
 
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
-     { usleep(1000);
+     { usleep(10000);
        sched_yield();
 
        if (Cfg_imsg.lib->Thread_sigusr1 == TRUE)
