@@ -641,7 +641,7 @@
 
        pthread_mutex_lock ( &Cfg_rs485.lib->synchro );                  /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
-       while (liste)
+       while (liste && lib->Thread_run == TRUE)
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->started != TRUE)                           /* Si le module est stopped, on le zappe */
            { liste = liste->next;
