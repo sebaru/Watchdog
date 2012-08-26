@@ -508,12 +508,6 @@
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
 
-    if (fg == FALSE)                                   /* Fermeture des descripteurs de fichiers inutiles */
-     { close(0);
-       close(1);
-       close(2);                                                            /* Fermeture des descripteurs */
-     }
-
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
     Info( Config.log, DEBUG_INFO, "Start" );
