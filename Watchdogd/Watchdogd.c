@@ -497,7 +497,7 @@
      { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
        exit(EXIT_ERREUR);
      }
-    if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                            /* Creation d'un verrou sur le fichier */
+    if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                     /* Creation d'un verrou sur le fichier */
      { printf( "Cannot lock %s/%s. Probably another daemon is running : %s\n",
                 Config.home, VERROU_SERVEUR, strerror(errno) );
        close(fd_lock);
@@ -506,14 +506,12 @@
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
 
-#ifdef bouh
     if (fg == FALSE)
      { int i;
        for (i=getdtablesize(); i>=0; i--)
         { if (i!=fd_lock) close(i); }                                       /* Fermeture des descripteurs */
        umask(022);                                                       /* Masque de creation de fichier */
      }
-#endif
 
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
@@ -629,13 +627,12 @@
 
           if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
            { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
+
+          Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
 
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
         { Info( Config.log, DEBUG_INFO, "MSRV: Pb Admin -> Arret" ); }
-
-       if (Config.single == FALSE)                                             /* Si demarrage des thread */
-        { Charger_librairies(); }
 
        pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
