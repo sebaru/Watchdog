@@ -29,14 +29,15 @@
  #include <openssl/ssl.h>
  #include <openssl/err.h>
  #include <sys/prctl.h>
+ #include <unistd.h>
  #include <string.h>
  #include <stdio.h>  /* Pour printf */
  #include <stdlib.h> /* Pour exit */
- #include <unistd.h>
  #include <fcntl.h>
  #include <sys/time.h>
  #include <signal.h>
  #include <sys/stat.h>
+ #include <sys/file.h>
  #include <popt.h>
  #include <pthread.h>
  #include <locale.h>
@@ -476,32 +477,32 @@
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
     printf(" Going to background : %s\n", (fg ? "FALSE" : "TRUE") );
 
-    fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );
-    if (fd_lock<0)
-     { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
-       exit(EXIT_ERREUR);
-     }
-    if (lockf( fd_lock, F_TLOCK, 0 )<0)                            /* Creation d'un verrou sur le fichier */
-     { printf( "Cannot lock %s/%s. Probably another daemon is running\n", Config.home, VERROU_SERVEUR );
-       close(fd_lock);
-       exit(EXIT_ERREUR);
-     }
-
     if (fg == FALSE)                                                   /* On tourne en tant que daemon ?? */
      { gint pid;
        pid = fork();
        if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
-       if (pid>0) exit(EXIT_OK);                                                        /* On kill le père */
+       if (pid>0) exit(EXIT_OK);                                                       /* On kill le père */
       
        setsid();                                                             /* Indépendance du processus */
       
        pid = fork();
        if (pid<0) { printf("Fork 2 failed\n"); exit(EXIT_ERREUR); }     /* Evite des pb (linuxmag 44 p78) */
-       if (pid>0) exit(EXIT_OK);                                                        /* On kill le père */
+       if (pid>0) exit(EXIT_OK);                                                       /* On kill le père */
 
        setsid();                                                             /* Indépendance du processus */
     }
     
+    fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );     /* Verification de l'unicité du process */
+    if (fd_lock<0)
+     { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
+       exit(EXIT_ERREUR);
+     }
+    if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                            /* Creation d'un verrou sur le fichier */
+     { printf( "Cannot lock %s/%s. Probably another daemon is running : %s\n",
+                Config.home, VERROU_SERVEUR, strerror(errno) );
+       close(fd_lock);
+       exit(EXIT_ERREUR);
+     }
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
 
@@ -655,7 +656,7 @@
     for (i=0; i<Config.max_serveur; i++)
      { pthread_mutex_destroy( &Partage->Sous_serveur[i].synchro ); }
 
-    close(fd_lock);
+    close(fd_lock);                       /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
     if (Socket_ecoute>0) close(Socket_ecoute);
     if (Config.rsa) RSA_free( Config.rsa );
