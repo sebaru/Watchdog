@@ -44,7 +44,7 @@
  struct COM_ARCH                                                               /* Communication vers ARCH */
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_arch;                                             /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_arch;                                               /* liste de struct ARCHDB a traiter */
     gint taille_arch;
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */

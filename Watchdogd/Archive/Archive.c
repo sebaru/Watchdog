@@ -31,7 +31,7 @@
  #include <unistd.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
- /*#define DEBUG*/
+
 /**********************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
@@ -50,7 +50,7 @@
        Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: Add Arch a traiter  num", num );
      }
 
-    arch = (struct ARCHDB *)g_malloc( sizeof(struct ARCHDB) );
+    arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
     if (!arch) return;
 
     gettimeofday( &tv, NULL );                                               /* On prend l'heure actuelle */
@@ -61,7 +61,7 @@
     arch->date_usec = tv.tv_usec;
 
     pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
-    Partage->com_arch.liste_arch = g_list_append( Partage->com_arch.liste_arch, arch );
+    Partage->com_arch.liste_arch = g_slist_prepend( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
@@ -96,7 +96,7 @@
         { Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
           Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
-                  g_list_length(Partage->com_arch.liste_arch) );
+                  g_slist_length(Partage->com_arch.liste_arch) );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
@@ -109,9 +109,9 @@
 
        pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
-       Partage->com_arch.liste_arch = g_list_remove ( Partage->com_arch.liste_arch, arch );
+       Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
        Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
-               g_list_length(Partage->com_arch.liste_arch) );
+               g_slist_length(Partage->com_arch.liste_arch) );
        Partage->com_arch.taille_arch--;
        pthread_mutex_unlock( &Partage->com_arch.synchro );
        Ajouter_archDB ( Config.log, db, arch );
