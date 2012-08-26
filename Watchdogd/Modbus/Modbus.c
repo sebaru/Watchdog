@@ -1036,6 +1036,7 @@
 /**********************************************************************************************************/
  void Run_modbus ( void )
   { struct MODULE_MODBUS *module;
+    static guint last_run;
     GList *liste;
 
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
@@ -1050,9 +1051,9 @@
      }
 
     Partage->com_modbus.Thread_run = TRUE;                                          /* Le thread tourne ! */
+    last_run = 0;
     while(Partage->com_modbus.Thread_run == TRUE)                        /* On tourne tant que necessaire */
-     { usleep(1000);
-       sched_yield();
+     { while ( Partage->top < last_run + 1 ) sched_yield();                     /* 10 tours par seconde ! */
 
        if (Partage->com_modbus.Thread_reload == TRUE)
         { Info( Config.log, DEBUG_MODBUS, "MODBUS: Run_modbus: Reloading conf" );
@@ -1171,6 +1172,7 @@
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
+       last_run = Partage->top;                                      /* On indique la date du dernier run */
      }
 
     Decharger_tous_MODBUS();
