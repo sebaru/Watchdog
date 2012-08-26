@@ -492,6 +492,13 @@
        setsid();                                                             /* Indépendance du processus */
     }
     
+    if (fg == FALSE)                                   /* Fermeture des descripteurs de fichiers inutiles */
+     { int i;
+       for (i=getdtablesize(); i>=0; i--)
+        { close(i); }                                                       /* Fermeture des descripteurs */
+     }
+    umask(022);                                                          /* Masque de creation de fichier */
+
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );     /* Verification de l'unicité du process */
     if (fd_lock<0)
      { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
@@ -505,13 +512,6 @@
      }
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
-
-    if (fg == FALSE)
-     { int i;
-       for (i=getdtablesize(); i>=0; i--)
-        { if (i!=fd_lock) close(i); }                                       /* Fermeture des descripteurs */
-       umask(022);                                                       /* Masque de creation de fichier */
-     }
 
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
