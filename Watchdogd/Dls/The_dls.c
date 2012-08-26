@@ -501,8 +501,8 @@
            }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].changes++;
-        } else if (Partage->top % 60) 
-        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_change trop tôt !", num ); }
+        } else if ( ! (Partage->top % 600) )                          /* On previent toutes les minutes ! */
+        { Info_n( Config.log, DEBUG_INFO, "DLS: MSG: last_change trop tot !", num ); }
        Partage->g[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
