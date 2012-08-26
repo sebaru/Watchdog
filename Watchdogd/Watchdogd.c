@@ -474,6 +474,7 @@
     gint import=0;
     gboolean fg;
 
+    umask(022);                                                          /* Masque de creation de fichier */
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
     printf(" Going to background : %s\n", (fg ? "FALSE" : "TRUE") );
 
@@ -491,13 +492,6 @@
 
        setsid();                                                             /* Indépendance du processus */
     }
-    
-    if (fg == FALSE)                                   /* Fermeture des descripteurs de fichiers inutiles */
-     { close(0);
-       close(1);
-       close(2);                                                            /* Fermeture des descripteurs */
-     }
-    umask(022);                                                          /* Masque de creation de fichier */
                                                                   /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
@@ -513,6 +507,12 @@
     fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                       /* Set close on exec flag */
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
+
+    if (fg == FALSE)                                   /* Fermeture des descripteurs de fichiers inutiles */
+     { close(0);
+       close(1);
+       close(2);                                                            /* Fermeture des descripteurs */
+     }
 
     Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
 
