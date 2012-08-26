@@ -34,8 +34,8 @@
  #include <stdio.h>  /* Pour printf */
  #include <stdlib.h> /* Pour exit */
  #include <fcntl.h>
- #include <sys/time.h>
  #include <signal.h>
+ #include <sys/time.h>
  #include <sys/stat.h>
  #include <sys/file.h>
  #include <popt.h>
@@ -493,13 +493,13 @@
     }
     
     if (fg == FALSE)                                   /* Fermeture des descripteurs de fichiers inutiles */
-     { int i;
-       for (i=getdtablesize(); i>=0; i--)
-        { close(i); }                                                       /* Fermeture des descripteurs */
+     { close(0);
+       close(1);
+       close(2);                                                            /* Fermeture des descripteurs */
      }
     umask(022);                                                          /* Masque de creation de fichier */
-
-    fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT, 0640 );     /* Verification de l'unicité du process */
+                                                                  /* Verification de l'unicité du process */
+    fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
      { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
        exit(EXIT_ERREUR);
@@ -510,6 +510,7 @@
        close(fd_lock);
        exit(EXIT_ERREUR);
      }
+    fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                       /* Set close on exec flag */
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
 
