@@ -197,7 +197,7 @@
                   }
                  liste = liste->next;
                }
-              if (found = FALSE) { Admin_running  ( client, ligne ); }
+              if (found == FALSE) { Admin_running ( client, ligne ); }
               g_snprintf( chaine, sizeof(chaine), "\n" );
               Write_admin ( client->connexion, chaine );
             }
