@@ -50,7 +50,7 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_new( Config.log, Config.log_all, LOG_DEBUG,
-              "Gerer_arrive_Ixxx_dls: Recu I(%03d)=%d, r%03d v%03d, b%03d. Reste a traite %03d",
+              "Gerer_arrive_Ixxx_dls: Recu I(%03d)=%d, r%03d v%03d, b%03d. Reste a traiter %03d",
               num, Partage->i[num].etat,
               Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu
             );
