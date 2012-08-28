@@ -58,7 +58,7 @@
     if (!log) return(NULL);
     
     g_snprintf( log->entete,  sizeof(log->entete), "%s", entete  );
-    log->debug_level = debug;
+    log->log_level = debug;
     on_exit( Info_stop, log );
     
     openlog( log->entete, LOG_CONS | LOG_PID | LOG_PERROR, LOG_USER );
@@ -68,8 +68,8 @@
 /* Info_init: Initialisation du traitement d'erreur                                                       */
 /* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                            */
 /**********************************************************************************************************/
- void Info_change_debug( struct LOG *log, guint debug )
-  { if (log) log->debug_level = debug;
+ void Info_change_log_level( struct LOG *log, guint debug )
+  { if (log) log->log_level = debug;
   }
 /**********************************************************************************************************/
 /* Info: Log dans un fichier ou sur le terminal l'évolution du systeme                                    */
@@ -80,7 +80,7 @@
     if (!log) return;
 
     prctl( PR_GET_NAME, &nom, 0, 0, 0);
-    if ( log->debug_level & niveau )
+    if ( log->log_level & niveau )
      { syslog( LOG_INFO, "%s -> %s\n", nom, texte );
      }
   }
@@ -113,7 +113,7 @@
     va_list ap;
     if (!log) return;
 
-    if ( override == TRUE || priority > log->debug_level )
+    if ( override == TRUE || priority > log->log_level )
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
        g_snprintf( chaine, sizeof(chaine), "%s -> ", nom_thread );
        strcat ( chaine, format );

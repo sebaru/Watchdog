@@ -64,7 +64,8 @@
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
     gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
-    guint debug_level;                                                    /* Niveau de debug du programme */
+    guint log_level;                                                      /* Niveau de debug du programme */
+    gboolean log_all;                                                             /* TRUE si log_override */
     guint max_login_failed;                                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */
@@ -92,7 +93,6 @@
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
  #define DEFAUT_DB_PORT                 3306
- #define DEFAUT_DEBUG_LEVEL             -1                                  /* Par défaut, tout est logué */
  #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
  #define DEFAUT_HOME                    g_get_home_dir()        /* Ne pas depasser TAILLE_HOME caracteres */

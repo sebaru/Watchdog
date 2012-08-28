@@ -59,7 +59,7 @@
        Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  debug debug_to_switch - Switch Debug Mode (switch are : list, all, none, or library name)\n" );
+       Write_admin ( client->connexion, "  log log_to_switch     - Switch Log Mode (info, notice, warning, error, list, all, none, or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -225,13 +225,13 @@
        Write_admin ( client->connexion, chaine );
        
      } else
-    if ( ! strcmp ( commande, "debug" ) )
+    if ( ! strcmp ( commande, "log" ) )
      { gchar debug[128];
 
        sscanf ( ligne, "%s %s", commande, debug );
 
        if ( ! strcmp ( debug, "all"       ) )
-        { Info_change_debug ( Config.log, ~0 );
+        { Config.log_all = TRUE;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
@@ -243,7 +243,7 @@
            }
         } else
        if ( ! strcmp ( debug, "none"      ) )
-        { Info_change_debug ( Config.log,  0 );
+        { Config.log_all = FALSE;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
@@ -264,63 +264,18 @@
              Write_admin ( client->connexion, chaine );
              liste = liste->next;
            }
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug all is %s\n",
+                      (Config.log_all ? " enabled" : "disabled") );
+          Write_admin ( client->connexion, chaine );
         } else
-       if ( ! strcmp ( debug, "INFO"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "NOTICE"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "WARNING"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "ERR"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "CRIT"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "EMERG"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "signaux"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SIGNAUX   ); } else
-       if ( ! strcmp ( debug, "db"        ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_DB        ); } else
-       if ( ! strcmp ( debug, "config"    ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CONFIG    ); } else
-       if ( ! strcmp ( debug, "user"      ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_USER      ); } else
-       if ( ! strcmp ( debug, "crypto"    ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CRYPTO    ); } else
-       if ( ! strcmp ( debug, "info"      ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_INFO      ); } else
-       if ( ! strcmp ( debug, "serveur"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SERVEUR   ); } else
-       if ( ! strcmp ( debug, "cdg"       ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CDG       ); } else
-       if ( ! strcmp ( debug, "network"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_NETWORK   ); } else
-       if ( ! strcmp ( debug, "arch"   ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ARCHIVE   ); } else
-       if ( ! strcmp ( debug, "connexion" ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CONNEXION ); } else
-       if ( ! strcmp ( debug, "dls"       ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_DLS       ); } else
-       if ( ! strcmp ( debug, "modbus"    ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_MODBUS    ); } else
-       if ( ! strcmp ( debug, "admin"     ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ADMIN     ); } else
-       if ( ! strcmp ( debug, "onduleur"  ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ONDULEUR  ); } else
-       if ( ! strcmp ( debug, "sms"       ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_SMS       ); } else
-       if ( ! strcmp ( debug, "audio"     ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_AUDIO     ); } else
-       if ( ! strcmp ( debug, "camera"    ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_CAMERA    ); } else
-       if ( ! strcmp ( debug, "courbe"    ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_COURBE    ); } else
-       if ( ! strcmp ( debug, "tellstick" ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_TELLSTICK ); } else
-       if ( ! strcmp ( debug, "lirc"      ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_LIRC      ); } else
-       if ( ! strcmp ( debug, "asterisk"  ) )
-        { Info_change_debug ( Config.log, Config.debug_level ^= DEBUG_ASTERISK  ); }
+       if ( ! strcmp ( debug, "info"    ) )
+        { Info_change_log_level ( Config.log, LOG_INFO    ); } else
+       if ( ! strcmp ( debug, "notice"  ) )
+        { Info_change_log_level ( Config.log, LOG_NOTICE  ); } else
+       if ( ! strcmp ( debug, "warning" ) )
+        { Info_change_log_level ( Config.log, LOG_WARNING ); } else
+       if ( ! strcmp ( debug, "error"   ) )
+        { Info_change_log_level ( Config.log, LOG_ERR     ); }
        else
         { liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
@@ -346,9 +301,7 @@
              Write_admin ( client->connexion, chaine );
            }
         }
-       g_snprintf( chaine, sizeof(chaine), " Debug_level is now %d\n", Config.log->debug_level );
-       Write_admin ( client->connexion, chaine );
-       Config.debug_level = Config.log->debug_level;  /* Sauvegarde pour persistence (export des données) */
+       Config.log_level = Config.log->log_level;    /* Sauvegarde pour persistence (export des données) */
      } else
     if ( ! strcmp ( commande, "ping" ) )
      { Write_admin ( client->connexion, " Pong !\n" );

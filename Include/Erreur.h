@@ -33,7 +33,7 @@
 
  #define TAILLE_ENTETE_LOG   40
  struct LOG { char entete [TAILLE_ENTETE_LOG+1];
-              guint debug_level;
+              guint log_level;
             };
 
  #define  fonction_entre(); { printf("Entre dans la fonction %s\n", __FUNCTION__ ); }
@@ -66,7 +66,7 @@
  extern void Info( struct LOG *log, guint niveau, gchar *texte );
  extern void Info_n( struct LOG *log, guint niveau, gchar *texte, gint valeur );
  extern void Info_c( struct LOG *log, guint niveau, gchar *texte, gchar *texte2 );
- extern void Info_change_debug( struct LOG *log, guint debug );
+ extern void Info_change_log_level( struct LOG *log, guint debug );
  extern void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... );
 
 #endif

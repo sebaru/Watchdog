@@ -176,81 +176,21 @@
        if (!Config.asterisk_m_max) Config.asterisk_m_max = DEFAUT_ASTERISK_M_MAX;
 
 /********************************************* Partie DEBUG ***********************************************/
-       Config.debug_level = 0;
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SIGNAUX", NULL );
-       if (debug) Config.debug_level += DEBUG_SIGNAUX;
+       Config.log_level = LOG_NOTICE;
+       chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
+       if (chaine)
+        {      if ( ! strcmp( chaine, "LOG_DEBUG" ) )   Config.log_level = LOG_DEBUG;
+          else if ( ! strcmp( chaine, "LOG_INFO" ) )    Config.log_level = LOG_INFO;
+          else if ( ! strcmp( chaine, "LOG_NOTICE" ) )  Config.log_level = LOG_NOTICE;
+          else if ( ! strcmp( chaine, "LOG_WARNING" ) ) Config.log_level = LOG_WARNING;
+          else if ( ! strcmp( chaine, "LOG_ERR" ) )     Config.log_level = LOG_ERR;
+          else if ( ! strcmp( chaine, "LOG_CRIT" ) )    Config.log_level = LOG_CRIT;
+          else if ( ! strcmp( chaine, "LOG_EMERG" ) )   Config.log_level = LOG_EMERG;
+          g_free(chaine);
+        }
 
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_DB", NULL );
-       if (debug) Config.debug_level += DEBUG_DB;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CONFIG", NULL );
-       if (debug) Config.debug_level += DEBUG_CONFIG;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_USER", NULL );
-       if (debug) Config.debug_level += DEBUG_USER;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CRYPTO", NULL );
-       if (debug) Config.debug_level += DEBUG_CRYPTO;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_INFO", NULL );
-       if (debug) Config.debug_level += DEBUG_INFO;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SERVEUR", NULL );
-       if (debug) Config.debug_level += DEBUG_SERVEUR;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CDG", NULL );
-       if (debug) Config.debug_level += DEBUG_CDG;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_NETWORK", NULL );
-       if (debug) Config.debug_level += DEBUG_NETWORK;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ARCHIVE", NULL );
-       if (debug) Config.debug_level += DEBUG_ARCHIVE;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CONNEXION", NULL );
-       if (debug) Config.debug_level += DEBUG_CONNEXION;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_DLS", NULL );
-       if (debug) Config.debug_level += DEBUG_DLS;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_MODBUS", NULL );
-       if (debug) Config.debug_level += DEBUG_MODBUS;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ADMIN", NULL );
-       if (debug) Config.debug_level += DEBUG_ADMIN;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ONDULEUR", NULL );
-       if (debug) Config.debug_level += DEBUG_ONDULEUR;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_SMS", NULL );
-       if (debug) Config.debug_level += DEBUG_SMS;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_AUDIO", NULL );
-       if (debug) Config.debug_level += DEBUG_AUDIO;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_CAMERA", NULL );
-       if (debug) Config.debug_level += DEBUG_CAMERA;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_COURBE", NULL );
-       if (debug) Config.debug_level += DEBUG_COURBE;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_TELLSTICK", NULL );
-       if (debug) Config.debug_level += DEBUG_TELLSTICK;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_LIRC", NULL );
-       if (debug) Config.debug_level += DEBUG_LIRC;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ASTERISK", NULL );
-       if (debug) Config.debug_level = DEBUG_ASTERISK;
-
-       debug = g_key_file_get_boolean ( gkf, "DEBUG", "debug_ALL", NULL );
-       if (debug) Config.debug_level = ~0;
-
-       if (!Config.debug_level) Config.debug_level = DEFAUT_DEBUG_LEVEL;                    /* Par défaut */
-
+       Config.log_all = g_key_file_get_boolean ( gkf, "DEBUG", "log_all", NULL );
      }
-    else Config.debug_level = DEFAUT_DEBUG_LEVEL;                                           /* Par défaut */
-    printf("Debug_level = %d\n", Config.debug_level );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
@@ -269,7 +209,7 @@
     Info_n( Config.log, DEBUG_CONFIG, "Config taille_clef_dh       ", Config.taille_clef_dh );
     Info_n( Config.log, DEBUG_CONFIG, "Config taille_clef_rsa      ", Config.taille_clef_rsa );
     Info_n( Config.log, DEBUG_CONFIG, "Config ssl crypt            ", Config.ssl_crypt );
-    Info_n( Config.log, DEBUG_CONFIG, "Config debug level          ", Config.debug_level );
+    Info_n( Config.log, DEBUG_CONFIG, "Config log_level            ", Config.log_level );
     Info_n( Config.log, DEBUG_CONFIG, "Config taille_bloc_reseau   ", Config.taille_bloc_reseau );
     Info_n( Config.log, DEBUG_CONFIG, "Config timeout connexion    ", Config.timeout_connexion );
     Info_n( Config.log, DEBUG_CONFIG, "Config max login failed     ", Config.max_login_failed );

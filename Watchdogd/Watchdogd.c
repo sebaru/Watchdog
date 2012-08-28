@@ -95,21 +95,21 @@
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  static void Charger_config_bit_interne( void )
-  { Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA" );
+  { Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des EANA" );
     Charger_eana();
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des EANA fait" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des EANA fait" );
 
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des SCENARIO" );
     Charger_scenario();
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des SCENARIO fait" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des SCENARIO fait" );
 
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs horaires" );
     Charger_cpth();
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs horaires fait" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs horaires fait" );
 
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs impulsion" );
     Charger_cpt_imp();
-    Info( Config.log, DEBUG_INFO, "MSRV: Chargement des compteurs impulsion fait" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs impulsion fait" );
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
@@ -120,7 +120,7 @@
     if (num == SIGALRM)
      { Partage->top++;
        if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
-        { Info( Config.log, DEBUG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
        if (!(Partage->top%5))                                          /* Cligno toutes les demi-secondes */
         { SB(5, !B(5)); }
        if (!(Partage->top%3))                                             /* Cligno toutes les 3 dixièmes */
@@ -142,7 +142,7 @@
 
        Partage->top_cdg_plugin_dls++;                                        /* Chien de garde plugin DLS */
        if (Partage->top_cdg_plugin_dls>200)                     /* Si pas de réponse D.L.S en 20 secondes */
-        { Info( Config.log, DEBUG_INFO, "Traitement signaux: CDG plugin DLS !!" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement signaux: CDG plugin DLS !!" );
           Partage->top_cdg_plugin_dls = 0;
         }
        return;
@@ -153,21 +153,21 @@
 
     switch (num)
      { case SIGQUIT:
-       case SIGINT:  Info( Config.log, DEBUG_INFO, "Recu SIGINT" );
+       case SIGINT:  Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGINT" );
                      Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
-       case SIGTERM: Info( Config.log, DEBUG_INFO, "Recu SIGTERM" );
+       case SIGTERM: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGTERM" );
                      Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
-       case SIGCHLD: Info( Config.log, DEBUG_INFO, "Recu SIGCHLD" );
+       case SIGCHLD: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGCHLD" );
                      break;
-       case SIGPIPE: Info( Config.log, DEBUG_INFO, "Recu SIGPIPE" ); break;
-       case SIGBUS:  Info( Config.log, DEBUG_INFO, "Recu SIGBUS" ); break;
-       case SIGIO:   Info( Config.log, DEBUG_INFO, "Recu SIGIO" ); break;
-       case SIGUSR1: Info( Config.log, DEBUG_INFO, "Recu SIGUSR1: dumping infos" );
+       case SIGPIPE: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGPIPE" ); break;
+       case SIGBUS:  Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGBUS" ); break;
+       case SIGIO:   Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGIO" ); break;
+       case SIGUSR1: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR1: dumping infos" );
                      Partage->com_msrv.Thread_sigusr1 = TRUE;
                      break;
-       case SIGUSR2: Info( Config.log, DEBUG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
+       case SIGUSR2: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->com_msrv.Thread_reload = TRUE;
                      break;
        default: Info_n( Config.log, DEBUG_INFO, "Recu signal", num ); break;
@@ -199,9 +199,9 @@
     nbr_msg_repeat = g_list_length( Partage->com_msrv.liste_msg_repeat );             /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), "MSRV: Reste %d I, %d MSG_ON, %d MSG_OFF, %d MSG_REPEAT",
+    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG_ON, %d MSG_OFF, %d MSG_REPEAT",
                 nbr_i, nbr_msg_on, nbr_msg_off, nbr_msg_repeat );
-    Info( Config.log, DEBUG_INFO, chaine );
+    Info_new( Config.log, Config.log_all, LOG_INFO, chaine );
   }
 /**********************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
@@ -216,10 +216,10 @@
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Debut boucle sans fin" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Debut boucle sans fin" );
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Connexion DB impossible" ); }
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Connexion DB impossible" ); }
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -242,7 +242,7 @@
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { guint i;
-          Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: RELOAD" );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: RELOAD" );
           Partage->com_modbus.Thread_reload    = TRUE;
           Partage->com_sms.Thread_reload       = TRUE;
           Partage->com_dls.Thread_reload       = TRUE;
@@ -256,7 +256,7 @@
 
           Lire_config( NULL );                              /* Lecture sur le fichier /etc/watchdogd.conf */
           Print_config();
-          Info_change_debug ( Config.log, Config.debug_level );
+          Info_change_log_level ( Config.log, Config.log_level );
           Charger_config_bit_interne();                         /* Rechargement des configs bits internes */
           Partage->com_msrv.Thread_reload      = FALSE;                             /* signal traité. RAZ */
         }
@@ -266,7 +266,7 @@
           GSList *liste;
           guint i;
 
-          Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: SIGUSR1" );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: SIGUSR1" );
           Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: jeton", Partage->jeton );
           Partage->com_modbus.Thread_sigusr1    = TRUE;
           Partage->com_sms.Thread_sigusr1       = TRUE;
@@ -292,7 +292,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
-        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Sauvegarde des CPT" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Sauvegarde des CPT" );
           Sauver_compteur( db );
           Exporter();
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
@@ -314,7 +314,7 @@
         }
 
        if (Partage->com_msrv.reset_motion_detect)
-        { Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: Reset_motion_detect" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Reset_motion_detect" );
           Demarrer_motion_detect();
           Partage->com_msrv.reset_motion_detect = FALSE;
         }
@@ -324,7 +324,7 @@
 
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
     Sauver_compteur( db );                                             /* Dernière sauvegarde avant arret */
-    Info( Config.log, DEBUG_INFO, "MSRV: Boucle_pere: fin boucle sans fin" );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
     Libere_DB_SQL( Config.log, &db );
     pthread_exit( NULL );
   }
@@ -334,7 +334,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, port, debug_level, max_client, fg, initrsa, single, compil;
+  { gint help, port, log_level, max_client, fg, initrsa, single, compil;
     gchar *home, *file;
     gint nbr_bytes;
     gchar *chaine;
@@ -347,7 +347,7 @@
        { "initrsa",    'r', POPT_ARG_NONE,
          &initrsa,          0, "RSA initialisation", NULL },
        { "debug",      'd', POPT_ARG_INT,
-         &debug_level,      0, "Debug level", "LEVEL" },
+         &log_level,      0, "Debug level", "LEVEL" },
        { "max_client", 'm', POPT_ARG_INT,
          &max_client,       0, "Maximum of connexions allowed", "MAX" },
        { "home",       'H', POPT_ARG_STRING,
@@ -369,7 +369,7 @@
     file = NULL;
     port           = -1;
     max_client     = -1;
-    debug_level    = -1;
+    log_level    = -1;
     initrsa        = 0;
     fg             = 0;
     help           = 0;
@@ -396,7 +396,7 @@
 
     if (single)          Config.single      = TRUE;                        /* Demarrage en mode single ?? */
     if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
-    if (debug_level!=-1) Config.debug_level = debug_level;
+    if (log_level!=-1)   Config.log_level   = log_level;
     if (max_client!=-1)  Config.max_client  = max_client;
     if (compil)          Config.compil      = 1;               /* Compilation de tous les plugins D.L.S ? */
     if (home)            g_snprintf( Config.home, sizeof(Config.home), "%s", home );
@@ -508,14 +508,15 @@
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
 
-    Config.log = Info_init( "Watchdogd", Config.debug_level );                     /* Init msgs d'erreurs */
+    g_thread_init(NULL);   /* Initialisation de la glib en environnement multi-threadé (obsolete en 2.32) */
+    Config.log = Info_init( "Watchdogd", Config.log_level );                       /* Init msgs d'erreurs */
 
-    Info( Config.log, DEBUG_INFO, "Start" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Start" );
     Print_config();
 
     Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
     if ( Socket_ecoute<0 )            
-     { Info( Config.log, DEBUG_INFO, "Network down, foreign connexions disabled" );
+     { Info_new( Config.log, Config.log_all, LOG_CRIT, "Network down, foreign connexions disabled" );
        return(EXIT_OK);
      }
 
@@ -523,7 +524,7 @@
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
-     { Info( Config.log, DEBUG_INFO, "Shared memory failed to allocate" ); }
+     { Info_new( Config.log, Config.log_all, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
@@ -582,52 +583,52 @@
        pthread_sigmask( SIG_SETMASK, &sigset, NULL );
 #endif
        if (!import)
-        { Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Clear Histo" );
           Clear_histoDB ();                                            /* Clear de la table histo au boot */
-          Info( Config.log, DEBUG_INFO, "MSRV: Clear Histo fait" );
-        } else Info( Config.log, DEBUG_INFO, "MSRV: Import => pas de clear histo" );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Clear Histo fait" );
+        } else Info_new( Config.log, Config.log_all, LOG_INFO, "Import => pas de clear histo" );
 
        Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
 
        if (Config.ssl_crypt) { Ssl_ctx = Init_ssl();                                /* Initialisation SSL */
                                if (!Ssl_ctx)
-                                { Info( Config.log, DEBUG_CRYPTO, "Init ssl failed" ); }
+                                { Info_new( Config.log, Config.log_all, LOG_ERR, "Init ssl failed" ); }
                              }
                         else { Ssl_ctx = NULL; }
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb ARCH" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb ARCH" ); }
 
           if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb MODBUS" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb MODBUS" ); }
 
           if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb SMS" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb SMS" ); }
 
           if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb AUDIO" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb AUDIO" ); }
 
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb DLS" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb DLS" ); }
 
           if (!Demarrer_onduleur())                                                 /* Démarrage Onduleur */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb ONDULEUR" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb ONDULEUR" ); }
 
           if (!Demarrer_tellstick())                                               /* Démarrage Tellstick */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb TELLSTICK" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb TELLSTICK" ); }
 
           if (!Demarrer_lirc())                                                         /* Démarrage Lirc */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb LIRC" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb LIRC" ); }
 
           if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
-           { Info( Config.log, DEBUG_INFO, "MSRV: Pb MOTION_DETECT" ); }
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb MOTION_DETECT" ); }
 
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
 
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
-        { Info( Config.log, DEBUG_INFO, "MSRV: Pb Admin -> Arret" ); }
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb Admin -> Arret" ); }
 
        pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
@@ -654,28 +655,28 @@
     if (Config.rsa) RSA_free( Config.rsa );
 
     if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();       /* Tente d'exporter les données */
-    else { Info_c( Config.log, DEBUG_INFO, "CLEAR-REBOOT : Erasing export file", FICHIER_EXPORT );
+    else { Info_new( Config.log, Config.log_all, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
     if (Partage->com_msrv.Thread_reboot == TRUE)
      { gint pid;
-       Info( Config.log, DEBUG_INFO, "Rebooting ..." );
+       Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting ..." );
        pid = fork();
-       if (pid<0) { Info( Config.log, DEBUG_INFO, "Fork Failed on reboot" );
+       if (pid<0) { Info_new( Config.log, Config.log_all, LOG_CRIT, "Fork Failed on reboot" );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
        if (pid>0)
         { Shm_stop( Partage );                                             /* Libération mémoire partagée */
           exit(EXIT_OK);                                                               /* On kill le père */
         }
-       Info_c( Config.log, DEBUG_INFO, "Rebooting in progress", argv[0] );
+       Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting in progress cmd=", argv[0] );
        sleep(5);
        execvp ( argv[0], argv );
-       Info_c( Config.log, DEBUG_INFO, "Rebooting ERROR !", strerror(errno) );
+       Info_new( Config.log, Config.log_all, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
        exit(EXIT_ERREUR);
      }
 
     Shm_stop( Partage );                                                   /* Libération mémoire partagée */
-    Info( Config.log, DEBUG_INFO, "Stopped" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);
   }
 /*--------------------------------------------------------------------------------------------------------*/
