@@ -113,13 +113,13 @@
     va_list ap;
     if (!log) return;
 
-    if ( override == TRUE || priority > log->log_level )
+    if ( override == TRUE || priority < log->log_level )                      /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
        g_snprintf( chaine, sizeof(chaine), "%s -> ", nom_thread );
        strcat ( chaine, format );
 
        va_start( ap, format );
-       vsyslog ( priority, chaine, ap );
+       vsyslog ( (override == TRUE ? LOG_EMERG : priority), chaine, ap );
        va_end ( ap );
      }
   }
