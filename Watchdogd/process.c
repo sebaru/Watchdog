@@ -58,17 +58,19 @@
  gboolean Start_librairie ( struct LIBRAIRIE *lib )
   { if (!lib) return(FALSE);
     if (lib->Thread_run == TRUE)
-     { Info_c( Config.log, DEBUG_INFO,
-               "Start_librairie: thread already seems to be running", lib->nom_fichier );
+     { Info_new( Config.log, Config.log_all, LOG_INFO,
+                 "Start_librairie: thread %s already seems to be running", lib->nom_fichier );
        return(FALSE);
      }
     if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
-     { Info( Config.log, DEBUG_INFO, _("Start_librairie: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Start_librairie: pthread_create failed (%s)",
+                lib->nom_fichier );
        return(FALSE);
      }
     pthread_detach( lib->TID );       /* On le détache pour qu'il puisse se terminer sur erreur tout seul */
-    Info_c( Config.log, DEBUG_INFO,
-            "Start_librairie: thread seems to be running", lib->nom_fichier );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+             "Start_librairie: Starting thread %s OK", lib->nom_fichier );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -79,16 +81,16 @@
  gboolean Stop_librairie ( struct LIBRAIRIE *lib )
   { if (!lib) return(FALSE);
     if (lib->Thread_run == FALSE)
-     { Info_c( Config.log, DEBUG_INFO,
-               "Stop_librairie: thread already stopped", lib->nom_fichier );
+     { Info_new( Config.log, Config.log_all, LOG_INFO,
+               "Stop_librairie: thread %s already stopped", lib->nom_fichier );
        return(FALSE);
      }
 
     lib->Thread_run = FALSE;                                         /* On demande au thread de s'arreter */
     while( lib->TID!=0 ) sched_yield();                                             /* Attente fin thread */
 
-    Info_c( Config.log, DEBUG_INFO,
-            "Stop_librairie: thread seems to be stopped", lib->nom_fichier );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+             "Stop_librairie: thread %s stopped", lib->nom_fichier );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -107,15 +109,16 @@
      { struct LIBRAIRIE *lib;
        lib = (struct LIBRAIRIE *)liste->data;
        if ( ! strcmp( lib->nom_fichier, nom_fichier ) )
-        { Info_c( Config.log, DEBUG_INFO,
-                  "Charger_librairie_par_fichier : Librairie already loaded", nom_fichier );
+        { Info_new( Config.log, Config.log_all, LOG_INFO,
+                   "Charger_librairie_par_fichier: Librairie %s already loaded", nom_fichier );
           return(NULL);
         }
        liste=liste->next;
      }
 
     lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
-    if (!lib) { Info( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier MemoryAlloc failed" );
+    if (!lib) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                          "Charger_librairie_par_fichier: MemoryAlloc failed" );
                 return(NULL);
               }
 
@@ -124,16 +127,16 @@
               }
          else { lib->dl_handle = dlopen( nom_fichier, RTLD_LAZY ); }
     if (!lib->dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier Candidat rejeté ", nom_fichier );
-       Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier -- sur ouverture", dlerror() );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                 "Charger_librairie_par_fichier Candidat: %s rejeté (%s)", nom_fichier, dlerror() );
        g_free(lib);
        return(NULL);
      }
 
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
-     { Info_c( Config.log, DEBUG_INFO,
-               "Charger_librairie_par_fichier Candidat rejeté sur absence Run_thread", nom_fichier ); 
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Charger_librairie_par_fichier: Candidat %s rejeté sur absence Run_thread", nom_fichier ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -141,8 +144,8 @@
 
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
-     { Info_c( Config.log, DEBUG_INFO,
-               "Charger_librairie_par_fichier Candidat rejeté sur absence Admin_command", nom_fichier ); 
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Charger_librairie_par_fichier: Candidat %s rejeté sur absence Admin_command", nom_fichier ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -150,7 +153,7 @@
 
     g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_fichier );
 
-    Info_c( Config.log, DEBUG_INFO, "Charger_librairie_par_fichier loaded", nom_fichier );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_librairie_par_fichier: %s loaded", nom_fichier );
 
     pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -173,7 +176,8 @@
      { lib = (struct LIBRAIRIE *)liste->data;                     /* Récupération des données de la liste */
 
        if ( ! strcmp ( lib->admin_prompt, prompt ) )
-        { Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: trying to unload", lib->nom_fichier );
+        { Info_new( Config.log, Config.log_all, LOG_INFO,
+                    "Decharger_librairie_par_prompt: trying to unload %s", lib->nom_fichier );
 
           Stop_librairie(lib);
 
@@ -181,13 +185,14 @@
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
                                                          /* Destruction de l'entete associé dans la GList */
-          Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: library unloaded", lib->nom_fichier );
+          Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                    "Decharger_librairie_par_prompt: library %s unloaded", lib->nom_fichier );
           g_free( lib );
           return(TRUE);
         }
        liste = liste->next;
      }
-   Info_c( Config.log, DEBUG_INFO, "MSRV: Decharger_librairie_par_prompt: library not found", prompt );
+   Info_new( Config.log, Config.log_all, LOG_ERR, "Decharger_librairie_par_prompt: library %s not found", prompt );
    return(FALSE);
   }
 /**********************************************************************************************************/
@@ -214,7 +219,7 @@
 
     repertoire = opendir ( Config.librairie_dir );                    /* Ouverture du répertoire des librairies */
     if (!repertoire)
-     { Info_c( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Directory Unknown", "/usr/local/lib" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_librairies: Directory %s Unknown", "/usr/local/lib" );
        return;
      }
 
@@ -229,8 +234,8 @@
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
 
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Charger_librairies: Number of Library loaded",
-            g_slist_length( Partage->com_msrv.Librairies ) );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_librairies: %d Library loaded",
+              g_slist_length( Partage->com_msrv.Librairies ) );
   }
 /**********************************************************************************************************/
 /* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
@@ -244,7 +249,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "MSRV: Creer_config_file_motion: Connexion DB failed" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Creer_config_file_motion: Connexion DB failed" );
        return(FALSE);
      }                                                                                  /* Si pas d'accès */
 
@@ -255,11 +260,11 @@
 
     unlink("motion.conf");                                      /* Création des fichiers de configuration */
     id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (id<0) { Info_n( Config.log, DEBUG_INFO,
-                        "MSRV: Creer_config_file_motion: creation motion.conf pid file failed", id );
+    if (id<0) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                          "Creer_config_file_motion: creation motion.conf pid file failed %d", id );
                 return(FALSE);
               }
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Creer_config_file_motion: creation motion.conf", id );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Creer_config_file_motion: creation motion.conf %d", id );
 #ifdef bouh
     g_snprintf(chaine, sizeof(chaine), "control_port 8080\n");
     write(id, chaine, strlen(chaine));
@@ -313,13 +318,13 @@
        
        unlink(nom_fichier);
        id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-       if (id<0) { Info_n( Config.log, DEBUG_INFO,
-                           "MSRV: Creer_config_file_motion: creation camera.conf failed", id );
+       if (id<0) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                           "Creer_config_file_motion: creation camera.conf failed %d", id );
                    g_free(camera);
                    close(id);
                    return(FALSE);
                  }
-       Info_n( Config.log, DEBUG_INFO, "MSRV: Creer_config_file_motion: creation thread camera", camera->num );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Creer_config_file_motion: creation thread camera", camera->num );
        g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
        write(id_camera, chaine, strlen(chaine));
        g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id) values (%d)\n",
@@ -344,26 +349,26 @@
  gboolean Demarrer_motion_detect ( void )
   { gchar chaine[80];
     gint id;
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_motion_detect: Demande de demarrage"), getpid() );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_motion_detect: Demande de demarrage %d", getpid() );
 
     if (!Creer_config_file_motion()) return(FALSE);
 
     g_snprintf(chaine, sizeof(chaine), "%s/Camera/motion.pid", Config.home);
     id = open ( chaine, O_RDONLY, 0 );
-    if (id<0) { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: ouverture pid file failed", id );
+    if (id<0) { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_motion_detect: ouverture pid file failed %d", id );
                 return(FALSE);
               }
 
     if (read ( id, chaine, sizeof(chaine) )<0)
-              { Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_motion_detect: erreur lecture pid file", id );
+              { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_motion_detect: erreur lecture pid file %d", id );
                 close(id);
                 return(FALSE);
               }
     close(id);
     PID_motion = atoi (chaine);
     kill( PID_motion, SIGHUP );                                                   /* Envoie reload conf a motion */
-    Info_n( Config.log, DEBUG_INFO,
-           "MSRV: Demarrer_motion_detect: process motion seems to be running", PID_motion );
+    Info_new( Config.log, Config.log_all, LOG_WARNING,
+           "Demarrer_motion_detect: process motion seems to be running %d", PID_motion );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -372,18 +377,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_sous_serveur ( int id )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: Demande de demarrage"), id );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur: Demande de demarrage %d", id );
     if (Partage->Sous_serveur[id].Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur: An instance is already running",
                Partage->Sous_serveur[id].pid );
        return(FALSE);
      }
     if ( pthread_create( &Partage->Sous_serveur[id].pid, NULL, (void *)Run_serveur, GINT_TO_POINTER(id) ) )
-     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur: pthread_create failed"), strerror(errno) );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Demarrer_sous_serveur: pthread_create failed %s", strerror(errno) );
        return(FALSE);
      }
     else pthread_detach( Partage->Sous_serveur[id].pid );            /* On détache le thread Sous-Serveur */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sous_serveur"), id );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur %d", id );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -392,18 +397,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_onduleur ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: Demande de demarrage %d", getpid() );
     if (Partage->com_onduleur.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: An instance is already running %d",
                Partage->com_onduleur.TID );
        return(FALSE);
      }
     if ( pthread_create( &Partage->com_onduleur.TID, NULL, (void *)Run_onduleur, NULL ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_onduleur: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_onduleur.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_onduleur: thread onduleur seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: thread onduleur seems to be running %d",
             Partage->com_onduleur.TID );
     return(TRUE);
   }
@@ -413,18 +418,19 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: Demande de demarrage %d", getpid() );
     if (Partage->com_dls.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: An instance is already running %d",
                Partage->com_dls.TID );
        return(FALSE);
      }
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_dls: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_dls.TID );      /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_dls: thread dls seems to be running", Partage->com_dls.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: thread dls seems to be running %d",
+              Partage->com_dls.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -433,23 +439,23 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_tellstick ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Demande de demarrage %d", getpid() );
 
     if (Partage->com_tellstick.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: An instance is already running",
                Partage->com_tellstick.TID );
        return(FALSE);
      }
 
     Partage->com_tellstick.dl_handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
     if (!Partage->com_tellstick.dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: dlopen failed"), dlerror() );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Demarrer_tellstick: dlopen failed (%s)", dlerror() );
        return(FALSE);
      }
                                                               /* Recherche de la fonction 'Run_tellstick' */
     Partage->com_tellstick.Run_tellstick = dlsym( Partage->com_tellstick.dl_handle, "Run_tellstick" );
     if (!Partage->com_tellstick.Run_tellstick)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Run_tellstick does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Run_tellstick does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
@@ -457,7 +463,7 @@
                                                           /* Recherche de la fonction 'Ajouter_tellstick' */
     Partage->com_tellstick.Ajouter_tellstick = dlsym( Partage->com_tellstick.dl_handle, "Ajouter_tellstick" );
     if (!Partage->com_tellstick.Ajouter_tellstick)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Ajouter_tellstick does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Ajouter_tellstick does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
@@ -465,7 +471,7 @@
                                                        /* Recherche de la fonction 'Admin_tellstick_list' */
     Partage->com_tellstick.Admin_tellstick_list = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_list" );
     if (!Partage->com_tellstick.Admin_tellstick_list)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_list does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_list does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
@@ -473,7 +479,7 @@
 
     Partage->com_tellstick.Admin_tellstick_learn = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_learn" );
     if (!Partage->com_tellstick.Admin_tellstick_learn)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_learn does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_learn does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
@@ -481,7 +487,7 @@
 
     Partage->com_tellstick.Admin_tellstick_start = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_start" );
     if (!Partage->com_tellstick.Admin_tellstick_start)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_start does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_start does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
@@ -489,18 +495,18 @@
 
     Partage->com_tellstick.Admin_tellstick_stop = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_stop" );
     if (!Partage->com_tellstick.Admin_tellstick_stop)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: Admin_tellstick_stop does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_stop does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_tellstick.dl_handle = NULL;
        return(FALSE);
      }
 
     if ( pthread_create( &Partage->com_tellstick.TID, NULL, (void *)Partage->com_tellstick.Run_tellstick, NULL ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_tellstick: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_tellstick.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_tellstick: thread tellstick seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: thread tellstick seems to be running",
             Partage->com_tellstick.TID );
     return(TRUE);
   }
@@ -510,33 +516,33 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_lirc ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: Demande de demarrage %d", getpid() );
     if (Partage->com_lirc.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: An instance is already running",
                Partage->com_lirc.TID );
        return(FALSE);
      }
 
     Partage->com_lirc.dl_handle = dlopen( "libwatchdog-lirc.so", RTLD_LAZY );
     if (!Partage->com_lirc.dl_handle)
-     { Info_c( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: dlopen failed"), dlerror() );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Demarrer_lirc: dlopen failed (%s)", dlerror() );
        return(FALSE);
      }
                                                               /* Recherche de la fonction 'Run_tellstick' */
     Partage->com_lirc.Run_lirc = dlsym( Partage->com_lirc.dl_handle, "Run_lirc" );
     if (!Partage->com_lirc.Run_lirc)
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: Run_lirc does not exist") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: Run_lirc does not exist" );
        dlclose( Partage->com_tellstick.dl_handle );
        Partage->com_lirc.dl_handle = NULL;
        return(FALSE);
      }
 
     if ( pthread_create( &Partage->com_lirc.TID, NULL, (void *)Partage->com_lirc.Run_lirc, NULL ) )
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_lirc: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_lirc.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_lirc: thread lirc seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: thread lirc seems to be running %d",
             Partage->com_lirc.TID );
     return(TRUE);
   }
@@ -546,18 +552,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_sms ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: Demande de demarrage %d", getpid() );
     if (Partage->com_sms.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: An instance is already running",
                Partage->com_sms.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_sms.TID, NULL, (void *)Run_sms, NULL ))
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_sms: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_sms.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_sms: thread sms seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: thread sms seems to be running",
             Partage->com_sms.TID );
     return(TRUE);
   }
@@ -567,18 +573,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_audio ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: Demande de demarrage %d", getpid() );
     if (Partage->com_audio.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: An instance is already running",
                Partage->com_audio.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_audio.TID, NULL, (void *)Run_audio, NULL ))
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_audio: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_audio.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_audio: thread audio seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: thread audio seems to be running",
             Partage->com_audio.TID );
     return(TRUE);
   }
@@ -588,18 +594,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_admin ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: Demande de demarrage %d", getpid() );
     if (Partage->com_admin.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: An instance is already running",
                Partage->com_admin.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_admin.TID, NULL, (void *)Run_admin, NULL ))
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_admin: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_admin.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_admin: thread admin seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: thread admin seems to be running",
             Partage->com_admin.TID );
     return(TRUE);
   }
@@ -609,18 +615,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_arch ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: Demande de demarrage %d", getpid() );
     if (Partage->com_arch.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: An instance is already running",
                Partage->com_arch.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_arch.TID, NULL, (void *)Run_arch, NULL ))
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_arch: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_arch.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_arch: thread arch seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: thread arch seems to be running",
             Partage->com_arch.TID );
     return(TRUE);
   }
@@ -630,18 +636,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_modbus ( void )
-  { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: Demande de demarrage"), getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: Demande de demarrage %d", getpid() );
     if (Partage->com_modbus.Thread_run == TRUE)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: An instance is already running"),
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: An instance is already running",
                Partage->com_modbus.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_modbus.TID, NULL, (void *)Run_modbus, NULL ))
-     { Info( Config.log, DEBUG_INFO, _("MSRV: Demarrer_modbus: pthread_create failed") );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_modbus.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_n( Config.log, DEBUG_INFO, "MSRV: Demarrer_modbus: thread modbus seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: thread modbus seems to be running",
             Partage->com_arch.TID );
     return(TRUE);
   }
@@ -713,33 +719,33 @@
      { i = Rechercher_serveur_inactif();                           /* A la recherche d'un serveur inactif */
        if (i!=-1)                                             /* Si c'est le cas, on lui assigne le jeton */
         { Partage->jeton = i;
-          Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: serveur sans client trouve") );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Gerer_jeton: serveur sans client trouve id=%d" );
         }
        else                  /* Tous nos serveurs sont utilisés, il faut donc soit créer un autre serveur */
         {                                            /* soit donner la connexion à un serveur deja occupé */
-          Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: Recherche d'un emplacement libre") );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG, "Gerer_jeton: Recherche d'un emplacement libre" );
           i = Rechercher_empl_libre();
           if (i != -1)
-           { Info_n( Config.log, DEBUG_INFO,
-                     _("MSRV: Gerer_jeton: Creation d'un nouveau ssrv"), i );
+           { Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                       "Gerer_jeton: Creation d'un nouveau ssrv id = %d", i );
              if (Demarrer_sous_serveur(i))
               { Partage->jeton = i;                                              /* On lui donne le jeton */
               }
              else
-              { Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: creation nouveau ssrv failed") ); }
+              { Info_new( Config.log, Config.log_all, LOG_WARNING, "Gerer_jeton: creation nouveau ssrv failed" ); }
            }
           else         /* On ne peut plus creer de sous serveur, on attribue la connexion au moins occupé */
-           { Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: Recherche du ssrv le moins chargé") );
+           { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Gerer_jeton: Recherche du ssrv le moins chargé" );
              i = Rechercher_moins_occupe();
              if (i != -1)
               { Partage->jeton = i;                                              /* On lui donne le jeton */
               }
              else
-              { Info( Config.log, DEBUG_INFO, _("MSRV: Gerer_jeton: rechercher_moins_occupe failed") );
+              { Info_new( Config.log, Config.log_all, LOG_WARNING, "Gerer_jeton: rechercher_moins_occupe failed" );
               }
            }
         }
-       Info_n( Config.log, DEBUG_INFO, _("MSRV:     Gerer_jeton: jeton to server"), i );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Gerer_jeton: jeton to server %d", i );
      }
   }
 /**********************************************************************************************************/
@@ -758,7 +764,8 @@
 
     i = Rechercher_empl_libre();
     if (i!=-1)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Gerer_manque_process: Too few servers, we create a new one"), i );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                 "Gerer_manque_process: Too few servers, we create a new one (id=%d)", i );
        Demarrer_sous_serveur(i);
      }
   }
@@ -768,67 +775,67 @@
 /**********************************************************************************************************/
  void Stopper_fils ( gint flag )
   { gint i;
-    Info( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Debut stopper_fils") );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Debut stopper_fils" );
 
     for (i=0; i<Config.max_serveur; i++)                   /* Arret de tous les fils en cours d'execution */
      { if (Partage->Sous_serveur[i].Thread_run == TRUE)                    /* Attente de la fin du fils i */
-        { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SSRV pid to finish"),
+        { Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for SSRV (%d) to finish",
                                           Partage->Sous_serveur[i].pid );
           Partage->Sous_serveur[i].Thread_run = FALSE;             /* Attention, les thread sont detach ! */
           while (Partage->Sous_serveur[i].pid) sched_yield();
-          Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SSRV down id "), i );
+          Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, SSRV (%d) down", i );
         }
      }
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for DLS to finish"), Partage->com_dls.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for DLS (%d) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                 /* Attente fin DLS */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, DLS is down"), Partage->com_dls.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, DLS is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ONDULEUR to finish"), Partage->com_onduleur.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for ONDULEUR (%d) to finish", Partage->com_onduleur.TID );
     Partage->com_onduleur.Thread_run = FALSE;
     while ( Partage->com_onduleur.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ONDULEUR is down"), Partage->com_onduleur.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, ONDULEUR is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for TELLSTICK to finish"), Partage->com_tellstick.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for TELLSTICK (%d) to finish", Partage->com_tellstick.TID );
     Partage->com_tellstick.Thread_run = FALSE;
     while ( Partage->com_tellstick.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, TELLSTICK is down"), Partage->com_tellstick.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, TELLSTICK is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for LIRC to finish"), Partage->com_lirc.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for LIRC (%d) to finish", Partage->com_lirc.TID );
     Partage->com_lirc.Thread_run = FALSE;
     while ( Partage->com_lirc.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, LIRC is down"), Partage->com_lirc.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, LIRC is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for MODBUS to finish"), Partage->com_modbus.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for MODBUS (%d) to finish", Partage->com_modbus.TID );
     Partage->com_modbus.Thread_run = FALSE;
     while ( Partage->com_modbus.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, MODBUS is down"), Partage->com_modbus.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, MODBUS is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for SMS to finish"), Partage->com_sms.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for SMS (%d) to finish", Partage->com_sms.TID );
     Partage->com_sms.Thread_run = FALSE;
     while ( Partage->com_sms.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, SMS is down"), Partage->com_sms.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, SMS is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ARCH to finish"), Partage->com_arch.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for ARCH (%d) to finish", Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;
     while ( Partage->com_arch.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ARCH is down"), Partage->com_arch.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, ARCH is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for AUDIO to finish"), Partage->com_audio.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for AUDIO (%d) to finish", Partage->com_audio.TID );
     Partage->com_audio.Thread_run = FALSE;
     while ( Partage->com_audio.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, AUDIO is down"), Partage->com_audio.TID );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, AUDIO is down" );
 
-    Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: keep MOTION running"), PID_motion );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: keep MOTION (%d) running", PID_motion );
 
     if (flag)
-     { Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Waiting for ADMIN to finish"), Partage->com_admin.TID );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for ADMIN (%d) to finish", Partage->com_admin.TID );
        Partage->com_admin.Thread_run = FALSE;
        while ( Partage->com_admin.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-       Info_n( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: ok, ADMIN is down"), Partage->com_admin.TID );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, ADMIN is down" );
      }
 
-    Info( Config.log, DEBUG_INFO, _("MSRV: Stopper_fils: Fin stopper_fils") );
+    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Fin stopper_fils" );
   }
 /*--------------------------------------------------------------------------------------------------------*/

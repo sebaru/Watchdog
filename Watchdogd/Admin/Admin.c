@@ -267,7 +267,6 @@
     Desactiver_ecoute_admin ();
     Info_new( Config.log, FALSE, LOG_NOTICE,
               "Run_admin: Down . . . TID = %d", pthread_self() );
-    Info_n( Config.log, DEBUG_ADMIN, "Admin: Run_admin: Down", pthread_self() );
     Partage->com_admin.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
