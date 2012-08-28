@@ -176,7 +176,7 @@
 
        client->last_use = Partage->top;
        Info_new( Config.log, FALSE, LOG_NOTICE,
-                 "Ecuter_admin : Command received = %s\n", ligne );
+                 "Ecouter_admin : Command received = %s\n", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
             if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + 7 ); }
