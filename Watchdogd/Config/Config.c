@@ -179,12 +179,12 @@
        Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
-        {      if ( ! strcmp( chaine, "debug"    ) )   Config.log_level = LOG_DEBUG;
-          else if ( ! strcmp( chaine, "info"     ) )    Config.log_level = LOG_INFO;
-          else if ( ! strcmp( chaine, "notice"   ) )  Config.log_level = LOG_NOTICE;
+        {      if ( ! strcmp( chaine, "debug"    ) ) Config.log_level = LOG_DEBUG;
+          else if ( ! strcmp( chaine, "info"     ) ) Config.log_level = LOG_INFO;
+          else if ( ! strcmp( chaine, "notice"   ) ) Config.log_level = LOG_NOTICE;
           else if ( ! strcmp( chaine, "warning"  ) ) Config.log_level = LOG_WARNING;
-          else if ( ! strcmp( chaine, "error"    ) )     Config.log_level = LOG_ERR;
-          else if ( ! strcmp( chaine, "critical" ) )    Config.log_level = LOG_CRIT;
+          else if ( ! strcmp( chaine, "error"    ) ) Config.log_level = LOG_ERR;
+          else if ( ! strcmp( chaine, "critical" ) ) Config.log_level = LOG_CRIT;
           g_free(chaine);
         }
 
@@ -200,38 +200,38 @@
  void Print_config ( void )
   { 
     if (!Config.log) return;
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config file                 %s", Config.config_file );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config port                 %d", Config.port );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config max client           %d", Config.max_client );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config min serveur          %d", Config.min_serveur );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config max serveur          %d", Config.max_serveur );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config max inactivite       %d", Config.max_inactivite );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config taille_clef_dh       %d", Config.taille_clef_dh );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config taille_clef_rsa      %d", Config.taille_clef_rsa );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config ssl crypt            %d", Config.ssl_crypt );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config log_level            %d", Config.log_level );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config taille_bloc_reseau   %d", Config.taille_bloc_reseau );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config timeout connexion    %d", Config.timeout_connexion );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config max login failed     %d", Config.max_login_failed );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config home                 %s", Config.home );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config librairie_dir        %s", Config.librairie_dir );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config db host              %s", Config.db_host );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config db database          %s", Config.db_database );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config db username          %s", Config.db_username );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config db password          %s", Config.db_password );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config crypto key           %s", Config.crypto_key );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config compil               %d", Config.compil );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config smsbox username      %s", Config.smsbox_username );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config smsbox password      %s", Config.smsbox_password );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config sms_telephone1       %s", Config.sms_telephone1 );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config sms_telephone2       %s", Config.sms_telephone2 );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config sms_min_m            %d", Config.sms_m_min );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config sms_max_m            %d", Config.sms_m_max );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config tellstick A(min)     %d", Config.tellstick_a_min );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config tellstick A(max)     %d", Config.tellstick_a_max );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config asterisk M(min)      %d", Config.asterisk_m_min );
-    Info_new( Config.log, Config.log_all, LOG_INFO,"Config asterisk M(max)      %d", Config.asterisk_m_max );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config file                 %s", Config.config_file );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config port                 %d", Config.port );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max client           %d", Config.max_client );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config min serveur          %d", Config.min_serveur );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max serveur          %d", Config.max_serveur );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max inactivite       %d", Config.max_inactivite );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config taille_clef_dh       %d", Config.taille_clef_dh );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config taille_clef_rsa      %d", Config.taille_clef_rsa );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config ssl crypt            %d", Config.ssl_crypt );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config log_level            %d", Config.log_level );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config taille_bloc_reseau   %d", Config.taille_bloc_reseau );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config timeout connexion    %d", Config.timeout_connexion );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max login failed     %d", Config.max_login_failed );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config home                 %s", Config.home );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db host              %s", Config.db_host );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db database          %s", Config.db_database );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db username          %s", Config.db_username );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db password          %s", Config.db_password );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db port              %d", Config.db_port );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config compil               %d", Config.compil );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config single               %d", Config.single );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config smsbox username      %s", Config.smsbox_username );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config smsbox password      %s", Config.smsbox_password );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_telephone1       %s", Config.sms_telephone1 );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_telephone2       %s", Config.sms_telephone2 );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_min_m            %d", Config.sms_m_min );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_max_m            %d", Config.sms_m_max );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config tellstick A(min)     %d", Config.tellstick_a_min );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config tellstick A(max)     %d", Config.tellstick_a_max );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config asterisk M(min)      %d", Config.asterisk_m_min );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config asterisk M(max)      %d", Config.asterisk_m_max );
   }
 /*--------------------------------------------------------------------------------------------------------*/

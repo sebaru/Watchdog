@@ -83,7 +83,7 @@
      }
     fcntl( ecoute, F_SETFL, O_NONBLOCK );        /* Mode non bloquant, ça aide pour une telle application */
     Info_new( Config.log, Config.log_all, LOG_INFO,
-              "Ecoute du port %s with socket %d", Config.port, ecoute );
+              "Ecoute du port %d with socket %d", Config.port, ecoute );
     return( ecoute );                                                            /* Tout s'est bien passé */
   }
 /*--------------------------------------------------------------------------------------------------------*/
