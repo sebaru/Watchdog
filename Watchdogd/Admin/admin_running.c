@@ -59,7 +59,7 @@
        Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  log_level loglevel    - Set Log Level (info, notice, warning, error)\n");
+       Write_admin ( client->connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n");
        Write_admin ( client->connexion, "  log switch            - Switch log (list, all, none, process name or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
