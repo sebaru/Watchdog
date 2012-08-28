@@ -594,19 +594,21 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_admin ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: Demande de demarrage %d", getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Demarrer_admin: Demande de demarrage %d", getpid() );
     if (Partage->com_admin.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: An instance is already running",
-               Partage->com_admin.TID );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                 "Demarrer_admin: An instance is already running (%d)",
+                 Partage->com_admin.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_admin.TID, NULL, (void *)Run_admin, NULL ))
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: pthread_create failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Demarrer_admin: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_admin.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_admin: thread admin seems to be running",
-            Partage->com_admin.TID );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+              "Demarrer_admin: thread admin (%d) seems to be running",
+              Partage->com_admin.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
