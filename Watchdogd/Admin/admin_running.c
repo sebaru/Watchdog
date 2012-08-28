@@ -59,7 +59,8 @@
        Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
-       Write_admin ( client->connexion, "  log log_to_switch     - Switch Log Mode (info, notice, warning, error, list, all, none, or library name)\n" );
+       Write_admin ( client->connexion, "  log_level loglevel    - Set Log Level (info, notice, warning, error\n");
+       Write_admin ( client->connexion, "  log switch            - Switch log (list, all, none, process name or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -225,6 +226,21 @@
        Write_admin ( client->connexion, chaine );
        
      } else
+    if ( ! strcmp ( commande, "log_level" ) )
+     { gchar debug[128], chaine [80];
+       sscanf ( ligne, "%s %s", commande, debug );
+       g_snprintf( chaine, sizeof(chaine), " Log level set to %s\n", debug );
+       if ( ! strcmp ( debug, "info"    ) )
+        { Info_change_log_level ( Config.log, LOG_INFO    ); } else
+       if ( ! strcmp ( debug, "notice"  ) )
+        { Info_change_log_level ( Config.log, LOG_NOTICE  ); } else
+       if ( ! strcmp ( debug, "warning" ) )
+        { Info_change_log_level ( Config.log, LOG_WARNING ); } else
+       if ( ! strcmp ( debug, "error"   ) )
+        { Info_change_log_level ( Config.log, LOG_ERR     ); }
+       else g_snprintf( chaine, sizeof(chaine), " Unknown log level %s\n", debug );
+       Write_admin ( client->connexion, chaine );
+     } else
     if ( ! strcmp ( commande, "log" ) )
      { gchar debug[128];
 
@@ -232,6 +248,7 @@
 
        if ( ! strcmp ( debug, "all"       ) )
         { Config.log_all = TRUE;
+          Config.log_db  = TRUE;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
@@ -244,6 +261,7 @@
         } else
        if ( ! strcmp ( debug, "none"      ) )
         { Config.log_all = FALSE;
+          Config.log_db  = FALSE;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
@@ -264,18 +282,17 @@
              Write_admin ( client->connexion, chaine );
              liste = liste->next;
            }
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug db is %s\n",
+                      (Config.log_db ? " enabled" : "disabled") );
+          Write_admin ( client->connexion, chaine );
           g_snprintf( chaine, sizeof(chaine), "  -> Debug all is %s\n",
                       (Config.log_all ? " enabled" : "disabled") );
           Write_admin ( client->connexion, chaine );
         } else
-       if ( ! strcmp ( debug, "info"    ) )
-        { Info_change_log_level ( Config.log, LOG_INFO    ); } else
-       if ( ! strcmp ( debug, "notice"  ) )
-        { Info_change_log_level ( Config.log, LOG_NOTICE  ); } else
-       if ( ! strcmp ( debug, "warning" ) )
-        { Info_change_log_level ( Config.log, LOG_WARNING ); } else
-       if ( ! strcmp ( debug, "error"   ) )
-        { Info_change_log_level ( Config.log, LOG_ERR     ); }
+       if ( ! strcmp ( debug, "db"   ) )
+        { if (Config.log_db == TRUE) Config.log_db = FALSE;
+          else Config.log_db = TRUE;
+        }
        else
         { liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
@@ -301,7 +318,6 @@
              Write_admin ( client->connexion, chaine );
            }
         }
-       Config.log_level = Config.log->log_level;    /* Sauvegarde pour persistence (export des données) */
      } else
     if ( ! strcmp ( commande, "ping" ) )
      { Write_admin ( client->connexion, " Pong !\n" );

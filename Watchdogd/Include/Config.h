@@ -66,6 +66,7 @@
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_all;                                                             /* TRUE si log_override */
+    gboolean log_db;                                                          /* TRUE si log des acces DB */
     guint max_login_failed;                                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */

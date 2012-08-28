@@ -187,18 +187,20 @@
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "sms"       ) ) { Admin_sms      ( client, ligne + 4);  }
-       else                                           { Admin_running  ( client, ligne ); }
-
-       liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
-       while(liste)
-        { lib = (struct LIBRAIRIE *)liste->data;
-          if ( ! strcmp( commande, lib->admin_prompt ) )
-           { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 ); }
-          liste = liste->next;
-        }
-
-       g_snprintf( chaine, sizeof(chaine), "\n" );
-       Write_admin ( client->connexion, chaine );
+       else { gboolean found = FALSE;
+              liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
+              while(liste)
+               { lib = (struct LIBRAIRIE *)liste->data;
+                 if ( ! strcmp( commande, lib->admin_prompt ) )
+                  { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 );
+                    found = TRUE;
+                  }
+                 liste = liste->next;
+               }
+              if (found = FALSE) { Admin_running  ( client, ligne ); }
+              g_snprintf( chaine, sizeof(chaine), "\n" );
+              Write_admin ( client->connexion, chaine );
+            }
      }
   }
 /**********************************************************************************************************/

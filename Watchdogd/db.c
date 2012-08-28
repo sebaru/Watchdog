@@ -44,7 +44,7 @@
     comment = g_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );  /* Au pire, ts les car sont doublés */
                                                                                   /* *6 pour gerer l'utf8 */
     if (!comment)
-     { Info_c( log, DEBUG_DB, "Normaliser_chaine: erreur mémoire", pre_comment );
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Normaliser_chaine: memory error %s", pre_comment );
        return(NULL);
      }
     source = pre_comment;
@@ -76,13 +76,13 @@
     my_bool reconnect;
     db = (struct DB *)g_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
-     { Info( log, DEBUG_DB, "Init_DB_SQL: Erreur allocation mémoire struct DB" );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Erreur allocation mémoire struct DB" );
        return(NULL);
      }
 
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
-     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme d'initialisation mysql_init",
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Probleme d'initialisation mysql_init (%s)",
                               (char *) mysql_error(db->mysql)  );
        g_free(db);
        return (NULL);
@@ -90,16 +90,18 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
-    if ( ! mysql_real_connect( db->mysql, Config.db_host, Config.db_username, Config.db_password, Config.db_database, Config.db_port, NULL, 0 ) )
-     { Info_c( log, DEBUG_DB, "Init_DB_SQL: Probleme de connexion à la base",
-                              (char *) mysql_error(db->mysql)  );
+    if ( ! mysql_real_connect( db->mysql, Config.db_host, Config.db_username,
+                               Config.db_password, Config.db_database, Config.db_port, NULL, 0 ) )
+     { Info_new( Config.log, Config.log_db, LOG_ERR,
+                 "Init_DB_SQL: Probleme de connexion à la base (%s)",
+                 (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
        g_free(db);
        return (NULL);
      }
     db->free = TRUE;
-    Info_c( log, DEBUG_DB, "Init_DB_SQL: Connexion effective DB", Config.db_database );
-    Info_c( log, DEBUG_DB, "                          avec user", Config.db_username );
+    Info_new( Config.log, Config.log_db, LOG_INFO,
+              "Init_DB_SQL: Connexion effective DB %s@%s", Config.db_username, Config.db_database );
     return(db);
   }
 /**********************************************************************************************************/
@@ -112,11 +114,11 @@
 
     db = *adr_db;
     if (db->free==FALSE)
-     { Info( log, DEBUG_DB, "Libere_DB_SQL: Reste un result a FREEer !" );
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Libere_DB_SQL: Reste un result a FREEer !" );
        Liberer_resultat_SQL ( log, db );
      }
     mysql_close( db->mysql );
-    Info( log, DEBUG_DB, "Libere_DB_SQL: Deconnexion effective" );
+    Info_new( Config.log, Config.log_db, LOG_INFO, "Libere_DB_SQL: Deconnexion effective" );
     g_free( db );
     *adr_db = NULL;
   }
@@ -129,11 +131,11 @@
   { if (!db) return(FALSE);
 
     if (db->free==FALSE)
-     { Info( log, DEBUG_DB, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
 
-    Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete", requete );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL: requete %s", requete );
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete failed",
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (%s)",
                (char *)mysql_error(db->mysql) );
        return(FALSE);
      }
@@ -142,7 +144,7 @@
      { db->result = mysql_store_result ( db->mysql );
        db->free = FALSE;
        if ( ! db->result )
-        { Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result failed",
+        { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: store_result failed (%s)",
                   (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
@@ -151,7 +153,7 @@
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }
-    Info_c( Config.log, DEBUG_DB, "Lancer_requete_SQL: requete traite", requete );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL: requete traite %s", requete );
     return(TRUE);
   }
 /**********************************************************************************************************/

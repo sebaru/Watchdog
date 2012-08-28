@@ -175,7 +175,7 @@
        Config.asterisk_m_max    = g_key_file_get_integer ( gkf, "ASTERISK", "max_m", NULL );
        if (!Config.asterisk_m_max) Config.asterisk_m_max = DEFAUT_ASTERISK_M_MAX;
 
-/********************************************* Partie DEBUG ***********************************************/
+/********************************************* Partie LOG *************************************************/
        Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
@@ -189,7 +189,8 @@
           g_free(chaine);
         }
 
-       Config.log_all = g_key_file_get_boolean ( gkf, "DEBUG", "log_all", NULL );
+       Config.log_all = g_key_file_get_boolean ( gkf, "LOG", "log_all", NULL );
+       Config.log_db  = g_key_file_get_boolean ( gkf, "LOG", "log_db", NULL );
      }
     g_key_file_free(gkf);
   }
