@@ -179,13 +179,12 @@
        Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
-        {      if ( ! strcmp( chaine, "LOG_DEBUG" ) )   Config.log_level = LOG_DEBUG;
-          else if ( ! strcmp( chaine, "LOG_INFO" ) )    Config.log_level = LOG_INFO;
-          else if ( ! strcmp( chaine, "LOG_NOTICE" ) )  Config.log_level = LOG_NOTICE;
-          else if ( ! strcmp( chaine, "LOG_WARNING" ) ) Config.log_level = LOG_WARNING;
-          else if ( ! strcmp( chaine, "LOG_ERR" ) )     Config.log_level = LOG_ERR;
-          else if ( ! strcmp( chaine, "LOG_CRIT" ) )    Config.log_level = LOG_CRIT;
-          else if ( ! strcmp( chaine, "LOG_EMERG" ) )   Config.log_level = LOG_EMERG;
+        {      if ( ! strcmp( chaine, "debug"    ) )   Config.log_level = LOG_DEBUG;
+          else if ( ! strcmp( chaine, "info"     ) )    Config.log_level = LOG_INFO;
+          else if ( ! strcmp( chaine, "notice"   ) )  Config.log_level = LOG_NOTICE;
+          else if ( ! strcmp( chaine, "warning"  ) ) Config.log_level = LOG_WARNING;
+          else if ( ! strcmp( chaine, "error"    ) )     Config.log_level = LOG_ERR;
+          else if ( ! strcmp( chaine, "critical" ) )    Config.log_level = LOG_CRIT;
           g_free(chaine);
         }
 
