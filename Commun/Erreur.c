@@ -119,7 +119,7 @@
        strcat ( chaine, format );
 
        va_start( ap, format );
-       vsyslog ( (override == TRUE ? LOG_EMERG : priority), chaine, ap );
+       vsyslog ( (override == TRUE ? LOG_ALERT : priority), chaine, ap );
        va_end ( ap );
      }
   }
