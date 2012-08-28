@@ -34,7 +34,6 @@
  #include <string.h>
  #include <stdio.h>
 
- #include <bonobo/bonobo-i18n.h>
  #include <sys/wait.h>
  #include <fcntl.h>
  #include <errno.h>

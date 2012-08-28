@@ -26,7 +26,6 @@
  */
 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  #include <unistd.h>
  #include <time.h>
@@ -40,19 +39,21 @@
 /**********************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
   { struct CMD_ETAT_BIT_CTRL *new_motif;
-    gint num;
+    gint num, reste;
 
     if (!Partage->com_msrv.liste_i) return;                                   /* Si pas de i, on se barre */
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
     num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);                /* Recuperation du numero de i */
-    Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls: Reste a traiter",
-                                   g_list_length(Partage->com_msrv.liste_i) );
+    reste = g_list_length(Partage->com_msrv.liste_i);
     Partage->com_msrv.liste_i = g_list_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls: Recu I DLS", num );
-    Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_Ixxx_dls:       mode", Partage->i[num].etat );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+              "Gerer_arrive_Ixxx_dls: Recu I(%03d)=%d, r%03d v%03d, b%03d. Reste a traite %03d",
+              num, Partage->i[num].etat,
+              Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu
+            );
 
 /***************************** Création de la structure passée aux clients ********************************/
     new_motif = (struct CMD_ETAT_BIT_CTRL *) g_malloc0( sizeof(struct CMD_ETAT_BIT_CTRL) );
@@ -78,14 +79,14 @@
                 pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
               }
              else
-              { Info( Config.log, DEBUG_INFO, "MSRV: Gerer_arrive_Ixxx_dls: not enough memory" ); }
+              { Info_new( Config.log, Config.log_all, LOG_ERR, "Gerer_arrive_Ixxx_dls: not enough memory" ); }
            }
         }
        g_free (new_motif);
      }
     else
-     { Info_n( Config.log, DEBUG_INFO,
-               "MSRV: Gerer_arrive_Ixxx_dls: Probleme d'allocation mémoire", num );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, 
+                "Gerer_arrive_Ixxx_dls: Not enough memory to hangle I%03d", num );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
