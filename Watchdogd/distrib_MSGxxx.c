@@ -27,7 +27,6 @@
 
  #include <glib.h>
  #include <sys/time.h>
- #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  #include <unistd.h>
  #include <time.h>
@@ -94,13 +93,13 @@
 
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
-     { Info_n( Config.log, DEBUG_INFO,
-               "MSRV: Gerer_arrive_message_dls_on: Message non trouvé", num );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, 
+                "Gerer_arrive_message_dls_on: Message %03d not found", num );
        return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
      }
-    else if (!msg->enable)                               /* Distribution du message aux sous serveurs */
-     { Info_n( Config.log, DEBUG_INFO,
-               "MSRV: Gerer_arrive_message_dls_on: Message inhibe", num );
+    else if (!msg->enable)                                   /* Distribution du message aux sous serveurs */
+     { Info_new( Config.log, Config.log_all, LOG_INFO, 
+                "Gerer_arrive_message_dls_on: Message %03d not enabled !", num );
        return;
      }
 
@@ -155,7 +154,8 @@
                 pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
               }
              else
-              { Info( Config.log, DEBUG_INFO, "MSRV: Gerer_arrive_message_dls_on: not enough memory" ); }
+              { Info_new( Config.log, Config.log_all, LOG_ERR,
+                         "Gerer_arrive_message_dls_on: not enought memory to handle %03d", msg->num ); }
            }
         }
 
@@ -169,8 +169,8 @@
        g_free (new_histo);
      }
     else
-     { Info_n( Config.log, DEBUG_INFO,
-               "MSRV: Gerer_arrive_message_dls_on: Probleme d'allocation mémoire", num );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, 
+               "Gerer_arrive_message_dls_on: Not enought memory for MSG%03d", num );
      }
     g_free( msg );                                                 /* On a plus besoin de cette reference */
   }
@@ -214,7 +214,8 @@
                 pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
               }
              else
-              { Info( Config.log, DEBUG_INFO, "MSRV: Gerer_arrive_message_dls_off: not enough memory" ); }
+              { Info_new( Config.log, Config.log_all, LOG_ERR,
+                         "Gerer_arrive_message_dls_off: not enough memory" ); }
            }
         }
 
@@ -222,8 +223,8 @@
        g_free (del_histo);
      }
     else
-     { Info_n( Config.log, DEBUG_INFO,
-               "MSRV: Gerer_arrive_message_dls_off: Probleme d'allocation mémoire", num );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, 
+                "Gerer_arrive_message_dls_off: Not enought memory for MSG%03d", num );
      }
   }
 /**********************************************************************************************************/
@@ -238,9 +239,9 @@
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data);     /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_off = g_list_remove ( Partage->com_msrv.liste_msg_off,
                                                          GINT_TO_POINTER(num) );
-       Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter OFF",
-                                      g_list_length(Partage->com_msrv.liste_msg_off) );
-       Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Disparition msg", num );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Gerer_arrive_message_dls: Handle MSG%03d=0, Reste a %d a traiter",
+               num, g_list_length(Partage->com_msrv.liste_msg_off) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
      }
@@ -249,9 +250,9 @@
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);      /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg_on = g_list_remove ( Partage->com_msrv.liste_msg_on,
                                                             GINT_TO_POINTER(num) );
-       Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Reste a traiter ON",
-                                      g_list_length(Partage->com_msrv.liste_msg_on) );
-       Info_n( Config.log, DEBUG_DLS, "MSRV: Gerer_arrive_message_dls: Apparition msg", num );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Gerer_arrive_message_dls: Handle MSG%03d=1, Reste a %d a traiter",
+               num, g_list_length(Partage->com_msrv.liste_msg_on) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
      }
