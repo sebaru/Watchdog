@@ -47,7 +47,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_INFO, "Charger_eana: Connexion DB failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_eana: Connexion DB failed" );
        return;
      }                                                                                  /* Si pas d'accès */
 
@@ -69,12 +69,13 @@
           Partage->ea[entree->num].last_arch = 0;    /* Mise à zero du champ de la derniere date d'archivage */
         }
        else
-        { Info_n( Config.log, DEBUG_INFO, "Charger_eana: entree->num out of range", entree->num ); }
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Charger_eana: entree->num (%d) out of range (max=%d)", entree->num, NBR_ENTRE_ANA ); }
        g_free(entree);
      }
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */
+/* Recuperer_entreeANADB: Recupération de la liste des EANA                                               */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -113,7 +114,8 @@
      }
 
     entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
-    if (!entreeana) Info( log, DEBUG_INFO, "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
+    if (!entreeana) Info_new( Config.log, Config.log_all, LOG_ERR,
+                             "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
      { entreeana->id_mnemo = atoi(db->row[0]);
        entreeana->num      = atoi(db->row[1]);
@@ -157,13 +159,14 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_entreeanaDB: EntreANA non trouvé dans la BDD", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Rechercher_entreeanaDB: EntreANA %d not found in DB", id );
        return(NULL);
      }
 
     entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana)
-     { Info( log, DEBUG_INFO, "Rechercher_entreeanaDB: Mem error" ); }
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_entreeanaDB: Mem error" ); }
     else
      { entreeana->id_mnemo = id;
        entreeana->num      = atoi(db->row[1]);
@@ -191,7 +194,7 @@
 
     unite = Normaliser_chaine ( log, entreeana->unite );                 /* Formatage correct des chaines */
     if (!unite)
-     { Info( log, DEBUG_DB, "Modifier_entreeANADB: Normalisation unite impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_entreeANADB: Normalisation unite impossible" );
        return(FALSE);
      }
 

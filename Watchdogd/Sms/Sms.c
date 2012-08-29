@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <string.h>
@@ -35,7 +34,6 @@
  #include <curl/curl.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
  #define PRESMS   "CDE:"
 /**********************************************************************************************************/
@@ -52,10 +50,10 @@
     pthread_mutex_unlock( &Partage->com_sms.synchro );
 
     if (nbr > 50)
-     { Info( Config.log, DEBUG_SMS, "Envoyer_sms: liste d'attente pleine" ); return; }
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Envoyer_sms: liste d'attente pleine" ); return; }
 
     copie = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!copie) { Info( Config.log, DEBUG_SMS, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
+    if (!copie) { Info_new( Config.log, Config.log_all, LOG_ERR, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
     memcpy ( copie, msg, sizeof(struct CMD_TYPE_MESSAGE) );
 
     pthread_mutex_lock( &Partage->com_sms.synchro );
@@ -71,7 +69,10 @@
   { struct CMD_TYPE_MESSAGE *msg;
 
     msg = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) { Info( Config.log, DEBUG_SMS, "Envoyer_sms_smsbox_text: pas assez de mémoire pour copie" ); return; }
+    if (!msg) { Info_new( Config.log, Config.log_all, LOG_ERR,
+                         "Envoyer_sms_smsbox_text: pas assez de mémoire pour copie" );
+                return;
+              }
 
     g_snprintf(msg->libelle_sms, sizeof(msg->libelle_sms), "%s", texte );
     msg->id  = 0;
@@ -92,7 +93,10 @@
   { struct CMD_TYPE_MESSAGE *msg;
 
     msg = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) { Info( Config.log, DEBUG_SMS, "Envoyer_sms_gsm_text: pas assez de mémoire pour copie" ); return; }
+    if (!msg) { Info_new( Config.log, Config.log_all, LOG_ERR,
+                         "Envoyer_sms_gsm_text: pas assez de mémoire pour copie" );
+                return;
+              }
 
     g_snprintf(msg->libelle_sms, sizeof(msg->libelle_sms), "%s", texte );
     msg->id  = 0;

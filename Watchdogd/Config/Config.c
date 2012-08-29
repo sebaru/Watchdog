@@ -41,7 +41,6 @@
 /**********************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
-    gint debug;
     GKeyFile *gkf;
 
     if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;

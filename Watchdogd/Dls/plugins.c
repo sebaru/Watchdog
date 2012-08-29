@@ -46,17 +46,18 @@
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
-    if (!handle) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté ", dls->plugindb.id );
-                   Info_c( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: -- sur ouverture", dlerror() );
+    if (!handle) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                            "Charger_un_plugin: Candidat %d rejeté (%s)", dls->plugindb.id, dlerror() );
                    return(FALSE);
                  }
     Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: Candidat rejeté sur absence GO", dls->plugindb.id ); 
+    if (!Go) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                        "Charger_un_plugin: Candidat %d rejeté sur absence GO", dls->plugindb.id ); 
                dlclose( handle );
                return(FALSE);
              }
 
-    Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin: id", dls->plugindb.id );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_un_plugin: id=%d", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
     dls->handle   = handle;
     dls->go       = Go;
@@ -79,7 +80,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Unable to open database" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: Unable to open database" );
        return(FALSE);
      }
 
@@ -87,13 +88,13 @@
     Libere_DB_SQL( Config.log, &db );
 
     if (!plugin_dls)
-     { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: Plugin non trouvé", id );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %d non trouvé", id );
        return(FALSE);
      }
 
     dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls)
-     { Info_n( Config.log, DEBUG_DLS, "DLS: Charger_un_plugin_by_id: out of memory", id );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%d", id );
        g_free(plugin_dls);
        return(FALSE);
      }
@@ -121,7 +122,8 @@
         { dlclose( plugin->handle );
           Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
-          Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_un_plugin_by_id: Dechargé", plugin->plugindb.id );
+          Info_new( Config.log, Config.log_all, LOG_INFO,
+                   "Decharger_un_plugin_by_id: plugin %d unloaded", plugin->plugindb.id );
           break;
         }
        plugins = plugins->next;
@@ -134,7 +136,7 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Reseter_un_plugin ( gint id )
-  { Info_n( Config.log, DEBUG_DLS, "DLS: Reseter_un_plugin: Demande de reset plugin", id );
+  { Info_new( Config.log, Config.log_all, LOG_INFO, "Reseter_un_plugin: Reset plugin %d", id );
 
     Decharger_un_plugin_by_id ( id );
     Charger_un_plugin_by_id ( id );
@@ -150,11 +152,10 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while(Partage->com_dls.Plugins)                                     /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)Partage->com_dls.Plugins->data;
-       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: tentative dechargement:", plugin->plugindb.id );
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
-       Info_n( Config.log, DEBUG_DLS, "DLS: Decharger_plugins: Dechargé", plugin->plugindb.id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Decharger_plugins: plugin %d unloaded", plugin->plugindb.id );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -171,7 +172,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: Unable to open database" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: Unable to open database" );
        return;
      }
 
@@ -186,7 +187,7 @@
    
           dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
           if (!dls)
-           { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: out of memory" );
+           { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: out of memory" );
              g_free(plugin);
              return;
            }
@@ -197,10 +198,10 @@
                                                                       /* Si option "compil" au demarrage" */
           if (Config.compil == 1) Compiler_source_dls( NULL, dls->plugindb.id );
           if (Charger_un_plugin( dls )==TRUE)
-           { Info_c( Config.log, DEBUG_DLS, "DLS: Plugin DLS charge", dls->plugindb.nom ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
         } while ( TRUE );
      }
-    else  { Info( Config.log, DEBUG_DLS, "DLS: Charger_plugins: Unable to load plugins" );
+    else  { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: Unable to load plugins" );
             return;
           }
  }
@@ -222,7 +223,7 @@
         { plugin->plugindb.on = actif;
           plugin->conso = 0.0;
           plugin->starting = 1;
-          Info_n( Config.log, DEBUG_DLS, "DLS: Activer_plugin_by_id done", plugin->plugindb.id );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Activer_plugin_by_id: id %d started", plugin->plugindb.id );
           break;
         }
        plugins = plugins->next;

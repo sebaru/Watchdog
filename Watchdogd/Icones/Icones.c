@@ -34,9 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Icones_DB.h"
- #include "Synoptiques_DB.h"
 
 /**********************************************************************************************************/
 /* Retirer_msgDB: Elimination d'un message                                                                */
@@ -67,7 +64,7 @@
 
     libelle = Normaliser_chaine ( log, icone->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_iconeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_iconeDB: Normalisation impossible" );
        return(-1);
      }
 
@@ -109,7 +106,7 @@
      }
 
     icone = (struct ICONEDB *)g_malloc0( sizeof(struct ICONEDB) );
-    if (!icone) Info( log, DEBUG_SERVEUR, "Recuperer_iconeDB_suite: Erreur allocation mémoire" );
+    if (!icone) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_iconeDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &icone->libelle, db->row[1], sizeof(icone->libelle) );        /* Recopie dans la structure */
        icone->id          = atoi(db->row[0]);
@@ -135,12 +132,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_SERVEUR, "Rechercher_iconeDB: Icone non trouvé dans la BDD", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_iconeDB: Icone %d not found in DB", id );
        return(NULL);
      }
 
     icone = (struct ICONEDB *)g_malloc0( sizeof(struct ICONEDB) );
-    if (!icone) { Info( log, DEBUG_SERVEUR, "Rechercher_iconeDB: Mem error" ); }
+    if (!icone) { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_iconeDB: Mem error" ); }
     else
      { memcpy( &icone->libelle, db->row[0], sizeof(icone->libelle) );        /* Recopie dans la structure */
        icone->id          = id;
@@ -159,7 +156,7 @@
 
     libelle = Normaliser_chaine ( log, icone->libelle );
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Modifier_iconeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_iconeDB: Normalisation impossible" );
        return(FALSE);
      }
 

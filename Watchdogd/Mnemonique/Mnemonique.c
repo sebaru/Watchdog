@@ -34,8 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Mnemonique_DB.h"
 
 /**********************************************************************************************************/
 /* Retirer_mnemoDB: Elimination d'un mnemo                                                                */
@@ -86,18 +84,18 @@
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible libelle" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_mnemoDB: Normalisation impossible libelle" );
        return(-1);
      }
     acro = Normaliser_chaine ( log, mnemo->acronyme );                   /* Formatage correct des chaines */
     if (!acro)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_mnemoDB: Normalisation impossible acronyme" );
        g_free(libelle);
        return(-1);
      }
     command_text = Normaliser_chaine ( log, mnemo->command_text );       /* Formatage correct des chaines */
     if (!command_text)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_mnemoDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_mnemoDB: Normalisation impossible command_text" );
        g_free(acro);
        g_free(libelle);
        return(-1);
@@ -154,7 +152,8 @@
 
     commande = Normaliser_chaine ( log, commande_pure );
     if (!commande)
-     { Info( log, DEBUG_SERVEUR, "Recuperer_mnemo_by_command_text: Normalisation impossible commande" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                 "Recuperer_mnemo_by_command_text: Normalisation impossible commande" );
        return(FALSE);
      }
 
@@ -222,7 +221,7 @@
      }
 
     mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
-    if (!mnemo) Info( log, DEBUG_SERVEUR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
+    if (!mnemo) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */
        memcpy( &mnemo->libelle,      db->row[5], sizeof(mnemo->libelle   ) );/* Recopie dans la structure */
@@ -266,13 +265,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_SERVEUR, "Rechercher_mnemoDB: Mnemo non trouvé dans la BDD", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_mnemoDB: Mnemo %03d not found in DB", id );
        return(NULL);
      }
 
     mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo)
-     { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB: Mem error" ); }
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_mnemoDB: Mem error" ); }
     else
      { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */
        memcpy( &mnemo->libelle,      db->row[5], sizeof(mnemo->libelle   ) );/* Recopie dans la structure */
@@ -317,13 +316,14 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB_type_num: Mnemo non trouvé dans la BDD" );
+       Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Rechercher_mnemoDB_type_num: Mnemo %03d not found in DB", critere->num );
        return(NULL);
      }
 
     mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo)
-     { Info( log, DEBUG_SERVEUR, "Rechercher_mnemoDB_type_num: Mem error" ); }
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_mnemoDB_type_num: Mem error" ); }
     else
      { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */
        memcpy( &mnemo->libelle,      db->row[5], sizeof(mnemo->libelle   ) );/* Recopie dans la structure */
@@ -349,20 +349,20 @@
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible libelle" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible libelle" );
        return(FALSE);
      }
 
     acronyme = Normaliser_chaine ( log, mnemo->acronyme );
     if (!acronyme)
-     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible acronyme" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible acronyme" );
        g_free(libelle);
        return(FALSE);
      }
 
     command_text = Normaliser_chaine ( log, mnemo->command_text );       /* Formatage correct des chaines */
     if (!command_text)
-     { Info( log, DEBUG_SERVEUR, "Modifier_mnemoDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible" );
        g_free(acronyme);
        g_free(libelle);
        return(-1);
@@ -419,7 +419,7 @@
      }
 
     mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
-    if (!mnemo) Info( log, DEBUG_SERVEUR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
+    if (!mnemo) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */
        memcpy( &mnemo->libelle,      db->row[5], sizeof(mnemo->libelle   ) );/* Recopie dans la structure */

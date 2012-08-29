@@ -48,13 +48,13 @@
 
     libelle = Normaliser_chaine ( log, histo->histo.msg.libelle );       /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_histo_hardDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_histo_hardDB: Normalisation impossible" );
        return(FALSE);
      }
 
     nom_ack = Normaliser_chaine ( log, histo->histo.nom_ack );           /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_histo_hardDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_histo_hardDB: Normalisation impossible" );
        g_free(libelle);
        return(FALSE);
      }
@@ -155,7 +155,8 @@
      }
 
     histo_hard = (struct HISTO_HARDDB *)g_malloc0( sizeof(struct HISTO_HARDDB) );
-    if (!histo_hard) Info( log, DEBUG_SERVEUR, "Recuperer_histo_hardDB_suite: Erreur allocation mémoire" );
+    if (!histo_hard) Info_new( Config.log, Config.log_all, LOG_ERR,
+                              "Recuperer_histo_hardDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */
      { memcpy( &histo_hard->histo.msg.libelle, db->row[1], sizeof(histo_hard->histo.msg.libelle) );
        memcpy( &histo_hard->histo.msg.groupe,  db->row[4], sizeof(histo_hard->histo.msg.groupe ) );

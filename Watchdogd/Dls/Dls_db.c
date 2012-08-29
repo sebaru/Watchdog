@@ -71,7 +71,7 @@
 
     nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
-     { Info( log, DEBUG_DB, "Ajouter_dlsDB: Normalisation nom impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_plugin_dlsDB: Normalisation nom impossible" );
        return(-1);
      }
 
@@ -93,7 +93,7 @@
 /* Sortie: une hquery, null si erreur                                                                     */
 /**********************************************************************************************************/
  gboolean Recuperer_plugins_dlsDB( struct LOG *log, struct DB *db )
-  { gchar requete[200];
+  { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                         /* Requete SQL */
                 "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page"
@@ -121,7 +121,8 @@
      }
 
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    if (!dls) Info( log, DEBUG_DLS, "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
+    if (!dls) Info_new( Config.log, Config.log_all, LOG_ERR,
+                       "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */
        memcpy( &dls->groupe,   db->row[5], sizeof(dls->groupe) );
@@ -158,12 +159,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_DB, "Rechercher_dlsDB: DLS non trouvé dans la BDD", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_dlsDB: DLS %03d not found in DB", id );
        return(NULL);
      }
 
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    if (!dls) Info( log, DEBUG_DLS, "Rechercher_dlsDB: Erreur allocation mémoire" );
+    if (!dls) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_dlsDB: memory error" );
     else
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */
        memcpy( &dls->groupe,   db->row[5], sizeof(dls->groupe) );
@@ -186,7 +187,7 @@
 
     nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
-     { Info( log, DEBUG_DB, "Modifier_plugin_dlsDB: Normalisation nom impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_plugin_dlsDB: Normalisation nom impossible" );
        return(-1);
      }
 

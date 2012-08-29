@@ -46,10 +46,11 @@
     guint fd;
     prctl(PR_SET_NAME, "W-Lirc", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_LIRC, "LIRC: demarrage" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: Start" );
 
     if ( (fd=lirc_init("Watchdogd",1))==-1)
-     { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to open LIRCD... stopping...", pthread_self() );
+     { Info_new( Config.log, Config.log_all, LOG_ERR,
+                "Run_lirc: Unable to open LIRCD... stopping...(%d)", pthread_self() );
        Partage->com_lirc.TID = 0;                         /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(0));
      }
@@ -57,7 +58,8 @@
     fcntl ( fd, F_SETFL, O_NONBLOCK );
 
     if (lirc_readconfig ( ".lircrc", &config, NULL)!=0)
-     { Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Run_lirc: Unable to read config... stopping...(%d)", pthread_self() );
        Partage->com_lirc.TID = 0;                         /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(0));
      }
@@ -69,11 +71,12 @@
        gint ret;
 
        if (Partage->com_lirc.Thread_reload)                                           /* On a recu RELOAD */
-        { Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: RELOAD" );
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: RELOAD" );
           lirc_freeconfig(config);
           if (lirc_readconfig ( NULL, &config, NULL)!=0)
            { config = NULL;
-             Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Unable to read config... stopping...", pthread_self() );
+             Info_new( Config.log, Config.log_all, LOG_WARNING,
+                      "Run_lirc: Unable to read config... stopping...(%s)", pthread_self() );
              Partage->com_lirc.Thread_run = FALSE;                        /* On demande l'arret du thread */
              break;
            }
@@ -81,7 +84,7 @@
         }
 
        if (Partage->com_lirc.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
-        { Info( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: SIGUSR1" );
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: SIGUSR1" );
           Partage->com_lirc.Thread_sigusr1 = FALSE;
         }
 
@@ -91,20 +94,20 @@
               { gint m;
                 if (c == NULL) break;
                 m = atoi (c);
-		Info_c( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Recu commande", code );
-		Info_c( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: -------------", c );
+		Info_new( Config.log, Config.log_all, LOG_INFO,
+                         "Run_lirc: Recu commande %s : %s (M%03d)", code, c, m );
                 Envoyer_commande_dls(m);
               }
              free(code);
              if(ret==-1) break;
            }
         }
-       usleep(1000);
+       usleep(10000);
      }
 
     if (config) lirc_freeconfig(config);
     lirc_deinit();
-    Info_n( Config.log, DEBUG_LIRC, "LIRC: Run_lirc: Down", pthread_self() );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: Down (%d)", pthread_self() );
     Partage->com_lirc.TID = 0;                            /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

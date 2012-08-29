@@ -76,8 +76,8 @@
        if ( temps->tm_wday == 0  && ! Partage->scenario[num].dimanche ) return;
      }
 
-    Info_n( Config.log, DEBUG_SERVEUR, "MSRV: Scenario Active num", num );
-    Info_n( Config.log, DEBUG_SERVEUR, "MSRV: Scenario Active bit", Partage->scenario[num].bit_m );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Scenario Active num %d -> M%03d",
+              num, Partage->scenario[num].bit_m );
     Envoyer_commande_dls( Partage->scenario[num].bit_m );
   }
 /**********************************************************************************************************/
@@ -91,7 +91,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info( Config.log, DEBUG_SERVEUR, "Charger_scenario: Connexion DB failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_scenario: Connexion DB failed" );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -116,7 +116,7 @@
 
     libelle = Normaliser_chaine ( log, scenario->libelle );              /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_scenarioDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_scenarioDB: Normalisation impossible" );
        return(-1);
      }
 
@@ -153,7 +153,7 @@
 
     libelle = Normaliser_chaine ( log, scenario->libelle );              /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Udpate_scenarioDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Udpate_scenarioDB: Normalisation impossible" );
        return(FALSE);
      }
 
@@ -298,7 +298,7 @@
      }
 
     sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
-    if (!sc) Info( log, DEBUG_SERVEUR, "Rechercher_scenarioDB: Erreur allocation mémoire" );
+    if (!sc) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_scenarioDB: Erreur allocation mémoire" );
     else
      { sc->id        = id;
        sc->bit_m     = atoi(db->row[0]);

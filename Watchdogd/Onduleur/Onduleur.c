@@ -62,20 +62,20 @@
     
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
     if (!host)
-     { Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation host impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation host impossible" );
        return(-1);
      }
     ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
     if (!ups)
      { g_free(host);
-       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation ups impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation ups impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(host);
        g_free(ups);
-       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation libelle impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation libelle impossible" );
        return(-1);
      }
     username = Normaliser_chaine ( log, onduleur->username );            /* Formatage correct des chaines */
@@ -83,7 +83,7 @@
      { g_free(host);
        g_free(ups);
        g_free(libelle);
-       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation username impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation username impossible" );
        return(-1);
      }
     password = Normaliser_chaine ( log, onduleur->password );            /* Formatage correct des chaines */
@@ -92,7 +92,7 @@
        g_free(ups);
        g_free(libelle);
        g_free(username);
-       Info( log, DEBUG_ONDULEUR, "Ajouter_onduleurDB: Normalisation password impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation password impossible" );
        return(-1);
      }
 
@@ -142,7 +142,7 @@
      }
 
     onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
-    if (!onduleur) Info( log, DEBUG_ONDULEUR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
+    if (!onduleur) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
        memcpy( &onduleur->ups,      db->row[2],  sizeof(onduleur->ups    ) );
@@ -178,13 +178,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_ONDULEUR, "Rechercher_onduleurDB: ONDULEUR non trouvé dans la BDD", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_onduleurDB: ONDULEUR %d not found in DB", id );
        return(NULL);
      }
 
     onduleur = g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur)
-     { Info( log, DEBUG_ONDULEUR, "Rechercher_onduleurDB: Mem error" ); }
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_onduleurDB: Mem error" ); }
     else
      { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
        memcpy( &onduleur->ups,      db->row[2],  sizeof(onduleur->ups    ) );
@@ -227,20 +227,20 @@
 
     host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
     if (!host)
-     { Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation host impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation host impossible" );
        return(-1);
      }
     ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
     if (!ups)
      { g_free(host);
-       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation ups impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation ups impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(host);
        g_free(ups);
-       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation libelle impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation libelle impossible" );
        return(-1);
      }
     username = Normaliser_chaine ( log, onduleur->username );            /* Formatage correct des chaines */
@@ -248,7 +248,7 @@
      { g_free(host);
        g_free(ups);
        g_free(libelle);
-       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation username impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation username impossible" );
        return(-1);
      }
     password = Normaliser_chaine ( log, onduleur->password );            /* Formatage correct des chaines */
@@ -257,7 +257,7 @@
        g_free(ups);
        g_free(libelle);
        g_free(username);
-       Info( log, DEBUG_ONDULEUR, "Modifier_onduleurDB: Normalisation password impossible" );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation password impossible" );
        return(-1);
      }
 
@@ -280,7 +280,7 @@
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Charger_tous_ONDULEUR: Requete la DB pour charger les modules onduleur                                 */
+/* Charger_tous_Requete la DB pour charger les modules onduleur                                 */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
@@ -293,15 +293,15 @@
        if (module->onduleur.id == id) return(module);
        liste = liste->next;
      }
-    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Chercher_module_by_id: UPS not found", id );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chercher_module_by_id: UPS %d not found", id );
     return(NULL);
   }
 /**********************************************************************************************************/
-/* Charger_tous_ONDULEUR: Requete la DB pour charger les modules onduleur                                 */
+/* Charger_tous_onduleur: Requete la DB pour charger les modules onduleur                                 */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static gboolean Charger_tous_ONDULEUR ( void  )
+ static gboolean Charger_tous_onduleur ( void  )
   { struct DB *db;
     gint cpt;
 
@@ -325,8 +325,8 @@
 
        module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info( Config.log, DEBUG_ONDULEUR,
-                "Charger_tous_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
+        { Info_new( Config.log, Config.log_all, LOG_ERR,
+                   "Charger_tous_Erreur allocation mémoire struct MODULE_ONDULEUR" );
           g_free(onduleur);
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
@@ -338,10 +338,11 @@
        pthread_mutex_lock( &Partage->com_onduleur.synchro );
        Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
        pthread_mutex_unlock( &Partage->com_onduleur.synchro );
-       Info_n( Config.log, DEBUG_ONDULEUR, "Charger_modules_ONDULEUR:  id    = ", module->onduleur.id   );
-       Info_c( Config.log, DEBUG_ONDULEUR, "                        -  host  = ", module->onduleur.host );
+       Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Charger_tous_onduleur: id = %03d, host=%s",
+                 module->onduleur.id, module->onduleur.host );
      }
-    Info_n( Config.log, DEBUG_ONDULEUR, "Charger_tous_ONDULEUR: module ONDULEUR found  !", cpt );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_tous_onduleur: %d ONDULEUR found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -361,8 +362,8 @@
 
     module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
     if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_ONDULEUR,
-             "Charger_un_ONDULEUR: Erreur allocation mémoire struct MODULE_ONDULEUR" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR,
+             "Charger_un_onduleur: Erreur allocation mémoire struct MODULE_ONDULEUR" );
        Libere_DB_SQL( Config.log, &db );
        return;
      }
@@ -370,8 +371,8 @@
     onduleur = Rechercher_onduleurDB( Config.log, db, id );
     Libere_DB_SQL( Config.log, &db );
     if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
-     { Info( Config.log, DEBUG_ONDULEUR,
-             "Charger_un_ONDULEUR: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR,
+             "Charger_un_onduleur: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
        g_free(module);
        return;
      }
@@ -395,7 +396,7 @@
     pthread_mutex_unlock( &Partage->com_onduleur.synchro );
   }
 /**********************************************************************************************************/
-/* Decharger_tous_ONDULEUR: Decharge l'ensemble des modules ONDULEUR                                          */
+/* Decharger_tous_Decharge l'ensemble des modules ONDULEUR                                          */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
@@ -421,7 +422,7 @@
        module->nbr_deconnect++;
      }
 
-    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Deconnecter_module", module->onduleur.id );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Deconnecter_module %d", module->onduleur.id );
     SB( module->onduleur.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
 
     num_ea = module->onduleur.ea_min;
@@ -441,68 +442,78 @@
 /* Entrée: une nom et un password                                                                         */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
- static gboolean Connecter_module ( struct MODULE_ONDULEUR *module )
+ static gboolean Connecter_onduleur ( struct MODULE_ONDULEUR *module )
   { gchar buffer[80];
     gint num_ea;
     int connexion;
 
     if ( (connexion = upscli_connect( &module->upsconn, module->onduleur.host,
                                       ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: connexion refused by module",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Connecter_onduleur: connexion refused by module %d (%s)",
+                 module->onduleur.id, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module", module->onduleur.host );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Connecter_onduleur %d", module->onduleur.host );
 
 /********************************************* UPSDESC ****************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->onduleur.ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending GET UPSDESC failed",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Connecter_onduleur: Sending GET UPSDESC failed (%s)",
+                (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading GET UPSDESC failed",
-                  (char *)upscli_strerror(&module->upsconn) );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Connecter_onduleur: Reading GET UPSDESC failed (%s)",
+                   (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading GET UPSDESC",
-                  buffer + strlen(module->onduleur.ups) + 9 );
+        { Info_new( Config.log, Config.log_all, LOG_DEBUG, 
+                   "Connecter_onduleur: Reading GET UPSDESC %s",
+                   buffer + strlen(module->onduleur.ups) + 9 );
         }
      }
 
 /********************************************* USERNAME ***************************************************/
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->onduleur.username );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending USERNAME failed",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Connecter_onduleur: Sending USERNAME failed %s",
+                (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading USERNAME failed",
-                  (char *)upscli_strerror(&module->upsconn) );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Connecter_onduleur: Reading USERNAME failed %s",
+                   (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading USERNAME",
-                  buffer );
+        { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "Connecter_onduleur: Reading USERNAME %s",
+                    buffer );
         }
      }
 
 /********************************************* PASSWORD ***************************************************/
     g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->onduleur.password );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Sending PASSWORD failed",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Connecter_onduleur: Sending PASSWORD failed %s",
+                (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading PASSWORD failed",
-                  (char *)upscli_strerror(&module->upsconn) );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Connecter_onduleur: Reading PASSWORD failed %s",
+                   (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Connecter_module: Reading PASSWORD",
-                  buffer );
+        { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "Connecter_onduleur: Reading PASSWORD %s",
+                   buffer );
         }
      }
 
@@ -549,21 +560,22 @@
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->onduleur.ups, nom_cmd );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed", buffer );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD failed",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                 "Onduleur_set_instcmd: Sending INSTCMD failed (%s) error %s",
+                 buffer, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Reading INSTCMD result failed", nom_cmd );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Reading INSTCMD result failed",
-                  (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Onduleur_set_instcmd: Reading INSTCMD result failed (%s) error %s",
+                 nom_cmd, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
     else
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", nom_cmd );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_set_instcmd: Sending INSTCMD OK", buffer );
+     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Onduleur_set_instcmd: Sending INSTCMD OK",
+                 nom_cmd, buffer );
      }
     return(TRUE);
   }
@@ -578,16 +590,16 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->onduleur.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed", buffer );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Sending GET VAR failed",
-               (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Onduleur_get_var: Sending GET VAR failed (%s) error %s",
+                buffer, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR result failed", nom_var );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR result failed",
-                  (char *)upscli_strerror(&module->upsconn) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Onduleur_get_var: Reading GET VAR result failed (%s) error %s",
+                 nom_var, (char *)upscli_strerror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
         { return(FALSE); }
        *retour = 0.0;
@@ -595,14 +607,14 @@
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
-     { Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", nom_var );
-       Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR OK", buffer );
+     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Onduleur_get_var: Reading GET VAR %s OK = %s", nom_var, buffer );
        *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
        return(TRUE);
      }
 
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR NOK", nom_var );
-    Info_c( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Onduleur_get_var: Reading GET VAR NOK", buffer );
+    Info_new( Config.log, Config.log_all, LOG_WARNING,
+             "Onduleur_get_var: Reading GET VAR %s NOK error %s", nom_var, buffer );
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -684,12 +696,12 @@
     GList *liste;
 
     prctl(PR_SET_NAME, "W-ONDULEUR", 0, 0, 0 );
-    Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: demarrage" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Start" );
 
     Partage->com_onduleur.Modules_ONDULEUR = NULL;                        /* Init des variables du thread */
 
-    if ( Charger_tous_ONDULEUR() == FALSE )                            /* Chargement des modules onduleur */
-     { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: No module ONDULEUR found -> stop" );
+    if ( Charger_tous_onduleur() == FALSE )                            /* Chargement des modules onduleur */
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Run_onduleur: No module ONDULEUR found -> stop" );
        Partage->com_onduleur.TID = 0;                     /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
@@ -701,55 +713,41 @@
        sched_yield();
 
        if (Partage->com_onduleur.Thread_reload == TRUE)
-        { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Reloading conf" );
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_onduleur: Reloading conf" );
           Decharger_tous_ONDULEUR();
-          Charger_tous_ONDULEUR();
+          Charger_tous_onduleur();
           Partage->com_onduleur.Thread_reload = FALSE;
         }
 
        if (Partage->com_onduleur.Thread_sigusr1 == TRUE)
-        { Info( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: SIGUSR1" );
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_onduleur: SIGUSR1" );
           Partage->com_onduleur.Thread_sigusr1 = FALSE;
         }
 
        if (Partage->com_onduleur.admin_del)
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Deleting module",
-                  Partage->com_onduleur.admin_del );
-          module = Chercher_module_by_id ( Partage->com_onduleur.admin_del );
+        { module = Chercher_module_by_id ( Partage->com_onduleur.admin_del );
           Deconnecter_module  ( module );
           Decharger_un_ONDULEUR ( module );
           Partage->com_onduleur.admin_del = 0;
         }
 
        if (Partage->com_onduleur.admin_add)
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Adding module",
-                  Partage->com_onduleur.admin_add );
-          Charger_un_ONDULEUR ( Partage->com_onduleur.admin_add );
+        { Charger_un_ONDULEUR ( Partage->com_onduleur.admin_add );
           Partage->com_onduleur.admin_add = 0;
         }
 
        if (Partage->com_onduleur.admin_start)
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Starting module",
-                  Partage->com_onduleur.admin_start );
-          module = Chercher_module_by_id ( Partage->com_onduleur.admin_start );
+        { module = Chercher_module_by_id ( Partage->com_onduleur.admin_start );
           if (module) module->onduleur.actif = 1;
-          else { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: UPS id not found",
-                         Partage->com_onduleur.admin_start );
-               }
           Partage->com_onduleur.admin_start = 0;
         }
 
        if (Partage->com_onduleur.admin_stop)
-        { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Stopping module",
-                  Partage->com_onduleur.admin_stop );
-          module = Chercher_module_by_id ( Partage->com_onduleur.admin_stop );
+        { module = Chercher_module_by_id ( Partage->com_onduleur.admin_stop );
           if (module) { module->onduleur.actif = 0;
                         Deconnecter_module  ( module );
                         module->date_retente = 0;                            /* RAZ de la date de retente */
                       }
-          else { Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: UPS id not found",
-                         Partage->com_onduleur.admin_stop );
-               }
           Partage->com_onduleur.admin_stop = 0;
         }
 
@@ -767,23 +765,23 @@
            }
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
-           { if ( ! Connecter_module( module ) )                     /* Demande de connexion a l'onduleur */
-              { Info_n( Config.log, DEBUG_ONDULEUR,
-                        "ONDULEUR: Run_onduleur: Module DOWN", module->onduleur.id );
+           { if ( ! Connecter_onduleur( module ) )                     /* Demande de connexion a l'onduleur */
+              { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                         "Run_onduleur: Module %03d DOWN", module->onduleur.id );
                 Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
                 module->date_retente = Partage->top + ONDULEUR_RETRY;
               }
            }
           else
-           { Info_n( Config.log, DEBUG_ONDULEUR,
-                     "ONDULEUR: Run_onduleur: Envoi des sorties onduleur ID", module->onduleur.id );
+           { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                      "Run_onduleur: Envoi des sorties onduleur ID%03d", module->onduleur.id );
              if ( Envoyer_sortie_onduleur ( module ) == FALSE )
               { Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
                 module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On retente dans longtemps */
               }
              else
-              { Info_n( Config.log, DEBUG_ONDULEUR,
-                        "ONDULEUR: Run_onduleur: Interrogation onduleur ID", module->onduleur.id );
+              { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Run_onduleur: Interrogation onduleur ID%03d", module->onduleur.id );
                 if ( Interroger_onduleur ( module ) == FALSE )
                  { Deconnecter_module ( module );
                    module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On retente dans longtemps */
@@ -796,7 +794,7 @@
      }
 
     Decharger_tous_ONDULEUR();
-    Info_n( Config.log, DEBUG_ONDULEUR, "ONDULEUR: Run_onduleur: Down", pthread_self() );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_onduleur: Down (%d)", pthread_self() );
     Partage->com_onduleur.TID = 0;                        /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
