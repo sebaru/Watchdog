@@ -41,13 +41,13 @@
     struct ARCHDB *arch;
 
     if (Partage->com_arch.taille_arch > 150)
-     { Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: DROP arch (taille>150) type", type );
-       Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: DROP arch (taille>150)  num", num );
+     { Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Ajouter_arch: DROP arch (taille>150) type=%d, num=%d", type, num );
        return;
      }
     else
-     { Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: Add Arch a traiter type", type );
-       Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Ajouter_arch: Add Arch a traiter  num", num );
+     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Ajouter_arch: Add Arch a traiter type=%d, num=%d", type, num );
      }
 
     arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
@@ -72,11 +72,12 @@
   { struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_ARCHIVE, "ARCH: demarrage" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Starting" );
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_c( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Unable to open database", Config.db_database );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, 
+                "Run_arch: Unable to open database %s", Config.db_database );
        Partage->com_arch.TID = 0;                         /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
@@ -88,15 +89,16 @@
      { struct ARCHDB *arch;
 
        if (Partage->com_arch.Thread_reload)                                         /* On a recu RELOAD ? */
-        { Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: RELOAD" );
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_arch: RELOAD" );
           Partage->com_arch.Thread_reload = FALSE;
         }
 
        if (Partage->com_arch.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
-        { Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: SIGUSR1" );
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_arch: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
-          Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
-                  g_slist_length(Partage->com_arch.liste_arch) );
+          Info_new( Config.log, Config.log_all, LOG_INFO,
+                   "Run_arch: Reste %d a traiter",
+                    g_slist_length(Partage->com_arch.liste_arch) );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
@@ -110,16 +112,17 @@
        pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
        Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-       Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Reste a traiter",
-               g_slist_length(Partage->com_arch.liste_arch) );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Run_arch: Reste a %d traiter",
+                 g_slist_length(Partage->com_arch.liste_arch) );
        Partage->com_arch.taille_arch--;
        pthread_mutex_unlock( &Partage->com_arch.synchro );
        Ajouter_archDB ( Config.log, db, arch );
-       Info( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: archive saved" );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG, "Run_arch: archive saved" );
        g_free(arch);
      }
     Libere_DB_SQL( Config.log, &db );
-    Info_n( Config.log, DEBUG_ARCHIVE, "ARCH: Run_arch: Down", pthread_self() );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_arch: Down (%d)", pthread_self() );
     Partage->com_arch.TID = 0;                            /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

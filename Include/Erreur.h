@@ -48,11 +48,7 @@
  #define  DEBUG_SERVEUR             (1<<6 ) /* Débug du thread SERVEUR */
  #define  DEBUG_CDG                 (1<<7 ) /* Chiens de garde */
  #define  DEBUG_NETWORK             (1<<8 ) /* Debug reseau */
- #define  DEBUG_ARCHIVE             (1<<9 ) /* Debug thread ARCHIVE */
  #define  DEBUG_CONNEXION           (1<<10) /* Debug connexions clientes */
- #define  DEBUG_DLS                 (1<<11) /* Debug modules DLS */
- #define  DEBUG_MODBUS              (1<<12) /* Debug modules MODBUS */
- #define  DEBUG_ADMIN               (1<<13) /* Debug connexion ADMIN */
  #define  DEBUG_COURBE              (1<<19) /* Debug des echanges COURBE */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );

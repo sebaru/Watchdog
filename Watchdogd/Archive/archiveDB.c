@@ -58,8 +58,6 @@
                 " ORDER BY `date_sec`,`date_usec` ASC",
                 NOM_TABLE_ARCH, type, num, (gint)date_deb, (gint)date_fin );
 
-   Info_c( log, DEBUG_ARCHIVE, "Recuperer_archDB: Requete SQL", requete );
-
    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
@@ -77,7 +75,8 @@
      }
 
     arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
-    if (!arch) Info( log, DEBUG_ARCHIVE, "Recuperer_archDB_suite: Erreur allocation mémoire" );
+    if (!arch) Info_new( Config.log, Config.log_all, LOG_ERR,
+                        "Recuperer_archDB_suite: Memory error" );
     else
      { arch->date_sec  = atoi(db->row[2]);
        arch->date_usec = atoi(db->row[3]);

@@ -407,7 +407,7 @@
     unlink ( cible );
     unlink ( log );
     Log = log_erreur;                                               /* Sauvegarde pour utilisation future */
-    Info_c( log_erreur, DEBUG_DLS, "Traduire_DLS: source", (new ? source : source_ok) );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );
 
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)

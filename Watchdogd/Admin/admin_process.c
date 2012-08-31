@@ -51,35 +51,35 @@
 
        if ( ! strcmp ( thread, "arch" ) )
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ARCH -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "modbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb MODBUS -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb MODBUS -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "sms" ) )
         { if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SMS -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SMS -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "audio" ) )
         { if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb AUDIO -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb AUDIO -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb DLS -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
         }  else
        if ( ! strcmp ( thread, "onduleur" ) )
         { if (!Demarrer_onduleur())                                                 /* Démarrage ONDULEUR */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb ONDULEUR -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ONDULEUR -> Arret" ); }
         }  else
        if ( ! strcmp ( thread, "tellstick" ) )
         { if (!Demarrer_tellstick())                                               /* Démarrage TELLSTICK */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb TELLSTICK -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb TELLSTICK -> Arret" ); }
         }  else
        if ( ! strcmp ( thread, "lirc" ) )
         { if (!Demarrer_lirc())                                                         /* Démarrage LIRC */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb LIRC -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb LIRC -> Arret" ); }
         }  else
        if ( ! strcmp ( thread, "ssrv" ) )
         { if (num<0 || num>=Config.max_serveur)
@@ -87,7 +87,7 @@
              Write_admin ( client->connexion, chaine );
            }
           else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
-           { Info( Config.log, DEBUG_ADMIN, "Admin: Pb SSRV -> Arret" ); }
+           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SSRV -> Arret" ); }
           else Gerer_jeton();                              /* Affectation du jeton a un des sous-serveurs */
         }
        else
