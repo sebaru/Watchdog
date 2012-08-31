@@ -47,14 +47,14 @@
 
     crypt = Crypter( log, clef, util->code_en_clair );
     if (!crypt)
-     { Info( log, DEBUG_DB, "Set_password: cryptage password impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Set_password: cryptage password impossible" );
        return(FALSE);
      }
 
     code_crypt = Normaliser_chaine ( log, crypt );
     g_free(crypt);
     if (!code_crypt)
-     { Info( log, DEBUG_DB, "Set_password: Normalisation code crypte impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Set_password: Normalisation code crypte impossible" );
        return(FALSE);
      }
  
@@ -64,11 +64,13 @@
     g_free(code_crypt);
 
     if ( ! Lancer_requete_SQL ( log, db, requete ))
-     { Info_c( log, DEBUG_DB, "Set_password: update failed", requete );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Set_password: update failed %s", util->id );
        g_free(crypt);
        return(FALSE);
      }
-    else Info_n( log, DEBUG_DB, "Set_password: update ok", util->id );
+    else Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                  "Set_password: update ok for id=%s", util->id );
     g_free(crypt);
     return(TRUE);
   }
@@ -92,13 +94,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_c( log, DEBUG_DB, "Recuperer_clef: Clef non trouvé dans la BDD", nom );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Recuperer_clef: Key not found in DB for %s", nom );
        return(NULL);
      }
 
     crypt = (gchar *)g_malloc0( NBR_CARAC_CODE_CRYPTE );
     if (!crypt)
-     { Info( log, DEBUG_DB, "Recuperer_clef: out of memory" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_clef: out of memory" );
        Liberer_resultat_SQL ( log, db );
        return(NULL);
      }
@@ -122,11 +124,11 @@
     gchar *result;
 
     if (!g_utf8_strlen(pass, -1))
-     { Info( log, DEBUG_CRYPTO, "Crypter: password should not be empty" );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Crypter: password should not be empty" );
        return( NULL );
      }
     if (!strlen(clef))
-     { Info( log, DEBUG_CRYPTO, "Crypter: clef should not be empty" );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Crypter: clef should not be empty" );
        return( NULL );
      }
 
@@ -137,25 +139,25 @@
     EVP_EncryptInit(&ctx, EVP_bf_cbc(), password, iv);                           /* Choix de l'algorithme */
                                                           /* Cryptage de la clef par le password, phase 1 */
     if(!EVP_EncryptUpdate(&ctx, outbuf, &outlen, clef, strlen(clef)))
-     { Info( log, DEBUG_CRYPTO, "Crypter: Encrypt phase 1 failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Crypter: Encrypt phase 1 failed" );
        return(NULL);
      }
 
     if(!EVP_EncryptFinal(&ctx, outbuf + outlen, &tmplen))                            /* Cryptage, phase 2 */
-     { Info( log, DEBUG_CRYPTO, "Crypter: Encrypt phase 2 failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Crypter: Encrypt phase 2 failed" );
        return(NULL);
      }
     outlen += tmplen;
     EVP_CIPHER_CTX_cleanup(&ctx);                                                    /* Cryptage effectué */
 
     if (outlen>NBR_CARAC_CODE_CRYPTE)
-     { Info_n( log, DEBUG_CRYPTO, "Crypter: clef cryptee tronquée !!", outlen );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Crypter: clef cryptee tronquée (%d)!!", outlen );
        outlen = NBR_CARAC_CODE_CRYPTE;
-     } else Info_n( log, DEBUG_CRYPTO, "Crypter: taille clef cryptee !!", outlen );
+     } else Info_new( Config.log, Config.log_all, LOG_INFO, "Crypter: taille clef cryptee (%d)!!", outlen );
 
     result = (gchar *)g_malloc0( outlen );
     if (!result)
-     { Info( log, DEBUG_CRYPTO, "Crypter: erreur allocation mémoire" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Crypter: memory error" );
        return(NULL);
      }
     memcpy( result, outbuf, outlen );

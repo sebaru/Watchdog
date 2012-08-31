@@ -43,7 +43,7 @@
     if (id < Config.tellstick_a_min || Config.tellstick_a_max < id) return;             /* Test d'echelle */
      
     if (Partage->com_tellstick.taille_tell > 150)
-     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Ajouter_tell: DROP tell (taille>150)  id", id );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Ajouter_tell: DROP tell (taille>150)  id=%d", id );
        return;
      }
 
@@ -73,7 +73,7 @@
     methods = tdMethods( num, TELLSTICK_LEARN );                                 /* Get methods of device */
 
     if ( methods | TELLSTICK_LEARN )
-     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Learning", num );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Learning %d", num );
        tdLearn ( num );
      }
 
@@ -95,7 +95,7 @@
     methods = tdMethods( num, TELLSTICK_TURNON );                                /* Get methods of device */
 
     if ( methods | TELLSTICK_TURNON )
-     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Starting", num );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Starting %d", num );
        tdTurnOn ( num );
      }
 
@@ -117,7 +117,7 @@
     methods = tdMethods( num, TELLSTICK_TURNOFF );                               /* Get methods of device */
 
     if ( methods | TELLSTICK_TURNOFF )
-     { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Stopping", num );
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Stopping %d", num );
        tdTurnOff ( num );
      }
 
@@ -174,7 +174,7 @@
   { guint methods;
     prctl(PR_SET_NAME, "W-Tellstick", 0, 0, 0 );
 
-    Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: demarrage" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Starting" );
 
     Partage->com_tellstick.liste_tell = NULL;                             /* Initialisation des variables */
     tdInit();
@@ -183,13 +183,13 @@
     while(Partage->com_tellstick.Thread_run == TRUE)                  /* On tourne tant que l'on a besoin */
      { struct TELLSTICKDB *tell;
        if (Partage->com_tellstick.Thread_reload)                                      /* On a recu reload */
-        { Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: RELOAD" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: RELOAD" );
           Partage->com_tellstick.Thread_reload = FALSE;
         }
 
        if (Partage->com_tellstick.Thread_sigusr1)                                 /* On a recu sigusr1 ?? */
-        { Info( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: SIGUSR1" );
-          Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Reste a traiter",
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: SIGUSR1" );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Reste a traiter %d",
                   Partage->com_tellstick.taille_tell );
           Partage->com_tellstick.Thread_sigusr1 = FALSE;
         }
@@ -203,7 +203,7 @@
        pthread_mutex_lock( &Partage->com_tellstick.synchro );                            /* lockage futex */
        tell = Partage->com_tellstick.liste_tell->data;                            /* Recuperation du tell */
        Partage->com_tellstick.liste_tell = g_list_remove ( Partage->com_tellstick.liste_tell, tell );
-       Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Reste a traiter",
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Reste a traiter %d",
                                        g_list_length(Partage->com_tellstick.liste_tell) );
        Partage->com_tellstick.taille_tell--;
        pthread_mutex_unlock( &Partage->com_tellstick.synchro );
@@ -211,18 +211,18 @@
        methods = tdMethods( tell->id, TELLSTICK_TURNON | TELLSTICK_TURNOFF );    /* Get methods of device */
 
        if ( tell->val == 1 && (methods | TELLSTICK_TURNON) )
-        { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Turning ON", tell->id );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Turning %d ON", tell->id );
           tdTurnOn ( tell->id );
         }
        else if ( tell->val == 0 && (methods | TELLSTICK_TURNOFF) )
-        { Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Turning OFF", tell->id );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Turning %d OFF", tell->id );
           tdTurnOff ( tell->id );
         }
 
        g_free(tell);
      }
     tdClose();
-    Info_n( Config.log, DEBUG_TELLSTICK, "TELLSTICK: Run_tellstick: Down", pthread_self() );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_tellstick: Down (%d)", pthread_self() );
     Partage->com_tellstick.TID = 0;                       /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

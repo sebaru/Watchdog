@@ -13,11 +13,9 @@ AM_YFLAGS = -p Dls_
 libtradDLS_la_LIBADD  = @LEXLIB@
 
 
-INCLUDES= -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
+INCLUDES= -I$(top_srcdir)/Include \
 	  -I../Include \
-          $(GLIB_CFLAGS)
+          $(GLIB_CFLAGS) $(MYSQL_CFLAGS)
 
 EXTRA_DIST = lignes.h
 CLEANFILES = lignes.h lignes.c mots.c

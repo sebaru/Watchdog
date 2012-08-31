@@ -35,9 +35,8 @@
  #include <stdlib.h>
  #include <string.h>
 
- #include "Erreur.h"
+ #include "watchdogd.h"
  #include "lignes.h"
- #include "Proto_traductionDLS.h"
 
  GList *Alias=NULL;
  static int Id_cible;                                           /* Pour la création du fichier temporaire */
@@ -64,7 +63,7 @@
  void Emettre( char *chaine )
   { int taille;
     taille = strlen(chaine);
-    Info_c( Log, DEBUG_DLS, "Emettre", chaine );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Emettre %s", chaine );
     write( Id_cible, chaine, taille );
   }
 /**********************************************************************************************************/
@@ -75,7 +74,7 @@
  void Emettre_erreur( char *chaine )
   { int taille;
     taille = strlen(chaine);
-    Info_c( Log, DEBUG_DLS, "Emettre_erreur", chaine );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Emettre_erreur %s", chaine );
     write( Id_log, chaine, taille );
   }
 /**********************************************************************************************************/
@@ -412,14 +411,16 @@
 
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
-     { Info_c( Log, DEBUG_DLS, "Traduire_DLS: Creation cible impossible", cible ); 
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Traduire_DLS: Target creation failed %s (%s)", cible, strerror(errno) ); 
        return(TRAD_DLS_ERROR_FILE);
      }
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
-     { close(Id_cible);
-       Info_c( Log, DEBUG_DLS, "Traduire_DLS: Creation log impossible", cible ); 
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Traduire_DLS: Log creation failed %s (%s)", cible, strerror(errno) ); 
+       close(Id_cible);
        return(TRAD_DLS_ERROR_FILE);
      }
 

@@ -61,13 +61,13 @@
 
     libelle = Normaliser_chaine ( log, comment->libelle );               /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_commentDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        return(-1);
      }
 
     font = Normaliser_chaine ( log, comment->font );                     /* Formatage correct des chaines */
     if (!font)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_commentDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        g_free(libelle);
        return(-1);
      }
@@ -114,7 +114,7 @@
      }
 
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
-    if (!comment) Info( log, DEBUG_SERVEUR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
+    if (!comment) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &comment->libelle, db->row[2], sizeof(comment->libelle) );    /* Recopie dans la structure */
        memcpy( &comment->font, db->row[3], sizeof(comment->font) );          /* Recopie dans la structure */
@@ -148,12 +148,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_n( log, DEBUG_SERVEUR, "Rechercher_commentDB: Comment non trouvé dans la BDD", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_commentDB: Comment %d not found in BD", id );
        return(NULL);
      }
 
     comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
-    if (!comment) Info( log, DEBUG_SERVEUR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
+    if (!comment) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &comment->libelle, db->row[1], sizeof(comment->libelle) );    /* Recopie dans la structure */
        memcpy( &comment->font, db->row[2], sizeof(comment->font) );          /* Recopie dans la structure */
@@ -180,13 +180,13 @@
 
     libelle = Normaliser_chaine ( log, comment->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_commentDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        return(FALSE);
      }
 
     font = Normaliser_chaine ( log, comment->font );                     /* Formatage correct des chaines */
     if (!font)
-     { Info( log, DEBUG_SERVEUR, "Ajouter_commentDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        g_free(libelle);
        return(FALSE);
      }

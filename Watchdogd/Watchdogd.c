@@ -61,9 +61,9 @@
     Partage->taille_partage = sizeof(struct PARTAGE);
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_CONFIG, "Donnees exportées", FICHIER_EXPORT );
+                Info_new( Config.log, Config.log_all, LOG_INFO, "Exporter: Data Export to %s", FICHIER_EXPORT );
               }
-    else      { Info_c( Config.log, DEBUG_CONFIG, "Could not export", strerror(errno) ); }
+    else      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Exporter: Could not export to %s", strerror(errno) ); }
     close (fd);
   }
 /**********************************************************************************************************/
@@ -75,18 +75,18 @@
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_c( Config.log, DEBUG_CONFIG, "Import : Donnees importées... Checking size", FICHIER_EXPORT );
+                Info_new( Config.log, Config.log_all, LOG_INFO, "Importer : Data Import %s... Checking size", FICHIER_EXPORT );
                 if (Partage->taille_partage != sizeof(struct PARTAGE) )
                  { memset( Partage, 0, sizeof(struct PARTAGE) );
-                   Info( Config.log, DEBUG_CONFIG, "Import: Wrong size .. zeroing ..." );
+                   Info_new( Config.log, Config.log_all, LOG_WARNING, "Importer: Wrong size .. zeroing ..." );
                  }
                 else
-                 { Info( Config.log, DEBUG_CONFIG, "Import: Size OK" ); }
+                 { Info_new( Config.log, Config.log_all, LOG_INFO, "Importer: Size OK" ); }
                 close (fd);
                 return(1);
               }
     else      { memset( Partage, 0, sizeof(struct PARTAGE) );
-                Info( Config.log, DEBUG_CONFIG, "Import: no file .. zeroing ..." );
+                Info_new( Config.log, Config.log_all, LOG_INFO, "Import: no file .. zeroing ..." );
               }
    return(0);
   }
@@ -149,7 +149,7 @@
      }
 
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-    Info_c( Config.log, DEBUG_INFO, "Traitement_signaux: traité par", chaine );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement_signaux: traité par %s", chaine );
 
     switch (num)
      { case SIGQUIT:
@@ -170,7 +170,7 @@
        case SIGUSR2: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->com_msrv.Thread_reload = TRUE;
                      break;
-       default: Info_n( Config.log, DEBUG_INFO, "Recu signal", num ); break;
+       default: Info_new( Config.log, Config.log_all, LOG_NOTICE, "Recu signal", num ); break;
      }
   }
 /**********************************************************************************************************/
@@ -267,7 +267,7 @@
           guint i;
 
           Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: SIGUSR1" );
-          Info_n( Config.log, DEBUG_INFO, "Recu SIGUSR1: jeton", Partage->jeton );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR1: jeton to server id %d", Partage->jeton );
           Partage->com_modbus.Thread_sigusr1    = TRUE;
           Partage->com_sms.Thread_sigusr1       = TRUE;
           Partage->com_dls.Thread_sigusr1       = TRUE;

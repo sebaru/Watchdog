@@ -29,6 +29,7 @@
  #define _WATCHDOGD_H_
 
  #include <pthread.h>
+ #include <errno.h>
  #include "Reseaux.h"
 
  #include "config.h"

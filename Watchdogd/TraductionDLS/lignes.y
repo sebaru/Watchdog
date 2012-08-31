@@ -37,7 +37,7 @@ int erreur;                                                             /* Compt
 #define  DEJA_DEFINI          "Ligne %d: %s is already defined\n"
 #define  INTERDIT_GAUCHE      "Ligne %d: %s interdit en position gauche\n"
 #define  INTERDIT_DROITE      "Ligne %d: %s interdit en position droite\n"
-#define  INTERDIT_MSG_BARRE   "Ligne %d: %s interdit en complement\n"
+#define  INTERDIT_T_MSG_BARRE   "Ligne %d: %s interdit en complement\n"
 #define  INTERDIT_REL_ORDRE   "Ligne %d: %s interdit dans la relation d'ordre\n"
 #define  INTERDIT_COMPARAISON "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
 #define  MANQUE_COMPARAISON   "Ligne %d: %s doit s'utiliser dans une comparaison\n"
@@ -64,7 +64,7 @@ int erreur;                                                             /* Compt
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI MONO ENTREE SORTIE TEMPO MSG ICONE CPT_H CPT_IMP EANA START
+%token <val>    BI MONO ENTREE SORTIE TEMPO T_MSG ICONE CPT_H CPT_IMP EANA START
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
@@ -105,7 +105,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case SORTIE:
                       case TEMPO :
                       case EANA  :
-                      case MSG   : if ( New_alias($1, $4, $5, $3, $6) == FALSE )         /* Deja defini ? */
+                      case T_MSG   : if ( New_alias($1, $4, $5, $3, $6) == FALSE )         /* Deja defini ? */
                                     { taille = strlen($1) + strlen(DEJA_DEFINI) + 1;
                                       chaine = New_chaine(taille);
                                       g_snprintf( chaine, taille, DEJA_DEFINI, ligne_source_dls, $1 );
@@ -141,7 +141,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | MSG | TEMPO | ICONE | CPT_H | CPT_IMP | EANA
+alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | TEMPO | ICONE | CPT_H | CPT_IMP | EANA
                 ;
 /******************************************* Gestion des instructions *************************************/
 listeInstr:     une_instr listeInstr
@@ -460,7 +460,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                   {{ $$=New_action_cpt_imp($2, $3);
                      Liberer_options($3);
                   }}
-                | MSG ENTIER                  {{ $$=New_action_msg($2);            }}
+                | T_MSG ENTIER                  {{ $$=New_action_msg($2);            }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                               /* Definition des actions via alias */
                    int taille;
@@ -486,11 +486,11 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                       options = g_list_concat( options_g, options_d );/* Concaténation des listes d'options */
                       switch(alias->bit)
                        { case TEMPO  : $$=New_action_tempo( alias->num, options );  break;
-                         case MSG    : if ($1)
+                         case T_MSG    : if ($1)
                                         { char *chaine;
-                                          taille = strlen(alias->nom) + strlen(INTERDIT_MSG_BARRE) + 1;
+                                          taille = strlen(alias->nom) + strlen(INTERDIT_T_MSG_BARRE) + 1;
                                           chaine = New_chaine(taille);
-                                          g_snprintf( chaine, taille, INTERDIT_MSG_BARRE,
+                                          g_snprintf( chaine, taille, INTERDIT_T_MSG_BARRE,
                                                       ligne_source_dls, alias->nom );
                                           Emettre_erreur(chaine); g_free(chaine);
                                           erreur++; 
