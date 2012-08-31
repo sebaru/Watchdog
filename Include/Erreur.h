@@ -40,7 +40,6 @@
  #define  fonction_sort();  { printf("Sort de la fonction %s\n", __FUNCTION__ ); }
  
  #define  DEBUG_INFO                (1<<5 ) /* Pour info */
- #define  DEBUG_SERVEUR             (1<<6 ) /* Débug du thread SERVEUR */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );

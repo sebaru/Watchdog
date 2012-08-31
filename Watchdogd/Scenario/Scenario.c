@@ -240,7 +240,7 @@
      }
 
     sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
-    if (!sc) Info( log, DEBUG_SERVEUR, "Recuperer_scenarioDB_suite: Erreur allocation mémoire" );
+    if (!sc) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_scenarioDB_suite: Erreur allocation mémoire" );
     else
      { sc->id        = atoi(db->row[26]);
        sc->bit_m     = atoi(db->row[0]);

@@ -216,7 +216,7 @@
 
        client->Db_watchdog = Init_DB_SQL( Config.log );
        if (!client->Db_watchdog)
-        { Info( Config.log, DEBUG_SERVEUR,
+        { Info_new( Config.log, Config.log_all, LOG_ERR,
                   "Accueillir_nouveaux_client: Unable to open database" );
           Deconnecter( client );
         }
@@ -260,27 +260,25 @@
     Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
     Partage->Sous_serveur[id].nb_client = 0;
 
-    Info_n( Config.log, DEBUG_SERVEUR, "Run_serveur: Enable", id );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_serveur: Enable", id );
          
     while( Partage->Sous_serveur[id].Thread_run == TRUE )                /* On tourne tant que necessaire */
      { if (Partage->jeton == id)                                                /* Avons nous le jeton ?? */
         { if (Accueillir_un_client( id ) == TRUE)                         /* Un client vient d'arriver ?? */
            { Partage->jeton = -1;                                /* On signale que l'on accepte le client */
-             Info_n( Config.log, DEBUG_SERVEUR, "Run_serveur: jeton rendu", id );
+             Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: jeton rendu %d)", id );
            }
         }
 
        if (Partage->Sous_serveur[id].Thread_sigusr1)                          /* Gestion des signaux USR1 */
-        { gchar chaine[256];
-          g_snprintf( chaine, sizeof(chaine), "Run_serveur: id %d, pid %d, nbr_client %d",
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: id %d, pid %d, nbr_client %d",
                       id, (guint)Partage->Sous_serveur[id].pid, Partage->Sous_serveur[id].nb_client );
-          Info( Config.log, DEBUG_SERVEUR, chaine );
           Partage->Sous_serveur[id].Thread_sigusr1 = FALSE;
         }
 
        if (Partage->Sous_serveur[id].Thread_reload)                         /* Gestion des signaux RELOAD */
         { Partage->Sous_serveur[id].Thread_reload = FALSE;
-          Info_n( Config.log, DEBUG_SERVEUR, "Run_serveur: RELOAD", id );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: RELOAD (%d)", id );
         }
 
        if (Partage->Sous_serveur[id].Clients)                                    /* Si il y a des clients */
@@ -483,7 +481,7 @@
                                        (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
                          g_free(etat);                                            /* On libere la mémoire */
                        }
-                      else Info( Config.log, DEBUG_SERVEUR, "pb alloc mem envoi capteur" );
+                      else Info_new( Config.log, Config.log_all, LOG_ERR, "Not enought memory envoi capteur" );
                     }
                    liste_capteur = liste_capteur->next;                    /* On passe au capteur suivant */
                  }
@@ -543,7 +541,7 @@
         }
        else
        if ( Partage->Sous_serveur[id].inactivite + 10*Config.max_inactivite < Partage->top )/* Inactivite ? */
-        { Info( Config.log, DEBUG_SERVEUR, "Inactivity time reached" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Inactivity time reached" );
           Partage->Sous_serveur[id].Thread_run = FALSE;                       /* Arret "Local" du process */
         }
 /****************************************** Ecoute des messages histo  ************************************/
@@ -600,13 +598,13 @@
 /********************************************* Arret du serveur *******************************************/
     if (Partage->jeton == id)
      { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
-       Info_n( Config.log, DEBUG_SERVEUR, "Run_serveur: jeton rendu", id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: jeton rendu (%d)", id );
      }
 
     while(Partage->Sous_serveur[id].Clients)                          /* Parcours de la liste des clients */
      { struct CLIENT *client;                                         /* Deconnection de tous les clients */
        client = (struct CLIENT *)Partage->Sous_serveur[id].Clients->data;
-       Info_c( Config.log, DEBUG_SERVEUR, "Run_serveur: deconnexion client", client->machine );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: deconnexion client from %s", client->machine );
        Deconnecter(client);
      }
 
@@ -628,7 +626,7 @@
        g_list_free ( Partage->Sous_serveur[id].new_motif );
        Partage->Sous_serveur[id].new_motif = NULL;
      }
-    Info_n( Config.log, DEBUG_SERVEUR, "Run_serveur: Down", id );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_serveur: Down (id=%d)", id );
     pthread_exit( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/
