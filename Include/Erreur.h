@@ -41,9 +41,6 @@
  
  #define  DEBUG_SIGNAUX             (1<<0 ) /* SIGTERM */
  #define  DEBUG_DB                  (1<<1 ) /* Acces DB */
- #define  DEBUG_USER                (1<<2 ) /* Connexion user */
- #define  DEBUG_CONFIG              (1<<3 ) /* Chargement du fichier de conf */
- #define  DEBUG_CRYPTO              (1<<4 ) /* Crytage des clefs */
  #define  DEBUG_INFO                (1<<5 ) /* Pour info */
  #define  DEBUG_SERVEUR             (1<<6 ) /* Débug du thread SERVEUR */
  #define  DEBUG_CDG                 (1<<7 ) /* Chiens de garde */

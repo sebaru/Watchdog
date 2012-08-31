@@ -26,12 +26,11 @@
  */
 
  #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
  #include <string.h>
  
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+
 /**********************************************************************************************************/
 /* Autoriser_client: Autorise le client à se connecter                                                    */
 /* Entrée/Sortie: rien                                                                                    */
@@ -42,7 +41,8 @@
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
-    Info_n( Config.log, DEBUG_CONNEXION, _("Autoriser_autorisation: RAZ 'login failed'"), client->util->id );
+    Info_new( Config.log, Config.log_all, LOG_INFO,
+             "Autoriser_autorisation: RAZ 'login failed' for %d", client->util->id );
     
     Raz_login_failed( Config.log, client->Db_watchdog, client->util->id );
   }
@@ -71,16 +71,16 @@
     clef = Recuperer_clef( Config.log, client->Db_watchdog,
                            client->ident.nom, &id );
     if (!clef)
-     { Info_c( Config.log, DEBUG_CONNEXION,
-               _("Tester_autorisation: Unable to retrieve the key of user"), client->ident.nom );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+               "Tester_autorisation: Unable to retrieve the key of user %s", client->ident.nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
           
     client->util = Rechercher_utilisateurDB( Config.log, client->Db_watchdog, id );
     if (!client->util)
-     { Info_c( Config.log, DEBUG_CONNEXION,
-               _("Tester_autorisation: Unable to retrieve the user"), client->ident.nom );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+               "Tester_autorisation: Unable to retrieve the user %s", client->ident.nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
@@ -89,19 +89,15 @@
 /***************************************** Identification du client ***************************************/
     crypt = Crypter( Config.log, Config.crypto_key, client->ident.password );
     if (!crypt)
-     { Info_c( Config.log, DEBUG_CRYPTO,
-               _("Tester_autorisation: Password encryption error"), client->util->nom );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+               "Tester_autorisation: Password encryption error for user %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
 
     if (memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
-     { Info_c( Config.log, DEBUG_CONNEXION, 
-               _("Tester_autorisation: Password error"), client->util->nom );
-       Info_c( Config.log, DEBUG_CONNEXION, 
-               _("Tester_autorisation: Password error"), client->util->code );
-       Info_c( Config.log, DEBUG_CONNEXION, 
-               _("Tester_autorisation: Password error"), crypt );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,  
+               "Tester_autorisation: Password error for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        g_free(crypt);
        Ajouter_one_login_failed( Config.log, client->Db_watchdog,  /* Dommage ! */
@@ -112,30 +108,32 @@
 
 /********************************************* Compte du client *******************************************/
     if (!client->util->actif)                              /* Est-ce que son compte est toujours actif ?? */
-     { Info_c( Config.log, DEBUG_CONNEXION, 
-               _("Tester_autorisation: Account disabled"), client->util->nom );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,  
+                "Tester_autorisation: Account disabled for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_DISABLED, NULL, 0 );
        return(DECONNECTE);
      }
 
     if (client->util->expire && client->util->date_expire<time(NULL) )   /* Expiration temporel du compte */
-     { Info_c( Config.log, DEBUG_CONNEXION,
-               _("Tester_autorisation: Account expired"), client->util->nom );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+                "Tester_autorisation: Account expired for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_EXPIRED, NULL, 0 );
        return(DECONNECTE);
      }
 
     if (client->util->changepass)                       /* L'utilisateur doit-il changer son mot de passe */
-     { Info_c( Config.log, DEBUG_CONNEXION, 
-               _("Tester_autorisation: User have to change his password"), client->util->nom );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,  
+                "Tester_autorisation: User %s have to change his password", client->util->nom );
        util.id = client->util->id;
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CHANGEPASS,
                      (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        return(ATTENTE_NEW_PASSWORD);
      }
-    Info_c( Config.log, DEBUG_CONNEXION, _("Tester_autorisation: Envoi Autorisation"), client->util->nom );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+             "Tester_autorisation: Envoi Autorisation for %s", client->util->nom );
     Autoriser_client ( Id_serveur, client );
-    Info_c( Config.log, DEBUG_CONNEXION, _("Tester_autorisation: Autorisation sent"), client->util->nom );
+    Info_new( Config.log, Config.log_all, LOG_INFO,
+             "Tester_autorisation: Autorisation sent for %s", client->util->nom );
     return( ENVOI_DONNEES );
   }
 /*--------------------------------------------------------------------------------------------------------*/

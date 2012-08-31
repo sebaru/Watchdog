@@ -31,7 +31,6 @@
  #include <openssl/rand.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
@@ -49,54 +48,52 @@
     if (!connexion->ssl)                                                  /* Premier appel de la fonction */
      { connexion->ssl = SSL_new( Ssl_ctx );                                    /* Creation d'une instance */
        if (!connexion->ssl)                                                   /* Si réussite d'allocation */
-        { Info( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: unable to create a ssl object" );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: unable to create a ssl object" );
           client->mode = DECONNECTE;  
           return;         
         }
 
        SSL_set_fd( connexion->ssl, connexion->socket );
        SSL_set_accept_state( connexion->ssl );
-       Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: set_accept_state", client->connexion->socket );
+       Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: set_accept_state %d", client->connexion->socket );
      }
-    Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: accept en cours 1", client->connexion->socket );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG, "Connecter_ssl: accept en cours 1 = %d", client->connexion->socket );
     retour = SSL_accept( connexion->ssl );
-    Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: accept en cours 2", retour );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG, "Connecter_ssl: accept en cours 2 = %d", retour );
     if (retour<=0)
      { retour = SSL_get_error( connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
-        { Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: need more data", client->connexion->socket );
+        { Info_new( Config.log, Config.log_all, LOG_DEBUG,  "Connecter_ssl: need more data", client->connexion->socket );
           return;
         }
        
-       Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: SSL_accept get error", retour );
+       Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: SSL_accept get error %d", retour );
        while ( (retour=ERR_get_error()) )
-        { Info_c( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: SSL_accept",
-                                            ERR_error_string( retour, NULL ) );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Connecter_ssl: SSL_accept error %s",
+                    ERR_error_string( retour, NULL ) );
         }
      }
                           /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats */ 
     certif = SSL_get_peer_certificate( connexion->ssl );             /* On prend le certificat du serveur */
     if (!certif)
-     { Info( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: no certificate received" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: no certificate received" );
        client->mode = DECONNECTE;
        return;
      }
-    Info( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: certificate received" );
+    Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: certificate received" );
 
     retour = SSL_get_verify_result( connexion->ssl );                       /* Verification du certificat */
     if ( retour != X509_V_OK )                                      /* Si erreur, on se deconnecte presto */
-     { Info( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: unauthorized certificate" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: unauthorized certificate" );
        client->mode = DECONNECTE;
        return;
      }
 
-    Info_c( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: algo crypto",
-                                      (gchar *)SSL_get_cipher_name( connexion->ssl ) );
-    Info_n( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: longueur clef",
-                                      SSL_get_cipher_bits( connexion->ssl, NULL ) );
-
-    Info_c( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: partenaire", Nom_certif ( certif ) );
-    Info_c( Config.log, DEBUG_CRYPTO, "SSRV: Connecter_ssl: signataire", Nom_certif_signataire ( certif ) );
+    Info_new( Config.log, Config.log_all, LOG_INFO,
+             "Connecter_ssl: algo crypto %s, (%d bits), for %s, signed by %s",
+             (gchar *)SSL_get_cipher_name( connexion->ssl ), SSL_get_cipher_bits( connexion->ssl, NULL ),
+              Nom_certif ( certif ), Nom_certif_signataire ( certif ) );
     
     Client_mode ( client, ATTENTE_IDENT );
   }
