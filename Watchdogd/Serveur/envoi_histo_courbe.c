@@ -32,7 +32,6 @@
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
@@ -55,7 +54,8 @@
     envoi_courbe = (struct CMD_START_COURBE *)g_malloc0( Config.taille_bloc_reseau );
     if (!envoi_courbe)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: Pb d'allocation memoire envoi_courbe" );
+       Info_new( Config.log, Config.log_all, LOG_ERR, 
+                "Proto_ajouter_histo_courbe_thread: Pb d'allocation memoire envoi_courbe" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -69,7 +69,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Info( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
+       Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
        g_free(envoi_courbe);
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -82,7 +82,7 @@
        client->histo_courbe.date_first = client->histo_courbe.date_last - 3600;
      }
 
-    Info( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
+    Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
     max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
 
     Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.num,                  /* Requete SQL */
@@ -100,7 +100,8 @@
        if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
         { Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_START_HISTO_COURBE, (gchar *)envoi_courbe,
                         sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
-          Info_n( Config.log, DEBUG_COURBE, "Proto_ajouter_histo_courbe_thread: taille donnees", envoi_courbe->taille_donnees );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "Proto_ajouter_histo_courbe_thread: taille donnees=%d", envoi_courbe->taille_donnees );
           envoi_courbe->taille_donnees = 0;
         }
      }
