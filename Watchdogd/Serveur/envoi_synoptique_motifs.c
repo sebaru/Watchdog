@@ -179,10 +179,7 @@
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
+        { Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
                         (gchar *)motifs,
                          sizeof(struct CMD_TYPE_MOTIFS) + motifs->nbr_motifs * sizeof(struct CMD_TYPE_MOTIF)
                        );
@@ -269,10 +266,7 @@
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+        { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
                         (gchar *)motifs,
                          sizeof(struct CMD_TYPE_MOTIFS) + motifs->nbr_motifs * sizeof(struct CMD_TYPE_MOTIF)
                        );

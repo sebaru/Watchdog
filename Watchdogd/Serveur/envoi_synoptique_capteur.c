@@ -161,8 +161,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
           pthread_exit ( NULL );
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass LIB", capteur->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass ID ", capteur->id );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
@@ -223,9 +221,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
           Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_capteur ", capteur->id );
         }
        else g_free(capteur_new);
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
 
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass LIB", capteur->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass ID ", capteur->id );

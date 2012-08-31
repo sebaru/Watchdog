@@ -159,8 +159,6 @@
           pthread_exit ( NULL );
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass LIB", pass->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass ID ", pass->id );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
@@ -227,9 +225,6 @@
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) );
           Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_3 );
         }
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
 
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass LIB", pass->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass ID ", pass->id );

@@ -161,9 +161,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
        g_free(camera_sup);
@@ -210,9 +207,6 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
 
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );

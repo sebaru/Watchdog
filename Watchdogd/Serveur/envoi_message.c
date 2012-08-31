@@ -248,10 +248,7 @@
         }
 
        if ( (msg == NULL) || msgs->nbr_messages == max_enreg )/* Si depassement de tampon ou plus d'enreg */
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE, (gchar *)msgs,
+        { Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE, (gchar *)msgs,
                          sizeof(struct CMD_TYPE_MESSAGES) + msgs->nbr_messages * sizeof(struct CMD_TYPE_MESSAGE) );
           msgs->nbr_messages = 0;
         }

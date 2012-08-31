@@ -74,8 +74,6 @@
           init_etat.bleu   = Partage->i[ bit_controle ].bleu;
           init_etat.cligno = Partage->i[ bit_controle ].cligno;
 
-          while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-
           Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
                         (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
           liste = liste->next;
@@ -98,8 +96,6 @@
                 client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
               }
            } else capteur = (struct CAPTEUR *)liste->data;
-
-          while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
 
           init_capteur = Formater_capteur(capteur);                    /* Formatage de la chaine associée */
 

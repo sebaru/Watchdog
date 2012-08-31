@@ -79,6 +79,7 @@
     gint32   socket;
     gint32   emetteur;
     SSL    *ssl;
+    struct LOG *log;
   };
 
  struct CMD_ENREG            /* Pour le comptage et la description des données en cours de telechargement */
@@ -109,12 +110,11 @@
     TAG_RFXCOM,                                                            /* Gestion des capteurs RFXCOM */
   };
 /************************************* Définitions des prototypes *****************************************/
- extern gint Recevoir_reseau( struct LOG *Log, struct CONNEXION *Connexion );
-
+ extern gint Recevoir_reseau( struct CONNEXION *Connexion );
  extern struct CONNEXION *Nouvelle_connexion ( struct LOG *Log,
                                                gint socket, gint emetteur, gint taille_bloc );
- extern gint Attendre_envoi_disponible ( struct LOG *Log, struct CONNEXION *connexion );
- extern gint Envoyer_reseau( struct LOG *Log, struct CONNEXION *connexion, gint destinataire,
+ extern gint Attendre_envoi_disponible ( struct CONNEXION *connexion );
+ extern gint Envoyer_reseau( struct CONNEXION *connexion, gint destinataire,
                              gint tag, gint ss_tag,
                              gchar *buffer, gint taille_totale );
  extern void Fermer_connexion ( struct CONNEXION *connexion );

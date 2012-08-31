@@ -280,10 +280,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
        rezo_icone = Preparer_envoi_icone( icone );
        g_free(icone);
        if (rezo_icone)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          Envoi_client ( client, tag, sstag,
+        { Envoi_client ( client, tag, sstag,
                          (gchar *)rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
           g_free(rezo_icone);
         }

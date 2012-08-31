@@ -159,9 +159,7 @@
        rezo_histo = Preparer_envoi_histo( histo );
        g_free(histo);
        if (rezo_histo)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-          Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO,
+        { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO,
                           (gchar *)rezo_histo, sizeof(struct CMD_TYPE_HISTO) );
           g_free(rezo_histo);
         }

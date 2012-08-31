@@ -196,8 +196,6 @@
           pthread_exit ( NULL );
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
        g_free(camera);
      }

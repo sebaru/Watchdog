@@ -48,27 +48,31 @@
 
     if ( !client ) return(0);
     if ( client->mode >= DECONNECTE )
-     { Info_n( Config.log, DEBUG_NETWORK, "Envoi_client : envoi interdit", client->connexion->socket);
+     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoi_client : envoi interdit to %d", client->connexion->socket);
        return(0);
      }
 
+    while (Attendre_envoi_disponible( client->connexion )) sched_yield();
+                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+          
     pthread_mutex_lock( &client->mutex_write );
-    retour = Envoyer_reseau( Config.log, client->connexion, W_CLIENT, tag, ss_tag, buffer, taille );
+    retour = Envoyer_reseau( client->connexion, W_CLIENT, tag, ss_tag, buffer, taille );
     pthread_mutex_unlock( &client->mutex_write );
     if (retour)
      { client->defaut++;
-       Info_n( Config.log, DEBUG_NETWORK, "Defaut envoi client id", client->connexion->socket);
-       Info_c( Config.log, DEBUG_NETWORK, "                   sur", client->machine);
-       Info_n( Config.log, DEBUG_NETWORK, "                 errno", retour);
+       Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Envoi_client: Failed sending to id=%s (%s), error %d",
+                client->connexion->socket, client->machine, retour);
 
        if (client->defaut>=DEFAUT_MAX)
-        { Info( Config.log, DEBUG_NETWORK, "Deconnexion client sur défaut" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Envoi_client: Deconnexion client sur défaut" );
           Client_mode ( client, DECONNECTE );
         }
        else switch(retour)
         { case EPIPE:
           case ECONNRESET: Client_mode ( client, DECONNECTE );          /* Connection resettée par le clt */
-                           Info( Config.log, DEBUG_NETWORK, "     decision: deconnexion client" );
+                           Info_new( Config.log, Config.log_all, LOG_INFO, "decision: deconnexion client" );
                            break;
         }
      }
@@ -96,16 +100,13 @@
 /**********************************************************************************************************/
  gboolean Envoyer_gif( struct CLIENT *client )
   { gint taille;
-    if (Attendre_envoi_disponible(Config.log, client->connexion)==-1)     /* Attente de liberation reseau */
+    if (Attendre_envoi_disponible(client->connexion)==-1)                 /* Attente de liberation reseau */
      { return( FALSE ); }
-printf("Envoi_gif: envoi disponible !!\n");
 
     if (!client->transfert.buffer)
-     { /*struct CMD_REZO_ENREG nbr;*/
-       client->transfert.buffer = g_malloc0( client->connexion->taille_bloc );
+     { client->transfert.buffer = g_malloc0( client->connexion->taille_bloc );
        if (!client->transfert.buffer)
-        { printf("Envoyer_donnees: Pas de mémoire\n");
-          client->transfert.en_cours = FALSE;
+        { client->transfert.en_cours = FALSE;
           return(TRUE);
         }
        /*nbr.num = client->transfert.taille;
@@ -116,19 +117,15 @@ printf("Envoi_gif: envoi disponible !!\n");
     if (client->transfert.en_cours)                    /* A-t-on deja un fichier en cours de transfert ?? */
      { taille = read( client->transfert.fd, client->transfert.buffer + sizeof(struct CMD_FICHIER),
                                             client->connexion->taille_bloc - sizeof(struct CMD_FICHIER) );
-       printf("taille lue: %d  taille max=%d\n", taille,
-              client->connexion->taille_bloc - sizeof(struct CMD_FICHIER) );
        if (taille>=0)                                            /* On n'est tjrs pas a la fin du fichier */
         { gint retour;
           retour = Envoi_client( client, TAG_FICHIER, SSTAG_SERVEUR_FICHIER, client->transfert.buffer,
                                  taille + sizeof(struct CMD_FICHIER) );
-          printf("Retour write: %d\n", retour );
         }
 
        if (taille != client->connexion->taille_bloc - sizeof(struct CMD_FICHIER) )
                                                        /* Est-on a la fin du fichier ?? (ou -1 si erreur) */
-        { printf("Fin fichier %s\n", ((struct CMD_FICHIER *)client->transfert.buffer)->nom );
-          close(client->transfert.fd);                         /* Oui, on le ferme et on passe au suivant */
+        { close(client->transfert.fd);                         /* Oui, on le ferme et on passe au suivant */
           client->transfert.en_cours = FALSE;
           g_free(client->transfert.fichiers->data);
           client->transfert.fichiers = g_list_remove( client->transfert.fichiers,
@@ -149,10 +146,11 @@ printf("Envoi_gif: envoi disponible !!\n");
        suivant:
        if (!client->transfert.fichiers) return(TRUE);
        liste = (struct LISTE_FICH *)(client->transfert.fichiers->data);
-       printf("Ouverture fichier %s\n", liste->fichier_absolu );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Envoyer_gif: Sending %s", liste->fichier_absolu );
        client->transfert.fd = open( liste->fichier_absolu, O_RDONLY );
        if (client->transfert.fd<0)
-        { Info_c( Config.log, DEBUG_INFO, "Transfert impossible", liste->fichier );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Envoyer_gif: Sending failed for %s (%s)", liste->fichier, strerror(errno) );
           g_free(client->transfert.fichiers->data);
           client->transfert.fichiers = g_list_remove( client->transfert.fichiers, liste );
           goto suivant;                                                           /* On essaie le suivant */

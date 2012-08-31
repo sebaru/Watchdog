@@ -188,9 +188,6 @@
           return;
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
        Envoi_client ( client, tag, sstag, (gchar *)syn, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
        g_free(syn);
      }

@@ -178,8 +178,6 @@
           pthread_exit ( NULL );
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,
                       (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
        g_free(sc);

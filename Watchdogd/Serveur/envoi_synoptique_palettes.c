@@ -153,8 +153,6 @@
           return;
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_palette_atelier: pass LIB", palette->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_palette_atelier: pass ID ", palette->id );
        Envoi_client ( client, TAG_ATELIER, sstag,
@@ -213,9 +211,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_palette_supervision: pass LIB", palette->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_palette_supervision: pass ID ", palette->id );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,

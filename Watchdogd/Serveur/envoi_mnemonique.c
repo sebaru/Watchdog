@@ -357,10 +357,7 @@
         }
 
        if ( (mnemo == NULL) || mnemos->nbr_mnemos == max_enreg ) /* Si depassement de tampon ou plus d'enreg */
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          Envoi_client ( client, tag, sstag, (gchar *)mnemos,
+        { Envoi_client ( client, tag, sstag, (gchar *)mnemos,
                          sizeof(struct CMD_TYPE_MNEMONIQUES) + mnemos->nbr_mnemos * sizeof(struct CMD_TYPE_MNEMONIQUE) );
           mnemos->nbr_mnemos = 0;
         }
@@ -407,9 +404,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
 
        Envoi_client ( client, tag, sstag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
        g_free(mnemo);

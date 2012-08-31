@@ -86,10 +86,9 @@
             struct REZO_CLI_IDENT *ident;
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
-            Info_n( Config.log, DEBUG_CONNEXION, "Identification du client", connexion->socket );
-            Info_c( Config.log, DEBUG_CONNEXION, "Nom de l'utilisateur", ident->nom );
-            Info_c( Config.log, DEBUG_CONNEXION, "Version du client   ", ident->version );
-            Info_n( Config.log, DEBUG_CONNEXION, "Version donnees     ", ident->version_d );
+            Info_new( Config.log, Config.log_all, LOG_INFO,
+                     "Gerer_protocol: Identification du client (%d), nom=%s, version=%s, version_donnees=%d",
+                      connexion->socket, ident->nom, ident->version, ident->version_d );
             memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );  /* Recopie pour sauvegarde */
             
                                                                         /* Vérification du MAJOR et MINOR */
@@ -103,7 +102,7 @@
                g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong version number" );
                Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                              (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-               Info( Config.log, DEBUG_CONNEXION, "Wrong version number" );
+               Info_new( Config.log, Config.log_all, LOG_WARNING, "Wrong version number" );
                Client_mode ( client, DECONNECTE );
              }
           }
@@ -112,7 +111,6 @@
                                                    && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
           { struct CMD_UTIL_SETPASSWORD *util;
             util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
-            printf("Set password for %d: %s\n", util->id, util->code_en_clair );
             Proto_set_password( Id_serveur, client, util );
           }
   }
@@ -124,7 +122,7 @@
  void Ecouter_client ( gint Id_serveur, struct CLIENT *client )
   { gint recu;
 
-    recu = Recevoir_reseau( Config.log, client->connexion );
+    recu = Recevoir_reseau( client->connexion );
     if (recu==RECU_OK)
      { /*switch( client->connexion->entete.destinataire )
         { case W_SERVEUR: */
@@ -134,9 +132,8 @@
         }*/
      }
     else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
-     { printf("Recu erreur\n");
-       switch( recu )
-        { case RECU_ERREUR_CONNRESET: Info( Config.log, DEBUG_NETWORK,
+     { switch( recu )
+        { case RECU_ERREUR_CONNRESET: Info_new( Config.log, Config.log_all, LOG_DEBUG,
                                             "Ecouter_client: Reset connexion" );
                                       break;
         }

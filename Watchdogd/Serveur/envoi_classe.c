@@ -235,10 +235,7 @@
        rezo_classe = Preparer_envoi_classe( classe );
        g_free(classe);
        if (rezo_classe)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          Envoi_client ( client, tag, sstag,
+        { Envoi_client ( client, tag, sstag,
                          (gchar *)rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
           g_free(rezo_classe);
         }

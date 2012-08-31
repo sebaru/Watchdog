@@ -159,9 +159,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         } 
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment LIB", comment->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment ID ", comment->id );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
@@ -210,9 +207,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
-
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
 
        Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment LIB", comment->libelle );
        Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment ID ", comment->id );

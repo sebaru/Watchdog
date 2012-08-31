@@ -46,7 +46,7 @@
 /* Entrée: log, connexion                                                                                 */
 /* Sortie: Code d'erreur le cas echeant                                                                   */
 /**********************************************************************************************************/
- gint Attendre_envoi_disponible ( struct LOG *Log, struct CONNEXION *connexion )
+ gint Attendre_envoi_disponible ( struct CONNEXION *connexion )
   { gint retour, cpt;
     struct timeval tv;
     fd_set fd;
@@ -62,18 +62,22 @@ one_again:
     if (retour==-1)
      { gint err;
        err = errno;
-       Info_c( Log, DEBUG_NETWORK, "Attendre_envoi_disponible: erreur select", strerror(errno) );
-       Info_n( Log, DEBUG_NETWORK, "                              code errno", err );
+       Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Attendre_envoi_disponible: erreur select %s, err %d",
+                 strerror(errno), err );
        switch(err)
         { case EINTR: if (cpt<10) { cpt++; goto one_again; }
-                      else Info( Log, DEBUG_NETWORK,
+                      else Info_new( connexion->log, FALSE, LOG_DEBUG,
                            "Attendre_envoi_disponible: Sortie apres 10 Interrupt Call." );
                       break;
         }
        return(err);
      }
     if (retour==0)                                   /* Traiter ensuite les signaux du genre relais brisé */
-     { Info( Log, DEBUG_NETWORK, "Attendre_envoi_disponible: select timeout" ); return(-1); }
+     { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Attendre_envoi_disponible: select timeout" );
+       return(-1);
+     }
     return(0);
   }
 /**********************************************************************************************************/
@@ -86,13 +90,13 @@ one_again:
   { struct CONNEXION *connexion;
 
     connexion = g_malloc0( sizeof(struct CONNEXION) );
-    if (!connexion) { Info( Log, DEBUG_INFO, "Nouvelle_connexion: not enought memory" );
+    if (!connexion) { Info_new( Log, FALSE, LOG_ERR, "Nouvelle_connexion: not enought memory" );
                       return(NULL);
                     }
 
     connexion->donnees = g_malloc0( taille_bloc );
     if (!connexion->donnees)
-     { Info( Log, DEBUG_INFO, "Nouvelle_connexion: not enought memory (buffer)" );
+     { Info_new( Log, FALSE, LOG_ERR, "Nouvelle_connexion: not enought memory (buffer)" );
        g_free(connexion);
        return(NULL);
      }
@@ -104,6 +108,7 @@ one_again:
     connexion->emetteur      = emetteur;
     connexion->taille_bloc   = taille_bloc;
     connexion->ssl           = NULL;
+    connexion->log           = Log;
     return(connexion);
   }
 
@@ -128,7 +133,7 @@ one_again:
 /* Entrée: la connexion                                                                                   */
 /* Sortie: -1 si erreur, 0 si kedal, le code de controle sinon                                            */
 /**********************************************************************************************************/
- gint Recevoir_reseau( struct LOG *Log, struct CONNEXION *connexion )
+ gint Recevoir_reseau( struct CONNEXION *connexion )
   { int taille_recue, err;
 
     if (!connexion) return( RECU_ERREUR );
@@ -159,19 +164,19 @@ one_again:
           printf( "recv_rezo, socket %d Errno=%d %s taille %d\n", 
                   connexion->socket, err, strerror(err), taille_recue );
           return(RECU_RIEN);
-        } else Info_n( Log, DEBUG_NETWORK, "taille entete recue", taille_recue );
+        }
 
        connexion->index_entete += taille_recue;                                 /* Indexage pour la suite */
 
        if (connexion->index_entete >= sizeof(struct ENTETE_CONNEXION))
-        { Info_n( Log, DEBUG_NETWORK, "Recu entete de", connexion->socket );
-          Info_n( Log, DEBUG_NETWORK, "           tag", connexion->entete.tag );
-          Info_n( Log, DEBUG_NETWORK, "        ss_tag", connexion->entete.ss_tag );
-          Info_n( Log, DEBUG_NETWORK, "       donnees", connexion->entete.taille_donnees );
+        { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau: From %d, tag=%d, sstag=%d, taille=%d",
+                    connexion->socket, connexion->entete.tag,
+                    connexion->entete.ss_tag, connexion->entete.taille_donnees );
 
           if ( connexion->entete.taille_donnees>connexion->taille_bloc )
            { connexion->entete.taille_donnees=connexion->taille_bloc;
-             Info_n( Log, DEBUG_NETWORK, "Paquet trop grand !!\n", connexion->socket );
+             Info_new( connexion->log, FALSE, LOG_DEBUG, "Recevoir_reseau: Paquet trop grand !! (%d)", connexion->socket );
            }
         }
      }
@@ -179,7 +184,8 @@ one_again:
      { if ( connexion->index_donnees == connexion->entete.taille_donnees )
         { connexion->index_entete  = 0;                                                 /* Raz des indexs */
           connexion->index_donnees = 0;
-          Info_n( Log, DEBUG_NETWORK, " recue donnees", connexion->entete.taille_donnees );
+          Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau: recue %d donnees", connexion->entete.taille_donnees );
           return(RECU_OK);
         }
        if (connexion->ssl)
@@ -216,16 +222,17 @@ one_again:
 /* Entrée: la socket, l'entete, le buffer                                                                 */
 /* Sortie: non nul si pb                                                                                  */
 /**********************************************************************************************************/
- gint Envoyer_reseau( struct LOG *Log, struct CONNEXION *connexion, gint destinataire, gint tag, gint ss_tag,
+ gint Envoyer_reseau( struct CONNEXION *connexion, gint destinataire, gint tag, gint ss_tag,
                       gchar *buffer, gint taille_totale )
   { struct ENTETE_CONNEXION Entete;
     gint err, retour, cpt;
 
     if (!connexion) return(-1);
 
-    if ( (retour=Attendre_envoi_disponible(Log, connexion)) )
-     { Info_n( Log, DEBUG_NETWORK, "Envoyer_reseau: timeout depassé (ou erreur)", connexion->socket );
-       Info_n( Log, DEBUG_NETWORK, "                             code de retour", retour );
+    if ( (retour=Attendre_envoi_disponible(connexion)) )
+     { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
+                 connexion->socket, retour );
        return(retour);
      }
 
@@ -235,10 +242,9 @@ one_again:
     Entete.ss_tag         = ss_tag;
     Entete.taille_donnees = taille_totale;
 
-    Info_n( Log, DEBUG_NETWORK, "Envoi du paquet au client", connexion->socket );
-    Info_n( Log, DEBUG_NETWORK, "                      tag", tag );
-    Info_n( Log, DEBUG_NETWORK, "                   ss_tag", ss_tag );
-    Info_n( Log, DEBUG_NETWORK, "                  donnees", taille_totale );
+    Info_new( connexion->log, FALSE, LOG_DEBUG,
+             "Envoyer_reseau: Sending to %d, tag=%d, sstag=%d, taille_totale=%d",
+             connexion->socket, tag, ss_tag, taille_totale );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
     while(cpt)
@@ -250,15 +256,15 @@ encore_entete:
 
        if (retour<=0)
         { err = errno;
-          Info_n( Log, DEBUG_NETWORK, "Envoyer_reseau: code de retour", err );
-          Info_c( Log, DEBUG_NETWORK, "              chaine de retour", strerror(err) );
+          Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Envoyer_reseau: error %s", strerror(err) );
           if (connexion->ssl)
-           { Info_n( Log, DEBUG_NETWORK, " retour SSL", SSL_get_error( connexion->ssl, retour ) );
+           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                     "Envoyer_reseau: retour SSL %s", SSL_get_error( connexion->ssl, retour ) );
            }
           if (err == EAGAIN) goto encore_entete;
           return(err);
-        } else Info_n( Log, DEBUG_NETWORK, "donnees envoyees entete", retour );
-          
+        }          
        cpt -= retour;
      }
 
@@ -268,9 +274,10 @@ encore_entete:
        while(cpt < Entete.taille_donnees)
         {
 encore_buffer:
-          if ( (retour=Attendre_envoi_disponible(Log, connexion)) )
-           { Info_n( Log, DEBUG_NETWORK, "Envoyer_reseau: timeout depassé (ou erreur)", connexion->socket );
-             Info_n( Log, DEBUG_NETWORK, "                             code de retour", retour );
+          if ( (retour=Attendre_envoi_disponible(connexion)) )
+           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
+                 connexion->socket, retour );
              return(retour);
            }
 
@@ -280,14 +287,15 @@ encore_buffer:
           
           err = errno;
           if (retour<=0)
-           { Info_n( Log, DEBUG_NETWORK, "Envoyer_reseau: code de retour", err );
-             Info_c( Log, DEBUG_NETWORK, "              chaine de retour", strerror(err) );
+           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                      "Envoyer_reseau: error %s", strerror(err) );
              if (connexion->ssl)
-              { Info_n( Log, DEBUG_NETWORK, " retour SSL", SSL_get_error( connexion->ssl, retour ) );
+              { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                     "Envoyer_reseau: retour SSL %s", SSL_get_error( connexion->ssl, retour ) );
               }
              if (err == EAGAIN) goto encore_buffer;
              return(err);
-           } else Info_n( Log, DEBUG_NETWORK, "donnees envoyees buffer", retour );
+           } 
           cpt += retour;
         }
      }

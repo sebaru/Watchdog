@@ -100,12 +100,7 @@
        rezo_histo->page_id = requete.page_id;              /* Envoie à la bonne page d'historique cliente */
        g_free(histo);
        if (rezo_histo)
-        { while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
-
-          /*printf("Envoi_histo_hard: num %d, type %d nom_ack %s, objet %s, libelle %s\n",
-                  rezo_histo->num,rezo_histo->type,rezo_histo->nom_ack,rezo_histo->objet,rezo_histo->libelle );*/
-          Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,
+        { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,
                          (gchar *)rezo_histo, sizeof(struct CMD_TYPE_HISTO_HARD) );
           g_free(rezo_histo);
         }

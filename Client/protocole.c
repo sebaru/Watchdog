@@ -127,7 +127,7 @@
   { gint recu;
 
     do
-     { recu = Recevoir_reseau( Config_cli.log, Connexion );
+     { recu = Recevoir_reseau( Connexion );
        if (recu==RECU_OK)
         { Gerer_protocole( Connexion ); }
      } while ( recu == RECU_EN_COURS || recu == RECU_OK );

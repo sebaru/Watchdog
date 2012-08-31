@@ -198,8 +198,6 @@
           pthread_exit ( NULL );
         }
 
-       while (Attendre_envoi_disponible( Config.log, client->connexion )) sched_yield();
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
        Envoi_client ( client, tag, sstag, (gchar *)modbus, sizeof(struct CMD_TYPE_MODBUS) );
        g_free(modbus);
      }
