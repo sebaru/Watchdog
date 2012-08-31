@@ -123,12 +123,14 @@
     gint sms_index;
 
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)               /* Read config file */
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Read Phone profile NOK", gn_error_print(error) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Lire_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
        return;
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
-     { Info_c( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Open Phone NOK", gn_error_print(error) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Lire_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
        gn_lib_library_free();
@@ -153,22 +155,23 @@
           if ( ! strncmp( (gchar *)sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )
            { guint num_bit;
              num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
-             Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Recu SMS", (gchar *)sms.user_data[0].u.text );
-             Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm:       de", sms.remote.number );
+             Info_new( Config.log, Config.log_all, LOG_INFO,
+                      "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
              if ( Config.sms_m_min <= num_bit && num_bit <= Config.sms_m_max)
               { Envoyer_commande_dls ( num_bit ); }                           /* Activation du monostable */ 
-             else Info_n ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: permission denied M number", num_bit );
+             else Info_new( Config.log, Config.log_all, LOG_INFO,
+                           "Lire_sms_gsm: permission denied M number %d", num_bit );
 
            }
           else
-           { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: Wrong CDE", (gchar *)sms.user_data[0].u.text );
-             Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm:        de", sms.remote.number );
+           { Info_new( Config.log, Config.log_all, LOG_INFO,
+                      "Lire_sms_gsm: Wrong CDE %s de %s", (gchar *)sms.user_data[0].u.text );
            }
           gn_sms_delete (&data, state);                               /* On l'a traité, on peut l'effacer */
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
-       else  { Info_c ( Config.log, DEBUG_SMS, "SMS: Lire_sms_gsm: error", gn_error_print(error) );
-               Info_n ( Config.log, DEBUG_SMS, "              sms.number", sms.number );
+       else  { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                        "Lire_sms_gsm: error %s from %s", gn_error_print(error), sms.number );
                break;
              }
      }
@@ -189,12 +192,14 @@
     gn_sms sms;
 
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)               /* Read config file */
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Read Phone profile NOK", gn_error_print(error) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Envoi_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
        return;
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
-     { Info_c( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Open Phone NOK", gn_error_print(error) );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Envoi_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
        return;
      }
 
@@ -216,7 +221,7 @@
           sms.smsc.type = data.message_center->smsc.type;
         }
        else
-        { Info ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Pb avec le SMSC" ); }
+        { Info_new( Config.log, Config.log_all, LOG_WARNING, "Envoi_sms_gsm: Pb avec le SMSC" ); }
        free(data.message_center);
      }
 
@@ -236,9 +241,10 @@
 
     error = gn_sms_send(&data, state);
     if (error == GN_ERR_NONE)
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Ok", msg->libelle_sms ); }
+     { Info_new( Config.log, Config.log_all, LOG_INFO, "Envoi_sms_gsm: Envoi SMS Ok %s", msg->libelle_sms ); }
     else
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi SMS Nok", gn_error_print(error)); }
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Envoi_sms_gsm: Envoi SMS Nok (%s)", gn_error_print(error)); }
 
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
@@ -274,7 +280,8 @@
                   CURLFORM_COPYCONTENTS, telephone,
                   CURLFORM_END); 
     if (Partage->top < TOP_MIN_ENVOI_SMS)
-     { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi trop tot !!", msg->libelle_sms );
+     { Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Envoi_sms_smsbox: Envoi trop tot !! (%s)", msg->libelle_sms );
        curl_formadd( &formpost, &lastptr,       /* Pas de SMS les 2 premières minutes de vie du processus */
                      CURLFORM_COPYNAME,     "origine",          /* 'debugvar' pour lancer en mode semonce */
                      CURLFORM_COPYCONTENTS, "debugvar",
@@ -301,14 +308,17 @@
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
        res = curl_easy_perform(curl);
        if (!res)
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS OK", msg->libelle_sms );
-          Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox:         vers", telephone );
+        { Info_new( Config.log, Config.log_all, LOG_INFO,
+                   "Envoi_sms_smsbox: Envoi SMS %s to %s", msg->libelle_sms, telephone );
         }
        else
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL", erreur); }
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL (%s)", erreur); }
      }
     else
-     { Info ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL Init"); }
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL Init");
+     }
     curl_easy_cleanup(curl);
     curl_formfree(formpost);
   }
@@ -322,7 +332,7 @@
     GList *liste_sms;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
-    Info ( Config.log, DEBUG_INFO, "SMS: Run_sms: Demarrage" );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_sms: Starting" );
                                                                 /* Initialisation des variables du thread */
     Partage->com_sms.Thread_run    = TRUE;                                          /* Le thread tourne ! */
 
@@ -330,18 +340,18 @@
      {
 
        if (Partage->com_sms.Thread_reload)                              /* A-t'on recu un signal RELOAD ? */
-        { Info( Config.log, DEBUG_INFO, "SMS: Run_sms: RELOAD" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_sms: RELOAD" );
           Partage->com_sms.Thread_reload = FALSE;
         }
 
        if (Partage->com_sms.Thread_sigusr1)                               /* A-t'on recu un signal USR1 ? */
         { int nbr;
 
-          Info( Config.log, DEBUG_INFO, "SMS: Run_sms: SIGUSR1" );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_sms: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_sms.synchro );     /* On recupere le nombre de sms en attente */
           nbr = g_list_length(Partage->com_sms.liste_sms);
           pthread_mutex_unlock( &Partage->com_sms.synchro );
-          Info_n( Config.log, DEBUG_INFO, "SMS: Nbr SMS a envoyer", nbr );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_sms: Nbr SMS a envoyer = %d", nbr );
           Partage->com_sms.Thread_sigusr1 = FALSE;
         }
 
@@ -355,7 +365,7 @@
           continue;
         }
 
-       Info( Config.log, DEBUG_SMS, "SMS: Run_sms send: debut" );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG, "Run_sms send: debut" );
        pthread_mutex_lock( &Partage->com_sms.synchro );
        liste_sms = Partage->com_sms.liste_sms;                         /* Sauvegarde du ptr sms a envoyer */
        pthread_mutex_unlock( &Partage->com_sms.synchro );
@@ -364,7 +374,8 @@
 /**************************************** Envoi en mode GSM ***********************************************/
 
        if (Partage->top < TOP_MIN_ENVOI_SMS)
-        { Info_c ( Config.log, DEBUG_SMS, "SMS: Envoi_sms_gsm: Envoi trop tot !!", msg->libelle_sms ); }
+        { Info_new( Config.log, Config.log_all, LOG_INFO,
+                   "Envoi_sms_gsm: Envoi trop tot !! (%s)", msg->libelle_sms ); }
        else if (msg->sms == MSG_SMS_GSM)
         { if ( strcmp(Config.sms_telephone1, DEFAUT_SMS_TELEPHONE) ) Envoi_sms_gsm ( msg, Config.sms_telephone1 );
           if ( strcmp(Config.sms_telephone2, DEFAUT_SMS_TELEPHONE) ) Envoi_sms_gsm ( msg, Config.sms_telephone2 );
@@ -377,15 +388,15 @@
 
        pthread_mutex_lock( &Partage->com_sms.synchro );
        Partage->com_sms.liste_sms = g_list_remove ( Partage->com_sms.liste_sms, msg );
-       Info_n ( Config.log, DEBUG_INFO, "SMS: Run_sms: Reste a envoyer",
-                g_list_length(Partage->com_sms.liste_sms) );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_sms: Reste %d a envoyer",
+                 g_list_length(Partage->com_sms.liste_sms) );
        pthread_mutex_unlock( &Partage->com_sms.synchro );
        g_free( msg );
 
-       Info( Config.log, DEBUG_SMS, "SMS: Run_sms send: fin" );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG, "Run_sms send: fin" );
      }
 
-    Info_n( Config.log, DEBUG_SMS, "SMS: Run_sms: Down", pthread_self() );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_sms: Down (%s)", pthread_self() );
     Partage->com_sms.TID = 0;                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

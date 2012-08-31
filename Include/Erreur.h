@@ -53,14 +53,7 @@
  #define  DEBUG_DLS                 (1<<11) /* Debug modules DLS */
  #define  DEBUG_MODBUS              (1<<12) /* Debug modules MODBUS */
  #define  DEBUG_ADMIN               (1<<13) /* Debug connexion ADMIN */
- #define  DEBUG_ONDULEUR            (1<<15) /* Debug modules ONDULEUR */
- #define  DEBUG_SMS                 (1<<16) /* Debug envoi SMS */
- #define  DEBUG_AUDIO               (1<<17) /* Debug envoi AUDIO */
- #define  DEBUG_CAMERA              (1<<18) /* Debug CAMERA */
  #define  DEBUG_COURBE              (1<<19) /* Debug des echanges COURBE */
- #define  DEBUG_TELLSTICK           (1<<20) /* Debug des echanges TELLSTICK */
- #define  DEBUG_LIRC                (1<<21) /* Debug des echanges LIRC */
- #define  DEBUG_ASTERISK            (1<<22) /* Debug des echanges ASTERISK */
 
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );
