@@ -40,6 +40,34 @@
  #include "Onduleur.h"
 
 /**********************************************************************************************************/
+/* Ups_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Ups_Lire_config ( void )
+  { GKeyFile *gkf;
+
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Ups_Lire_config : unable to load config file %s", Config.config_file );
+       return;
+     }
+                                                                               /* Positionnement du debug */
+    Cfg_ups.lib->Thread_debug = g_key_file_get_boolean ( gkf, "UPS", "debug", NULL ); 
+                                                                 /* Recherche des champs de configuration */
+
+    g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Ups_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                  */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Ups_Liberer_config ( void )
+  {
+  }
+/**********************************************************************************************************/
 /* Retirer_upsDB: Elimination d'un ups                                                                    */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
