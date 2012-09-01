@@ -27,7 +27,6 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Admin/libadmin.la \
 		    Utilisateur/libutil.la \
 		    Synoptiques/libsyn.la \
-		    Onduleur/libonduleur.la \
 		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
