@@ -3,18 +3,17 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Config Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
+SUBDIRS = Include Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           Compteur EntreeANA Message Mnemonique Scenario Icones Histo Utilisateur \
 	  Synoptiques Camera Onduleur Tellstick Lirc Asterisk Rfxcom Imsg
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
-                    ecoute.c shm.c \
+                    ecoute.c shm.c Config.c \
                     db.c ssl.c \
                     distrib_MSGxxx.c distrib_Ixxx.c
 
-Watchdogd_LDADD   = Config/libconfig.la \
-		    Serveur/libserveur.la \
+Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Modbus/libmodbus.la \
