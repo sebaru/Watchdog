@@ -146,7 +146,6 @@ Watchdogd/Icones/Makefile \
 Watchdogd/Histo/Makefile \
 Watchdogd/Utilisateur/Makefile \
 Watchdogd/Synoptiques/Makefile \
-Watchdogd/Compteur/Makefile \
 Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
