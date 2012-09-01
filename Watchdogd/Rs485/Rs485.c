@@ -239,7 +239,7 @@
 /* Entrée: l'id du module                                                                                 */
 /* Sortie: le module, ou NULL si non trouvé                                                               */
 /**********************************************************************************************************/
- static struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
+ struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
   { struct MODULE_RS485 *module;
     GSList *liste;
     module = NULL;

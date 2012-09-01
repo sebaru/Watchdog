@@ -96,7 +96,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_upsDB ( struct DB *db )
+ static gboolean Recuperer_upsDB ( struct DB *db )
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -110,7 +110,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct UPSDB *Recuperer_upsDB_suite( struct DB *db )
+ static struct UPSDB *Recuperer_upsDB_suite( struct DB *db )
   { struct UPSDB *ups;
 
     Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
@@ -248,7 +248,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static struct MODULE_UPS *Chercher_module_ups_by_id ( gint id )
+ struct MODULE_UPS *Chercher_module_ups_by_id ( gint id )
   { struct MODULE_UPS *module;
     GSList *liste;
     module = NULL;

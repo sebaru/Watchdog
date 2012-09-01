@@ -30,6 +30,17 @@
  #include "Rs485.h"
 
 /**********************************************************************************************************/
+/* Admin_rs485_reload: Demande le rechargement des conf RS485                                             */
+/* Entrée: le client                                                                                      */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Admin_rs485_reload ( struct CLIENT_ADMIN *client )
+  { Cfg_rs485.reload = TRUE;
+    Write_admin ( client->connexion, " RS485 Reloading in progress\n" );
+    while (Cfg_rs485.reload) sched_yield();
+    Write_admin ( client->connexion, " RS485 Reloading done\n" );
+  }
+/**********************************************************************************************************/
 /* Admin_rs485_list: Envoi la liste des modules chargés au client d'admin                                 */
 /* Entrée: Le client destinataire                                                                         */
 /* Sortie: néant                                                                                          */
@@ -221,9 +232,7 @@
      { Admin_rs485_list ( client );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Cfg_rs485.reload = TRUE;
-       Write_admin ( client->connexion,
-                     "  Reloading in progress . . .\n" );
+     { Admin_rs485_reload(client);
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,

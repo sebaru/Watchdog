@@ -83,12 +83,11 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
- extern void Run_ups ( void );                                                    /* Dans Onduleur.c */
  extern gboolean Retirer_upsDB ( struct UPSDB *ups );
  extern gint Ajouter_upsDB ( struct UPSDB *ups );
  extern gboolean Modifier_upsDB( struct UPSDB *ups );
- extern gboolean Recuperer_upsDB ( struct DB *db );
- extern struct UPSDB *Recuperer_upsDB_suite( struct DB *db );
+ extern struct MODULE_UPS *Chercher_module_ups_by_id ( gint id );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 
