@@ -138,10 +138,7 @@ Watchdogd/Tellstick/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Imsg/Makefile \
 Watchdogd/Lirc/Makefile \
-Watchdogd/EntreeANA/Makefile \
-Watchdogd/Camera/Makefile \
 Watchdogd/Asterisk/Makefile \
-Watchdogd/Histo/Makefile \
 Watchdogd/Utilisateur/Makefile \
 Watchdogd/Synoptiques/Makefile \
 Watchdogd/Serveur/Makefile \
