@@ -130,17 +130,68 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_ups_reload(client);
      }
+    else if ( ! strcmp ( commande, "add" ) )
+     { struct UPSDB ups;
+       gint retour;
+       sscanf ( ligne, "%s %s,%s,%s,%s,%d,%d,%d,%d,%s", commande,    /* Découpage de la ligne de commande */
+                ups.ups, ups.host, ups.username, ups.password,
+                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
+              );
+        retour = Ajouter_upsDB ( &ups );
+        if (retour == -1)
+         { Write_admin ( client->connexion, "Error, UPS not added\n" ); }
+        else
+         { gchar chaine[80];
+           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
+           Write_admin ( client->connexion, chaine );
+         }
+     }
+    else if ( ! strcmp ( commande, "change" ) )
+     { struct UPSDB ups;
+       gint retour;
+       sscanf ( ligne, "%s %d,%s,%s,%s,%s,%d,%d,%d,%d,%s", commande, /* Découpage de la ligne de commande */
+                &ups.id, ups.ups, ups.host, ups.username, ups.password,
+                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
+              );
+        retour = Modifier_upsDB ( &ups );
+        if (retour == FALSE)
+         { Write_admin ( client->connexion, "Error, UPS not changed\n" ); }
+        else
+         { gchar chaine[80];
+           g_snprintf( chaine, sizeof(chaine), " UPS %d changed\n", ups.id );
+           Write_admin ( client->connexion, chaine );
+         }
+     }
+    else if ( ! strcmp ( commande, "del" ) )
+     { gboolean retour;
+       gint id;
+       sscanf ( ligne, "%s %d", commande, id );                      /* Découpage de la ligne de commande */
+        retour = Retirer_upsDB ( id );
+        if (id == FALSE)
+         { Write_admin ( client->connexion, "Error, UPS not erased\n" ); }
+        else
+         { gchar chaine[80];
+           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", id );
+           Write_admin ( client->connexion, chaine );
+         }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
        Write_admin ( client->connexion,
-                     "  add x                                  - Demarre le module id\n" );
+                     "  add name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
        Write_admin ( client->connexion,
-                     "  del x                                  - Demarre le module id\n" );
+                     "                                         - Ajoute un UPS\n" );
        Write_admin ( client->connexion,
-                     "  start id                               - Demarre le module id\n" );
+                     "  change id,name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
        Write_admin ( client->connexion,
-                     "  stop id                                - Demarre le module id\n" );
+                     "                                         - Change UPS id\n" );
+       Write_admin ( client->connexion,
+                     "  del id                                 - Delete UPS id\n" );
+       Write_admin ( client->connexion,
+                     "  start id                               - Start UPS id\n" );
+       Write_admin ( client->connexion,
+                     "  stop id                                - Stop UPS id\n" );
        Write_admin ( client->connexion,
                      "  list                                   - Liste les modules ONDULEUR\n" );
        Write_admin ( client->connexion,
