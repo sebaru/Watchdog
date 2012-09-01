@@ -53,7 +53,8 @@
        case SSTAG_CLIENT_ATELIER_SYNOPTIQUE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
-               printf("Le client desire le synoptique numéro %d: %s\n", syn->id, syn->libelle );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire le synoptique numéro %d: %s", syn->id, syn->libelle );
                memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                                                               /* Sauvegarde du syn voulu pour envoi motif */
                Client_mode( client, ENVOI_MOTIF_ATELIER );
@@ -62,27 +63,31 @@
        case SSTAG_CLIENT_ATELIER_ADD_MOTIF:
              { struct CMD_TYPE_MOTIF *motif;
                motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
-               printf("Le client desire ajouter un motif\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire ajouter un motif" );
                Proto_ajouter_motif_atelier( client, motif );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_MOTIF:
              { struct CMD_TYPE_MOTIF *motif;
                motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
-               printf("Le client desire effacer le motif numéro %d: %s\n", motif->id, motif->libelle );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire effacer le motif numéro %d: %d", motif->id, motif->libelle );
                Proto_effacer_motif_atelier( client, motif );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_MOTIF:
              { struct CMD_TYPE_MOTIF *motif;
                motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
-               printf("Le client desire modifier le motif numéro %d: %s\n", motif->id, motif->libelle );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire modifier le motif numéro %d: %d", motif->id, motif->libelle );
                Proto_valider_editer_motif_atelier( client, motif );
              }
             break;
        case SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER:
              { Client_mode( client, ENVOI_CLASSE_FOR_ATELIER );
-               printf("Le client desire les classes icones par atelier\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire les classes icones par atelier\n" );
              }
             break;
        case SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER:
@@ -93,7 +98,8 @@
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
                Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC,
                                                  client, mnemo );
              }
@@ -101,7 +107,8 @@
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC2:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
                Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2,
                                                  client, mnemo );
              }
@@ -109,7 +116,8 @@
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CTRL:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
                Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL,
                                                  client, mnemo );
              }
@@ -117,7 +125,8 @@
        case SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
                Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA,
                                                  client, mnemo );
              }
@@ -125,7 +134,8 @@
        case SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               printf("Le client desire le mnemonique %d %d\n", mnemo->type, mnemo->num );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
                Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS,
                                                          client, mnemo );
              }
@@ -134,24 +144,25 @@
        case SSTAG_CLIENT_ATELIER_ADD_COMMENT: 
              { struct CMD_TYPE_COMMENT *comment;
                comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
-               Info_c( Config.log, DEBUG_INFO, "Le client desire ajouter un commentaire", comment->libelle );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire ajouter le commentaire %s", comment->libelle );
                Proto_ajouter_comment_atelier( client, comment );
-               Info_c( Config.log, DEBUG_INFO, "fin ajout commentaire", comment->libelle );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_COMMENT:
              { struct CMD_TYPE_COMMENT *comment;
                comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
-               printf("Le client desire effacer le comment numéro %d: %s\n", comment->id, comment->libelle );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire effacer le comment numéro %d: %s", comment->id, comment->libelle );
                Proto_effacer_comment_atelier( client, comment );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_COMMENT:
              { struct CMD_TYPE_COMMENT *comment;
                comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
-               Info_n( Config.log, DEBUG_INFO, "Le client desire modifier le comment numéro", comment->id );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire modifier le comment numéro", comment->id );
                Proto_valider_editer_comment_atelier( client, comment );
-               Info_n( Config.log, DEBUG_INFO, "fin edit comment numéro", comment->id );
              }
             break;
 /************************************* Gestion des cameras synoptiques ************************************/
@@ -181,36 +192,40 @@
             break;
 /************************************* Gestion des passerelle synoptiques *********************************/
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER:
-             { printf("Le client desire les syn pour atelier\n" );
+             { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire les syn pour atelier" );
                Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER );
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_PASS:
              { struct CMD_TYPE_PASSERELLE *pass;
                pass = (struct CMD_TYPE_PASSERELLE *)connexion->donnees;
-               printf("Le client desire ajouter une passerelle\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire ajouter une passerelle" );
                Proto_ajouter_passerelle_atelier( client, pass );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_PASS:
              { struct CMD_TYPE_PASSERELLE *pass;
                pass = (struct CMD_TYPE_PASSERELLE *)connexion->donnees;
-               printf("Le client desire virer une passerelle\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire virer une passerelle" );
                Proto_effacer_passerelle_atelier( client, pass );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_PASS:
              { struct CMD_TYPE_PASSERELLE *pass;
                pass = (struct CMD_TYPE_PASSERELLE *)connexion->donnees;
-               Info_n( Config.log, DEBUG_INFO, "Le client desire modifier le pass numéro", pass->id );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire modifier le pass numéro", pass->id );
                Proto_valider_editer_passerelle_atelier( client, pass );
-               Info_n( Config.log, DEBUG_INFO, "fin edit le pass numéro", pass->id );
              }
             break;
 /************************************* Gestion des palettes synoptiques ***********************************/
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE: 
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               printf("Le client desire les syn pour palettes atelier\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire les syn pour palettes atelier" );
                memcpy ( &client->syn, connexion->donnees, sizeof (struct CMD_TYPE_SYNOPTIQUE) );
                Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE );
              }
@@ -218,47 +233,50 @@
        case SSTAG_CLIENT_ATELIER_ADD_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
                palette = (struct CMD_TYPE_PALETTE *)connexion->donnees;
-               printf("Le client desire ajouter une palette\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire ajouter une palette" );
                Proto_ajouter_palette_atelier( client, palette );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
                palette = (struct CMD_TYPE_PALETTE *)connexion->donnees;
-               Info_n( Config.log, DEBUG_INFO, "Le client desire modifier le palette numéro", palette->id );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire modifier le palette numéro %d", palette->id );
                Proto_valider_editer_palette_atelier( client, palette );
-               Info_n( Config.log, DEBUG_INFO, "fin edit le palette numéro", palette->id );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
                palette = (struct CMD_TYPE_PALETTE *)connexion->donnees;
-               Info_n( Config.log, DEBUG_INFO, "Le client desire deleter le palette numéro", palette->id );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire deleter le palette numéro %d", palette->id );
                Proto_effacer_palette_atelier( client, palette );
-               Info_n( Config.log, DEBUG_INFO, "fin effacer le palette numéro", palette->id );
              }
             break;
 /*********************************** Gestion des capteurs synoptiques *************************************/
        case SSTAG_CLIENT_ATELIER_ADD_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
                capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
-               printf("Le client desire ajouter un capteur\n" );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire ajouter un capteur" );
                Proto_ajouter_capteur_atelier( client, capteur );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
                capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
-               printf("Le client desire effacer le texte numéro %d: %s\n", capteur->id, capteur->libelle );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire effacer le texte numéro %d: %s", capteur->id, capteur->libelle );
                Proto_effacer_capteur_atelier( client, capteur );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
                capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
-               Info_n( Config.log, DEBUG_INFO, "Le client desire modifier le palette numéro", capteur->id );
+               Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                         "Le client desire modifier le palette numéro %d", capteur->id );
                Proto_valider_editer_capteur_atelier( client, capteur );
-               Info_n( Config.log, DEBUG_INFO, "fin edit le palette numéro", capteur->id );
              }
             break;
      }

@@ -32,7 +32,6 @@
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
@@ -44,13 +43,11 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'effacement capteur" );
     retour = Retirer_capteurDB( Config.log, Db_watchdog, rezo_capteur );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK,
                      (gchar *)rezo_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement capteur OK" );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -58,7 +55,6 @@
                    "Unable to delete capteur %s", rezo_capteur->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement capteur NOK" );
      }
   }
 /**********************************************************************************************************/
@@ -72,7 +68,6 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'ajout capteur" );
     id = Ajouter_capteurDB ( Config.log, Db_watchdog, rezo_capteur );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -80,7 +75,6 @@
                    "Unable to add capteur %s", rezo_capteur->libelle );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur NOK" );
      }
     else { result = Rechercher_capteurDB( Config.log, Db_watchdog, id );
            if (!result) 
@@ -89,13 +83,11 @@
                           "Unable to locate capteur %s", rezo_capteur->libelle );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur NOK (2)" );
             }
            else
             { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_CAPTEUR) );
               g_free(result);
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout capteur OK" );
             }
          }
   }
@@ -108,7 +100,6 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-Info( Config.log, DEBUG_INFO, "Debut valider_editer_capteur_atelier" );
 
     retour = Modifier_capteurDB ( Config.log, Db_watchdog, rezo_capteur );
     if (retour==FALSE)
@@ -118,7 +109,6 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_capteur_atelier" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -161,8 +151,9 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
           pthread_exit ( NULL );
         }
 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass LIB", capteur->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_atelier: pass ID ", capteur->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_capteur_atelier: pass %d (%s) to client %s",
+                 capteur->id, capteur->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
                       (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
        g_free(capteur);
@@ -218,12 +209,14 @@ Info( Config.log, DEBUG_INFO, "fin valider_editer_capteur_atelier" );
 
        if ( ! g_list_find_custom(client->bit_init_capteur, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
         { client->bit_init_capteur = g_list_append( client->bit_init_capteur, capteur_new );
-          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_capteur ", capteur->id );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "liste des bit_init_capteur ", capteur->id );
         }
        else g_free(capteur_new);
 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass LIB", capteur->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_capteur_supervision: pass ID ", capteur->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_capteur_supervision: pass %d (%s) to client %s",
+                 capteur->id, capteur->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
                       (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
        g_free(capteur);

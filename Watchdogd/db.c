@@ -136,7 +136,7 @@
     Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL: requete %s", requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (%s)",
-               (char *)mysql_error(db->mysql) );
+                (char *)mysql_error(db->mysql) );
        return(FALSE);
      }
 
@@ -145,7 +145,7 @@
        db->free = FALSE;
        if ( ! db->result )
         { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: store_result failed (%s)",
-                  (char *) mysql_error(db->mysql) );
+                   (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
        else 

@@ -338,7 +338,8 @@
     mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_malloc0( Config.taille_bloc_reseau );    
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_INFO, "Envoyer_mnemoniques_tag: Pb d'allocation memoire mnemos" );
+       Info_new( Config.log, Config.log_all, LOG_ERR,
+                 "Envoyer_mnemoniques_tag: Pb d'allocation memoire mnemos" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );

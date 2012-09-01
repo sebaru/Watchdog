@@ -152,7 +152,8 @@
     motifs = (struct CMD_TYPE_MOTIFS *)g_malloc0( Config.taille_bloc_reseau );    
     if (!motifs)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_INFO, "Envoyer_motif_atelier_thread: Pb d'allocation memoire motifs" );
+       Info_new( Config.log, Config.log_all, LOG_ERR,
+                "Envoyer_motif_atelier_thread: Pb d'allocation memoire motifs" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -175,7 +176,8 @@
             motif->type_gestion != 0 /* TYPE_INERTE */
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
-          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn ", motif->bit_controle );
+                 Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                          "liste des bit_init_syn %d", motif->bit_controle );
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
@@ -240,7 +242,8 @@
     motifs = (struct CMD_TYPE_MOTIFS *)g_malloc0( Config.taille_bloc_reseau );    
     if (!motifs)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_INFO, "Envoyer_motif_supervision_thread: Pb d'allocation memoire motifs" );
+       Info_new( Config.log, Config.log_all, LOG_ERR,
+                "Envoyer_motif_supervision_thread: Pb d'allocation memoire motifs" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -262,7 +265,8 @@
             motif->type_gestion != 0 /* TYPE_INERTE */
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
-          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn ", motif->bit_controle );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "liste des bit_init_syn ", motif->bit_controle );
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */

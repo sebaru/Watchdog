@@ -43,8 +43,8 @@
 /**********************************************************************************************************/
  static void Info_stop( int code_retour, void *log )
   {
-    Info( log, DEBUG_INFO, "Fin des logs" );
-    if (log) g_free(log);
+    Info_new( log, TRUE, LOG_NOTICE, "End of logs" );
+    g_free(log);
   }
 
 /**********************************************************************************************************/
@@ -68,8 +68,8 @@
 /* Info_init: Initialisation du traitement d'erreur                                                       */
 /* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                            */
 /**********************************************************************************************************/
- void Info_change_log_level( struct LOG *log, guint debug )
-  { if (log) log->log_level = debug;
+ void Info_change_log_level( struct LOG *log, guint new_log_level )
+  { if (log) log->log_level = new_log_level;
   }
 /**********************************************************************************************************/
 /* Info: Log dans un fichier ou sur le terminal l'évolution du systeme                                    */

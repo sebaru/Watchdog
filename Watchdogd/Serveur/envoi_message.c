@@ -66,7 +66,8 @@
        g_snprintf( chaine, sizeof(chaine), "Son/%d.mp3", msg_mp3->num );
        id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
        if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-        { Info_n( Config.log, DEBUG_INFO, "Proto_valider_message_mp3: append impossible", msg_mp3->num );
+        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                    "Proto_valider_message_mp3: append impossible for %d", msg_mp3->num );
           return;
         }
        lockf( id_fichier, F_LOCK, 0 );
@@ -229,7 +230,8 @@
     msgs = (struct CMD_TYPE_MESSAGES *)g_malloc0( Config.taille_bloc_reseau );    
     if (!msgs)
      { struct CMD_GTK_MESSAGE erreur;
-       Info( Config.log, DEBUG_INFO, "Envoyer_messages_tag: Pb d'allocation memoire msgs" );
+       Info_new( Config.log, Config.log_all, LOG_ERR,
+                 "Envoyer_messages_tag: not enought memory" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );

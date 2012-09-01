@@ -44,13 +44,11 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'effacement comment" );
     retour = Retirer_commentDB( Config.log, Db_watchdog, rezo_comment );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_COMMENT_OK,
                      (gchar *)rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement comment OK" );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -58,7 +56,6 @@
                    "Unable to delete comment %s", rezo_comment->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement comment NOK" );
      }
   }
 /**********************************************************************************************************/
@@ -70,7 +67,6 @@
   { struct CMD_TYPE_COMMENT *result;
     struct DB *Db_watchdog;
     gint id;
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'ajout comment" );
     Db_watchdog = client->Db_watchdog;
 
     id = Ajouter_commentDB ( Config.log, Db_watchdog, rezo_comment );
@@ -80,26 +76,21 @@
                    "Unable to add comment %s", rezo_comment->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK" );
      }
     else { result = Rechercher_commentDB( Config.log, Db_watchdog, id );
-       Info_c( Config.log, DEBUG_INFO, "MSRV: ajout comment3", rezo_comment->libelle );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate comment %s", rezo_comment->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout comment NOK (2)" );
             }
            else
             { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_COMMENT) );
               g_free(result);
-              Info_c( Config.log, DEBUG_INFO, "MSRV: ajout comment OK", rezo_comment->libelle );
             }
          }
-       Info_c( Config.log, DEBUG_INFO, "MSRV: ajout comment4", rezo_comment->libelle );
   }
 /**********************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                       */
@@ -159,8 +150,9 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         } 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment LIB", comment->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_atelier: comment ID ", comment->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_comment_atelier: envoi comment %d (%s) to client %d",
+                 comment->id, comment->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
                       (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
        g_free(comment);
@@ -208,8 +200,9 @@
           pthread_exit( NULL );
         }
 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment LIB", comment->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_comment_supervision: comment ID ", comment->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_comment_supervision: envoi comment %d (%s) to client %d",
+                 comment->id, comment->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                       (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
        g_free(comment);

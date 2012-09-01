@@ -44,13 +44,11 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-    Info( Config.log, DEBUG_INFO, "SSRV: demande d'effacement camera_sup" );
     retour = Retirer_camera_supDB( Config.log, Db_watchdog, rezo_camera_sup );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,
                      (gchar *)rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
-       Info( Config.log, DEBUG_INFO, "SSRV: effacement camera_sup OK" );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -58,7 +56,6 @@
                    "Unable to delete camera_sup %s", rezo_camera_sup->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "SSRV: effacement camera_sup NOK" );
      }
   }
 /**********************************************************************************************************/
@@ -72,7 +69,6 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    Info( Config.log, DEBUG_INFO, "SSRV: demande d'ajout camera_sup" );
     id = Ajouter_camera_supDB ( Config.log, Db_watchdog, rezo_camera_sup );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -80,7 +76,6 @@
                    "Unable to add camera_sup %s", rezo_camera_sup->libelle );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "SSRV: ajout camera_sup NOK" );
      }
     else { result = Rechercher_camera_supDB( Config.log, Db_watchdog, id );
            if (!result) 
@@ -89,13 +84,11 @@
                           "Unable to locate camera_sup %s", rezo_camera_sup->libelle );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-              Info( Config.log, DEBUG_INFO, "SSRV: ajout camera_sup NOK (2)" );
             }
            else
             { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_CAMERA_SUP) );
               g_free(result);
-              Info( Config.log, DEBUG_INFO, "SSRV: ajout camera_sup OK" );
             }
          }
   }
@@ -109,7 +102,6 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-Info( Config.log, DEBUG_INFO, "Debut valider_editer_camera_sup_atelier" );
 
     retour = Modifier_camera_supDB ( Config.log, Db_watchdog, rezo_camera_sup );
     if (retour==FALSE)
@@ -119,7 +111,6 @@ Info( Config.log, DEBUG_INFO, "Debut valider_editer_camera_sup_atelier" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-Info( Config.log, DEBUG_INFO, "fin valider_editer_camera_sup_atelier" );
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */

@@ -39,8 +39,6 @@
  #define  fonction_entre(); { printf("Entre dans la fonction %s\n", __FUNCTION__ ); }
  #define  fonction_sort();  { printf("Sort de la fonction %s\n", __FUNCTION__ ); }
  
- #define  DEBUG_INFO                (1<<5 ) /* Pour info */
-
  extern struct LOG *Info_init( gchar *entete, guint debug );
  extern void Info( struct LOG *log, guint niveau, gchar *texte );
  extern void Info_n( struct LOG *log, guint niveau, gchar *texte, gint valeur );

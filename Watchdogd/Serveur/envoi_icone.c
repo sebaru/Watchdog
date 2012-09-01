@@ -196,7 +196,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { rezo_icone->id = id;
-                     Info_c( Config.log, DEBUG_INFO, "Envoi demande file icone", rezo_icone->libelle );
+                     Info_new( Config.log, Config.log_all, LOG_INFO,
+                              "Proto_ajouter_icone: Envoi demande file %s", rezo_icone->libelle );
                      Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_ADD_ICONE_WANT_FILE,
                                    (gchar *)rezo_icone, sizeof(struct CMD_TYPE_ICONE) );
                      Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_ADD_ICONE_OK,
@@ -214,7 +215,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
  void Proto_ajouter_icone_deb_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone )
   { gchar nom_fichier[80];
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%s", icone->nom_fichier );
-    Info_c ( Config.log, DEBUG_INFO, "Rapatriement du fichier", icone->nom_fichier );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+             "Proto_ajouter_icone_deb_file: Rapatriement du fichier %s starting.", icone->nom_fichier );
     unlink( nom_fichier );
   }
 /**********************************************************************************************************/

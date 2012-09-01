@@ -44,13 +44,11 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'effacement palette" );
     retour = Retirer_paletteDB( Config.log, Db_watchdog, rezo_palette );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_PALETTE_OK,
                      (gchar *)rezo_palette, sizeof(struct CMD_TYPE_PALETTE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement palette OK" );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -58,7 +56,6 @@
                    "Unable to delete palette %s", rezo_palette->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement palette NOK" );
      }
   }
 /**********************************************************************************************************/
@@ -72,7 +69,6 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'ajout palette" );
     id = Ajouter_paletteDB ( Config.log, Db_watchdog, rezo_palette );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -80,7 +76,6 @@
                    "Unable to add palette %s", rezo_palette->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: ajout palette NOK" );
      }
     else { result = Rechercher_paletteDB( Config.log, Db_watchdog, id );
            if (!result) 
@@ -89,13 +84,11 @@
                           "Unable to locate palette %s", rezo_palette->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout palette NOK (2)" );
             }
            else
             { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_PALETTE_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_PALETTE) );
               g_free(result);
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout palette OK" );
             }
          }
   }
@@ -118,7 +111,7 @@
      }
   }
 /**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
+/* Envoyer_palette_atelier_thread_tag: Envoi les palettes au client en parametre                          */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -153,15 +146,16 @@
           return;
         }
 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_palette_atelier: pass LIB", palette->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_palette_atelier: pass ID ", palette->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_palette_atelier: envoi pass %d (%s) to client %d",
+                palette->id, palette->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, sstag,
                       (gchar *)palette, sizeof(struct CMD_TYPE_PALETTE) );
        g_free(palette);
      }
   }
 /**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
+/* Envoyer_palette_atelier_thread: Envoi des palettes au client en mode atelier                           */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -172,7 +166,7 @@
     pthread_exit ( NULL );
   }
 /**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
+/* Envoyer_palette_supervision_thread: Envoi des palettes en mode supervision                             */
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -211,8 +205,9 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_palette_supervision: pass LIB", palette->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_palette_supervision: pass ID ", palette->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_palette_supervision: envoi pass %d (%s) to client %d",
+                palette->id, palette->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
                       (gchar *)palette, sizeof(struct CMD_TYPE_PALETTE) );
        g_free(palette);

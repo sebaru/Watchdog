@@ -32,6 +32,7 @@
  #include <unistd.h>
  #include <stdio.h>
  #include <string.h>
+ #include <errno.h>
 
  #include "Erreur.h"
  #include "Version.h"
@@ -51,14 +52,16 @@
         { read( id_fichier, &temps, sizeof(temps) );
           close(id_fichier);
         }
-       else { Info_c( log, DEBUG_INFO, "Action_version_donnees: open failed", FICHIER_VERSION );
+       else { Info_new( log, FALSE, LOG_ERR,
+                       "Action_version_donnees: open %s failed (%s)", FICHIER_VERSION, strerror(errno) );
               return(0);
             }
        return(temps);
      }
     else { id_fichier = open( FICHIER_VERSION, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
            if (id_fichier<0)
-            { Info_c( log, DEBUG_INFO, "Action_version_donnees: write failed", FICHIER_VERSION );
+            { Info_new( log, FALSE, LOG_ERR,
+                       "Action_version_donnees: write %s failed (%s)", FICHIER_VERSION, strerror(errno) );
               return(0);
             }
            write( id_fichier, &new_version, sizeof(new_version) );
@@ -72,7 +75,7 @@
 /* Sortie: ptr sur la chaine de version                                                                   */
 /**********************************************************************************************************/
  time_t Lire_version_donnees( struct LOG *log )
-  { return( Action_version_donnees( log, FALSE ) ); }
+  { return( Action_version_donnees( log, 0 ) ); }
 /**********************************************************************************************************/
 /* Changer_version_donnees: change l'actuelle version des données                                         */
 /* Entrée: néant                                                                                          */

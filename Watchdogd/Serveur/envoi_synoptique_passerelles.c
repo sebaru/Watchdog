@@ -32,7 +32,6 @@
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
@@ -44,13 +43,11 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'effacement pass" );
     retour = Retirer_passerelleDB( Config.log, Db_watchdog, rezo_pass );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_PASS_OK,
                      (gchar *)rezo_pass, sizeof(struct CMD_TYPE_PASSERELLE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement pass OK" );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -58,7 +55,6 @@
                    "Unable to delete pass %s", rezo_pass->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: effacement pass NOK" );
      }
   }
 /**********************************************************************************************************/
@@ -72,7 +68,6 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
-    Info( Config.log, DEBUG_INFO, "MSRV: demande d'ajout passerelle" );
     id = Ajouter_passerelleDB ( Config.log, Db_watchdog, rezo_pass );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -80,7 +75,6 @@
                    "Unable to add pass %s", rezo_pass->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Info( Config.log, DEBUG_INFO, "MSRV: ajout pass NOK" );
      }
     else { result = Rechercher_passerelleDB( Config.log, Db_watchdog, id );
            if (!result) 
@@ -89,13 +83,11 @@
                           "Unable to locate pass %s", rezo_pass->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout pass NOK (2)" );
             }
            else
             { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_PASS_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_PASSERELLE) );
               g_free(result);
-              Info( Config.log, DEBUG_INFO, "MSRV: ajout pass OK" );
             }
          }
   }
@@ -159,8 +151,9 @@
           pthread_exit ( NULL );
         }
 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass LIB", pass->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_passerelle_atelier: pass ID ", pass->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_passerelle_atelier: pass %d (%s) to client %s",
+                 pass->id, pass->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
                       (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);
@@ -211,23 +204,27 @@
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) );
-          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_1 );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "liste des bit_init_syn pass %d", pass->bit_controle_1 );
         }
 
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_2) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_2) );
-          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_2 );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "liste des bit_init_syn pass %d", pass->bit_controle_2 );
         }
 
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) );
-          Info_n( Config.log, DEBUG_INFO , "  liste des bit_init_syn pass", pass->bit_controle_3 );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                   "liste des bit_init_syn pass %d", pass->bit_controle_3 );
         }
 
-       Info_c( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass LIB", pass->libelle );
-       Info_n( Config.log, DEBUG_INFO, "THR Envoyer_pass_supervision: pass ID ", pass->id );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+                "Envoyer_passerelle_supervision: pass %d (%s) to client %s",
+                 pass->id, pass->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
                       (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);

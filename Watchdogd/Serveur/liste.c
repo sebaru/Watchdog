@@ -86,7 +86,8 @@
     taille = 0;
     repertoire = opendir ( Repertoire );
     if (!repertoire)
-     { Info_c( Config.log, DEBUG_INFO, "Ajouter_repertoire_liste: rep. inconnu", Repertoire );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Ajouter_repertoire_liste: Directory %s unknown", Repertoire );
        return(0);
      }
 

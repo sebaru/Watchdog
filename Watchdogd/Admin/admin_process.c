@@ -251,14 +251,14 @@
 
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
-     { Info( Config.log, DEBUG_INFO, "Admin_process : SHUTDOWN demandé" );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
        Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
        Ajouter_audio( 9998 ); /* Message audio avant reboot */
        sleep(2);
        Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
-     { Info( Config.log, DEBUG_INFO, "Admin_process : REBOOT demandé" );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : REBOOT demandé" );
        Write_admin ( client->connexion, "REBOOT in progress\n" );
        Ajouter_audio( 9999 ); /* Message audio avant reboot */
        sleep(2);
@@ -266,14 +266,14 @@
        Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
-     { Info( Config.log, DEBUG_INFO, "Admin_process : CLEAR-REBOOT demandé" );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
        Write_admin ( client->connexion, "CLEAR-REBOOT in progress\n" );
        Partage->com_msrv.Thread_clear_reboot = TRUE;
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
-     { Info( Config.log, DEBUG_INFO, "Admin_process : RELOAD demandé" );
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : RELOAD demandé" );
        Write_admin ( client->connexion, "RELOAD in progress\n" );
        Partage->com_msrv.Thread_reload = TRUE;
      } else
