@@ -120,7 +120,7 @@
        return(NULL);
      }
 
-    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info_new( Config.log, Config.log_all, LOG_ERR,
                        "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
     else
@@ -163,7 +163,7 @@
        return(NULL);
      }
 
-    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_dlsDB: memory error" );
     else
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */

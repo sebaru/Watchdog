@@ -74,7 +74,7 @@
        return(NULL);
      }
 
-    arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
+    arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
     if (!arch) Info_new( Config.log, Config.log_all, LOG_ERR,
                         "Recuperer_archDB_suite: Memory error" );
     else

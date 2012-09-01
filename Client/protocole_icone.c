@@ -106,7 +106,7 @@
              { struct CMD_TYPE_CLASSE *classe;
                Set_progress_plusun();
 
-               classe = (struct CMD_TYPE_CLASSE *)g_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
+               classe = (struct CMD_TYPE_CLASSE *)g_try_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
                if (!classe) return; 
                memcpy( classe, connexion->donnees, sizeof(struct CMD_TYPE_CLASSE ) );
                Arrivee_classe = g_list_append( Arrivee_classe, classe );
@@ -124,7 +124,7 @@
              { struct CMD_TYPE_ICONE *ico;
                Set_progress_plusun();
 
-               ico = (struct CMD_TYPE_ICONE *)g_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
+               ico = (struct CMD_TYPE_ICONE *)g_try_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
                if (!ico) return; 
                memcpy( ico, connexion->donnees, sizeof(struct CMD_TYPE_ICONE ) );
                Arrivee_icone = g_list_append( Arrivee_icone, ico );

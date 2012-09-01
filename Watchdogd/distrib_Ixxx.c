@@ -56,7 +56,7 @@
             );
 
 /***************************** Création de la structure passée aux clients ********************************/
-    new_motif = (struct CMD_ETAT_BIT_CTRL *) g_malloc0( sizeof(struct CMD_ETAT_BIT_CTRL) );
+    new_motif = (struct CMD_ETAT_BIT_CTRL *) g_try_malloc0( sizeof(struct CMD_ETAT_BIT_CTRL) );
     if (new_motif)
      { guint i;
 
@@ -70,7 +70,7 @@
        for (i=0; i<Config.max_serveur; i++)
         { struct CMD_ETAT_BIT_CTRL *motif_ssrv;
           if (Partage->Sous_serveur[i].Thread_run == TRUE)
-           { motif_ssrv = (struct CMD_ETAT_BIT_CTRL *)g_malloc0( sizeof( struct CMD_ETAT_BIT_CTRL ) );
+           { motif_ssrv = (struct CMD_ETAT_BIT_CTRL *)g_try_malloc0( sizeof( struct CMD_ETAT_BIT_CTRL ) );
              if (motif_ssrv)
               { memcpy ( motif_ssrv, new_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );            /* Recopie */
                 pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );

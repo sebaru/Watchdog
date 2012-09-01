@@ -335,7 +335,7 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMONIQUE);
-    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_malloc0( Config.taille_bloc_reseau );    
+    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Config.taille_bloc_reseau );    
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR,

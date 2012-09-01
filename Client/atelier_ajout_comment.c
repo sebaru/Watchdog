@@ -217,7 +217,7 @@
     struct CMD_TYPE_COMMENT *comment;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_comment->syn_id );
-    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
+    comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
      { return;
      }

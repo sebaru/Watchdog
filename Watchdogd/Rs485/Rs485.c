@@ -212,7 +212,7 @@
        return(NULL);
      }
 
-    rs485 = (struct RS485DB *)g_malloc0( sizeof(struct RS485DB) );
+    rs485 = (struct RS485DB *)g_try_malloc0( sizeof(struct RS485DB) );
     if (!rs485) Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                           "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
     else
@@ -279,7 +279,7 @@
        rs485 = Recuperer_rs485DB_suite( db );
        if (!rs485) break;
 
-       module = (struct MODULE_RS485 *)g_malloc0( sizeof(struct MODULE_RS485) );
+       module = (struct MODULE_RS485 *)g_try_malloc0( sizeof(struct MODULE_RS485) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                     "Charger_tous_RS485: Erreur allocation mémoire struct MODULE_RS485" );

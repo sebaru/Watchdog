@@ -98,7 +98,7 @@
        return(NULL);
      }
 
-    crypt = (gchar *)g_malloc0( NBR_CARAC_CODE_CRYPTE );
+    crypt = (gchar *)g_try_malloc0( NBR_CARAC_CODE_CRYPTE );
     if (!crypt)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_clef: out of memory" );
        Liberer_resultat_SQL ( log, db );
@@ -155,7 +155,7 @@
        outlen = NBR_CARAC_CODE_CRYPTE;
      } else Info_new( Config.log, Config.log_all, LOG_INFO, "Crypter: taille clef cryptee (%d)!!", outlen );
 
-    result = (gchar *)g_malloc0( outlen );
+    result = (gchar *)g_try_malloc0( outlen );
     if (!result)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Crypter: memory error" );
        return(NULL);

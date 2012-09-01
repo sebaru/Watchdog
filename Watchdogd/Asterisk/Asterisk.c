@@ -78,7 +78,7 @@
        return(NULL);
      }
 
-    asterisk = (struct CMD_TYPE_ASTERISK *)g_malloc0( sizeof(struct CMD_TYPE_ASTERISK) );
+    asterisk = (struct CMD_TYPE_ASTERISK *)g_try_malloc0( sizeof(struct CMD_TYPE_ASTERISK) );
     if (!asterisk) Info_new( Config.log, FALSE, LOG_WARNING, "Recuperer_asteriskDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &asterisk->calleridnum,  db->row[1], sizeof(asterisk->calleridnum  ) );

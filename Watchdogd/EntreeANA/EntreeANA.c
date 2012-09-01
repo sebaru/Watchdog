@@ -113,7 +113,7 @@
        return(NULL);
      }
 
-    entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
+    entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana) Info_new( Config.log, Config.log_all, LOG_ERR,
                              "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
@@ -164,7 +164,7 @@
        return(NULL);
      }
 
-    entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
+    entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_entreeanaDB: Mem error" ); }
     else

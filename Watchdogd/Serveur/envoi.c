@@ -104,7 +104,7 @@
      { return( FALSE ); }
 
     if (!client->transfert.buffer)
-     { client->transfert.buffer = g_malloc0( client->connexion->taille_bloc );
+     { client->transfert.buffer = g_try_malloc0( client->connexion->taille_bloc );
        if (!client->transfert.buffer)
         { client->transfert.en_cours = FALSE;
           return(TRUE);

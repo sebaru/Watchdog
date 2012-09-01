@@ -175,7 +175,7 @@
 
     Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );
 
-    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_malloc0( Config_cli.taille_bloc_reseau );
+    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Config_cli.taille_bloc_reseau );
     if (!edit_dls) return;
     buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
     taille_max       = Config_cli.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
@@ -292,9 +292,9 @@
 
     if ( Chercher_page_notebook ( TYPE_PAGE_SOURCE_DLS, rezo_dls->id, TRUE ) ) return; /* Page deja créé ? */
 
-    page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
-    page->infos = (struct TYPE_INFO_SOURCE_DLS *)g_malloc0( sizeof(struct TYPE_INFO_SOURCE_DLS) );
+    page->infos = (struct TYPE_INFO_SOURCE_DLS *)g_try_malloc0( sizeof(struct TYPE_INFO_SOURCE_DLS) );
     if (!page->infos) { g_free(page); return; }
     infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
     

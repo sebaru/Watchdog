@@ -69,7 +69,7 @@
        return(NULL);
      }
 
-    cpth = (struct CPTH_DB *)g_malloc0( sizeof(struct CPTH_DB) );
+    cpth = (struct CPTH_DB *)g_try_malloc0( sizeof(struct CPTH_DB) );
     if (!cpth) Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cpthDB_suite: Erreur allocation mémoire" );
     else
      { cpth->id_mnemo = atoi(db->row[0]);

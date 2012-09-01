@@ -369,7 +369,7 @@
     GtkListStore *store;
     struct PAGE_NOTEBOOK *page;
 
-    page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
     page->type  = TYPE_PAGE_PLUGIN_DLS;

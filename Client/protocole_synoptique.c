@@ -76,7 +76,7 @@
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_synoptique = g_list_append( Arrivee_synoptique, syn );
@@ -94,7 +94,7 @@
              { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
                memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );

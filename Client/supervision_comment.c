@@ -52,7 +52,7 @@
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_comment->syn_id );
     if (!(infos && infos->Trame)) { printf("test\n"); return; }
-    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
+    comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment)
      { return;
      }

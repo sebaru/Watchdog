@@ -40,7 +40,7 @@
  static struct CMD_TYPE_HISTO_HARD *Preparer_envoi_histo ( struct HISTO_HARDDB *histo )
   { struct CMD_TYPE_HISTO_HARD *rezo_histo;
 
-    rezo_histo = (struct CMD_TYPE_HISTO_HARD *)g_malloc0( sizeof(struct CMD_TYPE_HISTO_HARD) );
+    rezo_histo = (struct CMD_TYPE_HISTO_HARD *)g_try_malloc0( sizeof(struct CMD_TYPE_HISTO_HARD) );
     if (!rezo_histo) { return(NULL); }
     rezo_histo->num         = histo->histo.msg.num;
     rezo_histo->type        = histo->histo.msg.type;

@@ -91,7 +91,7 @@
 
           if ( !g_list_find_custom(client->bit_capteurs, liste->data,
                                    (GCompareFunc) Chercher_bit_capteurs) )
-           { capteur = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
+           { capteur = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
              if (capteur) 
               { memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
                 client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );

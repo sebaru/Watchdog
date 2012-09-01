@@ -105,7 +105,7 @@
        return(NULL);
      }
 
-    icone = (struct ICONEDB *)g_malloc0( sizeof(struct ICONEDB) );
+    icone = (struct ICONEDB *)g_try_malloc0( sizeof(struct ICONEDB) );
     if (!icone) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_iconeDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &icone->libelle, db->row[1], sizeof(icone->libelle) );        /* Recopie dans la structure */
@@ -136,7 +136,7 @@
        return(NULL);
      }
 
-    icone = (struct ICONEDB *)g_malloc0( sizeof(struct ICONEDB) );
+    icone = (struct ICONEDB *)g_try_malloc0( sizeof(struct ICONEDB) );
     if (!icone) { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_iconeDB: Mem error" ); }
     else
      { memcpy( &icone->libelle, db->row[0], sizeof(icone->libelle) );        /* Recopie dans la structure */

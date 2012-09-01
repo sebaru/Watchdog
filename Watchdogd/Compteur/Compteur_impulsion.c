@@ -116,7 +116,7 @@
        return(NULL);
      }
 
-    cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
+    cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
     if (!cpt_imp) Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
      { cpt_imp->id_mnemo = atoi(db->row[0]);
@@ -154,7 +154,7 @@
        return(NULL);
      }
 
-    cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
+    cpt_imp = (struct CMD_TYPE_OPTION_COMPTEUR_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
     if (!cpt_imp) Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cpt_impDB: Erreur allocation mémoire" );
     else
      { cpt_imp->id_mnemo = atoi(db->row[0]);

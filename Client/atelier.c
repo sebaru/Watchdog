@@ -225,13 +225,13 @@ printf("fin Detruire page atelier\n");
     gchar libelle[50];
     GdkColor color;
 
-    page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
     page->type  = TYPE_PAGE_ATELIER;
     Liste_pages = g_list_append( Liste_pages, page );
 
-    page->infos = (struct TYPE_INFO_ATELIER *)g_malloc0( sizeof(struct TYPE_INFO_ATELIER) );
+    page->infos = (struct TYPE_INFO_ATELIER *)g_try_malloc0( sizeof(struct TYPE_INFO_ATELIER) );
     if (!page->infos) { g_free(page); return; }
     infos = (struct TYPE_INFO_ATELIER *)page->infos;
     infos->syn.id = syn_id;
@@ -413,7 +413,7 @@ printf("fin Detruire page atelier\n");
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_motif->syn_id );
     if (!infos) return;
-    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
+    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif)
      { return;
      }

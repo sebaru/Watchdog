@@ -77,7 +77,7 @@
              { struct CMD_TYPE_UTILISATEUR *util;
                Set_progress_plusun();
 
-               util = (struct CMD_TYPE_UTILISATEUR *)g_malloc0( sizeof( struct CMD_TYPE_UTILISATEUR ) );
+               util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_UTILISATEUR ) );
                if (!util) return; 
                memcpy( util, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_util = g_list_append( Arrivee_util, util );
@@ -95,7 +95,7 @@
              { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
                memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe_for_util = g_list_append( Arrivee_groupe_for_util, groupe );
@@ -138,7 +138,7 @@
              { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
                memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );

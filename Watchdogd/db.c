@@ -41,7 +41,7 @@
     gunichar car;
 
     g_utf8_validate( pre_comment, -1, NULL );                                       /* Validate la chaine */
-    comment = g_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );  /* Au pire, ts les car sont doublés */
+    comment = g_try_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );  /* Au pire, ts les car sont doublés */
                                                                                   /* *6 pour gerer l'utf8 */
     if (!comment)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Normaliser_chaine: memory error %s", pre_comment );
@@ -74,7 +74,7 @@
  struct DB *Init_DB_SQL ( struct LOG *log )
   { struct DB *db;
     my_bool reconnect;
-    db = (struct DB *)g_malloc0( sizeof(struct DB) );
+    db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Erreur allocation mémoire struct DB" );
        return(NULL);

@@ -111,7 +111,7 @@
        return(NULL);
      }
 
-    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
+    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_motifDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );        /* Recopie dans la structure */
@@ -162,7 +162,7 @@
        return(NULL);
      }
 
-    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
+    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_motifDB: Erreur allocation mémoire" );
     else
      { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );        /* Recopie dans la structure */

@@ -162,7 +162,7 @@
        return(NULL);
      }
 
-    histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
+    histo = (struct HISTODB *)g_try_malloc0( sizeof(struct HISTODB) );
     if (!histo) Info_new( Config.log, Config.log_all, LOG_ERR,
                          "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
@@ -210,7 +210,7 @@
        return(NULL);
      }
 
-    histo = (struct HISTODB *)g_malloc0( sizeof(struct HISTODB) );
+    histo = (struct HISTODB *)g_try_malloc0( sizeof(struct HISTODB) );
     if (!histo) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );/* Recopie dans la structure */

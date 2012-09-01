@@ -51,7 +51,7 @@
 /**********************************************************************************************************/
  char *New_chaine( int longueur )
   { char *chaine;
-    chaine = g_malloc0( longueur );
+    chaine = g_try_malloc0( longueur );
     if (!chaine) { return(NULL); }
     return(chaine);
   }
@@ -120,7 +120,7 @@
 /**********************************************************************************************************/
  struct COMPARATEUR *New_comparateur( void )
   { struct COMPARATEUR *comparateur;
-    comparateur=(struct COMPARATEUR *)g_malloc0( sizeof(struct COMPARATEUR) );
+    comparateur=(struct COMPARATEUR *)g_try_malloc0( sizeof(struct COMPARATEUR) );
     return(comparateur);
   }
 /**********************************************************************************************************/
@@ -130,7 +130,7 @@
 /**********************************************************************************************************/
  struct OPTION *New_option( void )
   { struct OPTION *option;
-    option=(struct OPTION *)g_malloc0( sizeof(struct OPTION) );
+    option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
     return(option);
   }
 /**********************************************************************************************************/
@@ -157,7 +157,7 @@
 /**********************************************************************************************************/
  struct ACTION *New_action( void )
   { struct ACTION *action;
-    action=(struct ACTION *)g_malloc0( sizeof(struct ACTION) );
+    action=(struct ACTION *)g_try_malloc0( sizeof(struct ACTION) );
     if (!action) { return(NULL); }
     action->alors = NULL;
     action->sinon = NULL;
@@ -330,7 +330,7 @@
     if (Get_alias_par_nom( nom )) return(FALSE);                                     /* ID deja definit ? */
     /*if (Get_alias_par_bit( bit, num )) return(FALSE);                           /* Bit/Num deja definit ? */
 
-    alias=(struct ALIAS *)g_malloc0( sizeof(struct ALIAS) );
+    alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(FALSE); }
     alias->nom = nom;
     alias->bit = bit;

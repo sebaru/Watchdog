@@ -66,7 +66,7 @@
              { struct CMD_TYPE_HISTO_HARD *histo;
                Set_progress_plusun();
 
-               histo = (struct CMD_TYPE_HISTO_HARD *)g_malloc0( sizeof( struct CMD_TYPE_HISTO_HARD ) );
+               histo = (struct CMD_TYPE_HISTO_HARD *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO_HARD ) );
                if (!histo) return; 
                memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO_HARD ) );
                Arrivee_histo_hard = g_list_append( Arrivee_histo_hard, histo );
@@ -100,7 +100,7 @@
      { case SSTAG_SERVEUR_ADDPROGRESS_HISTO:
              { struct CMD_TYPE_HISTO *histo;
                Set_progress_plusun();
-               histo = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
+               histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
                if (!histo) return; 
                memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
      printf("Reception histo %s\n", histo->libelle );

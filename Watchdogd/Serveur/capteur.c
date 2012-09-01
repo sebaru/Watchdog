@@ -63,7 +63,7 @@
 
     if (!capteur) return(NULL);
 
-    etat_capteur = (struct CMD_ETAT_BIT_CAPTEUR *)g_malloc0( sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+    etat_capteur = (struct CMD_ETAT_BIT_CAPTEUR *)g_try_malloc0( sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
     if (!etat_capteur) return(NULL);
 
     etat_capteur->type         = capteur->type;

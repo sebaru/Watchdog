@@ -92,7 +92,7 @@
        return(FALSE);
      }
 
-    dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+    dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%d", id );
        g_free(plugin_dls);
@@ -185,7 +185,7 @@
              return;
            }
    
-          dls = (struct PLUGIN_DLS *)g_malloc0( sizeof(struct PLUGIN_DLS) );
+          dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
           if (!dls)
            { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: out of memory" );
              g_free(plugin);

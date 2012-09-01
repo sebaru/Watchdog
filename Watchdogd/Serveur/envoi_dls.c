@@ -157,7 +157,7 @@
  void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gchar chaine[80];
 
-    client->transfert.buffer = g_malloc0( Config.taille_bloc_reseau );
+    client->transfert.buffer = g_try_malloc0( Config.taille_bloc_reseau );
     if (!client->transfert.buffer)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message), "Not enough memory" );

@@ -52,7 +52,7 @@
     if (nbr > 50)
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Envoyer_sms: liste d'attente pleine" ); return; }
 
-    copie = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    copie = (struct CMD_TYPE_MESSAGE *) g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!copie) { Info_new( Config.log, Config.log_all, LOG_ERR, "Envoyer_sms: pas assez de mémoire pour copie" ); return; }
     memcpy ( copie, msg, sizeof(struct CMD_TYPE_MESSAGE) );
 
@@ -68,7 +68,7 @@
  void Envoyer_sms_smsbox_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE *msg;
 
-    msg = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    msg = (struct CMD_TYPE_MESSAGE *) g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) { Info_new( Config.log, Config.log_all, LOG_ERR,
                          "Envoyer_sms_smsbox_text: pas assez de mémoire pour copie" );
                 return;
@@ -92,7 +92,7 @@
  void Envoyer_sms_gsm_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE *msg;
 
-    msg = (struct CMD_TYPE_MESSAGE *) g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    msg = (struct CMD_TYPE_MESSAGE *) g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) { Info_new( Config.log, Config.log_all, LOG_ERR,
                          "Envoyer_sms_gsm_text: pas assez de mémoire pour copie" );
                 return;

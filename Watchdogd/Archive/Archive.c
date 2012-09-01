@@ -50,7 +50,7 @@
                 "Ajouter_arch: Add Arch a traiter type=%d, num=%d", type, num );
      }
 
-    arch = (struct ARCHDB *)g_malloc0( sizeof(struct ARCHDB) );
+    arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
     if (!arch) return;
 
     gettimeofday( &tv, NULL );                                               /* On prend l'heure actuelle */

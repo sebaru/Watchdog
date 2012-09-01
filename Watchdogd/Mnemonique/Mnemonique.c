@@ -220,7 +220,7 @@
        return(NULL);
      }
 
-    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */
@@ -269,7 +269,7 @@
        return(NULL);
      }
 
-    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_mnemoDB: Mem error" ); }
     else
@@ -321,7 +321,7 @@
        return(NULL);
      }
 
-    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_mnemoDB_type_num: Mem error" ); }
     else
@@ -418,7 +418,7 @@
        return(NULL);
      }
 
-    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
+    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
     if (!mnemo) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */

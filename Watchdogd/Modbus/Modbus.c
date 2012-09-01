@@ -121,7 +121,7 @@
        return(NULL);
      }
 
-    modbus = (struct CMD_TYPE_MODBUS *)g_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
+    modbus = (struct CMD_TYPE_MODBUS *)g_try_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
     if (!modbus) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_modbusDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &modbus->libelle, db->row[5], sizeof(modbus->libelle) );
@@ -161,7 +161,7 @@
        return(NULL);
      }
        
-    modbus = g_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
+    modbus = g_try_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
     if (!modbus)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_modbusDB: Mem error" ); }
     else
@@ -244,7 +244,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
-    module = (struct MODULE_MODBUS *)g_malloc0(sizeof(struct MODULE_MODBUS));
+    module = (struct MODULE_MODBUS *)g_try_malloc0(sizeof(struct MODULE_MODBUS));
     if (!module)                                                      /* Si probleme d'allocation mémoire */
      { Libere_DB_SQL( Config.log, &db );
        Info_new( Config.log, Config.log_all, LOG_ERR,
@@ -303,7 +303,7 @@
        modbus = Recuperer_modbusDB_suite( Config.log, db );
        if (!modbus) break;
 
-       module = (struct MODULE_MODBUS *)g_malloc0( sizeof(struct MODULE_MODBUS) );
+       module = (struct MODULE_MODBUS *)g_try_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Config.log_all, LOG_ERR,
                    "Charger_tous_Erreur allocation mémoire struct MODULE_MODBUS" );

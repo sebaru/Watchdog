@@ -155,7 +155,7 @@
        return(NULL);
      }
 
-    groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
+    groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!groupe) Info_new( Config.log, Config.log_all, LOG_ERR,
                            "Rechercher_groupeDB: memory error" );
     else
@@ -192,7 +192,7 @@
        return(NULL);
      }
 
-    groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
+    groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!groupe) Info_new( Config.log, Config.log_all, LOG_ERR,
                           "Recuperer_groupeDB_suite: memory error" );
     else

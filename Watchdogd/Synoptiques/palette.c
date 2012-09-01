@@ -99,7 +99,7 @@
        return(NULL);
      }
 
-    palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
+    palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
     if (!palette) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_paletteDB_suite: Erreur allocation mémoire" );
     else
      { palette->id           = atoi(db->row[0]);
@@ -137,7 +137,7 @@
        return(NULL);
      }
 
-    palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
+    palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
     if (!palette) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_paletteDB: Erreur allocation mémoire" );
     else
      { palette->id           = id;

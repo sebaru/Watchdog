@@ -41,7 +41,7 @@
  static struct CMD_TYPE_GROUPE *Preparer_envoi_groupe ( struct CMD_TYPE_GROUPE *groupe )
   { struct CMD_TYPE_GROUPE *rezo_groupe;
 
-    rezo_groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
+    rezo_groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!rezo_groupe) { return(NULL); }
 
     rezo_groupe->id = groupe->id;

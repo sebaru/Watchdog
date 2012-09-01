@@ -58,7 +58,7 @@
   { struct LISTE_FICH *nouveau;
     struct stat info;
 
-    nouveau = g_malloc0( sizeof(struct LISTE_FICH) );
+    nouveau = g_try_malloc0( sizeof(struct LISTE_FICH) );
     if (!nouveau) return(0);
 
     if (repertoire)

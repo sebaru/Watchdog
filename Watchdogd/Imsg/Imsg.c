@@ -167,7 +167,7 @@
               "Imsg_Sauvegarder_statut_contact : user %s(availability=%d) not found in list. Prepending...",
               nom, available );
                                        /* Si on arrive la, c'est que le contact n'est pas dans la liste ! */
-    contact = (struct IMSG_CONTACT *)g_malloc0( sizeof(struct IMSG_CONTACT) );
+    contact = (struct IMSG_CONTACT *)g_try_malloc0( sizeof(struct IMSG_CONTACT) );
     if (!contact) return;
     g_snprintf( contact->nom, sizeof(contact->nom), "%s", nom );
     contact->available = available;

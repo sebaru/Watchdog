@@ -42,7 +42,7 @@
  static struct CMD_TYPE_HISTO *Preparer_envoi_histo ( struct HISTODB *histo )
   { struct CMD_TYPE_HISTO *rezo_histo;
 
-    rezo_histo = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof(struct CMD_TYPE_HISTO) );
+    rezo_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (!rezo_histo) { return(NULL); }
 
     rezo_histo->id               = histo->msg.num;

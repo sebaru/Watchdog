@@ -76,7 +76,7 @@
 /**********************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_new_item ( void )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    trame_motif = g_malloc0( sizeof(struct TRAME_ITEM_MOTIF) );
+    trame_motif = g_try_malloc0( sizeof(struct TRAME_ITEM_MOTIF) );
     trame_motif->num_image  = 0;
     trame_motif->cligno     = 0;                                        /* Par defaut, on ne clignote pas */
     trame_motif->images     = NULL;
@@ -581,7 +581,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
 
     if (!(trame && camera_sup)) return(NULL);
 
-    trame_camera_sup = g_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
+    trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
 
     trame_camera_sup->camera_sup = camera_sup;
@@ -685,7 +685,7 @@ printf("New motif par item: %f %f\n", trame_motif->motif->largeur, trame_motif->
     guint couleur;
 
     if (!(trame && comm)) return(NULL);
-    trame_comm = g_malloc0( sizeof(struct TRAME_ITEM_COMMENT) );
+    trame_comm = g_try_malloc0( sizeof(struct TRAME_ITEM_COMMENT) );
     if (!trame_comm) return(NULL);
     couleur = ((guint)comm->rouge<<24) + ((guint)comm->vert<<16) + ((guint)comm->bleu<<8) + 0xFF;
 
@@ -725,7 +725,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     gdouble taillex, tailley;
        
     if (!(trame && pass)) return(NULL);
-    trame_pass = g_malloc0( sizeof(struct TRAME_ITEM_PASS) );
+    trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
     if (!trame_pass) return(NULL);
 
     trame_pass->pass = pass;
@@ -797,7 +797,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
        
     if (!(trame && capteur)) return(NULL);
-    trame_capteur = g_malloc0( sizeof(struct TRAME_ITEM_CAPTEUR) );
+    trame_capteur = g_try_malloc0( sizeof(struct TRAME_ITEM_CAPTEUR) );
     if (!trame_capteur) return(NULL);
 
     trame_capteur->capteur = capteur;
@@ -839,7 +839,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   { struct TRAME *trame;
     gdouble x, y;
 
-    trame = g_malloc0( sizeof(struct TRAME) );
+    trame = g_try_malloc0( sizeof(struct TRAME) );
     if (!trame) return(NULL);
 
     trame->trame_widget = goo_canvas_new();

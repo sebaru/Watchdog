@@ -92,7 +92,7 @@
        pthread_exit(NULL);
      }
                                                                     /* Sinon, on l'ajoute dans la liste ! */
-    courbe = (struct CMD_TYPE_COURBE *)g_malloc0( sizeof( struct CMD_TYPE_COURBE ) );
+    courbe = (struct CMD_TYPE_COURBE *)g_try_malloc0( sizeof( struct CMD_TYPE_COURBE ) );
     if (!courbe)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_courbe_thread: Pb d'allocation memoire" );
@@ -105,7 +105,7 @@
     memcpy ( courbe, &rezo_courbe, sizeof( struct CMD_TYPE_COURBE ) );
         
 /******************************************** Préparation structure d'envoi *******************************/
-    envoi_courbe = (struct CMD_START_COURBE *)g_malloc0( Config.taille_bloc_reseau );
+    envoi_courbe = (struct CMD_START_COURBE *)g_try_malloc0( Config.taille_bloc_reseau );
     if (!envoi_courbe)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_courbe_thread: Pb d'allocation memoire envoi_courbe" );

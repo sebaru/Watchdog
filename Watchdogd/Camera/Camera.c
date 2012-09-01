@@ -120,7 +120,7 @@
        return(NULL);
      }
 
-    camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
+    camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera) Info_new( Config.log, FALSE, LOG_ERR, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &camera->objet,    db->row[4], sizeof(camera->objet    ) );
@@ -159,7 +159,7 @@
        return(NULL);
      }
 
-    camera = g_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
+    camera = g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera)
      { Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cameraDB: Mem error" ); }
     else

@@ -141,7 +141,7 @@
        return(NULL);
      }
 
-    onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
+    onduleur = (struct CMD_TYPE_ONDULEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
@@ -182,7 +182,7 @@
        return(NULL);
      }
 
-    onduleur = g_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
+    onduleur = g_try_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
     if (!onduleur)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_onduleurDB: Mem error" ); }
     else
@@ -323,7 +323,7 @@
        onduleur = Recuperer_onduleurDB_suite( Config.log, db );
        if (!onduleur) break;
 
-       module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
+       module = (struct MODULE_ONDULEUR *)g_try_malloc0( sizeof(struct MODULE_ONDULEUR) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Config.log_all, LOG_ERR,
                    "Charger_tous_Erreur allocation mémoire struct MODULE_ONDULEUR" );
@@ -360,7 +360,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db) return;
 
-    module = (struct MODULE_ONDULEUR *)g_malloc0( sizeof(struct MODULE_ONDULEUR) );
+    module = (struct MODULE_ONDULEUR *)g_try_malloc0( sizeof(struct MODULE_ONDULEUR) );
     if (!module)                                                      /* Si probleme d'allocation mémoire */
      { Info_new( Config.log, Config.log_all, LOG_ERR,
              "Charger_un_onduleur: Erreur allocation mémoire struct MODULE_ONDULEUR" );

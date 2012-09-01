@@ -52,7 +52,7 @@
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_capteur->syn_id );
     if (!(infos && infos->Trame)) return;
-    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur)
      { return;
      }

@@ -60,7 +60,7 @@
              { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_TYPE_GROUPE *)g_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
                memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
                Arrivee_groupe_propriete_syn = g_list_append( Arrivee_groupe_propriete_syn, groupe );
@@ -158,7 +158,7 @@
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_synoptique_for_atelier = g_list_append( Arrivee_synoptique_for_atelier, syn );
@@ -177,7 +177,7 @@
              { struct CMD_TYPE_CAMERA *cam;
                Set_progress_plusun();
 
-               cam = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
+               cam = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
                if (!cam) return; 
                memcpy( cam, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA ) );
                Arrivee_camera_for_atelier = g_list_append( Arrivee_camera_for_atelier, cam );
@@ -196,7 +196,7 @@
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                Set_progress_plusun();
 
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
                if (!camera_sup) return; 
                memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA_SUP ) );
                Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
@@ -226,7 +226,7 @@
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
 
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_synoptique_for_atelier_palette = g_list_append( Arrivee_synoptique_for_atelier_palette, syn );
@@ -248,7 +248,7 @@
                Set_progress_plus( motifs->nbr_motifs );
                for (i=0; i<motifs->nbr_motifs; i++)
                 { struct CMD_TYPE_MOTIF *motif;
-                  motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
+                  motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
                   if (!motif) break; 
                   memcpy( motif, &motifs->motif[i], sizeof(struct CMD_TYPE_MOTIF ) );
                   Arrivee_motif = g_list_append( Arrivee_motif, motif );
@@ -269,7 +269,7 @@
              { struct CMD_TYPE_COMMENT *comment;
                Set_progress_plusun();
 
-               comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
+               comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
                if (!comment) return; 
                memcpy( comment, connexion->donnees, sizeof(struct CMD_TYPE_COMMENT ) );
                Arrivee_comment = g_list_append( Arrivee_comment, comment );
@@ -289,7 +289,7 @@
              { struct CMD_TYPE_PASSERELLE *pass;
                Set_progress_plusun();
 
-               pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
+               pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
                if (!pass) { printf("Pas assez de mémoire\n"); return;  }
                memcpy( pass, connexion->donnees, sizeof(struct CMD_TYPE_PASSERELLE ) );
                Arrivee_pass = g_list_append( Arrivee_pass, pass );
@@ -309,7 +309,7 @@
              { struct CMD_TYPE_CAPTEUR *capteur;
                Set_progress_plusun();
 
-               capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
+               capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
                if (!capteur) { printf("Pas assez de mémoire\n"); return;  }
                memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
                Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
@@ -328,7 +328,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
                Set_progress_plusun();
-               palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
+               palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
                if (!palette) return; 
                memcpy( palette, connexion->donnees, sizeof(struct CMD_TYPE_PALETTE ) );
                Arrivee_palette = g_list_append( Arrivee_palette, palette );
@@ -345,7 +345,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER:
              { struct CMD_TYPE_CLASSE *classe;
                Set_progress_plusun();
-               classe = (struct CMD_TYPE_CLASSE *)g_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
+               classe = (struct CMD_TYPE_CLASSE *)g_try_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
                if (!classe) return; 
                memcpy( classe, connexion->donnees, sizeof(struct CMD_TYPE_CLASSE ) );
                Arrivee_classe = g_list_append( Arrivee_classe, classe );
@@ -362,7 +362,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_ICONE_FOR_ATELIER:
              { struct CMD_TYPE_ICONE *ico;
 
-               ico = (struct CMD_TYPE_ICONE *)g_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
+               ico = (struct CMD_TYPE_ICONE *)g_try_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
                if (!ico) return; 
                memcpy( ico, connexion->donnees, sizeof(struct CMD_TYPE_ICONE ) );
                Arrivee_icone = g_list_append( Arrivee_icone, ico );

@@ -408,7 +408,7 @@
      { RSA *rsa;
 
        nbr_bytes = Config.taille_clef_rsa>>3;
-       chaine = g_malloc0( nbr_bytes );
+       chaine = g_try_malloc0( nbr_bytes );
        if (!chaine)
         { printf( " Not enough memory\n" );
           exit(EXIT_OK);

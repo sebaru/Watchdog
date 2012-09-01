@@ -198,7 +198,7 @@
        return(NULL);
      }
 
-    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!syn) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_synoptiqueDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
@@ -232,7 +232,7 @@
        return(NULL);
      }
 
-    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
     if (!syn)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_synoptiqueDB: Mem error" ); }
     else

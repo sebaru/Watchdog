@@ -51,7 +51,7 @@
                  /* La sauvegarde en local a été effectuée, nous indiquons au master qu'il peut continuer */
     client->courbe.num=-1;
 /******************************************** Préparation structure d'envoi *******************************/
-    envoi_courbe = (struct CMD_START_COURBE *)g_malloc0( Config.taille_bloc_reseau );
+    envoi_courbe = (struct CMD_START_COURBE *)g_try_malloc0( Config.taille_bloc_reseau );
     if (!envoi_courbe)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR, 

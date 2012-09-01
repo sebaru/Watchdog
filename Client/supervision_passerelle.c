@@ -81,7 +81,7 @@
         
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_pass->syn_id );
     if (!(infos && infos->Trame)) return;
-    pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
+    pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
     if (!pass)
      { return;
      }

@@ -142,7 +142,7 @@
     id_source = open ( fichier, O_RDONLY, 0 );
     if (id_source<0) return;
 
-    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_malloc0( Config_cli.taille_bloc_reseau );
+    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_try_malloc0( Config_cli.taille_bloc_reseau );
     if (!msg_mp3) return;
     buffer_envoi     = (gchar *)msg_mp3 + sizeof(struct CMD_TYPE_MESSAGE_MP3);
     taille_max       = Config_cli.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGE_MP3);

@@ -435,10 +435,10 @@
 
     GdkColor fond   = { 0x0, 0x0, 0x0, 0x0 };
 
-    page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
-    page->infos = (struct TYPE_INFO_COURBE *)g_malloc0( sizeof(struct TYPE_INFO_COURBE) );
+    page->infos = (struct TYPE_INFO_COURBE *)g_try_malloc0( sizeof(struct TYPE_INFO_COURBE) );
     infos = (struct TYPE_INFO_COURBE *)page->infos;
     if (!page->infos) { g_free(page); return; }
 

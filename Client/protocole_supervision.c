@@ -76,7 +76,7 @@
                Set_progress_plus( motifs->nbr_motifs );
                for (i=0; i<motifs->nbr_motifs; i++)
                 { struct CMD_TYPE_MOTIF *motif;
-                  motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
+                  motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
                   if (!motif) break; 
                   memcpy( motif, &motifs->motif[i], sizeof(struct CMD_TYPE_MOTIF ) );
                   Arrivee_motif = g_list_append( Arrivee_motif, motif );
@@ -96,7 +96,7 @@
              { struct CMD_TYPE_COMMENT *comment;
                Set_progress_plusun();
 
-               comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
+               comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
                if (!comment) return; 
                memcpy( comment, connexion->donnees, sizeof(struct CMD_TYPE_COMMENT ) );
                Arrivee_comment = g_list_append( Arrivee_comment, comment );
@@ -115,7 +115,7 @@
              { struct CMD_TYPE_PASSERELLE *pass;
                Set_progress_plusun();
 
-               pass = (struct CMD_TYPE_PASSERELLE *)g_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
+               pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
                if (!pass) return; 
                memcpy( pass, connexion->donnees, sizeof(struct CMD_TYPE_PASSERELLE ) );
                Arrivee_pass = g_list_append( Arrivee_pass, pass );
@@ -134,7 +134,7 @@
              { struct CMD_TYPE_PALETTE *palette;
                Set_progress_plusun();
 
-               palette = (struct CMD_TYPE_PALETTE *)g_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
+               palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
                if (!palette) return; 
                memcpy( palette, connexion->donnees, sizeof(struct CMD_TYPE_PALETTE ) );
                Arrivee_palette = g_list_append( Arrivee_palette, palette );
@@ -153,7 +153,7 @@
              { struct CMD_TYPE_CAPTEUR *capteur;
                Set_progress_plusun();
 
-               capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
+               capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
                if (!capteur) return; 
                memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
                Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
@@ -173,7 +173,7 @@
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                Set_progress_plusun();
 
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
                if (!camera_sup) return; 
                memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA_SUP ) );
                Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
@@ -215,7 +215,7 @@
              { struct CMD_TYPE_SCENARIO *sce;
                Set_progress_plusun();
 printf("Addprogress scenario\n");
-               sce = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
+               sce = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
                if (!sce) return; 
                memcpy( sce, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
                Arrivee_scenario = g_list_append( Arrivee_scenario, sce );

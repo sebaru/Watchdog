@@ -127,7 +127,7 @@
        return(NULL);
      }
 
-    msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
@@ -177,7 +177,7 @@
        return(NULL);
      }
 
-    msg = g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    msg = g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_msgDB: Mem error" ); }
     else
@@ -228,7 +228,7 @@
        return(NULL);
      }
 
-    msg = g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    msg = g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_msgDB_par_id: Mem error" ); }
     else

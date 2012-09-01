@@ -127,10 +127,10 @@
     static gint init_timer;
     GdkColor color;
 
-    page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
-    page->infos = (struct TYPE_INFO_SUPERVISION *)g_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
+    page->infos = (struct TYPE_INFO_SUPERVISION *)g_try_malloc0( sizeof(struct TYPE_INFO_SUPERVISION) );
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (!page->infos) { g_free(page); return; }
 
@@ -213,7 +213,7 @@
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_motif->syn_id );
     if (!(infos && infos->Trame)) return;
-    motif = (struct CMD_TYPE_MOTIF *)g_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
+    motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif)
      { return;
      }

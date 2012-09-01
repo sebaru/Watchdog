@@ -170,7 +170,7 @@
        return(NULL);
      }
 
-    rfxcom = (struct RFXCOMDB *)g_malloc0( sizeof(struct RFXCOMDB) );
+    rfxcom = (struct RFXCOMDB *)g_try_malloc0( sizeof(struct RFXCOMDB) );
     if (!rfxcom) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                            "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
     else
@@ -253,7 +253,7 @@
        rfxcom = Recuperer_rfxcomDB_suite( Config.log, db );
        if (!rfxcom) break;
 
-       module = (struct MODULE_RFXCOM *)g_malloc0( sizeof(struct MODULE_RFXCOM) );
+       module = (struct MODULE_RFXCOM *)g_try_malloc0( sizeof(struct MODULE_RFXCOM) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                     "Charger_tous_Erreur allocation mémoire struct MODULE_RFXCOM" );

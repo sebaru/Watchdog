@@ -239,7 +239,7 @@
        return(NULL);
      }
 
-    sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
+    sc = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
     if (!sc) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_scenarioDB_suite: Erreur allocation mémoire" );
     else
      { sc->id        = atoi(db->row[26]);
@@ -297,7 +297,7 @@
        return(NULL);
      }
 
-    sc = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
+    sc = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
     if (!sc) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_scenarioDB: Erreur allocation mémoire" );
     else
      { sc->id        = id;

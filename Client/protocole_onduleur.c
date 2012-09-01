@@ -75,7 +75,7 @@
              { struct CMD_TYPE_ONDULEUR *onduleur;
                Set_progress_plusun();
 
-               onduleur = (struct CMD_TYPE_ONDULEUR *)g_malloc0( sizeof( struct CMD_TYPE_ONDULEUR ) );
+               onduleur = (struct CMD_TYPE_ONDULEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_ONDULEUR ) );
                if (!onduleur) return; 
                memcpy( onduleur, connexion->donnees, sizeof(struct CMD_TYPE_ONDULEUR ) );
                Arrivee_onduleur = g_list_append( Arrivee_onduleur, onduleur );

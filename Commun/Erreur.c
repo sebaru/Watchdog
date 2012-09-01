@@ -54,7 +54,7 @@
  struct LOG *Info_init( gchar *entete, guint debug )
   { struct LOG *log;
 
-    log = g_malloc0( sizeof(struct LOG) );
+    log = g_try_malloc0( sizeof(struct LOG) );
     if (!log) return(NULL);
     
     g_snprintf( log->entete,  sizeof(log->entete), "%s", entete  );

@@ -90,7 +90,7 @@
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plusun();
 
-               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                if (!dls) return; 
                memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
                printf("One plugin receive %s\n", dls->nom );
@@ -108,7 +108,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
 printf("recu un syn\n");
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );

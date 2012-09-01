@@ -113,7 +113,7 @@
        return(NULL);
      }
 
-    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
+    comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &comment->libelle, db->row[2], sizeof(comment->libelle) );    /* Recopie dans la structure */
@@ -152,7 +152,7 @@
        return(NULL);
      }
 
-    comment = (struct CMD_TYPE_COMMENT *)g_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
+    comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &comment->libelle, db->row[1], sizeof(comment->libelle) );    /* Recopie dans la structure */

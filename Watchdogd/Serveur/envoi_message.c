@@ -227,7 +227,7 @@
      }
 
     max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGES)) / sizeof(struct CMD_TYPE_MESSAGE);
-    msgs = (struct CMD_TYPE_MESSAGES *)g_malloc0( Config.taille_bloc_reseau );    
+    msgs = (struct CMD_TYPE_MESSAGES *)g_try_malloc0( Config.taille_bloc_reseau );    
     if (!msgs)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR,

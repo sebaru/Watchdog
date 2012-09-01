@@ -202,7 +202,7 @@
           pthread_exit( NULL );
         }
 
-       capteur_new = (struct CAPTEUR *)g_malloc0( sizeof(struct CAPTEUR) );
+       capteur_new = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
        if (!capteur_new) continue;
        capteur_new->type = capteur->type;
        capteur_new->bit_controle = capteur->bit_controle;

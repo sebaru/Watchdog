@@ -75,7 +75,7 @@
              { struct CMD_TYPE_CAMERA *camera;
                Set_progress_plusun();
 
-               camera = (struct CMD_TYPE_CAMERA *)g_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
+               camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
                if (!camera) return; 
                memcpy( camera, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA ) );
                Arrivee_camera = g_list_append( Arrivee_camera, camera );

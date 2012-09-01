@@ -44,7 +44,7 @@
  static struct CMD_TYPE_CLASSE *Preparer_envoi_classe ( struct CLASSEDB *classe )
   { struct CMD_TYPE_CLASSE *rezo_classe;
 
-    rezo_classe = (struct CMD_TYPE_CLASSE *)g_malloc0( sizeof(struct CMD_TYPE_CLASSE) );
+    rezo_classe = (struct CMD_TYPE_CLASSE *)g_try_malloc0( sizeof(struct CMD_TYPE_CLASSE) );
     if (!rezo_classe) { return(NULL); }
 
     rezo_classe->id         = classe->id;

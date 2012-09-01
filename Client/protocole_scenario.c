@@ -81,7 +81,7 @@
              { struct CMD_TYPE_SCENARIO *sce;
                Set_progress_plusun();
 printf("Addprogress scenario\n");
-               sce = (struct CMD_TYPE_SCENARIO *)g_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
+               sce = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
                if (!sce) return; 
                memcpy( sce, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
                Arrivee_scenario = g_list_append( Arrivee_scenario, sce );

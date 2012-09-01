@@ -40,7 +40,7 @@
  static struct CMD_TYPE_UTILISATEUR *Preparer_envoi_utilisateur ( struct UTILISATEURDB *util )
   { struct CMD_TYPE_UTILISATEUR *rezo_util;
 
-    rezo_util = (struct CMD_TYPE_UTILISATEUR *)g_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
+    rezo_util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
     if (!rezo_util) { return(NULL); }
 
     rezo_util->id = util->id;

@@ -43,7 +43,7 @@
              sizeof( struct SOUS_SERVEUR ) * Config.max_serveur;         /* Nombre de connexions par fils */
     Info_new( Config.log, Config.log_all, LOG_INFO, "Shm_init: size required", taille );
 
-    partage = g_malloc0( taille );
+    partage = g_try_malloc0( taille );
     return(partage);
   }
 /**********************************************************************************************************/

@@ -79,7 +79,7 @@
                Set_progress_plus( msgs->nbr_messages );
                for (i=0; i<msgs->nbr_messages; i++)
                 { struct CMD_TYPE_MESSAGE *msg;
-                  msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof( struct CMD_TYPE_MESSAGE ) );
+                  msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof( struct CMD_TYPE_MESSAGE ) );
                   if (!msg) break; 
                   memcpy( msg, &msgs->msg[i], sizeof(struct CMD_TYPE_MESSAGE ) );
                   Arrivee_message = g_list_append( Arrivee_message, msg );
@@ -98,7 +98,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plusun();
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
 
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );

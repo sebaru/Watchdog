@@ -99,7 +99,7 @@
        return(NULL);
      }
 
-    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
     else
      { camera_sup->id           = atoi(db->row[0]);
@@ -142,7 +142,7 @@
        return(NULL);
      }
 
-    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_camera_supDB: Erreur allocation mémoire" );
     else
      { camera_sup->id           = id;

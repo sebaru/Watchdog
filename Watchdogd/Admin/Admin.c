@@ -132,7 +132,7 @@
      { Info_new( Config.log, FALSE, LOG_INFO,
                  "Accueillir_un_admin: Connexion wanted. ID=%d", id );
 
-       client = g_malloc0( sizeof(struct CLIENT_ADMIN) );/* On alloue donc une nouvelle structure cliente */
+       client = g_try_malloc0( sizeof(struct CLIENT_ADMIN) );/* On alloue donc une nouvelle structure cliente */
        if (!client) { Info_new( Config.log, FALSE, LOG_ERR,
                                 "Accueillir_un_admin: Not enought memory to connect client %d", id );
                       close(id);

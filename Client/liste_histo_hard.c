@@ -400,10 +400,10 @@ printf("Proto_afficher_histo_hard 1\n");
     struct TYPE_INFO_HISTO_HARD *infos;
     static gint page_id = 0;
 
-    page = (struct PAGE_NOTEBOOK *)g_malloc0( sizeof(struct PAGE_NOTEBOOK) );
+    page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
-    page->infos = (struct TYPE_INFO_HISTO_HARD *)g_malloc0( sizeof(struct TYPE_INFO_HISTO_HARD) );
+    page->infos = (struct TYPE_INFO_HISTO_HARD *)g_try_malloc0( sizeof(struct TYPE_INFO_HISTO_HARD) );
     if (!page->infos) { g_free(page); return; }
     infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
     infos->page_id = page_id++;

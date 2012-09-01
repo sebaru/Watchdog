@@ -90,7 +90,7 @@
                Set_progress_plus( mnemos->nbr_mnemos );
                for (i=0; i<mnemos->nbr_mnemos; i++)
                 { struct CMD_TYPE_MNEMONIQUE *mnemo;
-                  mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+                  mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
                   if (!mnemo) break;
                   memcpy( mnemo, &mnemos->mnemo[i], sizeof(struct CMD_TYPE_MNEMONIQUE ) );
                   Arrivee_mnemonique = g_list_append( Arrivee_mnemonique, mnemo );
@@ -108,7 +108,7 @@
        case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plusun();
-               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                if (!dls) return; 
 
                memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );

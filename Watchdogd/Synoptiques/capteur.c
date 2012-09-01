@@ -102,7 +102,7 @@
        return(NULL);
      }
 
-    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur) Info_new( Config.log, Config.log_all, LOG_ERR,
                            "Recuperer_capteurDB_suite: memory error" );
     else
@@ -141,7 +141,7 @@
        return(NULL);
      }
 
-    capteur = (struct CMD_TYPE_CAPTEUR *)g_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
+    capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
     if (!capteur) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_capteurDB: Erreur allocation mémoire" );
     else
      { capteur->id           = id;

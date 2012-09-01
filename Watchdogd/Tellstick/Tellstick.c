@@ -47,7 +47,7 @@
        return;
      }
 
-    tell = (struct TELLSTICKDB *)g_malloc( sizeof(struct TELLSTICKDB) );
+    tell = (struct TELLSTICKDB *)g_try_malloc0( sizeof(struct TELLSTICKDB) );
     if (!tell) return;
 
     tell->id  = id;

@@ -46,7 +46,7 @@
  static struct CMD_TYPE_ICONE *Preparer_envoi_icone ( struct ICONEDB *icone )
   { struct CMD_TYPE_ICONE *rezo_icone;
 
-    rezo_icone = (struct CMD_TYPE_ICONE *)g_malloc0( sizeof(struct CMD_TYPE_ICONE) );
+    rezo_icone = (struct CMD_TYPE_ICONE *)g_try_malloc0( sizeof(struct CMD_TYPE_ICONE) );
     if (!rezo_icone) { return(NULL); }
 
     rezo_icone->id         = icone->id;

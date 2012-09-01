@@ -105,7 +105,7 @@
        return(NULL);
      }
 
-    classe = (struct CLASSEDB *)g_malloc0( sizeof(struct CLASSEDB) );
+    classe = (struct CLASSEDB *)g_try_malloc0( sizeof(struct CLASSEDB) );
     if (!classe) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_classeDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &classe->libelle, db->row[1], sizeof(classe->libelle) );      /* Recopie dans la structure */
@@ -135,7 +135,7 @@
        return(NULL);
      }
 
-    classe = (struct CLASSEDB *)g_malloc0( sizeof(struct CLASSEDB) );
+    classe = (struct CLASSEDB *)g_try_malloc0( sizeof(struct CLASSEDB) );
     if (!classe) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_classeDB: Mem error" );
     else
      { memcpy( &classe->libelle, db->row[0], sizeof(classe->libelle) );      /* Recopie dans la structure */

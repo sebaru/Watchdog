@@ -149,7 +149,7 @@
      }
 
     max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
-    motifs = (struct CMD_TYPE_MOTIFS *)g_malloc0( Config.taille_bloc_reseau );    
+    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Config.taille_bloc_reseau );    
     if (!motifs)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR,
@@ -239,7 +239,7 @@
      }
 
     max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
-    motifs = (struct CMD_TYPE_MOTIFS *)g_malloc0( Config.taille_bloc_reseau );    
+    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Config.taille_bloc_reseau );    
     if (!motifs)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Config.log_all, LOG_ERR,

@@ -223,7 +223,7 @@
        return(NULL);
      }
 
-    util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
+    util = (struct UTILISATEURDB *)g_try_malloc0( sizeof(struct UTILISATEURDB) );
     if (!util) Info_new( Config.log, Config.log_all, LOG_ERR,
                         "Recuperer_utilsDB_suite: Erreur allocation mémoire" );
     else
@@ -265,7 +265,7 @@
        return(NULL);
      }
 
-    util = (struct UTILISATEURDB *)g_malloc0( sizeof(struct UTILISATEURDB) );
+    util = (struct UTILISATEURDB *)g_try_malloc0( sizeof(struct UTILISATEURDB) );
     if (!util) Info_new( Config.log, Config.log_all, LOG_ERR, 
                         "Rechercher_utilisateurDB: Erreur allocation mémoire" );
     else

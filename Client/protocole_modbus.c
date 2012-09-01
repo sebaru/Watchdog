@@ -75,7 +75,7 @@
              { struct CMD_TYPE_MODBUS *modbus;
                Set_progress_plusun();
 
-               modbus = (struct CMD_TYPE_MODBUS *)g_malloc0( sizeof( struct CMD_TYPE_MODBUS ) );
+               modbus = (struct CMD_TYPE_MODBUS *)g_try_malloc0( sizeof( struct CMD_TYPE_MODBUS ) );
                if (!modbus) return; 
 
                memcpy( modbus, connexion->donnees, sizeof(struct CMD_TYPE_MODBUS ) );

@@ -154,7 +154,7 @@
        return(NULL);
      }
 
-    histo_hard = (struct HISTO_HARDDB *)g_malloc0( sizeof(struct HISTO_HARDDB) );
+    histo_hard = (struct HISTO_HARDDB *)g_try_malloc0( sizeof(struct HISTO_HARDDB) );
     if (!histo_hard) Info_new( Config.log, Config.log_all, LOG_ERR,
                               "Recuperer_histo_hardDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */

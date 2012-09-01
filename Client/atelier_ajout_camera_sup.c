@@ -163,7 +163,7 @@
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_camera_sup->syn_id );
-    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
     if (!camera_sup)
      { return;
      }

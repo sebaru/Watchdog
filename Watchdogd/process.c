@@ -115,7 +115,7 @@
        liste=liste->next;
      }
 
-    lib = (struct LIBRAIRIE *) g_malloc0( sizeof ( struct LIBRAIRIE ) );
+    lib = (struct LIBRAIRIE *) g_try_malloc0( sizeof ( struct LIBRAIRIE ) );
     if (!lib) { Info_new( Config.log, Config.log_all, LOG_WARNING,
                           "Charger_librairie_par_fichier: MemoryAlloc failed" );
                 return(NULL);

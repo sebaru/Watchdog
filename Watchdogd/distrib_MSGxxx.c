@@ -114,7 +114,7 @@
        Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                   /* En minutes */
      }
 /***************************** Création de la structure interne de stockage *******************************/   
-    new_histo = (struct CMD_TYPE_HISTO *) g_malloc0( sizeof(struct CMD_TYPE_HISTO) );
+    new_histo = (struct CMD_TYPE_HISTO *) g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (new_histo)
      { struct timeval tv;
        guint i;
@@ -133,7 +133,7 @@
        while (liste)
         { void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo);
           struct CMD_TYPE_HISTO *dup_histo;
-          dup_histo = (struct CMD_TYPE_HISTO *)g_malloc(sizeof(struct CMD_TYPE_HISTO));
+          dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0(sizeof(struct CMD_TYPE_HISTO));
           if (dup_histo)
            { Gerer_histo = liste->data;
              memcpy ( dup_histo, new_histo, sizeof(struct CMD_TYPE_HISTO) );
@@ -145,7 +145,7 @@
        for (i=0; i<Config.max_serveur; i++)
         { struct CMD_TYPE_HISTO *histo_ssrv;
           if (Partage->Sous_serveur[i].Thread_run == TRUE)
-           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
+           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
              if (histo_ssrv)
               { memcpy ( histo_ssrv, new_histo, sizeof(struct CMD_TYPE_HISTO) );               /* Recopie */
                 pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
@@ -198,14 +198,14 @@
     Ajouter_histo_hardDB( Config.log, Db_watchdog, &histo_hard );
     g_free(histo);
 
-    del_histo = (struct CMD_TYPE_HISTO *) g_malloc0( sizeof(struct CMD_TYPE_HISTO) );
+    del_histo = (struct CMD_TYPE_HISTO *) g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (del_histo)
      { del_histo->id = num;
 
        for (i=0; i<Config.max_serveur; i++)
         { struct CMD_TYPE_HISTO *histo_ssrv;
           if (Partage->Sous_serveur[i].Thread_run == TRUE)
-           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
+           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
              if (histo_ssrv)
               { memcpy ( histo_ssrv, del_histo, sizeof(struct CMD_TYPE_HISTO) );               /* Recopie */
                 pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
