@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Onduleur/Onduleur.c  Gestion des modules ONDULEUR Watchdgo 2.0                               */
+/* Watchdogd/Onduleur/Onduleur.c  Gestion des modules UPS Watchdgo 2.0                               */
 /* Projet WatchDog version 2.0       Gestion d'habitat                     mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <stdio.h>
  #include <sys/prctl.h>
  #include <termios.h>
@@ -36,375 +35,285 @@
  #include <upsclient.h>
  #include <locale.h>
 
+/********************************************* Headers ****************************************************/
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "Onduleur.h"
 
 /**********************************************************************************************************/
-/* Retirer_onduleurDB: Elimination d'un onduleur                                                          */
+/* Retirer_upsDB: Elimination d'un ups                                                                    */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
+ gboolean Retirer_upsDB ( struct UPSDB *ups )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Retirer_upsDB: Database Connection Failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_ONDULEUR, onduleur->id );
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_UPS, ups->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( Config.log, &db );
+    Cfg_ups.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
+    return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_onduleurDB: Ajout ou edition d'un onduleur                                                     */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure onduleur                      */
-/* Sortie: false si probleme                                                                              */
+/* Recuperer_liste_id_upsDB: Recupération de la liste des ids des upss                                    */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gint Ajouter_onduleurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar *host, *ups, *libelle,*username,*password;
+ gboolean Recuperer_upsDB ( struct DB *db )
+  { gchar requete[256];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,host,ups,bit_comm,enable,ea_min,libelle,e_min,a_min,username,password "
+                " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
+
+    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_upsDB: Recupération de la liste des ids des upss                                    */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ struct UPSDB *Recuperer_upsDB_suite( struct DB *db )
+  { struct UPSDB *ups;
+
+    Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( Config.log, db );
+       return(NULL);
+     }
+
+    ups = (struct UPSDB *)g_try_malloc0( sizeof(struct UPSDB) );
+    if (!ups) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_upsDB_suite: Erreur allocation mémoire" );
+    else
+     { memcpy( &ups->host,     db->row[1],  sizeof(ups->host   ) );
+       memcpy( &ups->ups,      db->row[2],  sizeof(ups->ups    ) );
+       memcpy( &ups->libelle,  db->row[6],  sizeof(ups->libelle) );
+       memcpy( &ups->username, db->row[9],  sizeof(ups->username) );
+       memcpy( &ups->password, db->row[10], sizeof(ups->password) );
+       ups->id                = atoi(db->row[0]);
+       ups->bit_comm          = atoi(db->row[3]);
+       ups->enable            = atoi(db->row[4]);
+       ups->ea_min            = atoi(db->row[5]);
+       ups->e_min             = atoi(db->row[7]);
+       ups->a_min             = atoi(db->row[8]);
+     }
+    return(ups);
+  }
+/**********************************************************************************************************/
+/* Modifier_upsDB: Modification d'un ups Watchdog                                                         */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ static gint Ajouter_modifier_upsDB( struct UPSDB *ups, gboolean ajout )
+  { gchar *host, *name, *libelle,*username,*password;
+    gboolean retour_sql;
     gchar requete[2048];
-    
-    host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
-    if (!host)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation host impossible" );
-       return(-1);
-     }
-    ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
-    if (!ups)
-     { g_free(host);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation ups impossible" );
-       return(-1);
-     }
-    libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
-    if (!libelle)
-     { g_free(host);
-       g_free(ups);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation libelle impossible" );
-       return(-1);
-     }
-    username = Normaliser_chaine ( log, onduleur->username );            /* Formatage correct des chaines */
-    if (!username)
-     { g_free(host);
-       g_free(ups);
-       g_free(libelle);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation username impossible" );
-       return(-1);
-     }
-    password = Normaliser_chaine ( log, onduleur->password );            /* Formatage correct des chaines */
-    if (!password)
-     { g_free(host);
-       g_free(ups);
-       g_free(libelle);
-       g_free(username);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_onduleurDB: Normalisation password impossible" );
+    struct DB *db;
+    gint retour;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Database Connection Failed" );
        return(-1);
      }
 
-    g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s"
-                "(host,ups,libelle,bit_comm,actif,ea_min,e_min,a_min) "
-                "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
-                NOM_TABLE_ONDULEUR, host, ups, libelle, onduleur->bit_comm, onduleur->actif,
-                onduleur->ea_min, onduleur->e_min, onduleur->a_min, username,password
-              );
+    host = Normaliser_chaine ( Config.log, ups->host );                  /* Formatage correct des chaines */
+    if (!host)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation host impossible" );
+       return(-1);
+     }
+    name = Normaliser_chaine ( Config.log, ups->ups );                   /* Formatage correct des chaines */
+    if (!name)
+     { g_free(host);
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation name impossible" );
+       return(-1);
+     }
+    libelle = Normaliser_chaine ( Config.log, ups->libelle );            /* Formatage correct des chaines */
+    if (!libelle)
+     { g_free(host);
+       g_free(name);
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation libelle impossible" );
+       return(-1);
+     }
+    username = Normaliser_chaine ( Config.log, ups->username );          /* Formatage correct des chaines */
+    if (!username)
+     { g_free(host);
+       g_free(name);
+       g_free(libelle);
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation username impossible" );
+       return(-1);
+     }
+    password = Normaliser_chaine ( Config.log, ups->password );          /* Formatage correct des chaines */
+    if (!password)
+     { g_free(host);
+       g_free(name);
+       g_free(libelle);
+       g_free(username);
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation password impossible" );
+       return(-1);
+     }
+
+    if (ajout == TRUE)
+     { g_snprintf( requete, sizeof(requete),
+                   "INSERT INTO %s"
+                   "(host,ups,libelle,bit_comm,enable,ea_min,e_min,a_min) "
+                   "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
+                   NOM_TABLE_UPS, host, name, libelle, ups->bit_comm, ups->enable,
+                   ups->ea_min, ups->e_min, ups->a_min, username,password
+                 );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                   "UPDATE %s SET "             
+                   "host='%s',ups='%s',bit_comm=%d,enable=%d,"
+                   "ea_min=%d,e_min=%d,a_min=%d,"
+                   "libelle='%s',username='%s',password='%s' "
+                   "WHERE id=%d",
+                   NOM_TABLE_UPS, host, name, ups->bit_comm, ups->enable,
+                   ups->ea_min, ups->e_min, ups->a_min,
+                   libelle, username, password,
+                   ups->id );
+     }
     g_free(host);
-    g_free(ups);
+    g_free(name);
     g_free(libelle);
     g_free(username);
     g_free(password);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL( log, db ) );
+    retour_sql = Lancer_requete_SQL ( Config.log, db, requete );               /* Lancement de la requete */
+    if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL( Config.log, db );    /* Retourne le nouvel ID ups */
+       else retour = 0;
+     }
+    else retour = -1;
+    Libere_DB_SQL( Config.log, &db );
+    Cfg_ups.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
+    return ( retour );                                            /* Pas d'erreur lors de la modification */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_onduleurDB: Recupération de la liste des ids des onduleurs                          */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_onduleurDB ( struct LOG *log, struct DB *db )
-  { gchar requete[256];
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min,username,password "
-                " FROM %s ORDER BY host,ups", NOM_TABLE_ONDULEUR );
-
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_onduleurDB: Recupération de la liste des ids des onduleurs                          */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_ONDULEUR *Recuperer_onduleurDB_suite( struct LOG *log, struct DB *db )
-  { struct CMD_TYPE_ONDULEUR *onduleur;
-
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       return(NULL);
-     }
-
-    onduleur = (struct CMD_TYPE_ONDULEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
-    if (!onduleur) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_onduleurDB_suite: Erreur allocation mémoire" );
-    else
-     { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
-       memcpy( &onduleur->ups,      db->row[2],  sizeof(onduleur->ups    ) );
-       memcpy( &onduleur->libelle,  db->row[6],  sizeof(onduleur->libelle) );
-       memcpy( &onduleur->username, db->row[9],  sizeof(onduleur->username) );
-       memcpy( &onduleur->password, db->row[10], sizeof(onduleur->password) );
-       onduleur->id                = atoi(db->row[0]);
-       onduleur->bit_comm          = atoi(db->row[3]);
-       onduleur->actif             = atoi(db->row[4]);
-       onduleur->ea_min            = atoi(db->row[5]);
-       onduleur->e_min             = atoi(db->row[7]);
-       onduleur->a_min             = atoi(db->row[8]);
-     }
-    return(onduleur);
-  }
-/**********************************************************************************************************/
-/* Rechercher_onduleurDB: Recupération du onduleur dont le id est en parametre                            */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_ONDULEUR *Rechercher_onduleurDB ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[256];
-    struct CMD_TYPE_ONDULEUR *onduleur;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,actif,ea_min,libelle,e_min,a_min,username,password "
-                " FROM %s WHERE id=%d",
-                NOM_TABLE_ONDULEUR, id );
-
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
-     { return(NULL); }
-
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_onduleurDB: ONDULEUR %d not found in DB", id );
-       return(NULL);
-     }
-
-    onduleur = g_try_malloc0( sizeof(struct CMD_TYPE_ONDULEUR) );
-    if (!onduleur)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_onduleurDB: Mem error" ); }
-    else
-     { memcpy( &onduleur->host,     db->row[1],  sizeof(onduleur->host   ) );
-       memcpy( &onduleur->ups,      db->row[2],  sizeof(onduleur->ups    ) );
-       memcpy( &onduleur->libelle,  db->row[6],  sizeof(onduleur->libelle) );
-       memcpy( &onduleur->username, db->row[9],  sizeof(onduleur->username) );
-       memcpy( &onduleur->password, db->row[10], sizeof(onduleur->password) );
-       onduleur->id                = atoi(db->row[0]);
-       onduleur->bit_comm          = atoi(db->row[3]);
-       onduleur->actif             = atoi(db->row[4]);
-       onduleur->ea_min            = atoi(db->row[5]);
-       onduleur->e_min             = atoi(db->row[7]);
-       onduleur->a_min             = atoi(db->row[8]);
-     }
-    Liberer_resultat_SQL ( log, db );
-    return(onduleur);
-  }
-/**********************************************************************************************************/
-/* Modifier_onduleurDB: Modification d'un onduleur Watchdog                                               */
+/* Modifier_upsDB: Modification d'un ups Watchdog                                                         */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_onduleurDB_set_start( struct LOG *log, struct DB *db, gint id, gint start )
-
-  { gchar requete[128];
-
-    g_snprintf( requete, sizeof(requete), "UPDATE %s SET actif=%d WHERE id=%d",
-                NOM_TABLE_ONDULEUR, start, id
-              );
-
-    return ( Lancer_requete_SQL ( Config.log, db, requete ) );
+ gboolean Modifier_upsDB( struct UPSDB *ups )
+  { return ( Ajouter_modifier_upsDB( ups, FALSE ) );
   }
 /**********************************************************************************************************/
-/* Modifier_onduleurDB: Modification d'un onduleur Watchdog                                               */
+/* Modifier_upsDB: Modification d'un ups Watchdog                                                         */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_onduleurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ONDULEUR *onduleur )
-  { gchar *host, *ups, *libelle,*username,*password;
-    gchar requete[2048];
-
-    host = Normaliser_chaine ( log, onduleur->host );                    /* Formatage correct des chaines */
-    if (!host)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation host impossible" );
-       return(-1);
-     }
-    ups = Normaliser_chaine ( log, onduleur->ups );                      /* Formatage correct des chaines */
-    if (!ups)
-     { g_free(host);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation ups impossible" );
-       return(-1);
-     }
-    libelle = Normaliser_chaine ( log, onduleur->libelle );              /* Formatage correct des chaines */
-    if (!libelle)
-     { g_free(host);
-       g_free(ups);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation libelle impossible" );
-       return(-1);
-     }
-    username = Normaliser_chaine ( log, onduleur->username );            /* Formatage correct des chaines */
-    if (!username)
-     { g_free(host);
-       g_free(ups);
-       g_free(libelle);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation username impossible" );
-       return(-1);
-     }
-    password = Normaliser_chaine ( log, onduleur->password );            /* Formatage correct des chaines */
-    if (!password)
-     { g_free(host);
-       g_free(ups);
-       g_free(libelle);
-       g_free(username);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_onduleurDB: Normalisation password impossible" );
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
-                "host='%s',ups='%s',bit_comm=%d,actif=%d,"
-                "ea_min=%d,e_min=%d,a_min=%d,"
-                "libelle='%s',username='%s',password='%s' "
-                "WHERE id=%d",
-                NOM_TABLE_ONDULEUR, host, ups, onduleur->bit_comm, onduleur->actif,
-                                    onduleur->ea_min, onduleur->e_min, onduleur->a_min,
-                                    libelle, username, password,
-                onduleur->id );
-    g_free(host);
-    g_free(ups);
-    g_free(libelle);
-    g_free(username);
-    g_free(password);
-
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+ gboolean Ajouter_upsDB( struct UPSDB *ups )
+  { return ( Ajouter_modifier_upsDB( ups, TRUE ) );
   }
 /**********************************************************************************************************/
-/* Charger_tous_Requete la DB pour charger les modules onduleur                                 */
+/* Charger_tous_Requete la DB pour charger les modules ups                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static struct MODULE_ONDULEUR *Chercher_module_by_id ( gint id )
-  { GList *liste;
-    liste = Partage->com_onduleur.Modules_ONDULEUR;
+ static struct MODULE_UPS *Chercher_module_ups_by_id ( gint id )
+  { struct MODULE_UPS *module;
+    GSList *liste;
+    module = NULL;
+    pthread_mutex_lock ( &Cfg_ups.lib->synchro );
+    liste = Cfg_ups.Modules_UPS;
     while ( liste )
-     { struct MODULE_ONDULEUR *module;
-       module = ((struct MODULE_ONDULEUR *)liste->data);
-       if (module->onduleur.id == id) return(module);
+     { module = ((struct MODULE_UPS *)liste->data);
+       if (module->ups.id == id) break;
        liste = liste->next;
      }
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chercher_module_by_id: UPS %d not found", id );
+    pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
+    if (liste) return(module);
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chercher_module_ups_by_id: UPS %d not found", id );
     return(NULL);
   }
 /**********************************************************************************************************/
-/* Charger_tous_onduleur: Requete la DB pour charger les modules onduleur                                 */
+/* Charger_tous_ups: Requete la DB pour charger les modules ups                                           */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
 /**********************************************************************************************************/
- static gboolean Charger_tous_onduleur ( void  )
+ static gboolean Charger_tous_ups ( void  )
   { struct DB *db;
     gint cpt;
 
     db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
-
-/********************************************** Chargement des modules ************************************/
-    if ( ! Recuperer_onduleurDB( Config.log, db ) )
-     { Libere_DB_SQL( Config.log, &db );
+    if (!db)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_ups: Database Connection Failed" );
        return(FALSE);
      }
 
-    Partage->com_onduleur.Modules_ONDULEUR = NULL;
+/********************************************** Chargement des modules ************************************/
+    if ( ! Recuperer_upsDB( db ) )
+     { Libere_DB_SQL( Config.log, &db );
+       Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_ups: Recuperer_ups Failed" );
+       return(FALSE);
+     }
+
+    Cfg_ups.Modules_UPS = NULL;
     cpt = 0;
     for ( ; ; )
-     { struct MODULE_ONDULEUR *module;
-       struct CMD_TYPE_ONDULEUR *onduleur;
+     { struct MODULE_UPS *module;
+       struct UPSDB *ups;
 
-       onduleur = Recuperer_onduleurDB_suite( Config.log, db );
-       if (!onduleur) break;
+       ups = Recuperer_upsDB_suite( db );
+       if (!ups) break;
 
-       module = (struct MODULE_ONDULEUR *)g_try_malloc0( sizeof(struct MODULE_ONDULEUR) );
+       module = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Config.log_all, LOG_ERR,
-                   "Charger_tous_Erreur allocation mémoire struct MODULE_ONDULEUR" );
-          g_free(onduleur);
+                   "Charger_tous_Erreur allocation mémoire struct MODULE_UPS" );
+          g_free(ups);
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
         }
-       memcpy( &module->onduleur, onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
-       g_free(onduleur);
+       memcpy( &module->ups, ups, sizeof(struct UPSDB) );
+       if (module->ups.enable) module->started = TRUE;            /* Si enable at boot... et bien Start ! */
+       g_free(ups);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
-       pthread_mutex_lock( &Partage->com_onduleur.synchro );
-       Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
-       pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+       pthread_mutex_lock( &Cfg_ups.lib->synchro );
+       Cfg_ups.Modules_UPS = g_slist_prepend ( Cfg_ups.Modules_UPS, module );
+       pthread_mutex_unlock( &Cfg_ups.lib->synchro );
        Info_new( Config.log, Config.log_all, LOG_INFO,
-                "Charger_tous_onduleur: id = %03d, host=%s",
-                 module->onduleur.id, module->onduleur.host );
+                "Charger_tous_ups: id = %03d, host=%s, name=%s",
+                 module->ups.id, module->ups.host, module->ups.ups );
      }
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_tous_onduleur: %d ONDULEUR found  !", cpt );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_tous_ups: %03d UPS found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Rechercher_onduleurDB: Recupération du onduleur dont le num est en parametre                           */
+/* Rechercher_upsDB: Recupération du ups dont le num est en parametre                                     */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static void Charger_un_ONDULEUR ( gint id )
-  { struct MODULE_ONDULEUR *module;
-    struct CMD_TYPE_ONDULEUR *onduleur;
-    struct DB *db;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db) return;
-
-    module = (struct MODULE_ONDULEUR *)g_try_malloc0( sizeof(struct MODULE_ONDULEUR) );
-    if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Info_new( Config.log, Config.log_all, LOG_ERR,
-             "Charger_un_onduleur: Erreur allocation mémoire struct MODULE_ONDULEUR" );
-       Libere_DB_SQL( Config.log, &db );
-       return;
-     }
-
-    onduleur = Rechercher_onduleurDB( Config.log, db, id );
-    Libere_DB_SQL( Config.log, &db );
-    if (!onduleur)                                                 /* Si probleme d'allocation mémoire */
-     { Info_new( Config.log, Config.log_all, LOG_ERR,
-             "Charger_un_onduleur: Erreur allocation mémoire struct CMD_TYPE_ONDULEUR" );
-       g_free(module);
-       return;
-     }
-    memcpy( &module->onduleur, onduleur, sizeof(struct CMD_TYPE_ONDULEUR) );
-    g_free(onduleur);
-
-    pthread_mutex_lock( &Partage->com_onduleur.synchro );
-    Partage->com_onduleur.Modules_ONDULEUR = g_list_append ( Partage->com_onduleur.Modules_ONDULEUR, module );
-    pthread_mutex_unlock( &Partage->com_onduleur.synchro );
-  }
-/**********************************************************************************************************/
-/* Rechercher_onduleurDB: Recupération du onduleur dont le num est en parametre                           */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Decharger_un_ONDULEUR ( struct MODULE_ONDULEUR *module )
+ static void Decharger_un_UPS ( struct MODULE_UPS *module )
   { if (!module) return;
-    pthread_mutex_lock( &Partage->com_onduleur.synchro );
-    Partage->com_onduleur.Modules_ONDULEUR = g_list_remove ( Partage->com_onduleur.Modules_ONDULEUR, module );
+    pthread_mutex_lock( &Cfg_ups.lib->synchro );
+    Cfg_ups.Modules_UPS = g_slist_remove ( Cfg_ups.Modules_UPS, module );
     g_free(module);
-    pthread_mutex_unlock( &Partage->com_onduleur.synchro );
+    pthread_mutex_unlock( &Cfg_ups.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Decharger_tous_Decharge l'ensemble des modules ONDULEUR                                          */
+/* Decharger_tous_Decharge l'ensemble des modules UPS                                                     */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Decharger_tous_ONDULEUR ( void  )
-  { struct MODULE_ONDULEUR *module;
-    while ( Partage->com_onduleur.Modules_ONDULEUR )
-     { module = (struct MODULE_ONDULEUR *)Partage->com_onduleur.Modules_ONDULEUR->data;
-       Decharger_un_ONDULEUR ( module );
+ static void Decharger_tous_UPS ( void  )
+  { struct MODULE_UPS *module;
+    while ( Cfg_ups.Modules_UPS )
+     { module = (struct MODULE_UPS *)Cfg_ups.Modules_UPS->data;
+       Decharger_un_UPS ( module );
      }
   }
 /**********************************************************************************************************/
@@ -412,7 +321,7 @@
 /* Entrée: un id                                                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Deconnecter_module ( struct MODULE_ONDULEUR *module )
+ static void Deconnecter_module ( struct MODULE_UPS *module )
   { gint num_ea;
     if (!module) return;
 
@@ -422,10 +331,10 @@
        module->nbr_deconnect++;
      }
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Deconnecter_module %d", module->onduleur.id );
-    SB( module->onduleur.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Deconnecter_module %d", module->ups.id );
+    SB( module->ups.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
 
-    num_ea = module->onduleur.ea_min;
+    num_ea = module->ups.ea_min;
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
@@ -442,85 +351,85 @@
 /* Entrée: une nom et un password                                                                         */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
- static gboolean Connecter_onduleur ( struct MODULE_ONDULEUR *module )
+ static gboolean Connecter_ups ( struct MODULE_UPS *module )
   { gchar buffer[80];
     gint num_ea;
     int connexion;
 
-    if ( (connexion = upscli_connect( &module->upsconn, module->onduleur.host,
-                                      ONDULEUR_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
+    if ( (connexion = upscli_connect( &module->upsconn, module->ups.host,
+                                      UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Connecter_onduleur: connexion refused by module %d (%s)",
-                 module->onduleur.id, (char *)upscli_strerror(&module->upsconn) );
+                "Connecter_ups: connexion refused by module %d (%s)",
+                 module->ups.id, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Connecter_onduleur %d", module->onduleur.host );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Connecter_ups %d", module->ups.host );
 
 /********************************************* UPSDESC ****************************************************/
-    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->onduleur.ups );
+    g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->ups.ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Connecter_onduleur: Sending GET UPSDESC failed (%s)",
+                "Connecter_ups: Sending GET UPSDESC failed (%s)",
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                   "Connecter_onduleur: Reading GET UPSDESC failed (%s)",
+                   "Connecter_ups: Reading GET UPSDESC failed (%s)",
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
         { Info_new( Config.log, Config.log_all, LOG_DEBUG, 
-                   "Connecter_onduleur: Reading GET UPSDESC %s",
-                   buffer + strlen(module->onduleur.ups) + 9 );
+                   "Connecter_ups: Reading GET UPSDESC %s",
+                   buffer + strlen(module->ups.ups) + 9 );
         }
      }
 
 /********************************************* USERNAME ***************************************************/
-    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->onduleur.username );
+    g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->ups.username );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Connecter_onduleur: Sending USERNAME failed %s",
+                "Connecter_ups: Sending USERNAME failed %s",
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                   "Connecter_onduleur: Reading USERNAME failed %s",
+                   "Connecter_ups: Reading USERNAME failed %s",
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
         { Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                   "Connecter_onduleur: Reading USERNAME %s",
+                   "Connecter_ups: Reading USERNAME %s",
                     buffer );
         }
      }
 
 /********************************************* PASSWORD ***************************************************/
-    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->onduleur.password );
+    g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->ups.password );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Connecter_onduleur: Sending PASSWORD failed %s",
+                "Connecter_ups: Sending PASSWORD failed %s",
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
         { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                   "Connecter_onduleur: Reading PASSWORD failed %s",
+                   "Connecter_ups: Reading PASSWORD failed %s",
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
         { Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                   "Connecter_onduleur: Reading PASSWORD %s",
+                   "Connecter_ups: Reading PASSWORD %s",
                    buffer );
         }
      }
 
     module->date_retente = 0;
     module->started = TRUE;
-    SB( module->onduleur.bit_comm, 1 );                         /* Mise a un du bit interne lié au module */
-    num_ea = module->onduleur.ea_min;
+    SB( module->ups.bit_comm, 1 );                         /* Mise a un du bit interne lié au module */
+    num_ea = module->ups.ea_min;
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
@@ -534,31 +443,34 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Modbus_is_actif: Renvoi TRUE si au moins un des modules modbus est actif                               */
+/* Modbus_is_started: Renvoi TRUE si au moins un des modules modbus est started                           */
 /* Entrée: rien                                                                                           */
 /* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
- static gboolean Onduleur_is_actif ( void )
-  { GList *liste;
-    liste = Partage->com_onduleur.Modules_ONDULEUR;
+ static gboolean Onduleur_is_started ( void )
+  { GSList *liste;
+    liste = Cfg_ups.Modules_UPS;
+    pthread_mutex_lock ( &Cfg_ups.lib->synchro );
     while ( liste )
-     { struct MODULE_ONDULEUR *module;
-       module = ((struct MODULE_ONDULEUR *)liste->data);
+     { struct MODULE_UPS *module;
+       module = ((struct MODULE_UPS *)liste->data);
 
-       if (module->onduleur.actif) return(TRUE);
+       if (module->started) break;
        liste = liste->next;
      }
+    pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
+    if (liste) return(TRUE);
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Onduleur_set_instcmd: Envoi d'une instant commande à l'onduleur                                        */
-/* Entrée : l'onduleur, le nom de la commande                                                             */
+/* Onduleur_set_instcmd: Envoi d'une instant commande à l'ups                                             */
+/* Entrée : l'ups, le nom de la commande                                                                  */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
 /**********************************************************************************************************/
- gboolean Onduleur_set_instcmd ( struct MODULE_ONDULEUR *module, gchar *nom_cmd )
+ gboolean Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
   { gchar buffer[80];
 
-    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->onduleur.ups, nom_cmd );
+    g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups.ups, nom_cmd );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
                  "Onduleur_set_instcmd: Sending INSTCMD failed (%s) error %s",
@@ -582,13 +494,13 @@
 
 /**********************************************************************************************************/
 /* Onduleur_get_var: Recupere une valeur de la variable en parametre                                      */
-/* Entrée : l'onduleur, le nom de variable, la variable a renseigner                                      */
+/* Entrée : l'ups, le nom de variable, la variable a renseigner                                           */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
 /**********************************************************************************************************/
- gboolean Onduleur_get_var ( struct MODULE_ONDULEUR *module, gchar *nom_var, gdouble *retour )
+ gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gdouble *retour )
   { gchar buffer[80];
 
-    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->onduleur.ups, nom_var );
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
                 "Onduleur_get_var: Sending GET VAR failed (%s) error %s",
@@ -609,7 +521,7 @@
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Config.log_all, LOG_DEBUG,
                 "Onduleur_get_var: Reading GET VAR %s OK = %s", nom_var, buffer );
-       *retour = atof ( buffer + 7 + strlen(module->onduleur.ups) + strlen(nom_var) );
+       *retour = atof ( buffer + 7 + strlen(module->ups.ups) + strlen(nom_var) );
        return(TRUE);
      }
 
@@ -618,14 +530,14 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Envoyer_sortie_onduleur: Envoi des sorties/InstantCommand à l'onduleur                                 */
-/* Entrée: identifiants des modules onduleur                                                              */
+/* Envoyer_sortie_ups: Envoi des sorties/InstantCommand à l'ups                                           */
+/* Entrée: identifiants des modules ups                                                                   */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
- static gboolean Envoyer_sortie_onduleur( struct MODULE_ONDULEUR *module )
+ static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
   { gint num_a;
 
-    num_a = module->onduleur.a_min;
+    num_a = module->ups.a_min;
     if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); SA(num_a,0); }
     num_a++;
     if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); SA(num_a,0); }
@@ -646,15 +558,15 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Interroger_onduleur: Interrogation d'un onduleur                                                       */
-/* Entrée: identifiants des modules onduleur                                                              */
+/* Interroger_ups: Interrogation d'un ups                                                                 */
+/* Entrée: identifiants des modules ups                                                                   */
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
- static gboolean Interroger_onduleur( struct MODULE_ONDULEUR *module )
+ static gboolean Interroger_ups( struct MODULE_UPS *module )
   { gdouble valeur;
     gint num_ea;
 
-    num_ea = module->onduleur.ea_min;
+    num_ea = module->ups.ea_min;
 
     if ( Onduleur_get_var ( module, "ups.load", &valeur ) == FALSE ) return(FALSE);
     SEA( num_ea++, valeur );                                             /* Numéro de l'EA pour la valeur */
@@ -689,113 +601,115 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du ONDULEUR                                                                  */
+/* Main: Fonction principale du UPS                                                                       */
 /**********************************************************************************************************/
- void Run_onduleur ( void )
-  { struct MODULE_ONDULEUR *module;
-    GList *liste;
+ void Run_thread ( struct LIBRAIRIE *lib )
+  { struct MODULE_UPS *module;
+    GSList *liste;
 
-    prctl(PR_SET_NAME, "W-ONDULEUR", 0, 0, 0 );
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Start" );
+    prctl(PR_SET_NAME, "W-UPS", 0, 0, 0 );
+    memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                     /* Mise a zero de la structure de travail */
+    Cfg_ups.lib = lib;                         /* Sauvegarde de la structure pointant sur cette librairie */
+    Ups_Lire_config ();                                 /* Lecture de la configuration logiciel du thread */
 
-    Partage->com_onduleur.Modules_ONDULEUR = NULL;                        /* Init des variables du thread */
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+    Cfg_ups.lib->Thread_run = TRUE;                                                 /* Le thread tourne ! */
 
-    if ( Charger_tous_onduleur() == FALSE )                            /* Chargement des modules onduleur */
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Run_onduleur: No module ONDULEUR found -> stop" );
-       Partage->com_onduleur.TID = 0;                     /* On indique au master que le thread est mort. */
+    g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
+    g_snprintf( Cfg_ups.lib->admin_help,   sizeof(Cfg_ups.lib->admin_help),   "Manage UPS Modules" );
+
+    Cfg_ups.Modules_UPS = NULL;                                  /* Init des variables du thread */
+
+    if ( Charger_tous_ups() == FALSE )                                      /* Chargement des modules ups */
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Run_thread: No module UPS found -> stop" );
+       Ups_Liberer_config ();                           /* Lecture de la configuration logiciel du thread */
+       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
+       lib->TID        = 0;                               /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
 
-    Partage->com_onduleur.Thread_run = TRUE;                     /* On dit au maitre que le thread tourne */
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
-    while(Partage->com_onduleur.Thread_run == TRUE)                   /* On tourne tant que l'on a besoin */
+    while(lib->Thread_run == TRUE)                                    /* On tourne tant que l'on a besoin */
      { sleep(1);
        sched_yield();
 
-       if (Partage->com_onduleur.Thread_reload == TRUE)
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_onduleur: Reloading conf" );
-          Decharger_tous_ONDULEUR();
-          Charger_tous_onduleur();
-          Partage->com_onduleur.Thread_reload = FALSE;
+       if (Cfg_ups.reload == TRUE)
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_thread: Reloading conf" );
+          Decharger_tous_UPS();
+          Charger_tous_ups();
+          Cfg_ups.reload = FALSE;
         }
 
-       if (Partage->com_onduleur.Thread_sigusr1 == TRUE)
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_onduleur: SIGUSR1" );
-          Partage->com_onduleur.Thread_sigusr1 = FALSE;
+       if (lib->Thread_sigusr1 == TRUE)
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_thread: SIGUSR1" );
+          lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Partage->com_onduleur.admin_del)
-        { module = Chercher_module_by_id ( Partage->com_onduleur.admin_del );
-          Deconnecter_module  ( module );
-          Decharger_un_ONDULEUR ( module );
-          Partage->com_onduleur.admin_del = 0;
+       if (Cfg_ups.admin_start)
+        { module = Chercher_module_ups_by_id ( Cfg_ups.admin_start );
+          if (module) module->started = TRUE;
+          Cfg_ups.admin_start = 0;
         }
 
-       if (Partage->com_onduleur.admin_add)
-        { Charger_un_ONDULEUR ( Partage->com_onduleur.admin_add );
-          Partage->com_onduleur.admin_add = 0;
-        }
-
-       if (Partage->com_onduleur.admin_start)
-        { module = Chercher_module_by_id ( Partage->com_onduleur.admin_start );
-          if (module) module->onduleur.actif = 1;
-          Partage->com_onduleur.admin_start = 0;
-        }
-
-       if (Partage->com_onduleur.admin_stop)
-        { module = Chercher_module_by_id ( Partage->com_onduleur.admin_stop );
-          if (module) { module->onduleur.actif = 0;
+       if (Cfg_ups.admin_stop)
+        { module = Chercher_module_ups_by_id ( Cfg_ups.admin_stop );
+          if (module) { module->started = FALSE;
                         Deconnecter_module  ( module );
                         module->date_retente = 0;                            /* RAZ de la date de retente */
                       }
-          Partage->com_onduleur.admin_stop = 0;
+          Cfg_ups.admin_stop = 0;
         }
 
-       if (Partage->com_onduleur.Modules_ONDULEUR == NULL ||    /* Si pas de module référencés, on attend */
-           Onduleur_is_actif() == FALSE)
+       if (Cfg_ups.Modules_UPS == NULL ||              /* Si pas de module référencés, on attend */
+           Onduleur_is_started() == FALSE)
         { sleep(2); continue; }
 
-       liste = Partage->com_onduleur.Modules_ONDULEUR;
-       while (liste)
-        { module = (struct MODULE_ONDULEUR *)liste->data;
-          if ( module->onduleur.actif != TRUE ||     /* si le module n'est pas actif, on ne le traite pas */
+       pthread_mutex_lock ( &Cfg_ups.lib->synchro );               /* Car utilisation de la liste chainée */
+       liste = Cfg_ups.Modules_UPS;
+       while (liste && (lib->Thread_run == TRUE))
+        { module = (struct MODULE_UPS *)liste->data;
+          if ( module->started != TRUE ||          /* si le module n'est pas started, on ne le traite pas */
                Partage->top < module->date_retente )           /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
            }
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
-           { if ( ! Connecter_onduleur( module ) )                     /* Demande de connexion a l'onduleur */
+           { if ( ! Connecter_ups( module ) )                             /* Demande de connexion a l'ups */
               { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                         "Run_onduleur: Module %03d DOWN", module->onduleur.id );
+                         "Run_thread: Module %03d DOWN", module->ups.id );
                 Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
-                module->date_retente = Partage->top + ONDULEUR_RETRY;
+                module->date_retente = Partage->top + UPS_RETRY;
               }
            }
           else
            { Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                      "Run_onduleur: Envoi des sorties onduleur ID%03d", module->onduleur.id );
-             if ( Envoyer_sortie_onduleur ( module ) == FALSE )
+                      "Run_thread: Envoi des sorties ups ID%03d", module->ups.id );
+             if ( Envoyer_sortie_ups ( module ) == FALSE )
               { Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
-                module->date_retente = Partage->top + ONDULEUR_RETRY;        /* On retente dans longtemps */
+                module->date_retente = Partage->top + UPS_RETRY;             /* On retente dans longtemps */
               }
              else
               { Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                         "Run_onduleur: Interrogation onduleur ID%03d", module->onduleur.id );
-                if ( Interroger_onduleur ( module ) == FALSE )
+                         "Run_thread: Interrogation ups ID%03d", module->ups.id );
+                if ( Interroger_ups ( module ) == FALSE )
                  { Deconnecter_module ( module );
-                   module->date_retente = Partage->top + ONDULEUR_RETRY;     /* On retente dans longtemps */
+                   module->date_retente = Partage->top + UPS_RETRY;          /* On retente dans longtemps */
                  }
-                else module->date_retente = Partage->top + ONDULEUR_POLLING;/* Update toutes les xx secondes */
+                else module->date_retente = Partage->top + UPS_POLLING;  /* Update toutes les xx secondes */
               }
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
+       pthread_mutex_unlock ( &Cfg_ups.lib->synchro );             /* Car utilisation de la liste chainée */
      }
 
-    Decharger_tous_ONDULEUR();
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_onduleur: Down (%d)", pthread_self() );
-    Partage->com_onduleur.TID = 0;                        /* On indique au master que le thread est mort. */
+    Decharger_tous_UPS();
+    Ups_Liberer_config ();                              /* Lecture de la configuration logiciel du thread */
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_ups.lib->TID = 0;                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

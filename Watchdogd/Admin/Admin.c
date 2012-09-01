@@ -25,14 +25,12 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <sys/socket.h>
  #include <sys/un.h>                                               /* Description de la structure AF UNIX */
  #include <sys/types.h>
  #include <sys/prctl.h>
  #include <fcntl.h>
  #include <unistd.h>
- #include <errno.h>
 
  #include "watchdogd.h"
 
@@ -182,7 +180,6 @@
             if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + 7 ); }
        else if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
        else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "onduleur"  ) ) { Admin_onduleur ( client, ligne + 9 ); }
        else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + 10); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }

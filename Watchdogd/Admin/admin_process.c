@@ -69,10 +69,6 @@
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
         }  else
-       if ( ! strcmp ( thread, "onduleur" ) )
-        { if (!Demarrer_onduleur())                                                 /* Démarrage ONDULEUR */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ONDULEUR -> Arret" ); }
-        }  else
        if ( ! strcmp ( thread, "tellstick" ) )
         { if (!Demarrer_tellstick())                                               /* Démarrage TELLSTICK */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb TELLSTICK -> Arret" ); }
@@ -147,7 +143,6 @@
        if ( ! strcmp ( thread, "sms"       ) ) { Partage->com_sms.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
-       if ( ! strcmp ( thread, "onduleur"  ) ) { Partage->com_onduleur.Thread_run  = FALSE; } else
        if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; } else
        if ( ! strcmp ( thread, "lirc"      ) ) { Partage->com_lirc.Thread_run      = FALSE; }
        else
@@ -206,11 +201,6 @@
 
        g_snprintf( chaine, sizeof(chaine), " Built-in AUDIO    -> ------------- running = %s, TID = %d\n",
                    (Partage->com_audio.Thread_run ? "YES" : " NO"), (gint)Partage->com_audio.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
-       g_snprintf( chaine, sizeof(chaine), " Built-in ONDULEUR -> ------------- running = %s, TID = %d\n",
-                   (Partage->com_onduleur.Thread_run ? "YES" : " NO"), (gint)Partage->com_onduleur.TID
                  );
        Write_admin ( client->connexion, chaine );
 

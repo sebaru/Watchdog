@@ -270,13 +270,6 @@ extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNE
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
  extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
-                                                                                 /* Dans envoi_onduleur.c */
- extern void Proto_ajouter_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
- extern void Proto_effacer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
- extern void Proto_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
- extern void Proto_valider_editer_onduleur ( struct CLIENT *client, struct CMD_TYPE_ONDULEUR *rezo_onduleur );
- extern void *Envoyer_onduleurs_thread ( struct CLIENT *client );
-
                                                                                    /* Dans envoi_modbus.c */
  extern void Proto_ajouter_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );
  extern void Proto_effacer_modbus ( struct CLIENT *client, struct CMD_TYPE_MODBUS *rezo_modbus );

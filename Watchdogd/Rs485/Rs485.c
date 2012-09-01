@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
   
- #include <glib.h>
  #include <stdio.h>
  #include <fcntl.h>
  #include <sys/types.h>
@@ -92,7 +91,10 @@
     struct DB *db;
 
     db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
+    if (!db)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Retirer_rs485DB: Database Connection Failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RS485, rs485->id );
@@ -237,7 +239,7 @@
 /* Entrée: l'id du module                                                                                 */
 /* Sortie: le module, ou NULL si non trouvé                                                               */
 /**********************************************************************************************************/
- struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
+ static struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id )
   { struct MODULE_RS485 *module;
     GSList *liste;
     module = NULL;
@@ -250,6 +252,7 @@
      }
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
     if (liste) return(module);
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chercher_module_rs485_by_id: Module %d not found", id );
     return(NULL);
   }
 /**********************************************************************************************************/
@@ -262,7 +265,9 @@
     gint cpt;
 
     db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_rs485: Database Connection Failed" );
+       return(-1);
+     }
 
 /********************************************** Chargement des modules ************************************/
     if ( ! Recuperer_rs485DB( db ) )
@@ -618,7 +623,7 @@
               }
            }
           module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_start );
-          if (module) { module->started = 1; }
+          if (module) { module->started = TRUE; }
           Cfg_rs485.admin_start = 0;
         }
 
@@ -626,7 +631,7 @@
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                     "Run_thread: Run_rs485: Stopping module" );
           module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_stop );
-          if (module) module->started = 0;
+          if (module) module->started = FALSE;
           Deconnecter_rs485 ( module );
           Cfg_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
@@ -639,9 +644,9 @@
        if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
-       pthread_mutex_lock ( &Cfg_rs485.lib->synchro );                  /* Car utilisation de la liste chainée */
+       pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
-       while (liste && lib->Thread_run == TRUE)
+       while (liste && (lib->Thread_run == TRUE))
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->started != TRUE)                           /* Si le module est stopped, on le zappe */
            { liste = liste->next;
@@ -724,10 +729,11 @@
               }
 	   }
         }                                                                           /* Fin du While liste */
-       pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );                /* Car utilisation de la liste chainée */
+       pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );           /* Car utilisation de la liste chainée */
       }                                                                    /* Fin du while partage->arret */
     close(Cfg_rs485.fd);
     Decharger_tous_rs485();
+    Rs485_Liberer_config ();                         /* Lecture de la configuration logiciel du thread */
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %d", pthread_self() );
     Cfg_rs485.lib->TID = 0;                               /* On indique au master que le thread est mort. */

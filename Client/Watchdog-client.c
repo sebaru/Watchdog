@@ -84,8 +84,6 @@
  GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_UPS"), N_("Edit UPS"),
-                            Menu_want_onduleur, GNOME_STOCK_PIXMAP_BOOK_YELLOW ),
     GNOMEUIINFO_ITEM_STOCK( N_("_MODBUS"), N_("Edit MODBUS"),
                             Menu_want_modbus, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
     GNOMEUIINFO_END

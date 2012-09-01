@@ -31,7 +31,7 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -lssl -lpopt `pkg-config --libs glib-2.0 gthread-2.0` $(GNOKII_LIBS) $(MYSQL_LIBS) $(UPS_LIBS) $(CURL_LIBS)
+Watchdogd_LDFLAGS = -lssl -lpopt `pkg-config --libs glib-2.0 gthread-2.0` `mysql_config --libs` $(GNOKII_LIBS) $(UPS_LIBS) $(CURL_LIBS)
 
 sysconf_DATA = watchdogd.conf
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
@@ -39,7 +39,7 @@ pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
 	 `pkg-config --cflags glib-2.0 gthread-2.0` \
-	 $(MYSQL_CFLAGS) \
+	 `mysql_config --cflags` \
 	 $(CURL_CFLAGS) \
 	 $(UPS_CFLAGS)
 

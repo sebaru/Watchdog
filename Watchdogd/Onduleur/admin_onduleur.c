@@ -27,7 +27,7 @@
  
  #include <glib.h>
  #include "watchdogd.h"
-
+#ifdef bouh
 /**********************************************************************************************************/
 /* Admin_onduleur_reload: Demande le rechargement des conf ONDULEUR                                       */
 /* Entrée: le client                                                                                      */
@@ -113,6 +113,7 @@
      { g_snprintf( chaine, sizeof(chaine), " -- error -- Module ONDULEUR NOT %d stopped\n", id ); }
     Write_admin ( client->connexion, chaine );
   }
+#endif
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -120,37 +121,32 @@
 /**********************************************************************************************************/
  void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
-    struct DB*db;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db)
-     { Info_new( Config.log, FALSE, LOG_WARNING,
-                 "Admin_onduleur: impossible d'ouvrir la Base de données %s",
-                 Config.db_database );
-       return;
-     }
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_onduleur_start ( client, db, num );
+       /*Admin_onduleur_start ( client, db, num );*/
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_onduleur_stop ( client, db, num );
+/*       Admin_onduleur_stop ( client, db, num );*/
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_onduleur_list ( client );
+     {/* Admin_onduleur_list ( client );*/
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_onduleur_reload(client);
+     { /*Admin_onduleur_reload(client);*/
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'ONDULEUR'\n" );
+                     "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
+       Write_admin ( client->connexion,
+                     "  add x                                  - Demarre le module id\n" );
+       Write_admin ( client->connexion,
+                     "  del x                                  - Demarre le module id\n" );
        Write_admin ( client->connexion,
                      "  start id                               - Demarre le module id\n" );
        Write_admin ( client->connexion,
@@ -165,6 +161,5 @@
        g_snprintf( chaine, sizeof(chaine), " Unknown NUT command : %s\n", ligne );
        Write_admin ( client->connexion, chaine );
      }
-    Libere_DB_SQL( Config.log, &db );
   }
 /*--------------------------------------------------------------------------------------------------------*/

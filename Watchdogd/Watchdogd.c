@@ -247,7 +247,6 @@
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
           Partage->com_audio.Thread_reload     = TRUE;
-          Partage->com_onduleur.Thread_reload  = TRUE;
           Partage->com_lirc.Thread_reload      = TRUE;
           Partage->com_tellstick.Thread_reload = TRUE;
           for (i=0; i<Config.max_serveur; i++)
@@ -272,7 +271,6 @@
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_audio.Thread_sigusr1     = TRUE;
-          Partage->com_onduleur.Thread_sigusr1  = TRUE;
           Partage->com_admin.Thread_sigusr1     = TRUE;
           Partage->com_lirc.Thread_sigusr1      = TRUE;
           Partage->com_tellstick.Thread_sigusr1 = TRUE;
@@ -535,7 +533,6 @@
        memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
-       memset( &Partage->com_onduleur, 0, sizeof(Partage->com_onduleur) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
        memset( &Partage->com_lirc,     0, sizeof(Partage->com_lirc) );
        memset( &Partage->com_tellstick,0, sizeof(Partage->com_tellstick) );
@@ -549,7 +546,6 @@
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_audio.synchro, &attr );
-       pthread_mutex_init( &Partage->com_onduleur.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_tellstick.synchro, &attr );
        pthread_mutex_init( &Partage->com_lirc.synchro, &attr );
@@ -610,9 +606,6 @@
 
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb DLS" ); }
-
-          if (!Demarrer_onduleur())                                                 /* Démarrage Onduleur */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb ONDULEUR" ); }
 
           if (!Demarrer_tellstick())                                               /* Démarrage Tellstick */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb TELLSTICK" ); }

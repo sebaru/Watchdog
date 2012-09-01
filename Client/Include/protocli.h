@@ -331,9 +331,6 @@
  extern void Menu_want_courbe ( void );
  extern void Menu_want_histo_courbe ( void );
  extern void Menu_want_scenario ( void );
- extern void Menu_want_onduleur ( void );
- extern void Menu_want_rs485 ( void );
- extern void Menu_want_rfxcom ( void );
  extern void Menu_want_modbus ( void );
 
 
@@ -520,15 +517,6 @@
                                                                                    /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
  extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
-
- extern void Proto_afficher_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur );   /* Dans liste_onduleur.c */
- extern void Proto_cacher_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur );
- extern void Proto_rafraichir_un_onduleur( struct CMD_TYPE_ONDULEUR *onduleur );
- extern void Proto_afficher_un_syn_for_onduleur ( struct CMD_TYPE_SYNOPTIQUE *syn );
- extern void Creer_page_onduleur( void );
-
- extern void Menu_ajouter_editer_onduleur ( struct CMD_TYPE_ONDULEUR *edit_onduleur );/* Dans ajout_onduleur.c */
- extern void Proto_afficher_mnemo_onduleur ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
 
  extern void Proto_afficher_un_modbus( struct CMD_TYPE_MODBUS *modbus );           /* Dans liste_modbus.c */
  extern void Proto_cacher_un_modbus( struct CMD_TYPE_MODBUS *modbus );

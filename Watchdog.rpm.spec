@@ -102,6 +102,18 @@ This is the server side of Watchdog - RS485 Module
 %defattr(644,root,root)
 /usr/lib/libwatchdog-server-rs485*
 
+#----------------------------- Package Server-ups -------------------------------
+%package server-ups
+Summary: The Watchdogd Server - Module UPS
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-ups
+This is the server side of Watchdog - UPS Module
+
+%files server-ups
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-ups*
+
 #----------------------------- Package Server-tellstick -------------------------------
 %package server-tellstick
 Summary: The Watchdogd Server - Module tellstick

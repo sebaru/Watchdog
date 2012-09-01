@@ -5,13 +5,13 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-noinst_LTLIBRARIES     = libonduleur.la
-libonduleur_la_SOURCES = Onduleur.c
+lib_LTLIBRARIES     = libwatchdog-server-ups.la
+libwatchdog_server_ups_la_SOURCES = Onduleur.c admin_onduleur.c Onduleur.h
 
-INCLUDES= $(GNOME2_CFLAGS) \
-	  $(UPS_CFLAGS) \
-          -I$(top_srcdir) -I$(includedir) \
+INCLUDES= `pkg-config --cflags glib-2.0 libupsclient` \
+          -I$(includedir) \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
 	  $(MYSQL_CFLAGS) \
 	  -I../Include
+
+libwatchdog_server_ups_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

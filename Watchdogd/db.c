@@ -76,13 +76,13 @@
     my_bool reconnect;
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Erreur allocation mémoire struct DB" );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Memory error" );
        return(NULL);
      }
 
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Probleme d'initialisation mysql_init (%s)",
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Mysql_init failed (%s)",
                               (char *) mysql_error(db->mysql)  );
        g_free(db);
        return (NULL);
@@ -93,7 +93,7 @@
     if ( ! mysql_real_connect( db->mysql, Config.db_host, Config.db_username,
                                Config.db_password, Config.db_database, Config.db_port, NULL, 0 ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
-                 "Init_DB_SQL: Probleme de connexion à la base (%s)",
+                 "Init_DB_SQL: mysql_real_connect failed (%s)",
                  (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
        g_free(db);
@@ -101,7 +101,7 @@
      }
     db->free = TRUE;
     Info_new( Config.log, Config.log_db, LOG_INFO,
-              "Init_DB_SQL: Connexion effective DB %s@%s", Config.db_username, Config.db_database );
+              "Init_DB_SQL: Database Connection OK with %s@%s", Config.db_username, Config.db_database );
     return(db);
   }
 /**********************************************************************************************************/

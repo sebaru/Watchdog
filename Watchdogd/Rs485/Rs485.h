@@ -98,6 +98,5 @@
  extern gboolean Retirer_rs485DB ( struct RS485DB *rs485 );
  extern gint Ajouter_rs485DB ( struct RS485DB *rs485 );
  extern gboolean Modifier_rs485DB( struct RS485DB *rs485 );
- extern struct MODULE_RS485 *Chercher_module_rs485_by_id ( gint id );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

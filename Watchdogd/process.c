@@ -237,7 +237,7 @@
               g_slist_length( Partage->com_msrv.Librairies ) );
   }
 /**********************************************************************************************************/
-/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
+/* Demarrer_config_file_motion                                                                            */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
@@ -388,27 +388,6 @@
      }
     else pthread_detach( Partage->Sous_serveur[id].pid );            /* On détache le thread Sous-Serveur */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur %d", id );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_onduleur ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: Demande de demarrage %d", getpid() );
-    if (Partage->com_onduleur.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: An instance is already running %d",
-               Partage->com_onduleur.TID );
-       return(FALSE);
-     }
-    if ( pthread_create( &Partage->com_onduleur.TID, NULL, (void *)Run_onduleur, NULL ) )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: pthread_create failed" );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_onduleur.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_onduleur: thread onduleur seems to be running %d",
-            Partage->com_onduleur.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -792,11 +771,6 @@
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                 /* Attente fin DLS */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, DLS is down" );
-
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for ONDULEUR (%d) to finish", Partage->com_onduleur.TID );
-    Partage->com_onduleur.Thread_run = FALSE;
-    while ( Partage->com_onduleur.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, ONDULEUR is down" );
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for TELLSTICK (%d) to finish", Partage->com_tellstick.TID );
     Partage->com_tellstick.Thread_run = FALSE;

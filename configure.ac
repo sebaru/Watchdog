@@ -49,13 +49,6 @@ GNOKII_LIBS=`pkg-config --libs gnokii`
 dnl `pkg-config --libs gnokii`
 AC_SUBST(GNOKII_LIBS)
 
-UPS_CFLAGS=`pkg-config --cflags libupsclient`
-AC_SUBST(UPS_CFLAGS)
-
-UPS_LIBS=`pkg-config --libs libupsclient`
-AC_SUBST(UPS_LIBS)
-
-
 AM_PATH_GLIB_2_0( 2.2.2 )
 
 dnl Checks for header files.
