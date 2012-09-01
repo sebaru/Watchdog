@@ -30,9 +30,6 @@ AC_SUBST(CURL_CFLAGS)
 LIRC_CFLAGS=`pkg-config --cflags liblircclient0`
 AC_SUBST(LIRC_CFLAGS)
 
-BONOBO_CFLAGS=`pkg-config --cflags libbonobo-2.0`
-AC_SUBST(BONOBO_CFLAGS)
-
 GNOME2_LIBS=`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0 gtkdatabox`
 AC_SUBST(GNOME2_LIBS)
 
@@ -47,9 +44,6 @@ AC_SUBST(MYSQL_CFLAGS)
 
 MYSQL_LIBS=`mysql_config --libs`
 AC_SUBST(MYSQL_LIBS)
-
-BONOBO_LIBS=`pkg-config --libs libbonobo-2.0`
-AC_SUBST(BONOBO_LIBS)
 
 GNOKII_LIBS=`pkg-config --libs gnokii`
 dnl `pkg-config --libs gnokii`

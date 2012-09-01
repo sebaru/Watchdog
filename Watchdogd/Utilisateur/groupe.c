@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <bonobo/bonobo-i18n.h>                                           /* Pour l'internationalisation */
  #include <unistd.h>
  #include <stdio.h>
  #include <string.h>
@@ -33,19 +32,17 @@
  #include <stdlib.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Utilisateur_DB.h"
 
  static gchar *GROUPE_RESERVE[NBR_GROUPE_RESERVE][2]=
-  { { N_("Everybody"),        N_("The default group") },
-    { N_("Admin-UserDB"),     N_("Members can add/remove/edit users/groups") },
-    { N_("Admin-MsgDB"),      N_("Members can add/remove/edit Msgs") },
-    { N_("Admin-iconDB"),     N_("Members can add/remove/edit icons") },
-    { N_("Admin-synopDB"),    N_("Members can add/remove/edit syn") },
-    { N_("Log"),              N_("Members can see the log") },
-    { N_("Admin-dlsDB"),      N_("Members can add/remove/edit DLS plugins") },
-    { N_("Admin-histoDB"),    N_("Members can ack/query histo") },
-    { N_("Admin-scenarioDB"), N_("Members can add/remove Scenario") }
+  { { "Everybody",        "The default group" },
+    { "Admin-UserDB",     "Members can add/remove/edit users/groups" },
+    { "Admin-MsgDB",      "Members can add/remove/edit Msgs" },
+    { "Admin-iconDB",     "Members can add/remove/edit icons" },
+    { "Admin-synopDB",    "Members can add/remove/edit syn" },
+    { "Log",              "Members can see the log" },
+    { "Admin-dlsDB",      "Members can add/remove/edit DLS plugins" },
+    { "Admin-histoDB",    "Members can ack/query histo" },
+    { "Admin-scenarioDB", "Members can add/remove Scenario" }
   };
 /************************************ Prototypes des fonctions ********************************************/
  #include "proto_util.h"
@@ -56,7 +53,7 @@
 /* Sortie: une chaine de caractere non freable                                                            */
 /**********************************************************************************************************/
  gchar *Nom_groupe_reserve( gint id )
-  { if (id>=NBR_GROUPE_RESERVE) return( _("Unknown") );
+  { if (id>=NBR_GROUPE_RESERVE) return( "Unknown" );
     else { return( GROUPE_RESERVE[id][0] ); }
   }
 /**********************************************************************************************************/
@@ -65,7 +62,7 @@
 /* Sortie: une chaine de caractere non freable                                                            */
 /**********************************************************************************************************/
  gchar *Commentaire_groupe_reserve( gint id )
-  { if (id>=NBR_GROUPE_RESERVE) return( _("Unknown") );
+  { if (id>=NBR_GROUPE_RESERVE) return( "Unknown" );
     else return( GROUPE_RESERVE[id][1] );
   }
 /**********************************************************************************************************/

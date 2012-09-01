@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <glib.h>
  #include <openssl/ssl.h>
  #include <openssl/err.h>
  #include <sys/prctl.h>

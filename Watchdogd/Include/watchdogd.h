@@ -28,10 +28,12 @@
  #ifndef _WATCHDOGD_H_
  #define _WATCHDOGD_H_
 
+ #include <glib.h>
+ #include <glib/gthread.h>
  #include <pthread.h>
  #include <errno.h>
- #include "Reseaux.h"
 
+ #include "Reseaux.h"
  #include "config.h"
  #include "Db.h"
  #include "Config.h"
