@@ -72,39 +72,6 @@
   { if (log) log->log_level = new_log_level;
   }
 /**********************************************************************************************************/
-/* Info: Log dans un fichier ou sur le terminal l'évolution du systeme                                    */
-/* Entrée: Le niveau de debuggage, et le texte a afficher                                                 */
-/**********************************************************************************************************/
- void Info( struct LOG *log, guint niveau, gchar *texte )
-  { gchar nom[20];
-    if (!log) return;
-
-    prctl( PR_GET_NAME, &nom, 0, 0, 0);
-    if ( log->log_level & niveau )
-     { syslog( LOG_INFO, "%s -> %s\n", nom, texte );
-     }
-  }
-
-/**********************************************************************************************************/
-/* Info_n: on informe avec une donnée numérique                                                           */
-/* Entrée: le niveau, le texte, et la valeur à afficher                                                   */
-/**********************************************************************************************************/
- void Info_n( struct LOG *log, guint niveau, gchar *texte, gint valeur )
-  { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s: %d", texte, valeur );
-    Info( log, niveau, chaine );
-  }
-
-/**********************************************************************************************************/
-/* Info_c: on informe avec une donnée de type chaine                                                      */
-/* Entrée: le niveau, le texte, et la chaine à afficher                                                   */
-/**********************************************************************************************************/
- void Info_c( struct LOG *log, guint niveau, gchar *texte, gchar *texte2 )
-  { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s: %s", texte, texte2 );
-    Info( log, niveau, chaine );
-  }
-/**********************************************************************************************************/
 /* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres             */
 /* Entrée: le niveau, le texte, et la chaine à afficher                                                   */
 /**********************************************************************************************************/

@@ -40,9 +40,6 @@
  #define  fonction_sort();  { printf("Sort de la fonction %s\n", __FUNCTION__ ); }
  
  extern struct LOG *Info_init( gchar *entete, guint debug );
- extern void Info( struct LOG *log, guint niveau, gchar *texte );
- extern void Info_n( struct LOG *log, guint niveau, gchar *texte, gint valeur );
- extern void Info_c( struct LOG *log, guint niveau, gchar *texte, gchar *texte2 );
  extern void Info_change_log_level( struct LOG *log, guint debug );
  extern void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... );
 
