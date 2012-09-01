@@ -109,7 +109,7 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_ups ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */

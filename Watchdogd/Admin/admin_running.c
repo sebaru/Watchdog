@@ -56,7 +56,6 @@
        Write_admin ( client->connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
        Write_admin ( client->connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Write_admin ( client->connexion, "  rs485                 - Sous-menu de gestion des equipements RS485\n" );
-       Write_admin ( client->connexion, "  onduleur              - Sous-menu de gestion des equipements ONDULEUR\n" );
        Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
        Write_admin ( client->connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n");
@@ -232,7 +231,7 @@
        g_snprintf( chaine, sizeof(chaine), " Log level set to %s\n", debug );
        if ( ! strcmp ( debug, "debug"    ) )
         { Info_change_log_level ( Config.log, LOG_DEBUG   ); } else
-       if ( ! strcmp ( debug, "notice"  ) )
+       if ( ! strcmp ( debug, "info"  ) )
         { Info_change_log_level ( Config.log, LOG_INFO    ); } else
        if ( ! strcmp ( debug, "notice"  ) )
         { Info_change_log_level ( Config.log, LOG_NOTICE  ); } else
