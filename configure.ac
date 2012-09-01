@@ -139,8 +139,6 @@ Watchdogd/Rfxcom/Makefile \
 Watchdogd/Imsg/Makefile \
 Watchdogd/Lirc/Makefile \
 Watchdogd/EntreeANA/Makefile \
-Watchdogd/Message/Makefile \
-Watchdogd/Mnemonique/Makefile \
 Watchdogd/Scenario/Makefile \
 Watchdogd/Camera/Makefile \
 Watchdogd/Asterisk/Makefile \
