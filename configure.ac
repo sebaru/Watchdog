@@ -149,7 +149,6 @@ Watchdogd/Histo/Makefile \
 Watchdogd/Utilisateur/Makefile \
 Watchdogd/Synoptiques/Makefile \
 Watchdogd/Compteur/Makefile \
-Watchdogd/Config/Makefile \
 Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
