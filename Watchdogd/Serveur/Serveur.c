@@ -131,7 +131,8 @@
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 ); }
     client->mode = mode;
     g_snprintf( chaine, sizeof(chaine), "client %s (%s) en mode %s",
-                client->util->nom, client->machine, Mode_vers_string(mode) );
+                (client->util->nom ? client->util->nom : "unknown"),
+                client->machine, Mode_vers_string(mode) );
   }
 /**********************************************************************************************************/
 /* Deconnecter: Deconnection d'un client                                                                  */
