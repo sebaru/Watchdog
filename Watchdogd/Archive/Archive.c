@@ -97,7 +97,7 @@
         { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_arch: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
           Info_new( Config.log, Config.log_all, LOG_INFO,
-                   "Run_arch: Reste %d a traiter",
+                   "Run_arch: Reste %03d a traiter",
                     g_slist_length(Partage->com_arch.liste_arch) );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Partage->com_arch.Thread_sigusr1 = FALSE;
@@ -113,7 +113,7 @@
        arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
        Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
        Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                "Run_arch: Reste a %d traiter",
+                "Run_arch: Reste %03d a traiter",
                  g_slist_length(Partage->com_arch.liste_arch) );
        Partage->com_arch.taille_arch--;
        pthread_mutex_unlock( &Partage->com_arch.synchro );

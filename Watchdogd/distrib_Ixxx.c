@@ -52,7 +52,7 @@
     Info_new( Config.log, Config.log_all, LOG_DEBUG,
               "Gerer_arrive_Ixxx_dls: Recu I(%03d)=%d, r%03d v%03d, b%03d. Reste a traiter %03d",
               num, Partage->i[num].etat,
-              Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu
+              Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu, reste
             );
 
 /***************************** Création de la structure passée aux clients ********************************/
