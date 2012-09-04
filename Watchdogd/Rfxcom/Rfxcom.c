@@ -61,10 +61,10 @@
     if (!chaine)
      { Info_new ( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                   "Rfxcom_Lire_config: port is missing. Using default." );
-       g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "defaultuser" );
+       g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "/dev/watchdog_RFXCOM" );
      }
     else
-     { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "/dev/watchdog_RFXCOM" );
+     { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", chaine );
        g_free(chaine);
      }
 

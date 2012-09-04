@@ -396,7 +396,7 @@
        Info_new( Config.log, Config.log_all, LOG_DEBUG, "Run_sms send: fin" );
      }
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_sms: Down (%s)", pthread_self() );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_sms: Down (%d)", pthread_self() );
     Partage->com_sms.TID = 0;                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
