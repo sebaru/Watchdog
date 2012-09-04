@@ -304,7 +304,6 @@
           return(FALSE);
         }
        memcpy( &module->ups, ups, sizeof(struct UPSDB) );
-       if (module->ups.enable) module->started = TRUE;            /* Si enable at boot... et bien Start ! */
        g_free(ups);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
@@ -508,7 +507,7 @@
  gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gdouble *retour )
   { gchar buffer[80];
 
-    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s", module->ups.ups, nom_var );
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Onduleur_get_var: Sending GET VAR failed (%s) error=%s",
@@ -676,7 +675,7 @@
        liste = Cfg_ups.Modules_UPS;
        while (liste && (lib->Thread_run == TRUE))
         { module = (struct MODULE_UPS *)liste->data;
-          if ( module->started != TRUE ||          /* si le module n'est pas started, on ne le traite pas */
+          if ( module->ups.enable != TRUE ||        /* si le module n'est pas enable, on ne le traite pas */
                Partage->top < module->date_retente )           /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
