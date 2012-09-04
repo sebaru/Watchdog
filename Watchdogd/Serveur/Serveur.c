@@ -225,7 +225,7 @@
           Partage->Sous_serveur[ss_id].Clients = g_list_append( Partage->Sous_serveur[ss_id].Clients, client );
           pthread_mutex_unlock( &Partage->Sous_serveur[ss_id].synchro );
           Info_new( Config.log, Config.log_all, LOG_INFO,
-                   "Accueillir_un_client: Connexion accepted (id=%s) from %s", id, client->machine );
+                   "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
           Partage->Sous_serveur[ss_id].nb_client++;                   /* Nous gerons un client de plus !! */
           if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
                            else Client_mode( client, ATTENTE_IDENT );
