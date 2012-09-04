@@ -391,7 +391,7 @@
        return(FALSE);
      }
 
-    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups %d", module->ups.host );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups: %s", module->ups.host );
 
 /********************************************* UPSDESC ****************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->ups.ups );
