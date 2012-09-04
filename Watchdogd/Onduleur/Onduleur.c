@@ -528,17 +528,17 @@
  gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gdouble *retour )
   { gchar buffer[80];
 
-    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
+    g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Onduleur_get_var: Sending GET VAR failed (%s) error %s",
+                "Onduleur_get_var: Sending GET VAR failed (%s) error=%s",
                 buffer, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Onduleur_get_var: Reading GET VAR result failed (%s) error %s",
+                "Onduleur_get_var: Reading GET VAR result failed (%s) error=%s",
                  nom_var, (char *)upscli_strerror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
         { return(FALSE); }
