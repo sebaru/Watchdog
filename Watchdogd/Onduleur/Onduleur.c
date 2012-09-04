@@ -79,7 +79,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Retirer_upsDB: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Retirer_upsDB: Database Connection Failed" );
        return(FALSE);
      }
 
@@ -120,7 +120,7 @@
      }
 
     ups = (struct UPSDB *)g_try_malloc0( sizeof(struct UPSDB) );
-    if (!ups) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_upsDB_suite: Erreur allocation mémoire" );
+    if (!ups) Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "Recuperer_upsDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &ups->host,     db->row[1],  sizeof(ups->host   ) );
        memcpy( &ups->ups,      db->row[2],  sizeof(ups->ups    ) );
@@ -150,26 +150,26 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Database Connection Failed" );
        return(-1);
      }
 
     host = Normaliser_chaine ( Config.log, ups->host );                  /* Formatage correct des chaines */
     if (!host)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation host impossible" );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation host impossible" );
        return(-1);
      }
     name = Normaliser_chaine ( Config.log, ups->ups );                   /* Formatage correct des chaines */
     if (!name)
      { g_free(host);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation name impossible" );
+       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation name impossible" );
        return(-1);
      }
     libelle = Normaliser_chaine ( Config.log, ups->libelle );            /* Formatage correct des chaines */
     if (!libelle)
      { g_free(host);
        g_free(name);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation libelle impossible" );
+       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation libelle impossible" );
        return(-1);
      }
     username = Normaliser_chaine ( Config.log, ups->username );          /* Formatage correct des chaines */
@@ -177,7 +177,7 @@
      { g_free(host);
        g_free(name);
        g_free(libelle);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation username impossible" );
+       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation username impossible" );
        return(-1);
      }
     password = Normaliser_chaine ( Config.log, ups->password );          /* Formatage correct des chaines */
@@ -186,7 +186,7 @@
        g_free(name);
        g_free(libelle);
        g_free(username);
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation password impossible" );
+       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation password impossible" );
        return(-1);
      }
 
@@ -261,7 +261,7 @@
      }
     pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
     if (liste) return(module);
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chercher_module_ups_by_id: UPS %d not found", id );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Chercher_module_ups_by_id: UPS %d not found", id );
     return(NULL);
   }
 /**********************************************************************************************************/
@@ -275,14 +275,14 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_ups: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Charger_tous_ups: Database Connection Failed" );
        return(FALSE);
      }
 
 /********************************************** Chargement des modules ************************************/
     if ( ! Recuperer_upsDB( db ) )
      { Libere_DB_SQL( Config.log, &db );
-       Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_ups: Recuperer_ups Failed" );
+       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Charger_tous_ups: Recuperer_ups Failed" );
        return(FALSE);
      }
 
@@ -297,7 +297,7 @@
 
        module = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Config.log_all, LOG_ERR,
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR,
                    "Charger_tous_Erreur allocation mémoire struct MODULE_UPS" );
           g_free(ups);
           Libere_DB_SQL( Config.log, &db );
@@ -311,11 +311,11 @@
        pthread_mutex_lock( &Cfg_ups.lib->synchro );
        Cfg_ups.Modules_UPS = g_slist_prepend ( Cfg_ups.Modules_UPS, module );
        pthread_mutex_unlock( &Cfg_ups.lib->synchro );
-       Info_new( Config.log, Config.log_all, LOG_INFO,
+       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,
                 "Charger_tous_ups: id = %03d, host=%s, name=%s",
                  module->ups.id, module->ups.host, module->ups.ups );
      }
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_tous_ups: %03d UPS found  !", cpt );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Charger_tous_ups: %03d UPS found  !", cpt );
 
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
@@ -359,7 +359,7 @@
        module->nbr_deconnect++;
      }
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Deconnecter_module %d", module->ups.id );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Deconnecter_module %d", module->ups.id );
     SB( module->ups.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
 
     num_ea = module->ups.ea_min;
@@ -386,29 +386,29 @@
 
     if ( (connexion = upscli_connect( &module->upsconn, module->ups.host,
                                       UPS_PORT_TCP, UPSCLI_CONN_TRYSSL)) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Connecter_ups: connexion refused by module %d (%s)",
                  module->ups.id, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Connecter_ups %d", module->ups.host );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Connecter_ups %d", module->ups.host );
 
 /********************************************* UPSDESC ****************************************************/
     g_snprintf( buffer, sizeof(buffer), "GET UPSDESC %s\n", module->ups.ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Connecter_ups: Sending GET UPSDESC failed (%s)",
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                    "Connecter_ups: Reading GET UPSDESC failed (%s)",
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_new( Config.log, Config.log_all, LOG_DEBUG, 
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, 
                    "Connecter_ups: Reading GET UPSDESC %s",
                    buffer + strlen(module->ups.ups) + 9 );
         }
@@ -417,18 +417,18 @@
 /********************************************* USERNAME ***************************************************/
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->ups.username );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Connecter_ups: Sending USERNAME failed %s",
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                    "Connecter_ups: Reading USERNAME failed %s",
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                    "Connecter_ups: Reading USERNAME %s",
                     buffer );
         }
@@ -437,18 +437,18 @@
 /********************************************* PASSWORD ***************************************************/
     g_snprintf( buffer, sizeof(buffer), "PASSWORD %s\n", module->ups.password );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Connecter_ups: Sending PASSWORD failed %s",
                 (char *)upscli_strerror(&module->upsconn) );
      }
     else
      { if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                    "Connecter_ups: Reading PASSWORD failed %s",
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                    "Connecter_ups: Reading PASSWORD %s",
                    buffer );
         }
@@ -471,26 +471,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Modbus_is_started: Renvoi TRUE si au moins un des modules modbus est started                           */
-/* Entrée: rien                                                                                           */
-/* Sortie: TRUE/FALSE                                                                                     */
-/**********************************************************************************************************/
- static gboolean Onduleur_is_started ( void )
-  { GSList *liste;
-    liste = Cfg_ups.Modules_UPS;
-    pthread_mutex_lock ( &Cfg_ups.lib->synchro );
-    while ( liste )
-     { struct MODULE_UPS *module;
-       module = ((struct MODULE_UPS *)liste->data);
-
-       if (module->started) break;
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
-    if (liste) return(TRUE);
-    return(FALSE);
-  }
-/**********************************************************************************************************/
 /* Onduleur_set_instcmd: Envoi d'une instant commande à l'ups                                             */
 /* Entrée : l'ups, le nom de la commande                                                                  */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
@@ -500,20 +480,20 @@
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups.ups, nom_cmd );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "Onduleur_set_instcmd: Sending INSTCMD failed (%s) error %s",
                  buffer, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Onduleur_set_instcmd: Reading INSTCMD result failed (%s) error %s",
                  nom_cmd, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                 "Onduleur_set_instcmd: Sending INSTCMD OK",
                  nom_cmd, buffer );
      }
@@ -530,14 +510,14 @@
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Onduleur_get_var: Sending GET VAR failed (%s) error=%s",
                 buffer, (char *)upscli_strerror(&module->upsconn) );
        return(FALSE);
      }
 
     if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Onduleur_get_var: Reading GET VAR result failed (%s) error=%s",
                  nom_var, (char *)upscli_strerror(&module->upsconn) );
        if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
@@ -547,13 +527,13 @@
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
-     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                 "Onduleur_get_var: Reading GET VAR %s OK = %s", nom_var, buffer );
        *retour = atof ( buffer + 7 + strlen(module->ups.ups) + strlen(nom_var) );
        return(TRUE);
      }
 
-    Info_new( Config.log, Config.log_all, LOG_WARNING,
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
              "Onduleur_get_var: Reading GET VAR %s NOK error %s", nom_var, buffer );
     return(FALSE);
   }
@@ -650,7 +630,7 @@
     Cfg_ups.Modules_UPS = NULL;                                  /* Init des variables du thread */
 
     if ( Charger_tous_ups() == FALSE )                                      /* Chargement des modules ups */
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Run_thread: No module UPS found -> stop" );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Run_thread: No module UPS found -> stop" );
        Ups_Liberer_config ();                           /* Lecture de la configuration logiciel du thread */
        lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
        lib->TID        = 0;                               /* On indique au master que le thread est mort. */
@@ -663,14 +643,14 @@
        sched_yield();
 
        if (Cfg_ups.reload == TRUE)
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_thread: Reloading conf" );
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading conf" );
           Decharger_tous_UPS();
           Charger_tous_ups();
           Cfg_ups.reload = FALSE;
         }
 
        if (lib->Thread_sigusr1 == TRUE)
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_thread: SIGUSR1" );
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "Run_thread: SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
         }
 
@@ -689,8 +669,7 @@
           Cfg_ups.admin_stop = 0;
         }
 
-       if (Cfg_ups.Modules_UPS == NULL ||              /* Si pas de module référencés, on attend */
-           Onduleur_is_started() == FALSE)
+       if (Cfg_ups.Modules_UPS == NULL)                         /* Si pas de module référencés, on attend */
         { sleep(2); continue; }
 
        pthread_mutex_lock ( &Cfg_ups.lib->synchro );               /* Car utilisation de la liste chainée */
@@ -705,21 +684,21 @@
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
            { if ( ! Connecter_ups( module ) )                             /* Demande de connexion a l'ups */
-              { Info_new( Config.log, Config.log_all, LOG_WARNING,
+              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                          "Run_thread: Module %03d DOWN", module->ups.id );
                 Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
                 module->date_retente = Partage->top + UPS_RETRY;
               }
            }
           else
-           { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+           { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                       "Run_thread: Envoi des sorties ups ID%03d", module->ups.id );
              if ( Envoyer_sortie_ups ( module ) == FALSE )
               { Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
                 module->date_retente = Partage->top + UPS_RETRY;             /* On retente dans longtemps */
               }
              else
-              { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+              { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                          "Run_thread: Interrogation ups ID%03d", module->ups.id );
                 if ( Interroger_ups ( module ) == FALSE )
                  { Deconnecter_module ( module );
