@@ -60,7 +60,7 @@ blanc         [\t ]+
 "_TR"                      { Dls_lval.val = TEMPO;       return TEMPO;       }
 "_CH"                      { Dls_lval.val = CPT_H;       return CPT_H;       }
 "_CI"                      { Dls_lval.val = CPT_IMP;     return CPT_IMP;     }
-"_T_MSG"                     { Dls_lval.val = T_MSG;         return T_MSG;         }
+"_MSG"                     { Dls_lval.val = T_MSG;       return T_MSG;         }
 "_START"                   { Dls_lval.val = START;       return START;       }
 
  /***************************************** Methodes speciales ********************************************/
