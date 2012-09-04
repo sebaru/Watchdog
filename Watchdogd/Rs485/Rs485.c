@@ -92,7 +92,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Retirer_rs485DB: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Retirer_rs485DB: Database Connection Failed" );
        return(FALSE);
      }
 
@@ -252,7 +252,7 @@
      }
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
     if (liste) return(module);
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chercher_module_rs485_by_id: Module %d not found", id );
+    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO, "Chercher_module_rs485_by_id: Module %d not found", id );
     return(NULL);
   }
 /**********************************************************************************************************/
@@ -266,7 +266,7 @@
 
     db = Init_DB_SQL( Config.log );
     if ( !db )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_rs485: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Charger_tous_rs485: Database Connection Failed" );
        return(-1);
      }
 
