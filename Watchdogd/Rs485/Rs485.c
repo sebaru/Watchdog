@@ -265,6 +265,7 @@
     gint cpt;
 
     db = Init_DB_SQL( Config.log );
+    if ( !db )
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_tous_rs485: Database Connection Failed" );
        return(-1);
      }
