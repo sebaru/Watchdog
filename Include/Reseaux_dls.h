@@ -33,14 +33,14 @@
 
  #define NBR_BIT_DLS           10000
 
- #define NBR_ENTRE_TOR         256
+ #define NBR_ENTRE_TOR         512
  #define NBR_ENTRE_ANA         128
- #define NBR_SORTIE_TOR        256
+ #define NBR_SORTIE_TOR        512
  #define NBR_SORTIE_ANA        128
  #define NBR_BIT_CONTROLE      NBR_BIT_DLS  /* Ixxx */
  #define NBR_BIT_BISTABLE      NBR_BIT_DLS  /* Bxxx */
  #define NBR_BIT_MONOSTABLE    NBR_BIT_DLS  /* Mxxx */
- #define NBR_TEMPO             128
+ #define NBR_TEMPO             512
  #define NBR_MNEMONIQUE        NBR_BIT_DLS
  #define NBR_MESSAGE_ECRITS    NBR_BIT_DLS
  #define NBR_COMPTEUR_H        100
