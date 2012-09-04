@@ -165,13 +165,13 @@
            }
           else
            { Info_new( Config.log, Config.log_all, LOG_INFO,
-                      "Lire_sms_gsm: Wrong CDE %s de %s", (gchar *)sms.user_data[0].u.text );
+                      "Lire_sms_gsm: Wrong CDE %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
            }
           gn_sms_delete (&data, state);                               /* On l'a traité, on peut l'effacer */
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
        else  { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                        "Lire_sms_gsm: error %s from %s", gn_error_print(error), sms.number );
+                        "Lire_sms_gsm: error %s from %s", gn_error_print(error), sms.remote.number );
                break;
              }
      }
