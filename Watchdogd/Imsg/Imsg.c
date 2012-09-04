@@ -305,14 +305,12 @@
        if (result_mnemo)
         { gchar chaine[80];
           switch ( result_mnemo->type )
-           { case MNEMO_MONOSTABLE:
+           { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
                   g_snprintf( chaine, sizeof(chaine), "Mise a un du bit M%03d", result_mnemo->num );
                   Imsg_Envoi_message_to( from, chaine );
-                  if (result_mnemo->type == MNEMO_MONOSTABLE)            /* Positionnement du bit interne */
-                   { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                               "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
-                     Envoyer_commande_dls(result_mnemo->num); 
-                   }
+                  Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                             "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
+                  Envoyer_commande_dls(result_mnemo->num); 
                   break;
              case MNEMO_ENTREE:
                   g_snprintf( chaine, sizeof(chaine), " Result = %d", E(result_mnemo->num) );
@@ -322,6 +320,12 @@
                   g_snprintf( chaine, sizeof(chaine), " Result = %f", EA_ech(result_mnemo->num) );
                   Imsg_Envoi_message_to( from, chaine );
                   break;
+             default: g_snprintf( chaine, sizeof(chaine), "Cannot handle command... Check Mnemo !" );
+                      Imsg_Envoi_message_to( from, chaine );
+                      Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                               "Imsg_Reception_message: Cannot handle commande type %d (num=%03d)",
+                                result_mnemo->type, result_mnemo->num );
+                      break;
            }
           g_free(result_mnemo);
         }
