@@ -172,7 +172,7 @@ encore:
        return(FALSE);
      }
     Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
-              "Connecter_ssl: certificate received. Algo=%s, keylength=%s",
+              "Connecter_ssl: certificate received. Algo=%s, keylength=%d",
               (gchar *) SSL_get_cipher_name( Connexion->ssl ), SSL_get_cipher_bits( Connexion->ssl, NULL ) );
 
     retour = SSL_get_verify_result( Connexion->ssl );                       /* Verification du certificat */
