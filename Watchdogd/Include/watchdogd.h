@@ -50,7 +50,6 @@
  #include "Message_DB.h"
  #include "Asterisk_DB.h"
  #include "Camera_DB.h"
- #include "Sms.h"
  #include "Dls.h"
  #include "Histo_DB.h"
  #include "Synoptiques_DB.h"
@@ -148,7 +147,6 @@
     struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
     struct COM_TELLSTICK com_tellstick;                         /* Communication avec le thread tellstick */
-    struct COM_SMS com_sms;                                                              /* Comm msrv/sms */
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
@@ -181,9 +179,7 @@
  extern void Gerer_manque_process ( void );
  extern void Stopper_fils ( gint flag );
  extern gboolean Demarrer_dls ( void );
- extern gboolean Demarrer_rs485 ( void );
  extern gboolean Demarrer_modbus ( void );
- extern gboolean Demarrer_sms ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_audio ( void );
  extern gboolean Demarrer_admin ( void );

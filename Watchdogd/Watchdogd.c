@@ -243,7 +243,6 @@
         { guint i;
           Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: RELOAD" );
           Partage->com_modbus.Thread_reload    = TRUE;
-          Partage->com_sms.Thread_reload       = TRUE;
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
           Partage->com_audio.Thread_reload     = TRUE;
@@ -267,7 +266,6 @@
           Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: SIGUSR1" );
           Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR1: jeton to server id %d", Partage->jeton );
           Partage->com_modbus.Thread_sigusr1    = TRUE;
-          Partage->com_sms.Thread_sigusr1       = TRUE;
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_audio.Thread_sigusr1     = TRUE;
@@ -529,7 +527,6 @@
 
        memset( &Partage->com_msrv,     0, sizeof(Partage->com_msrv) );
        memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
-       memset( &Partage->com_sms,      0, sizeof(Partage->com_sms) );
        memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_audio,    0, sizeof(Partage->com_audio) );
@@ -541,7 +538,6 @@
        
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
-       pthread_mutex_init( &Partage->com_sms.synchro, &attr );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
@@ -598,9 +594,6 @@
           if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb MODBUS" ); }
 
-          if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb SMS" ); }
-
           if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb AUDIO" ); }
 
@@ -630,7 +623,6 @@
      }
 
     pthread_mutex_destroy( &Partage->com_modbus.synchro );
-    pthread_mutex_destroy( &Partage->com_sms.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );

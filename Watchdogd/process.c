@@ -525,27 +525,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_sms: Thread un process sms                                                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_sms ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: Demande de demarrage %d", getpid() );
-    if (Partage->com_sms.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: An instance is already running",
-               Partage->com_sms.TID );
-       return(FALSE);
-     }
-    if (pthread_create( &Partage->com_sms.TID, NULL, (void *)Run_sms, NULL ))
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: pthread_create failed" );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_sms.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sms: thread sms seems to be running",
-            Partage->com_sms.TID );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Demarrer_audio: Thread un process audio                                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
@@ -786,11 +765,6 @@
     Partage->com_modbus.Thread_run = FALSE;
     while ( Partage->com_modbus.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, MODBUS is down" );
-
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for SMS (%d) to finish", Partage->com_sms.TID );
-    Partage->com_sms.Thread_run = FALSE;
-    while ( Partage->com_sms.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, SMS is down" );
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for ARCH (%d) to finish", Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;

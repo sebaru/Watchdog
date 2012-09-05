@@ -88,7 +88,19 @@ This is the server side of Watchdog - RFXCOM Module
 
 %files server-rfxcom
 %defattr(644,root,root)
-/usr/lib/libwatchdog-rfxcom*
+/usr/lib/libwatchdog-server-rfxcom*
+
+#----------------------------- Package Server-sms ----------------------------------
+%package server-sms
+Summary: The Watchdogd Server - Module SMS
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-sms
+This is the server side of Watchdog - SMS Module
+
+%files server-sms
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-sms*
 
 #----------------------------- Package Server-rs485 -------------------------------
 %package server-rs485

@@ -29,15 +29,19 @@
  #define _SMS_H_
 
  #define TOP_MIN_ENVOI_SMS     1200                           /* 2 minutes sans envoi de SMS au démarrage */
+ #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */
+ #define TAILLE_SMSBOX_PASSWORD   32                        /* Nombre de caractere du mot de passe SMSBOX */
+ #define DEFAUT_SMSBOX_USERNAME         "user"
+ #define DEFAUT_SMSBOX_PASSWORD         "changeit"
 
- struct COM_SMS                                                        /* Communication entre MSRV et SMS */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_sms;                                              /* liste de struct MSGDB msg a envoyer */
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+ struct SMS_CONFIG
+  { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-  };
+    GSList *liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
+    gchar **recipients;
+    gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
+    gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
+ } Cfg_sms;
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_sms ( void );                                                              /* Dans Sms.c */

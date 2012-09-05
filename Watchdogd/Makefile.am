@@ -20,7 +20,6 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Modbus/libmodbus.la \
-		    Sms/libsms.la \
 		    Archive/libarchive.la \
 		    Modbus/libmodbus.la \
 		    Audio/libaudio.la \

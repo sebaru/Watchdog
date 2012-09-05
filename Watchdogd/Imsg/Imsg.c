@@ -93,7 +93,7 @@
     Cfg_imsg.recipients = g_key_file_get_string_list ( gkf, "IMSG", "recipients", NULL, NULL );
     if (!Cfg_imsg.recipients)
      { Info_new ( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
-                  "Imsg_Lire_config: recipients are is missing." );
+                  "Imsg_Lire_config: recipients are missing." );
      }
 
     g_key_file_free(gkf);
@@ -114,7 +114,7 @@
  void Imsg_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
   {
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    Cfg_imsg.Messages = g_slist_prepend ( Cfg_imsg.Messages, histo );                 /* Ajout a la liste */
+    Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, histo );                  /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -182,8 +182,7 @@
 /**********************************************************************************************************/
  static gboolean Imsg_recipient_authorized ( const gchar *nom )
   { gchar **liste;
-    gint cpt;
-    cpt = 0;
+    gint cpt = 0;
     liste = Cfg_imsg.recipients;
     while (liste[cpt])
      { if ( ! strncmp ( nom, liste[cpt], strlen(liste[cpt]) ) ) return(TRUE);

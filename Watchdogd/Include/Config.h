@@ -29,14 +29,8 @@
  #define _CONFIG_H_
  #include <openssl/rsa.h>
 
- #define NBR_ID_RS485             16
-
- #define TAILLE_PORT_RS485        30
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
  #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
- #define TAILLE_NUM_TELEPHONE     16                /* Nombre de caractere maximum du numero de telephone */
- #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */
- #define TAILLE_SMSBOX_PASSWORD   32                        /* Nombre de caractere du mot de passe SMSBOX */
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
@@ -58,10 +52,6 @@
     gchar crypto_key[TAILLE_CRYPTO_KEY+1];            /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
-    gchar sms_telephone1[TAILLE_NUM_TELEPHONE+1];               /* Numero de telephone pour les envoi SMS */
-    gchar sms_telephone2[TAILLE_NUM_TELEPHONE+1];               /* Numero de telephone pour les envoi SMS */
-    gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
-    gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
     gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
     guint log_level;                                                      /* Niveau de debug du programme */
@@ -74,8 +64,6 @@
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
     gint tellstick_a_min;                           /* Numéro de la sortie minimum gérée par le tellstick */
     gint tellstick_a_max;                           /* Numéro de la sortie maximum gérée par le tellstick */
-    gint sms_m_min;                               /* Numéro du monostable minimum gérée par le thread sms */
-    gint sms_m_max;                               /* Numéro du monostable maximum gérée par le thread SMS */
     gint asterisk_m_min;                     /* Numéro du monostable minimum gérée par le thread ASTERISK */
     gint asterisk_m_max;                     /* Numéro du monostable maximum gérée par le thread ASTERISK */
   };
@@ -100,11 +88,6 @@
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_MAX_LOGIN_FAILED        3
  #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
- #define DEFAUT_SMSBOX_USERNAME         "user"
- #define DEFAUT_SMSBOX_PASSWORD         "changeit"
- #define DEFAUT_SMS_TELEPHONE           "01"
- #define DEFAUT_SMS_M_MIN               -1
- #define DEFAUT_SMS_M_MAX               -1
  #define DEFAUT_TELLSTICK_A_MIN         -1
  #define DEFAUT_TELLSTICK_A_MAX         -1
  #define DEFAUT_ASTERISK_M_MIN          -1

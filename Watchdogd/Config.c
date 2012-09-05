@@ -96,37 +96,6 @@
         { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
-/********************************************* Partie SMS *************************************************/
-       chaine                    = g_key_file_get_string ( gkf, "SMS", "smsbox_username", NULL );
-       if (chaine)
-        { g_snprintf( Config.smsbox_username, sizeof(Config.smsbox_username), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.smsbox_username, sizeof(Config.smsbox_username), "%s", DEFAUT_SMSBOX_USERNAME  ); }
-
-       chaine                    = g_key_file_get_string ( gkf, "SMS", "smsbox_password", NULL );
-       if (chaine)
-        { g_snprintf( Config.smsbox_password, sizeof(Config.smsbox_password), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.smsbox_password, sizeof(Config.smsbox_password), "%s", DEFAUT_SMSBOX_PASSWORD  ); }
-
-       chaine                    = g_key_file_get_string ( gkf, "SMS", "sms_telephone1", NULL );
-       if (chaine)
-        { g_snprintf( Config.sms_telephone1, sizeof(Config.sms_telephone1), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.sms_telephone1, sizeof(Config.sms_telephone1), "%s", DEFAUT_SMS_TELEPHONE  ); }
-
-       chaine                    = g_key_file_get_string ( gkf, "SMS", "sms_telephone2", NULL );
-       if (chaine)
-        { g_snprintf( Config.sms_telephone2, sizeof(Config.sms_telephone2), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.sms_telephone2, sizeof(Config.sms_telephone2), "%s", DEFAUT_SMS_TELEPHONE  ); }
-
-       Config.sms_m_min          = g_key_file_get_integer ( gkf, "SMS", "min_m", NULL );
-       if (!Config.sms_m_min) Config.sms_m_min = DEFAUT_SMS_M_MIN;
-
-       Config.sms_m_max          = g_key_file_get_integer ( gkf, "SMS", "max_m", NULL );
-       if (!Config.sms_m_max) Config.sms_m_max = DEFAUT_SMS_M_MAX;
-
 /********************************************* Partie SERVER **********************************************/
        Config.ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
 
