@@ -25,76 +25,98 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <glib.h>
  #include <unistd.h>
  #include <fcntl.h>
  #include <sys/prctl.h>
  #include <lirc/lirc_client.h>
 
  #include "watchdogd.h"
+ #include "Lirc.h"
 
- extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
+/**********************************************************************************************************/
+/* Lirc_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Lirc_Lire_config ( void )
+  { GKeyFile *gkf;
 
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Lirc_Lire_config : unable to load config file %s", Config.config_file );
+       return;
+     }
+                                                                               /* Positionnement du debug */
+    Cfg_lirc.lib->Thread_debug = g_key_file_get_boolean ( gkf, "LIRC", "debug", NULL ); 
+                                                                 /* Recherche des champs de configuration */
+    g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Lirc_Liberer_config : Libere la mémoire allouer précédemment pour lire la config lirc                  */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Lirc_Liberer_config ( void )
+  {
+  }
+/**********************************************************************************************************/
+/* Admin_command : Fonction appelé lorsque le client envoi une commande d'admin pour LIRC                 */
+/* Entrée: Le client d'admin et la ligne de commande                                                      */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
+  {
+  }
 /**********************************************************************************************************/
 /* Run_lirc : Vérifie si le serveur a recu une commande IR                                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: néant. Les bits DLS sont positionnés                                                           */
 /**********************************************************************************************************/
- void Run_lirc ( void )
-  { struct lirc_config *config;
-    guint fd;
+ void Run_thread ( struct LIBRAIRIE *lib )
+  { 
+
     prctl(PR_SET_NAME, "W-Lirc", 0, 0, 0 );
+    memset( &Cfg_lirc, 0, sizeof(Cfg_lirc) );                   /* Mise a zero de la structure de travail */
+    Cfg_lirc.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Lirc_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: Start" );
+    Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+    Cfg_lirc.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
 
-    if ( (fd=lirc_init("Watchdogd",1))==-1)
-     { Info_new( Config.log, Config.log_all, LOG_ERR,
-                "Run_lirc: Unable to open LIRCD... stopping...(%d)", pthread_self() );
-       Partage->com_lirc.TID = 0;                         /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(0));
-     }
+    g_snprintf( Cfg_lirc.lib->admin_prompt, sizeof(Cfg_lirc.lib->admin_prompt), "lirc" );
+    g_snprintf( Cfg_lirc.lib->admin_help,   sizeof(Cfg_lirc.lib->admin_help),   "Manage InfraRed LIRC system" );
 
-    fcntl ( fd, F_SETFL, O_NONBLOCK );
-
-    if (lirc_readconfig ( ".lircrc", &config, NULL)!=0)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+    if (lirc_readconfig ( ".lircrc", &Cfg_lirc.config, NULL)!=0)
+     { Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_WARNING,
                 "Run_lirc: Unable to read config... stopping...(%d)", pthread_self() );
-       Partage->com_lirc.TID = 0;                         /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(0));
+       Cfg_lirc.lib->Thread_run = FALSE;
      }
+    else if ( (Cfg_lirc.fd=lirc_init("Watchdogd",1))==-1)
+     { Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_ERR,
+                "Run_lirc: Unable to open LIRCD... stopping...(%d)", pthread_self() );
+       Cfg_lirc.lib->Thread_run = FALSE;
+     }
+    else { fcntl ( Cfg_lirc.fd, F_SETFL, O_NONBLOCK ); }
 
-    Partage->com_lirc.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
-    while(Partage->com_lirc.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
+    while(lib->Thread_run == TRUE)                                    /* On tourne tant que l'on a besoin */
      { gchar *code;
        gchar *c;
        gint ret;
 
-       if (Partage->com_lirc.Thread_reload)                                           /* On a recu RELOAD */
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: RELOAD" );
-          lirc_freeconfig(config);
-          if (lirc_readconfig ( NULL, &config, NULL)!=0)
-           { config = NULL;
-             Info_new( Config.log, Config.log_all, LOG_WARNING,
-                      "Run_lirc: Unable to read config... stopping...(%s)", pthread_self() );
-             Partage->com_lirc.Thread_run = FALSE;                        /* On demande l'arret du thread */
-             break;
-           }
-          Partage->com_lirc.Thread_reload = FALSE;
-        }
-
-       if (Partage->com_lirc.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: SIGUSR1" );
-          Partage->com_lirc.Thread_sigusr1 = FALSE;
+       if (lib->Thread_sigusr1)                                                   /* On a recu sigusr1 ?? */
+        { Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE, "Run_lirc: SIGUSR1" );
+          lib->Thread_sigusr1 = FALSE;
         }
 
        if (lirc_nextcode(&code)==0)                          /* Si un code est présent sur le socket lirc */
         { if(code!=NULL)
-           { while( (ret=lirc_code2char(config,code,&c))==0)
+           { while( (ret=lirc_code2char(Cfg_lirc.config, code, &c))==0)        /* Tant qu'on a des char ! */
               { gint m;
                 if (c == NULL) break;
                 m = atoi (c);
-		Info_new( Config.log, Config.log_all, LOG_INFO,
+		Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_INFO,
                          "Run_lirc: Recu commande %s : %s (M%03d)", code, c, m );
                 Envoyer_commande_dls(m);
               }
@@ -105,10 +127,12 @@
        usleep(10000);
      }
 
-    if (config) lirc_freeconfig(config);
+    if (Cfg_lirc.config) lirc_freeconfig(Cfg_lirc.config);
     lirc_deinit();
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_lirc: Down (%d)", pthread_self() );
-    Partage->com_lirc.TID = 0;                            /* On indique au master que le thread est mort. */
+    Lirc_Liberer_config();                                    /* Liberation de la configuration du thread */
+
+    Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_lirc.lib->TID = 0;                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

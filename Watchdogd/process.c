@@ -489,42 +489,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_lirc: Thread un process LIRC                                                                  */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_lirc ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: Demande de demarrage %d", getpid() );
-    if (Partage->com_lirc.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: An instance is already running",
-               Partage->com_lirc.TID );
-       return(FALSE);
-     }
-
-    Partage->com_lirc.dl_handle = dlopen( "libwatchdog-lirc.so", RTLD_LAZY );
-    if (!Partage->com_lirc.dl_handle)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Demarrer_lirc: dlopen failed (%s)", dlerror() );
-       return(FALSE);
-     }
-                                                              /* Recherche de la fonction 'Run_tellstick' */
-    Partage->com_lirc.Run_lirc = dlsym( Partage->com_lirc.dl_handle, "Run_lirc" );
-    if (!Partage->com_lirc.Run_lirc)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: Run_lirc does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_lirc.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    if ( pthread_create( &Partage->com_lirc.TID, NULL, (void *)Partage->com_lirc.Run_lirc, NULL ) )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: pthread_create failed" );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_lirc.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_lirc: thread lirc seems to be running %d",
-            Partage->com_lirc.TID );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Demarrer_audio: Thread un process audio                                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
@@ -755,11 +719,6 @@
     Partage->com_tellstick.Thread_run = FALSE;
     while ( Partage->com_tellstick.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, TELLSTICK is down" );
-
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for LIRC (%d) to finish", Partage->com_lirc.TID );
-    Partage->com_lirc.Thread_run = FALSE;
-    while ( Partage->com_lirc.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, LIRC is down" );
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for MODBUS (%d) to finish", Partage->com_modbus.TID );
     Partage->com_modbus.Thread_run = FALSE;

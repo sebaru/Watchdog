@@ -28,15 +28,11 @@
 #ifndef _LIRC_H_
  #define _LIRC_H_
 
- struct COM_LIRC                                                               /* Communication vers LIRC */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    void *dl_handle;                                            /* handle de gestion de la librairie Lirc */
-    void (*Run_lirc)(void);                                   /* Fonction principale de gestion du thread */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-  };
+ struct IMSG_CONFIG
+  { struct LIBRAIRIE *lib;
+    struct lirc_config *config;                                        /* Configuration des telecommandes */
+    guint fd;                                                   /* FileDescriptor de la connexion a LIRCD */
+  } Cfg_lirc;
 
 /*************************************** Définitions des prototypes ***************************************/
 #endif

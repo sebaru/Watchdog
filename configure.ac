@@ -24,14 +24,8 @@ AC_PROG_LIBTOOL
 GNOME2_CFLAGS=`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0 gtkdatabox`
 AC_SUBST(GNOME2_CFLAGS)
 
-LIRC_CFLAGS=`pkg-config --cflags liblircclient0`
-AC_SUBST(LIRC_CFLAGS)
-
 GNOME2_LIBS=`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0 gtkdatabox`
 AC_SUBST(GNOME2_LIBS)
-
-LIRC_LIBS=`pkg-config --libs liblircclient0`
-AC_SUBST(LIRC_LIBS)
 
 MYSQL_CFLAGS=`mysql_config --cflags`
 AC_SUBST(MYSQL_CFLAGS)

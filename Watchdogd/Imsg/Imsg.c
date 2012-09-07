@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <termios.h>

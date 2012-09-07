@@ -5,15 +5,13 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-lib_LTLIBRARIES     = libwatchdog-lirc.la
-libwatchdog_lirc_la_SOURCES    = Lirc.c
+lib_LTLIBRARIES     = libwatchdog-server-lirc.la
+libwatchdog_server_lirc_la_SOURCES    = Lirc.c Lirc.h
 
-INCLUDES= $(GNOME2_CFLAGS) \
-          -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
-          $(MYSQL_CFLAGS) \
-	  $(LIRC_CFLAGS) \
-          -I../Include
+INCLUDES= -I$(top_srcdir)/Include -I../Include \
+          `mysql_config --libs` \
+	  `pkg-config --cflags liblircclient0 glib-2.0` \
+	  `mysql_config --cflags`
 
-libwatchdog_lirc_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) $(LIRC_LIBS)
+libwatchdog_server_lirc_la_LDFLAGS = -rdynamic `pkg-config --libs liblircclient0 glib-2.0` \
+				     -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

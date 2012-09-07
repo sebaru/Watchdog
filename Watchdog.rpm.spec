@@ -149,7 +149,7 @@ This is the server side of Watchdog - Lirc Module
 %files server-lirc
 %defattr(644,root,root)
 /usr/share/Watchdog/lircrc
-/usr/lib/libwatchdog-lirc*
+/usr/lib/libwatchdog-server-lirc*
 
 #----------------------------- Package Server-rfxcom ----------------------------------
 %package server-rfxcom

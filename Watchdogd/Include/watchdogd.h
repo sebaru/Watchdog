@@ -45,7 +45,6 @@
  #include "Cpt_imp_DB.h"
  #include "Modbus.h"
  #include "Tellstick.h"
- #include "Lirc.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
  #include "Asterisk_DB.h"
@@ -151,7 +150,6 @@
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
-    struct COM_LIRC com_lirc;                                                  /* Com avec le thread LIRC */
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
@@ -185,7 +183,6 @@
  extern gboolean Demarrer_admin ( void );
  extern gboolean Demarrer_motion_detect ( void );
  extern gboolean Demarrer_tellstick ( void );
- extern gboolean Demarrer_lirc ( void );
  extern gboolean Demarrer_sous_serveur ( int id );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );

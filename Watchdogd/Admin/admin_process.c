@@ -69,10 +69,6 @@
         { if (!Demarrer_tellstick())                                               /* Démarrage TELLSTICK */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb TELLSTICK -> Arret" ); }
         }  else
-       if ( ! strcmp ( thread, "lirc" ) )
-        { if (!Demarrer_lirc())                                                         /* Démarrage LIRC */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb LIRC -> Arret" ); }
-        }  else
        if ( ! strcmp ( thread, "ssrv" ) )
         { if (num<0 || num>=Config.max_serveur)
            { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
@@ -138,8 +134,7 @@
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
-       if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; } else
-       if ( ! strcmp ( thread, "lirc"      ) ) { Partage->com_lirc.Thread_run      = FALSE; }
+       if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; }
        else
         { GSList *liste;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
@@ -196,12 +191,6 @@
 
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
-       g_snprintf( chaine, sizeof(chaine), " Library LIRC      -> loaded = %s, running = %s, TID = %d\n",
-                   (Partage->com_lirc.dl_handle ? "YES" : " NO"),
-                   (Partage->com_lirc.Thread_run ? "YES" : " NO"), (gint)Partage->com_lirc.TID
                  );
        Write_admin ( client->connexion, chaine );
 
