@@ -375,7 +375,8 @@
 /**********************************************************************************************************/
  void SA( int num, int etat )
   { if (num<0 || num>=NBR_SORTIE_TOR)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SA : num out of range", num );
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "SA : num out of range", num ); }
        return;
      }
 
