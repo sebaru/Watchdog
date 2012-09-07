@@ -34,7 +34,7 @@
 /* Entrée: le client et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_sms ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */

@@ -44,9 +44,7 @@
  } Cfg_sms;
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Run_sms ( void );                                                              /* Dans Sms.c */
- extern void Envoyer_sms ( struct CMD_TYPE_MESSAGE *msg );
- extern void Envoyer_sms_smsbox_text ( gchar *texte );
+ extern void Envoyer_sms_smsbox_text ( gchar *texte );                                      /* Dans Sms.c */
  extern void Envoyer_sms_gsm_text ( gchar *texte );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

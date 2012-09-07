@@ -168,17 +168,65 @@
     Envoyer_sms ( msg );
   }
 /**********************************************************************************************************/
-/* Sms_Gerer_histo: Fonction d'abonné appellé lorsqu'un message est disponible.                           */
+/* Sms_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                         */
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Sms_Gerer_histo ( struct CMD_TYPE_MESSAGE *msg )
+ static void Sms_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
   { if ( msg->sms )
      { pthread_mutex_lock ( &Cfg_sms.lib->synchro );
        Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );                 /* Ajout a la liste */
        pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
      } else
      { g_free(msg); }
+  }
+/**********************************************************************************************************/
+/* Traiter_commande_sms: Fonction appeler pour traiter la commande sms recu par le telephone              */
+/* Entrée: le message text à traiter                                                                      */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Traiter_commande_sms ( gchar *texte )
+  { struct DB *db;
+
+    db = Init_DB_SQL( Config.log );
+    if (!db)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                 "Traiter_commande_sms : Connexion DB failed. sms not handled" );
+       return;
+     }
+    if ( ! Recuperer_mnemoDB_by_command_text ( Config.log, db, (gchar *)texte ) )
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                 "Traiter_commande_sms : Error searching Database" );
+     }
+    else 
+     { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo;
+          
+       for ( result_mnemo = NULL ; ; )
+        { mnemo = Recuperer_mnemoDB_suite( Config.log, db );
+          if (!mnemo) break;
+          if (db->nbr_result!=1) g_free(mnemo);
+                            else result_mnemo = mnemo;
+        }
+       if (result_mnemo)
+        { switch ( result_mnemo->type )
+           { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
+                  Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                             "Traiter_commande_sms: Mise a un du bit M%03d = 1", result_mnemo->num );
+                  Envoyer_commande_dls(result_mnemo->num); 
+                  break;
+             case MNEMO_ENTREE:
+                  break;
+             case MNEMO_ENTREE_ANA:
+                  break;
+             default: Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                               "Traiter_commande_sms: Cannot handle commande type %d (num=%03d)",
+                                result_mnemo->type, result_mnemo->num );
+                      break;
+           }
+          g_free(result_mnemo);
+        }
+     }
+    Libere_DB_SQL( Config.log, &db );
   }
 /**********************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                           */
@@ -229,13 +277,7 @@
              num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
              Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                       "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
-#ifdef bouh
-             if ( Config.sms_m_min <= num_bit && num_bit <= Config.sms_m_max)
-              { Envoyer_commande_dls ( num_bit ); }                           /* Activation du monostable */ 
-             else Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                           "Lire_sms_gsm: permission denied M number %d", num_bit );
-#endif
-
+             Traiter_commande_sms ( (gchar *)sms.user_data[0].u.text );
            }
           else
            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
@@ -417,7 +459,7 @@
     g_snprintf( Cfg_sms.lib->admin_prompt, sizeof(Cfg_sms.lib->admin_prompt), "sms" );
     g_snprintf( Cfg_sms.lib->admin_help,   sizeof(Cfg_sms.lib->admin_help),   "Manage SMS system" );
 
-    Abonner_distribution_histo ( Sms_Gerer_histo );               /* Abonnement à la diffusion des histos */
+    Abonner_distribution_message ( Sms_Gerer_message );               /* Abonnement à la diffusion des messages */
 
     while(Cfg_sms.lib->Thread_run == TRUE)                               /* On tourne tant que necessaire */
      { usleep(10000);
@@ -475,7 +517,7 @@
        g_free( msg );
      }
 
-    Desabonner_distribution_histo ( Sms_Gerer_histo );        /* Desabonnement de la diffusion des histos */
+    Desabonner_distribution_message ( Sms_Gerer_message );  /* Desabonnement de la diffusion des messages */
     Sms_Liberer_config();                                     /* Liberation de la configuration du thread */
 
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
