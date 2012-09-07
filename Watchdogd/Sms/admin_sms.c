@@ -25,9 +25,9 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <unistd.h>                                                                  /* Pour gethostname */
  #include "watchdogd.h"
+ #include "Sms.h"
 
 /**********************************************************************************************************/
 /* Admin_sms: Gere une commande 'admin sms' depuis une connexion admin                                    */

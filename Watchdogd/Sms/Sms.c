@@ -34,14 +34,15 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
+ #include "Sms.h"
  #define PRESMS   "CDE:"
 
 /**********************************************************************************************************/
-/* Imsg_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Sms_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Imsg_Lire_config ( void )
+ static void Sms_Lire_config ( void )
   { gchar *chaine;
     GKeyFile *gkf;
 
@@ -57,7 +58,7 @@
     chaine = g_key_file_get_string ( gkf, "SMS", "smsbox_username", NULL );
     if (!chaine)
      { Info_new ( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                  "Imsg_Lire_config: smsbox_username is missing. Using default." );
+                  "Sms_Lire_config: smsbox_username is missing. Using default." );
        g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), DEFAUT_SMSBOX_USERNAME );
      }
     else
@@ -85,7 +86,7 @@
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
-/* Imsg_Liberer_config : Libere la mémoire allouer précédemment pour lire la config sms                  */
+/* Sms_Liberer_config : Libere la mémoire allouer précédemment pour lire la config sms                  */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -102,7 +103,7 @@
     gint nbr;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );      /* On recupere le nombre de sms en attente */
-    nbr = g_slist_length(Cfg_sms.liste_sms);
+    nbr = g_slist_length(Cfg_sms.Liste_sms);
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
 
     if (nbr > 50)
@@ -119,7 +120,7 @@
     memcpy ( copie, msg, sizeof(struct CMD_TYPE_MESSAGE) );
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    Cfg_sms.liste_sms = g_slist_append ( Cfg_sms.liste_sms, copie );
+    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, copie );
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -171,18 +172,13 @@
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Sms_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
-  {
-    msg = (struct CMD_TYPE_MESSAGE *) g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                         "Sms_Gerer_histo: pas assez de mémoire pour copie" );
-                return;
-              }
-    memcpy ( &msg, &histo.msg, sizeof( struct CMD_TYPE_MESSAGE ) );
-    g_free(histo);
-    pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );                    /* Ajout a la liste */
-    pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
+ static void Sms_Gerer_histo ( struct CMD_TYPE_MESSAGE *msg )
+  { if ( msg->sms )
+     { pthread_mutex_lock ( &Cfg_sms.lib->synchro );
+       Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );                 /* Ajout a la liste */
+       pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
+     } else
+     { g_free(msg); }
   }
 /**********************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                           */
@@ -233,10 +229,12 @@
              num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
              Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                       "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
+#ifdef bouh
              if ( Config.sms_m_min <= num_bit && num_bit <= Config.sms_m_max)
               { Envoyer_commande_dls ( num_bit ); }                           /* Activation du monostable */ 
              else Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                            "Lire_sms_gsm: permission denied M number %d", num_bit );
+#endif
 
            }
           else
@@ -341,11 +339,11 @@
     formpost = lastptr = NULL;
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "login",
-                  CURLFORM_COPYCONTENTS, Config.smsbox_username,
+                  CURLFORM_COPYCONTENTS, Cfg_sms.smsbox_username,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "pass",
-                  CURLFORM_COPYCONTENTS, Config.smsbox_password,
+                  CURLFORM_COPYCONTENTS, Cfg_sms.smsbox_password,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "msg",
@@ -403,9 +401,9 @@
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Run_thread ( void )
+ void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_MESSAGE *msg;
-    GList *liste_sms;
+    GSList *Liste_sms;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     memset( &Cfg_sms, 0, sizeof(Cfg_sms) );                     /* Mise a zero de la structure de travail */
@@ -430,25 +428,25 @@
 
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
           pthread_mutex_lock( &Cfg_sms.lib->synchro );         /* On recupere le nombre de sms en attente */
-          nbr = g_slist_length(Cfg_sms.liste_sms);
+          nbr = g_slist_length(Cfg_sms.Liste_sms);
           pthread_mutex_unlock( &Cfg_sms.lib->synchro );
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Nbr SMS a envoyer = %d", nbr );
-          Cfg_sms.Thread_sigusr1 = FALSE;
+          Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
 
 /********************************************** Lecture de SMS ********************************************/
        Lire_sms_gsm();
 
 /************************************************ Envoi de SMS ********************************************/
-       if ( !Cfg_sms.liste_sms )                                        /* Attente de demande d'envoi SMS */
+       if ( !Cfg_sms.Liste_sms )                                        /* Attente de demande d'envoi SMS */
         { sleep(5);
           sched_yield();
           continue;
         }
 
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       liste_sms = Cfg_sms.liste_sms;                         /* Sauvegarde du ptr sms a envoyer */
-       msg = liste_sms->data;
+       Liste_sms = Cfg_sms.Liste_sms;                         /* Sauvegarde du ptr sms a envoyer */
+       msg = Liste_sms->data;
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                 "Run_thread : Sending msg %d (%s)", msg->num, msg->libelle );
@@ -470,9 +468,9 @@
         }
 
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       Cfg_sms.liste_sms = g_slist_remove ( Cfg_sms.liste_sms, msg );
+       Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, msg );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer",
-                 g_slist_length(Cfg_sms.liste_sms) );
+                 g_slist_length(Cfg_sms.Liste_sms) );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        g_free( msg );
      }

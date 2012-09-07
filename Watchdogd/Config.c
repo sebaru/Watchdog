@@ -191,12 +191,6 @@
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config smsbox username      %s", Config.smsbox_username );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config smsbox password      %s", Config.smsbox_password );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_telephone1       %s", Config.sms_telephone1 );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_telephone2       %s", Config.sms_telephone2 );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_min_m            %d", Config.sms_m_min );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config sms_max_m            %d", Config.sms_m_max );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config tellstick A(min)     %d", Config.tellstick_a_min );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config tellstick A(max)     %d", Config.tellstick_a_max );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config asterisk M(min)      %d", Config.asterisk_m_min );

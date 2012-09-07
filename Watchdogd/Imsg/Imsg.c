@@ -111,10 +111,10 @@
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Imsg_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
+ static void Imsg_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
   {
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, histo );                  /* Ajout a la liste */
+    Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, msg );                    /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -498,7 +498,7 @@
         }
      }
 
-    Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
+    Abonner_distribution_histo ( Imsg_Gerer_message );          /* Abonnement à la diffusion des messages */
 
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(10000);
@@ -517,20 +517,20 @@
         }
 
        if ( Cfg_imsg.Messages )                            /* Gestion de la listes des messages a traiter */
-        { struct CMD_TYPE_HISTO *histo;
+        { struct CMD_TYPE_MESSAGE *msg;
           pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-          histo = Cfg_imsg.Messages->data;
-          Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, histo );         /* Retrait de la liste */
+          msg = Cfg_imsg.Messages->data;
+          Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, msg );           /* Retrait de la liste */
           pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-          Imsg_Envoi_message_to_all_available ( histo->libelle );
-          g_free(histo);                     /* Fin d'utilisation de la structure donc liberation memoire */
+          Imsg_Envoi_message_to_all_available ( msg->libelle );
+          g_free(msg);                       /* Fin d'utilisation de la structure donc liberation memoire */
         }
 
        g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
 
-    Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
+    Desabonner_distribution_histo ( Imsg_Gerer_message );   /* Desabonnement de la diffusion des messages */
 
     if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
     sleep(2);

@@ -37,6 +37,49 @@
  static GSList *Liste_clients_msg  = NULL;
 
 /**********************************************************************************************************/
+/* Abonner_distribution_message: Abonnement d'un thread aux diffusions d'un message                       */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    Liste_clients_msg = g_slist_prepend( Liste_clients_msg, Gerer_message );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Desabonner_distribution_message: Desabonnement d'un thread aux diffusions d'un message                 */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    Liste_clients_msg = g_slist_remove( Liste_clients_msg, Gerer_message );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                 */
+/* Entrée : le message a envoyer                                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Envoyer_message_aux_abonnes ( struct CMD_TYPE_MESSAGE *msg )
+  { GSList *liste;
+
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    liste = Liste_clients_msg;
+    while (liste)                                                              /* Pour chacun des abonnes */
+     { void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg);
+       struct CMD_TYPE_MESSAGE *dup_msg;
+       dup_msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0(sizeof(struct CMD_TYPE_MESSAGE));
+       if (dup_msg)
+        { Gerer_message = liste->data;
+          memcpy ( dup_msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
+          Gerer_message (dup_msg);
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
 /* Gerer_message_repeat: Gestion de la répétition des messages                                            */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
@@ -52,7 +95,7 @@
 
        if (Partage->g[num].next_repeat <= Partage->top)
         { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
-          if (msg->sms)     Envoyer_sms   ( msg      );
+          Envoyer_message_aux_abonnes ( msg );
           if (msg->bit_voc) Ajouter_audio ( msg->num );
           g_free(msg);
           Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
@@ -60,26 +103,6 @@
        liste = liste->next;
      }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-  }
-/**********************************************************************************************************/
-/* Abonner_distribution_histo: Abonnement d'un thread aux diffusions d'un histo                           */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    Liste_clients_msg = g_slist_prepend( Liste_clients_msg, Gerer_histo );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
-  }
-/**********************************************************************************************************/
-/* Desabonner_distribution_histo: Desabonnement d'un thread aux diffusions d'un histo                     */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- void Desabonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    Liste_clients_msg = g_slist_remove( Liste_clients_msg, Gerer_histo );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
@@ -103,8 +126,10 @@
        return;
      }
 
+/********************************************* Envoi du message aux librairies abonnées *******************/
+    Envoyer_message_aux_abonnes ( msg );
+
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
-    if (msg->sms)     Envoyer_sms   ( msg      );
     if (msg->bit_voc) Ajouter_audio ( msg->num );
     if (msg->time_repeat) 
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -128,19 +153,6 @@
        memcpy( &new_histo->groupe,  msg->groupe,  sizeof(msg->groupe ) );
        memcpy( &new_histo->page,    msg->page,    sizeof(msg->page   ) );
 
-/********************************************* Envoi du message aux librairies abonnées *******************/
-       liste = Liste_clients_msg;
-       while (liste)
-        { void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo);
-          struct CMD_TYPE_HISTO *dup_histo;
-          dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0(sizeof(struct CMD_TYPE_HISTO));
-          if (dup_histo)
-           { Gerer_histo = liste->data;
-             memcpy ( dup_histo, new_histo, sizeof(struct CMD_TYPE_HISTO) );
-             Gerer_histo (dup_histo);
-           }
-          liste = liste->next;
-        }
 /********************************************* Envoi du message aux sous serveurs *************************/
        for (i=0; i<Config.max_serveur; i++)
         { struct CMD_TYPE_HISTO *histo_ssrv;

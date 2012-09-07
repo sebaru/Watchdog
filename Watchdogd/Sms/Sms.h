@@ -37,7 +37,7 @@
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    GSList *liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
     gchar **recipients;
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */

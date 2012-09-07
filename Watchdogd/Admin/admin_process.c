@@ -57,10 +57,6 @@
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb MODBUS -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "sms" ) )
-        { if (!Demarrer_sms())                                                        /* Démarrage S.M.S. */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SMS -> Arret" ); }
-        } else
        if ( ! strcmp ( thread, "audio" ) )
         { if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb AUDIO -> Arret" ); }
@@ -140,7 +136,6 @@
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
-       if ( ! strcmp ( thread, "sms"       ) ) { Partage->com_sms.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; } else
@@ -186,11 +181,6 @@
 
        g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %d\n",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (gint)Partage->com_dls.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
-       g_snprintf( chaine, sizeof(chaine), " Built-in SMS      -> ------------- running = %s, TID = %d\n",
-                   (Partage->com_sms.Thread_run ? "YES" : " NO"), (gint)Partage->com_sms.TID
                  );
        Write_admin ( client->connexion, chaine );
 

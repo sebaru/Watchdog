@@ -183,7 +183,6 @@
        else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + 10); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
-       else if ( ! strcmp ( commande, "sms"       ) ) { Admin_sms      ( client, ligne + 4);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
               while(liste)
