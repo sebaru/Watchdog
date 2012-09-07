@@ -512,7 +512,7 @@
        msg = Liste_sms->data;
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                "Run_thread : Sending msg %d (%s)", msg->num, msg->libelle );
+                "Run_thread : Sending msg %d (%s)", msg->num, msg->libelle_sms );
       
 /**************************************** Envoi en mode GSM ***********************************************/
 

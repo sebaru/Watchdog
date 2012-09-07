@@ -54,7 +54,7 @@
     if ( ! strcmp ( commande, "smsbox" ) )
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
-       Envoyer_sms_smsbox_text ( ligne + 4 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
+       Envoyer_sms_smsbox_text ( ligne + 7 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
        Write_admin ( client->connexion, chaine );
      } else
