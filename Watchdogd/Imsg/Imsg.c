@@ -274,8 +274,16 @@
               "Imsg_Reception_message : recu un msg xmpp de %s : %s", 
               from, lm_message_node_get_value ( body )
             );
+
+                                 /* On drop les messages du serveur jabber et des interlocuteurs inconnus */
     if ( (!from) || (!strncmp ( from, Cfg_imsg.username, strlen(Cfg_imsg.username) )) )
      { return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS); }
+
+    if ( Imsg_recipient_authorized ( from ) == FALSE )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Reception_message : unknown sender %s. Dropping message...", from );
+       return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+     }
 
     db = Init_DB_SQL( Config.log );
     if (!db)
@@ -498,7 +506,7 @@
         }
      }
 
-    Abonner_distribution_histo ( Imsg_Gerer_message );          /* Abonnement à la diffusion des messages */
+    Abonner_distribution_message ( Imsg_Gerer_message );        /* Abonnement à la diffusion des messages */
 
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(10000);
@@ -530,7 +538,7 @@
 
      }                                                                     /* Fin du while partage->arret */
 
-    Desabonner_distribution_histo ( Imsg_Gerer_message );   /* Desabonnement de la diffusion des messages */
+    Desabonner_distribution_message ( Imsg_Gerer_message ); /* Desabonnement de la diffusion des messages */
 
     if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
     sleep(2);

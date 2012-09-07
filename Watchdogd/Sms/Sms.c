@@ -181,12 +181,33 @@
      { g_free(msg); }
   }
 /**********************************************************************************************************/
+/* Sms_recipient_authorized : Renvoi TRUE si Watchdog peut recevoir/emettre au destinataire en parametre  */
+/* Entrée: le nom du destinataire                                                                         */
+/* Sortie : booléen, TRUE/FALSE                                                                           */
+/**********************************************************************************************************/
+ static gboolean Sms_recipient_authorized ( const gchar *tel )
+  { gchar **liste;
+    gint cpt = 0;
+    liste = Cfg_sms.recipients;
+    while (liste[cpt])
+     { if ( ! strncmp ( tel, liste[cpt], strlen(liste[cpt]) ) ) return(TRUE);
+       cpt++;
+     }
+    return(FALSE);
+  }
+/**********************************************************************************************************/
 /* Traiter_commande_sms: Fonction appeler pour traiter la commande sms recu par le telephone              */
 /* Entrée: le message text à traiter                                                                      */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Traiter_commande_sms ( gchar *texte )
+ static void Traiter_commande_sms ( gchar *from, gchar *texte )
   { struct DB *db;
+
+    if ( Sms_recipient_authorized ( from ) == FALSE )
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                "Traiter_commande_sms : unknown sender %s. Dropping message %s...", from, texte );
+       return;
+     }
 
     db = Init_DB_SQL( Config.log );
     if (!db)
@@ -277,7 +298,7 @@
              num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
              Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                       "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
-             Traiter_commande_sms ( (gchar *)sms.user_data[0].u.text );
+             Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
            }
           else
            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
@@ -330,7 +351,7 @@
     else { sms.remote.type = GN_GSM_NUMBER_Unknown; }
 
     if (!sms.smsc.number[0])                                                      /* Récupération du SMSC */
-     { data.message_center = calloc(1, sizeof(gn_sms_message_center));
+     { data.message_center = g_malloc0(sizeof(gn_sms_message_center));
        data.message_center->id = 1;
        if (gn_sm_functions(GN_OP_GetSMSCenter, &data, state) == GN_ERR_NONE)
         { strcpy(sms.smsc.number, data.message_center->smsc.number);
@@ -338,7 +359,7 @@
         }
        else
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Envoi_sms_gsm: Pb avec le SMSC" ); }
-       free(data.message_center);
+       g_free(data.message_center);
      }
 
     if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
