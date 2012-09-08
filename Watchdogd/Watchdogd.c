@@ -642,14 +642,14 @@
        pid = fork();
        if (pid<0) { Info_new( Config.log, Config.log_all, LOG_CRIT, "Fork Failed on reboot" );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
-       if (pid>0)
-        { return(EXIT_OK); }                                                           /* On kill le père */
-
-       Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
-       sleep(5);
-       execvp ( argv[0], argv );
-       Info_new( Config.log, Config.log_all, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
-       exit(EXIT_ERREUR);
+       if (pid>0)                                                                      /* On kill le père */
+        { sleep(5); }         /* En attendant que le fils ait loggué ses messages d'erreur le cas échéant */
+       else
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
+          execvp ( argv[0], argv );
+          Info_new( Config.log, Config.log_all, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
+          exit(EXIT_ERREUR);
+        }
      }
 
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Stopped" );
