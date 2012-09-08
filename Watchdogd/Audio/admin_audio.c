@@ -42,14 +42,14 @@
      { struct CMD_TYPE_MESSAGE msg;
        sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
        Jouer_mp3 ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", msg.num );
+       g_snprintf( chaine, sizeof(chaine), " Message id %d sent (mp3)\n", msg.num );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "tell_espeak" ) )
      { struct CMD_TYPE_MESSAGE msg;
        sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
        Jouer_espeak ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", msg.num );
+       g_snprintf( chaine, sizeof(chaine), " Message id %d sent (espeak)\n", msg.num );
        Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "help" ) )
