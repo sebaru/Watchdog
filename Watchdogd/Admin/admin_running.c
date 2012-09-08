@@ -51,12 +51,9 @@
        Write_admin ( client->connexion, "  clear_histo           - Clear Histo DB\n" );
        Write_admin ( client->connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Write_admin ( client->connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
-       Write_admin ( client->connexion, "  tell message_num      - Envoi d'un message audio _num_\n" );
        Write_admin ( client->connexion, "  msgs message          - Envoi d'un message a tous les clients\n" );
        Write_admin ( client->connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
        Write_admin ( client->connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
-       Write_admin ( client->connexion, "  rs485                 - Sous-menu de gestion des equipements RS485\n" );
-       Write_admin ( client->connexion, "  sms                   - Sous-menu d'envoi de SMS\n" );
        Write_admin ( client->connexion, "  dls                   - D.L.S. Status\n" );
        Write_admin ( client->connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n");
        Write_admin ( client->connexion, "  log switch            - Switch log (list, all, none, process name or library name)\n" );
@@ -117,13 +114,6 @@
             }
            pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
          }
-     } else
-    if ( ! strcmp ( commande, "tell" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Ajouter_audio ( num );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent\n", num );
-       Write_admin ( client->connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
      { GList *liste;

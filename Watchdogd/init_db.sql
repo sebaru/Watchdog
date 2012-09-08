@@ -600,28 +600,30 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
-  `num_syn` int(11) NOT NULL DEFAULT '0',
+  `num_plugin` int(11) NOT NULL DEFAULT '0',
   `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`), FULLTEXT('command_text')
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
-INSERT INTO `mnemos` (`type`, `num`, `num_syn`, `acronyme`, `libelle`) VALUES
-(0, 0, 1, 'SYSTEME', 'Change d''Ã©tat tous les tours programme'),
-(0, 1, 1, 'SYSTEME', 'Toujours Ã  0'),
-(0, 2, 1, 'SYSTEME', 'Toujours Ã  1'),
-(0, 3, 1, 'SYSTEME', '0 le premier tour programme puis tout le temps 1'),
-(0, 4, 1, 'SYSTEME', 'Cligno toutes les secondes'),
-(0, 5, 1, 'SYSTEME', 'Cligno toutes les demi-secondes'),
-(0, 6, 1, 'SYSTEME', 'Cligno toutes les 3 dixièmes de seconde'),
-(7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge'),
-(7, 4, 1, 'SYSTEME', 'rÃ©servÃ©'),
-(7, 3, 1, 'SYSTEME', 'rÃ©servÃ©'),
-(7, 0, 1, 'SYSTEME', 'rÃ©servÃ©'),
-(7, 2, 1, 'SYSTEME', 'rÃ©servÃ©'),
-(1, 4, 1, 'AUDIO_START', 'Emission de message Audio.'),
-(1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.');
+INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
+(0, 0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
+(0, 1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
+(0, 2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
+(0, 3, 1, 'SYS_ONE_RUN', '0 le premier tour programme puis tout le temps 1', ''),
+(0, 4, 1, 'SYS_TICK_1S', 'Cligno toutes les secondes', ''),
+(0, 5, 1, 'SYS_TICK_0.5S', 'Cligno toutes les demi-secondes', ''),
+(0, 6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
+(0, 7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
+(0, 8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
+(7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
+(7, 4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(7, 3, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(7, 0, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
+(1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', '');
 -- --------------------------------------------------------
 
 --
@@ -658,13 +660,16 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `bit_voc` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `num_syn` int(11) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
   `type_voc` int(11) NOT NULL DEFAULT '4',
   `vitesse_voc` int(11) NOT NULL DEFAULT '150',
   `time_repeat` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `num_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
+(1, 0, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
+(2, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
 
 -- --------------------------------------------------------
 

@@ -38,7 +38,6 @@
  #include "Db.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Audio.h"
  #include "Admin.h"
  #include "Client.h"
  #include "Cpth_DB.h"
@@ -148,7 +147,6 @@
     struct COM_TELLSTICK com_tellstick;                         /* Communication avec le thread tellstick */
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
-    struct COM_AUDIO com_audio;                                               /* Com avec le thread AUDIO */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
@@ -179,7 +177,6 @@
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_modbus ( void );
  extern gboolean Demarrer_arch ( void );
- extern gboolean Demarrer_audio ( void );
  extern gboolean Demarrer_admin ( void );
  extern gboolean Demarrer_motion_detect ( void );
  extern gboolean Demarrer_tellstick ( void );

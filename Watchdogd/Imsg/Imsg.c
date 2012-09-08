@@ -111,7 +111,19 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Imsg_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
-  {
+  { gint taille;
+
+    pthread_mutex_lock( &Cfg_imsg.lib->synchro );                        /* Ajout dans la liste a traiter */
+    taille = g_list_length( Cfg_imsg.Messages );
+    pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
+       g_free(msg);
+       return;
+     }
+
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
     Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, msg );                    /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );

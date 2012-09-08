@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <unistd.h>
  #include "watchdogd.h"
 
@@ -56,10 +55,6 @@
        if ( ! strcmp ( thread, "modbus" ) )
         { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb MODBUS -> Arret" ); }
-        } else
-       if ( ! strcmp ( thread, "audio" ) )
-        { if (!Demarrer_audio())                                                   /* Démarrage A.U.D.I.O */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb AUDIO -> Arret" ); }
         } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
@@ -132,7 +127,6 @@
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
-       if ( ! strcmp ( thread, "audio"     ) ) { Partage->com_audio.Thread_run     = FALSE; } else
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
        if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; }
        else
@@ -184,11 +178,6 @@
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in AUDIO    -> ------------- running = %s, TID = %d\n",
-                   (Partage->com_audio.Thread_run ? "YES" : " NO"), (gint)Partage->com_audio.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
                  );
@@ -222,24 +211,29 @@
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
        Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
-       Ajouter_audio( 9998 ); /* Message audio avant reboot */
-       sleep(2);
+       SB( 7, TRUE );                                                     /* Message audio avant Shutdown */
+       sleep(5);
        Partage->com_msrv.Thread_run = FALSE;
+       SB( 7, FALSE );                                                    /* Message audio avant Shutdown */
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : REBOOT demandé" );
        Write_admin ( client->connexion, "REBOOT in progress\n" );
-       Ajouter_audio( 9999 ); /* Message audio avant reboot */
-       sleep(2);
+       SB( 8, TRUE );                                                       /* Message audio avant Reboot */
+       sleep(5);
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
+       SB( 8, FALSE );                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
        Write_admin ( client->connexion, "CLEAR-REBOOT in progress\n" );
+       SB( 8, TRUE );                                                       /* Message audio avant Reboot */
+       sleep(5);
        Partage->com_msrv.Thread_clear_reboot = TRUE;
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
+       SB( 8, FALSE );                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : RELOAD demandé" );
@@ -254,9 +248,9 @@
        Write_admin ( client->connexion,
                      "  unload thread        - Unload a library\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv num, or library name)\n" );
+                     "  start thread         - Start a thread (arch,modbus,dls,tellstick,ssrv num, or library name)\n" );
        Write_admin ( client->connexion,
-                     "  stop                 - Stop thread (all,arch,rs485,modbus,sms,audio,dls,onduleur,tellstick,ssrv, or library name)\n" );
+                     "  stop                 - Stop thread (all,arch,modbus,dls,tellstick,ssrv, or library name)\n" );
        Write_admin ( client->connexion,
                      "  list                 - Liste les statut des threads\n" );
        Write_admin ( client->connexion,

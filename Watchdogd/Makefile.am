@@ -22,7 +22,6 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Modbus/libmodbus.la \
 		    Archive/libarchive.la \
 		    Modbus/libmodbus.la \
-		    Audio/libaudio.la \
 		    Admin/libadmin.la \
 		    Utilisateur/libutil.la \
 		    Synoptiques/libsyn.la \

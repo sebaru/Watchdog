@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <glib.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -96,7 +95,6 @@
        if (Partage->g[num].next_repeat <= Partage->top)
         { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
           Envoyer_message_aux_abonnes ( msg );
-          if (msg->bit_voc) Ajouter_audio ( msg->num );
           g_free(msg);
           Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
         }
@@ -130,7 +128,6 @@
     Envoyer_message_aux_abonnes ( msg );
 
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
-    if (msg->bit_voc) Ajouter_audio ( msg->num );
     if (msg->time_repeat) 
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
        Partage->com_msrv.liste_msg_repeat = g_list_append ( Partage->com_msrv.liste_msg_repeat,

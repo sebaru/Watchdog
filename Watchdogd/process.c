@@ -489,28 +489,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_audio: Thread un process audio                                                                */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_audio ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: Demande de demarrage %d", getpid() );
-    if (Partage->com_audio.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: An instance is already running",
-               Partage->com_audio.TID );
-       return(FALSE);
-     }
-    if (pthread_create( &Partage->com_audio.TID, NULL, (void *)Run_audio, NULL ))
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: pthread_create failed" );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_audio.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_audio: thread audio seems to be running",
-            Partage->com_audio.TID );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Demarrer_audio: Thread un process admin                                                                */
+/* Demarrer_admin: Thread un process admin                                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
@@ -729,11 +708,6 @@
     Partage->com_arch.Thread_run = FALSE;
     while ( Partage->com_arch.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, ARCH is down" );
-
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for AUDIO (%d) to finish", Partage->com_audio.TID );
-    Partage->com_audio.Thread_run = FALSE;
-    while ( Partage->com_audio.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, AUDIO is down" );
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: keep MOTION (%d) running", PID_motion );
 

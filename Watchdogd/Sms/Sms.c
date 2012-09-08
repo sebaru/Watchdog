@@ -173,12 +173,24 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Sms_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
-  { if ( msg->sms )
-     { pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-       Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );                 /* Ajout a la liste */
-       pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
-     } else
-     { g_free(msg); }
+  { gint taille;
+
+    if ( ! msg->sms ) { g_free(msg); return; }                           /* Si flag = 0; on return direct */
+
+    pthread_mutex_lock( &Cfg_sms.lib->synchro );                         /* Ajout dans la liste a traiter */
+    taille = g_list_length( Cfg_sms.Liste_sms );
+    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Sms_Gerer_message: DROP message %D (length = %d > 150)", msg->num, taille);
+       g_free(msg);
+       return;
+     }
+
+    pthread_mutex_lock ( &Cfg_sms.lib->synchro );
+    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );                    /* Ajout a la liste */
+    pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Sms_recipient_authorized : Renvoi TRUE si Watchdog peut recevoir/emettre au destinataire en parametre  */

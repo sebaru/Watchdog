@@ -32,18 +32,14 @@
  #define NUM_BIT_M_AUDIO_START       4                       /* M5 positionné quand arret diffusion audio */
  #define NUM_BIT_M_AUDIO_END         5                       /* M5 positionné quand arret diffusion audio */
 
- struct COM_AUDIO                                                  /* Communication entre DLS et la RS485 */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *liste_audio;                                                   /* liste de message a prononcer */
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
+ struct AUDIO_CONFIG
+  { struct LIBRAIRIE *lib;
+    GSList *Liste_audio;                                                  /* liste de message a prononcer */
     gint last_audio;                                               /* Date de la derniere emission sonore */
-  };
+  } Cfg_audio;
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Run_audio ( void );                                                          /* Dans Audio.c */
- extern void Ajouter_audio( gint num );
+ extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
+ extern void Jouer_espeak ( struct CMD_TYPE_MESSAGE *msg );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

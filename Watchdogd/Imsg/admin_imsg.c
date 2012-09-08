@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include "watchdogd.h"
  #include "Imsg.h"
 

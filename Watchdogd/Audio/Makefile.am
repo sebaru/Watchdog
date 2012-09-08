@@ -5,12 +5,10 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-noinst_LTLIBRARIES     = libaudio.la
-libaudio_la_SOURCES    = Audio.c
+lib_LTLIBRARIES     = libwatchdog-server-audio.la
+libwatchdog_server_audio_la_SOURCES    = Audio.c Audio.h admin_audio.c
 
-INCLUDES= $(GNOME2_CFLAGS) \
-          -I$(top_srcdir) -I$(includedir) \
+INCLUDES= `pkg-config --cflags glib-2.0` \
+	  `mysql_config --cflags` \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
-	  $(MYSQL_CFLAGS) \
-	  -I../Include
+ 	  -I../Include
