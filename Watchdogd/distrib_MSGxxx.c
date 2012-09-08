@@ -110,7 +110,6 @@
   { struct CMD_TYPE_HISTO *new_histo;
     struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
-    GSList *liste;
 
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)

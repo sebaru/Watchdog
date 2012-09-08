@@ -14,4 +14,5 @@ INCLUDES= `pkg-config --cflags glib-2.0 loudmouth-1.0` \
           $(MYSQL_CFLAGS) \
           -I../Include
 
-libwatchdog_server_imsg_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) `pkg-config --libs glib-2.0 loudmouth-1.0`
+libwatchdog_server_imsg_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
+	                             `pkg-config --libs glib-2.0 loudmouth-1.0`
