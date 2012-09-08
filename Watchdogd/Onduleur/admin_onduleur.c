@@ -163,15 +163,15 @@
          }
      }
     else if ( ! strcmp ( commande, "del" ) )
-     { gboolean retour;
-       gint id;
-       sscanf ( ligne, "%s %d", commande, id );                      /* Découpage de la ligne de commande */
-        retour = Retirer_upsDB ( id );
-        if (id == FALSE)
+     { struct UPSDB ups;
+       gboolean retour;
+       sscanf ( ligne, "%s %d", commande, &ups.id );                 /* Découpage de la ligne de commande */
+        retour = Retirer_upsDB ( &ups );
+        if (retour == FALSE)
          { Write_admin ( client->connexion, "Error, UPS not erased\n" ); }
         else
          { gchar chaine[80];
-           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", id );
+           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
            Write_admin ( client->connexion, chaine );
          }
      }

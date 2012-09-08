@@ -634,24 +634,24 @@
     else { Info_new( Config.log, Config.log_all, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
-    if (Partage->com_msrv.Thread_reboot == TRUE)
+
+    Shm_stop( Partage );                                                   /* Libération mémoire partagée */
+    if (Partage->com_msrv.Thread_reboot == TRUE)                     /* Devons-nous rebooter le process ? */
      { gint pid;
        Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting ..." );
        pid = fork();
        if (pid<0) { Info_new( Config.log, Config.log_all, LOG_CRIT, "Fork Failed on reboot" );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
        if (pid>0)
-        { Shm_stop( Partage );                                             /* Libération mémoire partagée */
-          exit(EXIT_OK);                                                               /* On kill le père */
-        }
-       Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting in progress cmd=", argv[0] );
+        { return(EXIT_OK); }                                                           /* On kill le père */
+
+       Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
        sleep(5);
        execvp ( argv[0], argv );
        Info_new( Config.log, Config.log_all, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
        exit(EXIT_ERREUR);
      }
 
-    Shm_stop( Partage );                                                   /* Libération mémoire partagée */
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);
   }
