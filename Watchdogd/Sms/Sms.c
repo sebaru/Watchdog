@@ -292,18 +292,9 @@
      { sms.number = sms_index;
 
        if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                      /* On recupere le SMS */
-        {                                                                           /* Commence par CDE ? */
-          if ( ! strncmp( (gchar *)sms.user_data[0].u.text, PRESMS, strlen(PRESMS) ) )
-           { guint num_bit;
-             num_bit = atoi( (gchar *)sms.user_data[0].u.text + strlen(PRESMS));
-             Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                      "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
-             Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
-           }
-          else
-           { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                      "Lire_sms_gsm: Wrong CDE %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
-           }
+        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                   "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
+          Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
           gn_sms_delete (&data, state);                               /* On l'a traité, on peut l'effacer */
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
