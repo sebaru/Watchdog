@@ -178,7 +178,7 @@
     if ( ! msg->sms ) { g_free(msg); return; }                           /* Si flag = 0; on return direct */
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );                         /* Ajout dans la liste a traiter */
-    taille = g_list_length( Cfg_sms.Liste_sms );
+    taille = g_slist_length( Cfg_sms.Liste_sms );
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
 
     if (taille > 150)

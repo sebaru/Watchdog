@@ -114,7 +114,7 @@
   { gint taille;
 
     pthread_mutex_lock( &Cfg_imsg.lib->synchro );                        /* Ajout dans la liste a traiter */
-    taille = g_list_length( Cfg_imsg.Messages );
+    taille = g_slist_length( Cfg_imsg.Messages );
     pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
 
     if (taille > 150)

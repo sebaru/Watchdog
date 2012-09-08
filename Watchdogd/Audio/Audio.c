@@ -211,7 +211,6 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_MESSAGE *msg;
     static gboolean audio_stop = TRUE;
-    guint num;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                 /* Mise a zero de la structure de travail */
