@@ -144,29 +144,7 @@
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_paserelleDB: Passerelle %d not found in DB", id );
-       return(NULL);
-     }
-
-    passerelle = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
-    if (!passerelle) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_paserelleDB: Erreur allocation mémoire" );
-    else
-     { passerelle->id             = atoi(db->row[0]);
-       passerelle->syn_id         = atoi(db->row[1]);           /* Synoptique ou est placée la passerelle */
-       passerelle->syn_cible_id   = atoi(db->row[2]);                /* Synoptique cible de la passerelle */
-       passerelle->bit_controle   = atoi(db->row[4]);                                       /* Ixxx, Cxxx */
-       passerelle->bit_controle_1 = atoi(db->row[5]);                                       /* Ixxx, Cxxx */
-       passerelle->bit_controle_2 = atoi(db->row[6]);                                       /* Ixxx, Cxxx */
-       passerelle->bit_controle_3 = atoi(db->row[7]);                                       /* Ixxx, Cxxx */
-       passerelle->position_x     = atoi(db->row[8]);                        /* en abscisses et ordonnées */
-       passerelle->position_y     = atoi(db->row[9]);
-       passerelle->angle          = atof(db->row[10]);
-       memcpy ( &passerelle->libelle, db->row[3], sizeof(passerelle->libelle) );
-     }
-    return(passerelle);
+    return ( Recuperer_passerelleDB_suite ( log, db ) );
   }
 /**********************************************************************************************************/
 /* Modifier_passerelleDB: Modification d'un passerelle Watchdog                                           */
