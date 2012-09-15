@@ -179,7 +179,7 @@
                     "Decharger_librairie_par_prompt: trying to unload %s", lib->nom_fichier );
 
           Stop_librairie(lib);
-
+          sleep(5);
           pthread_mutex_destroy( &lib->synchro );
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
