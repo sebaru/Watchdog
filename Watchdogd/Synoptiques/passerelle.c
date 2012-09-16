@@ -127,13 +127,12 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( struct LOG *log, struct DB *db, guint id )
-  { struct CMD_TYPE_PASSERELLE *passerelle;
-    gchar requete[512];
+  { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
                 "%s.bitctrl3,%s.posx,%s.posy,%s.angle"
-                "FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id", 
+                " FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id", 
                 NOM_TABLE_PASSERELLE, NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,
                 NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,NOM_TABLE_PASSERELLE,
