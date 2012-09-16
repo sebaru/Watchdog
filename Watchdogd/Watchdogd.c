@@ -583,12 +583,12 @@
        sigdelset ( &sig.sa_mask, SIGUSR1 );
        sigdelset ( &sig.sa_mask, SIGINT  );
        sigdelset ( &sig.sa_mask, SIGTERM );
-       pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
-
        sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
+       pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
 
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
        Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
