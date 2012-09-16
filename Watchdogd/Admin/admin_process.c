@@ -60,10 +60,6 @@
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
         }  else
-       if ( ! strcmp ( thread, "tellstick" ) )
-        { if (!Demarrer_tellstick())                                               /* Démarrage TELLSTICK */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb TELLSTICK -> Arret" ); }
-        }  else
        if ( ! strcmp ( thread, "ssrv" ) )
         { if (num<0 || num>=Config.max_serveur)
            { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
@@ -127,8 +123,7 @@
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
        if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
-       if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; } else
-       if ( ! strcmp ( thread, "tellstick" ) ) { Partage->com_tellstick.Thread_run = FALSE; }
+       if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; }
        else
         { GSList *liste;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
@@ -182,13 +177,6 @@
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
                  );
        Write_admin ( client->connexion, chaine );
-
-       g_snprintf( chaine, sizeof(chaine), " Library TELLSTICK -> loaded = %s, running = %s, TID = %d\n",
-                   (Partage->com_tellstick.dl_handle ? "YES" : " NO"),
-                   (Partage->com_tellstick.Thread_run ? "YES" : " NO"), (gint)Partage->com_tellstick.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -248,9 +236,9 @@
        Write_admin ( client->connexion,
                      "  unload thread        - Unload a library\n" );
        Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,modbus,dls,tellstick,ssrv num, or library name)\n" );
+                     "  start thread         - Start a thread (arch,modbus,dls,ssrv num, or library name)\n" );
        Write_admin ( client->connexion,
-                     "  stop                 - Stop thread (all,arch,modbus,dls,tellstick,ssrv, or library name)\n" );
+                     "  stop                 - Stop thread (all,arch,modbus,dls,ssrv num, or library name)\n" );
        Write_admin ( client->connexion,
                      "  list                 - Liste les statut des threads\n" );
        Write_admin ( client->connexion,

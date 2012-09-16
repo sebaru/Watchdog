@@ -412,83 +412,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_tellstick: Thread un process TELLSTICK                                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_tellstick ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Demande de demarrage %d", getpid() );
-
-    if (Partage->com_tellstick.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: An instance is already running",
-               Partage->com_tellstick.TID );
-       return(FALSE);
-     }
-
-    Partage->com_tellstick.dl_handle = dlopen( "libwatchdog-tellstick.so", RTLD_LAZY );
-    if (!Partage->com_tellstick.dl_handle)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Demarrer_tellstick: dlopen failed (%s)", dlerror() );
-       return(FALSE);
-     }
-                                                              /* Recherche de la fonction 'Run_tellstick' */
-    Partage->com_tellstick.Run_tellstick = dlsym( Partage->com_tellstick.dl_handle, "Run_tellstick" );
-    if (!Partage->com_tellstick.Run_tellstick)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Run_tellstick does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_tellstick.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                          /* Recherche de la fonction 'Ajouter_tellstick' */
-    Partage->com_tellstick.Ajouter_tellstick = dlsym( Partage->com_tellstick.dl_handle, "Ajouter_tellstick" );
-    if (!Partage->com_tellstick.Ajouter_tellstick)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Ajouter_tellstick does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_tellstick.dl_handle = NULL;
-       return(FALSE);
-     }
-                                                       /* Recherche de la fonction 'Admin_tellstick_list' */
-    Partage->com_tellstick.Admin_tellstick_list = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_list" );
-    if (!Partage->com_tellstick.Admin_tellstick_list)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_list does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_tellstick.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    Partage->com_tellstick.Admin_tellstick_learn = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_learn" );
-    if (!Partage->com_tellstick.Admin_tellstick_learn)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_learn does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_tellstick.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    Partage->com_tellstick.Admin_tellstick_start = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_start" );
-    if (!Partage->com_tellstick.Admin_tellstick_start)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_start does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_tellstick.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    Partage->com_tellstick.Admin_tellstick_stop = dlsym( Partage->com_tellstick.dl_handle, "Admin_tellstick_stop" );
-    if (!Partage->com_tellstick.Admin_tellstick_stop)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: Admin_tellstick_stop does not exist" );
-       dlclose( Partage->com_tellstick.dl_handle );
-       Partage->com_tellstick.dl_handle = NULL;
-       return(FALSE);
-     }
-
-    if ( pthread_create( &Partage->com_tellstick.TID, NULL, (void *)Partage->com_tellstick.Run_tellstick, NULL ) )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: pthread_create failed" );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_tellstick.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_tellstick: thread tellstick seems to be running",
-            Partage->com_tellstick.TID );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Demarrer_admin: Thread un process admin                                                                */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
@@ -693,11 +616,6 @@
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                 /* Attente fin DLS */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, DLS is down" );
-
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for TELLSTICK (%d) to finish", Partage->com_tellstick.TID );
-    Partage->com_tellstick.Thread_run = FALSE;
-    while ( Partage->com_tellstick.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, TELLSTICK is down" );
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for MODBUS (%d) to finish", Partage->com_modbus.TID );
     Partage->com_modbus.Thread_run = FALSE;

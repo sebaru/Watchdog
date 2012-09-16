@@ -192,10 +192,10 @@
     gchar chaine[256];
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
-    nbr_i          = g_list_length( Partage->com_msrv.liste_i );
-    nbr_msg_off    = g_list_length( Partage->com_msrv.liste_msg_off );     /* Recuperation du numero de i */
-    nbr_msg_on     = g_list_length( Partage->com_msrv.liste_msg_on );      /* Recuperation du numero de i */
-    nbr_msg_repeat = g_list_length( Partage->com_msrv.liste_msg_repeat );             /* liste des repeat */
+    nbr_i          = g_slist_length( Partage->com_msrv.liste_i );
+    nbr_msg_off    = g_slist_length( Partage->com_msrv.liste_msg_off );    /* Recuperation du numero de i */
+    nbr_msg_on     = g_slist_length( Partage->com_msrv.liste_msg_on );     /* Recuperation du numero de i */
+    nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );            /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG_ON, %d MSG_OFF, %d MSG_REPEAT",
@@ -238,6 +238,7 @@
     while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
      { Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
+       Gerer_arrive_Axxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { guint i;
@@ -245,7 +246,6 @@
           Partage->com_modbus.Thread_reload    = TRUE;
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
-          Partage->com_tellstick.Thread_reload = TRUE;
           for (i=0; i<Config.max_serveur; i++)
            { Partage->Sous_serveur[i].Thread_reload = TRUE; }
 
@@ -267,7 +267,6 @@
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_admin.Thread_sigusr1     = TRUE;
-          Partage->com_tellstick.Thread_sigusr1 = TRUE;
           for (i=0; i<Config.max_serveur; i++)
            { Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
 
@@ -526,7 +525,6 @@
        memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
-       memset( &Partage->com_tellstick,0, sizeof(Partage->com_tellstick) );
 
        Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
        
@@ -536,7 +534,6 @@
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
-       pthread_mutex_init( &Partage->com_tellstick.synchro, &attr );
        pthread_mutex_init( &Partage->com_modbus.synchro, &attr );
  
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
@@ -589,9 +586,6 @@
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb DLS" ); }
 
-          if (!Demarrer_tellstick())                                               /* Démarrage Tellstick */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb TELLSTICK" ); }
-
           if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb MOTION_DETECT" ); }
 
@@ -613,7 +607,6 @@
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
-    pthread_mutex_destroy( &Partage->com_tellstick.synchro );
     for (i=0; i<Config.max_serveur; i++)
      { pthread_mutex_destroy( &Partage->Sous_serveur[i].synchro ); }
 

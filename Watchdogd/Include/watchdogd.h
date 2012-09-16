@@ -43,7 +43,6 @@
  #include "Cpth_DB.h"
  #include "Cpt_imp_DB.h"
  #include "Modbus.h"
- #include "Tellstick.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
  #include "Asterisk_DB.h"
@@ -96,10 +95,11 @@
     gboolean Thread_clear_reboot;                        /* TRUE si le reboot doit suivre une RAZ mémoire */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-    GList *liste_msg_repeat;                                       /* liste de struct MSGDB msg a envoyer */
-    GList *liste_msg_on;                                           /* liste de struct MSGDB msg a envoyer */
-    GList *liste_msg_off;                                          /* liste de struct MSGDB msg a envoyer */
-    GList *liste_i;                                                /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_msg_repeat;                                      /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_msg_on;                                          /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_msg_off;                                         /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_i;                                               /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_a;                                          /* liste de A a traiter dans la ditribution */
     gboolean reset_motion_detect;
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
   };
@@ -144,7 +144,6 @@
                                                                                 /* Interfacage avec D.L.S */
     struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
     struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
-    struct COM_TELLSTICK com_tellstick;                         /* Communication avec le thread tellstick */
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
@@ -179,7 +178,6 @@
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_admin ( void );
  extern gboolean Demarrer_motion_detect ( void );
- extern gboolean Demarrer_tellstick ( void );
  extern gboolean Demarrer_sous_serveur ( int id );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
@@ -192,6 +190,10 @@
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );
  extern void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
  extern void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
+
+ extern void Abonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );      /* Dans distrib_Axxx.c */
+ extern void Desabonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );
+ extern void Gerer_arrive_Axxx_dls ( void );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                       /* Dans distrib_Ixxx.c */
 

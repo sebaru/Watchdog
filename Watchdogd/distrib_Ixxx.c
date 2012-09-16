@@ -45,8 +45,8 @@
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
     num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);                /* Recuperation du numero de i */
-    reste = g_list_length(Partage->com_msrv.liste_i);
-    Partage->com_msrv.liste_i = g_list_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
+    Partage->com_msrv.liste_i = g_slist_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
+    reste = g_slist_length(Partage->com_msrv.liste_i);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_new( Config.log, Config.log_all, LOG_DEBUG,

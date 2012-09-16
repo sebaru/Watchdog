@@ -5,14 +5,15 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-lib_LTLIBRARIES     = libwatchdog-tellstick.la
-libwatchdog_tellstick_la_SOURCES    = Tellstick.c
+lib_LTLIBRARIES     = libwatchdog-server_tellstick.la
+libwatchdog_server_tellstick_la_SOURCES    = Tellstick.c Tellstick.h admin_tellstick.c
 
-INCLUDES= $(GNOME2_CFLAGS) \
+INCLUDES= `pkg-config --cflags glib-2.0` \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
           $(MYSQL_CFLAGS) \
           -I../Include
 
-libwatchdog_tellstick_la_LDFLAGS = -ltelldus-core -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
+libwatchdog_tellstick_la_LDFLAGS = -ltelldus-core -rdynamic \
+                                   -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
+                                   `pkg-config --libs glib-2.0`

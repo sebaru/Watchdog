@@ -25,205 +25,126 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <unistd.h>
- #include <telldus-core.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "Tellstick.h"
 
+/**********************************************************************************************************/
+/* Tellstick_Lire_config : Lit la config Watchdog et rempli la structure mémoire                          */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Tellstick_Lire_config ( void )
+  { GKeyFile *gkf;
+
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Tellstick_Lire_config : unable to load config file %s", Config.config_file );
+       return;
+     }
+                                                                               /* Positionnement du debug */
+    Cfg_tellstick.lib->Thread_debug = g_key_file_get_boolean ( gkf, "TELLSTICK", "debug", NULL ); 
+                                                                 /* Recherche des champs de configuration */
+    g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Tellstick_Liberer_config : Libere la mémoire allouer précédemment pour lire la config tellstick        */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Tellstick_Liberer_config ( void )
+  { 
+  }
 /**********************************************************************************************************/
 /* Ajouter_tellstick: Ajoute une demande d'envoi RF tellstick dans la liste des envoi tellstick           */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
 /**********************************************************************************************************/
- void Ajouter_tellstick( gint id, gint val )
-  { struct TELLSTICKDB *tell;
+ void Tellstick_Gerer_sortie( gint num_a )                                 /* Num_a est l'id du tellstick */
+  { gint taille;
 
-    if (id < Config.tellstick_a_min || Config.tellstick_a_max < id) return;             /* Test d'echelle */
-     
-    if (Partage->com_tellstick.taille_tell > 150)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Ajouter_tell: DROP tell (taille>150)  id=%d", id );
+    pthread_mutex_lock( &Cfg_tellstick.lib->synchro );           /* Ajout dans la liste de tell a traiter */
+    taille = g_slist_length( Cfg_tellstick.Liste_tell );
+    pthread_mutex_unlock( &Cfg_tellstick.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_WARNING,
+                "Ajouter_tell: DROP tell (taille>150)  id=%d", num_a );
        return;
      }
 
-    tell = (struct TELLSTICKDB *)g_try_malloc0( sizeof(struct TELLSTICKDB) );
-    if (!tell) return;
-
-    tell->id  = id;
-    tell->val = val;
-
-    pthread_mutex_lock( &Partage->com_tellstick.synchro );       /* Ajout dans la liste de tell a traiter */
-    Partage->com_tellstick.liste_tell = g_list_append( Partage->com_tellstick.liste_tell, tell );
-    Partage->com_tellstick.taille_tell++;
-    pthread_mutex_unlock( &Partage->com_tellstick.synchro );
-  }
-/**********************************************************************************************************/
-/* Admin_tellstick_learn: Envoi une commande de LEARN tellstick                                           */
-/* Entrée: Le client admin et le numéro ID du tellstick                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_tellstick_learn ( struct CLIENT_ADMIN *client, gint num )
-  { int methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Envoi de la commande LEARN TellstickS\n" );
-    Write_admin ( client->connexion, chaine );
-
-    methods = tdMethods( num, TELLSTICK_LEARN );                                 /* Get methods of device */
-
-    if ( methods | TELLSTICK_LEARN )
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Learning %d", num );
-       tdLearn ( num );
-     }
-
-    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Learning of device = %d\n", num );
-    Write_admin ( client->connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Admin_tellstick_start: Envoi une commande de START tellstick                                           */
-/* Entrée: Le client admin et le numéro ID du tellstick                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_tellstick_start ( struct CLIENT_ADMIN *client, gint num )
-  { int methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Demande d'activation d'un device Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
-
-    methods = tdMethods( num, TELLSTICK_TURNON );                                /* Get methods of device */
-
-    if ( methods | TELLSTICK_TURNON )
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Starting %d", num );
-       tdTurnOn ( num );
-     }
-
-    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Starting device = %d\n", num );
-    Write_admin ( client->connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Admin_tellstick_stop : Envoi une commande de STOP  tellstick                                           */
-/* Entrée: Le client admin et le numéro ID du tellstick                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_tellstick_stop ( struct CLIENT_ADMIN *client, gint num )
-  { int methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Demande de desactivation d'un deviece Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
-
-    methods = tdMethods( num, TELLSTICK_TURNOFF );                               /* Get methods of device */
-
-    if ( methods | TELLSTICK_TURNOFF )
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Stopping %d", num );
-       tdTurnOff ( num );
-     }
-
-    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Stoppping device = %d\n", num );
-    Write_admin ( client->connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- void Admin_tellstick_list ( struct CLIENT_ADMIN *client )
-  { int nbrDevice, i, supportedMethods, methods;
-    gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des device Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
-
-    nbrDevice = tdGetNumberOfDevices();
-    g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Number of devices = %d\n", nbrDevice );
-    Write_admin ( client->connexion, chaine );
-
-    for (i= 0; i<nbrDevice; i++)
-     { char *name, *proto, *house, *unit;
-       int id;
-       id    = tdGetDeviceId( i );
-       name  = tdGetName( id );
-       proto = tdGetProtocol( id );
-       house = tdGetDeviceParameter( id, "house", "NULL" );
-       unit  = tdGetDeviceParameter( id, "unit", "NULL" );
-       supportedMethods = TELLSTICK_TURNON | TELLSTICK_TURNOFF | TELLSTICK_BELL | TELLSTICK_LEARN;
-       methods = tdMethods( id, supportedMethods );
-
-       g_snprintf( chaine, sizeof(chaine),
-                   "   Tellstick [%d] -> proto=%s, house=%s, unit=%s, methods=%s-%s-%s-%s, name=%s\n",
-                   id, proto, house, unit,
-                   ( methods & TELLSTICK_TURNON  ? "ON"    : "  "     ),
-                   ( methods & TELLSTICK_TURNOFF ? "OFF"   : "   "    ),
-                   ( methods & TELLSTICK_BELL    ? "BELL"  : "    "   ),
-                   ( methods & TELLSTICK_LEARN   ? "LEARN" : "      " ),
-                   name
-                 );
-       Write_admin ( client->connexion, chaine );
-       tdReleaseString(name);
-       tdReleaseString(proto);
-       tdReleaseString(house);
-       tdReleaseString(unit);
-     }
+    pthread_mutex_lock( &Cfg_tellstick.lib->synchro );       /* Ajout dans la liste de tell a traiter */
+    Cfg_tellstick.Liste_tell = g_slist_prepend( Cfg_tellstick.Liste_tell, GINT_TO_POINTER(num_a) );
+    pthread_mutex_unlock( &Cfg_tellstick.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Tellstick                                                          */
 /**********************************************************************************************************/
- void Run_tellstick ( void )
+ void Run_thread ( struct LIBRAIRIE *lib )
   { guint methods;
+
     prctl(PR_SET_NAME, "W-Tellstick", 0, 0, 0 );
+    memset( &Cfg_tellstick, 0, sizeof(Cfg_tellstick) );         /* Mise a zero de la structure de travail */
+    Cfg_tellstick.lib = lib;                   /* Sauvegarde de la structure pointant sur cette librairie */
+    Tellstick_Lire_config ();                           /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Starting" );
+    Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+    Cfg_tellstick.lib->Thread_run = TRUE;                                           /* Le thread tourne ! */
 
-    Partage->com_tellstick.liste_tell = NULL;                             /* Initialisation des variables */
-    tdInit();
+    g_snprintf( Cfg_tellstick.lib->admin_prompt, sizeof(Cfg_tellstick.lib->admin_prompt), "tellstick" );
+    g_snprintf( Cfg_tellstick.lib->admin_help,   sizeof(Cfg_tellstick.lib->admin_help),   "Manage Tellstick system" );
 
-    Partage->com_tellstick.Thread_run = TRUE;                    /* On dit au maitre que le thread tourne */
-    while(Partage->com_tellstick.Thread_run == TRUE)                  /* On tourne tant que l'on a besoin */
-     { struct TELLSTICKDB *tell;
-       if (Partage->com_tellstick.Thread_reload)                                      /* On a recu reload */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: RELOAD" );
-          Partage->com_tellstick.Thread_reload = FALSE;
+    tdInit();                                                 /* Initialisation de la librairie tellstick */
+    Abonner_distribution_sortie ( Tellstick_Gerer_sortie );     /* Abonnement de la diffusion des sorties */
+    while(lib->Thread_run == TRUE)                                    /* On tourne tant que l'on a besoin */
+     { gint id;
+
+       if (lib->Thread_sigusr1)                                                   /* On a recu sigusr1 ?? */
+        { Info_new( Config.log, lib->Thread_debug, LOG_INFO, "Run_tellstick: SIGUSR1" );
+          pthread_mutex_lock ( &Cfg_tellstick.lib->synchro );
+          Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: USR1 -> Nbr of Tellstick to send=%d",
+                    g_slist_length ( Cfg_tellstick.Liste_tell )
+                  );
+          pthread_mutex_unlock ( &Cfg_tellstick.lib->synchro );
+          lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Partage->com_tellstick.Thread_sigusr1)                                 /* On a recu sigusr1 ?? */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: SIGUSR1" );
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Reste a traiter %d",
-                  Partage->com_tellstick.taille_tell );
-          Partage->com_tellstick.Thread_sigusr1 = FALSE;
-        }
-
-       if (!Partage->com_tellstick.liste_tell)                            /* Si pas de message, on tourne */
+       if (!Cfg_tellstick.Liste_tell)                            /* Si pas de message, on tourne */
         { sched_yield();
           usleep(10000);
           continue;
         }
 
-       pthread_mutex_lock( &Partage->com_tellstick.synchro );                            /* lockage futex */
-       tell = Partage->com_tellstick.liste_tell->data;                            /* Recuperation du tell */
-       Partage->com_tellstick.liste_tell = g_list_remove ( Partage->com_tellstick.liste_tell, tell );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Reste a traiter %d",
-                                       g_list_length(Partage->com_tellstick.liste_tell) );
-       Partage->com_tellstick.taille_tell--;
-       pthread_mutex_unlock( &Partage->com_tellstick.synchro );
+       pthread_mutex_lock( &Cfg_tellstick.lib->synchro );                                /* lockage futex */
+       id = GPOINTER_TO_INT(Cfg_tellstick.Liste_tell->data);                      /* Recuperation du tell */
+       Cfg_tellstick.Liste_tell = g_slist_remove ( Cfg_tellstick.Liste_tell, GINT_TO_POINTER(id) );
+       Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_INFO,
+                "Run_tellstick: Reste a traiter %d",
+                 g_slist_length(Cfg_tellstick.Liste_tell) );
+       pthread_mutex_unlock( &Cfg_tellstick.lib->synchro );
 
-       methods = tdMethods( tell->id, TELLSTICK_TURNON | TELLSTICK_TURNOFF );    /* Get methods of device */
+       methods = tdMethods( id, TELLSTICK_TURNON | TELLSTICK_TURNOFF );          /* Get methods of device */
 
-       if ( tell->val == 1 && (methods | TELLSTICK_TURNON) )
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Turning %d ON", tell->id );
-          tdTurnOn ( tell->id );
+       if ( A(id) == 1 && (methods | TELLSTICK_TURNON) )
+        { Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_INFO, "Run_tellstick: Turning %d ON", id );
+          tdTurnOn ( id );
         }
-       else if ( tell->val == 0 && (methods | TELLSTICK_TURNOFF) )
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_tellstick: Turning %d OFF", tell->id );
-          tdTurnOff ( tell->id );
+       else if ( A(id) == 0 && (methods | TELLSTICK_TURNOFF) )
+        { Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_INFO, "Run_tellstick: Turning %d OFF", id );
+          tdTurnOff ( id );
         }
-
-       g_free(tell);
      }
+    Desabonner_distribution_sortie ( Tellstick_Gerer_sortie );/* Desabonnement de la diffusion des sorties */
     tdClose();
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_tellstick: Down (%d)", pthread_self() );
-    Partage->com_tellstick.TID = 0;                       /* On indique au master que le thread est mort. */
+    Tellstick_Liberer_config();                               /* Liberation de la configuration du thread */
+
+    Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_tellstick.lib->TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

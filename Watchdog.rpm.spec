@@ -136,7 +136,7 @@ This is the server side of Watchdog - Telldus Module
 
 %files server-tellstick
 %defattr(644,root,root)
-/usr/lib/libwatchdog-tellstick*
+/usr/lib/libwatchdog-server-tellstick*
 
 #----------------------------- Package Server-lirc -----------------------------------
 %package server-lirc

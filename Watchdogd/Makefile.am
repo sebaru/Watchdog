@@ -14,7 +14,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 		    Compteur_horaire.c Compteur_impulsion.c \
 		    Icones.c classe.c Scenario.c \
 		    EntreeANA.c Histo.c Histo_hard.c Camera.c \
-                    distrib_MSGxxx.c distrib_Ixxx.c
+                    distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c 
 
 Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Dls/libdls.la \

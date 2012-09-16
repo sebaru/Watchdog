@@ -60,7 +60,7 @@
 /* Entrée : le message a envoyer                                                                          */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Envoyer_message_aux_abonnes ( struct CMD_TYPE_MESSAGE *msg )
+ static void Envoyer_message_aux_abonnes ( struct CMD_TYPE_MESSAGE *msg )
   { GSList *liste;
 
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
@@ -84,7 +84,7 @@
 /**********************************************************************************************************/
  void Gerer_message_repeat ( struct DB *Db_watchdog )
   { struct CMD_TYPE_MESSAGE *msg;
-    GList *liste;
+    GSList *liste;
     gint num;
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -129,8 +129,8 @@
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
     if (msg->time_repeat) 
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
-       Partage->com_msrv.liste_msg_repeat = g_list_append ( Partage->com_msrv.liste_msg_repeat,
-                                                            GINT_TO_POINTER(msg->num) );
+       Partage->com_msrv.liste_msg_repeat = g_slist_prepend ( Partage->com_msrv.liste_msg_repeat,
+                                                              GINT_TO_POINTER(msg->num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                   /* En minutes */
      }
@@ -194,8 +194,8 @@
     guint i;
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Retrait de la liste des messages en REPEAT */
-    Partage->com_msrv.liste_msg_repeat = g_list_remove ( Partage->com_msrv.liste_msg_repeat,
-                                                         GINT_TO_POINTER(num) );
+    Partage->com_msrv.liste_msg_repeat = g_slist_remove ( Partage->com_msrv.liste_msg_repeat,
+                                                          GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     histo = Rechercher_histoDB( Config.log, Db_watchdog, num );
@@ -245,22 +245,22 @@
     if (Partage->com_msrv.liste_msg_off)                        /* Priorité à la disparition des messages */
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data);     /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_msg_off = g_list_remove ( Partage->com_msrv.liste_msg_off,
-                                                         GINT_TO_POINTER(num) );
+       Partage->com_msrv.liste_msg_off = g_slist_remove ( Partage->com_msrv.liste_msg_off,
+                                                          GINT_TO_POINTER(num) );
        Info_new( Config.log, Config.log_all, LOG_DEBUG,
                 "Gerer_arrive_message_dls: Handle MSG%03d=0, Reste a %d a traiter",
-               num, g_list_length(Partage->com_msrv.liste_msg_off) );
+               num, g_slist_length(Partage->com_msrv.liste_msg_off) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
      }
     else if (Partage->com_msrv.liste_msg_on)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);      /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_msg_on = g_list_remove ( Partage->com_msrv.liste_msg_on,
-                                                            GINT_TO_POINTER(num) );
+       Partage->com_msrv.liste_msg_on = g_slist_remove ( Partage->com_msrv.liste_msg_on,
+                                                         GINT_TO_POINTER(num) );
        Info_new( Config.log, Config.log_all, LOG_DEBUG,
                 "Gerer_arrive_message_dls: Handle MSG%03d=1, Reste a %d a traiter",
-               num, g_list_length(Partage->com_msrv.liste_msg_on) );
+               num, g_slist_length(Partage->com_msrv.liste_msg_on) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
      }

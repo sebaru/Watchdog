@@ -341,11 +341,8 @@
            }
 
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
-          nbr = g_list_length( Partage->com_msrv.liste_i );
-          if ( nbr < 200 && (! g_list_find( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) )) )
-           { Partage->com_msrv.liste_i = g_list_append( Partage->com_msrv.liste_i,
-                                                        GINT_TO_POINTER(num) );
-           }
+          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
+                                                      GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->i[num].changes++;                             /* Un change de plus ! */
         }
@@ -388,8 +385,10 @@
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
         { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );
-          if (Partage->com_tellstick.Ajouter_tellstick) /* A revoir. Le polling est a faire par le thread tellstick ?? */
-           { Partage->com_tellstick.Ajouter_tellstick( num, etat ); }
+          pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
+                                                      GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->a[num].changes++;                                              /* Un change de plus !! */
         } else if ( ! (Partage->top % 600 ))             /* Si persistence on prévient toutes les minutes */
         { Info_new( Config.log, Config.log_all, LOG_INFO, "SA: last_change trop tôt !", num ); }
@@ -493,12 +492,12 @@
        if ( Partage->g[num].changes <= 5 ) 
         { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
           if (etat) 
-           { Partage->com_msrv.liste_msg_on  = g_list_append( Partage->com_msrv.liste_msg_on,
-                                                              GINT_TO_POINTER(num) );
+           { Partage->com_msrv.liste_msg_on  = g_slist_append( Partage->com_msrv.liste_msg_on,
+                                                               GINT_TO_POINTER(num) );
            }
           else
-           { Partage->com_msrv.liste_msg_off = g_list_append( Partage->com_msrv.liste_msg_off,
-                                                              GINT_TO_POINTER(num) );
+           { Partage->com_msrv.liste_msg_off = g_slist_append( Partage->com_msrv.liste_msg_off,
+                                                               GINT_TO_POINTER(num) );
            }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].changes++;

@@ -180,7 +180,6 @@
             if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + 7 ); }
        else if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
        else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "tellstick" ) ) { Admin_tellstick( client, ligne + 10); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
        else { gboolean found = FALSE;
