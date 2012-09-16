@@ -209,7 +209,6 @@
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute, cpt_1_seconde;
-    struct sigaction sig;
     struct DB *db;
     gint cpt;
 
@@ -223,18 +222,6 @@
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
     cpt_1_seconde = Partage->top + 10;
-
-    sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
-    sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-    sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
-    sigaction( SIGPIPE, &sig, NULL );
-    sigaction( SIGHUP,  &sig, NULL );                                            /* Reinitialisation soft */
-    sigaction( SIGINT,  &sig, NULL );                                            /* Reinitialisation soft */
-    sigaction( SIGALRM, &sig, NULL );                                            /* Reinitialisation soft */
-    sigaction( SIGUSR1, &sig, NULL );                                  /* Reinitialisation DLS uniquement */
-    sigaction( SIGUSR2, &sig, NULL );                                  /* Reinitialisation DLS uniquement */
-    sigaction( SIGIO, &sig, NULL );                                    /* Reinitialisation DLS uniquement */
-    sigaction( SIGTERM, &sig, NULL );
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
@@ -460,7 +447,8 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
-  { gchar strpid[12];
+  { struct sigaction sig;
+    gchar strpid[12];
     gint fd_lock, i;
     pthread_t TID;
     gint import=0;
@@ -549,10 +537,9 @@
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
 
-#ifdef bouh
-       sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
-       pthread_sigmask( SIG_SETMASK, &sigset, NULL );
-#endif
+       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+       pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
        if (!import)
         { Info_new( Config.log, Config.log_all, LOG_INFO, "Clear Histo" );
           Clear_histoDB ();                                            /* Clear de la table histo au boot */
@@ -587,6 +574,22 @@
         { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb Admin -> Arret" ); }
 
        pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
+
+                                     /********** Mise en place de la gestion des signaux ******************/
+       sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
+       sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+       sigdelset ( &sig.sa_mask, SIGALRM );
+       sigdelset ( &sig.sa_mask, SIGUSR1 );
+       sigdelset ( &sig.sa_mask, SIGINT  );
+       sigdelset ( &sig.sa_mask, SIGTERM );
+       pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
+       sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
+       sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
+       sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
+       sigaction( SIGTERM, &sig, NULL );
+
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
        Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
        Decharger_librairies();
