@@ -208,7 +208,7 @@
        g_snprintf( chaine, sizeof(chaine), " Distribution des Msg ON : reste %d\n", num );
        Write_admin ( client->connexion, chaine );
 
-       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                    /* liste des repeat */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), "          MSgs en REPEAT : reste %d\n", num );

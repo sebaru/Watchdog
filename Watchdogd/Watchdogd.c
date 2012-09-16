@@ -209,7 +209,7 @@
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute, cpt_1_seconde;
-    sigset_t sigset;
+    struct sigaction sig;
     struct DB *db;
     gint cpt;
 
@@ -224,14 +224,17 @@
     cpt_1_minute  = Partage->top + 600;
     cpt_1_seconde = Partage->top + 10;
 
-    sigfillset (&sigset);                                     /* Par défaut tous les signaux sont bloqués */
-    sigdelset (&sigset, SIGALRM);
-    sigdelset (&sigset, SIGPIPE);
-    sigdelset (&sigset, SIGHUP);
-    sigdelset (&sigset, SIGUSR1);
-    sigdelset (&sigset, SIGUSR2);
-    sigdelset (&sigset, SIGTERM);
-    pthread_sigmask( SIG_SETMASK, &sigset, NULL );
+    sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
+    sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+    sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
+    sigaction( SIGPIPE, &sig, NULL );
+    sigaction( SIGHUP,  &sig, NULL );                                            /* Reinitialisation soft */
+    sigaction( SIGINT,  &sig, NULL );                                            /* Reinitialisation soft */
+    sigaction( SIGALRM, &sig, NULL );                                            /* Reinitialisation soft */
+    sigaction( SIGUSR1, &sig, NULL );                                  /* Reinitialisation DLS uniquement */
+    sigaction( SIGUSR2, &sig, NULL );                                  /* Reinitialisation DLS uniquement */
+    sigaction( SIGIO, &sig, NULL );                                    /* Reinitialisation DLS uniquement */
+    sigaction( SIGTERM, &sig, NULL );
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
@@ -457,8 +460,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
-  { struct sigaction sig;
-    gchar strpid[12];
+  { gchar strpid[12];
     gint fd_lock, i;
     pthread_t TID;
     gint import=0;
@@ -531,6 +533,7 @@
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
+       pthread_mutex_init( &Partage->com_msrv.synchro_Liste_abonne_msg, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
@@ -545,18 +548,6 @@
           Partage->Sous_serveur[i].nb_client = -1;
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
-
-       sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
-       sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
-       sigaction( SIGPIPE, &sig, NULL );
-       sigaction( SIGHUP,  &sig, NULL );                                         /* Reinitialisation soft */
-       sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
-       sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
-       sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
-       sigaction( SIGUSR2, &sig, NULL );                               /* Reinitialisation DLS uniquement */
-       sigaction( SIGIO, &sig, NULL );                                 /* Reinitialisation DLS uniquement */
-       sigaction( SIGTERM, &sig, NULL );
 
 #ifdef bouh
        sigfillset (&sigset);                                  /* Par défaut tous les signaux sont bloqués */
@@ -604,6 +595,7 @@
 
     pthread_mutex_destroy( &Partage->com_modbus.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
+    pthread_mutex_destroy( &Partage->com_msrv.synchro_Liste_abonne_msg );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );

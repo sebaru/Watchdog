@@ -89,17 +89,22 @@
   };
 
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
-  { pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+  { gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reboot;                              /* TRUE si le reboot doit suivre une RAZ mémoire */
     gboolean Thread_clear_reboot;                        /* TRUE si le reboot doit suivre une RAZ mémoire */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
+
+    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GSList *liste_msg_repeat;                                      /* liste de struct MSGDB msg a envoyer */
     GSList *liste_msg_on;                                          /* liste de struct MSGDB msg a envoyer */
     GSList *liste_msg_off;                                         /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                               /* liste de struct MSGDB msg a envoyer */
     GSList *liste_a;                                          /* liste de A a traiter dans la ditribution */
+
+    pthread_mutex_t synchro_Liste_abonne_msg;                         /* Bit de synchronisation processus */
+    GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
+
     gboolean reset_motion_detect;
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
   };

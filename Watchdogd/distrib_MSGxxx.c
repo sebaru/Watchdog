@@ -33,17 +33,15 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
 
- static GSList *Liste_clients_msg  = NULL;
-
 /**********************************************************************************************************/
 /* Abonner_distribution_message: Abonnement d'un thread aux diffusions d'un message                       */
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    Liste_clients_msg = g_slist_prepend( Liste_clients_msg, Gerer_message );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
+    Partage->com_msrv.Liste_abonne_msg = g_slist_prepend( Partage->com_msrv.Liste_abonne_msg, Gerer_message );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
   }
 /**********************************************************************************************************/
 /* Desabonner_distribution_message: Desabonnement d'un thread aux diffusions d'un message                 */
@@ -51,9 +49,9 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    Liste_clients_msg = g_slist_remove( Liste_clients_msg, Gerer_message );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
+    Partage->com_msrv.Liste_abonne_msg = g_slist_remove( Partage->com_msrv.Liste_abonne_msg, Gerer_message );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
   }
 /**********************************************************************************************************/
 /* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                 */
@@ -63,8 +61,8 @@
  static void Envoyer_message_aux_abonnes ( struct CMD_TYPE_MESSAGE *msg )
   { GSList *liste;
 
-    pthread_mutex_lock ( &Partage->com_msrv.synchro );
-    liste = Liste_clients_msg;
+    pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
+    liste = Partage->com_msrv.Liste_abonne_msg;
     while (liste)                                                              /* Pour chacun des abonnes */
      { void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg);
        struct CMD_TYPE_MESSAGE *dup_msg;
@@ -76,7 +74,7 @@
         }
        liste = liste->next;
      }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
   }
 /**********************************************************************************************************/
 /* Gerer_message_repeat: Gestion de la répétition des messages                                            */
