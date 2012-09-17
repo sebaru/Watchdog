@@ -518,16 +518,6 @@
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
  extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
 
- extern void Proto_afficher_un_modbus( struct CMD_TYPE_MODBUS *modbus );           /* Dans liste_modbus.c */
- extern void Proto_cacher_un_modbus( struct CMD_TYPE_MODBUS *modbus );
- extern void Proto_rafraichir_un_modbus( struct CMD_TYPE_MODBUS *modbus );
- extern void Creer_page_modbus( void );
- extern void Creer_liste_modbus( GtkWidget **Liste, GtkWidget **Scroll );
-                                                                                   /* Dans ajout_modbus.c */
- extern void Menu_ajouter_editer_modbus ( struct CMD_TYPE_MODBUS *edit_modbus);
-
- extern void Proto_afficher_mnemo_modbus ( struct CMD_TYPE_MNEMONIQUE *mnemo );
-
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
 
