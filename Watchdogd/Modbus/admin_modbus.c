@@ -70,7 +70,7 @@
                    module->modbus.min_s_tor, module->modbus.min_s_ana,
                    module->transaction_id, module->nbr_deconnect, module->request,
                    (module->date_retente   ? (module->date_retente   - Partage->top)/10 : -1),
-                   (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1)
+                   (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;                                  /* Passage au module suivant */
