@@ -137,14 +137,14 @@
                 ups.ups, ups.host, ups.username, ups.password,
                 &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
               );
-        retour = Ajouter_upsDB ( &ups );
-        if (retour == -1)
-         { Write_admin ( client->connexion, "Error, UPS not added\n" ); }
-        else
-         { gchar chaine[80];
-           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
-           Write_admin ( client->connexion, chaine );
-         }
+       retour = Ajouter_upsDB ( &ups );
+       if (retour == -1)
+        { Write_admin ( client->connexion, "Error, UPS not added\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
+          Write_admin ( client->connexion, chaine );
+        }
      }
     else if ( ! strcmp ( commande, "change" ) )
      { struct UPSDB ups;
@@ -153,27 +153,27 @@
                 &ups.id, ups.ups, ups.host, ups.username, ups.password,
                 &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
               );
-        retour = Modifier_upsDB ( &ups );
-        if (retour == FALSE)
-         { Write_admin ( client->connexion, "Error, UPS not changed\n" ); }
-        else
-         { gchar chaine[80];
-           g_snprintf( chaine, sizeof(chaine), " UPS %d changed\n", ups.id );
-           Write_admin ( client->connexion, chaine );
-         }
+       retour = Modifier_upsDB ( &ups );
+       if (retour == FALSE)
+        { Write_admin ( client->connexion, "Error, UPS not changed\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " UPS %s changed\n", ups.ups );
+          Write_admin ( client->connexion, chaine );
+        }
      }
     else if ( ! strcmp ( commande, "del" ) )
      { struct UPSDB ups;
        gboolean retour;
        sscanf ( ligne, "%s %d", commande, &ups.id );                 /* Découpage de la ligne de commande */
-        retour = Retirer_upsDB ( &ups );
-        if (retour == FALSE)
-         { Write_admin ( client->connexion, "Error, UPS not erased\n" ); }
-        else
-         { gchar chaine[80];
-           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
-           Write_admin ( client->connexion, chaine );
-         }
+       retour = Retirer_upsDB ( &ups );
+       if (retour == FALSE)
+        { Write_admin ( client->connexion, "Error, UPS not erased\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
+          Write_admin ( client->connexion, chaine );
+        }
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,

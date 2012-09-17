@@ -134,6 +134,54 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_modbus_reload(client);
      }
+    else if ( ! strcmp ( commande, "add" ) )
+     { struct UPSDB ups;
+       gint retour;
+
+       sscanf ( ligne, "%s %d,%d,%d,%s,%d,%d,%d,%d,%s", commande,    /* Découpage de la ligne de commande */
+                &modbus.enable, &modbus.bit, modbus.ip,
+                &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
+                modbus.libelle
+              );
+       retour = Ajouter_modbusDB ( &modbus );
+       if (retour == -1)
+        { Write_admin ( client->connexion, "Error, MODBUS not added\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " MODBUS %s added. New ID=%d\n", modbus.ip, retour );
+          Write_admin ( client->connexion, chaine );
+        }
+     }
+    else if ( ! strcmp ( commande, "change" ) )
+     { struct UPSDB ups;
+       gint retour;
+       sscanf ( ligne, "%s %d,%d,%d,%d,%s,%d,%d,%d,%d,%s", commande, /* Découpage de la ligne de commande */
+                &modbus.id, &modbus.enable, &modbus.bit, modbus.ip,
+                &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
+                modbus.libelle
+              );
+       retour = Modifier_modbusDB ( &modbus );
+       if (retour == FALSE)
+        { Write_admin ( client->connexion, "Error, MODBUS not changed\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " MODBUS %s changed\n", modbus.ip );
+          Write_admin ( client->connexion, chaine );
+        }
+     }
+    else if ( ! strcmp ( commande, "del" ) )
+     { struct MODBUSDB modbus;
+       gboolean retour;
+       sscanf ( ligne, "%s %d", commande, &modbus.id );              /* Découpage de la ligne de commande */
+       retour = Retirer_modbusDB ( &modbus );
+       if (retour == FALSE)
+        { Write_admin ( client->connexion, "Error, MODBUS not erased\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " MODBUS %d erased\n", modbus.id );
+          Write_admin ( client->connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
