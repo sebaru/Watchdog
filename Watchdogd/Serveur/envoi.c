@@ -25,17 +25,14 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
  #include <string.h>
  #include <errno.h>
  #include <sys/stat.h>
  #include <fcntl.h>
  #include <sys/unistd.h>
- #include <bonobo/bonobo-i18n.h>
 
  #define DEFAUT_MAX 3
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
