@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-lib_LTLIBRARIES     = libwatchdog-server_tellstick.la
+lib_LTLIBRARIES     = libwatchdog-server-tellstick.la
 libwatchdog_server_tellstick_la_SOURCES    = Tellstick.c Tellstick.h admin_tellstick.c
 
 INCLUDES= `pkg-config --cflags glib-2.0` \
