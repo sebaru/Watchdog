@@ -25,15 +25,13 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <glib.h>
- #include <bonobo/bonobo-i18n.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+
 /**********************************************************************************************************/
 /* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                            */
 /* Entrée: L'element                                                                                      */
