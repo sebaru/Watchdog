@@ -52,10 +52,6 @@
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
         } else
-       if ( ! strcmp ( thread, "modbus" ) )
-        { if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb MODBUS -> Arret" ); }
-        } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
@@ -122,7 +118,6 @@
         { Stopper_fils(FALSE);                           /* Termine tous les process sauf le thread ADMIN */
         } else
        if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
-       if ( ! strcmp ( thread, "modbus"    ) ) { Partage->com_modbus.Thread_run    = FALSE; } else
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; }
        else
         { GSList *liste;
