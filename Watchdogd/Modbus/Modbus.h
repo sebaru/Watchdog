@@ -89,7 +89,7 @@
   };
 
 /********************************************* Gestion des modbus ******************************************/
- struct CMD_TYPE_MODBUS
+ struct MODBUSDB
   { guint id;                                                 /* Numéro du module dans la base de données */
     gboolean enable;                                                       /* Le module doit-il tourner ? */
     guint watchdog;                       /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
@@ -103,7 +103,7 @@
   };
 
  struct MODULE_MODBUS
-  { struct CMD_TYPE_MODBUS modbus;
+  { struct MODBUSDB modbus;
 
     gboolean started;                                                                  /* Est-il actif ?? */
     gint connexion;                                                                 /* FD de connexion IP */
@@ -124,9 +124,9 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
- extern gint Ajouter_modbusDB ( struct CMD_TYPE_MODBUS *modbus );
- extern gboolean Retirer_modbusDB ( struct CMD_TYPE_MODBUS *modbus );
- extern gint Modifier_modbusDB( struct CMD_TYPE_MODBUS *modbus );
+ extern gint Ajouter_modbusDB ( struct MODBUSDB *modbus );
+ extern gboolean Retirer_modbusDB ( struct MODBUSDB *modbus );
+ extern gint Modifier_modbusDB( struct MODBUSDB *modbus );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

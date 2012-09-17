@@ -135,7 +135,7 @@
      { Admin_modbus_reload(client);
      }
     else if ( ! strcmp ( commande, "add" ) )
-     { struct UPSDB ups;
+     { struct MODBUSDB ups;
        gint retour;
 
        sscanf ( ligne, "%s %d,%d,%d,%s,%d,%d,%d,%d,%s", commande,    /* Découpage de la ligne de commande */
@@ -153,7 +153,7 @@
         }
      }
     else if ( ! strcmp ( commande, "change" ) )
-     { struct UPSDB ups;
+     { struct MODBUSDB ups;
        gint retour;
        sscanf ( ligne, "%s %d,%d,%d,%d,%s,%d,%d,%d,%d,%s", commande, /* Découpage de la ligne de commande */
                 &modbus.id, &modbus.enable, &modbus.bit, modbus.ip,

@@ -77,7 +77,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_modbusDB ( struct CMD_TYPE_MODBUS *modbus )
+ gboolean Retirer_modbusDB ( struct MODBUSDB *modbus )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
@@ -101,7 +101,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                        */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- static gint Ajouter_modifier_modbusDB ( struct CMD_TYPE_MODBUS *modbus, gboolean ajout )
+ static gint Ajouter_modifier_modbusDB ( struct MODBUSDB *modbus, gboolean ajout )
   { gchar requete[2048];
     gchar *libelle, *ip;
     gboolean retour_sql;
@@ -165,14 +165,14 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                        */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_modbusDB ( struct CMD_TYPE_MODBUS *modbus )
+ gint Ajouter_modbusDB ( struct MODBUSDB *modbus )
   { return ( Ajouter_modifier_modbusDB ( modbus, TRUE ) ); }
 /**********************************************************************************************************/
 /* Modifier_modbusDB: Modification d'un modbus Watchdog                                                   */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gint Modifier_modbusDB( struct CMD_TYPE_MODBUS *modbus )
+ gint Modifier_modbusDB( struct MODBUSDB *modbus )
   { return ( Ajouter_modifier_modbusDB ( modbus, FALSE ) ); }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                              */
@@ -193,8 +193,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_MODBUS *Recuperer_modbusDB_suite( struct DB *db )
-  { struct CMD_TYPE_MODBUS *modbus;
+ struct MODBUSDB *Recuperer_modbusDB_suite( struct DB *db )
+  { struct MODBUSDB *modbus;
 
     Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -202,7 +202,7 @@
        return(NULL);
      }
 
-    modbus = (struct CMD_TYPE_MODBUS *)g_try_malloc0( sizeof(struct CMD_TYPE_MODBUS) );
+    modbus = (struct MODBUSDB *)g_try_malloc0( sizeof(struct MODBUSDB) );
     if (!modbus) Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                           "Recuperer_modbusDB_suite: Erreur allocation mémoire" );
     else
@@ -257,7 +257,7 @@
     cpt = 0;
     for ( ; ; )
      { struct MODULE_MODBUS *module;
-       struct CMD_TYPE_MODBUS *modbus;
+       struct MODBUSDB *modbus;
 
        modbus = Recuperer_modbusDB_suite( db );
        if (!modbus) break;
@@ -270,7 +270,7 @@
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
         }
-       memcpy( &module->modbus, modbus, sizeof(struct CMD_TYPE_MODBUS) );
+       memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
        g_free(modbus);
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
