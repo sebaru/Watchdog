@@ -14,6 +14,6 @@ INCLUDES= `pkg-config --cflags glib-2.0` \
           $(MYSQL_CFLAGS) \
           -I../Include
 
-libwatchdog_tellstick_la_LDFLAGS = -ltelldus-core -rdynamic \
-                                   -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
-                                   `pkg-config --libs glib-2.0`
+libwatchdog_server_tellstick_la_LDFLAGS = -ltelldus-core -rdynamic \
+                                          -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
+                                          `pkg-config --libs glib-2.0`
