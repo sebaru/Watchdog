@@ -25,7 +25,6 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  option_entreeana.c option_cpt_imp.c \
                           liste_camera.c ajout_camera.c protocole_camera.c \
 			  liste_scenario.c ajout_scenario.c protocole_scenario.c \
-			  liste_modbus.c ajout_modbus.c protocole_modbus.c \
 			  atelier.c atelier_clic_trame.c atelier_selection.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \
 			  atelier_ajout_comment.c \

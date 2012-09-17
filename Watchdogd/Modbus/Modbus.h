@@ -62,7 +62,7 @@
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     gboolean reload;
-  };
+  } Cfg_modbus;
 
  struct TRAME_MODBUS_REQUETE                                             /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
