@@ -47,7 +47,6 @@
  #include "Reseaux_histo_courbe.h"
  #include "Reseaux_fichier.h"
  #include "Reseaux_scenario.h"
- #include "Reseaux_modbus.h"
 
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
@@ -103,10 +102,7 @@
     TAG_HISTO_COURBE,                                                 /* Gestions des historiques courbes */
     TAG_SCENARIO,                                                                 /* Gestion des scenario */
     TAG_CAMERA,                                                                     /* Gestion des camera */
-    TAG_ONDULEUR,                                                                /* Gestion des onduleurs */
-    TAG_RS485,                                                               /* Gestion des modules RS485 */
-    TAG_MODBUS,                                                             /* Gestion des modules MODBUS */
-    TAG_RFXCOM,                                                            /* Gestion des capteurs RFXCOM */
+
   };
 /************************************* Définitions des prototypes *****************************************/
  extern gint Recevoir_reseau( struct CONNEXION *Connexion );

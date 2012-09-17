@@ -456,27 +456,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_modbus: Thread un process modbus                                                              */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_modbus ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: Demande de demarrage %d", getpid() );
-    if (Partage->com_modbus.Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: An instance is already running",
-               Partage->com_modbus.TID );
-       return(FALSE);
-     }
-    if (pthread_create( &Partage->com_modbus.TID, NULL, (void *)Run_modbus, NULL ))
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: pthread_create failed" );
-       return(FALSE);
-     }
-    pthread_detach( Partage->com_modbus.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_modbus: thread modbus seems to be running",
-            Partage->com_arch.TID );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Rechercher_empl_libre: recherche un emplacement libre dans la zone partagée Sous_serveur               */
 /* Entrée: rien                                                                                           */
 /* Sortie: la place libre, ou -1 si erreur                                                                */
@@ -616,11 +595,6 @@
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                 /* Attente fin DLS */
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, DLS is down" );
-
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for MODBUS (%d) to finish", Partage->com_modbus.TID );
-    Partage->com_modbus.Thread_run = FALSE;
-    while ( Partage->com_modbus.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, MODBUS is down" );
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for ARCH (%d) to finish", Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;

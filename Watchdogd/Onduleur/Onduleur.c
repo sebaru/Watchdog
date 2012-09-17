@@ -232,7 +232,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_upsDB( struct UPSDB *ups )
+ gint Modifier_upsDB( struct UPSDB *ups )
   { return ( Ajouter_modifier_upsDB( ups, FALSE ) );
   }
 /**********************************************************************************************************/
@@ -240,7 +240,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Ajouter_upsDB( struct UPSDB *ups )
+ gint Ajouter_upsDB( struct UPSDB *ups )
   { return ( Ajouter_modifier_upsDB( ups, TRUE ) );
   }
 /**********************************************************************************************************/

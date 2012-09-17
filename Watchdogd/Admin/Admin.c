@@ -177,8 +177,7 @@
                  "Ecouter_admin : Command received = %s\n", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "modbus"    ) ) { Admin_modbus   ( client, ligne + 7 ); }
-       else if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
+            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
        else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }

@@ -6,12 +6,10 @@
 SUBDIRS= 
 
 noinst_LTLIBRARIES     = libadmin.la
-libadmin_la_SOURCES    = Admin.c admin_running.c admin_modbus.c admin_process.c admin_dls.c \
+libadmin_la_SOURCES    = Admin.c admin_running.c admin_process.c admin_dls.c \
 			 admin_set.c admin_get.c
 
-INCLUDES= $(GNOME2_CFLAGS) \
-          -I$(top_srcdir) -I$(includedir) \
+INCLUDES= `pkg-config --cflags glib-2.0` \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
 	  $(MYSQL_CFLAGS) \
 	  -I../Include

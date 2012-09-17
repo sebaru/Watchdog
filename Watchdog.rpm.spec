@@ -78,18 +78,6 @@ This is the server side of Watchdog
 %doc /usr/share/Watchdog/motion.conf
 %doc /usr/share/Watchdog/cam0001.conf
 
-#----------------------------- Package Server-rfxcom -------------------------------
-%package server-rfxcom
-Summary: The Watchdogd Server - Module RFXCom
-Group:                  Development/Tools
-requires: Watchdog-server
-%description server-rfxcom
-This is the server side of Watchdog - RFXCOM Module
-
-%files server-rfxcom
-%defattr(644,root,root)
-/usr/lib/libwatchdog-server-rfxcom*
-
 #----------------------------- Package Server-sms ----------------------------------
 %package server-sms
 Summary: The Watchdogd Server - Module SMS
@@ -101,6 +89,18 @@ This is the server side of Watchdog - SMS Module
 %files server-sms
 %defattr(644,root,root)
 /usr/lib/libwatchdog-server-sms*
+
+#----------------------------- Package Server-modbus ------------------------------
+%package server-modbus
+Summary: The Watchdogd Server - Module MODBUS
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-modbus
+This is the server side of Watchdog - MODBUS (Wago) Module
+
+%files server-modbus
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-modbus*
 
 #----------------------------- Package Server-rs485 -------------------------------
 %package server-rs485

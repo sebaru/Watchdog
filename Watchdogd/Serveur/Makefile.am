@@ -12,7 +12,6 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         protocole_mnemonique.c protocole_supervision.c protocole_atelier.c \
                         protocole_icone.c protocole_histo.c protocole_courbe.c  \
 			protocole_scenario.c protocole_synoptique.c protocole_camera.c \
-			protocole_modbus.c \
                         envoi_groupe.c envoi_util.c envoi_dls.c envoi_histo.c envoi_message.c \
                         envoi_synoptique.c envoi_synoptique_motifs.c envoi_synoptique_palettes.c \
                         envoi_synoptique_comments.c envoi_synoptique_passerelles.c \
@@ -20,7 +19,6 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         envoi_bit_init.c envoi_scenario.c envoi_synoptique_scenario.c \
                         envoi_mnemonique.c envoi_classe.c envoi_icone.c \
 			envoi_courbe.c envoi_histo_courbe.c envoi_entreeana.c \
-			envoi_modbus.c \
                         accept.c liste.c envoi_histo_hard.c \
                         capteur.c
 
@@ -30,4 +28,4 @@ INCLUDES= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/intl \
 	  -I../Include \
           $(MYSQL_CFLAGS) \
-	  $(GNOME2_CFLAGS)
+	  `pkg-config --cflags glib-2.0`

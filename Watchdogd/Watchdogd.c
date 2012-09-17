@@ -233,7 +233,6 @@
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { guint i;
           Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: RELOAD" );
-          Partage->com_modbus.Thread_reload    = TRUE;
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
           for (i=0; i<Config.max_serveur; i++)
@@ -253,7 +252,6 @@
 
           Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: SIGUSR1" );
           Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR1: jeton to server id %d", Partage->jeton );
-          Partage->com_modbus.Thread_sigusr1    = TRUE;
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_admin.Thread_sigusr1     = TRUE;
@@ -511,7 +509,6 @@
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 
        memset( &Partage->com_msrv,     0, sizeof(Partage->com_msrv) );
-       memset( &Partage->com_modbus,   0, sizeof(Partage->com_modbus) );
        memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
@@ -525,7 +522,6 @@
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
-       pthread_mutex_init( &Partage->com_modbus.synchro, &attr );
  
        Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
        for (i=0; i<Config.max_serveur; i++)
@@ -557,9 +553,6 @@
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb ARCH" ); }
-
-          if (!Demarrer_modbus())                                      /* Demarrage gestion module MODBUS */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb MODBUS" ); }
 
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb DLS" ); }
@@ -596,7 +589,6 @@
        if (Config.ssl_crypt) SSL_CTX_free( Ssl_ctx );                               /* Libération mémoire */
      }
 
-    pthread_mutex_destroy( &Partage->com_modbus.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro_Liste_abonne_msg );
     pthread_mutex_destroy( &Partage->com_dls.synchro );

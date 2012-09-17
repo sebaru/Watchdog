@@ -42,7 +42,6 @@
  #include "Client.h"
  #include "Cpth_DB.h"
  #include "Cpt_imp_DB.h"
- #include "Modbus.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
  #include "Asterisk_DB.h"
@@ -148,7 +147,6 @@
     guint audit_tour_dls_per_sec_hold;
                                                                                 /* Interfacage avec D.L.S */
     struct COM_MSRV com_msrv;                                                    /* Changement du à D.L.S */
-    struct COM_MODBUS com_modbus;                                              /* Comm vers thread modbus */
     struct COM_DLS com_dls;                                                   /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                  /* Com avec le thread ARCH */
     struct COM_ADMIN com_admin;                                               /* Com avec le thread ADMIN */
@@ -179,7 +177,6 @@
  extern void Gerer_manque_process ( void );
  extern void Stopper_fils ( gint flag );
  extern gboolean Demarrer_dls ( void );
- extern gboolean Demarrer_modbus ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_admin ( void );
  extern gboolean Demarrer_motion_detect ( void );

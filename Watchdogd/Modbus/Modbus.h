@@ -57,18 +57,11 @@
 
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
 
- struct COM_MODBUS                                                 /* Communication entre DLS et la MODBUS */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *Modules_MODBUS;
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-    guint admin_del;                                                            /* Demande de deconnexion */
+ struct MODBUS_CONFIG                                             /* Communication entre DLS et la MODBUS */
+  { GSList *Modules_MODBUS;
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
-    guint admin_add;                                                            /* Demande de deconnexion */
-    guint admin_module_reload;                                                  /* Demande de deconnexion */
+    gboolean reload;
   };
 
  struct TRAME_MODBUS_REQUETE                                             /* Definition d'une trame MODBUS */
@@ -92,6 +85,20 @@
     guint8 unit_id; /* 0xFF */
     guint8 fct;
     guint8 data[32]; /* max = 64 octets description wago */
+  };
+
+/********************************************* Gestion des modbus ******************************************/
+ struct CMD_TYPE_MODBUS
+  { guint id;                                                 /* Numéro du module dans la base de données */
+    gboolean enable;                                                       /* Le module doit-il tourner ? */
+    guint watchdog;                       /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
+    guint bit;                                       /* Bit interne B d'etat communication avec le module */
+    gchar ip[32];                                                         /* Adresses IP du module MODBUS */
+    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                             /* Libelle de la modbus */
+    guint min_e_tor;
+    guint min_e_ana;
+    guint min_s_tor;
+    guint min_s_ana;
   };
 
  struct MODULE_MODBUS
