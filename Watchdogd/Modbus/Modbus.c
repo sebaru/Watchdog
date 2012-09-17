@@ -236,51 +236,6 @@
     return(NULL);
   }
 /**********************************************************************************************************/
-/* Charger_un_Modbus: Charge un module dont l'id est en paramètre                                         */
-/* Entrée: l'ID du module a charger                                                                       */
-/* Sortie: TRUE si pas de souci, FALSE si erreur                                                          */
-/**********************************************************************************************************/
- static gboolean Charger_un_MODBUS ( gint id  )
-  { struct MODULE_MODBUS *module;
-    struct CMD_TYPE_MODBUS *modbus;
-    struct DB *db;
-
-    db = Init_DB_SQL( Config.log );
-    if (!db) return(FALSE);
-
-    module = (struct MODULE_MODBUS *)g_try_malloc0(sizeof(struct MODULE_MODBUS));
-    if (!module)                                                      /* Si probleme d'allocation mémoire */
-     { Libere_DB_SQL( Config.log, &db );
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
-             "Charger_un_modbus: Erreur allocation mémoire struct MODULE_MODBUS" );
-       return(FALSE);
-     }
-
-    modbus = Rechercher_modbusDB ( Config.log, db, id );
-    if (!modbus)                                                      /* Si probleme d'allocation mémoire */
-     { Libere_DB_SQL( Config.log, &db );
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
-             "Charger_un_modbus: Erreur allocation mémoire struct CMD_TYPE_MODBUS" );
-       g_free(module);
-       return(FALSE);
-     }
-
-    memcpy( &module->modbus, modbus, sizeof(struct CMD_TYPE_MODBUS) );
-    g_free(modbus);
-
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "Charger_modules_ id=%d, actif=%d, ip=%s, bit=%d, watchdog=%d, e=%d-%d a=%d-%d",
-             module->modbus.id, module->modbus.enable, module->modbus.ip, module->modbus.bit,
-             module->modbus.watchdog,
-             module->modbus.min_e_tor, module->modbus.min_e_ana,
-             module->modbus.min_s_tor, module->modbus.min_s_ana );
-
-    Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
-
-    Libere_DB_SQL( Config.log, &db );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
