@@ -142,7 +142,7 @@
      { struct MODBUSDB modbus;
        gint retour;
 
-       sscanf ( ligne, "%s %d,%d,%[^,]s,%d,%d,%d,%d,%[^\n]s", commande,/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
                 &modbus.enable, &modbus.bit, modbus.ip,
                 &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
                 modbus.libelle
@@ -159,7 +159,7 @@
     else if ( ! strcmp ( commande, "change" ) )
      { struct MODBUSDB modbus;
        gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%[^,]s,%d,%d,%d,%d,%[^\n]s", commande,/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
                 &modbus.id, &modbus.enable, &modbus.bit, modbus.ip,
                 &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
                 modbus.libelle
