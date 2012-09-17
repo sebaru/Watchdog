@@ -133,7 +133,7 @@
     else if ( ! strcmp ( commande, "add" ) )
      { struct UPSDB ups;
        gint retour;
-       sscanf ( ligne, "%s %s,%s,%s,%s,%d,%d,%d,%d,%s", commande,    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d,%[^\n]", commande,    /* Découpage de la ligne de commande */
                 ups.ups, ups.host, ups.username, ups.password,
                 &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
               );

@@ -192,7 +192,7 @@
     if ( ! strcmp ( commande, "add" ) )
      { struct RS485DB rs485;
        memset( &rs485, 0, sizeof(struct RS485DB) );
-       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d %s", commande,/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
                 &rs485.num, &rs485.bit_comm, (gint *)&rs485.enable,
                 &rs485.ea_min, &rs485.ea_max,
                 &rs485.e_min, &rs485.e_max,
@@ -209,7 +209,7 @@
     else if ( ! strcmp ( commande, "change" ) )
      { struct RS485DB rs485;
        memset( &rs485, 0, sizeof(struct RS485DB) );
-       sscanf ( ligne, "%s %d %d %d %d %d %d %d %d %d %d %d %d %s", commande,/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
                 &rs485.id, &rs485.num, &rs485.bit_comm, (gint *)&rs485.enable,
                 &rs485.ea_min, &rs485.ea_max,
                 &rs485.e_min, &rs485.e_max,
@@ -238,11 +238,11 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
        Write_admin ( client->connexion,
-                     "  add num bit_comm enable ea_min ea_max e_min e_max s_min s_max sa_min sa_max libelle\n" );
+                     "  add num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
        Write_admin ( client->connexion,
                      "                                         - Ajoute un module RS485\n" );
        Write_admin ( client->connexion,
-                     "  change id num bit_comm enable ea_min ea_max e_min e_max s_min s_max sa_min sa_max libelle\n" );
+                     "  change id,num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
        Write_admin ( client->connexion,
                      "                                         - Modifie le module id\n" );
        Write_admin ( client->connexion,
