@@ -115,9 +115,9 @@
     guint nbr_entree_tor;                                      /* Nombre de entree TOR donnée par le wago */
     guint nbr_sortie_tor;                                      /* Nombre de sortie TOR donnée par le wago */
     guint nbr_deconnect;
-    time_t date_retente;                           /* Prochaine date de raccrochage module en cas de DOWN */
-    time_t date_last_reponse;                                   /* Utilisé pour détecter un "DOWN module" */
-    time_t date_next_eana;                       /* Utilisé pour gérer les interrogations des bornes EANA */
+    guint date_retente;                            /* Prochaine date de raccrochage module en cas de DOWN */
+    guint date_last_reponse;                                    /* Utilisé pour détecter un "DOWN module" */
+    guint date_next_eana;                        /* Utilisé pour gérer les interrogations des bornes EANA */
     gboolean do_check_eana;                                       /* Interrogation des bornes EANA ou non */
     gboolean request;                /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
     struct TRAME_MODBUS_REPONSE response;

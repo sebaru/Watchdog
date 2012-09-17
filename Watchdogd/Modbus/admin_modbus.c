@@ -63,12 +63,13 @@
        g_snprintf( chaine, sizeof(chaine),
                    " MODBUS[%02d] -> bit=%04d, enable=%d, started=%d, mode=%02d, watchdog=%03d, IP=%s,\n"
                    "               min_e_tor=%03d, min_e_ana=%03d, min_s_tor=%03d, min_s_ana=%03d\n"
-                   "               trans.=%06d, deco.=%02d, request=%02d, retente=in %03d, date_next_eana=in %03d\n",
+                   "               trans.=%06d, deco.=%02d, last_reponse=%03ds ago, retente=in %03d, date_next_eana=in %03d\n",
                    module->modbus.id, module->modbus.bit, module->modbus.enable,
                    module->started, module->mode, module->modbus.watchdog, module->modbus.ip,
                    module->modbus.min_e_tor, module->modbus.min_e_ana,
                    module->modbus.min_s_tor, module->modbus.min_s_ana,
-                   module->transaction_id, module->nbr_deconnect, module->request,
+                   module->transaction_id, module->nbr_deconnect,
+                  (Partage->top - module->date_last_reponse)/10,                   
                    (module->date_retente   ? (module->date_retente   - Partage->top)/10 : -1),
                    (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
                  );
