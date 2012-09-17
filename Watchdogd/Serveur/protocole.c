@@ -25,7 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <gnome.h>
  #include <stdio.h>
  #include <openssl/err.h>
  #include <sys/types.h>
@@ -36,7 +35,6 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
