@@ -34,7 +34,12 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_modbus_reload ( struct CLIENT_ADMIN *client )
-  { Cfg_modbus.reload = TRUE;
+  { if (Cfg_modbus.lib->Thread_run == FALSE)
+     { Write_admin ( client->connexion, " Thread MODBUS is not running\n" );
+       return;
+     }
+    
+    Cfg_modbus.reload = TRUE;
     Write_admin ( client->connexion, " MODBUS Reloading in progress\n" );
     while (Cfg_modbus.reload) sched_yield();
     Write_admin ( client->connexion, " MODBUS Reloading done\n" );

@@ -35,7 +35,12 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_rs485_reload ( struct CLIENT_ADMIN *client )
-  { Cfg_rs485.reload = TRUE;
+  { if (Cfg_rs485.lib->Thread_run == FALSE)
+     { Write_admin ( client->connexion, " Thread RS485 is not running\n" );
+       return;
+     }
+    
+    Cfg_rs485.reload = TRUE;
     Write_admin ( client->connexion, " RS485 Reloading in progress\n" );
     while (Cfg_rs485.reload) sched_yield();
     Write_admin ( client->connexion, " RS485 Reloading done\n" );

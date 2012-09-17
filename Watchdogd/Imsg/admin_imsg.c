@@ -60,37 +60,6 @@
         }
        pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
      }
-#ifdef bouh
-    else if ( ! strcmp ( commande, "change" ) )
-     { struct IMSGDB imsg;
-       memset( &imsg, 0, sizeof(struct IMSGDB) );
-       sscanf ( ligne, "%s %d %d %d %d %d %d %s", commande,          /* Découpage de la ligne de commande */
-                &imsg.id, (gint *)&imsg.type, (gint *)&imsg.canal,
-                &imsg.e_min, &imsg.ea_min, &imsg.a_min, imsg.libelle );
-       Admin_imsg_change ( client, &imsg );
-     }
-    else if ( ! strcmp ( commande, "cmd" ) )
-     { sscanf ( ligne, "%s %d %d %d %d %d %d %d", commande,          /* Découpage de la ligne de commande */
-                &Partage->com_imsg.learn.id1, &Partage->com_imsg.learn.id2,
-                &Partage->com_imsg.learn.id3, &Partage->com_imsg.learn.id4,
-                &Partage->com_imsg.learn.unitcode,
-                &Partage->com_imsg.learn.cmd,
-                &Partage->com_imsg.learn.level
-               );
-       Partage->com_imsg.Thread_commande = TRUE;
-       Write_admin ( client->connexion, " IMSG Sending CMD....\n" );
-       while (Partage->com_imsg.Thread_commande) sched_yield();
-       Write_admin ( client->connexion, " IMSG Done.\n" );
-     }
-    else if ( ! strcmp ( commande, "del" ) )
-     { gint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_imsg_del ( client, num );
-     }
-    else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_imsg_reload(client);
-     }
-#endif
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );

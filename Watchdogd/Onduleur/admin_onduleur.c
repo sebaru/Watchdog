@@ -33,7 +33,12 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_ups_reload ( struct CLIENT_ADMIN *client )
-  { Cfg_ups.reload = TRUE;
+  { if (Cfg_ups.lib->Thread_run == FALSE)
+     { Write_admin ( client->connexion, " Thread ONDULEUR is not running\n" );
+       return;
+     }
+    
+    Cfg_ups.reload = TRUE;
     Write_admin ( client->connexion, " ONDULEUR Reloading in progress\n" );
     while (Cfg_ups.reload) sched_yield();
     Write_admin ( client->connexion, " ONDULEUR Reloading done\n" );
