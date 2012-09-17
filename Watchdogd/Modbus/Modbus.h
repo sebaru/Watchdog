@@ -124,13 +124,9 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
- extern void Run_modbus ( void );                                                        /* Dans Modbus.c */
- extern struct CMD_TYPE_MODBUS *Rechercher_modbusDB ( struct LOG *log, struct DB *db, guint id );
- extern struct CMD_TYPE_MODBUS *Recuperer_modbusDB_suite( struct LOG *log, struct DB *db );
- extern gboolean Recuperer_modbusDB ( struct LOG *log, struct DB *db );
- extern gint Ajouter_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
- extern gboolean Retirer_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
- extern gboolean Modifier_modbusDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus );
+ extern gint Ajouter_modbusDB ( struct CMD_TYPE_MODBUS *modbus );
+ extern gboolean Retirer_modbusDB ( struct CMD_TYPE_MODBUS *modbus );
+ extern gint Modifier_modbusDB( struct CMD_TYPE_MODBUS *modbus );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
 

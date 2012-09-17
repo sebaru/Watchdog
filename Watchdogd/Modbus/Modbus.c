@@ -77,14 +77,14 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_modbusDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MODBUS *modbus )
+ gboolean Retirer_modbusDB ( struct CMD_TYPE_MODBUS *modbus )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Retirer_modbusDB: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Retirer_modbusDB: Database Connection Failed" );
        return(FALSE);
      }
 
@@ -110,11 +110,11 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Database Connection Failed" );
        return(-1);
      }
 
-    libelle = Normaliser_chaine ( log, modbus->libelle );                /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( Config.log, modbus->libelle );         /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Normalisation libelle impossible" );
        return(-1);
@@ -132,7 +132,7 @@
      { g_snprintf( requete, sizeof(requete),
                   "INSERT INTO %s(enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana) "
                   "VALUES ('%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
-                   NOM_TABLE_MODULE_MODBUS, modbus->actif, ip, modbus->bit, modbus->watchdog, libelle,
+                   NOM_TABLE_MODULE_MODBUS, modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
                    modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana
                  );
      }
@@ -143,7 +143,7 @@
                   "min_e_tor='%d',min_e_ana='%d',min_s_tor='%d',min_s_ana='%d'"
                   " WHERE id=%d",
                    NOM_TABLE_MODULE_MODBUS,
-                   modbus->actif, ip, modbus->bit, modbus->watchdog, libelle,
+                   modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
                    modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana,
                    modbus->id );
       }
@@ -209,7 +209,7 @@
      { memcpy( &modbus->libelle, db->row[5], sizeof(modbus->libelle) );
        memcpy( &modbus->ip,      db->row[2], sizeof(modbus->ip) );
        modbus->id        = atoi(db->row[0]);
-       modbus->actif     = atoi(db->row[1]);
+       modbus->enable     = atoi(db->row[1]);
        modbus->bit       = atoi(db->row[3]);
        modbus->watchdog  = atoi(db->row[4]);
        modbus->min_e_tor = atoi(db->row[6]);
@@ -225,7 +225,7 @@
 /* Sortie: le modules trouvé ou NULL si erreur                                                            */
 /**********************************************************************************************************/
  static struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
-  { GList *liste;
+  { GSList *liste;
     liste = Cfg_modbus.Modules_MODBUS;
     while ( liste )
      { struct MODULE_MODBUS *module;
@@ -293,7 +293,7 @@
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/
-    if ( ! Recuperer_modbusDB( Config.log, db ) )
+    if ( ! Recuperer_modbusDB( db ) )
      { Libere_DB_SQL( Config.log, &db );
        return(FALSE);
      }
@@ -304,7 +304,7 @@
      { struct MODULE_MODBUS *module;
        struct CMD_TYPE_MODBUS *modbus;
 
-       modbus = Recuperer_modbusDB_suite( Config.log, db );
+       modbus = Recuperer_modbusDB_suite( db );
        if (!modbus) break;
 
        module = (struct MODULE_MODBUS *)g_try_malloc0( sizeof(struct MODULE_MODBUS) );
@@ -419,7 +419,7 @@
 /* Sortie: TRUE/FALSE                                                                                     */
 /**********************************************************************************************************/
  static gboolean Modbus_is_actif ( void )
-  { GList *liste;
+  { GSList *liste;
     liste = Cfg_modbus.Modules_MODBUS;
     while ( liste )
      { struct MODULE_MODBUS *module;
@@ -1021,9 +1021,9 @@
 /**********************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                    */
 /**********************************************************************************************************/
- void Run_thread ( void )
+ void Run_thread ( struct LIBRAIRIE *lib )
   { struct MODULE_MODBUS *module;
-    GList *liste;
+    GSList *liste;
 
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );               /* Mise a zero de la structure de travail */
@@ -1052,17 +1052,17 @@
           lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Partage->com_modbus.admin_start)
-        { module = Chercher_module_by_id ( Partage->com_modbus.admin_start );
+       if (Cfg_modbus.admin_start)
+        { module = Chercher_module_by_id ( Cfg_modbus.admin_start );
           if (module) module->modbus.enable = 1;
-          Partage->com_modbus.admin_start = 0;
+          Cfg_modbus.admin_start = 0;
         }
 
-       if (Partage->com_modbus.admin_stop)
-        { module = Chercher_module_by_id ( Partage->com_modbus.admin_stop );
+       if (Cfg_modbus.admin_stop)
+        { module = Chercher_module_by_id ( Cfg_modbus.admin_stop );
           if (module) module->modbus.enable = 0;
           Deconnecter_module  ( module );
-          Partage->com_modbus.admin_stop = 0;
+          Cfg_modbus.admin_stop = 0;
         }
 
        if (Cfg_modbus.Modules_MODBUS == NULL ||                 /* Si pas de module référencés, on attend */
