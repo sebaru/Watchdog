@@ -163,11 +163,6 @@
                  );
        Write_admin ( client->connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in MODBUS   -> ------------- running = %s, TID = %d\n",
-                   (Partage->com_modbus.Thread_run ? "YES" : " NO"), (gint)Partage->com_modbus.TID
-                 );
-       Write_admin ( client->connexion, chaine );
-
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
                  );
