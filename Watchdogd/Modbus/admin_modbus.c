@@ -61,11 +61,11 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " MODBUS[%02d] -> bit=%04d, enable=%d, started=%d, mode=%02d, watchdog=%03d, IP=%s,\n"
+                   " MODBUS[%02d] -> bit=%04d, enable=%d, started=%d, mode=%02d, watchdog=%03d, IP=%s, libelle=%s\n"
                    "               min_e_tor=%03d (nbr %03d), min_e_ana=%03d (nbr %03d), min_s_tor=%03d (nbr %03d), min_s_ana=%03d (nbr %03d)\n"
                    "               trans.=%06d, deco.=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds\n",
                    module->modbus.id, module->modbus.bit, module->modbus.enable,
-                   module->started, module->mode, module->modbus.watchdog, module->modbus.ip,
+                   module->started, module->mode, module->modbus.watchdog, module->modbus.ip, module->modbus.libelle,
                    module->modbus.min_e_tor, module->nbr_entree_tor,
                    module->modbus.min_e_ana, module->nbr_entree_ana,
                    module->modbus.min_s_tor, module->nbr_sortie_tor,
