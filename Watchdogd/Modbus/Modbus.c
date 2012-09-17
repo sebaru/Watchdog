@@ -1033,7 +1033,7 @@
         { sleep(2); continue; }
 
        liste = Cfg_modbus.Modules_MODBUS;
-       while (liste)
+       while (liste && (lib->Thread_run == TRUE) && (Cfg_modbus.reload == FALSE) )
         { module = (struct MODULE_MODBUS *)liste->data;
           if ( module->modbus.enable != TRUE || 
                Partage->top < module->date_retente )           /* Si attente retente, on change de module */
