@@ -45,7 +45,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_modbus_list ( struct CLIENT_ADMIN *client )
-  { GList *liste_modules;
+  { GSList *liste_modules;
     gchar chaine[512];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules MODBUS\n" );
@@ -61,10 +61,10 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " MODBUS[%02d] -> IP=%s, bit=%d, actif=%d, started=%d, mode=%d, watchdog=%d, \n"
+                   " MODBUS[%02d] -> IP=%s, bit=%d, enable=%d, started=%d, mode=%d, watchdog=%d, \n"
                    "                 min_e_tor=%d, min_e_ana=%d, min_s_tor=%d, min_s_ana=%d\n"
                    "                 trans.=%d, deco.=%d, request=%d, retente=%d, date_next_eana=%d\n",
-                   module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.actif,
+                   module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.enable,
                    module->started, module->mode, module->modbus.watchdog,
                    module->modbus.min_e_tor, module->modbus.min_e_ana,
                    module->modbus.min_s_tor, module->modbus.min_s_ana,
