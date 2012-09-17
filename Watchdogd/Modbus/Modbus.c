@@ -152,7 +152,7 @@
 
     retour_sql = Lancer_requete_SQL ( Config.log, db, requete );               /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL( Config.log, db );    /* Retourne le nouvel ID ups */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL( Config.log, db );    /* Retourne le nouvel ID modbus */
        else retour = 0;
      }
     else retour = -1;
@@ -1004,8 +1004,15 @@
      { usleep(10000);
 
        if (lib->Thread_sigusr1 == TRUE)
-        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "Run_modbus: SIGUSR1" );
+        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_modbus: SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
+        }
+
+       if (Cfg_modbus.reload == TRUE)
+        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading conf" );
+          Decharger_tous_MODBUS();
+          Charger_tous_MODBUS();
+          Cfg_modbus.reload = FALSE;
         }
 
        if (Cfg_modbus.admin_start)
