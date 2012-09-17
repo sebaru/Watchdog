@@ -190,9 +190,13 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
        Write_admin ( client->connexion,
-                     "  add xxxxxxxxxxxxxxxxxxxxxx             - Ajoute un module modbus\n" );
+                     "  add enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Write_admin ( client->connexion,
-                     "  change id xxxxxxxxxxxxxxxxxxxxx        - Modifie le module id\n" );
+                     "                                         - Ajoute un module modbus\n" );
+       Write_admin ( client->connexion,
+                     "  change id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Write_admin ( client->connexion,
+                     "                                         - Modifie le module id\n" );
        Write_admin ( client->connexion,
                      "  del id                                 - Supprime le module id\n" );
        Write_admin ( client->connexion,
