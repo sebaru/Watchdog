@@ -265,7 +265,7 @@
        module = (struct MODULE_MODBUS *)g_try_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
-                   "Charger_tous_Erreur allocation mémoire struct MODULE_MODBUS" );
+                   "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           g_free(modbus);
           Libere_DB_SQL( Config.log, &db );
           return(FALSE);
@@ -275,11 +275,12 @@
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
-                "Charger_tous_ id=%d, actif=%d", module->modbus.id, module->modbus.enable );
+                "Charger_tous_MODBUS: id=%d, enable=%d", module->modbus.id, module->modbus.enable );
 
        Cfg_modbus.Modules_MODBUS = g_slist_append ( Cfg_modbus.Modules_MODBUS, module );
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Charger_tous_%d modules MODBUS found  !", cpt );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+             "Charger_tous_MODBUS: %d modules MODBUS found  !", cpt );
     Libere_DB_SQL( Config.log, &db );
     return(TRUE);
   }

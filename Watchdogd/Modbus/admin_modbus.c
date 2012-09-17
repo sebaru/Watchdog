@@ -61,15 +61,16 @@
        module = (struct MODULE_MODBUS *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " MODBUS[%02d] -> IP=%s, bit=%d, enable=%d, started=%d, mode=%d, watchdog=%d, \n"
-                   "                 min_e_tor=%d, min_e_ana=%d, min_s_tor=%d, min_s_ana=%d\n"
-                   "                 trans.=%d, deco.=%d, request=%d, retente=%d, date_next_eana=%d\n",
-                   module->modbus.id, module->modbus.ip, module->modbus.bit, module->modbus.enable,
-                   module->started, module->mode, module->modbus.watchdog,
+                   " MODBUS[%02d] -> bit=%04d, enable=%d, started=%d, mode=%02d, watchdog=%03d, IP=%s,\n"
+                   "               min_e_tor=%03d, min_e_ana=%03d, min_s_tor=%03d, min_s_ana=%03d\n"
+                   "               trans.=%06d, deco.=%02d, request=%02d, retente=in %03d, date_next_eana=in %03d\n",
+                   module->modbus.id, module->modbus.bit, module->modbus.enable,
+                   module->started, module->mode, module->modbus.watchdog, module->modbus.ip,
                    module->modbus.min_e_tor, module->modbus.min_e_ana,
                    module->modbus.min_s_tor, module->modbus.min_s_ana,
                    module->transaction_id, module->nbr_deconnect, module->request,
-                   (int)module->date_retente, (int)module->date_next_eana
+                   (module->date_retente   ? (module->date_retente   - Partage->top)/10 : -1),
+                   (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1)
                  );
        Write_admin ( client->connexion, chaine );
        liste_modules = liste_modules->next;                                  /* Passage au module suivant */
