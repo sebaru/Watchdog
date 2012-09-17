@@ -58,7 +58,8 @@
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
 
  struct MODBUS_CONFIG                                             /* Communication entre DLS et la MODBUS */
-  { GSList *Modules_MODBUS;
+  { struct LIBRAIRIE *lib;
+    GSList *Modules_MODBUS;
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     gboolean reload;
