@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 SUBDIRS = Include Serveur Dls TraductionDLS Rs485 Sms Archive Modbus Audio Admin \
           Utilisateur \
-	  Synoptiques Onduleur Tellstick Lirc Asterisk Rfxcom Imsg
+	  Synoptiques Onduleur Lirc Asterisk Rfxcom Imsg
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -28,14 +28,14 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -lssl -lpopt `pkg-config --libs glib-2.0 gthread-2.0` `mysql_config --libs` $(GNOKII_LIBS) $(UPS_LIBS) $(CURL_LIBS)
+Watchdogd_LDFLAGS = -lpopt `pkg-config --libs openssl glib-2.0 gthread-2.0` `mysql_config --libs`
 
 sysconf_DATA = watchdogd.conf
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
-	 `pkg-config --cflags glib-2.0 gthread-2.0` \
+	 `pkg-config --cflags openssl glib-2.0 gthread-2.0` \
 	 `mysql_config --cflags` \
 	 $(CURL_CFLAGS) \
 	 $(UPS_CFLAGS)

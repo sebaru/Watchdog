@@ -9,9 +9,8 @@ lib_LTLIBRARIES     = libwatchdog-server-lirc.la
 libwatchdog_server_lirc_la_SOURCES    = Lirc.c Lirc.h
 
 INCLUDES= -I$(top_srcdir)/Include -I../Include \
-          `mysql_config --libs` \
-	  `pkg-config --cflags liblircclient0 glib-2.0` \
+	  `pkg-config --cflags glib-2.0` \
 	  `mysql_config --cflags`
 
-libwatchdog_server_lirc_la_LDFLAGS = -rdynamic `pkg-config --libs liblircclient0 glib-2.0` \
+libwatchdog_server_lirc_la_LDFLAGS = -llirc_client -rdynamic `pkg-config --libs glib-2.0` `mysql_config --libs` \
 				     -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)

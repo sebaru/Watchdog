@@ -29,7 +29,9 @@
  #define _WATCHDOGD_H_
 
  #include <glib.h>
+#if GLIB_MAJOR_VERSION <= 2 && GLIB_MINOR_VERSION < 32
  #include <glib/gthread.h>
+#endif
  #include <pthread.h>
  #include <errno.h>
 
