@@ -19,9 +19,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
-		    Modbus/libmodbus.la \
 		    Archive/libarchive.la \
-		    Modbus/libmodbus.la \
 		    Admin/libadmin.la \
 		    Utilisateur/libutil.la \
 		    Synoptiques/libsyn.la \
