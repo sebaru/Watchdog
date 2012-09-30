@@ -648,7 +648,7 @@
           Deconnecter_rs485 ( module );
           Cfg_rs485.admin_stop = 0;
           if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
-           { close(Cfg_rs485.fd);
+           { Fermer_rs485();
              Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
                        "Run_thread: Restart FileDescriptor sur All RS down");
            }
@@ -690,11 +690,13 @@
                 nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
                 attente_reponse = FALSE;
                 sleep(2);                                          /* Attente de 5 secondes avant relance */
-                Cfg_rs485.fd = Init_rs485();
-                if (Cfg_rs485.fd<0)                                        /* On valide l'acces aux ports */
-                 { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
-                            "Run_thread: Restart Acces RS485 impossible, terminé");
-                   lib->Thread_run = FALSE;                                 /* Le thread ne tourne plus ! */
+                if (Rs485_is_actif() == TRUE)        /* Si il reste des modules actifs on relance la comm */
+                 { Cfg_rs485.fd = Init_rs485();
+                   if (Cfg_rs485.fd<0)                                     /* On valide l'acces aux ports */
+                    { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
+                               "Run_thread: Restart Acces RS485 impossible, terminé");
+                      lib->Thread_run = FALSE;                              /* Le thread ne tourne plus ! */
+                    }
                  }
                 liste = NULL;          /* Pour sortir de la boucle (amélioration reactivité admin command */
                 continue;
