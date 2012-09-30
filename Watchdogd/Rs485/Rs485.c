@@ -645,9 +645,13 @@
            { if ( Partage->top - module->date_requete >= RS485_TEMPS_SEUIL_DOWN )  /* Si la comm est niet */
               { memset (&Trame, 0, sizeof(struct TRAME_RS485) );
                 module->nbr_deconnect++;
-                if (module->nbr_deconnect>10) { module->started=FALSE; }      /* Arret sur pb comm module */
                 Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
-                          "Run_thread: Run_rs485: module %03d down. Restarting communication....", module->rs485.id );
+                          "Run_thread: module %03d down. Restarting communication....", module->rs485.id );
+                if (module->nbr_deconnect>4)                                  /* Arret sur pb comm module */
+                 { module->started=FALSE; 
+                   Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
+                            "Run_thread: module %03d down too many times -> Stopping.", module->rs485.id );
+                 }
                 Fermer_rs485();                                                  /* Extinction de la comm */
                 nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
                 attente_reponse = FALSE;
