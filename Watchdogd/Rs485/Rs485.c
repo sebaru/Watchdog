@@ -694,9 +694,9 @@
                 if (Cfg_rs485.fd<0)                                        /* On valide l'acces aux ports */
                  { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
                             "Run_thread: Restart Acces RS485 impossible, terminé");
-                   lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
+                   lib->Thread_run = FALSE;                                 /* Le thread ne tourne plus ! */
                  }
-                liste = liste->next;
+                liste = NULL;          /* Pour sortir de la boucle (amélioration reactivité admin command */
                 continue;
               }
            }
