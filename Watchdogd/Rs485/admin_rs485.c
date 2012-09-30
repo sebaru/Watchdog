@@ -60,6 +60,12 @@
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
+    g_snprintf( chaine, sizeof(chaine),
+                   " RS485     -> bit_comm=B%04d(=%d)\n",
+                   Cfg_rs485.bit_comm, B(Cfg_rs485.bit_comm)
+              );
+    Write_admin ( client->connexion, chaine );
+
     pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     liste_modules = Cfg_rs485.Modules_RS485;
     while ( liste_modules )
@@ -67,17 +73,16 @@
        module = (struct MODULE_RS485 *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " RS485[%02d] -> num=%02d, enable=%s, bit=%d, ea=%03d-%03d, e=%03d-%03d, s=%03d-%03d, sa=%03d-%03d\n"
-                   "              started=%s, requete=%03ds ago, retente=in %03ds, next_get_ana=in %03ds\n",
+                   " RS485[%02d] -> num=%02d, enable=%s, bit_comm=B%04d(=%d), ea=%03d-%03d, e=%03d-%03d, s=%03d-%03d, sa=%03d-%03d\n"
+                   "              started=%s, requete=%03ds ago, next_get_ana=in %03ds\n",
                    module->rs485.id, module->rs485.num,
                    (module->rs485.enable ? "TRUE " : "FALSE"),
-                   module->rs485.bit_comm,
+                   module->rs485.bit_comm, B(module->rs485.bit_comm),
                    module->rs485.ea_min, module->rs485.ea_max,
                    module->rs485.e_min, module->rs485.e_max,
                    module->rs485.s_min, module->rs485.s_max, module->rs485.sa_min, module->rs485.sa_max,
                    (module->started      ? "TRUE " : "FALSE"),
                    (Partage->top - module->date_requete)/10,
-                   (module->date_retente ? (module->date_retente - Partage->top)/10 : -1),
                    (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1)
                  );
        Write_admin ( client->connexion, chaine );

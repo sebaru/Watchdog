@@ -38,8 +38,7 @@
  
  #define RS485_TEMPS_UPDATE_IO_ANA  50                              /* Get IO/ANA toutes les 5 secondes ! */
 
- #define RS485_TEMPS_SEUIL_DOWN     20                  /* Temps avant de considérer un module comme DOWN */
- #define RS485_TEMPS_RETENTE       200   /* Tente de se raccrocher au module banni toutes les 20 secondes */
+ #define RS485_TEMPS_SEUIL_DOWN     40                  /* Temps avant de considérer un module comme DOWN */
 
  #define NOM_TABLE_MODULE_RS485   "rs485"
  #define TAILLE_ENTETE  6
@@ -81,7 +80,6 @@
 
     gboolean started;                                                           /* Module Start at boot ? */
     guint  date_requete;
-    guint  date_retente;
     guint  date_next_get_ana;
   };
 
@@ -89,6 +87,7 @@
   { struct LIBRAIRIE *lib;
     GSList *Modules_RS485;
     gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
+    guint bit_comm;                              /* Bit d'état de la communication avec les modules RS485 */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     gint  fd;                                         /* File Descriptor de la connexion a la ligne RS485 */
