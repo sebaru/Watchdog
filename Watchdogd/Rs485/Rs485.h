@@ -79,6 +79,7 @@
   { struct RS485DB rs485;
 
     gboolean started;                                                           /* Module Start at boot ? */
+    guint  nbr_deconnect;
     guint  date_requete;
     guint  date_next_get_ana;
   };

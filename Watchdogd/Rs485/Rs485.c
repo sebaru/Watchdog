@@ -602,6 +602,7 @@
           Rs485_Liberer_config ();                      /* Lecture de la configuration logiciel du thread */
           Decharger_tous_rs485();
           Fermer_rs485();
+          sleep(5);                                                /* Attente de 5 secondes avant relance */
           nbr_oct_lu = 0;
           attente_reponse = FALSE;
           Rs485_Lire_config ();                         /* Lecture de la configuration logiciel du thread */
@@ -679,9 +680,21 @@
           else
            { if ( Partage->top - module->date_requete >= RS485_TEMPS_SEUIL_DOWN )  /* Si la comm est niet */
               { memset (&Trame, 0, sizeof(struct TRAME_RS485) );
+                module->nbr_deconnect++;
+                if (module->nbr_deconnect>10) { module->started=FALSE; }      /* Arret sur pb comm module */
                 Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
-                          "Run_thread: Run_rs485: module %03d down. Sending Reload..", module->rs485.id );
-                Cfg_rs485.reload = TRUE;
+                          "Run_thread: Run_rs485: module %03d down. Restarting communication....", module->rs485.id );
+                          Fermer_rs485();
+                Fermer_rs485();                                                  /* Extonction de la comm */
+                nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
+                attente_reponse = FALSE;
+                sleep(5);                                          /* Attente de 5 secondes avant relance */
+                Cfg_rs485.fd = Init_rs485();
+                if (Cfg_rs485.fd<0)                                        /* On valide l'acces aux ports */
+                 { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
+                            "Run_thread: Restart Acces RS485 impossible, terminé");
+                   lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
+                 }
                 liste = liste->next;
                 continue;
               }
