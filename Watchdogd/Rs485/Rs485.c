@@ -492,7 +492,9 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Fermer_rs485 ( void )
-  { close(Cfg_rs485.fd);
+  { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+               "Fermer_rs485: Fermeture port rs485 okay" );
+    close(Cfg_rs485.fd);
     SB ( Cfg_rs485.bit_comm, 0 );
   }
 /**********************************************************************************************************/
@@ -733,9 +735,10 @@
                     }
                    else
                     { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
-                       { attente_reponse = FALSE;
-                         liste = liste->next;
+                       { attente_reponse = FALSE;                             /* Nous avons une reponse ! */
                          SB(module->rs485.bit_comm, 1);
+                         module->nbr_deconnect = 0;
+                         liste = liste->next;
                        }
                     }
                    memset (&Trame, 0, sizeof(struct TRAME_RS485) );
