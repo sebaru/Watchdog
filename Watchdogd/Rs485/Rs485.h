@@ -38,7 +38,7 @@
  
  #define RS485_TEMPS_UPDATE_IO_ANA  50                              /* Get IO/ANA toutes les 5 secondes ! */
 
- #define RS485_TEMPS_SEUIL_DOWN     40                  /* Temps avant de considérer un module comme DOWN */
+ #define RS485_TEMPS_SEUIL_DOWN     20                  /* Temps avant de considérer un module comme DOWN */
 
  #define NOM_TABLE_MODULE_RS485   "rs485"
  #define TAILLE_ENTETE  6

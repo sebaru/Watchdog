@@ -689,7 +689,7 @@
                 Fermer_rs485();                                                  /* Extinction de la comm */
                 nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
                 attente_reponse = FALSE;
-                sleep(5);                                          /* Attente de 5 secondes avant relance */
+                sleep(2);                                          /* Attente de 5 secondes avant relance */
                 Cfg_rs485.fd = Init_rs485();
                 if (Cfg_rs485.fd<0)                                        /* On valide l'acces aux ports */
                  { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
