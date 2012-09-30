@@ -330,26 +330,6 @@
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
   }
 /**********************************************************************************************************/
-/* RS485_is_actif: Renvoi TRUE si au moins un des modules rs est actif                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: TRUE/FALSE                                                                                     */
-/**********************************************************************************************************/
- static gboolean Rs485_is_actif ( void )
-  { GSList *liste;
-    liste = Cfg_rs485.Modules_RS485;
-    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
-    while ( liste )
-     { struct MODULE_RS485 *module;
-       module = ((struct MODULE_RS485 *)liste->data);
-
-       if (module->started) break;
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
-    if (liste) return(TRUE);
-    return(FALSE);
-  }
-/**********************************************************************************************************/
 /* Deconnecter_rs485: Deconnecte un module RS485 de la liste des modules interrogés                       */
 /* Entrée: le module                                                                                      */
 /* Sortie: void                                                                                           */
@@ -492,10 +472,13 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Fermer_rs485 ( void )
-  { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-               "Fermer_rs485: Fermeture port rs485 okay" );
-    close(Cfg_rs485.fd);
-    SB ( Cfg_rs485.bit_comm, 0 );
+  { if ( Cfg_rs485.fd != -1 )
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                "Fermer_rs485: Fermeture port rs485 okay" );
+       close(Cfg_rs485.fd);
+       Cfg_rs485.fd = -1;
+       SB ( Cfg_rs485.bit_comm, 0 );
+     }
   }
 /**********************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
@@ -575,20 +558,9 @@
     g_snprintf( Cfg_rs485.lib->admin_prompt, sizeof(Cfg_rs485.lib->admin_prompt), "rs485" );
     g_snprintf( Cfg_rs485.lib->admin_help,   sizeof(Cfg_rs485.lib->admin_help),   "Manage RS485 Modules" );
 
-    Cfg_rs485.fd = Init_rs485();
-    if (Cfg_rs485.fd<0)                                                    /* On valide l'acces aux ports */
-     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Acces RS485 impossible, Thread down");
-       Rs485_Liberer_config ();                         /* Lecture de la configuration logiciel du thread */
-       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
-       lib->TID        = 0;                               /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(-1));
-     }
-    else { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO, 
-                     "Run_thread: Acces RS485 FD=%d", Cfg_rs485.fd );
-         }
-
     Cfg_rs485.Modules_RS485 = NULL;                             /* Initialisation des variables du thread */
+    Cfg_rs485.fd = -1;
+    SB ( Cfg_rs485.bit_comm, 0 );
     Charger_tous_rs485();                                                 /* Chargement des modules rs485 */
 
     nbr_oct_lu = 0;
@@ -608,13 +580,7 @@
           nbr_oct_lu = 0;
           attente_reponse = FALSE;
           Rs485_Lire_config ();                         /* Lecture de la configuration logiciel du thread */
-          Cfg_rs485.fd = Init_rs485();
-          if (Cfg_rs485.fd<0)                                              /* On valide l'acces aux ports */
-           { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
-                       "Run_thread: Restart Acces RS485 impossible, terminé");
-             lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
-           }
-          else { Charger_tous_rs485(); }
+          Charger_tous_rs485();
           Cfg_rs485.reload = FALSE;
         }
 
@@ -627,14 +593,6 @@
        if (Cfg_rs485.admin_start)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                     "Run_thread: Run_rs485: Starting module" );
-          if (Rs485_is_actif() == FALSE)                /* Si aucun module started, on restart la comm RS */
-           { Cfg_rs485.fd = Init_rs485();
-             if (Cfg_rs485.fd<0)                                           /* On valide l'acces aux ports */
-              { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
-                          "Run_thread: Restart Acces RS485 impossible, terminé");
-               lib->Thread_run = FALSE;                                     /* Le thread ne tourne plus ! */
-              }
-           }
           module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_start );
           if (module) { module->started = TRUE; }
           Cfg_rs485.admin_start = 0;
@@ -647,11 +605,6 @@
           if (module) module->started = FALSE;
           Deconnecter_rs485 ( module );
           Cfg_rs485.admin_stop = 0;
-          if (Rs485_is_actif() == FALSE)                  /* Si aucun module actif, on restart la comm RS */
-           { Fermer_rs485();
-             Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
-                       "Run_thread: Restart FileDescriptor sur All RS down");
-           }
         }
 
        if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
@@ -667,7 +620,16 @@
            }
 
           if ( attente_reponse == FALSE )
-           { if (module->date_next_get_ana > Partage->top)                  /* Ana toutes les 10 secondes */
+           { if (Cfg_rs485.fd == -1)
+              { Cfg_rs485.fd = Init_rs485();
+                if (Cfg_rs485.fd == -1)
+                 { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
+                            "Run_thread: Start Acces RS485 failed, stopping thread.");
+                      lib->Thread_run = FALSE;
+                   continue;
+                 }
+              }
+             if (module->date_next_get_ana > Partage->top)                  /* Ana toutes les 10 secondes */
               { Envoyer_trame_want_inputTOR( module, Cfg_rs485.fd ); }
              else
               { Envoyer_trame_want_inputANA( module, Cfg_rs485.fd );
@@ -690,14 +652,6 @@
                 nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
                 attente_reponse = FALSE;
                 sleep(2);                                          /* Attente de 5 secondes avant relance */
-                if (Rs485_is_actif() == TRUE)        /* Si il reste des modules actifs on relance la comm */
-                 { Cfg_rs485.fd = Init_rs485();
-                   if (Cfg_rs485.fd<0)                                     /* On valide l'acces aux ports */
-                    { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
-                               "Run_thread: Restart Acces RS485 impossible, terminé");
-                      lib->Thread_run = FALSE;                              /* Le thread ne tourne plus ! */
-                    }
-                 }
                 liste = NULL;          /* Pour sortir de la boucle (amélioration reactivité admin command */
                 continue;
               }
