@@ -8,11 +8,11 @@ SUBDIRS=
 lib_LTLIBRARIES                      = libwatchdog-server-sms.la
 libwatchdog_server_sms_la_SOURCES    = Sms.c Sms.h admin_sms.c 
 
-INCLUDES= `pkg-config --cflags glib-2.0 libcurl` \
+INCLUDES= `pkg-config --cflags glib-2.0 libcurl gnokii` \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           $(MYSQL_CFLAGS) \
           -I../Include
 
 libwatchdog_server_sms_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) 
-	                             `pkg-config --libs glib-2.0 libcurl`
+	                             `pkg-config --libs glib-2.0 libcurl gnokii`
