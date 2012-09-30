@@ -648,7 +648,8 @@
                 Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                           "Run_thread: module %03d down. Restarting communication....", module->rs485.id );
                 if (module->nbr_deconnect>4)                                  /* Arret sur pb comm module */
-                 { module->started=FALSE; 
+                 { Deconnecter_rs485 ( module );
+                   module->started=FALSE; 
                    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                             "Run_thread: module %03d down too many times -> Stopping.", module->rs485.id );
                  }
