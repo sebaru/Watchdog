@@ -88,7 +88,6 @@
   { struct LIBRAIRIE *lib;
     GSList *Modules_RS485;
     gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
-    guint bit_comm;                              /* Bit d'état de la communication avec les modules RS485 */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
     gint  fd;                                         /* File Descriptor de la connexion a la ligne RS485 */

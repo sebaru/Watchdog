@@ -60,12 +60,6 @@
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Write_admin ( client->connexion, chaine );
        
-    g_snprintf( chaine, sizeof(chaine),
-                   " RS485     -> bit_comm=B%04d(=%d)\n",
-                   Cfg_rs485.bit_comm, B(Cfg_rs485.bit_comm)
-              );
-    Write_admin ( client->connexion, chaine );
-
     pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     liste_modules = Cfg_rs485.Modules_RS485;
     while ( liste_modules )

@@ -71,8 +71,6 @@
        g_free(chaine);
      }
 
-    Cfg_rs485.bit_comm = g_key_file_get_integer ( gkf, "RS485", "bit_comm", NULL );
-
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
@@ -463,7 +461,6 @@
        tcflush(fd, TCIOFLUSH);
        Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
                "Init_rs485: Ouverture port rs485 okay %s", Cfg_rs485.port );
-       SB ( Cfg_rs485.bit_comm, 1 );
      }
     return(fd);
   }
@@ -477,7 +474,6 @@
                 "Fermer_rs485: Fermeture port rs485 okay" );
        close(Cfg_rs485.fd);
        Cfg_rs485.fd = -1;
-       SB ( Cfg_rs485.bit_comm, 0 );
      }
   }
 /**********************************************************************************************************/
@@ -560,7 +556,6 @@
 
     Cfg_rs485.Modules_RS485 = NULL;                             /* Initialisation des variables du thread */
     Cfg_rs485.fd = -1;
-    SB ( Cfg_rs485.bit_comm, 0 );
     Charger_tous_rs485();                                                 /* Chargement des modules rs485 */
 
     nbr_oct_lu = 0;
@@ -696,7 +691,7 @@
                    else
                     { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;                             /* Nous avons une reponse ! */
-                         SB(module->rs485.bit_comm, 1);
+                         SB(module->rs485.bit_comm, 1);             /* Bit de comm = 1 pour avertir D.L.S */
                          module->nbr_deconnect = 0;
                          liste = liste->next;
                        }
