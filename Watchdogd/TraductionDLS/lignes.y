@@ -33,15 +33,16 @@
 
 extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
 int erreur;                                                             /* Compteur d'erreur du programme */
-#define  NON_DEFINI           "Ligne %d: %s is not defined\n"
-#define  DEJA_DEFINI          "Ligne %d: %s is already defined\n"
-#define  INTERDIT_GAUCHE      "Ligne %d: %s interdit en position gauche\n"
-#define  INTERDIT_DROITE      "Ligne %d: %s interdit en position droite\n"
-#define  INTERDIT_T_MSG_BARRE   "Ligne %d: %s interdit en complement\n"
-#define  INTERDIT_REL_ORDRE   "Ligne %d: %s interdit dans la relation d'ordre\n"
-#define  INTERDIT_COMPARAISON "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
-#define  MANQUE_COMPARAISON   "Ligne %d: %s doit s'utiliser dans une comparaison\n"
-#define  ERR_SYNTAXE          "Ligne %d: Erreur de syntaxe -> %s\n"
+#define  NON_DEFINI                  "Ligne %d: %s is not defined\n"
+#define  DEJA_DEFINI                 "Ligne %d: %s is already defined\n"
+#define  INTERDIT_GAUCHE             "Ligne %d: %s interdit en position gauche\n"
+#define  INTERDIT_DROITE             "Ligne %d: %s interdit en position droite\n"
+#define  INTERDIT_BARRE_DROITE       "Ligne %d: /%s interdit en position droite\n"
+#define  INTERDIT_T_MSG_BARRE        "Ligne %d: %s interdit en complement\n"
+#define  INTERDIT_REL_ORDRE          "Ligne %d: %s interdit dans la relation d'ordre\n"
+#define  INTERDIT_COMPARAISON        "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
+#define  MANQUE_COMPARAISON          "Ligne %d: %s doit s'utiliser dans une comparaison\n"
+#define  ERR_SYNTAXE                 "Ligne %d: Erreur de syntaxe -> %s\n"
 
 
 %}
@@ -505,7 +506,22 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                                        break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
                          case BI     : $$=New_action_bi( alias->num, $1 );           break;
-                         case MONO   : $$=New_action_mono( alias->num );             break;
+                         case MONO   : if ($1)
+                                        { char *chaine;
+                                          taille = strlen(alias->nom) + strlen(INTERDIT_BARRE_DROITE) + 2;
+                                          chaine = New_chaine(taille);
+                                          g_snprintf( chaine, taille, INTERDIT_BARRE_DROITE, ligne_source_dls, alias->nom );
+                                          Emettre_erreur(chaine); g_free(chaine);
+                                          erreur++;
+
+                                          $$=New_action();
+                                          taille = 2;
+                                          $$->alors = New_chaine( taille );
+                                          g_snprintf( $$->alors, taille, " " ); 
+                                          $$->sinon = NULL;
+                                        }
+                                       else $$=New_action_mono( alias->num );        break;
+
                          case CPT_H  : $$=New_action_cpt_h( alias->num );            break;
                          case CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
