@@ -580,6 +580,7 @@
        sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
+       sigaction( SIGPIPE, &sig, NULL );                           /* Pour prevenir un segfault du client */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
 
