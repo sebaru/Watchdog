@@ -51,6 +51,7 @@
  } Cfg_imsg;
 /****************************************** Déclarations des prototypes ***********************************/
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
+ extern void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

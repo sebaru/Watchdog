@@ -83,6 +83,10 @@
         }
        else Write_admin ( client->connexion, " No connexion ... strange ! \n" );
      }
+    else if ( ! strcmp ( commande, "presence" ) )
+     { Imsg_Mode_presence ( NULL, "chat", commande + 9 );
+       Write_admin ( client->connexion, " Presence Status changed ! \n" );
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
@@ -90,6 +94,8 @@
                      "  send user@domain/resource message      - Send a message to user\n" );
        Write_admin ( client->connexion,
                      "  list                                   - List contact and availability\n" );
+       Write_admin ( client->connexion,
+                     "  presence status                        - Change Presence status\n" );
        Write_admin ( client->connexion,
                      "  status                                 - See connexion status\n" );
      }

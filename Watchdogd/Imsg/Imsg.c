@@ -245,7 +245,7 @@
 /* Entrée: le message                                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Imsg_Envoi_message_to_all_available ( gchar *message )
+ static void Imsg_Envoi_message_to_all_available ( gchar *message )
   { GSList *liste;
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
     liste = Cfg_imsg.contacts;
