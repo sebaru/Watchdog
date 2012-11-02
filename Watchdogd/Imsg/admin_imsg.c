@@ -84,7 +84,8 @@
        else Write_admin ( client->connexion, " No connexion ... strange ! \n" );
      }
     else if ( ! strcmp ( commande, "presence" ) )
-     { Imsg_Mode_presence ( NULL, "chat", commande + 9 );
+     { g_snprintf( Cfg_imsg.new_status, sizeof(Cfg_imsg.new_status), "%s", commande + 9 );
+       Cfg_imsg.set_status = TRUE;
        Write_admin ( client->connexion, " Presence Status changed ! \n" );
      }
     else if ( ! strcmp ( commande, "help" ) )

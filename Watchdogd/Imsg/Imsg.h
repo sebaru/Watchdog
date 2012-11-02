@@ -48,6 +48,8 @@
     LmConnection *connection;
     GSList *contacts;
     GSList *Messages;
+    gboolean set_status;
+    gchar new_status[80];
  } Cfg_imsg;
 /****************************************** Déclarations des prototypes ***********************************/
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );

@@ -598,13 +598,18 @@
           g_free(msg);                       /* Fin d'utilisation de la structure donc liberation memoire */
         }
 
+       if (Cfg_imsg.set_status)
+        { Cfg_imsg.set_status = FALSE;
+          Imsg_Mode_presence( NULL, "chat", Cfg_imsg.new_status );
+        }
+
        g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
 
     Desabonner_distribution_message ( Imsg_Gerer_message ); /* Desabonnement de la diffusion des messages */
 
-    if (lm_connection_is_authenticated  ( Cfg_imsg.connection ))
+    if ( !lm_connection_is_authenticated  ( Cfg_imsg.connection ) )
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
                  "Run_thread: Strange, connexion is not authenticated...");
      }
