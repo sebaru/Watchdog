@@ -75,7 +75,7 @@
              case LM_CONNECTION_STATE_AUTHENTICATING:
                   g_snprintf( chaine, sizeof(chaine), " Connexion is authenticating.\n"); break;
              case LM_CONNECTION_STATE_AUTHENTICATED:
-                  g_snprintf( chaine, sizeof(chaine), " Connexion authenticated.\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " Connexion authenticated (OK).\n"); break;
              default:
                   g_snprintf( chaine, sizeof(chaine), " Connexion Status Unknown.\n"); break;
            }

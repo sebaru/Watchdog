@@ -435,6 +435,55 @@
     return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
 /**********************************************************************************************************/
+/* Imsg_Connexion_close : Appellé lorsque la connexion est fortuitement close..                           */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Imsg_Connection_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data)
+  { switch (reason)
+     { case LM_DISCONNECT_REASON_OK:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = User requested disconnect."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_PING_TIME_OUT:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = Connection to the server timed out."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_HUP:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = The socket emitted that the connection was hung up."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_ERROR:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = A generic error somewhere in the transport layer."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_RESOURCE_CONFLICT:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = Another connection was made to the server with the same resource."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_INVALID_XML:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = Invalid XML was sent from the client."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_UNKNOWN:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = An unknown error."
+                    );
+            break;
+       default:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = An very unknown error."
+                    );
+            break;
+    }
+  }
+/**********************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                               */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
@@ -494,6 +543,10 @@
           Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
                     "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
 
+          lm_connection_set_disconnect_function ( Cfg_imsg.connection,         /* Fonction de deconnexion */
+                                                  (LmDisconnectFunction)Imsg_Connection_close,
+                                                  NULL, NULL );
+
           lm_connection_set_keep_alive_rate ( Cfg_imsg.connection, 60 );       /* Ping toutes les minutes */
                                                /* Set up message handler to handle incoming text messages */
           lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_message, NULL, NULL );
@@ -551,11 +604,15 @@
 
     Desabonner_distribution_message ( Imsg_Gerer_message ); /* Desabonnement de la diffusion des messages */
 
-    if (Cfg_imsg.connection) Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
+    if (lm_connection_is_authenticated  ( Cfg_imsg.connection ))
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                 "Run_thread: Strange, connexion is not authenticated...");
+     }
+    else if (Cfg_imsg.connection)                                  /* Fermeture de la Cfg_imsg.connection */
+     { Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
+       lm_connection_close (Cfg_imsg.connection, NULL);
+     }
     sleep(2);
-
-                                                                   /* Fermeture de la Cfg_imsg.connection */
-    if (Cfg_imsg.connection) lm_connection_close (Cfg_imsg.connection, NULL);
                                                                   /* Destruction de la structure associée */
     if (Cfg_imsg.connection) lm_connection_unref (Cfg_imsg.connection);
     g_main_context_unref (MainLoop);
