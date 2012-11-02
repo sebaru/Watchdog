@@ -60,6 +60,29 @@
         }
        pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
      }
+    else if ( ! strcmp ( commande, "status" ) )
+     { gchar chaine[128];
+       if (Cfg_imsg.connection)
+        { LmConnectionState state;
+          state =  lm_connection_get_state ( Cfg_imsg.connection );
+          switch (state)
+           { case LM_CONNECTION_STATE_CLOSED:
+                  g_snprintf( chaine, sizeof(chaine), " Connexion closed.\n"); break;
+             case LM_CONNECTION_STATE_OPENING:
+                  g_snprintf( chaine, sizeof(chaine), " Connexion is opening.\n"); break;
+             case LM_CONNECTION_STATE_OPEN:
+                  g_snprintf( chaine, sizeof(chaine), " Connexion opened.\n"); break;
+             case LM_CONNECTION_STATE_AUTHENTICATING:
+                  g_snprintf( chaine, sizeof(chaine), " Connexion is authenticating.\n"); break;
+             case LM_CONNECTION_STATE_AUTHENTICATED:
+                  g_snprintf( chaine, sizeof(chaine), " Connexion authenticated.\n"); break;
+             default:
+                  g_snprintf( chaine, sizeof(chaine), " Connexion Status Unknown.\n"); break;
+           }
+          Write_admin ( client->connexion, chaine );
+        }
+       else Write_admin ( client->connexion, " No connexion ... strange ! \n" );
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
@@ -67,6 +90,8 @@
                      "  send user@domain/resource message      - Send a message to user\n" );
        Write_admin ( client->connexion,
                      "  list                                   - List contact and availability\n" );
+       Write_admin ( client->connexion,
+                     "  status                                 - See connexion status\n" );
      }
     else
      { gchar chaine[128];
