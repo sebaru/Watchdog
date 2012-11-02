@@ -311,7 +311,8 @@
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
        else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                        "Lire_sms_gsm: error %s from %s", gn_error_print(error), sms.remote.number );
+                        "Lire_sms_gsm: error %s from %s (sms_index=%d)",
+                        gn_error_print(error), sms.remote.number, sms_index );
                break;
              }
      }
