@@ -38,6 +38,11 @@
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
  #include "Imsg.h"
 
+ static GMainContext *MainLoop;                             /* Contexte pour attendre les evenements xmpp */
+ static void Imsg_Fermer_connexion ( void );
+ static gboolean Imsg_Ouvrir_connexion ( void );
+ static void Imsg_Connexion_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data);
+
 /**********************************************************************************************************/
 /* Imsg_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
@@ -435,11 +440,108 @@
     return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
 /**********************************************************************************************************/
+/* Imsg_Fermer_connexion : Ferme une connexion avec le serveur Jabber                                     */
+/* Entrée : Void                                                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Imsg_Fermer_connexion ( void )
+  { if ( ! lm_connection_is_authenticated  ( Cfg_imsg.connection ) )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                 "Imsg_Fermer_connexion: Strange, connexion is not authenticated...");
+     }
+    else                                                           /* Fermeture de la Cfg_imsg.connection */
+     { Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
+       lm_connection_close (Cfg_imsg.connection, NULL);
+     }
+    sleep(2);
+                                                                  /* Destruction de la structure associée */
+    lm_connection_unref (Cfg_imsg.connection);
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Fermer_connexion: Connexion is closed.");
+  }
+/**********************************************************************************************************/
+/* Imsg_Ouvrir_connexion : Ouvre une connexion avec le serveur Jabber                                     */
+/* Entrée : Void                                                                                          */
+/* Sortie : TRUE ou FALSE si probleme                                                                     */
+/**********************************************************************************************************/
+ static gboolean Imsg_Ouvrir_connexion ( void )
+  { LmMessageHandler *lmMsgHandler;
+    GError       *error = NULL;
+
+    Cfg_imsg.connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
+    if ( Cfg_imsg.connection == NULL )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Ouvrir_connexion: Error creating connection" );
+       return(FALSE);
+     }
+
+    if ( Cfg_imsg.connection && (lm_ssl_is_supported () == TRUE) )
+     { LmSSL *ssl;
+       ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
+       lm_ssl_use_starttls ( ssl, TRUE, TRUE );
+       lm_connection_set_ssl ( Cfg_imsg.connection, ssl );
+       lm_ssl_unref ( ssl );
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                 "Imsg_Ouvrir_connexion: SSL is available" );
+     }
+    else { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                     "Imsg_Ouvrir_connexion: SSL is _Not_ available" );
+         }
+                                                                             /* Connexion au serveur XMPP */
+    if ( lm_connection_open_and_block (Cfg_imsg.connection, &error) == FALSE )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Ouvrir_connexion: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
+       lm_connection_unref (Cfg_imsg.connection);
+       return(FALSE);
+     }
+
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+              "Imsg_Ouvrir_connexion: Connexion to xmpp server %s OK", Cfg_imsg.server );
+    if ( lm_connection_authenticate_and_block ( Cfg_imsg.connection, Cfg_imsg.username, Cfg_imsg.password,
+                                                "server", &error) == FALSE )
+    { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                "Imsg_Ouvrir_connexion: Unable to authenticate to xmpp server -> %s", error->message );
+      lm_connection_close (Cfg_imsg.connection, NULL);
+      lm_connection_unref (Cfg_imsg.connection);
+      return(FALSE);
+    }
+
+     
+   Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+             "Imsg_Ouvrir_connexion: Authentication to xmpp server OK (%s@%s)",
+             Cfg_imsg.username, Cfg_imsg.server );
+
+   lm_connection_set_disconnect_function ( Cfg_imsg.connection,                /* Fonction de deconnexion */
+                                           (LmDisconnectFunction)Imsg_Connexion_close,
+                                           NULL, NULL );
+
+   lm_connection_set_keep_alive_rate ( Cfg_imsg.connection, 60 );       /* Ping toutes les minutes */
+                                               /* Set up message handler to handle incoming text messages */
+   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_message, NULL, NULL );
+   lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
+                                           LM_MESSAGE_TYPE_MESSAGE, LM_HANDLER_PRIORITY_NORMAL);
+   lm_message_handler_unref(lmMsgHandler);
+
+                                           /* Set up message handler to handle incoming presence messages */
+   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_presence, NULL, NULL );
+   lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
+                                           LM_MESSAGE_TYPE_PRESENCE, LM_HANDLER_PRIORITY_NORMAL);
+   lm_message_handler_unref(lmMsgHandler);
+
+                                                /* Set up message handler to handle incoming contact list */
+   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_contact, NULL, NULL );
+   lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
+                                           LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
+   lm_message_handler_unref(lmMsgHandler);
+   Imsg_Mode_presence ( NULL, "chat", "Waiting for commands" );
+   return(TRUE);
+ }
+/**********************************************************************************************************/
 /* Imsg_Connexion_close : Appellé lorsque la connexion est fortuitement close..                           */
 /* Entrée : Le Handler, la connexion, le message                                                          */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Imsg_Connection_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data)
+ static void Imsg_Connexion_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data)
   { switch (reason)
      { case LM_DISCONNECT_REASON_OK:
             Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
@@ -448,7 +550,7 @@
             break;
        case LM_DISCONNECT_REASON_PING_TIME_OUT:
             Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                     "Imsg_Connexion_close : Connexion lost = Connection to the server timed out."
+                     "Imsg_Connexion_close : Connexion lost = Connexion to the server timed out."
                     );
             break;
        case LM_DISCONNECT_REASON_HUP:
@@ -482,15 +584,17 @@
                     );
             break;
     }
+   Imsg_Fermer_connexion();
+   Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+             "Imsg_Connexion_close : Trying to reconnect..."
+           );
+   if (Imsg_Ouvrir_connexion() == FALSE) Cfg_imsg.lib->Run_thread = FALSE;
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                               */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { GMainContext *MainLoop;
-    GError       *error = NULL;
-
-    prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
+  { prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
     memset( &Cfg_imsg, 0, sizeof(Cfg_imsg) );                   /* Mise a zero de la structure de travail */
     Cfg_imsg.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
     Imsg_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
@@ -504,71 +608,7 @@
 
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
-    Cfg_imsg.connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
-    if ( Cfg_imsg.connection == NULL )
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Error creating connection" );
-       Cfg_imsg.lib->Thread_run = FALSE;                                               /* Arret du thread */
-     }
-
-    if ( Cfg_imsg.connection && (lm_ssl_is_supported () == TRUE) )
-     { LmSSL *ssl;
-       ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
-       lm_ssl_use_starttls ( ssl, TRUE, TRUE );
-       lm_connection_set_ssl ( Cfg_imsg.connection, ssl );
-       lm_ssl_unref ( ssl );
-       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                 "Run_thread: SSL is available" );
-     }
-    else { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
-                     "Run_thread: SSL is _Not_ available" );
-         }
-                                                                             /* Connexion au serveur XMPP */
-    if ( Cfg_imsg.connection == FALSE || lm_connection_open_and_block (Cfg_imsg.connection, &error) == FALSE )
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
-       Cfg_imsg.lib->Thread_run = FALSE;                                               /* Arret du thread */
-     }
-    else
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
-                 "Run_thread: Connection to xmpp server %s OK", Cfg_imsg.server );
-       if ( lm_connection_authenticate_and_block ( Cfg_imsg.connection, Cfg_imsg.username, Cfg_imsg.password,
-                                                   "server", &error) == FALSE )
-        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                    "Run_thread: Unable to authenticate to xmpp server -> %s", error->message );
-          Cfg_imsg.lib->Thread_run = FALSE;                                                        /* Arret du thread */
-        }
-       else
-        { LmMessageHandler *lmMsgHandler;
-          Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Authentication to xmpp server OK (%s@%s)", Cfg_imsg.username, Cfg_imsg.server );
-
-          lm_connection_set_disconnect_function ( Cfg_imsg.connection,         /* Fonction de deconnexion */
-                                                  (LmDisconnectFunction)Imsg_Connection_close,
-                                                  NULL, NULL );
-
-          lm_connection_set_keep_alive_rate ( Cfg_imsg.connection, 60 );       /* Ping toutes les minutes */
-                                               /* Set up message handler to handle incoming text messages */
-          lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_message, NULL, NULL );
-          lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
-                                                  LM_MESSAGE_TYPE_MESSAGE, LM_HANDLER_PRIORITY_NORMAL);
-          lm_message_handler_unref(lmMsgHandler);
-
-                                           /* Set up message handler to handle incoming presence messages */
-          lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_presence, NULL, NULL );
-          lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
-                                                  LM_MESSAGE_TYPE_PRESENCE, LM_HANDLER_PRIORITY_NORMAL);
-          lm_message_handler_unref(lmMsgHandler);
-
-                                                /* Set up message handler to handle incoming contact list */
-          lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_contact, NULL, NULL );
-          lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
-                                                  LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
-          lm_message_handler_unref(lmMsgHandler);
-
-          Imsg_Mode_presence ( NULL, "chat", "Waiting for commands" );
-        }
-     }
+    if ( Imsg_Ouvrir_connexion() == FALSE ) { Cfg_imsg.lib->Thread_run = FALSE; }      /* Arret du thread */
 
     Abonner_distribution_message ( Imsg_Gerer_message );        /* Abonnement à la diffusion des messages */
 
@@ -608,18 +648,7 @@
      }                                                                     /* Fin du while partage->arret */
 
     Desabonner_distribution_message ( Imsg_Gerer_message ); /* Desabonnement de la diffusion des messages */
-
-    if ( !lm_connection_is_authenticated  ( Cfg_imsg.connection ) )
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                 "Run_thread: Strange, connexion is not authenticated...");
-     }
-    else if (Cfg_imsg.connection)                                  /* Fermeture de la Cfg_imsg.connection */
-     { Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
-       lm_connection_close (Cfg_imsg.connection, NULL);
-     }
-    sleep(2);
-                                                                  /* Destruction de la structure associée */
-    if (Cfg_imsg.connection) lm_connection_unref (Cfg_imsg.connection);
+    Imsg_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
     g_main_context_unref (MainLoop);
     Imsg_Liberer_config();                        /* Liberation de la configuration de l'InstantMessaging */
     Imsg_Liberer_liste_contacts();                                     /* Liberation de la liste contacts */
