@@ -547,6 +547,7 @@
             Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
                      "Imsg_Connexion_close : Connexion lost = User requested disconnect."
                     );
+            return;                          /* Dans ce cas la, il ne faut pas tenter de se reconnecter ! */
             break;
        case LM_DISCONNECT_REASON_PING_TIME_OUT:
             Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
@@ -580,7 +581,7 @@
             break;
        default:
             Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                     "Imsg_Connexion_close : Connexion lost = An very unknown error."
+                     "Imsg_Connexion_close : Connexion lost = A very unknown error."
                     );
             break;
     }
