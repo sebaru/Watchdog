@@ -57,7 +57,12 @@
 /**********************************************************************************************************/
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct CMD_ETAT_BIT_CLIC bit_clic;
-    bit_clic.num = trame_motif->motif->bit_clic;
+    if (trame_motif->motif->type_gestion == TYPE_BOUTON)
+     { bit_clic.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3);
+     }
+    else
+     { bit_clic.num = trame_motif->motif->bit_clic; }
+
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACTION_M,
                    (gchar *)&bit_clic, sizeof(struct CMD_ETAT_BIT_CLIC) );
     printf("Envoi M%d = 1 au serveur \n", bit_clic.num );
