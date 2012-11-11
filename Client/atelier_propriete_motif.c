@@ -700,7 +700,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     g_signal_connect( G_OBJECT( GTK_OPTION_MENU(Option_dialog_cde) ), "changed",
                       G_CALLBACK( Changer_dialog_cde ), NULL );
 
-    texte = gtk_label_new( _("Action bit (M)") );
+    texte = gtk_label_new( _("First Action bit (M)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
 
     Spin_bit_clic = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
@@ -712,7 +712,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_entry_set_editable( GTK_ENTRY(Entry_bit_clic), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_clic, 2, 4, 4, 5 );
 
-    texte = gtk_label_new( _("Action bit2 (M)") );
+    texte = gtk_label_new( _("(dont-use)Act.bit2 (M)") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
 
     Spin_bit_clic2 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );

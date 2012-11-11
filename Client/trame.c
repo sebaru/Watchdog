@@ -388,11 +388,12 @@
     
     if (!(trame_motif && trame_motif->motif)) { printf ("Niet\n"); return; }
 
-    if (trame_motif->num_image == num )                                         /* Frame deja affichée ?? */
+#ifdef bouh
+ test le 11/11/12    if (trame_motif->num_image == num )                                         /* Frame deja affichée ?? */
      { Trame_peindre_motif( trame_motif, r, v, b );
        return;
      }
-
+#endif
     frame = g_list_nth( trame_motif->images, num );
     if (!frame) { frame = trame_motif->images;                                      /* Bouclage si erreur */
                   num = 0;

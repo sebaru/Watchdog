@@ -256,6 +256,14 @@
                                                  etat_motif->bleu );                           /* frame 1 */
             break;
        case TYPE_BOUTON:
+            if ( ! (etat_motif->etat % 2) )
+             { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2),
+                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
+             } else
+             { Trame_choisir_frame( trame_motif, 3*(etat_motif->etat/2) + 1,
+                                    etat_motif->rouge, etat_motif->vert, etat_motif->bleu );
+             }
+            break;
        case TYPE_DYNAMIQUE: 
             if (etat_motif->etat)
              { Trame_choisir_frame( trame_motif, 1, etat_motif->rouge,
