@@ -120,9 +120,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Client_mode ( struct CLIENT *client, gint mode )
-  { gchar chaine[80];
-
-    if (client->mode == DECONNECTE)
+  { if (client->mode == DECONNECTE)
      { Info_new( Config.log, Config.log_all, LOG_INFO,
                 "Client_mode: postionnement impossible pour %s car mode = DECONNECTE", client->util->nom);
      }
@@ -130,8 +128,8 @@
     if (client->mode == VALIDE_NON_ROOT && mode == VALIDE)                    /* Nous prevenons le client */
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 ); }
     client->mode = mode;
-    g_snprintf( chaine, sizeof(chaine), "client %s en mode %s",
-                client->machine, Mode_vers_string(mode) );
+    Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Client_mode: client %s en mode %s", client->machine, Mode_vers_string(mode) );
   }
 /**********************************************************************************************************/
 /* Deconnecter: Deconnection d'un client                                                                  */
