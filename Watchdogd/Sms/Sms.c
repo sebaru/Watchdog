@@ -390,6 +390,7 @@
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
     gn_lib_library_free();
+    sleep(5);                                         /* Attente de 5 secondes pour ne pas saturer le GSM */
   }
 /**********************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                              */
