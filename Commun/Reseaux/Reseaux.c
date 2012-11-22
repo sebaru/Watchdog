@@ -27,6 +27,7 @@
 
  #include <glib.h>
  #include <openssl/ssl.h>
+ #include <openssl/err.h>
  #include <sys/types.h>                                                     /* Prototypes pour read/write */
  #include <sys/stat.h>
  #include <sys/time.h>
@@ -260,7 +261,8 @@ encore_entete:
                    "Envoyer_reseau: error %s", strerror(err) );
           if (connexion->ssl)
            { Info_new( connexion->log, FALSE, LOG_DEBUG,
-                     "Envoyer_reseau: retour SSL %s", SSL_get_error( connexion->ssl, retour ) );
+                      "Envoyer_reseau: retour SSL %s",
+                       ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
            }
           if (err == EAGAIN) goto encore_entete;
           return(err);
@@ -291,7 +293,8 @@ encore_buffer:
                       "Envoyer_reseau: error %s", strerror(err) );
              if (connexion->ssl)
               { Info_new( connexion->log, FALSE, LOG_DEBUG,
-                     "Envoyer_reseau: retour SSL %s", SSL_get_error( connexion->ssl, retour ) );
+                         "Envoyer_reseau: retour SSL %s",
+                          ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
               }
              if (err == EAGAIN) goto encore_buffer;
              return(err);
