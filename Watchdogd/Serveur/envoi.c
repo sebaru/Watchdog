@@ -59,7 +59,7 @@
     if (retour)
      { client->defaut++;
        Info_new( Config.log, Config.log_all, LOG_WARNING,
-                "Envoi_client: Failed sending to id=%s (%s), error %d",
+                "Envoi_client: Failed sending to id=%d (%s), error %d",
                 client->connexion->socket, client->machine, retour);
 
        if (client->defaut>=DEFAUT_MAX)
