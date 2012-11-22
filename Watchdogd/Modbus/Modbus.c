@@ -50,8 +50,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Modbus_Lire_config ( void )
-  { gchar *chaine;
-    GKeyFile *gkf;
+  { GKeyFile *gkf;
 
     gkf = g_key_file_new();
     if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
@@ -355,6 +354,8 @@
   { if (!module) return;
     Deconnecter_module  ( module );                                  /* Deconnexion du module en question */
     Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
+             "Decharger_un_MODBUS: Dechergement module %d (%s)", module->modbus.id, module->modbus.ip );
     g_free(module);
   }
 /**********************************************************************************************************/
