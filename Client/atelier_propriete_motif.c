@@ -33,16 +33,16 @@
  #include "trame.h"
 
  static gchar *TYPE_GESTION_MOTIF[]=                      /* Type de gestion d'un motif sur un synoptique */
-  { "Inerte",
-    "Actif",
-    "Repos/Actif",
-    "Repos/Anime(0-n)",
-    "Repos/Anime/Repos",
+  { "Inerte (Mur)",
+    "Actif (Lampe)",
+    "Repos/Actif (Porte)",
+    "Repos/Anime(0-n) (Moteur)",
+    "Repos/Anime/Repos (Rideau)",
     "Indicateur",
-    "Repos/Anime(1-n)",
-    "Inerte/Repos/Actif",
+    "Repos/Anime(1-n) (Moteur)",
+    "Inerte/Repos/Actif (Bouton)",
     "Fond d'ecran",
-    "Repos/Anime(2-n)",
+    "Repos/Anime(2-n) (Moteur)",
     NULL
   };
 
