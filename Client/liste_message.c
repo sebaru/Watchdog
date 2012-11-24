@@ -250,6 +250,10 @@
 
     cairo_set_font_size (cr, PRINT_FONT_SIZE );
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_message) );
+    if ( gtk_list_store_iter_is_valid ( GTK_LIST_STORE(store), iter ) == FALSE )
+     { printf("Iter is not valid !! Return !!\n");
+       return;
+     }
     valide = TRUE;
     y = 2 * PRINT_FONT_SIZE;
     while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */

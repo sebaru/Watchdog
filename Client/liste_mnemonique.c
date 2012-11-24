@@ -328,10 +328,9 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     cairo_t *cr;
     gdouble y;
     
-    printf("Page_nr = %d\n", page_nr );
+    printf("Page_nr = %d, ter=%p\n", page_nr, iter );
   
     cr = gtk_print_context_get_cairo_context (context);
-  
     cairo_select_font_face (cr, "Courier", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size (cr, 20.0 );
 
@@ -351,13 +350,17 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 
     cairo_set_font_size (cr, PRINT_FONT_SIZE );
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
+    if ( gtk_list_store_iter_is_valid ( GTK_LIST_STORE(store), iter ) == FALSE )
+     { printf("Iter is not valid !! Return !!\n");
+       return;
+     }
     valide = TRUE;
     y = 2 * PRINT_FONT_SIZE;
     while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */
-     { gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_GROUPE_PAGE_DLS, &groupe_page,
+     { printf("Iter = %p\n", iter );
+       gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_GROUPE_PAGE_DLS, &groupe_page,
                            COLONNE_ACRONYME, &acronyme, COLONNE_LIBELLE, &libelle,
                            COLONNE_COULEUR, &color, -1 );
-
        cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
        cairo_set_source_rgb (cr, color->red/65536.0, color->green/65536.0, color->blue/65536.0);
        cairo_show_text (cr, type_string );
