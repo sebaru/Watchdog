@@ -363,13 +363,8 @@
  static int Processer_trame( struct TRAME_RFXCOM *trame )
   { 
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame     taille: %d", trame->taille );
-    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame       type: %02d(0x%02X)", trame->type );
-    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame  sous_type: %02d(0x%02X)", trame->sous_type );
-    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame      seqno: %d", trame->seqno );
+              "Processer_trame taille=%d, type=%02d(0x%02x), sous_type=%02d(%02X), seqno=%03d",
+               trame->taille, trame->type, trame->type, trame->sous_type, trame->sous_type, trame->seqno );
 
     if (trame->type == 0x01 && trame->sous_type == 0x00)
      { if (trame->data[0] == 0x52) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
