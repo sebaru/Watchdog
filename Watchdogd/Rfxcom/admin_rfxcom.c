@@ -137,14 +137,14 @@
     if ( ! strcmp ( commande, "add" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
-       sscanf ( ligne, "%s %d %d %d %d %d %s", commande,             /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%[^\n]", commande,         /* Découpage de la ligne de commande */
                 (gint *)&rfxcom.type, (gint *)&rfxcom.canal, &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_add ( client, &rfxcom );
      }
     else if ( ! strcmp ( commande, "change" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
-       sscanf ( ligne, "%s %d %d %d %d %d %d %s", commande,          /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%[^\n]", commande,          /* Découpage de la ligne de commande */
                 &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.canal,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_change ( client, &rfxcom );
@@ -174,10 +174,10 @@
      { Write_admin ( client->connexion,
                      "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
        Write_admin ( client->connexion,
-                     "  add type canal e_min ea_min a_min libelle\n"
+                     "  add type,canal,e_min,ea_min,a_min,libelle\n"
                      "                                         - Ajoute un module\n" );
        Write_admin ( client->connexion,
-                     "  change ID type canal e_min ea_min a_min libelle\n"
+                     "  change ID,type,canal,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
        Write_admin ( client->connexion,
                      "  del ID                                 - Retire le module ID\n" );

@@ -504,6 +504,7 @@
         { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
           Decharger_tous_rfxcom();
           Charger_tous_rfxcom();
+          Cfg_rfxcom.reload = FALSE;
         }
 
        FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
