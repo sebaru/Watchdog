@@ -623,6 +623,9 @@
         }
      }
 
+    sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
+    pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
+
     Shm_stop( Partage );                                                   /* Libération mémoire partagée */
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);
