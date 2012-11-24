@@ -133,7 +133,7 @@
                                             "Ecouter_client: Reset connexion" );
                                       break;
         }
-       client->mode = DECONNECTE;
+       Client_mode ( DECONNECTE );
      }             
   }
 /*--------------------------------------------------------------------------------------------------------*/

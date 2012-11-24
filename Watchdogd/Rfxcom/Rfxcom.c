@@ -351,7 +351,7 @@
        if (module->rfxcom.type == type && module->rfxcom.canal == canal) break;
        liste_modules = liste_modules->next;
      }
-    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
+    pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
     if (liste_modules) return(module);
     return(NULL);
   }
