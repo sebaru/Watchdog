@@ -265,26 +265,13 @@
              }
             break;
        case TYPE_DYNAMIQUE: 
-            if (etat_motif->etat)
-             { Trame_choisir_frame( trame_motif, 1, etat_motif->rouge,
-                                                    etat_motif->vert,
-                                                    etat_motif->bleu );                        /* frame 1 */
-             }
-            else
-             { Trame_choisir_frame( trame_motif, 0, etat_motif->rouge,
-                                                    etat_motif->vert,
-                                                    etat_motif->bleu );
-             }
-            break;
+            Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->rouge,
+                                                                etat_motif->vert,
+                                                                etat_motif->bleu );            /* frame 1 */
        case TYPE_PROGRESSIF:
             Trame_peindre_motif ( trame_motif, etat_motif->rouge,
                                                etat_motif->vert,
                                                etat_motif->bleu );
-            break;
-       case TYPE_INDICATEUR:
-            Trame_choisir_frame( trame_motif, etat_motif->etat, etat_motif->rouge,
-                                                                etat_motif->vert,
-                                                                etat_motif->bleu );            /* frame 1 */
             break;
        default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
                         trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );

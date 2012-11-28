@@ -35,10 +35,10 @@
  static gchar *TYPE_GESTION_MOTIF[]=                      /* Type de gestion d'un motif sur un synoptique */
   { "Inerte (Mur)",
     "Actif (Lampe)",
-    "Repos/Actif (Porte)",
+    "Repos/Actif (Porte/Volet)",
     "Repos/Anime(0-n) (Moteur)",
     "Repos/Anime/Repos (Rideau)",
-    "Indicateur",
+    "OLD-Indicateur (don't use)",
     "Repos/Anime(1-n) (Moteur)",
     "Inerte/Repos/Actif (Bouton)",
     "Fond d'ecran",
@@ -118,11 +118,11 @@
   { static gint top=0;
 
     if (!ok_timer) return(TRUE);
-printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gestion );
-    if (Trame_motif->motif->type_gestion == TYPE_INDICATEUR)
+
+    if (Trame_motif->motif->type_gestion == TYPE_DYNAMIQUE ||
+        Trame_motif->motif->type_gestion == TYPE_BOUTON )
      { Trame_choisir_frame( Trame_motif_p1, Trame_motif_p1->num_image+1,
                                             ROUGE1, VERT1, BLEU1 );                    /* frame numero ++ */
-       printf("Timer, type INDICATEUR\n");
      }
     else if (Trame_motif->motif->type_gestion == TYPE_CYCLIQUE_0N ||
              Trame_motif->motif->type_gestion == TYPE_PROGRESSIF
@@ -159,11 +159,6 @@ printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gesti
           top = 0;                                                            /* Raz pour prochaine frame */
         }
      }
-    else if (Trame_motif->motif->type_gestion == TYPE_BOUTON)
-     { Trame_choisir_frame( Trame_motif_p1, (Trame_motif_p1->num_image == 2 ? 1 : 2),
-                                            ROUGE1, VERT1, BLEU1 );                    /* frame numero ++ */
-       printf("Timer, type BOUTON\n");
-     }
     top += RESOLUTION_TIMER;                                           /* sinon, la prochaine sera +10 ms */
     return(TRUE);
   }
@@ -193,7 +188,7 @@ printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gesti
                              ok_timer = TIMER_OFF;
                              break;
        case TYPE_DYNAMIQUE:  Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
-                             ok_timer = TIMER_OFF;
+                             ok_timer = TIMER_ON;
                              break;
        case TYPE_BOUTON:     Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
                              ok_timer = TIMER_ON;
@@ -203,8 +198,6 @@ printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gesti
        case TYPE_CYCLIQUE_2N:gtk_widget_set_sensitive( Spin_rafraich, TRUE );
                              ok_timer = TIMER_ON;
                              printf("type cyclique: ok_timer = %d\n", ok_timer );
-                             break;
-       case TYPE_INDICATEUR: ok_timer = TIMER_ON;
                              break;
        default: printf("Rafraichir_sensibilite: type_gestion inconnu\n" );
      }
@@ -244,7 +237,7 @@ printf("Trame_motif->motif->type_gestion = %d\n", Trame_motif->motif->type_gesti
        case  1: Trame_motif->motif->type_gestion = TYPE_FOND;       break;
        case  2: Trame_motif->motif->type_gestion = TYPE_STATIQUE;   break;
        case  3: Trame_motif->motif->type_gestion = TYPE_DYNAMIQUE;  break;
-       case  4: Trame_motif->motif->type_gestion = TYPE_INDICATEUR; break;
+       case  4: Trame_motif->motif->type_gestion = TYPE_DYNAMIQUE;  break;/* Anciennement TYPE_INDICATEUR */
        case  5: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_0N;break;
        case  6: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_1N;break;
        case  7: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_2N;break;
