@@ -161,12 +161,12 @@
     return( chaine );
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur complementée d'une tempo retard                                                      */
+/* Renvoie la valeur TRUE si la temporisation est en cours de comptage, FALSE sinon                       */
 /**********************************************************************************************************/
- int TRbarre( int num )
+ int TRCount( int num )
   { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].consigne &&
                                          (Partage->top<Partage->Tempo_R[num].consigne) );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "TRbarre : num out of range", num );
+    else Info_new( Config.log, Config.log_all, LOG_INFO, "TRCount : num out of range", num );
     return(0);
   }
 /**********************************************************************************************************/

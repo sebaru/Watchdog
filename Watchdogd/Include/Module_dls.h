@@ -32,7 +32,7 @@
  extern int B( int num );
  extern int M( int num );
  extern int TR( int num );
- extern int TRbarre( int num );
+ extern int TRCount( int num );
  extern int EA_ech_inf( double val, int num );
  extern int EA_ech_sup( double val, int num );
  extern int EA_ech_inf_egal( double val, int num );
