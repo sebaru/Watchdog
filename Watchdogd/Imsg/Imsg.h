@@ -33,6 +33,7 @@
  #define DEFAUT_USERNAME_IMSG      "defaultuser"
  #define DEFAUT_SERVER_IMSG        "defaultserver.org"
  #define DEFAUT_PASSWORD_IMSG      "defaultpassword"
+ #define TIME_RECONNECT_IMSG                                600 /* 1 minute avant reconnexion si probleme */
 
  struct IMSG_CONTACT
   { gchar nom[80];
@@ -50,6 +51,7 @@
     GSList *Messages;
     gboolean set_status;
     gchar new_status[80];
+    gint date_retente;                                                 /* Date de reconnexion si probleme */
  } Cfg_imsg;
 /****************************************** Déclarations des prototypes ***********************************/
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
