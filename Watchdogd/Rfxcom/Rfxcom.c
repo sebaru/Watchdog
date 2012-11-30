@@ -483,7 +483,7 @@
        lib->TID = 0;                                      /* On indique au master que le thread est mort. */
        pthread_exit(GINT_TO_POINTER(-1));
      }
-    else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,"Acces RFXCOM FD", Cfg_rfxcom.fd ); }
+    else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,"Acces RFXCOM FD=%d", Cfg_rfxcom.fd ); }
 
     Charger_tous_rfxcom();                          /* Chargement de tous les capteurs/actionneurs RFXCOM */
     nbr_oct_lu = 0;
