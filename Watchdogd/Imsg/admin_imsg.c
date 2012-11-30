@@ -80,6 +80,11 @@
                   g_snprintf( chaine, sizeof(chaine), " Connexion Status Unknown.\n"); break;
            }
           Write_admin ( client->connexion, chaine );
+          if (Cfg_imsg.date_retente)
+           { g_snprintf( chaine, sizeof(chaine), " Re-trying in %03ds.\n",
+                         (Cfg_imsg.date_retente - Partage->top)/10);
+             Write_admin ( client->connexion, chaine );
+           }
         }
        else Write_admin ( client->connexion, " No connexion ... strange ! \n" );
      }
