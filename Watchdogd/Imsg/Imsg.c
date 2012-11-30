@@ -642,7 +642,7 @@
           Imsg_Mode_presence( NULL, "chat", Cfg_imsg.new_status );
         }
 
-       if (Partage->top > Cfg_imsg.date_retente)
+       if (Cfg_imsg.date_retente && Partage->top >= Cfg_imsg.date_retente)
         { Cfg_imsg.date_retente = 0;
           Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
                    "Run_thread : Trying to reconnect..."
