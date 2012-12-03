@@ -420,8 +420,6 @@ printf("Changer_couleur %p\n", data);
      { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_DYNAMIQUE  ) ) );
        gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_INDICATEUR ) ) );
-       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
                               gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_0N) ) );
 
      }
@@ -447,12 +445,11 @@ printf("Changer_couleur %p\n", data);
        case  TYPE_FOND       : choix = 1; break;
        case  TYPE_STATIQUE   : choix = 2; break;
        case  TYPE_DYNAMIQUE  : choix = 3; break;
-       case  TYPE_INDICATEUR : choix = 4; break;
-       case  TYPE_CYCLIQUE_0N: choix = 5; break;
-       case  TYPE_CYCLIQUE_1N: choix = 6; break;
-       case  TYPE_CYCLIQUE_2N: choix = 7; break;
-       case  TYPE_PROGRESSIF : choix = 8; break;
-       case  TYPE_BOUTON     : choix = 9; break;
+       case  TYPE_CYCLIQUE_0N: choix = 4; break;
+       case  TYPE_CYCLIQUE_1N: choix = 5; break;
+       case  TYPE_CYCLIQUE_2N: choix = 6; break;
+       case  TYPE_PROGRESSIF : choix = 7; break;
+       case  TYPE_BOUTON     : choix = 8; break;
        default: choix = 0; break;
      }
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_gestion), choix );
