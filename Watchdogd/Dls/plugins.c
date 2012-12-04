@@ -45,7 +45,7 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
 
-    handle = dlopen( nom_fichier_absolu, RTLD_LAZY );
+    handle = dlopen( nom_fichier_absolu, RTLD_NOW );
     if (!handle) { Info_new( Config.log, Config.log_all, LOG_WARNING,
                             "Charger_un_plugin: Candidat %d rejeté (%s)", dls->plugindb.id, dlerror() );
                    return(FALSE);
