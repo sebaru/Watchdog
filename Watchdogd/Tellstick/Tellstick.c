@@ -98,6 +98,7 @@
     g_snprintf( Cfg_tellstick.lib->admin_prompt, sizeof(Cfg_tellstick.lib->admin_prompt), "tellstick" );
     g_snprintf( Cfg_tellstick.lib->admin_help,   sizeof(Cfg_tellstick.lib->admin_help),   "Manage Tellstick system" );
 
+    sleep(10);                                                 /* attente 10 secondes pour initialisation */
     tdInit();                                                 /* Initialisation de la librairie tellstick */
     Abonner_distribution_sortie ( Tellstick_Gerer_sortie );     /* Abonnement de la diffusion des sorties */
     while(lib->Thread_run == TRUE)                                    /* On tourne tant que l'on a besoin */

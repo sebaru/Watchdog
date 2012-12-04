@@ -556,9 +556,8 @@
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: Demarrage" );                /* Log Start */
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
+    sleep(30);/* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
     Charger_plugins();                                                      /* Chargement des modules dls */
-
-    sleep(10);/* attente 10 secondes pour initialisation des bit internes et collection des infos modules */
 
     while(Partage->com_dls.Thread_run == TRUE)                           /* On tourne tant que necessaire */
      { struct timeval tv_avant, tv_apres;
