@@ -78,42 +78,6 @@
     write( Id_log, chaine, taille );
   }
 /**********************************************************************************************************/
-/* Emettre_init_alias: Initialisation des alias dans le fichier temp                                      */
-/* Entrées: néant                                                                                         */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- void Emettre_init_alias( void )
-  {
-#ifdef bouh
-    GList *liste;
-    char *chaine;
-    char *Tab;
-    int taille;
-
-    liste = Alias;
-    while(liste)
-     { struct ALIAS *alias;
-       alias = (struct ALIAS *)liste->data;
-
-       taille = strlen(alias->nom) + 20;
-       chaine = New_chaine( taille );
-       switch( alias->bit )
-        { case ENTREE: Tab = "E"; break;
-          case BI    : Tab = "B"; break;
-          case MONO  : Tab = "M"; break;
-          default: Tab = NULL;
-        }
-       if (Tab)
-        { if (alias->barre) g_snprintf( chaine, taille, "%s=!%s(%d);\n", alias->nom, Tab, alias->num );
-                       else g_snprintf( chaine, taille, "%s=%s(%d);\n", alias->nom, Tab, alias->num );
-          Emettre(chaine);
-        }
-       free(chaine);
-       liste = liste->next;
-     }
-#endif
-  }
-/**********************************************************************************************************/
 /* New_option: Alloue une certaine quantité de mémoire pour les options                                   */
 /* Entrées: rien                                                                                          */
 /* Sortie: NULL si probleme                                                                               */

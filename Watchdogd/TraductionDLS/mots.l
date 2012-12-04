@@ -58,7 +58,6 @@ blanc         [\t ]+
 "_B"                       { Dls_lval.val = BI;          return BI;          }
 "_M"                       { Dls_lval.val = MONO;        return MONO;        }
 "_TR"                      { Dls_lval.val = TEMPO;       return TEMPO;       }
-"_TRCount"                 { Dls_lval.val = T_TRCOUNT;   return T_TRCOUNT;   }
 "_CH"                      { Dls_lval.val = CPT_H;       return CPT_H;       }
 "_CI"                      { Dls_lval.val = CPT_IMP;     return CPT_IMP;     }
 "_MSG"                     { Dls_lval.val = T_MSG;       return T_MSG;       }
@@ -93,6 +92,7 @@ blanc         [\t ]+
 "ratio"                    { Dls_lval.val = RATIO;       return RATIO;       }
 "color"                    { Dls_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { Dls_lval.val = CLIGNO;      return CLIGNO;      }
+"is_counting"              { Dls_lval.val = T_IS_COUNTING; return T_IS_COUNTING; }
  /*********************************************** Le reste ************************************************/
 "."                        { Dls_lval.val = ET;          return ET;          }
 "+"                        { Dls_lval.val = OU;          return OU;          }

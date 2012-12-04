@@ -37,6 +37,7 @@ int erreur;                                                             /* Compt
 #define  DEJA_DEFINI                 "Ligne %d: %s is already defined\n"
 #define  INTERDIT_GAUCHE             "Ligne %d: %s interdit en position gauche\n"
 #define  INTERDIT_DROITE             "Ligne %d: %s interdit en position droite\n"
+#define  INTERDIT_BARRE              "Ligne %d: Use of /%s forbidden\n"
 #define  INTERDIT_BARRE_DROITE       "Ligne %d: /%s interdit en position droite\n"
 #define  INTERDIT_REL_ORDRE          "Ligne %d: %s interdit dans la relation d'ordre\n"
 #define  INTERDIT_COMPARAISON        "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
@@ -64,7 +65,7 @@ int erreur;                                                             /* Compt
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI MONO ENTREE SORTIE TEMPO T_TRCOUNT T_MSG ICONE CPT_H CPT_IMP EANA START
+%token <val>    BI MONO ENTREE SORTIE TEMPO T_IS_COUNTING T_MSG ICONE CPT_H CPT_IMP EANA START
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
@@ -92,7 +93,7 @@ ligne_source_dls:         listeAlias listeInstr
 
 /************************************************* Gestion des alias **************************************/
 listeAlias:     un_alias listeAlias
-                | un_alias          {{ Emettre_init_alias(); }}
+                | un_alias
                 ;
                 
 un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
@@ -101,7 +102,6 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                    switch($4)
                     { case ENTREE:
                       case SORTIE:
-                      case T_TRCOUNT :
                       case BI    : if ( New_alias($1, $4, $5, $3, $6) == FALSE )         /* Deja defini ? */
                                     { taille = strlen($1) + strlen(DEJA_DEFINI) + 1;
                                       chaine = New_chaine(taille);
@@ -117,9 +117,9 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case CPT_IMP:
                       case T_MSG :
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
-                                    { taille = strlen($1) + strlen(ERR_SYNTAXE) + 1;
+                                    { taille = strlen($1) + strlen(INTERDIT_BARRE) + 1;
                                       chaine = New_chaine(taille);
-                                      g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, $1 );
+                                      g_snprintf( chaine, taille, INTERDIT_BARRE, ligne_source_dls, $1 );
                                       Emettre_erreur(chaine); g_free(chaine);
                                       erreur++;
                                     }
@@ -142,7 +142,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | TEMPO | T_TRCOUNT | ICONE | CPT_H | CPT_IMP | EANA
+alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | TEMPO | ICONE | CPT_H | CPT_IMP | EANA
                 ;
 /******************************************* Gestion des instructions *************************************/
 listeInstr:     une_instr listeInstr
@@ -264,23 +264,14 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
                     }
                 }}
-                | barre TEMPO ENTIER
-                {{ int taille;
-                   if ($1) { taille = 15;
-                             $$ = New_chaine( taille ); /* 10 caractères max */
-                             g_snprintf( $$, taille, "TRbarre(%d)", $3 );
-                           }
-                      else { taille = 15;
-                             $$ = New_chaine( taille ); /* 10 caractères max */
-                             g_snprintf( $$, taille, "TR(%d)", $3 );
-                           }
-                }}
-                | barre T_TRCOUNT ENTIER
-                {{ int taille;
-                   taille = 16;
+                | barre TEMPO liste_options ENTIER
+                {{ int taille, is_counting;
+                   taille = 20;
+                   is_counting = Get_option_entier( $3, T_IS_COUNTING );
                    $$ = New_chaine( taille ); /* 10 caractères max */
-                   if ($1) { g_snprintf( $$, taille, "!TRCount(%d)", $3 ); }
-                      else { g_snprintf( $$, taille,  "TRcount(%d)", $3 ); }
+                   g_snprintf( $$, taille, "%sTR%s(%d)",
+                               ($1 ? "!" : ""), (is_counting == -1 ? "" : "Count"), $4 );
+                   Liberer_options($3);
                 }}
                 | barre POUV expr PFERM
                 {{ int taille;
@@ -290,31 +281,14 @@ unite:          modulateur ENTIER HEURE ENTIER
                    else    { g_snprintf( $$, taille, "(%s)", $3 ); }
                    g_free($3);
                 }}
-                | barre ID comparateur
+                | barre ID liste_options comparateur
                 {{ struct ALIAS *alias;
                    char *chaine;
                    int taille;
                    alias = Get_alias_par_nom($2);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case T_TRCOUNT :
-                                      if ($3)
-                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       }
-                                      else
-                                       { taille = 16;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if ($1) g_snprintf( $$, taille, "!TRCount(%d)", alias->num );
-                                            else g_snprintf( $$, taille,  "TRCount(%d)", alias->num );
-                                       }
-                                      break;
-                         case TEMPO : if ($3)
+                       { case TEMPO : if ($4)
                                        { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
@@ -324,13 +298,18 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          g_snprintf( $$, 2, "0" );                                      
                                        } 
                                       else
-                                       { taille = 15;
+                                       { int taille, is_counting;
+                                         taille = 20;
+                                         is_counting = Get_option_entier( $3, T_IS_COUNTING );
+                                         if (is_counting == -1)
+                                          { is_counting = Get_option_entier( alias->options, T_IS_COUNTING ); }
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if (!$1) g_snprintf( $$, taille, "TR(%d)", alias->num );
-                                         else g_snprintf( $$, taille, "TRbarre(%d)", alias->num );
+                                         g_snprintf( $$, taille, "%sTR%s(%d)",
+                                                    (alias->barre ? "!" : ""),
+                                                    (is_counting == -1 ? "" : "Count"), alias->num );
                                        }
                                       break;
-                         case ENTREE: if ($3)
+                         case ENTREE: if ($4)
                                        { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
@@ -347,7 +326,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          else g_snprintf( $$, taille, "!E(%d)", alias->num );
                                        }
                                       break;
-                         case BI    : if ($3)
+                         case BI    : if ($4)
                                        { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
@@ -364,7 +343,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          else g_snprintf( $$, taille, "!B(%d)", alias->num );
                                        }
                                       break;
-                         case MONO  : if ($3)
+                         case MONO  : if ($4)
                                        { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
@@ -381,7 +360,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          else g_snprintf( $$, taille, "!M(%d)", alias->num );
                                        }
                                       break;
-                         case EANA  : if (!$3)
+                         case EANA  : if (!$4)
                                        { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
@@ -393,15 +372,15 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = 50;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         switch($3->type)
-                                          { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $3->valf, alias->num ); break;
-                                            case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $3->valf, alias->num ); break;
-                                            case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $3->valf, alias->num ); break;
-                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $3->valf, alias->num ); break;
+                                         switch($4->type)
+                                          { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4->valf, alias->num ); break;
+                                            case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4->valf, alias->num ); break;
+                                            case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4->valf, alias->num ); break;
+                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4->valf, alias->num ); break;
                                           }
                                        }
                                       break;
-                         case CPT_IMP:if (!$3)
+                         case CPT_IMP:if (!$4)
                                        { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
@@ -413,11 +392,11 @@ unite:          modulateur ENTIER HEURE ENTIER
                                       else
                                        { taille = 30;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         switch($3->type)
-                                          { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $3->valf );  break;
-                                            case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $3->valf );  break;
-                                            case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $3->valf ); break;
-                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $3->valf ); break;
+                                         switch($4->type)
+                                          { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $4->valf );  break;
+                                            case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $4->valf );  break;
+                                            case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $4->valf ); break;
+                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $4->valf ); break;
                                           }
                                        }
                                       break;
@@ -440,7 +419,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                           g_snprintf( $$, 2, "0" );
                         }
                    g_free($2);                                     /* On n'a plus besoin de l'identifiant */
-                   if ($3) g_free($3);
+                   Liberer_options($3);
+                   if ($4) g_free($4);
                 }}
                 ;
 /********************************************* Gestion des actions ****************************************/
@@ -485,7 +465,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                   {{ $$=New_action_cpt_imp($2, $3);
                      Liberer_options($3);
                   }}
-                | T_MSG ENTIER                  {{ $$=New_action_msg($2);            }}
+                | T_MSG ENTIER                {{ $$=New_action_msg($2);            }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                               /* Definition des actions via alias */
                    int taille;
@@ -651,6 +631,11 @@ une_option:     MODE EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RATIO;
                    $$->entier = $3;
+                }}
+                | T_IS_COUNTING
+                {{ $$=New_option();
+                   $$->type = T_IS_COUNTING;
+                   $$->entier = 1;
                 }}
                 ;
 
