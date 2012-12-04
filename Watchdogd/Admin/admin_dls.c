@@ -78,20 +78,27 @@
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
     Write_admin ( client->connexion, chaine );
-    liste_dls = Partage->com_dls.Plugins;
-    while ( liste_dls )
-     { struct PLUGIN_DLS *dls;
-       dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-       if ( id == -1 || id == dls->plugindb.id)
-        { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
+    if (id == -1)
+     { liste_dls = Partage->com_dls.Plugins;
+       while ( liste_dls )
+        { struct PLUGIN_DLS *dls;
+          dls = (struct PLUGIN_DLS *)liste_dls->data;
+
+          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
           Write_admin ( client->connexion, chaine );
           Compiler_source_dls ( NULL, dls->plugindb.id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
           Write_admin ( client->connexion, chaine );
         }
        liste_dls = liste_dls->next;
-     }
+     } else
+        { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
+          Write_admin ( client->connexion, chaine );
+          Compiler_source_dls ( NULL, id );
+          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
+          Write_admin ( client->connexion, chaine );
+        }
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
