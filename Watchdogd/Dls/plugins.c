@@ -47,17 +47,18 @@
 
     handle = dlopen( nom_fichier_absolu, RTLD_NOW );
     if (!handle) { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                            "Charger_un_plugin: Candidat %d rejeté (%s)", dls->plugindb.id, dlerror() );
+                            "Charger_un_plugin: Candidat %04d failed (%s)", dls->plugindb.id, dlerror() );
                    return(FALSE);
                  }
     Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
     if (!Go) { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                        "Charger_un_plugin: Candidat %d rejeté sur absence GO", dls->plugindb.id ); 
+                        "Charger_un_plugin: Candidat %04d failed sur absence GO", dls->plugindb.id ); 
                dlclose( handle );
                return(FALSE);
              }
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_un_plugin: id=%d", dls->plugindb.id );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_un_plugin: plugin id = %04d (%s) loaded",
+              dls->plugindb.id, dls->plugindb.nom );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
     dls->handle   = handle;
     dls->go       = Go;
@@ -88,13 +89,13 @@
     Libere_DB_SQL( Config.log, &db );
 
     if (!plugin_dls)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %d non trouvé", id );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %04d non trouvé", id );
        return(FALSE);
      }
 
     dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%d", id );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%04d", id );
        g_free(plugin_dls);
        return(FALSE);
      }
@@ -123,12 +124,16 @@
           Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
           Info_new( Config.log, Config.log_all, LOG_INFO,
-                   "Decharger_un_plugin_by_id: plugin %d unloaded", plugin->plugindb.id );
+                   "Decharger_un_plugin_by_id: plugin %04d unloaded", plugin->plugindb.id );
           break;
         }
        plugins = plugins->next;
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+    if (plugins == NULL)
+     { Info_new( Config.log, Config.log_all, LOG_INFO,
+                "Decharger_un_plugin_by_id: plugin %04d not found", plugin->plugindb.id );
+     }
   }
 /**********************************************************************************************************/
 /* Retirer_un_plugin: Decharge le plugin dont le numero est en parametre                                  */
@@ -136,7 +141,7 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Reseter_un_plugin ( gint id )
-  { Info_new( Config.log, Config.log_all, LOG_INFO, "Reseter_un_plugin: Reset plugin %d", id );
+  { Info_new( Config.log, Config.log_all, LOG_INFO, "Reseter_un_plugin: Reset plugin %04d", id );
 
     Decharger_un_plugin_by_id ( id );
     Charger_un_plugin_by_id ( id );
@@ -155,7 +160,7 @@
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Decharger_plugins: plugin %d unloaded", plugin->plugindb.id );
+       Info_new( Config.log, Config.log_all, LOG_INFO, "Decharger_plugins: plugin %04d unloaded", plugin->plugindb.id );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -223,7 +228,8 @@
         { plugin->plugindb.on = actif;
           plugin->conso = 0.0;
           plugin->starting = 1;
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Activer_plugin_by_id: id %d started", plugin->plugindb.id );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Activer_plugin_by_id: id %04d started (%s)",
+                    plugin->plugindb.id, plugin->plugindb.nom );
           break;
         }
        plugins = plugins->next;

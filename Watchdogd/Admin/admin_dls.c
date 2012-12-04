@@ -86,7 +86,7 @@
        if ( id == -1 || id == dls->plugindb.id)
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
           Write_admin ( client->connexion, chaine );
-          Compiler_source_dls ( NULL, id );
+          Compiler_source_dls ( NULL, dls->plugindb.id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
           Write_admin ( client->connexion, chaine );
         }
