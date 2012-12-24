@@ -44,6 +44,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_ADMIN_OK:
              { if (!Tester_page_notebook(TYPE_PAGE_ADMIN)) { Creer_page_admin(); }
+               Chercher_page_notebook( TYPE_PAGE_ADMIN, 0, TRUE );                /* Affichage de la page */
              }
             break;
        case SSTAG_SERVEUR_RESPONSE_OK:

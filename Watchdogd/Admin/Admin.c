@@ -165,6 +165,10 @@
     GSList *liste;
     gchar *buffer;
 
+    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+              "Processer_commande_admin: Commande Received from %s@%s : %s",
+              client->util->nom, client->machine, commande );
+
     buffer = NULL;                                             /* Initialisation de la variable de retour */
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 

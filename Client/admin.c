@@ -37,6 +37,20 @@
  #include "protocli.h"
 
 /**********************************************************************************************************/
+/* Menu_valider_request: Envoi une request d'admin au serveur                                             */
+/* Entrée: rien                                                                                           */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ static void Menu_valider_request ( void )
+  { struct CMD_TYPE_ADMIN Admin;
+
+    g_snprintf( Admin.buffer, sizeof(Admin.buffer),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_request) ) );
+    
+    Envoi_serveur( TAG_ADMIN, SSTAG_CLIENT_REQUEST,
+                   (gchar *)&Admin, sizeof( struct CMD_TYPE_ADMIN ) );
+  }
+/**********************************************************************************************************/
 /* Creer_page_admin: Creation de la page du notebook consacrée aux admins watchdog                        */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
@@ -50,7 +64,7 @@
     
     page->type  = TYPE_PAGE_ADMIN;
     Liste_pages = g_list_append( Liste_pages, page );
-
+printf("Creer_page_admin !\n");
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
@@ -67,6 +81,8 @@
 
     Entry_request = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_request), NBR_CARAC_BUFFER_ADMIN );
+    g_signal_connect_swapped( G_OBJECT(Entry_request), "activate",
+                              G_CALLBACK(Menu_valider_request), NULL );
     gtk_box_pack_start( GTK_BOX(boite), Entry_request, FALSE, FALSE, 0 );
 
 /************************************ Les boutons de controles ********************************************/
@@ -81,10 +97,10 @@
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_JUMP_TO );
+    bouton = gtk_button_new_from_stock( GTK_STOCK_EXECUTE );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-/*    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_editer_admin), NULL );*/
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_valider_request), NULL );
 
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Admin.") ) );

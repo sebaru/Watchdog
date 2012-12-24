@@ -49,6 +49,9 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_ADMIN:
              { Envoi_client( client, TAG_ADMIN, SSTAG_SERVEUR_CREATE_PAGE_ADMIN_OK, NULL, 0 );
+               Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                        "Gerer_protocole_admin: Acces to Watchdog CLI granted to %s@%s",
+                         client->util->nom, client->machine );
              }
             break;
        case SSTAG_CLIENT_REQUEST:
