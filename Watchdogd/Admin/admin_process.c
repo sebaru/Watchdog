@@ -33,18 +33,12 @@
 /* Entrée: La connexion cliente et la ligne de commande                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- gchar *Admin_process ( struct CLIENT *client, gchar *ligne )
+ gchar *Admin_process ( struct CLIENT *client, gchar *buffer, gchar *ligne )
   { struct LIBRAIRIE *lib;
-    gchar commande[128], *buffer;
+    gchar commande[128];
     GSList *liste;
 
-    buffer = (gchar *)g_try_malloc0 ( NBR_CARAC_BUFFER_ADMIN );
-    if (!buffer)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Admin_process: Memory error" );
-       return(NULL);
-     }
-
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "start" ) )
      { gchar thread[128], chaine[128];
@@ -187,7 +181,7 @@
            { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
           g_snprintf( chaine, sizeof(chaine), "%d (%s)\n", (gint) lib->TID, lib->nom_fichier );
           memcpy( result + 47, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          g_strlcat ( buffer, result, NBR_CARAC_BUFFER_ADMIN );
           liste = liste->next;
         }
 

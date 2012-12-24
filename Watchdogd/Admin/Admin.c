@@ -162,27 +162,36 @@
 /**********************************************************************************************************/
  gchar *Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
   { GSList *liste;
-    gchar *buffer;
+    gchar *buffer, commande[128];
 
     Info_new( Config.log, Config.log_all, LOG_NOTICE,
               "Processer_commande_admin: Commande Received from %s@%s : %s",
               client->util->nom, client->machine, ligne );
 
-    buffer = NULL;                                             /* Initialisation de la variable de retour */
-    sscanf ( ligne, "%s", ligne );                                   /* Découpage de la ligne de commande */
+    buffer = (gchar *)g_try_malloc0 ( NBR_CARAC_BUFFER_ADMIN );
+    if (!buffer)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Processer_commande_admin: Memory error" );
+       return(NULL);
+     }
 
-            if ( ! strcmp ( ligne, "process"   ) ) { buffer = Admin_process  ( client, ligne + 8 ); }
+    g_strlcat ( buffer, "#Request> ", NBR_CARAC_BUFFER_ADMIN );
+    g_strlcat ( buffer, ligne,    NBR_CARAC_BUFFER_ADMIN );
+    g_strlcat ( buffer, "\n",     NBR_CARAC_BUFFER_ADMIN );
+
+    sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */
+
+            if ( ! strcmp ( commande, "process"   ) ) { buffer = Admin_process  ( client, buffer, ligne + 8 ); }
 #ifdef bouh
-       else if ( ! strcmp ( ligne, "dls"       ) ) { buffer = Admin_dls      ( ligne + 4 ); }
-       else if ( ! strcmp ( ligne, "set"       ) ) { buffer = Admin_set      ( ligne + 4);  }
-       else if ( ! strcmp ( ligne, "get"       ) ) { buffer = Admin_get      ( ligne + 4);  }
+       else if ( ! strcmp ( commande, "dls"       ) ) { buffer = Admin_dls      ( ligne + 4 ); }
+       else if ( ! strcmp ( commande, "set"       ) ) { buffer = Admin_set      ( ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { buffer = Admin_get      ( ligne + 4);  }
 #endif
        else { gboolean found = FALSE;
 #ifdef bouh
               liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
               while(liste)
                { lib = (struct LIBRAIRIE *)liste->data;
-                 if ( ! strcmp( ligne, lib->admin_prompt ) )
+                 if ( ! strcmp( commande, lib->admin_prompt ) )
                   { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 );
                     found = TRUE;
                   }
