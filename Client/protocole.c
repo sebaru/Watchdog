@@ -92,6 +92,7 @@
           case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
           case TAG_SCENARIO    : Gerer_protocole_scenario     ( connexion ); break;
           case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
+          case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
           case TAG_CONNEXION   : if ( Reseau_ss_tag( connexion ) == SSTAG_SERVEUR_PULSE ) 
                                   { Set_progress_pulse(); }
                                  break;

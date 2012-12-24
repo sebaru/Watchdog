@@ -64,6 +64,7 @@
     TYPE_PAGE_RS485,                                                  /* Page affichant les modules RS485 */
     TYPE_PAGE_MODBUS,                                                /* Page affichant les modules MODBUS */
     TYPE_PAGE_RFXCOM,                                                /* Page affichant les modules RFXCOM */
+    TYPE_PAGE_ADMIN,                           /* Page de gestion des commandes/requests d'administration */
   };
 
  struct PAGE_NOTEBOOK
@@ -229,16 +230,16 @@
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_scenario ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
- extern void Gerer_protocole_onduleur ( struct CONNEXION *connexion );
- extern void Gerer_protocole_rs485 ( struct CONNEXION *connexion );
- extern void Gerer_protocole_modbus ( struct CONNEXION *connexion );
- extern void Gerer_protocole_rfxcom ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
 
 
  extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
  extern SSL_CTX *Init_ssl ( void );
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */
+
+ extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                     /* Dans admin.c */ 
+ extern void Creer_page_admin( void );
 
  extern void Proto_afficher_un_groupe( struct CMD_TYPE_GROUPE *groupe );           /* Dans liste_groupe.c */ 
  extern void Proto_cacher_un_groupe( struct CMD_TYPE_GROUPE *groupe );
@@ -331,7 +332,7 @@
  extern void Menu_want_courbe ( void );
  extern void Menu_want_histo_courbe ( void );
  extern void Menu_want_scenario ( void );
- extern void Menu_want_modbus ( void );
+ extern void Menu_want_page_admin ( void );
 
 
  extern void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif );           /* Dans atelier.c */

@@ -44,6 +44,14 @@
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_PAGE_DLS, NULL, 0 );
   }
 /**********************************************************************************************************/
+/* Menu_want_page_admin: l'utilisateur desire envoyer des requetes d'administration                       */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Menu_want_page_admin ( void )
+  { if (Chercher_page_notebook( TYPE_PAGE_ADMIN, 0, TRUE )) return;
+    Envoi_serveur( TAG_ADMIN, SSTAG_CLIENT_WANT_PAGE_ADMIN, NULL, 0 );
+  }
+/**********************************************************************************************************/
 /* Menu_want_util: l'utilisateur desire editer les bases users                                            */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

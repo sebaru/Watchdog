@@ -94,7 +94,9 @@
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_admin[]=                                       /*!< Définition du menu d'administration */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
+  { GNOMEUIINFO_ITEM_STOCK( N_("_Administration"), N_("Administration"),
+                            Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
+    GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
                             Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
                             Menu_want_mnemonique, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
