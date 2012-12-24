@@ -37,7 +37,6 @@
  #include <semaphore.h>
 
  #include "watchdogd.h"
- #include "Dls.h"
 
  static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
  struct BIT_A_CHANGER
