@@ -8,7 +8,7 @@ SUBDIRS=
 noinst_LTLIBRARIES   = libserveur.la
 libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         protocole_utilisateur.c protocole_dls.c protocole_message.c \
-                        protocole_histo_courbe.c \
+                        protocole_histo_courbe.c protocole_admin.c \
                         protocole_mnemonique.c protocole_supervision.c protocole_atelier.c \
                         protocole_icone.c protocole_histo.c protocole_courbe.c  \
 			protocole_scenario.c protocole_synoptique.c protocole_camera.c \

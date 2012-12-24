@@ -66,6 +66,7 @@
                case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( Id_serveur, client ); break;
                case TAG_SCENARIO    : Gerer_protocole_scenario     ( Id_serveur, client ); break;
                case TAG_CAMERA      : Gerer_protocole_camera       ( Id_serveur, client ); break;
+               case TAG_ADMIN       : Gerer_protocole_admin        ( Id_serveur, client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_UTIL_SETPASSWORD *util;
                                          util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
