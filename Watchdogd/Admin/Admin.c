@@ -160,6 +160,41 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
+ static gchar *Processer_commande_admin ( struct CLIENT *client, gchar *commande )
+  { gchar ligne[128];
+    GSList *liste;
+    gchar *buffer;
+
+    buffer = NULL;                                             /* Initialisation de la variable de retour */
+    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+
+            if ( ! strcmp ( commande, "process"   ) ) { buffer = Admin_process  ( client, ligne + 8 ); }
+#ifdef bouh
+       else if ( ! strcmp ( commande, "dls"       ) ) { buffer = Admin_dls      ( ligne + 4 ); }
+       else if ( ! strcmp ( commande, "set"       ) ) { buffer = Admin_set      ( ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { buffer = Admin_get      ( ligne + 4);  }
+       else { gboolean found = FALSE;
+              liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
+              while(liste)
+               { lib = (struct LIBRAIRIE *)liste->data;
+                 if ( ! strcmp( commande, lib->admin_prompt ) )
+                  { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 );
+                    found = TRUE;
+                  }
+                 liste = liste->next;
+               }
+              if (found == FALSE) { Admin_running ( client, ligne ); }
+            }
+       g_snprintf( chaine, sizeof(chaine), "\n" );                                        /* \n de fin !! */
+       Write_admin ( client->connexion, chaine );
+#endif
+    return(buffer);
+  }
+/**********************************************************************************************************/
+/* Ecouter_admin: Ecoute ce que dis le client                                                             */
+/* Entrée: le client                                                                                      */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
  static void Ecouter_admin ( struct CLIENT_ADMIN *client )
   { gchar ligne[128], commande[128], chaine[128];
     struct LIBRAIRIE *lib;
@@ -177,8 +212,8 @@
                  "Ecouter_admin : Command received = %s\n", ligne );
        sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
-       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
+/*            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
+       else*/ if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
        else { gboolean found = FALSE;

@@ -28,15 +28,23 @@
  #include <unistd.h>
  #include "watchdogd.h"
 
+ #define TAILLEMAX_BUFFER    1024
+
 /**********************************************************************************************************/
 /* Activer_process: Appeller lorsque l'admin envoie une commande 'process' dans la ligne de commande      */
 /* Entrée: La connexion cliente et la ligne de commande                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_process ( struct CLIENT_ADMIN *client, gchar *ligne )
+ gchar *Admin_process ( struct CLIENT *client, gchar *ligne )
   { struct LIBRAIRIE *lib;
+    gchar commande[128], *buffer;
     GSList *liste;
-    gchar commande[128];
+
+    buffer = (gchar *)g_try_malloc0 ( TAILLEMAX_BUFFER );
+    if (!buffer)
+     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Admin_process: Memory error" );
+       return(NULL);
+     }
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
 
@@ -46,7 +54,7 @@
        sscanf ( ligne, "%s %s %d", commande, thread, &num );
 
        g_snprintf( chaine, sizeof(chaine), " Trying to start %s\n", thread );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
 
        if ( ! strcmp ( thread, "arch" ) )
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
@@ -59,7 +67,7 @@
        if ( ! strcmp ( thread, "ssrv" ) )
         { if (num<0 || num>=Config.max_serveur)
            { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
-             Write_admin ( client->connexion, chaine );
+             g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
            }
           else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SSRV -> Arret" ); }
@@ -76,7 +84,7 @@
                  { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt ); }
                 else
                  { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
-                Write_admin ( client->connexion, chaine );
+                   g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
               }
              liste = liste->next;
            }
@@ -96,7 +104,7 @@
         }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while loading library %s\n", thread ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
      } else
     if ( ! strcmp ( commande, "unload" ) )
      { gchar thread[128], chaine[128];
@@ -105,14 +113,14 @@
         { g_snprintf( chaine, sizeof(chaine), " Library %s stopped and unloaded\n", thread ); }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while unloading library %s\n", thread ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
      } else
     if ( ! strcmp ( commande, "stop" ) )
      { gchar thread[128], chaine[128];
        sscanf ( ligne, "%s %s", commande, thread );
 
        g_snprintf( chaine, sizeof(chaine), " Trying to stop %s\n", thread );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
 
        if ( ! strcmp ( thread, "all" ) )
         { Stopper_fils(FALSE);                           /* Termine tous les process sauf le thread ADMIN */
@@ -128,13 +136,13 @@
              if ( ! strcmp( lib->admin_prompt, thread ) )
               { if (Stop_librairie(lib))
                  { g_snprintf( chaine, sizeof(chaine), " Library %s (%s) stopped\n",
-                   lib->admin_prompt, lib->nom_fichier );
+                               lib->admin_prompt, lib->nom_fichier );
                  }
                 else
                  { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) \n",
                                lib->admin_prompt, lib->nom_fichier );
                  }
-                Write_admin ( client->connexion, chaine );
+                g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
               }
              liste = liste->next;
            }
@@ -146,27 +154,27 @@
        guint i;
 
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
 
        g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
 
        for (i=0; i<Config.max_serveur; i++)
         { g_snprintf( chaine, sizeof(chaine), " Built-in SSRV[%d]  -> ------------- running = %s, TID = %d\n", i,
                       (Partage->Sous_serveur[i].Thread_run ? "YES" : " NO"), (gint)Partage->Sous_serveur[i].pid
                     );
-          Write_admin ( client->connexion, chaine );
+          g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
         }
 
        g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %d\n",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (gint)Partage->com_dls.TID
                  );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
 
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
                  );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -181,33 +189,33 @@
            { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
           g_snprintf( chaine, sizeof(chaine), "%d (%s)\n", (gint) lib->TID, lib->nom_fichier );
           memcpy( result + 47, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
-          Write_admin ( client->connexion, result );
+          g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
           liste = liste->next;
         }
 
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
-       Write_admin ( client->connexion, "SHUTDOWN in progress\n" );
+       g_strlcat ( buffer, "SHUTDOWN in progress\n", TAILLEMAX_BUFFER );
        SB( 7, TRUE );                                                     /* Message audio avant Shutdown */
-       sleep(5);
+       sleep(1);
        Partage->com_msrv.Thread_run = FALSE;
        SB( 7, FALSE );                                                    /* Message audio avant Shutdown */
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : REBOOT demandé" );
-       Write_admin ( client->connexion, "REBOOT in progress\n" );
+       g_strlcat ( buffer, "REBOOT in progress\n", TAILLEMAX_BUFFER );
        SB( 8, TRUE );                                                       /* Message audio avant Reboot */
-       sleep(5);
+       sleep(1);
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
        SB( 8, FALSE );                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
-       Write_admin ( client->connexion, "CLEAR-REBOOT in progress\n" );
+       g_strlcat ( buffer, "CLEAR-REBOOT in progress\n", TAILLEMAX_BUFFER );
        SB( 8, TRUE );                                                       /* Message audio avant Reboot */
-       sleep(5);
+       sleep(1);
        Partage->com_msrv.Thread_clear_reboot = TRUE;
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
@@ -215,35 +223,26 @@
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : RELOAD demandé" );
-       Write_admin ( client->connexion, "RELOAD in progress\n" );
+       g_strlcat ( buffer, "RELOAD in progress\n", TAILLEMAX_BUFFER );
        Partage->com_msrv.Thread_reload = TRUE;
      } else
     if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
-       Write_admin ( client->connexion,
-                     "  load thread          - Load a library (but not start it !)\n" );
-       Write_admin ( client->connexion,
-                     "  unload thread        - Unload a library\n" );
-       Write_admin ( client->connexion,
-                     "  start thread         - Start a thread (arch,modbus,dls,ssrv num, or library name)\n" );
-       Write_admin ( client->connexion,
-                     "  stop                 - Stop thread (all,arch,modbus,dls,ssrv num, or library name)\n" );
-       Write_admin ( client->connexion,
-                     "  list                 - Liste les statut des threads\n" );
-       Write_admin ( client->connexion,
-                     "  RELOAD               - Reload configuration\n" );
-       Write_admin ( client->connexion,
-                     "  REBOOT               - Restart all processes\n" );
-       Write_admin ( client->connexion,
-                     "  CLEAR-REBOOT         - Restart all processes with no DATA import/export\n" );
-       Write_admin ( client->connexion,
-                     "  SHUTDOWN             - Stop processes\n" );
+     { g_strlcat ( buffer, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  load thread          - Load a library (but not start it !)\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  unload thread        - Unload a library\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  start thread         - Start a thread (arch,modbus,dls,ssrv num, or library name)\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  stop                 - Stop thread (all,arch,modbus,dls,ssrv num, or library name)\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  list                 - Liste les statut des threads\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  RELOAD               - Reload configuration\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  REBOOT               - Restart all processes\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  CLEAR-REBOOT         - Restart all processes with no DATA import/export\n", TAILLEMAX_BUFFER );
+       g_strlcat ( buffer, "  SHUTDOWN             - Stop processes\n", TAILLEMAX_BUFFER );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown PROCESS command : %s\n", ligne );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, TAILLEMAX_BUFFER );
      }
+    return(buffer);
   }
 /*--------------------------------------------------------------------------------------------------------*/
