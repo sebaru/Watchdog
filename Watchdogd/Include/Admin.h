@@ -55,6 +55,7 @@
  extern void Admin_get ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_sms ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Write_admin ( gint fd, gchar *chaine );
+ extern gchar *Processer_commande_admin ( struct CLIENT *client, gchar *commande );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

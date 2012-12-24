@@ -160,7 +160,7 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static gchar *Processer_commande_admin ( struct CLIENT *client, gchar *commande )
+ gchar *Processer_commande_admin ( struct CLIENT *client, gchar *commande )
   { gchar ligne[128];
     GSList *liste;
     gchar *buffer;

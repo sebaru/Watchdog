@@ -212,7 +212,8 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (6, 'Admin-dlsDB', 'Members can add/remove/edit DLS plugins'),
 (7, 'Admin-histoDB', 'Members can ack/query histo'),
 (8, 'Admin-scenarioDB', 'Members can add/remove Scenario'),
-(9, 'Admin-Lowlevel I/O', 'Configuration MODBUS/RS485/ONDULEUR/...');
+(9, 'Admin-Lowlevel I/O', 'Configuration MODBUS/RS485/ONDULEUR/...'),
+(10, 'Admin-CommandLineInterface', 'Command Line Interface Access');
 
 -- --------------------------------------------------------
 
