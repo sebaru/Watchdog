@@ -43,12 +43,11 @@
 /**********************************************************************************************************/
  static void Menu_valider_request ( void )
   { struct CMD_TYPE_ADMIN Admin;
-
     g_snprintf( Admin.buffer, sizeof(Admin.buffer),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_request) ) );
-    
     Envoi_serveur( TAG_ADMIN, SSTAG_CLIENT_REQUEST,
                    (gchar *)&Admin, sizeof( struct CMD_TYPE_ADMIN ) );
+    gtk_entry_set_text( GTK_ENTRY(Entry_request), "" );                           /* RAZ du entry request */
   }
 /**********************************************************************************************************/
 /* Creer_page_admin: Creation de la page du notebook consacrée aux admins watchdog                        */
