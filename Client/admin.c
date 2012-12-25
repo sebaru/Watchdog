@@ -123,15 +123,13 @@ printf("Creer_page_admin !\n");
 
     if (!Tester_page_notebook(TYPE_PAGE_ADMIN)) Creer_page_admin();
 
-    gtk_text_buffer_insert_at_cursor ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)),
-                                       admin->buffer, -1 );
+    gtk_text_buffer_get_end_iter ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), &iter );
+    gtk_text_buffer_insert ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), &iter,
+                             admin->buffer, -1 );
 
     gtk_text_buffer_get_end_iter ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), &iter );
+    
     tmp_textMark = gtk_text_buffer_create_mark(gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), NULL, &iter, FALSE);
     gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(Text_buffer), tmp_textMark, 0, FALSE, 0, 0);
-
-    gtk_text_view_place_cursor_onscreen (GTK_TEXT_VIEW(Text_buffer));
- /*   gtk_text_buffer_get_end_iter ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), &iter );
-    gtk_text_view_scroll_to_iter ( GTK_TEXT_VIEW(Text_buffer), &iter, 0.0, TRUE, 1.0, 1.0 );*/
   }
 /*--------------------------------------------------------------------------------------------------------*/
