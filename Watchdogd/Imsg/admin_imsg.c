@@ -33,7 +33,7 @@
 /* Entrée: Le client d'admin, la ligne a traiter                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command( struct CLIENT *client, gchar *buffer, gchar *ligne )
+ void Admin_command( struct CLIENT *client, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */

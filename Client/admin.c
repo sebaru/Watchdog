@@ -55,7 +55,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Creer_page_admin( void )
-  { GtkWidget *boite, *hboite, *bouton, *separateur;
+  { GtkWidget *boite, *hboite, *bouton, *separateur, *scroll;
     PangoFontDescription *font_desc;
     struct PAGE_NOTEBOOK *page;
 
@@ -73,13 +73,17 @@ printf("Creer_page_admin !\n");
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, TRUE, TRUE, 0 );
 
+    scroll = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+    gtk_box_pack_start( GTK_BOX(boite), scroll, TRUE, TRUE, 0 );
+
     Text_buffer = gtk_text_view_new();
     gtk_text_view_set_editable ( GTK_TEXT_VIEW(Text_buffer), FALSE );
     gtk_text_view_set_cursor_visible ( GTK_TEXT_VIEW(Text_buffer), FALSE );
     font_desc = pango_font_description_from_string("Monospace 10");
     gtk_widget_modify_font( Text_buffer, font_desc );
     pango_font_description_free(font_desc);
-    gtk_box_pack_start( GTK_BOX(boite), Text_buffer, TRUE, TRUE, 0 );
+    gtk_container_add( GTK_CONTAINER(scroll), Text_buffer );
 
 
     Entry_request = gtk_entry_new();
@@ -114,9 +118,20 @@ printf("Creer_page_admin !\n");
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin )
-  { if (!Tester_page_notebook(TYPE_PAGE_ADMIN)) Creer_page_admin();
+  { GtkTextIter iter;
+    GtkTextMark *tmp_textMark = NULL;
+
+    if (!Tester_page_notebook(TYPE_PAGE_ADMIN)) Creer_page_admin();
 
     gtk_text_buffer_insert_at_cursor ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)),
                                        admin->buffer, -1 );
+
+    gtk_text_buffer_get_end_iter ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), &iter );
+    tmp_textMark = gtk_text_buffer_create_mark(gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), NULL, &iter, FALSE);
+    gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(Text_buffer), tmp_textMark, 0, FALSE, 0, 0);
+
+    gtk_text_view_place_cursor_onscreen (GTK_TEXT_VIEW(Text_buffer));
+ /*   gtk_text_buffer_get_end_iter ( gtk_text_view_get_buffer (GTK_TEXT_VIEW(Text_buffer)), &iter );
+    gtk_text_view_scroll_to_iter ( GTK_TEXT_VIEW(Text_buffer), &iter, 0.0, TRUE, 1.0, 1.0 );*/
   }
 /*--------------------------------------------------------------------------------------------------------*/
