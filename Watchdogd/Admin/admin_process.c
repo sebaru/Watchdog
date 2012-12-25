@@ -29,11 +29,11 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Activer_process: Appeller lorsque l'admin envoie une commande 'process' dans la ligne de commande      */
-/* Entrée: La connexion cliente et la ligne de commande                                                   */
+/* Admin_process: Appeller lorsque l'admin envoie une commande 'process' dans la ligne de commande        */
+/* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- gchar *Admin_process ( struct CLIENT *client, gchar *buffer, gchar *ligne )
+ void Admin_process ( struct CLIENT *client, gchar *buffer, gchar *ligne )
   { struct LIBRAIRIE *lib;
     gchar commande[128];
     GSList *liste;
@@ -235,6 +235,5 @@
        g_snprintf( chaine, sizeof(chaine), " Unknown PROCESS command : %s\n", ligne );
        g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      }
-    return(buffer);
   }
 /*--------------------------------------------------------------------------------------------------------*/

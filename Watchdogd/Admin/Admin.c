@@ -180,11 +180,11 @@
 
     sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "process"   ) ) { buffer = Admin_process  ( client, buffer, ligne + 8 ); }
+            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, buffer, ligne + 8 ); }
 #ifdef bouh
-       else if ( ! strcmp ( commande, "dls"       ) ) { buffer = Admin_dls      ( ligne + 4 ); }
-       else if ( ! strcmp ( commande, "set"       ) ) { buffer = Admin_set      ( ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { buffer = Admin_get      ( ligne + 4);  }
+       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( ligne + 4 ); }
+       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( ligne + 4);  }
 #endif
        else { gboolean found = FALSE;
 #ifdef bouh
@@ -238,7 +238,7 @@
                   }
                  liste = liste->next;
                }
-              if (found == FALSE) { Admin_running ( client, ligne ); }
+              if (found == FALSE) { /*Admin_running ( client, ligne ); */ }
             }
        g_snprintf( chaine, sizeof(chaine), "\n" );                                        /* \n de fin !! */
        Write_admin ( client->connexion, chaine );

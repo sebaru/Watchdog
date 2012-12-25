@@ -255,7 +255,7 @@
 
     infos->compositor = gtk_source_print_compositor_new ( GTK_SOURCE_BUFFER(infos->text) );
     gtk_source_print_compositor_set_print_line_numbers ( infos->compositor, 5 );
-    gtk_source_print_compositor_set_body_font_name ( infos->compositor, "Courier 10");
+    gtk_source_print_compositor_set_body_font_name ( infos->compositor, "Monospace 10");
     gtk_source_print_compositor_set_print_header ( infos->compositor, TRUE );
     gtk_source_print_compositor_set_header_format ( infos->compositor, TRUE,
                                                     "Module DLS",
@@ -319,7 +319,7 @@
     gtk_container_add( GTK_CONTAINER(scroll), text );
 
   /* Change default font throughout the widget */
-    font = pango_font_description_from_string ("Courier 10");
+    font = pango_font_description_from_string ("Monospace 10");
     gtk_widget_modify_font(text, font);
     pango_font_description_free(font);
 

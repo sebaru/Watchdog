@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Client/liste_admin.c        Configuration des admins de Watchdog v2.0                                  */
+/* Client/admin.c        Administration du serveur Watchdog v2.0                                          */
 /* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 24 déc. 2012 13:08:00 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -56,6 +56,7 @@
 /**********************************************************************************************************/
  void Creer_page_admin( void )
   { GtkWidget *boite, *hboite, *bouton, *separateur;
+    PangoFontDescription *font_desc;
     struct PAGE_NOTEBOOK *page;
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
@@ -75,6 +76,9 @@ printf("Creer_page_admin !\n");
     Text_buffer = gtk_text_view_new();
     gtk_text_view_set_editable ( GTK_TEXT_VIEW(Text_buffer), FALSE );
     gtk_text_view_set_cursor_visible ( GTK_TEXT_VIEW(Text_buffer), FALSE );
+    font_desc = pango_font_description_from_string("Monospace 10");
+    gtk_widget_modify_font( Text_buffer, font_desc );
+    pango_font_description_free(font_desc);
     gtk_box_pack_start( GTK_BOX(boite), Text_buffer, TRUE, TRUE, 0 );
 
 
