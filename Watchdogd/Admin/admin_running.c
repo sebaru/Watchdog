@@ -30,7 +30,7 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Admin_process: Appeller lorsque l'admin envoie une commande en mode run dans la ligne de commande      */
+/* Admin_running: Appellée lorsque l'admin envoie une commande en mode run dans la ligne de commande      */
 /* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/

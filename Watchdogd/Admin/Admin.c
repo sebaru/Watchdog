@@ -161,12 +161,19 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  gchar *Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
-  { GSList *liste;
+  { struct LIBRAIRIE *lib;
     gchar *buffer, commande[128];
+    GSList *liste;
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE,
-              "Processer_commande_admin: Commande Received from %s@%s : %s",
-              client->util->nom, client->machine, ligne );
+    if (client)
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                 "Processer_commande_admin: Commande Received from %s@%s : %s",
+                 client->util->nom, client->machine, ligne );
+     } else
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                 "Processer_commande_admin: Commande Received from localuser : %s",
+                 ligne );
+     }
 
     buffer = (gchar *)g_try_malloc0 ( NBR_CARAC_BUFFER_ADMIN );
     if (!buffer)
@@ -181,8 +188,8 @@
     sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */
 
             if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, buffer, ligne + 8 ); }
+       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, buffer, ligne + 4 ); }
 #ifdef bouh
-       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( ligne + 4 ); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( ligne + 4);  }
 #endif
@@ -198,8 +205,9 @@
                  liste = liste->next;
                }
 #endif
-              if (found == FALSE) { /*Admin_running ( client, ligne ); */ }
+              if (found == FALSE) { Admin_running ( client, buffer, ligne ); }
             }
+    g_strlcat ( buffer, "\n", NBR_CARAC_BUFFER_ADMIN );
     return(buffer);
   }
 /**********************************************************************************************************/
@@ -208,9 +216,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Ecouter_admin ( struct CLIENT_ADMIN *client )
-  { gchar ligne[128], commande[128], chaine[128];
-    struct LIBRAIRIE *lib;
-    GSList *liste;
+  { gchar ligne[128], *buffer;
     gint taille;
 
     memset( ligne, 0, sizeof(ligne) );
@@ -220,28 +226,11 @@
      { ligne[taille] = 0;
 
        client->last_use = Partage->top;
-       Info_new( Config.log, FALSE, LOG_NOTICE,
-                 "Ecouter_admin : Command received = %s\n", ligne );
-       sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
-
-/*            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
-       else*/ if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
-       else { gboolean found = FALSE;
-              liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
-              while(liste)
-               { lib = (struct LIBRAIRIE *)liste->data;
-                 if ( ! strcmp( commande, lib->admin_prompt ) )
-                  { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 );
-                    found = TRUE;
-                  }
-                 liste = liste->next;
-               }
-              if (found == FALSE) { /*Admin_running ( client, ligne ); */ }
-            }
-       g_snprintf( chaine, sizeof(chaine), "\n" );                                        /* \n de fin !! */
-       Write_admin ( client->connexion, chaine );
+       buffer = Processer_commande_admin (NULL, ligne);
+       if (buffer)
+        { write ( client->connexion, buffer, strlen(buffer) );
+          g_free(buffer);
+        }
      }
   }
 /**********************************************************************************************************/
