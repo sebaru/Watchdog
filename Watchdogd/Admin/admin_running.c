@@ -181,9 +181,6 @@
        g_snprintf( chaine, sizeof(chaine), " -- Audit de performance\n" );
        g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
 
-       g_snprintf( chaine, sizeof(chaine), " Partage->Top : %d\n", Partage->top );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
-
        g_snprintf( chaine, sizeof(chaine), " Bit/s        : %d\n", Partage->audit_bit_interne_per_sec_hold );
        g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
 
@@ -270,7 +267,7 @@
              g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for library %s (%s)\n",
                          (lib->Thread_debug ? " enabled" : "disabled"),
                          lib->admin_prompt, lib->nom_fichier );
-             Write_admin ( client->connexion, chaine );
+             g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
              liste = liste->next;
            }
           g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for db\n",

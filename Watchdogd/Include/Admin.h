@@ -45,16 +45,11 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Admin.c */
- extern void Admin_modbus ( struct CLIENT_ADMIN *client, gchar *ligne );
  extern void Admin_running ( struct CLIENT *client, gchar *buffer, gchar *ligne );
  extern void Admin_process ( struct CLIENT *client, gchar *buffer, gchar *ligne );
  extern void Admin_dls ( struct CLIENT *client, gchar *buffer, gchar *ligne );
- extern void Admin_onduleur ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Admin_tellstick ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Admin_set ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Admin_get ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Admin_sms ( struct CLIENT_ADMIN *client, gchar *ligne );
- extern void Write_admin ( gint fd, gchar *chaine );
+ extern void Admin_set ( struct CLIENT *client, gchar *buffer, gchar *ligne );
+ extern void Admin_get ( struct CLIENT *client, gchar *buffer, gchar *ligne );
  extern gchar *Processer_commande_admin ( struct CLIENT *client, gchar *commande );
 
 #endif

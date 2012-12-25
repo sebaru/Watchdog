@@ -50,10 +50,7 @@
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S\n" );
     g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
-
-    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
-       
+     
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
     while ( liste_dls )

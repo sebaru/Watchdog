@@ -34,24 +34,24 @@
 /* Entrée: le client et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_get ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_get ( struct CLIENT *client, gchar *buffer, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
+     { g_strlcat ( buffer, "  -- Watchdog ADMIN -- Help du mode 'SET'\n", NBR_CARAC_BUFFER_ADMIN );
 
-       Write_admin ( client->connexion, "  e num                 - Get E[num]\n" );
-       Write_admin ( client->connexion, "  ea num                - Get EA[num]\n" );
-       Write_admin ( client->connexion, "  m num                 - Get M[num]\n" );
-       Write_admin ( client->connexion, "  b num                 - Get B[num]\n" );
-       Write_admin ( client->connexion, "  a num                 - Get A[num]\n" );
-       Write_admin ( client->connexion, "  msg num               - Get MSG[num]\n" );
-       Write_admin ( client->connexion, "  tr num                - Get TR[num]\n" );
-       Write_admin ( client->connexion, "  i num                 - Get I[num]\n" );
-       Write_admin ( client->connexion, "  ci num                - Get CI[num]\n" );
-       Write_admin ( client->connexion, "  ch num                - Get CH[num]\n" );
-       Write_admin ( client->connexion, "  help                  - This help\n" );
+       g_strlcat ( buffer, "  e num                 - Get E[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  ea num                - Get EA[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  m num                 - Get M[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  b num                 - Get B[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  a num                 - Get A[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  msg num               - Get MSG[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  tr num                - Get TR[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  i num                 - Get I[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  ci num                - Get CI[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  ch num                - Get CH[num]\n", NBR_CARAC_BUFFER_ADMIN );
+       g_strlcat ( buffer, "  help                  - This help\n", NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "tr" ) )
      { int num;
@@ -61,7 +61,7 @@
                       num, TR(num), Partage->Tempo_R[num].consigne, Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " TR -> num '%d' out of range\n", num ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num;
@@ -75,7 +75,7 @@
                       Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " I -> num '%d' out of range\n", num ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { int num;
@@ -86,47 +86,45 @@
                       Partage->g[num].last_change, Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range\n", num ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, M(num) );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "ea" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_ENTRE_ANA)
-        { g_snprintf( chaine, sizeof(chaine), " Partage->Top : %d\n", Partage->top );
-          Write_admin ( client->connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine),
+        { g_snprintf( chaine, sizeof(chaine),
                       " EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d, min=%8.2f, max=%8.2f\n",
                       num, EA_ech(num), Partage->ea[num].cmd_type_eana.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
                       Partage->ea[num].cmd_type_eana.type, Partage->ea[num].last_arch, 
                       Partage->ea[num].cmd_type_eana.min, Partage->ea[num].cmd_type_eana.max 
                     );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " EA -> num '%d' out of range\n", num ); }
-       Write_admin ( client->connexion, chaine );
+        { g_snprintf( chaine, sizeof(chaine), " EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, B(num) );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "a" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, A(num) );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "ci" ) )
      { int num;
@@ -139,7 +137,7 @@
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CI -> num '%d' out of range\n", num ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num;
@@ -150,10 +148,10 @@
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range\n", num ); }
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Write_admin ( client->connexion, chaine );
+       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

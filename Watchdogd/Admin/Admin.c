@@ -108,8 +108,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
-  { Write_admin( client->connexion, "\n - Disconnected - \n" );
-    close ( client->connexion );
+  { close ( client->connexion );
     Info_new( Config.log, FALSE, LOG_INFO,
               "Deconnecter_admin : connection closed with client %d", client->connexion );
     Clients = g_slist_remove ( Clients, client );
@@ -149,20 +148,13 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
-/* Write_admin: Envoi la réponse au client                                                                */
-/* Entrée: la chaine de caractère                                                                         */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Write_admin ( gint fd, gchar *chaine )
-  { write ( fd, chaine, strlen(chaine) ); }
-/**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */
 /* Entrée: le client                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  gchar *Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
-  { struct LIBRAIRIE *lib;
-    gchar *buffer, commande[128];
+  { gchar *buffer, commande[128], chaine[256];
+    struct LIBRAIRIE *lib;
     GSList *liste;
 
     if (client)
@@ -181,18 +173,16 @@
        return(NULL);
      }
 
-    g_strlcat ( buffer, "#Request> ", NBR_CARAC_BUFFER_ADMIN );
-    g_strlcat ( buffer, ligne,    NBR_CARAC_BUFFER_ADMIN );
-    g_strlcat ( buffer, "\n",     NBR_CARAC_BUFFER_ADMIN );
+    g_snprintf( chaine, sizeof(chaine), " #Watchdogd*CLI> %s  -- Top = %d\n",
+                ligne, Partage->top );
+    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
 
     sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */
 
             if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, buffer, ligne + 8 ); }
        else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, buffer, ligne + 4 ); }
-#ifdef bouh
-       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( ligne + 4);  }
-#endif
+       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, buffer, ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, buffer, ligne + 4);  }
        else { gboolean found = FALSE;
 #ifdef bouh
               liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
@@ -274,7 +264,7 @@
            { client = (struct CLIENT_ADMIN *)liste->data;
 
              if ( Partage->top > client->last_use + 3000 )    /* Deconnexion = 300 secondes si inactivité */
-              { Write_admin( client->connexion, "timeout\n" );
+              { write( client->connexion, "timeout\n", 9 );
                 Deconnecter_admin ( client ); 
                 liste = Clients;
                 continue;

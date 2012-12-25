@@ -148,9 +148,6 @@
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
        g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
 
-       g_snprintf( chaine, sizeof(chaine), " Partage->top = %d\n", Partage->top );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
-
        for (i=0; i<Config.max_serveur; i++)
         { g_snprintf( chaine, sizeof(chaine), " Built-in SSRV[%d]  -> ------------- running = %s, TID = %d\n", i,
                       (Partage->Sous_serveur[i].Thread_run ? "YES" : " NO"), (gint)Partage->Sous_serveur[i].pid
