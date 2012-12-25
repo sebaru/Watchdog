@@ -86,7 +86,8 @@
     gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );              /* Fonction principale de gestion du thread */
-    void (*Admin_command)( struct CLIENT_ADMIN *client, gchar *ligne );/* Fonction de gestion des commandes d'admin */
+                                                             /* Fonction de gestion des commandes d'admin */
+    void (*Admin_command)( struct CLIENT *client, gchar *ligne );
   };
 
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */

@@ -58,11 +58,7 @@
              { struct CMD_TYPE_ADMIN *admin;
                gchar *response;
                admin = (struct CMD_TYPE_ADMIN *)connexion->donnees;
-               response = Processer_commande_admin ( client, admin->buffer );
-               if (response)
-                { Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_OK, response, strlen(response)+1 );
-                  g_free(response);
-                }
+               Processer_commande_admin ( client, admin->buffer );
              }
             break;
 

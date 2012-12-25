@@ -33,23 +33,23 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_dls_reload ( struct CLIENT *client, gchar *buffer )
+ static void Admin_dls_reload ( struct CLIENT *client )
   { Partage->com_dls.Thread_reload = TRUE;
-    g_strlcat ( buffer, " DLS Reloading in progress\n", NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, " DLS Reloading in progress\n" );
     while (Partage->com_dls.Thread_reload) sched_yield();
-    g_strlcat ( buffer, " DLS Reloading done\n", NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, " DLS Reloading done\n" );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_list ( struct CLIENT *client, gchar *buffer )
+ static void Admin_dls_list ( struct CLIENT *client )
   { GList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S\n" );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
      
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
@@ -59,7 +59,7 @@
 
        g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, conso=%4.03f, nom=%s\n",
                            dls->plugindb.id, dls->plugindb.on, dls->conso, dls->plugindb.nom );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
        liste_dls = liste_dls->next;
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -69,12 +69,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_gcc ( struct CLIENT *client, gchar *buffer, gint id )
+ static void Admin_dls_gcc ( struct CLIENT *client, gint id )
   { GList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
 
     if (id == -1)
      { liste_dls = Partage->com_dls.Plugins;
@@ -83,18 +83,18 @@
           dls = (struct PLUGIN_DLS *)liste_dls->data;
 
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
           Compiler_source_dls ( NULL, dls->plugindb.id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
         }
        liste_dls = liste_dls->next;
      } else
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
           Compiler_source_dls ( NULL, id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
         }
   }
 /**********************************************************************************************************/
@@ -102,12 +102,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_start ( struct CLIENT *client, gchar *buffer, gint id )
+ static void Admin_dls_start ( struct CLIENT *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un plugin D.L.S\n" );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
 
     while (Partage->com_dls.admin_start) sched_yield();
     Partage->com_dls.admin_start = id;
@@ -131,19 +131,19 @@
     Libere_DB_SQL( Config.log, &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d started\n", id );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_stop ( struct CLIENT *client, gchar *buffer, gint id )
+ static void Admin_dls_stop ( struct CLIENT *client, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " -- Arret d'un plugin D.L.S\n" );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
 
     while (Partage->com_dls.admin_stop) sched_yield();
     Partage->com_dls.admin_stop = id;
@@ -167,14 +167,14 @@
     Libere_DB_SQL( Config.log, &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d stopped\n", id );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_dls: Appellée lorsque l'admin envoie une commande en mode dls dans la ligne de commande          */
 /* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_dls ( struct CLIENT *client, gchar *buffer, gchar *ligne )
+ void Admin_dls ( struct CLIENT *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -182,36 +182,36 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_dls_start ( client, buffer, num );
+       Admin_dls_start ( client, num );
      }
     else if ( ! strcmp ( commande, "gcc" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_dls_gcc ( client, buffer, num );
+       Admin_dls_gcc ( client, num );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_dls_stop ( client, buffer, num );
+       Admin_dls_stop ( client, num );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_dls_list ( client, buffer );
+     { Admin_dls_list ( client );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_dls_reload(client, buffer);
+     { Admin_dls_reload( client );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { g_strlcat ( buffer, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  start id                               - Demarre le module id\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  stop id                                - Stop le module id\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  list                                   - D.L.S. Status\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  gcc id                                 - Compile le plugin id (-1 for all)\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  reload                                 - Recharge la configuration\n", NBR_CARAC_BUFFER_ADMIN );
+     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n" );
+       Admin_write ( client, "  start id                               - Demarre le module id\n" );
+       Admin_write ( client, "  stop id                                - Stop le module id\n" );
+       Admin_write ( client, "  list                                   - D.L.S. Status\n" );
+       Admin_write ( client, "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
+       Admin_write ( client, "  reload                                 - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown DLS command : %s\n", ligne );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

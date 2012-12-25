@@ -34,29 +34,29 @@
 /* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_running ( struct CLIENT *client, gchar *buffer, gchar *ligne )
+ void Admin_running ( struct CLIENT *client, gchar *ligne )
   { struct LIBRAIRIE *lib;
     GSList *liste;
     gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { g_strlcat ( buffer, "  -- Watchdog ADMIN -- Help du mode 'running'\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  ident                 - ID du serveur Watchdog\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  ping                  - Ping Watchdog\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  audit                 - Audit bit/s\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  ssrv                  - SousServers Status\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  client                - Client Status\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  kick nom_machine      - Kick client nom@machine\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  clear_histo           - Clear Histo DB\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  get                   - Sous-menu de lecture des bits internes\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  set                   - Sous-menu d'affectation des bits internes\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  msgs message          - Envoi d'un message a tous les clients\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  setrootpasswd         - Set the Watchdog root password\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  modbus                - Sous-menu de gestion des equipements MODBUS\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  dls                   - D.L.S. Status\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n", NBR_CARAC_BUFFER_ADMIN );
-       g_strlcat ( buffer, "  log switch            - Switch log (list, all, none, process name or library name)\n", NBR_CARAC_BUFFER_ADMIN );
+     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
+       Admin_write ( client, "  ident                 - ID du serveur Watchdog\n" );
+       Admin_write ( client, "  ping                  - Ping Watchdog\n" );
+       Admin_write ( client, "  audit                 - Audit bit/s\n" );
+       Admin_write ( client, "  ssrv                  - SousServers Status\n" );
+       Admin_write ( client, "  client                - Client Status\n" );
+       Admin_write ( client, "  kick nom_machine      - Kick client nom@machine\n" );
+       Admin_write ( client, "  clear_histo           - Clear Histo DB\n" );
+       Admin_write ( client, "  get                   - Sous-menu de lecture des bits internes\n" );
+       Admin_write ( client, "  set                   - Sous-menu d'affectation des bits internes\n" );
+       Admin_write ( client, "  msgs message          - Envoi d'un message a tous les clients\n" );
+       Admin_write ( client, "  setrootpasswd         - Set the Watchdog root password\n" );
+       Admin_write ( client, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
+       Admin_write ( client, "  dls                   - D.L.S. Status\n" );
+       Admin_write ( client, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n" );
+       Admin_write ( client, "  log switch            - Switch log (list, all, none, process name or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -66,28 +66,28 @@
           memcpy ( chaine + 24, "-", 1 );
           memcpy ( chaine + 26, lib->admin_help, strlen(lib->admin_help) );
           memcpy ( chaine + 26 + strlen(lib->admin_help), "\n", 2 );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
           liste = liste->next;
         }
 
-       g_strlcat ( buffer, "  help                  - This help\n", NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
        gethostname( nom, sizeof(nom) );
        g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
      } else
     if ( ! strcmp ( commande, "ssrv" ) )
      { int i;
 
        g_snprintf( chaine, sizeof(chaine), " Jeton au SSRV %02d\n", Partage->jeton );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        for (i=0; i<Config.max_serveur; i++)
         { g_snprintf( chaine, sizeof(chaine), " SSRV[%02d] -> %02d clients\n",
                       i, Partage->Sous_serveur[i].nb_client );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
         }
      } else
     if ( ! strcmp ( commande, "client" ) )
@@ -95,7 +95,7 @@
        gint i;
         
        g_snprintf( chaine, sizeof(chaine), " -- Liste des clients connectés au serveur\n" );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
 
@@ -108,7 +108,7 @@
               g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s",
                           i, client_srv->ident.version, client_srv->util->nom, client_srv->machine,
                           client_srv->mode, client_srv->defaut, ctime(&client_srv->date_connexion) );
-              g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );     /* ctime ajoute un \n à la fin !! */
+              Admin_write ( client, chaine );     /* ctime ajoute un \n à la fin !! */
 
               liste = liste->next;
             }
@@ -120,7 +120,7 @@
        gint i;
 
        g_snprintf( chaine, sizeof(chaine), " -- Liste des clients recevant le message\n" );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
        for (i=0; i<Config.max_serveur; i++)
          { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
            liste = Partage->Sous_serveur[i].Clients;
@@ -135,7 +135,7 @@
 
               g_snprintf( chaine, sizeof(chaine), " - %s@%s\n",
                           client_wat->util->nom, client_wat->machine );
-              g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+              Admin_write ( client, chaine );
               liste = liste->next;
             }
          }
@@ -150,7 +150,7 @@
        db = Init_DB_SQL( Config.log );
        if (!db)
         { g_snprintf( chaine, sizeof(chaine), " Unable to connect to Database\n" );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
         }
        else
         { util.id = 0;
@@ -167,49 +167,49 @@
            { g_snprintf( chaine, sizeof(chaine), " Password set\n" ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
           Libere_DB_SQL( Config.log, &db );
         }
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )
      { Clear_histoDB ();                                            /* Clear de la table histo au boot */
        g_snprintf( chaine, sizeof(chaine), " HistoDB cleared\n" );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
      } else
     if ( ! strcmp ( commande, "audit" ) )
      { gint num;
        g_snprintf( chaine, sizeof(chaine), " -- Audit de performance\n" );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Bit/s        : %d\n", Partage->audit_bit_interne_per_sec_hold );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Tour/s       : %d\n", Partage->audit_tour_dls_per_sec_hold );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_i );                  /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), " Distribution des I      : reste %d\n", num );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg_off );            /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), " Distribution des Msg OFF: reste %d\n", num );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg_on );             /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), " Distribution des Msg ON : reste %d\n", num );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                    /* liste des repeat */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), "          MSgs en REPEAT : reste %d\n", num );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
        
      } else
     if ( ! strcmp ( commande, "log_level" ) )
@@ -227,7 +227,7 @@
        if ( ! strcmp ( debug, "error"   ) )
         { Info_change_log_level ( Config.log, LOG_ERR     ); }
        else g_snprintf( chaine, sizeof(chaine), " -- Unknown log level %s\n", debug );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
      } else
     if ( ! strcmp ( commande, "log" ) )
      { gchar debug[128];
@@ -243,7 +243,7 @@
              lib->Thread_debug = TRUE;
              g_snprintf( chaine, sizeof(chaine), "  -> Log enabled for library %s (%s)\n",
                          lib->admin_prompt, lib->nom_fichier );
-             g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+             Admin_write ( client, chaine );
              liste = liste->next;
            }
         } else
@@ -256,7 +256,7 @@
              lib->Thread_debug = FALSE;
              g_snprintf( chaine, sizeof(chaine), "  -> Log disabled for library %s (%s)\n",
                          lib->admin_prompt, lib->nom_fichier );
-             g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+             Admin_write ( client, chaine );
              liste = liste->next;
            }
         } else
@@ -267,22 +267,22 @@
              g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for library %s (%s)\n",
                          (lib->Thread_debug ? " enabled" : "disabled"),
                          lib->admin_prompt, lib->nom_fichier );
-             g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+             Admin_write ( client, chaine );
              liste = liste->next;
            }
           g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
           g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for all\n",
                       (Config.log_all ? " enabled" : "disabled") );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
         } else
        if ( ! strcmp ( debug, "db"   ) )
         { if (Config.log_db == TRUE) Config.log_db = FALSE;
           else Config.log_db = TRUE;
           g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
-          g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+          Admin_write ( client, chaine );
         }
        else
         { liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
@@ -299,26 +299,26 @@
                    g_snprintf( chaine, sizeof(chaine), "  -> Log enabled for library %s (%s)\n",
                                lib->admin_prompt, lib->nom_fichier );
                  } 
-                g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+                Admin_write ( client, chaine );
                 break;
               }
              liste = liste->next;
            }
           if ( liste == NULL )                                       /* Si l'on a pas trouve de librairie */
            { g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch\n" );
-             g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+             Admin_write ( client, chaine );
            }
         }
      } else
     if ( ! strcmp ( commande, "ping" ) )
-     { g_strlcat ( buffer, " Pong !\n", NBR_CARAC_BUFFER_ADMIN );
+     { Admin_write ( client, " Pong !\n" );
      } else
     if ( ! strcmp ( commande, "nocde" ) )
      { g_snprintf( chaine, sizeof(chaine), "\n" );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+       Admin_write ( client, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

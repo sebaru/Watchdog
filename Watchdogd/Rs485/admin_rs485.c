@@ -34,31 +34,31 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_rs485_reload ( struct CLIENT_ADMIN *client )
+ static void Admin_rs485_reload ( struct CLIENT *client )
   { if (Cfg_rs485.lib->Thread_run == FALSE)
-     { Write_admin ( client->connexion, " Thread RS485 is not running\n" );
+     { Admin_write ( client, " Thread RS485 is not running\n" );
        return;
      }
     
     Cfg_rs485.reload = TRUE;
-    Write_admin ( client->connexion, " RS485 Reloading in progress\n" );
+    Admin_write ( client, " RS485 Reloading in progress\n" );
     while (Cfg_rs485.reload) sched_yield();
-    Write_admin ( client->connexion, " RS485 Reloading done\n" );
+    Admin_write ( client, " RS485 Reloading done\n" );
   }
 /**********************************************************************************************************/
 /* Admin_rs485_list: Envoi la liste des modules chargés au client d'admin                                 */
 /* Entrée: Le client destinataire                                                                         */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_list ( struct CLIENT_ADMIN *client )
+ static void Admin_rs485_list ( struct CLIENT *client )
   { GSList *liste_modules;
     gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules RS485\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
        
     pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     liste_modules = Cfg_rs485.Modules_RS485;
@@ -80,7 +80,7 @@
                    (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1),
                    module->nbr_deconnect
                  );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
@@ -90,14 +90,14 @@
 /* Entrée: le client et l'id                                                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_del ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_rs485_del ( struct CLIENT *client, gint id )
   { struct MODULE_RS485 *module;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rs485 %02d\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     module = Chercher_module_rs485_by_id ( id );
     if (!module)
@@ -110,86 +110,86 @@
        else
         { g_snprintf( chaine, sizeof(chaine), " Error. Module %02d is NOT erased.\n", id ); }
      }
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rs485_add: Ajoute un capteur/module RS485                                                        */
 /* Entrée: le client et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_add ( struct CLIENT_ADMIN *client, struct RS485DB *rs485 )
+ static void Admin_rs485_add ( struct CLIENT *client, struct RS485DB *rs485 )
   { gchar chaine[128];
     gint last_id;
 
     g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rs485\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     last_id = Ajouter_rs485DB( rs485 );
     if ( last_id != -1 )
      { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n", last_id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rs485_change: Modifie la configuration d'un capteur RS485                                        */
 /* Entrée: le client et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_change ( struct CLIENT_ADMIN *client, struct RS485DB *rs485 )
+ static void Admin_rs485_change ( struct CLIENT *client, struct RS485DB *rs485 )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rs485\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     if ( Modifier_rs485DB( rs485 ) )
      { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n", rs485->id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rs485_start: Demande le demarrage du traitement du module en paremetre                           */
 /* Entrée: Le client demandeur, l'id du module                                                            */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_start ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_rs485_start ( struct CLIENT *client, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module RS485\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     Cfg_rs485.admin_start = id;
 
     g_snprintf( chaine, sizeof(chaine), " Module RS485 %d started\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rs485_stop: Demande l'arret du traitement du module en paremetre                                 */
 /* Entrée: Le client demandeur, l'id du module                                                            */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_stop ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_rs485_stop ( struct CLIENT *client, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module RS485\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     Cfg_rs485.admin_stop = id;
 
     g_snprintf( chaine, sizeof(chaine), " Module RS485 %d stopped\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
 /* Entrée: Le client d'admin, la ligne a traiter                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command ( struct CLIENT *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -240,31 +240,21 @@
      { Admin_rs485_reload(client);
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
-       Write_admin ( client->connexion,
-                     "  add num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
-       Write_admin ( client->connexion,
-                     "                                         - Ajoute un module RS485\n" );
-       Write_admin ( client->connexion,
-                     "  change id,num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
-       Write_admin ( client->connexion,
-                     "                                         - Modifie le module id\n" );
-       Write_admin ( client->connexion,
-                     "  del id                                 - Retire le module id\n" );
-       Write_admin ( client->connexion,
-                     "  start id                               - Demarre le module id\n" );
-       Write_admin ( client->connexion,
-                     "  stop id                                - Demarre le module id\n" );
-       Write_admin ( client->connexion,
-                     "  list                                   - Affiche les status des equipements RS485\n" );
-       Write_admin ( client->connexion,
-                     "  reload                                 - Recharge les modules en memoire\n" );
+     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
+       Admin_write ( client, "  add num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
+       Admin_write ( client, "                                         - Ajoute un module RS485\n" );
+       Admin_write ( client, "  change id,num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
+       Admin_write ( client, "                                         - Modifie le module id\n" );
+       Admin_write ( client, "  del id                                 - Retire le module id\n" );
+       Admin_write ( client, "  start id                               - Demarre le module id\n" );
+       Admin_write ( client, "  stop id                                - Demarre le module id\n" );
+       Admin_write ( client, "  list                                   - Affiche les status des equipements RS485\n" );
+       Admin_write ( client, "  reload                                 - Recharge les modules en memoire\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown RS485 command : %s\n", ligne );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

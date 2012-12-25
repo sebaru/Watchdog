@@ -148,11 +148,19 @@
     return(FALSE);
   }
 /**********************************************************************************************************/
+/* Admin_write : Concatene la chaine en parametre dans le buffer de reponse                               */
+/* Entrée : le buffer et la chaine                                                                        */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Admin_write ( struct CLIENT *client, gchar *response )
+  { Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_OK, response, strlen(response)+1 );
+  }
+/**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */
 /* Entrée: le client                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- gchar *Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
+ void Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
   { gchar *buffer, commande[128], chaine[256];
     struct LIBRAIRIE *lib;
     GSList *liste;
@@ -165,26 +173,20 @@
      { Info_new( Config.log, Config.log_all, LOG_NOTICE,
                  "Processer_commande_admin: Commande Received from localuser : %s",
                  ligne );
-     }
-
-    buffer = (gchar *)g_try_malloc0 ( NBR_CARAC_BUFFER_ADMIN );
-    if (!buffer)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Processer_commande_admin: Memory error" );
-       return(NULL);
+return;
      }
 
     g_snprintf( chaine, sizeof(chaine), " #Watchdogd*CLI> %s  -- Top = %d\n",
                 ligne, Partage->top );
-    g_strlcat ( buffer, chaine, NBR_CARAC_BUFFER_ADMIN );
+    Admin_write ( client, chaine );
 
     sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, buffer, ligne + 8 ); }
-       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, buffer, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, buffer, ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, buffer, ligne + 4);  }
+            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
+       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
+       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
        else { gboolean found = FALSE;
-#ifdef bouh
               liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
               while(liste)
                { lib = (struct LIBRAIRIE *)liste->data;
@@ -194,11 +196,8 @@
                   }
                  liste = liste->next;
                }
-#endif
-              if (found == FALSE) { Admin_running ( client, buffer, ligne ); }
+              if (found == FALSE) { Admin_running ( client, ligne ); }
             }
-    g_strlcat ( buffer, "\n", NBR_CARAC_BUFFER_ADMIN );
-    return(buffer);
   }
 /**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */
@@ -216,11 +215,7 @@
      { ligne[taille] = 0;
 
        client->last_use = Partage->top;
-       buffer = Processer_commande_admin (NULL, ligne);
-       if (buffer)
-        { write ( client->connexion, buffer, strlen(buffer) );
-          g_free(buffer);
-        }
+       Processer_commande_admin (NULL, ligne);
      }
   }
 /**********************************************************************************************************/

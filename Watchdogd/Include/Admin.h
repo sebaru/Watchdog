@@ -45,12 +45,13 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Admin.c */
- extern void Admin_running ( struct CLIENT *client, gchar *buffer, gchar *ligne );
- extern void Admin_process ( struct CLIENT *client, gchar *buffer, gchar *ligne );
- extern void Admin_dls ( struct CLIENT *client, gchar *buffer, gchar *ligne );
- extern void Admin_set ( struct CLIENT *client, gchar *buffer, gchar *ligne );
- extern void Admin_get ( struct CLIENT *client, gchar *buffer, gchar *ligne );
- extern gchar *Processer_commande_admin ( struct CLIENT *client, gchar *commande );
+ extern void Admin_running ( struct CLIENT *client, gchar *ligne );
+ extern void Admin_process ( struct CLIENT *client, gchar *ligne );
+ extern void Admin_dls ( struct CLIENT *client, gchar *ligne );
+ extern void Admin_set ( struct CLIENT *client, gchar *ligne );
+ extern void Admin_get ( struct CLIENT *client, gchar *ligne );
+ extern void Admin_write ( struct CLIENT *client, gchar *chaine );
+ extern void Processer_commande_admin ( struct CLIENT *client, gchar *commande );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
