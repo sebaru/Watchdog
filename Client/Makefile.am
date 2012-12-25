@@ -43,7 +43,7 @@ Watchdog_client_LDADD  = $(top_srcdir)/Commun/libwatchdog.la \
                          Config_cli/libconfig_cli.la \
                          $(GNOME2_LIBS) -lm
 
-Watchdog_client_LDFLAGS = `pkg-config --libs openssl`
+#Watchdog_client_LDFLAGS = `pkg-config --libs openssl`
 
 INCLUDES=$(GNOME_INCLUDEDIR) `pkg-config --cflags openssl` -I$(top_srcdir)/Include \
                              -IInclude \

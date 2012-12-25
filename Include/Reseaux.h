@@ -52,8 +52,9 @@
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
  /********* Codes reconnaissances applications **********/
- #define W_SERVEUR     1
- #define W_CLIENT      2
+ #define W_SERVEUR       1
+ #define W_CLIENT        2
+ #define W_CLIENT_ADMIN  3
 
  struct ENTETE_CONNEXION
   { /*gint  emetteur;  Reduction bande passante

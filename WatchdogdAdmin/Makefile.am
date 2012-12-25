@@ -7,6 +7,7 @@ SUBDIRS =
 
 bin_PROGRAMS = WatchdogdAdmin
 WatchdogdAdmin_SOURCES = WatchdogdAdmin.c
+WatchdogdAdmin_LDADD   = $(top_srcdir)/Commun/libwatchdog.la
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \

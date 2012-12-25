@@ -12,7 +12,7 @@ libwatchdog_la_SOURCES = Erreur.c Version.c
 libwatchdog_la_LIBADD  = Reseaux/librezo.la
 # Trame/libtrame.la
 
-libwatchdog_la_LDFLAGS = -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
+libwatchdog_la_LDFLAGS = `pkg-config --libs openssl` -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
 
 INCLUDES=$(GLIB_CFLAGS) -I$(top_srcdir)/Include
 MAINTAINERCLEANFILES = Makefile.in

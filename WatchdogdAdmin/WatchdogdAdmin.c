@@ -38,11 +38,21 @@
  #include <readline/readline.h>
  #include <readline/history.h>
 
+ #include "Reseaux.h"
  #include "config.h"
 
- static gint Socket, wait_reponse;                                             /* Socket d'administration */
+ static struct CONNEXION *Connexion;                                              /* connexion au serveur */
+/* static gint Socket, wait_reponse;                                             /* Socket d'administration */
  static gchar Socket_file[128];
 
+/**********************************************************************************************************/
+/* Deconnecter_admin: Ferme la socket admin                                                               */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Deconnecter_admin ( void )
+  { Fermer_connexion( Connexion );
+  }
 /**********************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                           */
 /* Entrée: une nom et un password                                                                         */
@@ -65,10 +75,20 @@
        close(connexion);
        return(FALSE);
      }
+
+    Connexion = Nouvelle_connexion( NULL, connexion,
+                                    W_CLIENT_ADMIN, 8192 );
+    if (!Connexion)
+     { printf("Not enough memory to open connexion\n");
+       return(FALSE);       
+     }
+
+#ifdef bouh
   fcntl( connexion, F_SETFL, O_ASYNC | O_NONBLOCK );/* Mode non bloquant, ça aide pour une telle application */
   fcntl( connexion, F_SETOWN, getpid() );     /* Mode non bloquant, ça aide pour une telle application */
-
     Socket = connexion;
+#endif
+
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -117,7 +137,7 @@
  static void Traitement_signaux( int num )
   { static gint nbr_slash_n = 0;
     gchar reponse[2];
-    gint taille;
+    gint taille, recu;
     
 
     switch (num)
@@ -128,16 +148,22 @@
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
-       case SIGIO:   while ( (taille = read( Socket, reponse, 1 )) > 0 )
-                      { reponse[taille] = 0;
-                        printf("%s", reponse );
-                        if (wait_reponse == FALSE)                  /* message non sollicité du serveur ? */
-                         { _exit(0); }
-                        if (reponse[0] == '\n')
-                         { if (nbr_slash_n == 1) { wait_reponse = FALSE; nbr_slash_n = 0; }
-                           else nbr_slash_n++;
-                         } else nbr_slash_n = 0;
+       case SIGIO:   recu = Recevoir_reseau( Connexion );
+                     if (recu==RECU_OK)
+                      { if ( Reseau_tag(Connexion) == TAG_ADMIN && Reseau_ss_tag (Connexion) == SSTAG_SERVEUR_RESPONSE_OK )
+                         { struct CMD_TYPE_ADMIN *admin;
+                           admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
+                           printf("Received %s\n", admin->buffer );
+                         } else
+                        { printf( "Ecouter_admin: Wrong TAG\n" ); }
                       }
+                     else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
+                      { switch( recu )
+                         { case RECU_ERREUR_CONNRESET: printf ( "Ecouter_admin: Reset connexion\n" );
+                                                       break;
+                         }
+                       Deconnecter_admin ();
+                      }             
                      fflush(stdout);
                      break;
        default: printf ("Recu signal %d ", num ); break;
@@ -170,17 +196,19 @@
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
 
-    write ( Socket, "ident", 6 );             /* Demande l'envoi de la chaine d'identification du serveur */
-    wait_reponse = TRUE;                               /* Précisons que l'on attend la réponse du serveur */
+/*    write ( Socket, "ident", 6 );             /* Demande l'envoi de la chaine d'identification du serveur */
+ /*   wait_reponse = TRUE;                               /* Précisons que l'on attend la réponse du serveur */
 
     for ( ; ; )
-     { while (wait_reponse != FALSE);
+     { /*while (wait_reponse != FALSE);*/
        commande = readline ("#Watchdogd*CLI> ");
+#ifdef bouh
        if (!commande)
         { write ( Socket, "nocde", strlen("nocde")+1 );
           fsync(Socket);                                                             /* Flush la sortie ! */
           continue;
         }
+#endif
 
        taille = strlen(commande);
        if ( taille )
@@ -192,15 +220,18 @@
 
           if ( ! strncmp ( commande, "quit", taille ) ) break;                           /* On s'arrete ? */
           else
-           { write ( Socket, commande, taille );
-             fsync(Socket);                                                          /* Flush la sortie ! */
-             wait_reponse = TRUE;                      /* Précisons que l'on attend la réponse du serveur */
+           { struct CMD_TYPE_ADMIN admin;
+             g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", commande );
+             Envoyer_reseau( Connexion, W_SERVEUR, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
+                             (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
+/*           fsync(Socket);                                                          /* Flush la sortie ! */
+/*           wait_reponse = TRUE;                      /* Précisons que l'on attend la réponse du serveur */
            }
         }
        g_free (commande);
      }
 
-    close( Socket );
+    Fermer_connexion ( Connexion );
     write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
     return(0);
   }

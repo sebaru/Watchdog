@@ -32,31 +32,31 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_ups_reload ( struct CLIENT_ADMIN *client )
+ static void Admin_ups_reload ( struct CLIENT *client )
   { if (Cfg_ups.lib->Thread_run == FALSE)
-     { Write_admin ( client->connexion, " Thread ONDULEUR is not running\n" );
+     { Admin_write ( client, " Thread ONDULEUR is not running\n" );
        return;
      }
     
     Cfg_ups.reload = TRUE;
-    Write_admin ( client->connexion, " ONDULEUR Reloading in progress\n" );
+    Admin_write ( client, " ONDULEUR Reloading in progress\n" );
     while (Cfg_ups.reload) sched_yield();
-    Write_admin ( client->connexion, " ONDULEUR Reloading done\n" );
+    Admin_write ( client, " ONDULEUR Reloading done\n" );
   }
 /**********************************************************************************************************/
 /* Admin_ups_list : L'utilisateur admin lance la commande "list" en mode ups                              */
 /* Entrée: La connexion client ADMIN                                                                      */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
- static void Admin_ups_list ( struct CLIENT_ADMIN *client )
+ static void Admin_ups_list ( struct CLIENT *client )
   { GSList *liste_modules;
     gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des UPS\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
        
     pthread_mutex_lock ( &Cfg_ups.lib->synchro );
     liste_modules = Cfg_ups.Modules_UPS;
@@ -72,7 +72,7 @@
                    module->nbr_deconnect, (int)module->date_retente, module->ups.bit_comm,
                    module->ups.ea_min, module->ups.e_min, module->ups.a_min
                  );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
@@ -82,39 +82,39 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_ups_start ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_ups_start ( struct CLIENT *client, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module UPS\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     Cfg_ups.admin_start = id;
 
     g_snprintf( chaine, sizeof(chaine), " Module UPS %d started\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_ups_stop ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_ups_stop ( struct CLIENT *client, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module UPS\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     Cfg_ups.admin_stop = id;
 
     g_snprintf( chaine, sizeof(chaine), " Module UPS %d stopped\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command ( struct CLIENT *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -144,11 +144,11 @@
               );
        retour = Ajouter_upsDB ( &ups );
        if (retour == -1)
-        { Write_admin ( client->connexion, "Error, UPS not added\n" ); }
+        { Admin_write ( client, "Error, UPS not added\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
-          Write_admin ( client->connexion, chaine );
+          Admin_write ( client, chaine );
         }
      }
     else if ( ! strcmp ( commande, "change" ) )
@@ -160,11 +160,11 @@
               );
        retour = Modifier_upsDB ( &ups );
        if (retour == FALSE)
-        { Write_admin ( client->connexion, "Error, UPS not changed\n" ); }
+        { Admin_write ( client, "Error, UPS not changed\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s changed\n", ups.ups );
-          Write_admin ( client->connexion, chaine );
+          Admin_write ( client, chaine );
         }
      }
     else if ( ! strcmp ( commande, "del" ) )
@@ -173,39 +173,29 @@
        sscanf ( ligne, "%s %d", commande, &ups.id );                 /* Découpage de la ligne de commande */
        retour = Retirer_upsDB ( &ups );
        if (retour == FALSE)
-        { Write_admin ( client->connexion, "Error, UPS not erased\n" ); }
+        { Admin_write ( client, "Error, UPS not erased\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
-          Write_admin ( client->connexion, chaine );
+          Admin_write ( client, chaine );
         }
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
-       Write_admin ( client->connexion,
-                     "  add name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
-       Write_admin ( client->connexion,
-                     "                                         - Ajoute un UPS\n" );
-       Write_admin ( client->connexion,
-                     "  change id,name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
-       Write_admin ( client->connexion,
-                     "                                         - Change UPS id\n" );
-       Write_admin ( client->connexion,
-                     "  del id                                 - Delete UPS id\n" );
-       Write_admin ( client->connexion,
-                     "  start id                               - Start UPS id\n" );
-       Write_admin ( client->connexion,
-                     "  stop id                                - Stop UPS id\n" );
-       Write_admin ( client->connexion,
-                     "  list                                   - Liste les modules ONDULEUR\n" );
-       Write_admin ( client->connexion,
-                     "  reload                                 - Recharge la configuration\n" );
+     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
+       Admin_write ( client, "  add name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
+       Admin_write ( client, "                                         - Ajoute un UPS\n" );
+       Admin_write ( client, "  change id,name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
+       Admin_write ( client, "                                         - Change UPS id\n" );
+       Admin_write ( client, "  del id                                 - Delete UPS id\n" );
+       Admin_write ( client, "  start id                               - Start UPS id\n" );
+       Admin_write ( client, "  stop id                                - Stop UPS id\n" );
+       Admin_write ( client, "  list                                   - Liste les modules ONDULEUR\n" );
+       Admin_write ( client, "  reload                                 - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown NUT command : %s\n", ligne );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -107,10 +107,11 @@
 /* Entrée: le client                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Deconnecter_admin ( struct CLIENT_ADMIN *client )
-  { close ( client->connexion );
+ static void Deconnecter_admin ( struct CLIENT *client )
+  { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
+    Fermer_connexion( client->connexion );
     Info_new( Config.log, FALSE, LOG_INFO,
-              "Deconnecter_admin : connection closed with client %d", client->connexion );
+              "Deconnecter_admin : connection closed with client %d", client->connexion->socket );
     Clients = g_slist_remove ( Clients, client );
     g_free(client);
   }
@@ -120,7 +121,7 @@
 /* Sortie: TRUE si un nouveau client est arrivé                                                           */
 /**********************************************************************************************************/
  static gboolean Accueillir_un_admin( gint ecoute )
-  { struct CLIENT_ADMIN *client;
+  { struct CLIENT *client;
     struct sockaddr_un distant;
     guint taille_distant, id;
  
@@ -129,16 +130,23 @@
      { Info_new( Config.log, FALSE, LOG_INFO,
                  "Accueillir_un_admin: Connexion wanted. ID=%d", id );
 
-       client = g_try_malloc0( sizeof(struct CLIENT_ADMIN) );/* On alloue donc une nouvelle structure cliente */
+       client = g_try_malloc0( sizeof(struct CLIENT) );  /* On alloue donc une nouvelle structure cliente */
        if (!client) { Info_new( Config.log, FALSE, LOG_ERR,
                                 "Accueillir_un_admin: Not enought memory to connect client %d", id );
                       close(id);
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
                     }
 
-       client->connexion = id;
-       client->last_use = Partage->top;
-       fcntl( client->connexion, F_SETFL, O_NONBLOCK );                              /* Mode non bloquant */
+       client->connexion = Nouvelle_connexion( Config.log, id,
+                                               W_SERVEUR, Config.taille_bloc_reseau );
+
+       if (!client->connexion)
+        { Info_new( Config.log, FALSE, LOG_ERR,
+                   "Accueillir_un_admin: Not enought memory for %d", id );
+          close(id);
+          g_free( client );
+          return(FALSE);
+        }
 
        Clients = g_slist_prepend( Clients, client );
        Info_new( Config.log, FALSE, LOG_INFO,
@@ -161,7 +169,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
-  { gchar *buffer, commande[128], chaine[256];
+  { gchar commande[128], chaine[256];
     struct LIBRAIRIE *lib;
     GSList *liste;
 
@@ -204,19 +212,26 @@ return;
 /* Entrée: le client                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Ecouter_admin ( struct CLIENT_ADMIN *client )
-  { gchar ligne[128], *buffer;
-    gint taille;
+ static void Ecouter_admin ( struct CLIENT *client )
+  { gint recu;
 
-    memset( ligne, 0, sizeof(ligne) );
-    taille = read( client->connexion, ligne, sizeof(ligne) );
-
-    if (taille > 0)
-     { ligne[taille] = 0;
-
-       client->last_use = Partage->top;
-       Processer_commande_admin (NULL, ligne);
+    recu = Recevoir_reseau( client->connexion );
+    if (recu==RECU_OK)
+     { if ( Reseau_tag(client->connexion) == TAG_ADMIN && Reseau_ss_tag (client->connexion) == SSTAG_CLIENT_REQUEST )
+        { struct CMD_TYPE_ADMIN *admin;
+          admin = (struct CMD_TYPE_ADMIN *)client->connexion->donnees;
+          Processer_commande_admin ( client, admin->buffer );
+        } else
+        { Info_new( Config.log, FALSE, LOG_DEBUG, "Ecouter_admin: Wrong TAG" ); }
      }
+    else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
+     { switch( recu )
+        { case RECU_ERREUR_CONNRESET: Info_new( Config.log, FALSE, LOG_DEBUG,
+                                               "Ecouter_admin: Reset connexion" );
+                                      break;
+        }
+       Deconnecter_admin ( client );
+     }             
   }
 /**********************************************************************************************************/
 /* Run_admin: Ecoute les commandes d'admin locale et les traite                                           */
@@ -251,20 +266,20 @@ return;
        Accueillir_un_admin( Fd_ecoute );                  /* Accueille les nouveaux admin */
 
        if ( Clients )                                          /* Ecoutons nos clients */
-        { struct CLIENT_ADMIN *client;
+        { struct CLIENT *client;
           GSList *liste;
 
           liste = Clients;
           while (liste)
-           { client = (struct CLIENT_ADMIN *)liste->data;
-
+           { client = (struct CLIENT *)liste->data;
+#ifdef bouh
              if ( Partage->top > client->last_use + 3000 )    /* Deconnexion = 300 secondes si inactivité */
               { write( client->connexion, "timeout\n", 9 );
                 Deconnecter_admin ( client ); 
                 liste = Clients;
                 continue;
               }
-
+#endif
              Ecouter_admin( client );
              liste = liste->next;
            }
@@ -274,8 +289,8 @@ return;
      }
 
     while(Clients)                                                    /* Parcours de la liste des clients */
-     { struct CLIENT_ADMIN *client;                                   /* Deconnection de tous les clients */
-       client = (struct CLIENT_ADMIN *)Clients->data;
+     { struct CLIENT *client;                                   /* Deconnection de tous les clients */
+       client = (struct CLIENT *)Clients->data;
        Deconnecter_admin ( client );
      }
 

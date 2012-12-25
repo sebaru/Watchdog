@@ -182,7 +182,7 @@
      { Info_new( Config.log, Config.log_all, LOG_INFO,
                 "Accueillir_nouveaux_client: Connexion wanted. ID=%d", id );
 
-       client = g_try_malloc0( sizeof(struct CLIENT) );      /* On alloue donc une nouvelle structure cliente */
+       client = g_try_malloc0( sizeof(struct CLIENT) );  /* On alloue donc une nouvelle structure cliente */
        if (!client) { Info_new( Config.log, Config.log_all, LOG_ERR,
                                "Accueillir_nouveaux_client: Not enought memory to connect %d", id );
                       close(id);
@@ -227,8 +227,8 @@
           Partage->Sous_serveur[ss_id].nb_client++;                   /* Nous gerons un client de plus !! */
           if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
                            else Client_mode( client, ATTENTE_IDENT );
+          return(TRUE);
         }
-       return(TRUE);
      }
     return(FALSE);
   }
