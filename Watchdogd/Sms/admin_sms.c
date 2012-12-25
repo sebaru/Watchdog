@@ -34,32 +34,32 @@
 /* Entrée: le client et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command ( struct CLIENT *client, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
-       Write_admin ( client->connexion, "  sms smsbox message    - Send 'message' via smsbox\n" );
-       Write_admin ( client->connexion, "  sms gsm    message    - Send 'message' via gsm\n" );
-       Write_admin ( client->connexion, "  help                  - This help\n" );
+     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
+       Admin_write ( client, "  sms smsbox message    - Send 'message' via smsbox\n" );
+       Admin_write ( client, "  sms gsm    message    - Send 'message' via gsm\n" );
+       Admin_write ( client, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "gsm" ) )
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
        Envoyer_sms_gsm_text ( ligne + 4 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
      } else
     if ( ! strcmp ( commande, "smsbox" ) )
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
        Envoyer_sms_smsbox_text ( ligne + 7 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -33,12 +33,12 @@
 /* Entrée: Le client admin et le numéro ID du tellstick                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_tellstick_learn ( struct CLIENT_ADMIN *client, gint id )
+ static void Admin_tellstick_learn ( struct CLIENT *client, gint id )
   { int methods;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Envoi de la commande LEARN Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     methods = tdMethods( id, TELLSTICK_LEARN );                                 /* Get methods of device */
 
@@ -48,19 +48,19 @@
      }
 
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Learning of device = %d\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_tellstick_on: Envoi une commande de START tellstick                                              */
 /* Entrée: Le client admin et le numéro ID du tellstick                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_tellstick_on ( struct CLIENT_ADMIN *client, gint id )
+ void Admin_tellstick_on ( struct CLIENT *client, gint id )
   { int methods;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Demande d'activation d'un device Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     methods = tdMethods( id, TELLSTICK_TURNON );                                /* Get methods of device */
 
@@ -70,19 +70,19 @@
      }
 
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Starting device = %d\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_tellstick_off : Envoi une commande de STOP  tellstick                                            */
 /* Entrée: Le client admin et le numéro ID du tellstick                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_tellstick_off ( struct CLIENT_ADMIN *client, gint id )
+ void Admin_tellstick_off ( struct CLIENT *client, gint id )
   { int methods;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Demande de desactivation d'un deviece Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     methods = tdMethods( id, TELLSTICK_TURNOFF );                               /* Get methods of device */
 
@@ -92,23 +92,23 @@
      }
 
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Stoppping device = %d\n", id );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_tellstick_list ( struct CLIENT_ADMIN *client )
+ void Admin_tellstick_list ( struct CLIENT *client )
   { int nbrDevice, i, supportedMethods, methods;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des device Tellstick\n" );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     nbrDevice = tdGetNumberOfDevices();
     g_snprintf( chaine, sizeof(chaine), "   Tellstick -> Number of devices = %d\n", nbrDevice );
-    Write_admin ( client->connexion, chaine );
+    Admin_write ( client, chaine );
 
     for (i= 0; i<nbrDevice; i++)
      { char *name, *proto, *house, *unit;
@@ -130,7 +130,7 @@
                    ( methods & TELLSTICK_LEARN   ? "LEARN" : "      " ),
                    name
                  );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
        tdReleaseString(name);
        tdReleaseString(proto);
        tdReleaseString(house);
@@ -142,7 +142,7 @@
 /* Entrée: Le client d'admin, la ligne a traiter                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command( struct CLIENT_ADMIN *client, gchar *ligne )
+ void Admin_command( struct CLIENT *client, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -166,21 +166,16 @@
      { Admin_tellstick_list ( client );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Write_admin ( client->connexion,
-                     "  -- Watchdog ADMIN -- Help du mode 'Tellstick'\n" );
-       Write_admin ( client->connexion,
-                     "  on id             - Start telltick ID\n" );
-       Write_admin ( client->connexion,
-                     "  off id            - Stop telltick ID\n" );
-       Write_admin ( client->connexion,
-                     "  learn id          - Learn telltick ID\n" );
-       Write_admin ( client->connexion,
-                     "  list              - List tellstick id and infos\n" );
+     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'Tellstick'\n" );
+       Admin_write ( client, "  on id             - Start telltick ID\n" );
+       Admin_write ( client, "  off id            - Stop telltick ID\n" );
+       Admin_write ( client, "  learn id          - Learn telltick ID\n" );
+       Admin_write ( client, "  list              - List tellstick id and infos\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown Tellstick command : %s\n", ligne );
-       Write_admin ( client->connexion, chaine );
+       Admin_write ( client, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
