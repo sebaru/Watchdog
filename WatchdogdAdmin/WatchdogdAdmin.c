@@ -178,9 +178,8 @@
 /**********************************************************************************************************/
  int main ( int argc, char *argv[] )
   { gint taille, taille_old;
-    gchar commande_old[128];
     struct sigaction sig;
-    gchar *commande;
+    gchar *commande, commande_old[128];
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
@@ -206,7 +205,7 @@
     taille_old = 5;
     read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
 
-    printf("  --  WatchdogdAdmin  v%s \n", VERSION );
+    printf("  --  WatchdogdAdmin  v%s ('quit' to end session)\n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
     for ( ; ; )
      { commande = readline ( PROMPT );

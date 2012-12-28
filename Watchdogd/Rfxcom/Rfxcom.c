@@ -126,9 +126,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(type,canal,libelle,e_min,ea_min,a_min) "
-                " VALUES ('%d','%d','%s','%d','%d','%d')",
-                NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->canal, libelle,
+                "INSERT INTO %s(type,sstype,canal,libelle,e_min,ea_min,a_min) "
+                " VALUES ('%d','%d','%d','%s','%d','%d','%d')",
+                NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->sous_type, rfxcom->canal, libelle,
                 rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
               );
     g_free(libelle);
@@ -151,7 +151,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,canal,libelle,e_min,ea_min,a_min"
+                "SELECT id,type,sstype,canal,libelle,e_min,ea_min,a_min"
                 " FROM %s ORDER BY type,canal", NOM_TABLE_MODULE_RFXCOM );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -177,7 +177,8 @@
      { memcpy( &rfxcom->libelle, db->row[3], sizeof(rfxcom->libelle) );
        rfxcom->id                = atoi(db->row[0]);
        rfxcom->type              = atoi(db->row[1]);
-       rfxcom->canal             = atoi(db->row[2]);
+       rfxcom->sous_type         = atoi(db->row[2]);
+       rfxcom->canal             = atoi(db->row[3]);
        rfxcom->e_min             = atoi(db->row[4]);
        rfxcom->ea_min            = atoi(db->row[5]);
        rfxcom->a_min             = atoi(db->row[6]);
@@ -211,10 +212,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "type='%d',canal='%d',libelle='%s',e_min='%d',ea_min='%d',a_min='%d' "
+                "type='%d',sstype='%d',canal='%d',libelle='%s',e_min='%d',ea_min='%d',a_min='%d' "
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_RFXCOM,
-                rfxcom->type, rfxcom->canal, libelle,
+                rfxcom->type, rfxcom->sous_type, rfxcom->canal, libelle,
                 rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min,
                 rfxcom->id );
     g_free(libelle);
@@ -338,7 +339,7 @@
 /* Entrée: les paramètres de critères de recherche                                                        */
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
- static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint canal )
+ static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint sous_type, gint canal )
   { struct MODULE_RFXCOM *module;
     GSList *liste_modules;
 
@@ -348,7 +349,8 @@
     while ( liste_modules )
      { module = (struct MODULE_RFXCOM *)liste_modules->data;
 
-       if (module->rfxcom.type == type && module->rfxcom.canal == canal) break;
+       if (module->rfxcom.type == type && module->rfxcom.sous_type == sous_type && 
+           module->rfxcom.canal == canal) break;
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
@@ -409,13 +411,13 @@
     else if (trame->type == 0x52 && trame->sous_type == 0x01)
      { struct MODULE_RFXCOM *module;
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame : get status type=%02d, sous_type=%02d, id1=%03d, id2=%02d, high=%02d, "
+                 "Processer_trame : get status type=%02d(%02X), sous_type=%02d(%02X), id1=%03d, id2=%02d, high=%02d, "
                  "signe=%02d, low=%02d, hum=%02d, humstatus=%02d, battery=%02d, rssi=%02d",
-                 trame->type, trame->sous_type, trame->data[0], trame->data[1],
+                 trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0], trame->data[1],
                  trame->data[2] >> 1, trame->data[2] & 1, trame->data[3], trame->data[4], trame->data[5],
                  trame->data[6] >> 4, trame->data[6] & 0x0F
                );   
-       module = Chercher_rfxcom( trame->type, trame->data[1] );
+       module = Chercher_rfxcom( trame->type, trame->sous_type, trame->data[1] );
        if (module)
         { SEA( module->rfxcom.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)* ( (trame->data[2] >> 1) + trame->data[3])
                                            / 10.0 );                                              /* Temp */
@@ -426,7 +428,8 @@
           module->date_last_view = Partage->top;
         }
        else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame No matching module for packet received type=%02d, sous_type=%02d", trame->type, trame->sous_type );
+                      "Processer_trame: No module found for packet received type=%02d(%02X), sous_type=%02d(%02X)",
+                      trame->type, trame->type, trame->sous_type, trame->sous_type );
      }
     else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                    "Processer_trame unknown packet type %02d, sous_type=%02d", trame->type, trame->sous_type );

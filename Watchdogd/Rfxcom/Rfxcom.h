@@ -45,6 +45,7 @@
  struct RFXCOMDB
   { guint id;                                                                   /* ID unique de la rfxcom */
     guchar type;                                                                   /* Numéro de la rfxcom */
+    guchar sous_type;                                                              /* Numéro de la rfxcom */
     guchar canal;                                                                  /* Numéro de la rfxcom */
     gint e_min, ea_min, a_min;
     gchar libelle[NBR_CARAC_LIBELLE_RFXCOM];                                      /* Libelle de la rfxcom */
