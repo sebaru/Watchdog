@@ -147,7 +147,7 @@
        case SIGUSR1: printf( "Recu SIGUSR1" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
-       case SIGIO:   printf( "Recu SIGIO\n" );  break;
+       case SIGIO:   printf( "Recu SIGIO\n" );
                      recu = Recevoir_reseau( Connexion );
                      printf(" Recu = %d\n", recu );
                      fflush(stdout);
