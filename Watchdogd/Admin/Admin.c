@@ -173,15 +173,15 @@
     struct LIBRAIRIE *lib;
     GSList *liste;
 
-    if (client)
+    if (client->util)
      { Info_new( Config.log, Config.log_all, LOG_NOTICE,
-                 "Processer_commande_admin: Commande Received from %s@%s : %s",
+                "Processer_commande_admin: Commande Received from %s@%s : %s",
                  client->util->nom, client->machine, ligne );
-     } else
+     }
+    else
      { Info_new( Config.log, Config.log_all, LOG_NOTICE,
                  "Processer_commande_admin: Commande Received from localuser : %s",
                  ligne );
-return;
      }
 
     g_snprintf( chaine, sizeof(chaine), " #Watchdogd*CLI> %s  -- Top = %d\n",
