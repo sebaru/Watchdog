@@ -147,18 +147,21 @@
        case SIGUSR1: printf( "Recu SIGUSR1" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
-       case SIGIO:   printf( "Recu SIGIO\n" );
-                     recu = Recevoir_reseau( Connexion );
-                     printf(" Recu = %d\n", recu );
-                     fflush(stdout);
+       case SIGIO:   do { recu = Recevoir_reseau( Connexion );
+                        }
+                     while ( recu == RECU_EN_COURS );
                      if (recu==RECU_OK)
-                      { if ( Reseau_tag(Connexion) == TAG_ADMIN && Reseau_ss_tag (Connexion) == SSTAG_SERVEUR_RESPONSE_OK )
+                      { if ( Reseau_tag(Connexion) != TAG_ADMIN )
+                         { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
+                        else
                          { struct CMD_TYPE_ADMIN *admin;
                            admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
-                           printf("Received %s\n", admin->buffer );
-                         } else
-                         { printf( "Ecouter_admin: Wrong TAG\n" ); }
-                        fflush(stdout);
+                           switch ( Reseau_ss_tag (Connexion) )
+                            { case SSTAG_SERVEUR_RESPONSE_OK:
+                                   printf("%s\n", admin->buffer ); break;
+                              default: printf("Wrong SSTAG\n");
+                            }
+                         }
                       }
                      else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
                       { switch( recu )
@@ -166,7 +169,7 @@
                                                        break;
                          }
                         Deconnecter_admin ();
-                      }             
+                      }
                      fflush(stdout);
                      break;
        default: printf ("Recu signal %d ", num ); break;
