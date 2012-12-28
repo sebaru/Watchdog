@@ -208,20 +208,8 @@
 
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
-/*    write ( Socket, "ident", 6 );           /* Demande l'envoi de la chaine d'identification du serveur */
- /*   wait_reponse = TRUE;                             /* Précisons que l'on attend la réponse du serveur */
-
     for ( ; ; )
-     { /*while (wait_reponse != FALSE);*/
-       commande = readline ( PROMPT );
-#ifdef bouh
-       if (!commande)
-        { write ( Socket, "nocde", strlen("nocde")+1 );
-          fsync(Socket);                                                             /* Flush la sortie ! */
-          continue;
-        }
-#endif
-
+     { commande = readline ( PROMPT );
        taille = strlen(commande);
        if ( taille )
         { if (strncmp ( commande, commande_old, (taille < taille_old ? taille : taille_old)))
@@ -236,8 +224,6 @@
              g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", commande );
              Envoyer_reseau( Connexion, W_SERVEUR, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
                              (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
-/*           fsync(Socket);                                                          /* Flush la sortie ! */
-/*           wait_reponse = TRUE;                      /* Précisons que l'on attend la réponse du serveur */
            }
         }
        g_free (commande);
