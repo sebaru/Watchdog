@@ -158,6 +158,8 @@
        case SIGTERM: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGTERM" );
                      Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
+       case SIGABRT: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGABRT" );
+                     break;
        case SIGCHLD: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGCHLD" );
                      break;
        case SIGPIPE: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGPIPE" ); break;
@@ -580,6 +582,7 @@
        sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
+       sigaction( SIGABRT, &sig, NULL );
        sigaction( SIGPIPE, &sig, NULL );                           /* Pour prevenir un segfault du client */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
