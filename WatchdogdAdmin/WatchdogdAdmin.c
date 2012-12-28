@@ -134,7 +134,7 @@
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
- static void Traitement_signaux( int num, siginfo_t *info, void *ptr )            /* Accrochage du signal */
+ static void Traitement_signaux( int num )                                        /* Accrochage du signal */
   { static gint nbr_slash_n = 0;
     gchar reponse[2];
     gint taille, recu;
@@ -147,6 +147,7 @@
        case SIGTERM: printf( "Recu SIGTERM" ); break;
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGALRM: printf( "Recu SIGALRM" ); break;
+       case SIGUSR1: printf( "Recu SIGUSR1" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
        case SIGIO:   printf( "Recu SIGIO" );  break;
@@ -185,11 +186,11 @@
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
-    sig.sa_sigaction = Traitement_signaux;                      /* Gestionnaire de traitement des signaux */
+    sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-    sig.sa_flags |= SA_SIGINFO;
     sigaction( SIGIO,   &sig, NULL );                               /* Accrochage du signal a son handler */
     sigaction( SIGALRM, &sig, NULL );                               /* Accrochage du signal a son handler */
+    sigaction( SIGUSR1, &sig, NULL );                               /* Accrochage du signal a son handler */
     sigaction( SIGPIPE, &sig, NULL );
     sigaction( SIGINT,  &sig, NULL );
     sigaction( SIGTERM, &sig, NULL );
@@ -197,6 +198,7 @@
     sigdelset ( &sig.sa_mask, SIGIO   );
     sigdelset ( &sig.sa_mask, SIGINT  );
     sigdelset ( &sig.sa_mask, SIGALRM );
+    sigdelset ( &sig.sa_mask, SIGUSR1 );
     sigdelset ( &sig.sa_mask, SIGTERM );
     sigdelset ( &sig.sa_mask, SIGPIPE );
     sigprocmask(SIG_SETMASK, &sig.sa_mask, NULL);
