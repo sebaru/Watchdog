@@ -187,9 +187,16 @@
     sig.sa_sigaction = Traitement_signaux;                      /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sig.sa_flags |= SA_SIGINFO;
-    sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
+    sigaction( SIGIO,   &sig, NULL );                               /* Accrochage du signal a son handler */
     sigaction( SIGPIPE, &sig, NULL );
-    sigaction( SIGINT, &sig, NULL );
+    sigaction( SIGINT,  &sig, NULL );
+    sigaction( SIGTERM, &sig, NULL );
+    sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+    sigdelset ( &sig.sa_mask, SIGIO   );
+    sigdelset ( &sig.sa_mask, SIGINT  );
+    sigdelset ( &sig.sa_mask, SIGTERM );
+    sigdelset ( &sig.sa_mask, SIGPIPE );
+    sigprocmask(SIG_SETMASK, &sig.sa_mask, NULL);
 
     g_snprintf( commande_old, sizeof(commande_old), "nocde" );
     taille_old = 5;

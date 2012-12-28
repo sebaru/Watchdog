@@ -573,17 +573,19 @@
                                      /********** Mise en place de la gestion des signaux ******************/
        sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
        sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
-       sigdelset ( &sig.sa_mask, SIGALRM );
-       sigdelset ( &sig.sa_mask, SIGUSR1 );
-       sigdelset ( &sig.sa_mask, SIGINT  );
-       sigdelset ( &sig.sa_mask, SIGTERM );
        sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
        sigaction( SIGABRT, &sig, NULL );
        sigaction( SIGPIPE, &sig, NULL );                           /* Pour prevenir un segfault du client */
+       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+       sigdelset ( &sig.sa_mask, SIGALRM );
+       sigdelset ( &sig.sa_mask, SIGUSR1 );
+       sigdelset ( &sig.sa_mask, SIGINT  );
+       sigdelset ( &sig.sa_mask, SIGTERM );
+       sigdelset ( &sig.sa_mask, SIGABRT );
+       sigdelset ( &sig.sa_mask, SIGPIPE );
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
 
