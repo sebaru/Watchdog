@@ -47,11 +47,15 @@
                Chercher_page_notebook( TYPE_PAGE_ADMIN, 0, TRUE );                /* Affichage de la page */
              }
             break;
-       case SSTAG_SERVEUR_RESPONSE_OK:
+       case SSTAG_SERVEUR_RESPONSE_START:
+            break;
+       case SSTAG_SERVEUR_RESPONSE_BUFFER:
              { struct CMD_TYPE_ADMIN *admin;
                admin = (struct CMD_TYPE_ADMIN *)connexion->donnees;
                Proto_afficher_un_admin( admin );
              }
+            break;
+       case SSTAG_SERVEUR_RESPONSE_STOP:
             break;
      }
   }

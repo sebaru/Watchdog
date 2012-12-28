@@ -161,7 +161,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_write ( struct CLIENT *client, gchar *response )
-  { Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_OK, response, strlen(response)+1 );
+  { Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );
   }
 /**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */
@@ -184,6 +184,7 @@
                  ligne );
      }
 
+    Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );      /* Debut de la reponse */
     g_snprintf( chaine, sizeof(chaine), " #Watchdogd*CLI> %s  -- Top = %d\n",
                 ligne, Partage->top );
     Admin_write ( client, chaine );
@@ -206,6 +207,7 @@
                }
               if (found == FALSE) { Admin_running ( client, ligne ); }
             }
+    Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );       /* Debut de la reponse */
   }
 /**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */

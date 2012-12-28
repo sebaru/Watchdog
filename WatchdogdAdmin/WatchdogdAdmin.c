@@ -41,10 +41,9 @@
  #include "Reseaux.h"
  #include "config.h"
 
+ #define PROMPT   "#Watchdogd*CLI> "
  static struct CONNEXION *Connexion;                                              /* connexion au serveur */
-/* static gint Socket, wait_reponse;                                             /* Socket d'administration */
  static gchar Socket_file[128];
-
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin                                                               */
 /* Entrée: Néant                                                                                          */
@@ -132,11 +131,7 @@
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
  static void Traitement_signaux( int num )                                        /* Accrochage du signal */
-  { static gint nbr_slash_n = 0;
-    gchar reponse[2];
-    gint taille, recu;
-    
-
+  { gint recu;
     switch (num)
      { case SIGQUIT:
        case SIGINT:  write_history ( NULL );        /* Ecriture de l'historique des commandes précédentes */
@@ -157,8 +152,9 @@
                          { struct CMD_TYPE_ADMIN *admin;
                            admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
                            switch ( Reseau_ss_tag (Connexion) )
-                            { case SSTAG_SERVEUR_RESPONSE_OK:
-                                   printf("%s\n", admin->buffer ); break;
+                            { case SSTAG_SERVEUR_RESPONSE_START:  printf("\n" ); break;
+                              case SSTAG_SERVEUR_RESPONSE_BUFFER: printf("%s", admin->buffer ); break;
+                              case SSTAG_SERVEUR_RESPONSE_STOP:   printf( PROMPT ); break;
                               default: printf("Wrong SSTAG\n");
                             }
                          }
@@ -217,7 +213,7 @@
 
     for ( ; ; )
      { /*while (wait_reponse != FALSE);*/
-       commande = readline ("#Watchdogd*CLI> ");
+       commande = readline ( PROMPT );
 #ifdef bouh
        if (!commande)
         { write ( Socket, "nocde", strlen("nocde")+1 );

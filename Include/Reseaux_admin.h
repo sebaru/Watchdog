@@ -36,10 +36,12 @@
   };
 
  enum 
-  { SSTAG_CLIENT_WANT_PAGE_ADMIN,                                 /* Le client demande la page admin */
-    SSTAG_SERVEUR_CREATE_PAGE_ADMIN_OK,         /* Les serveur repond OK pour la creation de la page */
-    SSTAG_CLIENT_REQUEST,                            /* Le client envoi une requete d'administration */
-    SSTAG_SERVEUR_RESPONSE_OK,                                  /* Le serveur envoi la reponse texte */
+  { SSTAG_CLIENT_WANT_PAGE_ADMIN,                                      /* Le client demande la page admin */
+    SSTAG_SERVEUR_CREATE_PAGE_ADMIN_OK,              /* Les serveur repond OK pour la creation de la page */
+    SSTAG_CLIENT_REQUEST,                                 /* Le client envoi une requete d'administration */
+    SSTAG_SERVEUR_RESPONSE_START,                                    /* Le serveur envoi la reponse texte */
+    SSTAG_SERVEUR_RESPONSE_BUFFER,                                   /* Le serveur envoi la reponse texte */
+    SSTAG_SERVEUR_RESPONSE_STOP,                                     /* Le serveur envoi la reponse texte */
   };
 
 #endif
