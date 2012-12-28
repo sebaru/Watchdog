@@ -134,7 +134,7 @@
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
- static void Traitement_signaux( int num )
+ static void Traitement_signaux( int num, siginfo_t *info, void *ptr )            /* Accrochage du signal */
   { static gint nbr_slash_n = 0;
     gchar reponse[2];
     gint taille, recu;
@@ -184,11 +184,12 @@
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
-    sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
+    sig.sa_sigaction = Traitement_signaux;                      /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+    sig.sa_flags |= SA_SIGINFO;
+    sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
     sigaction( SIGPIPE, &sig, NULL );
     sigaction( SIGINT, &sig, NULL );
-    sigaction( SIGIO, &sig, NULL );                                 /* Accrochage du signal a son handler */
 
     g_snprintf( commande_old, sizeof(commande_old), "nocde" );
     taille_old = 5;
@@ -196,9 +197,8 @@
 
     printf("  --  WatchdogdAdmin  v%s \n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
-
-/*    write ( Socket, "ident", 6 );             /* Demande l'envoi de la chaine d'identification du serveur */
- /*   wait_reponse = TRUE;                               /* Précisons que l'on attend la réponse du serveur */
+/*    write ( Socket, "ident", 6 );           /* Demande l'envoi de la chaine d'identification du serveur */
+ /*   wait_reponse = TRUE;                             /* Précisons que l'on attend la réponse du serveur */
 
     for ( ; ; )
      { /*while (wait_reponse != FALSE);*/
