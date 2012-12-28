@@ -408,6 +408,36 @@
        if (trame->data[4] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                                            "Processer_trame get_status proto X10" );   
      }
+    else if (trame->type == 0x02)
+     { switch (trame->sous_type)
+        { case 0x00: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                              "Processer_trame : Transceiver message : Error, receiver did not lock" );
+                     break;
+          case 0x01: switch (trame->data[0])
+                      { case 0x00: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame : Transceiver message : ACK, transmit OK" );
+                                   break;
+                        case 0x01: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame : Transceiver message : ACK, "
+                                            "but transmit started after 3 seconds delay anyway with RF receive data" );
+                                   break;
+                        case 0x02: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame : Transceiver message : NAK, transmitter "
+                                            "did not lock on the requested transmit frequency" );
+                                   break;
+                        case 0x03: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame : Transceiver message : NAK, "
+                                            "AC address zero in id1-id4 not allowed" );
+                                   break;
+                        default  : Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame : Transceiver message : Unknown message..." );
+                                   break;
+                      }
+                     break;
+          default :  Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                              "Processer_trame : Transceiver message : unknown packet ssous_type %d", trame->sous_type);
+        }
+     } 
     else if (trame->type == 0x52 && trame->sous_type == 0x01)
      { struct MODULE_RFXCOM *module;
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,

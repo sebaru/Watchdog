@@ -51,7 +51,7 @@
        g_snprintf( chaine, sizeof(chaine),
                    " RFXCOM[%02d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),canal=%02d\n"
                    "               e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
-                   "               date_last_view=%03d\n",
+                   "               date_last_view=%03ds\n",
                    module->rfxcom.id, module->rfxcom.type, module->rfxcom.type,
                    module->rfxcom.sous_type, module->rfxcom.sous_type, module->rfxcom.canal,
                    module->rfxcom.e_min, module->rfxcom.ea_min, module->rfxcom.a_min,
