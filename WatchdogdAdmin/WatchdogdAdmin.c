@@ -148,21 +148,22 @@
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
-       case SIGIO:   recu = Recevoir_reseau( Connexion );
+       case SIGIO:   printf( "Recu SIGIO" );  break;
+                     recu = Recevoir_reseau( Connexion );
                      if (recu==RECU_OK)
                       { if ( Reseau_tag(Connexion) == TAG_ADMIN && Reseau_ss_tag (Connexion) == SSTAG_SERVEUR_RESPONSE_OK )
                          { struct CMD_TYPE_ADMIN *admin;
                            admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
                            printf("Received %s\n", admin->buffer );
                          } else
-                        { printf( "Ecouter_admin: Wrong TAG\n" ); }
+                         { printf( "Ecouter_admin: Wrong TAG\n" ); }
                       }
                      else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
                       { switch( recu )
                          { case RECU_ERREUR_CONNRESET: printf ( "Ecouter_admin: Reset connexion\n" );
                                                        break;
                          }
-                       Deconnecter_admin ();
+                        Deconnecter_admin ();
                       }             
                      fflush(stdout);
                      break;
