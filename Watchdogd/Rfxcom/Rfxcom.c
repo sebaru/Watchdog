@@ -174,14 +174,14 @@
     if (!rfxcom) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                            "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &rfxcom->libelle, db->row[3], sizeof(rfxcom->libelle) );
+     { memcpy( &rfxcom->libelle, db->row[4], sizeof(rfxcom->libelle) );
        rfxcom->id                = atoi(db->row[0]);
        rfxcom->type              = atoi(db->row[1]);
        rfxcom->sous_type         = atoi(db->row[2]);
        rfxcom->canal             = atoi(db->row[3]);
-       rfxcom->e_min             = atoi(db->row[4]);
-       rfxcom->ea_min            = atoi(db->row[5]);
-       rfxcom->a_min             = atoi(db->row[6]);
+       rfxcom->e_min             = atoi(db->row[5]);
+       rfxcom->ea_min            = atoi(db->row[6]);
+       rfxcom->a_min             = atoi(db->row[7]);
      }
     return(rfxcom);
   }
@@ -365,7 +365,7 @@
  static int Processer_trame( struct TRAME_RFXCOM *trame )
   { 
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame taille=%d, type=%02d(0x%02x), sous_type=%02d(%02X), seqno=%03d",
+              "Processer_trame taille=%d, type=%02d(0x%02x), sous_type=%02d(0x%02X), seqno=%03d",
                trame->taille, trame->type, trame->type, trame->sous_type, trame->sous_type, trame->seqno );
 
     if (trame->type == 0x01 && trame->sous_type == 0x00)

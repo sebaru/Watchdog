@@ -50,8 +50,8 @@
 
        g_snprintf( chaine, sizeof(chaine),
                    " RFXCOM[%02d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),canal=%02d\n"
-                   "                 e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
-                   "                 date_last_view=%03d\n",
+                   "               e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
+                   "               date_last_view=%03d\n",
                    module->rfxcom.id, module->rfxcom.type, module->rfxcom.type,
                    module->rfxcom.sous_type, module->rfxcom.sous_type, module->rfxcom.canal,
                    module->rfxcom.e_min, module->rfxcom.ea_min, module->rfxcom.a_min,
@@ -91,8 +91,6 @@
 
     g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rfxcom\n" );
     Admin_write ( client, chaine );
-    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Admin_write ( client, chaine );
 
     last_id = Ajouter_rfxcomDB( rfxcom );
     if ( last_id != -1 )
@@ -110,8 +108,6 @@
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Modification du module rfxcom %03d\n", rfxcom->id );
-    Admin_write ( client, chaine );
-    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
     Admin_write ( client, chaine );
 
     if ( Modifier_rfxcomDB( rfxcom ) )
@@ -133,7 +129,7 @@
     if ( ! strcmp ( commande, "add" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%[^\n]", commande,         /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%[^\n]", commande,      /* Découpage de la ligne de commande */
                 (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type, (gint *)&rfxcom.canal,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_add ( client, &rfxcom );
@@ -141,22 +137,31 @@
     else if ( ! strcmp ( commande, "change" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,          /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,   /* Découpage de la ligne de commande */
                 &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type, (gint *)&rfxcom.canal,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_change ( client, &rfxcom );
      }
     else if ( ! strcmp ( commande, "cmd" ) )
-     { /*sscanf ( ligne, "%s %d %d %d %d %d %d %d", commande,          /* Découpage de la ligne de commande */
-         /*       &Partage->com_rfxcom.learn.id1, &Partage->com_rfxcom.learn.id2,
-                &Partage->com_rfxcom.learn.id3, &Partage->com_rfxcom.learn.id4,
-                &Partage->com_rfxcom.learn.unitcode,
-                &Partage->com_rfxcom.learn.cmd,
-                &Partage->com_rfxcom.learn.level
-               );
-       Partage->com_rfxcom.Thread_commande = TRUE;
-       Write_admin ( client->connexion, " RFXCOM Sending CMD....\n" );
-       while (Partage->com_rfxcom.Thread_commande) sched_yield();*/
+     { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+       gint id1, id2, id3, id4, unitcode, cmd;
+
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
+                &id1, &id2, &id3, &id4, &unitcode, &cmd );
+
+       trame_send_AC[0]  = 0x0B; /* Taille */
+       trame_send_AC[1]  = 0x11; /* lightning 2 */
+       trame_send_AC[2]  = 0x00; /* AC */
+       trame_send_AC[3]  = 0x01; /* Seqnbr */
+       trame_send_AC[4]  = id1 << 6;
+       trame_send_AC[5]  = id2;
+       trame_send_AC[6]  = id3;
+       trame_send_AC[7]  = id4;
+       trame_send_AC[8]  = unitcode;
+       trame_send_AC[9]  = cmd;
+       trame_send_AC[10] = 0; /*liblearn.level;*/
+       trame_send_AC[11] = 0x0; /* rssi */
+       write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
      }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
