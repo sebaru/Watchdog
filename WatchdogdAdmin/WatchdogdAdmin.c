@@ -83,12 +83,7 @@
        return(FALSE);       
      }
 
-#ifdef bouh
-  fcntl( connexion, F_SETFL, O_ASYNC | O_NONBLOCK );/* Mode non bloquant, ça aide pour une telle application */
-  fcntl( connexion, F_SETOWN, getpid() );     /* Mode non bloquant, ça aide pour une telle application */
-    Socket = connexion;
-#endif
-
+    fcntl( Connexion->socket, F_SETOWN, getpid() );      /* Active la reception du signal SIGIO sur ce FD */
     return(TRUE);
   }
 /**********************************************************************************************************/
