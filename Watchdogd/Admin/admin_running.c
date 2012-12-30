@@ -210,7 +210,6 @@
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), "          MSgs en REPEAT : reste %d\n", num );
        Admin_write ( client, chaine );
-       
      } else
     if ( ! strcmp ( commande, "log_level" ) )
      { gchar debug[128], chaine [80];

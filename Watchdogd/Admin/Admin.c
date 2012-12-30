@@ -185,8 +185,8 @@
      }
 
     Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );      /* Debut de la reponse */
-    g_snprintf( chaine, sizeof(chaine), " #Watchdogd*CLI> %s  -- Top = %d\n",
-                ligne, Partage->top );
+    g_snprintf( chaine, sizeof(chaine), " #Watchdogd*%010.1f*CLI> %s\n",
+                Partage->top/10.0, ligne );
     Admin_write ( client, chaine );
 
     sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */

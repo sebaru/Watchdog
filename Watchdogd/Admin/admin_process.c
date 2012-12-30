@@ -63,7 +63,7 @@
            }
           else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SSRV -> Arret" ); }
-          else Gerer_jeton();                              /* Affectation du jeton a un des sous-serveurs */
+          Gerer_jeton();                                   /* Affectation du jeton a un des sous-serveurs */
         }
        else
         { GSList *liste;

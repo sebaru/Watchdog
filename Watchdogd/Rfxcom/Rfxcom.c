@@ -273,7 +273,7 @@
      }
     pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-              "Charger_tous_module : %d RFXCOM found !", g_slist_length( Cfg_rfxcom.Modules_RFXCOM ) );
+              "Charger_tous_module : %d RFXCOM Modules found !", g_slist_length( Cfg_rfxcom.Modules_RFXCOM ) );
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
 
     Libere_DB_SQL( Config.log, &db );
