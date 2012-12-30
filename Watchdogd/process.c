@@ -127,7 +127,7 @@
          else { lib->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW ); }
     if (!lib->dl_handle)
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
-                 "Charger_librairie_par_fichier Candidat: %s rejeté (%s)", nom_fichier, dlerror() );
+                 "Charger_librairie_par_fichier Candidat: %s failed (%s)", nom_fichier, dlerror() );
        g_free(lib);
        return(NULL);
      }

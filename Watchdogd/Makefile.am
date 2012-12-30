@@ -26,7 +26,8 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
-Watchdogd_LDFLAGS = -lpopt `pkg-config --libs glib-2.0 gthread-2.0` `mysql_config --libs`
+# rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
+Watchdogd_LDFLAGS = -rdynamic -lpopt `pkg-config --libs glib-2.0 gthread-2.0` `mysql_config --libs`
 
 sysconf_DATA = watchdogd.conf
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
