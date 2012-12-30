@@ -83,7 +83,7 @@
        client->mode = DECONNECTE;
        return;
      }
-    Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: certificate received" );
+    Info_new( Config.log, Config.log_all, LOG_INFO,  "Connecter_ssl: certificate received" );
 
     retour = SSL_get_verify_result( connexion->ssl );                       /* Verification du certificat */
     if ( retour != X509_V_OK )                                      /* Si erreur, on se deconnecte presto */

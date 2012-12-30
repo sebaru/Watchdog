@@ -531,7 +531,6 @@
           Partage->Sous_serveur[i].Thread_sigusr1 = FALSE;
           Partage->Sous_serveur[i].Thread_reload = FALSE;
           Partage->Sous_serveur[i].pid = -1;
-          Partage->Sous_serveur[i].nb_client = -1;
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
 
@@ -568,7 +567,10 @@
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
         { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb Admin -> Arret" ); }
 
-       pthread_create( &TID, NULL, (void *)Boucle_pere, NULL );
+       if ( pthread_create( &TID, NULL, (void *)Boucle_pere, NULL ) )
+        { Info_new( Config.log, Config.log_all, LOG_ERR,
+                   "Demarrage boucle sans fin pthread_create failed %s", strerror(errno) );
+        }
 
                                      /********** Mise en place de la gestion des signaux ******************/
        sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */

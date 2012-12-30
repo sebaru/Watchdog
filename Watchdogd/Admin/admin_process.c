@@ -85,6 +85,7 @@
              liste = liste->next;
            }
           g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) started : %d\n", found );
+          Admin_write ( client, chaine );
         }
      } else
     if ( ! strcmp ( commande, "load" ) )
@@ -147,6 +148,7 @@
              liste = liste->next;
            }
           g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) stopped : %d\n", found );
+          Admin_write ( client, chaine );
         }
 
      } else

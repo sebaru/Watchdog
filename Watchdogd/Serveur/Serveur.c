@@ -224,7 +224,6 @@
           pthread_mutex_unlock( &Partage->Sous_serveur[ss_id].synchro );
           Info_new( Config.log, Config.log_all, LOG_INFO,
                    "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
-          Partage->Sous_serveur[ss_id].nb_client++;                   /* Nous gerons un client de plus !! */
           if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
                            else Client_mode( client, ATTENTE_IDENT );
           return(TRUE);
@@ -256,7 +255,6 @@
     Partage->Sous_serveur[id].inactivite = Partage->top;                     /* On prend l'heure actuelle */
     Partage->Sous_serveur[id].Thread_run = TRUE;                                    /* Le thread tourne ! */
     Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
-    Partage->Sous_serveur[id].nb_client = 0;
 
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_serveur: Enable", id );
          
@@ -264,13 +262,15 @@
      { if (Partage->jeton == id)                                                /* Avons nous le jeton ?? */
         { if (Accueillir_un_client( id ) == TRUE)                         /* Un client vient d'arriver ?? */
            { Partage->jeton = -1;                                /* On signale que l'on accepte le client */
-             Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: jeton rendu %d)", id );
+             Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: jeton rendu (%d)", id );
            }
         }
 
        if (Partage->Sous_serveur[id].Thread_sigusr1)                          /* Gestion des signaux USR1 */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: id %d, pid %d, nbr_client %d",
-                      id, (guint)Partage->Sous_serveur[id].pid, Partage->Sous_serveur[id].nb_client );
+        { pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
+          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: id %d, pid %d, nbr_client %d",
+                      id, (guint)Partage->Sous_serveur[id].pid, g_list_length(Partage->Sous_serveur[id].Clients) );
+          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
           Partage->Sous_serveur[id].Thread_sigusr1 = FALSE;
         }
 
@@ -291,8 +291,6 @@
 
              if (client->mode == DECONNECTE && client->struct_used == 0)      /* Deconnection des clients */
               { Deconnecter( client );
-                if (Partage->Sous_serveur[id].nb_client)                 /* Nous avons un client de moins */
-                 { Partage->Sous_serveur[id].nb_client--; }
                 break;
               }
 
@@ -606,7 +604,6 @@
        Deconnecter(client);
      }
 
-    Partage->Sous_serveur[id].nb_client = -1;
     Partage->Sous_serveur[id].Clients   = NULL;
     Partage->Sous_serveur[id].pid       = 0;
     if (Partage->Sous_serveur[id].new_histo)

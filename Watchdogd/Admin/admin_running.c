@@ -85,8 +85,10 @@
        Admin_write ( client, chaine );
 
        for (i=0; i<Config.max_serveur; i++)
-        { g_snprintf( chaine, sizeof(chaine), " SSRV[%02d] -> %02d clients\n",
-                      i, Partage->Sous_serveur[i].nb_client );
+        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+          g_snprintf( chaine, sizeof(chaine), " SSRV[%02d] -> %02d clients\n",
+                      i, g_list_length(Partage->Sous_serveur[i].Clients) );
+          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
           Admin_write ( client, chaine );
         }
      } else

@@ -348,7 +348,7 @@
  gboolean Demarrer_motion_detect ( void )
   { gchar chaine[80];
     gint id;
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_motion_detect: Demande de demarrage %d", getpid() );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG, "Demarrer_motion_detect: Demande de demarrage %d", getpid() );
 
     if (!Creer_config_file_motion()) return(FALSE);
 
@@ -376,18 +376,19 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_sous_serveur ( int id )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur: Demande de demarrage %d", id );
+  { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Demarrer_sous_serveur: Demande de demarrage %d", id );
     if (Partage->Sous_serveur[id].Thread_run == TRUE)
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur: An instance is already running",
                Partage->Sous_serveur[id].pid );
        return(FALSE);
      }
+
     if ( pthread_create( &Partage->Sous_serveur[id].pid, NULL, (void *)Run_serveur, GINT_TO_POINTER(id) ) )
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Demarrer_sous_serveur: pthread_create failed %s", strerror(errno) );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Demarrer_sous_serveur: pthread_create failed %s", strerror(errno) );
        return(FALSE);
      }
     else pthread_detach( Partage->Sous_serveur[id].pid );            /* On détache le thread Sous-Serveur */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur %d", id );
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Demarrer_sous_serveur: thread (%d) seems to be running", id );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -396,18 +397,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_dls ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: Demande de demarrage %d", getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Demarrer_dls: Demande de demarrage %d", getpid() );
     if (Partage->com_dls.Thread_run == TRUE)
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: An instance is already running %d",
                Partage->com_dls.TID );
        return(FALSE);
      }
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: pthread_create failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Demarrer_dls: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_dls.TID );      /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_dls: thread dls seems to be running %d",
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Demarrer_dls: thread dls (%d) seems to be running",
               Partage->com_dls.TID );
     return(TRUE);
   }
@@ -440,18 +441,18 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Demarrer_arch ( void )
-  { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: Demande de demarrage %d", getpid() );
+  { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Demarrer_arch: Demande de demarrage %d", getpid() );
     if (Partage->com_arch.Thread_run == TRUE)
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: An instance is already running",
                Partage->com_arch.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_arch.TID, NULL, (void *)Run_arch, NULL ))
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: pthread_create failed" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR, "Demarrer_arch: pthread_create failed" );
        return(FALSE);
      }
     pthread_detach( Partage->com_arch.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_arch: thread arch seems to be running",
+    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Demarrer_arch: thread arch (%d) seems to be running",
             Partage->com_arch.TID );
     return(TRUE);
   }
@@ -472,10 +473,13 @@
 /* Sortie: l'id du serveur inactif, ou -1 si il n'y en a pas                                              */
 /**********************************************************************************************************/
  static gint Rechercher_serveur_inactif ( void )
-  { gint i;
+  { gint i, nb_client;
     for (i=0; i<Config.max_serveur; i++)                                /* Recherche d'un serveur inactif */
-     { if (Partage->Sous_serveur[i].Thread_run == TRUE &&
-           Partage->Sous_serveur[i].nb_client == 0) return(i);
+     { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+       nb_client = g_list_length( Partage->Sous_serveur[i].Clients );
+       pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+          
+       if (Partage->Sous_serveur[i].Thread_run == TRUE && nb_client == 0) return(i);
      }
     return(-1);
   }
@@ -485,13 +489,19 @@
 /* Sortie: l'id du serveur ou -1 si il n'y en a pas                                                       */
 /**********************************************************************************************************/
  static gint Rechercher_moins_occupe ( void )
-  { gint i, choix;
+  { gint i, choix, nb_client_i, nb_client_choix;
     choix = -1;                                                     /* On début, nous n'avons rien choisi */
     for (i=0; i<Config.max_serveur; i++)            /* Recherche d'un serveur moins chargé que les autres */
      { if (Partage->Sous_serveur[i].Thread_run == TRUE)
-        { if (choix==-1) choix = i;                                                   /* Premier choix !! */
-          else { if (Partage->Sous_serveur[i].nb_client < Partage->Sous_serveur[choix].nb_client)
-                  { choix = i; }
+        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+          nb_client_i = g_list_length( Partage->Sous_serveur[i].Clients );
+          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+       
+          if (choix==-1) choix = i;                                                   /* Premier choix !! */
+          else { pthread_mutex_lock( &Partage->Sous_serveur[choix].synchro );
+                 nb_client_choix = g_list_length( Partage->Sous_serveur[choix].Clients );
+                 pthread_mutex_unlock( &Partage->Sous_serveur[choix].synchro );
+                 if (nb_client_i < nb_client_choix) { choix = i; }
                }
         }
      }
@@ -507,7 +517,13 @@
     nb = 0;                                                         /* On début, nous n'avons rien choisi */
     for (i=0; i<Config.max_serveur; i++)                                /* Recherche de tous les serveurs */
      { if (Partage->Sous_serveur[i].Thread_run == TRUE)
-        { nb += Partage->Sous_serveur[i].nb_client; }
+        { gint nb_client;
+          pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+          nb_client = g_list_length( Partage->Sous_serveur[i].Clients );
+          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+       
+          nb += nb_client;
+        }
      }
     return(nb);
   }
