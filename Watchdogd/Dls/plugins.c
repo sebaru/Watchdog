@@ -45,7 +45,7 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
 
-    handle = dlopen( nom_fichier_absolu, RTLD_NOW );
+    handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );
     if (!handle) { Info_new( Config.log, Config.log_all, LOG_WARNING,
                             "Charger_un_plugin: Candidat %04d failed (%s)", dls->plugindb.id, dlerror() );
                    return(FALSE);
