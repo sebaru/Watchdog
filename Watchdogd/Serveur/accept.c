@@ -73,6 +73,8 @@
                    "Connecter_ssl: SSL_accept error %s",
                     ERR_error_string( retour, NULL ) );
         }
+       client->mode = DECONNECTE;
+       return;
      }
                           /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats */ 
     certif = SSL_get_peer_certificate( connexion->ssl );             /* On prend le certificat du serveur */
