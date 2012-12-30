@@ -122,9 +122,9 @@
               }
 
     if (path) { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom_fichier );
-                lib->dl_handle = dlopen( nom_absolu, RTLD_LAZY );
+                lib->dl_handle = dlopen( nom_absolu, RTLD_NOW );
               }
-         else { lib->dl_handle = dlopen( nom_fichier, RTLD_LAZY ); }
+         else { lib->dl_handle = dlopen( nom_fichier, RTLD_NOW ); }
     if (!lib->dl_handle)
      { Info_new( Config.log, Config.log_all, LOG_WARNING,
                  "Charger_librairie_par_fichier Candidat: %s rejeté (%s)", nom_fichier, dlerror() );

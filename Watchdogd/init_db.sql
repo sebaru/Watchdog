@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `dls_cpt_imp` (
   `val` float NOT NULL,
   `type_ci` int(11) NOT NULL,
   `multi` float NOT NULL DEFAULT '1',
-  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
+  `unite` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
