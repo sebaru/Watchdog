@@ -680,7 +680,7 @@ INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `typ
 
 CREATE TABLE IF NOT EXISTS `onduleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `actif` tinyint(1) NOT NULL,
+  `enable` tinyint(1) NOT NULL,
   `host` text NOT NULL,
   `ups` text NOT NULL,
   `username` text NOT NULL,

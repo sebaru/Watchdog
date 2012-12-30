@@ -200,6 +200,7 @@
  static gboolean Sms_recipient_authorized ( const gchar *tel )
   { gchar **liste;
     gint cpt = 0;
+    if (!Cfg_sms.recipients) return(FALSE);                        /* Si aucun destinataire, retour FALSE */
     liste = Cfg_sms.recipients;
     while (liste[cpt])
      { if ( ! strncmp ( tel, liste[cpt], strlen(liste[cpt]) ) ) return(TRUE);

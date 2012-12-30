@@ -67,19 +67,24 @@
         }
        else
         { GSList *liste;
+          gint found;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          found = 0;
           while(liste)
            { struct LIBRAIRIE *lib;
              lib = (struct LIBRAIRIE *)liste->data;
              if ( ! strcmp( lib->admin_prompt, thread ) )
               { if (Start_librairie(lib))
-                 { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt ); }
+                 { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt );
+                   found++;
+                 }
                 else
                  { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
                    Admin_write ( client, chaine );
               }
              liste = liste->next;
            }
+          g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) started : %d\n", found );
         }
      } else
     if ( ! strcmp ( commande, "load" ) )
@@ -121,7 +126,9 @@
        if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; }
        else
         { GSList *liste;
+          gint found;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          found = 0;
           while(liste)
            { struct LIBRAIRIE *lib;
              lib = (struct LIBRAIRIE *)liste->data;
@@ -129,6 +136,7 @@
               { if (Stop_librairie(lib))
                  { g_snprintf( chaine, sizeof(chaine), " Library %s (%s) stopped\n",
                                lib->admin_prompt, lib->nom_fichier );
+                   found++;
                  }
                 else
                  { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) \n",
@@ -138,6 +146,7 @@
               }
              liste = liste->next;
            }
+          g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) stopped : %d\n", found );
         }
 
      } else
