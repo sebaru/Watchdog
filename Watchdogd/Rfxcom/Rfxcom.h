@@ -46,7 +46,12 @@
   { guint id;                                                                   /* ID unique de la rfxcom */
     guchar type;                                                                   /* Numéro de la rfxcom */
     guchar sous_type;                                                              /* Numéro de la rfxcom */
-    guchar canal;                                                                  /* Numéro de la rfxcom */
+    guchar id1;                                                                    /* Numéro de la rfxcom */
+    guchar id2;                                                                    /* Numéro de la rfxcom */
+    guchar id3;                                                                    /* Numéro de la rfxcom */
+    guchar id4;                                                                    /* Numéro de la rfxcom */
+    guchar housecode;                                                              /* Numéro de la rfxcom */
+    guchar unitcode;                                                               /* Numéro de la rfxcom */
     gint e_min, ea_min, a_min;
     gchar libelle[NBR_CARAC_LIBELLE_RFXCOM];                                      /* Libelle de la rfxcom */
   };

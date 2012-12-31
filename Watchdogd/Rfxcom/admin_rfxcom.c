@@ -49,11 +49,13 @@
        module = (struct MODULE_RFXCOM *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " RFXCOM[%02d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),canal=%02d\n"
+                   " RFXCOM[%02d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),ids=%02d %02d %02d %02d housecode=%02d unitcode=%02d\n"
                    "               e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
                    "               date_last_view=%03ds\n",
                    module->rfxcom.id, module->rfxcom.type, module->rfxcom.type,
-                   module->rfxcom.sous_type, module->rfxcom.sous_type, module->rfxcom.canal,
+                   module->rfxcom.sous_type, module->rfxcom.sous_type,
+                   module->rfxcom.id1, module->rfxcom.id2, module->rfxcom.id3, module->rfxcom.id4, 
+                   module->rfxcom.housecode, module->rfxcom.unitcode,
                    module->rfxcom.e_min, module->rfxcom.ea_min, module->rfxcom.a_min,
                    module->rfxcom.libelle, 
                    (Partage->top - module->date_last_view)/10
@@ -128,17 +130,21 @@
 
     if ( ! strcmp ( commande, "add" ) )
      { struct RFXCOMDB rfxcom;
-       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%[^\n]", commande,      /* Découpage de la ligne de commande */
-                (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type, (gint *)&rfxcom.canal,
+       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,
+                (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
+                (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
+                (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_add ( client, &rfxcom );
      }
     else if ( ! strcmp ( commande, "change" ) )
      { struct RFXCOMDB rfxcom;
-       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,   /* Découpage de la ligne de commande */
-                &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type, (gint *)&rfxcom.canal,
+       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,
+                &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
+                (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
+                (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_change ( client, &rfxcom );
      }
@@ -173,9 +179,9 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
-       Admin_write ( client, "  add type,sstype,canal,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( client, "  add type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Ajoute un module\n" );
-       Admin_write ( client, "  change ID,type,sstype,canal,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( client, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
        Admin_write ( client, "  del ID                                 - Retire le module ID\n" );
        Admin_write ( client, "  cmd id1 id2 id3 id4 unitcode cmdnumber - Envoie une commande RFXCOM\n" );

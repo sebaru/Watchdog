@@ -127,9 +127,10 @@
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s(type,sstype,canal,libelle,e_min,ea_min,a_min) "
-                " VALUES ('%d','%d','%d','%s','%d','%d','%d')",
-                NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->sous_type, rfxcom->canal, libelle,
-                rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
+                " VALUES ('%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
+                NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->sous_type,
+                rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
+                libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
               );
     g_free(libelle);
 
@@ -151,7 +152,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,sstype,canal,libelle,e_min,ea_min,a_min"
+                "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
                 " FROM %s ORDER BY type,canal", NOM_TABLE_MODULE_RFXCOM );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
@@ -174,14 +175,19 @@
     if (!rfxcom) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                            "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &rfxcom->libelle, db->row[4], sizeof(rfxcom->libelle) );
+     { memcpy( &rfxcom->libelle, db->row[9], sizeof(rfxcom->libelle) );
        rfxcom->id                = atoi(db->row[0]);
        rfxcom->type              = atoi(db->row[1]);
        rfxcom->sous_type         = atoi(db->row[2]);
-       rfxcom->canal             = atoi(db->row[3]);
-       rfxcom->e_min             = atoi(db->row[5]);
-       rfxcom->ea_min            = atoi(db->row[6]);
-       rfxcom->a_min             = atoi(db->row[7]);
+       rfxcom->id1               = atoi(db->row[3]);
+       rfxcom->id2               = atoi(db->row[4]);
+       rfxcom->id3               = atoi(db->row[5]);
+       rfxcom->id4               = atoi(db->row[6]);
+       rfxcom->housecode         = atoi(db->row[7]);
+       rfxcom->unitcode          = atoi(db->row[8]);
+       rfxcom->e_min             = atoi(db->row[10]);
+       rfxcom->ea_min            = atoi(db->row[11]);
+       rfxcom->a_min             = atoi(db->row[12]);
      }
     return(rfxcom);
   }
@@ -212,11 +218,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "type='%d',sstype='%d',canal='%d',libelle='%s',e_min='%d',ea_min='%d',a_min='%d' "
+                "type='%d',sstype='%d',id1='%d',id2='%d',id3='%d',id4='%d',housecode='%d',unitcode='%d',"
+                "libelle='%s',e_min='%d',ea_min='%d',a_min='%d' "
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_RFXCOM,
-                rfxcom->type, rfxcom->sous_type, rfxcom->canal, libelle,
-                rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min,
+                rfxcom->type, rfxcom->sous_type,
+                rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
+                libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min,
                 rfxcom->id );
     g_free(libelle);
 
@@ -339,7 +347,14 @@
 /* Entrée: les paramètres de critères de recherche                                                        */
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
- static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint sous_type, gint canal )
+ static struct MODULE_RFXCOM *Chercher_rfxcom ( gint type, gint sous_type,
+                                                gboolean check_id1, gchar id1,
+                                                gboolean check_id2, gchar id2,
+                                                gboolean check_id3, gchar id3,
+                                                gboolean check_id4, gchar id4,
+                                                gboolean check_housecode, gchar housecode,
+                                                gboolean check_unitcode, gchar unitcode
+                                              )
   { struct MODULE_RFXCOM *module;
     GSList *liste_modules;
 
@@ -350,7 +365,13 @@
      { module = (struct MODULE_RFXCOM *)liste_modules->data;
 
        if (module->rfxcom.type == type && module->rfxcom.sous_type == sous_type && 
-           module->rfxcom.canal == canal) break;
+           (check_id1       == FALSE || module->rfxcom.id1 == id1) &&
+           (check_id2       == FALSE || module->rfxcom.id1 == id2) &&
+           (check_id3       == FALSE || module->rfxcom.id1 == id3) &&
+           (check_id4       == FALSE || module->rfxcom.id1 == id4) &&
+           (check_housecode == FALSE || module->rfxcom.id1 == housecode) &&
+           (check_unitcode  == FALSE || module->rfxcom.id1 == unitcode)
+          ) break;
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
@@ -447,7 +468,8 @@
                  trame->data[2] >> 1, trame->data[2] & 1, trame->data[3], trame->data[4], trame->data[5],
                  trame->data[6] >> 4, trame->data[6] & 0x0F
                );   
-       module = Chercher_rfxcom( trame->type, trame->sous_type, trame->data[1] );
+       module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0], TRUE, trame->data[1],
+                                 FALSE, 0, FALSE, 0, FALSE, 0, FALSE, 0 );
        if (module)
         { SEA( module->rfxcom.ea_min,     (trame->data[2] & 1 ? -1.0 : 1.0)* ( (trame->data[2] >> 1) + trame->data[3])
                                            / 10.0 );                                              /* Temp */
