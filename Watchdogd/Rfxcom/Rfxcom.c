@@ -366,11 +366,11 @@
 
        if (module->rfxcom.type == type && module->rfxcom.sous_type == sous_type && 
            (check_id1       == FALSE || module->rfxcom.id1 == id1) &&
-           (check_id2       == FALSE || module->rfxcom.id1 == id2) &&
-           (check_id3       == FALSE || module->rfxcom.id1 == id3) &&
-           (check_id4       == FALSE || module->rfxcom.id1 == id4) &&
-           (check_housecode == FALSE || module->rfxcom.id1 == housecode) &&
-           (check_unitcode  == FALSE || module->rfxcom.id1 == unitcode)
+           (check_id2       == FALSE || module->rfxcom.id2 == id2) &&
+           (check_id3       == FALSE || module->rfxcom.id3 == id3) &&
+           (check_id4       == FALSE || module->rfxcom.id4 == id4) &&
+           (check_housecode == FALSE || module->rfxcom.housecode == housecode) &&
+           (check_unitcode  == FALSE || module->rfxcom.unitcode  == unitcode)
           ) break;
        liste_modules = liste_modules->next;
      }
@@ -462,7 +462,7 @@
     else if (trame->type == 0x52 && trame->sous_type == 0x01)
      { struct MODULE_RFXCOM *module;
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame : get status type=%02d(0x%02X), sous_type=%02d(0x%02X), id1=%03d, id2=%02d, high=%02d, "
+                 "Processer_trame : get status type=%02d(0x%02X), sous_type=%02d(0x%02X), id1=%02d, id2=%02d, high=%02d, "
                  "signe=%02d, low=%02d, hum=%02d, humstatus=%02d, battery=%02d, rssi=%02d",
                  trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0], trame->data[1],
                  trame->data[2] >> 1, trame->data[2] & 1, trame->data[3], trame->data[4], trame->data[5],
