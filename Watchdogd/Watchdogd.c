@@ -148,7 +148,7 @@
      }
 
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement_signaux: traité par %s", chaine );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement_signaux: handled by %s", chaine );
 
     switch (num)
      { case SIGQUIT:
@@ -577,6 +577,7 @@
        sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
        sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
+       sigaction( SIGUSR2, &sig, NULL );                               /* Reinitialisation DLS uniquement */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
        sigaction( SIGABRT, &sig, NULL );
@@ -584,6 +585,7 @@
        sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
        sigdelset ( &sig.sa_mask, SIGALRM );
        sigdelset ( &sig.sa_mask, SIGUSR1 );
+       sigdelset ( &sig.sa_mask, SIGUSR2 );
        sigdelset ( &sig.sa_mask, SIGINT  );
        sigdelset ( &sig.sa_mask, SIGTERM );
        sigdelset ( &sig.sa_mask, SIGABRT );
