@@ -63,6 +63,8 @@
            }
           else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SSRV -> Arret" ); }
+          sleep(1);                  /* On attend une seconde pour donner le temps au thread de demarrer, */
+/* sinon 'Gerer_jeton' va detecter un manque de thread et en demarrer un, avec potentiellement le meme id */
           Gerer_jeton();                                   /* Affectation du jeton a un des sous-serveurs */
         }
        else
