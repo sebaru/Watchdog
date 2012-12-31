@@ -153,7 +153,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
-                " FROM %s ORDER BY type,canal", NOM_TABLE_MODULE_RFXCOM );
+                " FROM %s ORDER BY type,sstype", NOM_TABLE_MODULE_RFXCOM );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }
