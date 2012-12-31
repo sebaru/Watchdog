@@ -126,7 +126,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(type,sstype,canal,libelle,e_min,ea_min,a_min) "
+                "INSERT INTO %s(type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
                 " VALUES ('%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
                 NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->sous_type,
                 rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
