@@ -447,7 +447,8 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
-  { struct sigaction sig;
+  { struct itimerval timer;
+    struct sigaction sig;
     gchar strpid[12];
     gint fd_lock, i;
     pthread_t TID;
@@ -592,6 +593,9 @@
        sigdelset ( &sig.sa_mask, SIGPIPE );
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
+       timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                /* Tous les 100 millisecondes */
+       timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;             /* = 10 fois par secondes */
+       setitimer( ITIMER_REAL, &timer, NULL );                                         /* Active le timer */
 
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
        Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */

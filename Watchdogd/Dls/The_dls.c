@@ -310,8 +310,7 @@
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
-  { gint nbr;
-    if ( num<0 || num>=NBR_BIT_CONTROLE )
+  { if ( num<0 || num>=NBR_BIT_CONTROLE )
      { Info_new( Config.log, Config.log_all, LOG_INFO, "SI : num out of range", num );
        return;
      }
@@ -538,8 +537,7 @@
 /* Main: Fonction principale du DLS                                                                       */
 /**********************************************************************************************************/
  void Run_dls ( void )
-  { struct itimerval timer;
-    gint Update_heure=0;
+  { gint Update_heure=0;
     GList *plugins;
 
     Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
@@ -548,10 +546,6 @@
     Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                   /* Tous les 100 millisecondes */
-    timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                /* = 10 fois par secondes */
-    setitimer( ITIMER_REAL, &timer, NULL );                                            /* Active le timer */
-
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: Demarrage" );                /* Log Start */
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
