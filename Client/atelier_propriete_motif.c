@@ -34,15 +34,14 @@
 
  static gchar *TYPE_GESTION_MOTIF[]=                      /* Type de gestion d'un motif sur un synoptique */
   { "Inerte (Mur)",
+    "Fond d'ecran",
     "Actif (Lampe)",
     "Repos/Actif (Porte/Volet)",
     "Repos/Anime(0-n) (Moteur)",
-    "Repos/Anime/Repos (Rideau)",
-    "OLD-Indicateur (don't use)",
     "Repos/Anime(1-n) (Moteur)",
-    "Inerte/Repos/Actif (Bouton)",
-    "Fond d'ecran",
     "Repos/Anime(2-n) (Moteur)",
+    "Repos/Anime/Repos (Rideau)",
+    "Inerte/Repos/Actif (Bouton)",
     NULL
   };
 
@@ -187,10 +186,9 @@
        case TYPE_STATIQUE:   Trame_choisir_frame( Trame_motif_p1, 0, ROUGE1, VERT1, BLEU1 );   /* frame 0 */
                              ok_timer = TIMER_OFF;
                              break;
-       case TYPE_DYNAMIQUE:  Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
-                             ok_timer = TIMER_ON;
-                             break;
-       case TYPE_BOUTON:     Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
+       case TYPE_BOUTON    :
+       case TYPE_PROGRESSIF:
+       case TYPE_DYNAMIQUE : Trame_choisir_frame( Trame_motif_p1, 1, ROUGE1, VERT1, BLEU1 );   /* frame 1 */
                              ok_timer = TIMER_ON;
                              break;
        case TYPE_CYCLIQUE_0N:
