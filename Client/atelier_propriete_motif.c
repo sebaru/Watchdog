@@ -229,22 +229,7 @@
 /* Sortie: la base de données est mise à jour                                                             */
 /**********************************************************************************************************/
  static void Changer_gestion_motif ( void )
-  { gint choix;
-    choix = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_gestion) );
-
-    switch(choix)
-     { case  0: Trame_motif->motif->type_gestion = TYPE_INERTE;     break;
-       case  1: Trame_motif->motif->type_gestion = TYPE_FOND;       break;
-       case  2: Trame_motif->motif->type_gestion = TYPE_STATIQUE;   break;
-       case  3: Trame_motif->motif->type_gestion = TYPE_DYNAMIQUE;  break;
-       case  4: Trame_motif->motif->type_gestion = TYPE_DYNAMIQUE;  break;/* Anciennement TYPE_INDICATEUR */
-       case  5: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_0N;break;
-       case  6: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_1N;break;
-       case  7: Trame_motif->motif->type_gestion = TYPE_CYCLIQUE_2N;break;
-       case  8: Trame_motif->motif->type_gestion = TYPE_PROGRESSIF; break;
-       case  9: Trame_motif->motif->type_gestion = TYPE_BOUTON;     break;
-       default: Trame_motif->motif->type_gestion = TYPE_INERTE;     break;
-     }
+  { Trame_motif->motif->type_gestion = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_gestion) );
     printf("Gestion = %s\n", Type_gestion_motif( Trame_motif->motif->type_gestion) );
     Rafraichir_sensibilite();                           /* Pour mettre a jour les sensibility des widgets */
   }
@@ -438,21 +423,8 @@ printf("Changer_couleur %p\n", data);
     gtk_widget_show_all(Option_gestion);
     g_signal_handlers_unblock_by_func( G_OBJECT( GTK_OPTION_MENU(Option_gestion) ),
                                        G_CALLBACK( Changer_gestion_motif ), NULL );
-/*    choix = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_gestion) );*/
 
-    switch(motif->type_gestion)
-     { case  TYPE_INERTE     : choix = 0; break;
-       case  TYPE_FOND       : choix = 1; break;
-       case  TYPE_STATIQUE   : choix = 2; break;
-       case  TYPE_DYNAMIQUE  : choix = 3; break;
-       case  TYPE_CYCLIQUE_0N: choix = 4; break;
-       case  TYPE_CYCLIQUE_1N: choix = 5; break;
-       case  TYPE_CYCLIQUE_2N: choix = 6; break;
-       case  TYPE_PROGRESSIF : choix = 7; break;
-       case  TYPE_BOUTON     : choix = 8; break;
-       default: choix = 0; break;
-     }
-    gtk_option_menu_set_history( GTK_OPTION_MENU(Option_gestion), choix );
+    gtk_option_menu_set_history( GTK_OPTION_MENU(Option_gestion), motif->type_gestion );
 
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_dialog_cde), motif->type_dialog );
     printf("Rafraichir_proprietes8:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );

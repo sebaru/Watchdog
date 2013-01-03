@@ -44,15 +44,14 @@
 
  enum                                                            /* Différents types de gestion de motifs */
   { TYPE_INERTE,
+    TYPE_FOND,
     TYPE_STATIQUE,
     TYPE_DYNAMIQUE,
     TYPE_CYCLIQUE_0N,
-    TYPE_PROGRESSIF,
-    TYPE_CAN_BE_USED,
     TYPE_CYCLIQUE_1N,
-    TYPE_BOUTON,
-    TYPE_FOND,
-    TYPE_CYCLIQUE_2N
+    TYPE_CYCLIQUE_2N,
+    TYPE_PROGRESSIF,
+    TYPE_BOUTON
   };
 
  enum                                                             /* Différente action associée à un item */
