@@ -51,7 +51,8 @@
     TYPE_CYCLIQUE_1N,
     TYPE_CYCLIQUE_2N,
     TYPE_PROGRESSIF,
-    TYPE_BOUTON
+    TYPE_BOUTON,
+    NBR_TYPE_GESTION_MOTIF
   };
 
  enum                                                             /* Différente action associée à un item */

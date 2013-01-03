@@ -70,7 +70,7 @@
  extern GtkWidget *F_trame;                       /* C'est bien le widget referencant la trame synoptique */
 
  static GtkWidget *F_propriete;                                      /* Pour acceder la fenetre graphique */
- static GtkWidget *Option_gestion;                                            /* Type de gestion du motif */
+ static GtkWidget *Combo_gestion;                                            /* Type de gestion du motif */
  static GtkWidget *Option_dialog_cde;                      /* Type de boite de dialogue clic gauche motif */
  static GtkWidget *Combo_groupe;                                        /* groupe d'appartenance du motif */
  static GtkWidget *Spin_rafraich;                    /* Frequence de refraichissement d'un motif cyclique */
@@ -229,7 +229,7 @@
 /* Sortie: la base de données est mise à jour                                                             */
 /**********************************************************************************************************/
  static void Changer_gestion_motif ( void )
-  { Trame_motif->motif->type_gestion = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_gestion) );
+  { Trame_motif->motif->type_gestion = gtk_combo_box_get_active( GTK_COMBO_BOX(Combo_gestion) );
     printf("Gestion = %s\n", Type_gestion_motif( Trame_motif->motif->type_gestion) );
     Rafraichir_sensibilite();                           /* Pour mettre a jour les sensibility des widgets */
   }
@@ -341,9 +341,8 @@ printf("Changer_couleur %p\n", data);
 /**********************************************************************************************************/
  static void Rafraichir_propriete ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct CMD_TYPE_MOTIF *motif;
-    GtkWidget *menu;
     GList *liste;
-    gint choix,cpt;
+    gint i,cpt;
 
     Trame_motif = trame_motif;                  /* Sauvegarde pour les futurs changements d'environnement */
  
@@ -363,13 +362,13 @@ printf("Changer_couleur %p\n", data);
     if (Trame_motif_p0)
      { goo_canvas_item_remove( Trame_motif_p0->item_groupe );
        Trame_preview0->trame_items = g_list_remove( Trame_preview0->trame_items, Trame_motif_p0 );
-       gdk_pixbuf_unref( Trame_motif_p0->pixbuf );
+       g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
      }    
     if (Trame_motif_p1)
      { goo_canvas_item_remove( Trame_motif_p1->item_groupe );
        Trame_preview1->trame_items = g_list_remove( Trame_preview1->trame_items, Trame_motif_p1 );
-       gdk_pixbuf_unref( Trame_motif_p1->pixbuf );
+       g_object_unref( Trame_motif_p1->pixbuf );
        g_free(Trame_motif_p1);
      }    
     Trame_motif_p0 = Trame_ajout_motif( TRUE, Trame_preview0, &Motif_preview0 );   /* Affichage à l'ecran */
@@ -388,43 +387,30 @@ printf("Changer_couleur %p\n", data);
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_rafraich), motif->rafraich );
     printf("Rafraichir_proprietes2:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
-    g_signal_handlers_block_by_func( G_OBJECT( GTK_OPTION_MENU(Option_gestion) ),
+    g_signal_handlers_block_by_func( G_OBJECT( GTK_COMBO_BOX(Combo_gestion) ),
                                      G_CALLBACK( Changer_gestion_motif ), NULL );
-    gtk_option_menu_remove_menu( GTK_OPTION_MENU(Option_gestion) );
-    menu = gtk_menu_new();
+    for (i=0; i<NBR_TYPE_GESTION_MOTIF; i++) gtk_combo_box_remove_text( GTK_COMBO_BOX(Combo_gestion), 0 );
     printf("Nombre de images motif! %d....\n", trame_motif->nbr_images );
-    gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                           gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_INERTE   ) ) );
-    gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                           gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_FOND ) ) );
-    gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                           gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_STATIQUE ) ) );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_INERTE   ) );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_FOND     ) );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_STATIQUE ) );
     printf("Rafraichir_proprietes3:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
     if (trame_motif->nbr_images >= 2)                                    /* Sensibilite des boutons radio */
-     { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_DYNAMIQUE  ) ) );
-       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_0N) ) );
-
+     { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_DYNAMIQUE   ) );
+       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_CYCLIQUE_0N ) );
      }
     if (trame_motif->nbr_images >= 3)
-     { gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_1N ) ) );
-       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_CYCLIQUE_2N ) ) );
-       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_PROGRESSIF ) ) );
-       gtk_menu_shell_append( GTK_MENU_SHELL(menu),
-                              gtk_menu_item_new_with_label( Type_gestion_motif( TYPE_BOUTON     ) ) );
+     { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_CYCLIQUE_1N ) );
+       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_CYCLIQUE_2N ) );
+       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_PROGRESSIF  ) );
+       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_gestion), Type_gestion_motif( TYPE_BOUTON      ) );
      }
-
-    gtk_option_menu_set_menu( GTK_OPTION_MENU(Option_gestion), menu );
-    gtk_widget_show_all(Option_gestion);
-    g_signal_handlers_unblock_by_func( G_OBJECT( GTK_OPTION_MENU(Option_gestion) ),
+    gtk_widget_show_all(Combo_gestion);
+    g_signal_handlers_unblock_by_func( G_OBJECT( GTK_COMBO_BOX(Combo_gestion) ),
                                        G_CALLBACK( Changer_gestion_motif ), NULL );
 
-    gtk_option_menu_set_history( GTK_OPTION_MENU(Option_gestion), motif->type_gestion );
+    gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_gestion), motif->type_gestion );
 
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_dialog_cde), motif->type_dialog );
     printf("Rafraichir_proprietes8:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
@@ -631,9 +617,9 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     texte = gtk_label_new( _("Type of response") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 1, 2 );
 
-    Option_gestion = gtk_option_menu_new();
-    gtk_table_attach_defaults( GTK_TABLE(table), Option_gestion, 2, 4, 1, 2 );
-    g_signal_connect( G_OBJECT( GTK_OPTION_MENU(Option_gestion) ), "changed",
+    Combo_gestion = gtk_combo_box_new_text();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_gestion, 2, 4, 1, 2 );
+    g_signal_connect( G_OBJECT( GTK_OPTION_MENU(Combo_gestion) ), "changed",
                       G_CALLBACK( Changer_gestion_motif ), NULL );
 
     texte = gtk_label_new( _("Control bit (I)") );

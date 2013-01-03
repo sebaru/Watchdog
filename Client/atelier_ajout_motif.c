@@ -101,7 +101,7 @@
      { goo_canvas_item_remove( Trame_motif_p0->item_groupe );
        Trame_preview0->trame_items = g_list_remove( Trame_preview0->trame_items,
                                                     Trame_motif_p0 );
-       gdk_pixbuf_unref( Trame_motif_p0->pixbuf );
+       g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
      }    
                                                                                    /* Affichage à l'ecran */
@@ -143,7 +143,7 @@
      { goo_canvas_item_remove( Trame_motif_p0->item_groupe );
        Trame_preview0->trame_items = g_list_remove( Trame_preview0->trame_items,
                                                            Trame_motif_p0 );
-       gdk_pixbuf_unref( Trame_motif_p0->pixbuf );
+       g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
        Trame_motif_p0 = NULL;
      }    
@@ -385,12 +385,11 @@
  void Proto_afficher_un_icone_atelier( struct CMD_TYPE_ICONE *icone )
   { GtkTreeModel *store;
     GtkTreeIter iter;
-    gboolean valide;
 
     if (!Tester_page_notebook(TYPE_PAGE_ATELIER)) return;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_icone) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
+    gtk_tree_model_get_iter_first( store, &iter );
 
     gtk_list_store_append ( GTK_LIST_STORE(store), &iter );                      /* Acquisition iterateur */
     Rafraichir_visu_icone_atelier ( &iter, icone );
