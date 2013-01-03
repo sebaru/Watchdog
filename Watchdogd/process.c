@@ -539,7 +539,8 @@
      { i = Rechercher_serveur_inactif();                           /* A la recherche d'un serveur inactif */
        if (i!=-1)                                             /* Si c'est le cas, on lui assigne le jeton */
         { Partage->jeton = i;
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Gerer_jeton: serveur sans client trouve id=%d" );
+          Info_new( Config.log, Config.log_all, LOG_INFO,
+                   "Gerer_jeton: serveur sans client trouve id=%d", i );
         }
        else                  /* Tous nos serveurs sont utilisés, il faut donc soit créer un autre serveur */
         {                                            /* soit donner la connexion à un serveur deja occupé */

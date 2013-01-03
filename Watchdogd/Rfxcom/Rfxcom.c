@@ -175,7 +175,7 @@
     if (!rfxcom) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                            "Recuperer_rfxcomDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &rfxcom->libelle, db->row[9], sizeof(rfxcom->libelle) );
+     { g_snprintf( rfxcom->libelle, sizeof(rfxcom->libelle), "%s", db->row[9] );
        rfxcom->id                = atoi(db->row[0]);
        rfxcom->type              = atoi(db->row[1]);
        rfxcom->sous_type         = atoi(db->row[2]);
