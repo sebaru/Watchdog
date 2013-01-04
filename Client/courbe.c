@@ -670,7 +670,8 @@
        new_X = g_try_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
        new_Y = g_try_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
 
-       printf(" New taille = %d\n", courbe->taille_donnees * sizeof(gfloat) );
+       printf(" index = %d : New taille = %d(gfloat), %d(gdouble)\n", 
+               courbe->index, courbe->taille_donnees * sizeof(gfloat), courbe->taille_donnees * sizeof(gdouble) );
 
        if (new_X && new_Y)
         { courbe->X = new_X;

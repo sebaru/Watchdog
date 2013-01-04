@@ -43,9 +43,9 @@
   };
 
  struct CAPTEUR
-  { gint    type;                                                              /* type du bit de controle */
-    guint bit_controle;
-    gdouble val_ech;
+  { gint   type;                                                               /* type du bit de controle */
+    guint  bit_controle;
+    gfloat val_ech;
   };
 
 /*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/

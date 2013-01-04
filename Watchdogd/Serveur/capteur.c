@@ -44,8 +44,7 @@
        case MNEMO_BISTABLE:
             return( capteur->val_ech != B(capteur->bit_controle) );
        case MNEMO_ENTREE_ANA:
-            return( TRUE
-                  );
+            return( TRUE );
        case MNEMO_CPTH:
             return( capteur->val_ech != Partage->ch[capteur->bit_controle].cpthdb.valeur );
        case MNEMO_CPT_IMP:
@@ -106,10 +105,10 @@
              }
             break;
        case MNEMO_CPT_IMP:
-             { gdouble valeur;
+             { gfloat valeur;
                gchar *format;
                valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
-               valeur = valeur * (gdouble)Partage->ci[capteur->bit_controle].cpt_impdb.multi;      /* Multiplication ! */
+               valeur = valeur * (gfloat)Partage->ci[capteur->bit_controle].cpt_impdb.multi;      /* Multiplication ! */
                switch (Partage->ci[capteur->bit_controle].cpt_impdb.type)
                 { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
                   default:              format = "%8.2f %s"; break;

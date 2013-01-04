@@ -35,7 +35,7 @@
   { guint  slot_id;                               /* Numero du slot de la courbe dans l'interface cliente */
     guint  type; /* utile ?? */
     guint  date;
-    gdouble val_avant_ech;
+    gfloat val_avant_ech;
   };
 
  struct CMD_START_COURBE
@@ -44,7 +44,7 @@
     guint  taille_donnees;       /* Taille en octet du nombre de données valides qui suivent la structure */
     struct CMD_START_COURBE_VALEUR
            { guint date;                                                           /* tableau dynamique ! */
-             gdouble val_avant_ech;
+             gfloat val_avant_ech;
            } valeurs[];
   };
 

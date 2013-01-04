@@ -72,7 +72,7 @@
 /**********************************************************************************************************/
 /* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                       */
 /**********************************************************************************************************/
- double EA_ech( int num )
+ float EA_ech( int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
     else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech : num out of range", num );
     return(0.0);
@@ -80,7 +80,7 @@
 /**********************************************************************************************************/
 /* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                           */
 /**********************************************************************************************************/
- int EA_ech_inf( double val, int num )
+ int EA_ech_inf( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
     else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_inf : num out of range", num );
     return(0);
@@ -88,7 +88,7 @@
 /**********************************************************************************************************/
 /* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale à une mesure                             */
 /**********************************************************************************************************/
- int EA_ech_inf_egal( double val, int num )
+ int EA_ech_inf_egal( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
     else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_inf_egal : num out of range", num );
     return(0);
@@ -96,7 +96,7 @@
 /**********************************************************************************************************/
 /* EA_ech_sup : Teste si la valeur de l'EA est sup à une mesure                                           */
 /**********************************************************************************************************/
- int EA_ech_sup( double val, int num )
+ int EA_ech_sup( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
     else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_sup : num out of range", num );
     return(0);
@@ -104,7 +104,7 @@
 /**********************************************************************************************************/
 /* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale à une mesure                             */
 /**********************************************************************************************************/
- int EA_ech_sup_egal( double val, int num )
+ int EA_ech_sup_egal( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
     else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_sup_egal : num out of range", num );
     return(0);
@@ -198,7 +198,7 @@
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
 /**********************************************************************************************************/
- void SEA( int num, double val_avant_ech )
+ void SEA( int num, float val_avant_ech )
   { if (num<0 || num>=NBR_ENTRE_ANA)
      { Info_new( Config.log, Config.log_all, LOG_INFO, "SEA : num out of range", num );
        return;
@@ -222,7 +222,7 @@
                 }
                else
                 { if (val_avant_ech < 204) val_avant_ech = 204;
-                  Partage->ea[ num ].val_ech = (gdouble)
+                  Partage->ea[ num ].val_ech = (gfloat)
                   ((val_avant_ech-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
                   + Partage->ea[num].cmd_type_eana.min;                             /* Valeur à l'echelle */ 
 
@@ -236,19 +236,19 @@
                 }
                else
                 { if (val_avant_ech < 816) val_avant_ech = 816;
-                  Partage->ea[ num ].val_ech = (gdouble)
+                  Partage->ea[ num ].val_ech = (gfloat)
                   ((val_avant_ech-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_WAGO_750455:
-               Partage->ea[ num ].val_ech = (gdouble)
+               Partage->ea[ num ].val_ech = (gfloat)
                   (val_avant_ech*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                break;
           case ENTREEANA_WAGO_750461:
-               Partage->ea[ num ].val_ech = (gdouble)(val_avant_ech/10.0);                /* Valeur à l'echelle */ 
+               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);                /* Valeur à l'echelle */ 
                break;
           default:
                Partage->ea[num].val_ech = 0.0;

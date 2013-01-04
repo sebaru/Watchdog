@@ -504,7 +504,7 @@
 /* Entrée : l'ups, le nom de variable, la variable a renseigner                                           */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                      */
 /**********************************************************************************************************/
- gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gdouble *retour )
+ gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gfloat *retour )
   { gchar buffer[80];
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
@@ -570,7 +570,7 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                           */
 /**********************************************************************************************************/
  static gboolean Interroger_ups( struct MODULE_UPS *module )
-  { gdouble valeur;
+  { gfloat valeur;
     gint num_ea;
 
     num_ea = module->ups.ea_min;
