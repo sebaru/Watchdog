@@ -150,14 +150,14 @@
      }
     else if ( ! strcmp ( commande, "light1" ) )
      { gchar trame_send_AC[] = { 0x07, 0x10, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-       gint housecode, unitcode, cmd;
+       gint proto, housecode, unitcode, cmd;
 
-       sscanf ( ligne, "%s %d,%d,%d", commande,             /* Découpage de la ligne de commande */
-                &housecode, &unitcode, &cmd );
+       sscanf ( ligne, "%s %d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
+                &proto, &housecode, &unitcode, &cmd );
 
        trame_send_AC[0]  = 0x07; /* Taille */
        trame_send_AC[1]  = 0x10; /* lightning 1 */
-       trame_send_AC[2]  = 0x01; /* ARC */
+       trame_send_AC[2]  = proto; /* ARC */
        trame_send_AC[3]  = 0x01; /* Seqnbr */
        trame_send_AC[4]  = housecode;
        trame_send_AC[5]  = unitcode;
@@ -201,7 +201,7 @@
        Admin_write ( client, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
        Admin_write ( client, "  del ID                                 - Retire le module ID\n" );
-       Admin_write ( client, "  light1 housecode,unitcode,cmdnumber\n" );
+       Admin_write ( client, "  light1 proto,housecode,unitcode,cmdnumber\n" );
        Admin_write ( client, "                                         - Envoie une commande RFXCOM\n" );
        Admin_write ( client, "  light2 id1,id2,id3,id4,unitcode,cmdnumber,level\n" );
        Admin_write ( client, "                                         - Envoie une commande RFXCOM\n" );
