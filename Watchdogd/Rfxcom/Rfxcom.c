@@ -646,7 +646,7 @@
            }
         }
 /********************************************** Transmission des trames aux sorties ***********************/
-       if (!Cfg_rfxcom.Liste_sortie)                            /* Si pas de message, on tourne */
+       if (Cfg_rfxcom.Liste_sortie)                            /* Si pas de message, on tourne */
         { gint num_a;
           pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                /* lockage futex */
           num_a = GPOINTER_TO_INT(Cfg_rfxcom.Liste_sortie->data);               /* Recuperation du numero */
