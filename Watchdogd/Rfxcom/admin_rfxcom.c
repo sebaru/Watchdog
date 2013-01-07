@@ -148,9 +148,26 @@
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_change ( client, &rfxcom );
      }
-    else if ( ! strcmp ( commande, "cmd" ) )
+    else if ( ! strcmp ( commande, "light1" ) )
+     { gchar trame_send_AC[] = { 0x07, 0x10, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+       gint housecode, unitcode, cmd;
+
+       sscanf ( ligne, "%s %d,%d,%d", commande,             /* Découpage de la ligne de commande */
+                &housecode, &unitcode, &cmd );
+
+       trame_send_AC[0]  = 0x07; /* Taille */
+       trame_send_AC[1]  = 0x10; /* lightning 1 */
+       trame_send_AC[2]  = 0x01; /* ARC */
+       trame_send_AC[3]  = 0x01; /* Seqnbr */
+       trame_send_AC[8]  = housecode;
+       trame_send_AC[9]  = unitcode;
+       trame_send_AC[10] = cmd;
+       trame_send_AC[10] = 0x0; /* rssi */
+       write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
+     }
+    else if ( ! strcmp ( commande, "light2" ) )
      { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-       gint id1, id2, id3, id4, unitcode, cmd;
+       gint id1, id2, id3, id4, unitcode, cmd, level;
 
        sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
                 &id1, &id2, &id3, &id4, &unitcode, &cmd );
@@ -165,7 +182,7 @@
        trame_send_AC[7]  = id4;
        trame_send_AC[8]  = unitcode;
        trame_send_AC[9]  = cmd;
-       trame_send_AC[10] = 0; /*liblearn.level;*/
+       trame_send_AC[10] = level;
        trame_send_AC[11] = 0x0; /* rssi */
        write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
      }
@@ -184,7 +201,10 @@
        Admin_write ( client, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
        Admin_write ( client, "  del ID                                 - Retire le module ID\n" );
-       Admin_write ( client, "  cmd id1 id2 id3 id4 unitcode cmdnumber - Envoie une commande RFXCOM\n" );
+       Admin_write ( client, "  light1 housecode,unitcode,cmdnumber\n" );
+       Admin_write ( client, "                                         - Envoie une commande RFXCOM\n" );
+       Admin_write ( client, "  light2 id1,id2,id3,id4,unitcode,cmdnumber,level\n" );
+       Admin_write ( client, "                                         - Envoie une commande RFXCOM\n" );
        Admin_write ( client, "  list                                   - Affiche les status des equipements RFXCOM\n" );
      }
     else
