@@ -67,6 +67,7 @@
     gint fd;                                                /* File descripteur de la connexion au RFXCOM */
     gboolean reload;
     GSList *Modules_RFXCOM;                                                  /* Listes des modules RFXCOM */
+    GSList *Liste_sortie;                                              /* Liste des sorties a positionner */
  } Cfg_rfxcom;
 
 /*************************************** Définitions des prototypes ***************************************/
