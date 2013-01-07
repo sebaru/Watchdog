@@ -159,10 +159,10 @@
        trame_send_AC[1]  = 0x10; /* lightning 1 */
        trame_send_AC[2]  = 0x01; /* ARC */
        trame_send_AC[3]  = 0x01; /* Seqnbr */
-       trame_send_AC[8]  = housecode;
-       trame_send_AC[9]  = unitcode;
-       trame_send_AC[10] = cmd;
-       trame_send_AC[10] = 0x0; /* rssi */
+       trame_send_AC[4]  = housecode;
+       trame_send_AC[5]  = unitcode;
+       trame_send_AC[6] = cmd;
+       trame_send_AC[7] = 0x0; /* rssi */
        write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
      }
     else if ( ! strcmp ( commande, "light2" ) )
