@@ -177,7 +177,7 @@ one_again:
 
           if ( connexion->entete.taille_donnees>connexion->taille_bloc )
            { connexion->entete.taille_donnees=connexion->taille_bloc;
-             Info_new( connexion->log, FALSE, LOG_DEBUG, "Recevoir_reseau: Paquet trop grand !! (%d)", connexion->socket );
+             Info_new( connexion->log, FALSE, LOG_ERR, "Recevoir_reseau: Paquet trop grand !! (%d)", connexion->socket );
            }
         }
      }
