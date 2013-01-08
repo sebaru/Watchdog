@@ -177,7 +177,7 @@ one_again:
                     connexion->entete.ss_tag, connexion->entete.taille_donnees );
 
           if ( connexion->entete.tag != TAG_INTERNAL &&
-               connexion->entete.taille_donnees>connexion->taille_bloc )
+               connexion->entete.taille_donnees > connexion->taille_bloc )
            { Info_new( connexion->log, FALSE, LOG_ERR,
                       "Recevoir_reseau: Paquet trop grand !! (socket %d, %d data received, %d size buffer )",
                        connexion->socket, connexion->entete.taille_donnees, connexion->taille_bloc );
@@ -205,8 +205,9 @@ one_again:
         { Info_new( connexion->log, FALSE, LOG_ERR,
                    "Recevoir_reseau: recue TAG_INTERNAL, but SSTAG (%d) not known or forbidden",
                     connexion->entete.ss_tag );
-sleep(5);
         }
+       connexion->index_entete  = 0;                        /* Raz des indexs (ie le paquet est traité !) */
+       connexion->index_donnees = 0;
        return(RECU_OK);
      }
     else                                    /* Ok, on a l'entete parfaite, maintenant fo voir les donnees */
