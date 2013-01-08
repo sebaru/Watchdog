@@ -78,6 +78,7 @@
  static gchar *Mode_vers_string ( gint mode )
   { switch (mode)
      { case ATTENTE_CONNEXION_SSL       : return("ATTENTE_CONNEXION_SSL");
+       case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");
        case ATTENTE_IDENT               : return("ATTENTE_IDENT");
        case ENVOI_AUTORISATION          : return("ENVOI_AUTORISATION");
        case ATTENTE_NEW_PASSWORD        : return("ATTENTE_NEW_PASSWORD");
@@ -224,10 +225,7 @@
           Info_new( Config.log, Config.log_all, LOG_INFO,
                    "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
           if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
-          else { Envoyer_reseau( client->connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
-                                 NULL, client->connexion->taille_bloc );
-                 Client_mode( client, ATTENTE_IDENT );
-               }
+          else { Client_mode( client, ENVOI_INTERNAL ); }
           return(TRUE);
         }
      }
@@ -300,6 +298,13 @@
               { case ATTENTE_CONNEXION_SSL:
                      Connecter_ssl ( client );                        /* Tentative de connexion securisée */
                      break;
+                case ENVOI_INTERNAL:
+                     Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
+                                   NULL, client->connexion->taille_bloc );
+                     Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,
+                                   NULL, 0 );
+                     Client_mode ( client, ATTENTE_IDENT );
+                     break;                 
                 case ENVOI_AUTORISATION :
                      new_mode = Tester_autorisation( id, client );
                      if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */

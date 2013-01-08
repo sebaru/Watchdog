@@ -97,9 +97,6 @@
              (gchar *)SSL_get_cipher_name( connexion->ssl ), SSL_get_cipher_bits( connexion->ssl, NULL ),
               Nom_certif ( certif ), Nom_certif_signataire ( certif ) );
     
-    Envoyer_reseau( client->connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
-                    NULL, client->connexion->taille_bloc );
-                 
-    Client_mode ( client, ATTENTE_IDENT );
+    Client_mode ( client, ENVOI_INTERNAL );
   }
 /*--------------------------------------------------------------------------------------------------------*/

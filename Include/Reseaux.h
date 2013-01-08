@@ -103,7 +103,8 @@
   };
 
  enum
-  { SSTAG_INTERNAL_PAQUETSIZE
+  { SSTAG_INTERNAL_PAQUETSIZE,
+    SSTAG_INTERNAL_END
   };
 
 /************************************* Définitions des prototypes *****************************************/

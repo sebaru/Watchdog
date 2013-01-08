@@ -56,6 +56,9 @@
 
     switch ( Reseau_tag(connexion) )
      { case TAG_GTK_MESSAGE : Gerer_protocole_gtk_message ( connexion ); return;
+       case TAG_INTERNAL    : if (Reseau_ss_tag(connexion) == SSTAG_INTERNAL_END)/* Fin echange interne ? */
+                               { Client_en_cours.mode = ENVOI_IDENT; }
+                              break;
        case TAG_CONNEXION: 
             switch ( Reseau_ss_tag ( connexion ) )
              { case SSTAG_SERVEUR_OFF:

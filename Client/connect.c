@@ -221,7 +221,7 @@ one_again:
        if ( ! Connecter_ssl() ) return(FALSE);                                 /* Gere les parametres SSL */
      }
 
-    Client_en_cours.mode = ENVOI_IDENT;
+    Client_en_cours.mode = ATTENTE_INTERNAL;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ENVOI_IDENT" );
     Envoyer_identification();                                        /* Envoi l'identification au serveur */
 
