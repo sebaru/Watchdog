@@ -222,8 +222,7 @@ one_again:
      }
 
     Client_en_cours.mode = ATTENTE_INTERNAL;
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ENVOI_IDENT" );
-    Envoyer_identification();                                        /* Envoi l'identification au serveur */
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ATTENTE_INTERNAL" );
 
     return(TRUE);
   }

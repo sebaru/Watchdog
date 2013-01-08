@@ -176,9 +176,11 @@ one_again:
                     connexion->socket, connexion->entete.tag,
                     connexion->entete.ss_tag, connexion->entete.taille_donnees );
 
-          if ( connexion->entete.taille_donnees>connexion->taille_bloc )
-           { connexion->entete.taille_donnees=connexion->taille_bloc;
-             Info_new( connexion->log, FALSE, LOG_ERR, "Recevoir_reseau: Paquet trop grand !! (%d)", connexion->socket );
+          if ( connexion->entete.tag != TAG_INTERNAL &&
+               connexion->entete.taille_donnees>connexion->taille_bloc )
+           { Info_new( connexion->log, FALSE, LOG_ERR,
+                      "Recevoir_reseau: Paquet trop grand !! (socket %d, %d data received, %d size buffer )",
+                       connexion->socket, connexion->entete.taille_donnees, connexion->taille_bloc );
            }
         }
      }
@@ -186,18 +188,24 @@ one_again:
      { if (connexion->entete.ss_tag == SSTAG_INTERNAL_PAQUETSIZE && connexion->taille_bloc == -1)
         { connexion->donnees = g_try_malloc0( connexion->entete.taille_donnees );
           if (!connexion->donnees)
-           { Info_new( connexion->log, FALSE, LOG_ERR, "Recevoir_reseau: not enought memory (buffer)" );
+           { Info_new( connexion->log, FALSE, LOG_ERR, "Recevoir_reseau: not enought memory (%do needed)",
+                       connexion->entete.taille_donnees );
              return(RECU_ERREUR);
            }
           connexion->taille_bloc = connexion->entete.taille_donnees;
-          Info_new( connexion->log, FALSE, LOG_INFO,
+          Info_new( connexion->log, FALSE, LOG_NOTICE,
                    "Recevoir_reseau: Setting PaquetSize to %d",
                     connexion->taille_bloc );
+        }
+       else if (connexion->entete.ss_tag == SSTAG_INTERNAL_END)
+        { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau: recue TAG_INTERNAL, end of internal transmissions" );
         }
        else
         { Info_new( connexion->log, FALSE, LOG_ERR,
                    "Recevoir_reseau: recue TAG_INTERNAL, but SSTAG (%d) not known or forbidden",
                     connexion->entete.ss_tag );
+sleep(5);
         }
        return(RECU_OK);
      }

@@ -186,6 +186,6 @@ encore:
     Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE,
               "Connecter_ssl: partenaire %s, signataire %s",
               Nom_certif ( certif ), Nom_certif_signataire ( certif ) );
-        return(TRUE);
+    return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

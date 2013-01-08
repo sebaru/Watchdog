@@ -305,7 +305,7 @@
     gtk_widget_show_all( F_client );                               /* Affichage de le fenetre de controle */
     while ( Arret != TRUE )
      { gtk_main_iteration_do ( FALSE );
-       if (Client_en_cours.mode >= ENVOI_IDENT) Ecouter_serveur();
+       if (Connexion) Ecouter_serveur();
        usleep(1000);
      }
 
