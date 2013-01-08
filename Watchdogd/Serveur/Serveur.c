@@ -224,7 +224,10 @@
           Info_new( Config.log, Config.log_all, LOG_INFO,
                    "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
           if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
-                           else Client_mode( client, ATTENTE_IDENT );
+          else { Envoyer_reseau( client->connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
+                                 NULL, client->connexion->taille_bloc );
+                 Client_mode( client, ATTENTE_IDENT );
+               }
           return(TRUE);
         }
      }

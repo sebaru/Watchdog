@@ -109,7 +109,6 @@ one_again:
           g_free(connexion);
           return(NULL);
         }
-       Envoyer_reseau( connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE, NULL, taille_bloc );
      }
 
     return(connexion);
