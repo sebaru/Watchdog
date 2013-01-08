@@ -137,8 +137,7 @@
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
                     }
 
-       client->connexion = Nouvelle_connexion( Config.log, id,
-                                               W_SERVEUR, Config.taille_bloc_reseau );
+       client->connexion = Nouvelle_connexion( Config.log, id, Config.taille_bloc_reseau );
 
        if (!client->connexion)
         { Info_new( Config.log, FALSE, LOG_ERR,

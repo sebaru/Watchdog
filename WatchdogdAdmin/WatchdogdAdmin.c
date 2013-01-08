@@ -75,8 +75,7 @@
        return(FALSE);
      }
 
-    Connexion = Nouvelle_connexion( NULL, connexion,
-                                    W_CLIENT_ADMIN, 8192 );
+    Connexion = Nouvelle_connexion( NULL, connexion, -1 );                    /* Creation de la structure */
     if (!Connexion)
      { printf("Not enough memory to open connexion\n");
        return(FALSE);       

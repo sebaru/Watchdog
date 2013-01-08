@@ -206,8 +206,7 @@ one_again:
     else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
                    _("Connecter_au_serveur: Connect OK") );
 
-    Connexion = Nouvelle_connexion( Config_cli.log, connexion,
-                                    W_CLIENT, Config_cli.taille_bloc_reseau );
+    Connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );          /* Creation de la structure */
     if (!Connexion)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
                  _("Connecter_au_serveur: cannot create new connexion") );

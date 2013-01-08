@@ -54,9 +54,6 @@
      {
 
 /********************************************* Partie SERVEUR *********************************************/
-       config_cli->taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
-       if (!config_cli->taille_bloc_reseau) config_cli->taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
-
        config_cli->ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "host", NULL );
@@ -109,7 +106,5 @@
               "Config log_level -------- %d", config_cli->log_level );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config log_override ----- %d", config_cli->log_override );
-    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config taille_bloc_reseau %d", config_cli->taille_bloc_reseau );
   }
 /*--------------------------------------------------------------------------------------------------------*/

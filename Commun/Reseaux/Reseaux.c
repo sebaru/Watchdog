@@ -86,8 +86,7 @@ one_again:
 /* Entrée: socket distante, l'id de l'appli hote                                                          */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- struct CONNEXION *Nouvelle_connexion ( struct LOG *Log, gint socket, gint emetteur,
-                                        gint taille_bloc )
+ struct CONNEXION *Nouvelle_connexion ( struct LOG *Log, gint socket, gint taille_bloc )
   { struct CONNEXION *connexion;
 
     connexion = g_try_malloc0( sizeof(struct CONNEXION) );
@@ -106,7 +105,6 @@ one_again:
     connexion->index_entete  = 0;
     connexion->index_donnees = 0;
     connexion->socket        = socket;                   /* Sauvegarde de la socket pour ecoute prochaine */
-    connexion->emetteur      = emetteur;
     connexion->taille_bloc   = taille_bloc;
     connexion->ssl           = NULL;
     connexion->log           = Log;

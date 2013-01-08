@@ -51,11 +51,6 @@
 
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
- /********* Codes reconnaissances applications **********/
- #define W_SERVEUR       1
- #define W_CLIENT        2
- #define W_CLIENT_ADMIN  3
-
  struct ENTETE_CONNEXION
   { /*gint  emetteur;  Reduction bande passante
     gint  destinataire;*/
@@ -109,8 +104,7 @@
   };
 /************************************* Définitions des prototypes *****************************************/
  extern gint Recevoir_reseau( struct CONNEXION *Connexion );
- extern struct CONNEXION *Nouvelle_connexion ( struct LOG *Log,
-                                               gint socket, gint emetteur, gint taille_bloc );
+ extern struct CONNEXION *Nouvelle_connexion ( struct LOG *Log, gint socket, gint taille_bloc );
  extern gint Attendre_envoi_disponible ( struct CONNEXION *connexion );
  extern gint Envoyer_reseau( struct CONNEXION *connexion,
                              gint tag, gint ss_tag,

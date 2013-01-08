@@ -189,8 +189,7 @@
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
                     }
 
-       client->connexion = Nouvelle_connexion( Config.log, id,
-                                               W_SERVEUR, Config.taille_bloc_reseau );
+       client->connexion = Nouvelle_connexion( Config.log, id, Config.taille_bloc_reseau );
        if (!client->connexion)
         { Info_new( Config.log, Config.log_all, LOG_ERR,
                    "Accueillir_nouveaux_client: Not enought memory for %d", id );

@@ -35,6 +35,7 @@
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
@@ -175,10 +176,10 @@
 
     Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );
 
-    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Config_cli.taille_bloc_reseau );
+    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Connexion->taille_bloc );
     if (!edit_dls) return;
     buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
-    taille_max       = Config_cli.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
+    taille_max       = Connexion->taille_bloc - sizeof(struct CMD_TYPE_SOURCE_DLS);
     edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id;
     edit_dls->taille = 0;
                                                           /* Demande de suppression du fichier source DLS */
@@ -191,7 +192,7 @@
     while( source != Source_fin )
      { gint taille;
        taille = Source_fin-source;                                                 /* Combien il reste ?? */
-       if (taille>Config_cli.taille_bloc_reseau) taille = taille_max;
+       if (taille>Connexion->taille_bloc) taille = taille_max;
        memcpy( buffer_envoi, source, taille );                                         /* Recopie mémoire */  
        edit_dls->taille = taille;
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
