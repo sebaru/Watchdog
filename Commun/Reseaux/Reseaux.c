@@ -94,13 +94,6 @@ one_again:
                       return(NULL);
                     }
 
-    connexion->donnees = g_try_malloc0( taille_bloc );
-    if (!connexion->donnees)
-     { Info_new( Log, FALSE, LOG_ERR, "Nouvelle_connexion: not enought memory (buffer)" );
-       g_free(connexion);
-       return(NULL);
-     }
-
     fcntl( socket, F_SETFL, O_NONBLOCK );
     connexion->index_entete  = 0;
     connexion->index_donnees = 0;
@@ -108,6 +101,17 @@ one_again:
     connexion->taille_bloc   = taille_bloc;
     connexion->ssl           = NULL;
     connexion->log           = Log;
+
+    if (taille_bloc != -1)           /* taille != -1 pour le cote serveur Watchdog, -1 pour les clients ! */
+     { connexion->donnees = g_try_malloc0( taille_bloc );
+       if (!connexion->donnees)
+        { Info_new( Log, FALSE, LOG_ERR, "Nouvelle_connexion: not enought memory (buffer)" );
+          g_free(connexion);
+          return(NULL);
+        }
+       Envoyer_reseau( connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE, NULL, taille_bloc );
+     }
+
     return(connexion);
   }
 
@@ -178,6 +182,25 @@ one_again:
              Info_new( connexion->log, FALSE, LOG_ERR, "Recevoir_reseau: Paquet trop grand !! (%d)", connexion->socket );
            }
         }
+     }
+    else if (connexion->entete.tag == TAG_INTERNAL)                    /* S'agit-il d'un paquet interne ? */
+     { if (connexion->entete.ss_tag == SSTAG_INTERNAL_PAQUETSIZE && connexion->taille_bloc == -1)
+        { connexion->donnees = g_try_malloc0( connexion->entete.taille_donnees );
+          if (!connexion->donnees)
+           { Info_new( connexion->log, FALSE, LOG_ERR, "Recevoir_reseau: not enought memory (buffer)" );
+             return(RECU_ERREUR);
+           }
+          connexion->taille_bloc = connexion->entete.taille_donnees;
+          Info_new( connexion->log, FALSE, LOG_INFO,
+                   "Recevoir_reseau: Setting PaquetSize to %d",
+                    connexion->taille_bloc );
+        }
+       else
+        { Info_new( connexion->log, FALSE, LOG_ERR,
+                   "Recevoir_reseau: recue TAG_INTERNAL, but SSTAG (%d) not known or forbidden",
+                    connexion->entete.ss_tag );
+        }
+       return(RECU_OK);
      }
     else                                    /* Ok, on a l'entete parfaite, maintenant fo voir les donnees */
      { if ( connexion->index_donnees == connexion->entete.taille_donnees )
@@ -274,9 +297,8 @@ encore_entete:
        cpt -= retour;
      }
 
-    if (buffer)                                                        /* Preparation de l'envoi du buffer */
-     { /*cpt = Entete.taille_donnees;*/
-       cpt = 0;
+    if (buffer && tag != TAG_INTERNAL)                                /* Preparation de l'envoi du buffer */
+     {  cpt = 0;
        while(cpt < Entete.taille_donnees)
         {
 encore_buffer:

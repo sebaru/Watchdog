@@ -52,9 +52,7 @@
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
  struct ENTETE_CONNEXION
-  { /*gint  emetteur;  Reduction bande passante
-    gint  destinataire;*/
-    gint32  ss_tag;
+  { gint32  ss_tag;
     gint32  tag;
     gint32  taille_donnees;
   };
@@ -83,7 +81,8 @@
   };
 
  enum
-  { TAG_GTK_MESSAGE,                                                              /* Envoi de message GTK */
+  { TAG_INTERNAL,                                                     /* Gestion interne librairie Reseau */
+    TAG_GTK_MESSAGE,                                                              /* Envoi de message GTK */
     TAG_FICHIER,                                           /* Echange de fichiers entre serveur et client */
     TAG_CONNEXION,                                                              /* Gestion des connexions */
     TAG_ICONE,                                                                      /* Gestion des icones */
@@ -102,6 +101,11 @@
     TAG_ADMIN,                                /* Utilisation des commandes d'admin depuis le client lourd */
 
   };
+
+ enum
+  { SSTAG_INTERNAL_PAQUETSIZE
+  };
+
 /************************************* Définitions des prototypes *****************************************/
  extern gint Recevoir_reseau( struct CONNEXION *Connexion );
  extern struct CONNEXION *Nouvelle_connexion ( struct LOG *Log, gint socket, gint taille_bloc );
