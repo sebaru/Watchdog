@@ -112,9 +112,9 @@
  extern struct CONNEXION *Nouvelle_connexion ( struct LOG *Log,
                                                gint socket, gint emetteur, gint taille_bloc );
  extern gint Attendre_envoi_disponible ( struct CONNEXION *connexion );
- extern gint Envoyer_reseau( struct CONNEXION *connexion, gint destinataire,
+ extern gint Envoyer_reseau( struct CONNEXION *connexion,
                              gint tag, gint ss_tag,
-                             gchar *buffer, gint taille_totale );
+                             gchar *buffer, gint taille_buffer );
  extern void Fermer_connexion ( struct CONNEXION *connexion );
  extern gint Reseau_tag( struct CONNEXION *connexion );
  extern gint Reseau_ss_tag( struct CONNEXION *connexion );

@@ -221,7 +221,7 @@
           else
            { struct CMD_TYPE_ADMIN admin;
              g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", commande );
-             Envoyer_reseau( Connexion, W_SERVEUR, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
+             Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
                              (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
            }
         }

@@ -54,7 +54,7 @@
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           
     pthread_mutex_lock( &client->mutex_write );
-    retour = Envoyer_reseau( client->connexion, W_CLIENT, tag, ss_tag, buffer, taille );
+    retour = Envoyer_reseau( client->connexion, tag, ss_tag, buffer, taille );
     pthread_mutex_unlock( &client->mutex_write );
     if (retour)
      { client->defaut++;

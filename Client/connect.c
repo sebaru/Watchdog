@@ -145,7 +145,7 @@ one_again:
 /**********************************************************************************************************/
  void Deconnecter ( void )
   { if (!Connexion) return;
-    Envoyer_reseau( Connexion, W_SERVEUR, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );
+    Envoyer_reseau( Connexion, TAG_CONNEXION, SSTAG_CLIENT_OFF, NULL, 0 );
     Deconnecter_sale();
   }
 /**********************************************************************************************************/
@@ -154,7 +154,7 @@ one_again:
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille )
-  { if ( Envoyer_reseau( Connexion, W_SERVEUR, tag, ss_tag, buffer, taille ) )
+  { if ( Envoyer_reseau( Connexion, tag, ss_tag, buffer, taille ) )
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Deconnexion sur erreur envoi au serveur" );
        Deconnecter_sale();
        Log ( _("Disconnected (server offline ?)") );

@@ -223,29 +223,35 @@ one_again:
 /* Entrée: la socket, l'entete, le buffer                                                                 */
 /* Sortie: non nul si pb                                                                                  */
 /**********************************************************************************************************/
- gint Envoyer_reseau( struct CONNEXION *connexion, gint destinataire, gint tag, gint ss_tag,
-                      gchar *buffer, gint taille_totale )
+ gint Envoyer_reseau( struct CONNEXION *connexion, gint tag, gint ss_tag,
+                      gchar *buffer, gint taille_buffer )
   { struct ENTETE_CONNEXION Entete;
     gint err, retour, cpt;
 
     if (!connexion) return(-1);
 
+    if ( taille_buffer > connexion->taille_bloc )
+     { Info_new( connexion->log, FALSE, LOG_ERR,
+                "Envoyer_reseau: Paquet trop grand !! (socket %d, size to send %d, max %d)",
+                 connexion->socket, taille_buffer, connexion->taille_bloc );
+       return(-1);
+     }
+
+
     if ( (retour=Attendre_envoi_disponible(connexion)) )
-     { Info_new( connexion->log, FALSE, LOG_DEBUG,
+     { Info_new( connexion->log, FALSE, LOG_WARNING,
                 "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
                  connexion->socket, retour );
        return(retour);
      }
 
-    /*Entete.emetteur       = connexion->emetteur;                             /* Recopie dans la structure */
-    /*Entete.destinataire   = destinataire;*/
     Entete.tag            = tag;
     Entete.ss_tag         = ss_tag;
-    Entete.taille_donnees = taille_totale;
+    Entete.taille_donnees = taille_buffer;
 
     Info_new( connexion->log, FALSE, LOG_DEBUG,
-             "Envoyer_reseau: Sending to %d, tag=%d, sstag=%d, taille_totale=%d",
-             connexion->socket, tag, ss_tag, taille_totale );
+             "Envoyer_reseau: Sending to %d, tag=%d, sstag=%d, taille_buffer=%d",
+             connexion->socket, tag, ss_tag, taille_buffer );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
     while(cpt)
@@ -257,10 +263,10 @@ encore_entete:
 
        if (retour<=0)
         { err = errno;
-          Info_new( connexion->log, FALSE, LOG_DEBUG,
+          Info_new( connexion->log, FALSE, LOG_ERR,
                    "Envoyer_reseau: error %s", strerror(err) );
           if (connexion->ssl)
-           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+           { Info_new( connexion->log, FALSE, LOG_ERR,
                       "Envoyer_reseau: retour SSL %s",
                        ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
            }
@@ -277,7 +283,7 @@ encore_entete:
         {
 encore_buffer:
           if ( (retour=Attendre_envoi_disponible(connexion)) )
-           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+           { Info_new( connexion->log, FALSE, LOG_WARNING,
                 "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
                  connexion->socket, retour );
              return(retour);
@@ -289,10 +295,10 @@ encore_buffer:
           
           err = errno;
           if (retour<=0)
-           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+           { Info_new( connexion->log, FALSE, LOG_ERR,
                       "Envoyer_reseau: error %s", strerror(err) );
              if (connexion->ssl)
-              { Info_new( connexion->log, FALSE, LOG_DEBUG,
+              { Info_new( connexion->log, FALSE, LOG_ERR,
                          "Envoyer_reseau: retour SSL %s",
                           ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
               }
