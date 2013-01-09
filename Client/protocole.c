@@ -91,12 +91,9 @@
                       gtk_widget_show_all(dialog);
                       Deconnecter();
                       Log ( _("Disconnected by server shutdown") );
-                      break;
+                      return;
                     }
-               default : printf("recu TAG_CONNEXION, SSTAG %d\n", Reseau_ss_tag ( connexion ) );
-                         break;
              }
-            return;
      }
 /*************************************** Client en mode VALIDE ********************************************/
     if ( Client_en_cours.mode >= VALIDE )                                       /* Le client valide  */
