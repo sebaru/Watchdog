@@ -78,7 +78,7 @@
                                         _("Gerer_protocole: client en mode ENVOI_IDENT") );
                                  Envoyer_identification();           /* Envoi l'identification au serveur */
                                }
-                              break;
+                              return;
        case TAG_CONNEXION: 
             switch ( Reseau_ss_tag ( connexion ) )
              { case SSTAG_SERVEUR_OFF:
@@ -93,10 +93,10 @@
                       Log ( _("Disconnected by server shutdown") );
                       break;
                     }
-               default : /*printf("recu SSTAG %d\n", Reseau_ss_tag ( connexion ) );*/
+               default : printf("recu TAG_CONNEXION, SSTAG %d\n", Reseau_ss_tag ( connexion ) );
                          break;
              }
-            break;
+            return;
      }
 /*************************************** Client en mode VALIDE ********************************************/
     if ( Client_en_cours.mode >= VALIDE )                                       /* Le client valide  */
@@ -155,7 +155,7 @@
      } while ( recu == RECU_EN_COURS || recu == RECU_OK );
 
     if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
-     { printf("Recu erreur\n");
+     { printf("Recu erreur %d\n", recu);
        switch( recu )
         { case RECU_ERREUR_CONNRESET: Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                                             "Ecouter_serveur: Reset connexion" );

@@ -172,8 +172,8 @@ one_again:
 
        if (connexion->index_entete >= sizeof(struct ENTETE_CONNEXION))
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Recevoir_reseau: From %d, tag=%d, sstag=%d, taille=%d",
-                    connexion->socket, connexion->entete.tag,
+                   "Recevoir_reseau: From %d (ssl=%s), tag=%d, sstag=%d, taille=%d",
+                    connexion->socket, (connexion->ssl ? "yes" : "no"), connexion->entete.tag,
                     connexion->entete.ss_tag, connexion->entete.taille_donnees );
 
           if ( connexion->entete.tag != TAG_INTERNAL &&
@@ -283,8 +283,8 @@ one_again:
     Entete.taille_donnees = taille_buffer;
 
     Info_new( connexion->log, FALSE, LOG_DEBUG,
-             "Envoyer_reseau: Sending to %d, tag=%d, sstag=%d, taille_buffer=%d",
-             connexion->socket, tag, ss_tag, taille_buffer );
+             "Envoyer_reseau: Sending to %d (ssl=%s), tag=%d, sstag=%d, taille_buffer=%d",
+             connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
     while(cpt)
