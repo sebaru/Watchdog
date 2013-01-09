@@ -150,6 +150,11 @@
        Clients = g_slist_prepend( Clients, client );
        Info_new( Config.log, FALSE, LOG_INFO,
                  "Accueillir_un_admin: Connexion granted to ID=%d", id );
+       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,         /* Envoi des infos internes */
+                     NULL, client->connexion->taille_bloc );
+       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
+                     NULL, 0 );
+
        return(TRUE);
      }
     return(FALSE);
