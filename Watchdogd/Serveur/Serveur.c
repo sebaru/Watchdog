@@ -123,7 +123,8 @@
  void Client_mode ( struct CLIENT *client, gint mode )
   { if (client->mode == DECONNECTE)
      { Info_new( Config.log, Config.log_all, LOG_INFO,
-                "Client_mode: postionnement impossible pour %s car mode = DECONNECTE", client->util->nom);
+                "Client_mode: positionnement impossible pour %s car mode = DECONNECTE", client->util->nom);
+       return;
      }
 
     if (client->mode == VALIDE_NON_ROOT && mode == VALIDE)                    /* Nous prevenons le client */

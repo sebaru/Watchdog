@@ -39,8 +39,8 @@
  #define TEMPS_UPDATE_CAPTEUR      20              /* Rafraichissement des capteurs toutes les 2 secondes */
  #define TEMPS_PULSE               20                                       /* Envoi d'un pulse au client */
  enum
-  { ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
-    ENVOI_INTERNAL,                              /* Envoi des informations internes à la librairie Reseau */
+  { ENVOI_INTERNAL,                              /* Envoi des informations internes à la librairie Reseau */
+    ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
     ATTENTE_IDENT,                                /* Permet de demander l'identification de l'utilisateur */
     ENVOI_AUTORISATION,                                                 /* Envoi de l'autorisation ou pas */
 

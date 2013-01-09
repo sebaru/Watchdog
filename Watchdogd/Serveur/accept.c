@@ -67,7 +67,8 @@
           return;
         }
        
-       Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: SSL_accept get error %d", retour );
+       Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: SSL_accept get error %d (%s)",
+                 retour, ERR_error_string( retour, NULL ) );
        while ( (retour=ERR_get_error()) )
         { Info_new( Config.log, Config.log_all, LOG_WARNING,
                    "Connecter_ssl: SSL_accept error %s",
