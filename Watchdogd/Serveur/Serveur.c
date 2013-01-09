@@ -299,10 +299,10 @@
                                    NULL, client->connexion->taille_bloc );
                      if (Config.ssl_crypt)
                       { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED, NULL, 0 ); 
-                        Client_mode ( client, ATTENTE_IDENT );
+                        Client_mode ( client, ATTENTE_CONNEXION_SSL );
                       }
                      else
-                      { Client_mode ( client, ATTENTE_CONNEXION_SSL ); }
+                      { Client_mode ( client, ATTENTE_IDENT ); }
                      Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
                                    NULL, 0 );
                      break;                 

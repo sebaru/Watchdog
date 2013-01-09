@@ -62,7 +62,7 @@
                                         _("Gerer_protocole: client en mode ATTENTE_CONNEXION_SSL") );
                                  if ( ! Connecter_ssl() )                      /* Gere les parametres SSL */
                                   { Deconnecter();
-                                    Log( "SSL conexion failed..." );
+                                    Log( "SSL connexion failed..." );
                                   }
                                }
                              else if (Reseau_ss_tag(connexion) == SSTAG_INTERNAL_END)/* Fin echange interne ? */

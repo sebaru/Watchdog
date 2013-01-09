@@ -134,7 +134,7 @@
   { gint retour;
     X509 *certif;
 
-    Ssl_ctx = Init_ssl();
+    if (!Ssl_ctx) Ssl_ctx = Init_ssl();
     if (!Ssl_ctx)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
                  "Connecter_ssl : Can't initialise SSL" );
