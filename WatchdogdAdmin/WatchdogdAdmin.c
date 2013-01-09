@@ -145,9 +145,11 @@
                         }
                      while ( recu == RECU_EN_COURS );
                      if (recu==RECU_OK)
-                      { if ( Reseau_tag(Connexion) != TAG_ADMIN )
+                      { if ( Reseau_tag(Connexion) != TAG_INTERNAL )
+                         { printf( "Ecouter_admin: setting internal parameters for communications\n" ); break; }
+                        else if ( Reseau_tag(Connexion) != TAG_ADMIN )
                          { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
-                        else
+                        else                                           /* Il s'agit donc d'un TAG_ADMIN ! */
                          { struct CMD_TYPE_ADMIN *admin;
                            admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
                            switch ( Reseau_ss_tag (Connexion) )
