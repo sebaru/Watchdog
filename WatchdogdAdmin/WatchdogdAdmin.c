@@ -145,7 +145,7 @@
                         }
                      while ( recu == RECU_EN_COURS );
                      if (recu==RECU_OK)
-                      { if ( Reseau_tag(Connexion) != TAG_INTERNAL )
+                      { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
                          { printf( "Ecouter_admin: setting internal parameters for communications\n" ); break; }
                         else if ( Reseau_tag(Connexion) != TAG_ADMIN )
                          { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
