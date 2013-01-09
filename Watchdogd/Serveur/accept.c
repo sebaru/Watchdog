@@ -97,6 +97,6 @@
              (gchar *)SSL_get_cipher_name( connexion->ssl ), SSL_get_cipher_bits( connexion->ssl, NULL ),
               Nom_certif ( certif ), Nom_certif_signataire ( certif ) );
     
-    Client_mode ( client, ENVOI_INTERNAL );
+    Client_mode ( client, ATTENTE_IDENT );
   }
 /*--------------------------------------------------------------------------------------------------------*/

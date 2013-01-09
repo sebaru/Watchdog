@@ -38,7 +38,7 @@
  extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
- extern SSL_CTX *Ssl_ctx;                                                                 /* Contexte SSL */
+ SSL_CTX *Ssl_ctx;                                                                        /* Contexte SSL */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
@@ -133,6 +133,13 @@
  gboolean Connecter_ssl ( void )
   { gint retour;
     X509 *certif;
+
+    Ssl_ctx = Init_ssl();
+    if (!Ssl_ctx)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Connecter_ssl : Can't initialise SSL" );
+       return(FALSE);
+     }
 
     if (!Connexion->ssl)                                               /* Premier appel de la fonction ?? */
      { Connexion->ssl = SSL_new( Ssl_ctx );                                  /* Instanciation du contexte */

@@ -58,7 +58,6 @@
  struct CLIENT Client_en_cours;                                  /* Identifiant de l'utilisateur en cours */
  struct CONFIG_CLI Config_cli;                                 /* Configuration generale cliente watchdog */
  struct CONNEXION *Connexion = NULL;                                              /* Connexion au serveur */
- SSL_CTX *Ssl_ctx;                                                                        /* Contexte SSL */
 
  static void Fermer_client ( void );
  static void A_propos ( GtkWidget *widget, gpointer data );
@@ -285,12 +284,6 @@
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
     Print_config_cli( &Config_cli );
 
-    if (Config_cli.ssl_crypt)
-     { Ssl_ctx = Init_ssl();
-       if (!Ssl_ctx)
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, _("Main : Can't initialise SSL") ); }
-     } else Ssl_ctx = NULL;
-    
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
     sig.sa_flags = 0;
@@ -310,7 +303,6 @@
      }
 
     if (Client_en_cours.gids) g_list_free(Client_en_cours.gids);
-    if (Config_cli.ssl_crypt) SSL_CTX_free(Ssl_ctx);
     Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, _("Main : Stopped") );
     exit(0);
   }

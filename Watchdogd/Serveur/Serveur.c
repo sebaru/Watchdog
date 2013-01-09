@@ -224,8 +224,7 @@
           pthread_mutex_unlock( &Partage->Sous_serveur[ss_id].synchro );
           Info_new( Config.log, Config.log_all, LOG_INFO,
                    "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
-          if (Config.ssl_crypt) Client_mode( client, ATTENTE_CONNEXION_SSL );/* On attend la connexion SSL */
-          else { Client_mode( client, ENVOI_INTERNAL ); }
+          Client_mode( client, ENVOI_INTERNAL );
           return(TRUE);
         }
      }
@@ -295,16 +294,21 @@
               }
 
              switch (client->mode)
-              { case ATTENTE_CONNEXION_SSL:
-                     Connecter_ssl ( client );                        /* Tentative de connexion securisée */
-                     break;
-                case ENVOI_INTERNAL:
+              { case ENVOI_INTERNAL:
                      Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
                                    NULL, client->connexion->taille_bloc );
-                     Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,
+                     if (Config.ssl_crypt)
+                      { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED, NULL, 0 ); 
+                        Client_mode ( client, ATTENTE_IDENT );
+                      }
+                     else
+                      { Client_mode ( client, ATTENTE_CONNEXION_SSL ); }
+                     Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
                                    NULL, 0 );
-                     Client_mode ( client, ATTENTE_IDENT );
                      break;                 
+                case ATTENTE_CONNEXION_SSL:
+                     Connecter_ssl ( client );                        /* Tentative de connexion securisée */
+                     break;
                 case ENVOI_AUTORISATION :
                      new_mode = Tester_autorisation( id, client );
                      if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */

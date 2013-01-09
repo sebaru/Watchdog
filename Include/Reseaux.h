@@ -103,8 +103,9 @@
   };
 
  enum
-  { SSTAG_INTERNAL_PAQUETSIZE,
-    SSTAG_INTERNAL_END
+  { SSTAG_INTERNAL_PAQUETSIZE,                                       /* Taille d'un bloc d'échange reseau */
+    SSTAG_INTERNAL_SSLNEEDED,                                      /* La communication doit passer en ssl */
+    SSTAG_INTERNAL_END                                                       /* Fin des echanges internes */
   };
 
 /************************************* Définitions des prototypes *****************************************/

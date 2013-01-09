@@ -56,8 +56,19 @@
 
     switch ( Reseau_tag(connexion) )
      { case TAG_GTK_MESSAGE : Gerer_protocole_gtk_message ( connexion ); return;
-       case TAG_INTERNAL    : if (Reseau_ss_tag(connexion) == SSTAG_INTERNAL_END)/* Fin echange interne ? */
+       case TAG_INTERNAL    : if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED ) 
+                               { Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
+                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                        _("Gerer_protocole: client en mode ATTENTE_CONNEXION_SSL") );
+                                 if ( ! Connecter_ssl() )                      /* Gere les parametres SSL */
+                                  { Deconnecter();
+                                    Log( "SSL conexion failed..." );
+                                  }
+                               }
+                             else if (Reseau_ss_tag(connexion) == SSTAG_INTERNAL_END)/* Fin echange interne ? */
                                { Client_en_cours.mode = ENVOI_IDENT;
+                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                        _("Gerer_protocole: client en mode ENVOI_IDENT") );
                                  Envoyer_identification();           /* Envoi l'identification au serveur */
                                }
                               break;

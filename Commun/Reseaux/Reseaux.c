@@ -197,11 +197,15 @@ one_again:
                    "Recevoir_reseau: Setting PaquetSize to %d",
                     connexion->taille_bloc );
         }
+       else if (connexion->entete.ss_tag == SSTAG_INTERNAL_SSLNEEDED)
+        { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau: recue TAG_INTERNAL_SSLNEEDED. Passing to application for setup" );
+        }
        else if (connexion->entete.ss_tag == SSTAG_INTERNAL_END)
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue TAG_INTERNAL, end of internal transmissions" );
         }
-       else
+       else 
         { Info_new( connexion->log, FALSE, LOG_ERR,
                    "Recevoir_reseau: recue TAG_INTERNAL, but SSTAG (%d) not known or forbidden",
                     connexion->entete.ss_tag );

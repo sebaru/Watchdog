@@ -131,6 +131,7 @@ one_again:
 /**********************************************************************************************************/
  void Deconnecter_sale ( void )
   { Fermer_connexion(Connexion);
+    SSL_CTX_free(Ssl_ctx);
     Connexion = NULL;
     Log ( _("Disconnected") );
     Client_en_cours.mode = INERTE;
@@ -214,13 +215,6 @@ one_again:
        return(FALSE);       
      }
 
-    if ( Config_cli.ssl_crypt ) 
-     { Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                 _("Connecter_au_serveur: client en mode ATTENTE_CONNEXION_SSL") );
-       if ( ! Connecter_ssl() ) return(FALSE);                                 /* Gere les parametres SSL */
-     }
-
     Client_en_cours.mode = ATTENTE_INTERNAL;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "client en mode ATTENTE_INTERNAL" );
 
@@ -302,9 +296,7 @@ one_again:
 
            gtk_widget_destroy( F_ident );                                      /* Fermeture de la fenetre */
            if (Connecter_au_serveur())                          /* Essai de connexion au serveur Watchdog */
-            { if (Config_cli.ssl_crypt) Log( _("Waiting for SSL handshake") );
-                                   else Log( _("Waiting for connexion....") );
-            }
+            { Log( _("Waiting for connexion....") ); }
          }
   }
 /*--------------------------------------------------------------------------------------------------------*/

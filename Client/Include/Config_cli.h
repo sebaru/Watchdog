@@ -37,7 +37,6 @@
   { gint  port;                                                    /* Port d'ecoute des requetes clientes */
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
     gchar serveur[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
-    gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
     guint log_override;                                     /* Pour afficher tous les informations de log */
     guint log_level;                                                      /* Niveau de debug du programme */
     struct LOG *log;                                                         /* Pour l'affichage des logs */

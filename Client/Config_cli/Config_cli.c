@@ -54,8 +54,6 @@
      {
 
 /********************************************* Partie SERVEUR *********************************************/
-       config_cli->ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
-
        chaine = g_key_file_get_string ( gkf, "SERVER", "host", NULL );
        if (chaine)
         { g_snprintf( config_cli->serveur, sizeof(config_cli->serveur), "%s", chaine ); g_free(chaine); }
@@ -100,8 +98,6 @@
               "Config serveur ---------- %s", config_cli->serveur );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config port ------------- %d", config_cli->port );
-    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config ssl crypt -------- %d", config_cli->ssl_crypt );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config log_level -------- %d", config_cli->log_level );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
