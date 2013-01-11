@@ -131,7 +131,8 @@ one_again:
 /**********************************************************************************************************/
  void Deconnecter_sale ( void )
   { Fermer_connexion(Connexion);
-    SSL_CTX_free(Ssl_ctx);
+    SSL_CTX_free(Ssl_ctx);                                                  /* Libération du contexte SSL */
+    Ssl_ctx = NULL;
     Connexion = NULL;
     Log ( _("Disconnected") );
     Client_en_cours.mode = INERTE;

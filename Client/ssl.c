@@ -134,28 +134,26 @@
   { gint retour;
     X509 *certif;
 
-    if (!Ssl_ctx) Ssl_ctx = Init_ssl();
+    Ssl_ctx = Init_ssl();
     if (!Ssl_ctx)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
                  "Connecter_ssl : Can't initialise SSL" );
        return(FALSE);
      }
 
-    if (!Connexion->ssl)                                               /* Premier appel de la fonction ?? */
-     { Connexion->ssl = SSL_new( Ssl_ctx );                                  /* Instanciation du contexte */
-
-       if (Connexion->ssl)                                                    /* Si réussite d'allocation */
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new OK" );
-          SSL_set_fd( Connexion->ssl, Connexion->socket );
-          SSL_set_connect_state( Connexion->ssl );                               /* Nous sommes un client */
-        }
-       else
-        { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new failed" );
-          Log( "Impossible de creer le contexte SSL" );
-          Deconnecter();
-          return(FALSE);
-        }
+    Connexion->ssl = SSL_new( Ssl_ctx );                                     /* Instanciation du contexte */
+    if (Connexion->ssl)                                                       /* Si réussite d'allocation */
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new OK" );
+       SSL_set_fd( Connexion->ssl, Connexion->socket );
+       SSL_set_connect_state( Connexion->ssl );                                  /* Nous sommes un client */
      }
+    else
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "Connecter_ssl: SSL_new failed" );
+       Log( "Impossible de creer le contexte SSL" );
+       Deconnecter();
+       return(FALSE);
+     }
+
 encore:
     retour = SSL_connect( Connexion->ssl );
     if (retour<=0)
