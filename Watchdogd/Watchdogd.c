@@ -532,6 +532,7 @@
           Partage->Sous_serveur[i].Thread_sigusr1 = FALSE;
           Partage->Sous_serveur[i].Thread_reload = FALSE;
           Partage->Sous_serveur[i].pid = -1;
+          Partage->Sous_serveur[i].Clients = NULL;
           pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
         }
 
