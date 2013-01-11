@@ -290,11 +290,6 @@
                "THRCompil: Proto_compiler_source_dls: gcc is down, OK %d", pidgcc );
 
 
-       pthread_mutex_lock( &Partage->com_dls.synchro );             /* Demande le reset du plugin à D.L.S */
-       Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                                             GINT_TO_POINTER(id) );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-
        if (client)
         { if (retour == TRAD_DLS_WARNING)
            { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
@@ -304,9 +299,14 @@
            { g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
                          "\n -> Compilation OK\nReset plugin OK" );
            }
+          pthread_mutex_lock( &Partage->com_dls.synchro );                 /* Demande le reset du plugin à D.L.S */
+          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                                                GINT_TO_POINTER(id) );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
      }
-    if (client) Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,           /* Envoi du résultat */
+
+    if (client) Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,                  /* Envoi du résultat */
                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
 
     Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompil: Compiler_source_dls: end of %d", id );

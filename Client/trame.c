@@ -40,7 +40,7 @@
 
  #include "trame.h"
 
-#define DEBUG_TRAME
+ #define DEBUG_TRAME
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 

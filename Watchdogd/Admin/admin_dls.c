@@ -77,7 +77,8 @@
     Admin_write ( client, chaine );
 
     if (id == -1)
-     { liste_dls = Partage->com_dls.Plugins;
+     { pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Lock du mutex */
+       liste_dls = Partage->com_dls.Plugins;
        while ( liste_dls )
         { struct PLUGIN_DLS *dls;
           dls = (struct PLUGIN_DLS *)liste_dls->data;
@@ -87,14 +88,22 @@
           Compiler_source_dls ( NULL, dls->plugindb.id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
           Admin_write ( client, chaine );
+
+          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                                                GINT_TO_POINTER(id) );
+          liste_dls = liste_dls->next;
         }
-       liste_dls = liste_dls->next;
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
      } else
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
           Admin_write ( client, chaine );
           Compiler_source_dls ( NULL, id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
           Admin_write ( client, chaine );
+          pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Lock du mutex */
+          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                                                GINT_TO_POINTER(id) );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );    
         }
   }
 /**********************************************************************************************************/

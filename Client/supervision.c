@@ -276,8 +276,6 @@
        default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
                         trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
      }
-    printf("Changer_etat_motif: sortie\n");
-    
   }
 /**********************************************************************************************************/
 /* Changer_etat_motif: Changement d'etat d'un motif                                                       */
