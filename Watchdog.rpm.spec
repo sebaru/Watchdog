@@ -163,3 +163,27 @@ This is the server side of Watchdog - RFXCOM Module
 %defattr(644,root,root)
 /usr/lib/libwatchdog-server-rfxcom*
 
+#----------------------------- Package Server-audio ----------------------------------
+%package server-audio
+Summary: The Watchdogd Server - Module AUDIO
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-audio
+This is the server side of Watchdog - AUDIO Module
+
+%files server-audio
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-audio*
+
+#----------------------------- Package Server-imsg ----------------------------------
+%package server-imsg
+Summary: The Watchdogd Server - Instant Messaging RFXCOM
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-imsg
+This is the server side of Watchdog - Instant Messaging Module
+
+%files server-imsg
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-imsg*
+
