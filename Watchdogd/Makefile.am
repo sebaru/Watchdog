@@ -39,5 +39,5 @@ INCLUDES=-I$(top_srcdir)/Include \
 	 $(CURL_CFLAGS) \
 	 $(UPS_CFLAGS)
 
-EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
+EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
 MAINTAINERCLEANFILES = Makefile.in
