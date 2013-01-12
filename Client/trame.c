@@ -93,9 +93,9 @@
     if (trame_motif->select_hg) goo_canvas_item_remove( trame_motif->select_hg );
     if (trame_motif->select_bd) goo_canvas_item_remove( trame_motif->select_bd );
     if (trame_motif->select_bg) goo_canvas_item_remove( trame_motif->select_bg );
-    g_list_foreach( trame_motif->images, (GFunc) gdk_pixbuf_unref /*g_free*/, NULL );
+    g_list_foreach( trame_motif->images, (GFunc) g_object_unref /*g_free*/, NULL );
     g_list_free( trame_motif->images );
-    if (trame_motif->pixbuf) gdk_pixbuf_unref(trame_motif->pixbuf);
+    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
@@ -344,7 +344,7 @@
             trame_motif->gif_largeur, trame_motif->gif_hauteur, r, v, b );
 #endif       
 
-    if (trame_motif->pixbuf) gdk_pixbuf_unref(trame_motif->pixbuf);
+    if (trame_motif->pixbuf) g_object_unref(trame_motif->pixbuf);
     trame_motif->pixbuf = gdk_pixbuf_copy( (GdkPixbuf *)(trame_motif->image->data) );
     buffer = gdk_pixbuf_get_pixels( trame_motif->pixbuf );
 
@@ -535,25 +535,25 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
        trame_motif->select_hg = goo_canvas_image_new ( trame->canvas_root,
                                                        pixbuf, 0.0, 0.0,
                                                        NULL );
-       gdk_pixbuf_unref(pixbuf);
+       g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_hd.gif", NULL );
        trame_motif->select_hd = goo_canvas_image_new ( trame->canvas_root,
                                                        pixbuf, 0.0, 0.0,
                                                        NULL );
-       gdk_pixbuf_unref(pixbuf);
+       g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bg.gif", NULL );
        trame_motif->select_bg = goo_canvas_image_new ( trame->canvas_root,
                                                        pixbuf, 0.0, 0.0,
                                                        NULL );
-       gdk_pixbuf_unref(pixbuf);
+       g_object_unref(pixbuf);
 
        pixbuf = gdk_pixbuf_new_from_file( "fleche_bd.gif", NULL );
        trame_motif->select_bd = goo_canvas_image_new ( trame->canvas_root,
                                                        pixbuf, 0.0, 0.0,
                                                        NULL );
-       gdk_pixbuf_unref(pixbuf);
+       g_object_unref(pixbuf);
 
        g_object_set( trame_motif->select_hg, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
        g_object_set( trame_motif->select_hd, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
