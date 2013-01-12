@@ -228,7 +228,7 @@
     gchar *file;
     struct poptOption Options[]= 
      { { "port", 'p',       POPT_ARG_INT,
-         &port,             0, _("Port to listen to"), "PORT" },
+         &port,             0, _("Port to connect to"), "PORT" },
        { "debug",'d',       POPT_ARG_INT,
          &debug_level,      0, _("log level"), "LEVEL" },
        { "conffile", 'c',   POPT_ARG_STRING,
