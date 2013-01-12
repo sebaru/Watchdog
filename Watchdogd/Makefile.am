@@ -30,7 +30,7 @@ Watchdogd_LDADD   = Serveur/libserveur.la \
 Watchdogd_LDFLAGS = -rdynamic -lpopt `pkg-config --libs glib-2.0 gthread-2.0` `mysql_config --libs`
 
 sysconf_DATA = watchdogd.conf
-pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
+pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
 
 INCLUDES=-I$(top_srcdir)/Include \
 	 -IInclude/ \
