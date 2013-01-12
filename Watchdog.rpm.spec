@@ -127,16 +127,16 @@ This is the server side of Watchdog - UPS Module
 /usr/lib/libwatchdog-server-ups*
 
 #----------------------------- Package Server-tellstick -------------------------------
-%package server-tellstick
-Summary: The Watchdogd Server - Module tellstick
-Group:                  Development/Tools
-requires: Watchdog-server
-%description server-tellstick
-This is the server side of Watchdog - Telldus Module
-
-%files server-tellstick
-%defattr(644,root,root)
-/usr/lib/libwatchdog-server-tellstick*
+#%package server-tellstick
+#Summary: The Watchdogd Server - Module tellstick
+#Group:                  Development/Tools
+#requires: Watchdog-server
+#%description server-tellstick
+#This is the server side of Watchdog - Telldus Module
+#
+#%files server-tellstick
+#%defattr(644,root,root)
+#/usr/lib/libwatchdog-server-tellstick*
 
 #----------------------------- Package Server-lirc -----------------------------------
 %package server-lirc
