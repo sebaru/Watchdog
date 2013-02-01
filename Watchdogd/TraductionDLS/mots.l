@@ -61,7 +61,7 @@ blanc         [\t ]+
 "_CH"                      { Dls_lval.val = CPT_H;       return CPT_H;       }
 "_CI"                      { Dls_lval.val = CPT_IMP;     return CPT_IMP;     }
 "_MSG"                     { Dls_lval.val = T_MSG;       return T_MSG;       }
-"_START"                   { Dls_lval.val = START;       return START;       }
+"_START"                   { Dls_lval.val = T_START;     return T_START;     }
 
  /***************************************** Methodes speciales ********************************************/
 "HEURE"                    { Dls_lval.val = HEURE;       return HEURE;       }

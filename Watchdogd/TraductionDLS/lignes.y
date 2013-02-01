@@ -65,7 +65,7 @@ int erreur;                                                             /* Compt
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI MONO ENTREE SORTIE TEMPO T_IS_COUNTING T_MSG ICONE CPT_H CPT_IMP EANA START
+%token <val>    BI MONO ENTREE SORTIE TEMPO T_IS_COUNTING T_MSG ICONE CPT_H CPT_IMP EANA T_START
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
@@ -149,18 +149,7 @@ listeInstr:     une_instr listeInstr
                 | une_instr
                 ;
 
-une_instr:      MOINS START DONNE action PVIRGULE
-                {{ int taille;
-                   char *instr;
-                   taille = strlen($4->alors)+20;
-                   instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(start) { %s }\n", $4->alors );
-
-                   Emettre( instr ); g_free(instr);
-                   if ($4->sinon) g_free($4->sinon); 
-                   g_free($4->alors); g_free($4);
-                }}
-                | MOINS expr DONNE action PVIRGULE
+une_instr:      MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
                    taille = strlen($2)+strlen($4->alors)+11;
@@ -220,6 +209,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                    taille = 18;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "Jour_semaine(%d)", $1 );
+                }}
+                | T_START
+                {{ int taille;
+                   taille = 18;
+                   $$ = New_chaine(taille);
+                   g_snprintf( $$, taille, "(start)", $1 );
                 }}
                 | barre BI ENTIER
                 {{ int taille;
