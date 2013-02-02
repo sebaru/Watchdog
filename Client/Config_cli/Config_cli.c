@@ -68,9 +68,9 @@
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "password", NULL );
        if (chaine)
-        { g_snprintf( config_cli->user, sizeof(config_cli->passwd), "%s", chaine ); g_free(chaine); }
+        { g_snprintf( config_cli->passwd, sizeof(config_cli->passwd), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( config_cli->user, sizeof(config_cli->passwd), "%s", DEFAUT_PASSWD  ); }
+        { g_snprintf( config_cli->passwd, sizeof(config_cli->passwd), "%s", DEFAUT_PASSWD  ); }
 
        config_cli->port = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!config_cli->port) config_cli->port = DEFAUT_PORT;

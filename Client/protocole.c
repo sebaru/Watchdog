@@ -127,6 +127,8 @@
                                { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                                            "Gerer_protocole : Client en mode VALIDE" );
                                  Client_en_cours.mode = VALIDE;
+                                 if (Config_cli.gui_tech==FALSE)                    /* Affichage GUI Client */
+                                  { Menu_want_supervision(); }                               
                                }
                               break;
           case TAG_FICHIER  : Gerer_protocole_fichier_connecte ( connexion ); break;

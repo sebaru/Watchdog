@@ -221,11 +221,11 @@
  int main ( int argc,                                   /*!< nombre d'argument dans la ligne de commande, */
             char *argv[]                                           /*!< Arguments de la ligne de commande */
           )
-  { gint help, port, gui_tech, debug_level;
+  { gint help = 0, port = -1, gui_tech = 0, debug_level = -1;
     struct sigaction sig;
     GnomeClient *client;
     GnomeProgram *prg;
-    gchar *file, *host, *user, *passwd;
+    gchar *file = NULL, *host = NULL, *user = NULL, *passwd = NULL;
     struct poptOption Options[]= 
      { { "conffile", 'c',   POPT_ARG_STRING,
          &file,             0, _("Configuration file"), "FILE" },
@@ -246,12 +246,6 @@
        POPT_TABLEEND
      };
 
-    file = NULL;
-    host = NULL;
-    port           = -1;
-    debug_level    = -1;
-    help           = 0;
-
     if (chdir( g_get_home_dir() ))                                  /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
 
@@ -260,15 +254,15 @@
        chdir ( REPERTOIR_CONF );
      }
 
+    Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                    /* Init msgs d'erreurs */
     Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
-    if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host), "%s", host   );
+    if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host),    "%s", host   );
     if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
     if (passwd)          g_snprintf( Config_cli.passwd,  sizeof(Config_cli.passwd),  "%s", passwd );
     if (port!=-1)        Config_cli.port      = port;                  /* Priorite à la ligne de commande */
     if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;              /* Priorite à la ligne de commande */
     if (debug_level!=-1) Config_cli.log_level = debug_level;
-
-    Config_cli.log = Info_init( "Watchdog_client", Config_cli.log_level );         /* Init msgs d'erreurs */
+    Info_change_log_level( Config_cli.log, Config_cli.log_level );
 
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
     Print_config_cli( &Config_cli );
