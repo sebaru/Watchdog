@@ -204,6 +204,7 @@
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
  
  extern void Connecter ( void );                                                        /* Dans connect.c */
+ extern gboolean Connecter_au_serveur ( void );
  extern void Deconnecter_sale ( void );
  extern void Deconnecter ( void );
  extern gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille );

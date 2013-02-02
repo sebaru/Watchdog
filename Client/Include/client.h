@@ -59,9 +59,9 @@
     guint32 id;
     GList *gids;
     struct CONNEXION *connexion;
-    gchar user[NBR_CARAC_LOGIN_UTF8+1]; /* encore utile ??? */
-    gchar password[NBR_CARAC_LOGIN_UTF8+1]; /* idem */
-    gchar serveur[TAILLE_NOM_SERVEUR+1]; /* idem */
+    gchar host[TAILLE_NOM_SERVEUR+1];
+    gchar user[NBR_CARAC_LOGIN_UTF8+1];
+    gchar password[NBR_CARAC_LOGIN_UTF8+1];
     struct
      { gint32 id_fichier_gif;                  /* Identificateur de fichier gif en cours d'envoi au serveur */
        gchar *buffer;                                        /* Doit contenir aussi l'entete CMD_ID_ICONE */

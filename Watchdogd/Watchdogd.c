@@ -349,7 +349,7 @@
     file = NULL;
     port           = -1;
     max_client     = -1;
-    log_level    = -1;
+    log_level      = -1;
     initrsa        = 0;
     fg             = 0;
     help           = 0;

@@ -169,21 +169,21 @@ one_again:
 /* Entrée: une nom et un password                                                                         */
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
- static gboolean Connecter_au_serveur ( void )
+ gboolean Connecter_au_serveur ( void )
   { struct sockaddr_in src;                                            /* Données locales: pas le serveur */
     struct hostent *host;
     int connexion;
 
     Log( _("Trying to connect") );
        
-    if ( !(host = gethostbyname( Client_en_cours.serveur )) )                     /* On veut l'adresse IP */
+    if ( !(host = gethostbyname( Client_en_cours.host )) )                     /* On veut l'adresse IP */
      { Log( _("DNS failed") );
        Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
-                 _("Connecter_au_serveur: DNS failed %s"), Client_en_cours.serveur );
+                 _("Connecter_au_serveur: DNS failed %s"), Client_en_cours.host );
        return(FALSE);
      }
     else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                   _("Connecter_au_serveur: DNS Request OK %s"), Client_en_cours.serveur );
+                   _("Connecter_au_serveur: DNS Request OK %s"), Client_en_cours.host );
 
     src.sin_family = host->h_addrtype;
     memcpy( (char*)&src.sin_addr, host->h_addr, host->h_length );                 /* On recopie les infos */
@@ -200,7 +200,7 @@ one_again:
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
-                 _("Connecter_au_serveur: connexion refused by server %s"), Config_cli.serveur );
+                 _("Connecter_au_serveur: connexion refused by server %s"), Config_cli.host );
        Log(_("connexion refused by server"));
        close(connexion);
        return(FALSE);
@@ -228,7 +228,7 @@ one_again:
 /**********************************************************************************************************/
  void Connecter ( void )
   { GtkWidget *table, *texte, *boite, *frame;
-    GtkWidget *Entry_serveur, *Entry_nom, *Entry_code;
+    GtkWidget *Entry_host, *Entry_nom, *Entry_code;
     gint retour;
 
     if (Connexion) return;
@@ -252,9 +252,9 @@ one_again:
 
     texte = gtk_label_new( _("Serveur") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-    Entry_serveur = gtk_entry_new();
-    gtk_entry_set_text( GTK_ENTRY(Entry_serveur), Config_cli.serveur );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_serveur, 1, 3, 0, 1 );
+    Entry_host = gtk_entry_new();
+    gtk_entry_set_text( GTK_ENTRY(Entry_host), Config_cli.host );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_host, 1, 3, 0, 1 );
 
     texte = gtk_label_new( _("Name") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
@@ -272,7 +272,7 @@ one_again:
     gtk_entry_set_text( GTK_ENTRY(Entry_code), "bouh" );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_code, 1, 3, 2, 3 );
 
-    g_signal_connect_swapped( Entry_serveur, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
+    g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
     g_signal_connect_swapped( Entry_nom, "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
 
     gtk_widget_grab_focus( Entry_nom );
@@ -285,12 +285,8 @@ one_again:
          }
     else { memcpy( Client_en_cours.user,     gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
                    sizeof(Client_en_cours.user) );
-           memcpy( Config_cli.user,          gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
-                   sizeof(Config_cli.user) );
-           memcpy( Client_en_cours.serveur,  gtk_entry_get_text( GTK_ENTRY(Entry_serveur) ),
-                   sizeof(Client_en_cours.serveur) );
-           memcpy( Config_cli.serveur,       gtk_entry_get_text( GTK_ENTRY(Entry_serveur) ),
-                   sizeof(Config_cli.serveur) );
+           memcpy( Client_en_cours.host,     gtk_entry_get_text( GTK_ENTRY(Entry_host) ),
+                   sizeof(Client_en_cours.host) );
            memcpy( Client_en_cours.password, gtk_entry_get_text( GTK_ENTRY(Entry_code) ),
                    sizeof(Client_en_cours.password) );
 

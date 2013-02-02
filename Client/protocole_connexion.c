@@ -91,12 +91,14 @@
 
                ident = (struct REZO_SRV_IDENT *)connexion->donnees;
                g_snprintf( chaine, sizeof(chaine), _("Connected to %s@%s:%d  %s"),
-                           Client_en_cours.user, Client_en_cours.serveur, Config_cli.port, ident->comment );
+                           Client_en_cours.user, Client_en_cours.host, Config_cli.port, ident->comment );
                gnome_appbar_push( GNOME_APPBAR(Barre_status), chaine );
                Log( _("Connected") );
                Client_en_cours.mode = CONNECTE;
                Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                          "Gerer_protocole_connexion : Client en mode CONNECTE" );
+               if (Config_cli.gui_tech==FALSE)
+                { Menu_want_supervision(); }
              }
             break;
      }

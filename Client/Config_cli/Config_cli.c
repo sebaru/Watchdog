@@ -56,9 +56,9 @@
 /********************************************* Partie SERVEUR *********************************************/
        chaine = g_key_file_get_string ( gkf, "SERVER", "host", NULL );
        if (chaine)
-        { g_snprintf( config_cli->serveur, sizeof(config_cli->serveur), "%s", chaine ); g_free(chaine); }
+        { g_snprintf( config_cli->host, sizeof(config_cli->host), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( config_cli->serveur, sizeof(config_cli->serveur), "%s", DEFAUT_SERVEUR  ); }
+        { g_snprintf( config_cli->host, sizeof(config_cli->host), "%s", DEFAUT_SERVEUR  ); }
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "user", NULL );
        if (chaine)
@@ -66,7 +66,13 @@
        else
         { g_snprintf( config_cli->user, sizeof(config_cli->user), "%s", DEFAUT_USER  ); }
 
-       config_cli->port              = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
+       chaine = g_key_file_get_string ( gkf, "SERVER", "password", NULL );
+       if (chaine)
+        { g_snprintf( config_cli->user, sizeof(config_cli->passwd), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( config_cli->user, sizeof(config_cli->passwd), "%s", DEFAUT_PASSWD  ); }
+
+       config_cli->port = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!config_cli->port) config_cli->port = DEFAUT_PORT;
 
 /********************************************* Partie LOG *************************************************/
@@ -83,6 +89,8 @@
 
        config_cli->log_override = g_key_file_get_boolean ( gkf, "DEBUG", "log_all", NULL );
 
+/********************************************* Partie GUI *************************************************/
+       config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
      }
     g_key_file_free(gkf);
   }
@@ -93,9 +101,13 @@
  void Print_config_cli ( struct CONFIG_CLI *config_cli )
   { if (!config_cli->log) return;
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config GUI Technical ---- %d", config_cli->gui_tech );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config host ------------- %s", config_cli->host );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config user ------------- %s", config_cli->user );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config serveur ---------- %s", config_cli->serveur );
+              "Config passwd ----------- %s", config_cli->passwd );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config port ------------- %d", config_cli->port );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,

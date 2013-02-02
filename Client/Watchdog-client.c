@@ -172,7 +172,7 @@
      };
 
     gtk_show_about_dialog( NULL, "program-name", "Watchdog-client",
-                           "version", VERSION, "copyright", "Copyright 2010 © Sebastien Lefevre",
+                           "version", VERSION, "copyright", "Copyright 2010-2013 © Sebastien Lefevre",
                            "authors", auteurs,
                            "license", "Watchdog is free software; you can redistribute it and/or modify\n"
                                       "it under the terms of the GNU General Public License as published by\n"
@@ -221,27 +221,58 @@
  int main ( int argc,                                   /*!< nombre d'argument dans la ligne de commande, */
             char *argv[]                                           /*!< Arguments de la ligne de commande */
           )
-  { gint help, port, debug_level;
+  { gint help, port, gui_tech, debug_level;
     struct sigaction sig;
     GnomeClient *client;
     GnomeProgram *prg;
-    gchar *file;
+    gchar *file, *host, *user, *passwd;
     struct poptOption Options[]= 
-     { { "port", 'p',       POPT_ARG_INT,
+     { { "conffile", 'c',   POPT_ARG_STRING,
+         &file,             0, _("Configuration file"), "FILE" },
+       { "host", 's',       POPT_ARG_STRING,
+         &host,             0, _("Server to connect to"), "HOST" },
+       { "user", 'u',       POPT_ARG_STRING,
+         &user,             0, _("User to connect to"), "USER" },
+       { "passwd", 'w',       POPT_ARG_STRING,
+         &passwd,           0, _("Passwd of User"), "PASSWD" },
+       { "port", 'p',       POPT_ARG_INT,
          &port,             0, _("Port to connect to"), "PORT" },
        { "debug",'d',       POPT_ARG_INT,
          &debug_level,      0, _("log level"), "LEVEL" },
-       { "conffile", 'c',   POPT_ARG_STRING,
-         &file,             0, _("Configuration file"), "FILE" },
+       { "gui-tech", 't',   POPT_ARG_NONE,
+         &gui_tech,         0, _("Technical GUI"), NULL },
        { "help", 'h',       POPT_ARG_NONE,
          &help,             0, _("Help"), NULL },
        POPT_TABLEEND
      };
 
     file = NULL;
+    host = NULL;
     port           = -1;
     debug_level    = -1;
     help           = 0;
+
+    if (chdir( g_get_home_dir() ))                                  /* Positionnement à la racine du home */
+     { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
+
+    if (chdir( REPERTOIR_CONF ))                                    /* Positionnement à la bonne position */
+     { mkdir ( REPERTOIR_CONF, 0700 );
+       chdir ( REPERTOIR_CONF );
+     }
+
+    Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
+    if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host), "%s", host   );
+    if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
+    if (passwd)          g_snprintf( Config_cli.passwd,  sizeof(Config_cli.passwd),  "%s", passwd );
+    if (port!=-1)        Config_cli.port      = port;                  /* Priorite à la ligne de commande */
+    if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;              /* Priorite à la ligne de commande */
+    if (debug_level!=-1) Config_cli.log_level = debug_level;
+
+    Config_cli.log = Info_init( "Watchdog_client", Config_cli.log_level );         /* Init msgs d'erreurs */
+
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
+    Print_config_cli( &Config_cli );
+
 
     prg = gnome_program_init( PROGRAMME, VERSION, LIBGNOMEUI_MODULE, argc, argv,            /* Init gnome */
                               GNOME_PARAM_POPT_TABLE, Options, GNOME_PARAM_NONE );
@@ -253,8 +284,11 @@
                       G_CALLBACK( Fermer_client ), NULL );
     g_signal_connect( G_OBJECT( F_client ), "destroy",
                       G_CALLBACK( Fermer_client ), NULL );
-    gnome_app_create_menus( GNOME_APP(F_client), Menu_principal );
-    gnome_app_create_toolbar( GNOME_APP(F_client), Barre_outils );
+
+    if (Config_cli.gui_tech)
+     { gnome_app_create_menus( GNOME_APP(F_client), Menu_principal );
+       gnome_app_create_toolbar( GNOME_APP(F_client), Barre_outils );
+     }
     Barre_status = gnome_appbar_new( TRUE, TRUE, GNOME_PREFERENCES_USER );
     gnome_app_set_statusbar( GNOME_APP( F_client ), Barre_status );
 
@@ -266,23 +300,6 @@
     Orange = gdk_pixmap_create_from_xpm_d( F_client->window, &Omask, NULL, boule_orange_xpm );
     Jaune  = gdk_pixmap_create_from_xpm_d( F_client->window, &Jmask, NULL, boule_jaune_xpm );
     gnome_app_set_contents( GNOME_APP(F_client), Creer_boite_travail() );
-
-    if (chdir( g_get_home_dir() ))                                  /* Positionnement à la racine du home */
-     { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
-
-    if (chdir( REPERTOIR_CONF ))                                    /* Positionnement à la bonne position */
-     { mkdir ( REPERTOIR_CONF, 0700 );
-       chdir ( REPERTOIR_CONF );
-     }
-
-    Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
-    if (port!=-1)        Config_cli.port      = port;                  /* Priorite à la ligne de commande */
-    if (debug_level!=-1) Config_cli.log_level = debug_level;
-
-    Config_cli.log = Info_init( "Watchdog_client", Config_cli.log_level );         /* Init msgs d'erreurs */
-
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
-    Print_config_cli( &Config_cli );
 
     sig.sa_handler = Traitement_signaux;
     sigemptyset(&sig.sa_mask);
@@ -296,6 +313,13 @@
     Client_en_cours.mode = INERTE;
 
     gtk_widget_show_all( F_client );                               /* Affichage de le fenetre de controle */
+    if (Config_cli.gui_tech == FALSE)
+     { memcpy( Client_en_cours.user, Config_cli.user,        sizeof(Client_en_cours.user) );
+       memcpy( Client_en_cours.host,  Config_cli.host,       sizeof(Client_en_cours.host) );
+       memcpy( Client_en_cours.password, Config_cli.passwd,  sizeof(Client_en_cours.password) );
+       Connecter_au_serveur();
+     }
+
     while ( Arret != TRUE )
      { gtk_main_iteration_do ( FALSE );
        if (Connexion) Ecouter_serveur();

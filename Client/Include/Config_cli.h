@@ -35,16 +35,19 @@
  
  struct CONFIG_CLI
   { gint  port;                                                    /* Port d'ecoute des requetes clientes */
+    gchar host[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
-    gchar serveur[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
+    gchar passwd[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
     guint log_override;                                     /* Pour afficher tous les informations de log */
     guint log_level;                                                      /* Niveau de debug du programme */
+    gboolean gui_tech;                               /* True si la GUI doit présenter l'aspect Technicien */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
   };
 
  #define DEFAUT_FICHIER_CONFIG_CLI      "watchdog-client.conf"
- #define DEFAUT_USER                    "supervision"
  #define DEFAUT_SERVEUR                 "localhost"
+ #define DEFAUT_USER                    "supervision"
+ #define DEFAUT_PASSWD                  "supervision"
  #define DEFAUT_PORT                    5558
  #define DEFAUT_LOG_LEVEL               LOG_INFO
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
