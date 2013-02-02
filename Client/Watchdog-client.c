@@ -221,7 +221,7 @@
  int main ( int argc,                                   /*!< nombre d'argument dans la ligne de commande, */
             char *argv[]                                           /*!< Arguments de la ligne de commande */
           )
-  { gint help = 0, port = -1, gui_tech = 0, debug_level = -1;
+  { gint help = 0, port = -1, gui_tech = -1, debug_level = -1;
     struct sigaction sig;
     GnomeClient *client;
     GnomeProgram *prg;
@@ -279,7 +279,7 @@
     g_signal_connect( G_OBJECT( F_client ), "destroy",
                       G_CALLBACK( Fermer_client ), NULL );
 
-    if (Config_cli.gui_tech)
+    if (Config_cli.gui_tech == TRUE)
      { gnome_app_create_menus( GNOME_APP(F_client), Menu_principal );
        gnome_app_create_toolbar( GNOME_APP(F_client), Barre_outils );
      }
