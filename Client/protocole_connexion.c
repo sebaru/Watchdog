@@ -97,8 +97,6 @@
                Client_en_cours.mode = CONNECTE;
                Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                          "Gerer_protocole_connexion : Client en mode CONNECTE" );
-               if (Config_cli.gui_tech==FALSE)
-                { Menu_want_supervision(); }
              }
             break;
      }
