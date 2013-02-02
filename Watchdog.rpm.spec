@@ -177,7 +177,7 @@ This is the server side of Watchdog - AUDIO Module
 
 #----------------------------- Package Server-imsg ----------------------------------
 %package server-imsg
-Summary: The Watchdogd Server - Instant Messaging RFXCOM
+Summary: The Watchdogd Server - Instant Messaging Thread
 Group:                  Development/Tools
 requires: Watchdog-server
 %description server-imsg
@@ -187,3 +187,14 @@ This is the server side of Watchdog - Instant Messaging Module
 %defattr(644,root,root)
 /usr/lib/libwatchdog-server-imsg*
 
+#----------------------------- Package Server-Master ----------------------------------
+%package server-master
+Summary: The Watchdogd Server - Master Thread for Slave Connexion
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-master
+This is the server side of Watchdog - Master Thread for Slave Connexion
+
+%files server-master
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-master*

@@ -111,6 +111,7 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Imsg/Makefile \
+Watchdogd/Master/Makefile \
 Watchdogd/Lirc/Makefile \
 Watchdogd/Asterisk/Makefile \
 Watchdogd/Utilisateur/Makefile \
