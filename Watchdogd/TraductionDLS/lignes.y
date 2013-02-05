@@ -300,7 +300,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                           { is_counting = Get_option_entier( alias->options, T_IS_COUNTING ); }
                                          $$ = New_chaine( taille ); /* 10 caractères max */
                                          g_snprintf( $$, taille, "%sTR%s(%d)",
-                                                    (alias->barre ? "!" : ""),
+                                                    (alias->barre == 1 ? "!" : ""),
                                                     (is_counting == -1 ? "" : "Count"), alias->num );
                                        }
                                       break;
