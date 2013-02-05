@@ -259,14 +259,14 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
                     }
                 }}
-                | barre TEMPO liste_options ENTIER
+                | barre TEMPO ENTIER liste_options 
                 {{ int taille, is_counting;
                    taille = 20;
-                   is_counting = Get_option_entier( $3, T_IS_COUNTING );
+                   is_counting = Get_option_entier( $4, T_IS_COUNTING );
                    $$ = New_chaine( taille ); /* 10 caractères max */
                    g_snprintf( $$, taille, "%sTR%s(%d)",
-                               ($1==1 ? "!" : ""), (is_counting == -1 ? "" : "Count"), $4 );
-                   Liberer_options($3);
+                               ($1==1 ? "!" : ""), (is_counting == -1 ? "" : "Count"), $3 );
+                   Liberer_options($4);
                 }}
                 | barre POUV expr PFERM
                 {{ int taille;
@@ -299,8 +299,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          if (is_counting == -1)
                                           { is_counting = Get_option_entier( alias->options, T_IS_COUNTING ); }
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         g_snprintf( $$, taille, "%sTR%s(%d)",
-                                                    (alias->barre == 1 ? "!" : ""),
+                                         g_snprintf( $$, taille, "%sTR%s(%d)",   /* alias->barre not used */
+                                                    ($1 == 1 ? "!" : ""),
                                                     (is_counting == -1 ? "" : "Count"), alias->num );
                                        }
                                       break;
