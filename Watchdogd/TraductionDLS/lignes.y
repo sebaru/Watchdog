@@ -265,7 +265,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    is_counting = Get_option_entier( $3, T_IS_COUNTING );
                    $$ = New_chaine( taille ); /* 10 caractères max */
                    g_snprintf( $$, taille, "%sTR%s(%d)",
-                               ($1 ? "!" : ""), (is_counting == -1 ? "" : "Count"), $4 );
+                               ($1==1 ? "!" : ""), (is_counting == -1 ? "" : "Count"), $4 );
                    Liberer_options($3);
                 }}
                 | barre POUV expr PFERM

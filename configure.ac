@@ -21,10 +21,10 @@ AC_ISC_POSIX
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
-GNOME2_CFLAGS=`pkg-config --cflags libgnomeui-2.0 goocanvas-2.0 gtksourceview-2.0 gtkdatabox`
+GNOME2_CFLAGS=`pkg-config --cflags libgnomeui-2.0 goocanvas gtksourceview-2.0 gtkdatabox`
 AC_SUBST(GNOME2_CFLAGS)
 
-GNOME2_LIBS=`pkg-config --libs libgnomeui-2.0 goocanvas-2.0 gtksourceview-2.0 gtkdatabox`
+GNOME2_LIBS=`pkg-config --libs libgnomeui-2.0 goocanvas gtksourceview-2.0 gtkdatabox`
 AC_SUBST(GNOME2_LIBS)
 
 MYSQL_CFLAGS=`mysql_config --cflags`
