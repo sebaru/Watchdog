@@ -309,7 +309,7 @@
  static int Init_rfxcom ( void )
   { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    gchar trame_set_all_proto[] = { 0x0D, 00, 00, 02, 04, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+    gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 80, 0x08, 0x42, 00, 00, 00, 00 };
     struct termios oldtio;
     int fd;
 
@@ -335,8 +335,8 @@
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending INIT" );
     write (fd, &trame_reset, sizeof(trame_reset) );
     sleep(2);
-    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending SET ALL PROTO" );
-    write (fd, &trame_set_all_proto, sizeof(trame_set_all_proto) );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending SET PROTO" );
+    write (fd, &trame_set_proto, sizeof(trame_set_proto) );
     sleep(2);
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending GET STATUS" );
     write (fd, &trame_get_status, sizeof(trame_get_status) );
