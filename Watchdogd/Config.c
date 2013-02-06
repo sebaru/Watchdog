@@ -61,6 +61,12 @@
        else
         { g_snprintf( Config.home, sizeof(Config.home), "%s", DEFAUT_HOME  ); }
 
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
+       if (chaine)
+        { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", DEFAUT_RUN_AS   ); }
+
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
        if (chaine)
         { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
@@ -169,6 +175,7 @@
   { 
     if (!Config.log) return;
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config file                 %s", Config.config_file );
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Config run_as               %s", Config.run_as );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config port                 %d", Config.port );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config max client           %d", Config.max_client );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config min serveur          %d", Config.min_serveur );

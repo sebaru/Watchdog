@@ -36,6 +36,7 @@
 
   struct CONFIG
   { gchar config_file[80];                    /* Nom du fichier dont est issu les informations ci dessous */
+    gchar run_as [ 40 ];                                        /* Nom du user sur lequel tourne Watchdog */
     gint  port;                                                    /* Port d'ecoute des requetes clientes */
     gint  max_client;                  /* Nombre maximum de client qui peuvent se connecter en meme temps */
     gint  min_serveur;                                     /* Nombre de server min à lancer en même temps */
@@ -69,6 +70,7 @@
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
+ #define DEFAUT_RUN_AS                  "watchdog"
  #define DEFAUT_PORT                    5558
  #define DEFAUT_MAX_CLIENT              100
  #define DEFAUT_MIN_SERVEUR             1

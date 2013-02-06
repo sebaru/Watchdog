@@ -40,6 +40,7 @@
  #include <popt.h>
  #include <pthread.h>
  #include <locale.h>
+ #include <pwd.h>
 
  #include "watchdogd.h"
 
@@ -449,6 +450,7 @@
  int main ( int argc, char *argv[], char *envp[] )
   { struct itimerval timer;
     struct sigaction sig;
+    struct passwd *pwd;
     gchar strpid[12];
     gint fd_lock, i;
     pthread_t TID;
@@ -457,7 +459,12 @@
 
     umask(022);                                                          /* Masque de creation de fichier */
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
-    printf(" Going to background : %s\n", (fg ? "FALSE" : "TRUE") );
+    pwd = getpwnam ( Config.run_as );
+    if (!pwd)
+     { printf("Warning, user %s not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
+       exit(-1);
+     }
+    setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
 
     if (fg == FALSE)                                                   /* On tourne en tant que daemon ?? */
      { gint pid;
