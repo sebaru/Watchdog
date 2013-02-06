@@ -432,12 +432,14 @@
                trame->taille, trame->type, trame->type, trame->sous_type, trame->sous_type, trame->seqno );
 
     if (trame->type == 0x01 && trame->sous_type == 0x00)
-     { if (trame->data[0] == 0x52) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                 "Processer_trame get_status Cmd= %d (0x%2X)", trame->data[0], trame->data[0] );
+       if (trame->data[1] == 0x52) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                                              "Processer_trame get_status 433MHz receiver only" );   
-       if (trame->data[0] == 0x53) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+       if (trame->data[1] == 0x53) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                                              "Processer_trame get_status 433MHz transceiver" );   
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame get_status firmware %d", trame->data[1] );   
+                 "Processer_trame get_status firmware %d (0x%2X)", trame->data[2], trame->data[2] );
        if (trame->data[3] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                                             "Processer_trame get_status proto RFU" );   
        if (trame->data[3] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
