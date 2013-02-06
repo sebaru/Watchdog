@@ -310,7 +310,6 @@
   { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 0x00, 0x00, 0x27, 00, 00, 00, 00 };
-           /* Attention dans la doc RFXCOM il faut remplir msg5 alors qu'en reel, il faut remplir msg4 !! */
     struct termios oldtio;
     int fd;
 
@@ -441,37 +440,53 @@
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame get_status firmware %d (0x%2X)", trame->data[2], trame->data[2] );
        if (trame->data[3] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU" );   
+                                            "Processer_trame get_status proto Unencoded Frame" );   
        if (trame->data[3] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Rollertroll" );   
+                                            "Processer_trame get_status proto RFU6" );   
        if (trame->data[3] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Proguard" );   
+                                            "Processer_trame get_status proto RFU5" );   
        if (trame->data[3] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FS20" );   
+                                            "Processer_trame get_status proto RFU4" );   
        if (trame->data[3] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LaCrosse" );   
+                                            "Processer_trame get_status proto RFU3" );   
        if (trame->data[3] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Hideki" );   
+                                            "Processer_trame get_status proto FineOffset/Viking" );   
        if (trame->data[3] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LightwaveRF" );   
+                                            "Processer_trame get_status proto Rubicson" );   
        if (trame->data[3] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Mertik" );   
+                                            "Processer_trame get_status proto AE" );   
        if (trame->data[4] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Visonic" );   
+                                            "Processer_trame get_status proto BlindsT1" );   
        if (trame->data[4] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ATI" );   
+                                            "Processer_trame get_status proto BlindsT0" );   
        if (trame->data[4] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto OregonScientific" );   
+                                            "Processer_trame get_status proto ProGuard" );   
        if (trame->data[4] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto IkeaKoppla" );   
+                                            "Processer_trame get_status proto FS20" );   
        if (trame->data[4] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto HomeEasy" );   
+                                            "Processer_trame get_status proto LaCrosse" );   
        if (trame->data[4] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AC" );   
+                                            "Processer_trame get_status proto Hideki" );   
        if (trame->data[4] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ARC" );   
+                                            "Processer_trame get_status proto LightwaveRF" );   
        if (trame->data[4] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                                           "Processer_trame get_status proto X10" );   
+                                            "Processer_trame get_status proto Mertik" );   
+       if (trame->data[5] & 0x80) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto Visonic" );   
+       if (trame->data[5] & 0x40) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto ATI" );   
+       if (trame->data[5] & 0x20) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto OregonScientific" );   
+       if (trame->data[5] & 0x10) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto MeianTech" );   
+       if (trame->data[5] & 0x08) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto HomeEasy/EU" );   
+       if (trame->data[5] & 0x04) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto AC" );   
+       if (trame->data[5] & 0x02) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto ARC" );   
+       if (trame->data[5] & 0x01) Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                                            "Processer_trame get_status proto X10" );   
      }
     else if (trame->type == 0x02)
      { switch (trame->sous_type)
