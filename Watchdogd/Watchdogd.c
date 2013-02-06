@@ -316,7 +316,8 @@
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
   { gint help, port, log_level, max_client, fg, initrsa, single, compil;
-    gchar *home, *file;
+    gchar *home, *file, *run_as;
+    struct passwd *pwd;
     gint nbr_bytes;
     gchar *chaine;
     FILE *fd;
@@ -333,6 +334,8 @@
          &max_client,       0, "Maximum of connexions allowed", "MAX" },
        { "home",       'H', POPT_ARG_STRING,
          &home,             0, "Home directory", "HOME" },
+       { "run_as",     'u', POPT_ARG_STRING,
+         &run_as,           0, "Run as user", "USER" },
        { "conffile",   'c', POPT_ARG_STRING,
          &file,             0, "Configuration file", "FILE" },
        { "compil",     'C', POPT_ARG_NONE,
@@ -346,8 +349,9 @@
     poptContext context;
     int rc;
 
-    home = NULL;
-    file = NULL;
+    home   = NULL;
+    file   = NULL;
+    run_as = NULL;
     port           = -1;
     max_client     = -1;
     log_level      = -1;
@@ -380,7 +384,15 @@
     if (log_level!=-1)   Config.log_level   = log_level;
     if (max_client!=-1)  Config.max_client  = max_client;
     if (compil)          Config.compil      = 1;               /* Compilation de tous les plugins D.L.S ? */
-    if (home)            g_snprintf( Config.home, sizeof(Config.home), "%s", home );
+    if (home)            g_snprintf( Config.home,   sizeof(Config.home),   "%s", home );
+    if (run_as)          g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
+
+    pwd = getpwnam ( Config.run_as );
+    if (!pwd)
+     { printf("Warning, user %s not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
+       exit(-1);
+     }
+    setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
@@ -450,7 +462,6 @@
  int main ( int argc, char *argv[], char *envp[] )
   { struct itimerval timer;
     struct sigaction sig;
-    struct passwd *pwd;
     gchar strpid[12];
     gint fd_lock, i;
     pthread_t TID;
@@ -459,12 +470,6 @@
 
     umask(022);                                                          /* Masque de creation de fichier */
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
-    pwd = getpwnam ( Config.run_as );
-    if (!pwd)
-     { printf("Warning, user %s not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
-       exit(-1);
-     }
-    setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
 
     if (fg == FALSE)                                                   /* On tourne en tant que daemon ?? */
      { gint pid;
