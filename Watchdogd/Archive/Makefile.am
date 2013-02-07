@@ -8,9 +8,7 @@ SUBDIRS=
 noinst_LTLIBRARIES     = libarchive.la
 libarchive_la_SOURCES    = Archive.c archiveDB.c
 
-INCLUDES= $(GNOME2_CFLAGS) \
-	  $(MYSQL_CFLAGS) \
-          -I$(top_srcdir) -I$(includedir) \
+INCLUDES= `pkg-config --cflags glib-2.0` \
+          `mysql_config --cflags` \
           -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
 	  -I../Include
