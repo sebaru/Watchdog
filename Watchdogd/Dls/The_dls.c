@@ -144,30 +144,23 @@
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
- int TR( int num )
-  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].consigne &&
-                                         (Partage->Tempo_R[num].consigne<=Partage->top) );
+ int T( int num )
+  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
     else Info_new( Config.log, Config.log_all, LOG_INFO, "TR : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
- char *TRdetail( int num )
+ char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "TR%d %d %d val %d", num, Partage->Tempo_R[num].consigne, Partage->top,
-                                        Partage->Tempo_R[num].consigne<=Partage->top );
+    snprintf( chaine, sizeof(chaine), "TR%d date_on=%d(%03ds) date_off=%d(%03ds) state=%d", num,
+              Partage->Tempo_R[num].date_on,  Partage->top-Partage->Tempo_R[num].date_on,
+              Partage->Tempo_R[num].date_off, Partage->top-Partage->Tempo_R[num].date_off,
+              Partage->Tempo_R[num].state );
     return( chaine );
   }
-/**********************************************************************************************************/
-/* Renvoie la valeur TRUE si la temporisation est en cours de comptage, FALSE sinon                       */
-/**********************************************************************************************************/
- int TRCount( int num )
-  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].consigne &&
-                                         (Partage->top<Partage->Tempo_R[num].consigne) );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "TRCount : num %d out of range", num );
-    return(0);
-  }
+
 /**********************************************************************************************************/
 /* Met à jour l'entrée num                                                                                */
 /**********************************************************************************************************/
@@ -353,15 +346,47 @@
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
- void STR( int num, int cons )
-  { if (num<0 || num>=NBR_TEMPO)
+ void STR( int num, int etat, int type, int delai_on, int delai_off )
+  { struct TEMPO *tempo;
+
+    if (num<0 || num>=NBR_TEMPO)
      { Info_new( Config.log, Config.log_all, LOG_INFO, "STR: num %d out of range", num );
        return;
      }
-                                                                             /* Si pas deja en decomptage */
-    if (!cons) Partage->Tempo_R[num].consigne = 0;                                     /* Raz de la tempo */
-    else                                               /* Initialisation tempo, si elle ne l'est pas deja */
-    if (!Partage->Tempo_R[num].consigne) Partage->Tempo_R[num].consigne = Partage->top + cons;
+    tempo = &Partage->Tempo_R[num];                                       /* Récupération de la structure */
+    switch(type)                                                             /* Tempo retard ou creneau ? */
+     { case 1:                                                                         /* Tempo Creneau ? */
+            if (etat == 1)
+             { if (tempo->date_on == 0)                                        /* Demarrage du comptage ! */
+                { tempo->date_on = Partage->top + delai_on;
+                  tempo->date_off = tempo->date_on + delai_off;
+                }
+             }
+            if (tempo->date_off <= Partage->top)                                        /* Fin de tempo ? */
+             { tempo->date_off = tempo->date_on = 0;
+               tempo->state = FALSE;
+             }
+            if (tempo->date_on <= Partage->top && Partage->top < tempo->date_off)         /* Analyse Etat */
+             { tempo->state = TRUE; }
+            else
+             { tempo->state = FALSE; }
+            break;
+       case 0:                                                                          /* Tempo Retard ? */
+            if (etat == 1)
+             { if (tempo->date_on == 0)                                        /* Demarrage du comptage ! */
+                { tempo->date_on = Partage->top + delai_on;
+                  tempo->date_off = 0;                               /* Date off inconnue a ce temps la ! */
+                }
+             } else if (etat == 0 && tempo->date_on != 0 && tempo->date_off == 0)
+             { tempo->date_off = Partage->top + delai_off; }
+
+            if ( tempo->date_on <= Partage->top && 
+                 (tempo->date_off == 0 || Partage->top < tempo->date_off ))               /* Analyse Etat */
+             { tempo->state = TRUE; }
+            else
+             { tempo->state = FALSE; }
+            break;
+     }
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */

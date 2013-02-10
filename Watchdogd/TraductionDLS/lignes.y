@@ -65,8 +65,9 @@ int erreur;                                                             /* Compt
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI MONO ENTREE SORTIE TEMPO T_IS_COUNTING T_MSG ICONE CPT_H CPT_IMP EANA T_START
-%type  <val>    alias_bit
+%token <val>    BI MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD T_CRENEAU T_DELAI_ON T_DELAI_OFF
+%token <val>    T_MSG ICONE CPT_H CPT_IMP EANA T_START
+%type  <val>    alias_bit type_tempo
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
 %type  <val>    couleur
@@ -110,7 +111,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                                       erreur++;
                                     }
                                    break;
-                      case TEMPO :
+                      case T_TEMPO :
                       case EANA  :
                       case MONO  :
                       case CPT_H :
@@ -142,7 +143,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | TEMPO | ICONE | CPT_H | CPT_IMP | EANA
+alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | CPT_IMP | EANA
                 ;
 /******************************************* Gestion des instructions *************************************/
 listeInstr:     une_instr listeInstr
@@ -214,7 +215,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ int taille;
                    taille = 18;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(start)", $1 );
+                   g_snprintf( $$, taille, "(start)" );
                 }}
                 | barre BI ENTIER
                 {{ int taille;
@@ -259,13 +260,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
                     }
                 }}
-                | barre TEMPO ENTIER liste_options 
-                {{ int taille, is_counting;
-                   taille = 20;
-                   is_counting = Get_option_entier( $4, T_IS_COUNTING );
+                | barre T_TEMPO ENTIER liste_options 
+                {{ int taille;
+                   taille = 40;
                    $$ = New_chaine( taille ); /* 10 caractères max */
-                   g_snprintf( $$, taille, "%sTR%s(%d)",
-                               ($1==1 ? "!" : ""), (is_counting == -1 ? "" : "Count"), $3 );
+                   g_snprintf( $$, taille, "%sT(%d)",
+                               ($1==1 ? "!" : ""), $3 );
                    Liberer_options($4);
                 }}
                 | barre POUV expr PFERM
@@ -283,7 +283,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    alias = Get_alias_par_nom($2);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case TEMPO : if ($4)
+                       { case T_TEMPO : if ($4)
                                        { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
                                          g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
@@ -293,15 +293,11 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          g_snprintf( $$, 2, "0" );                                      
                                        } 
                                       else
-                                       { int taille, is_counting;
-                                         taille = 20;
-                                         is_counting = Get_option_entier( $3, T_IS_COUNTING );
-                                         if (is_counting == -1)
-                                          { is_counting = Get_option_entier( alias->options, T_IS_COUNTING ); }
+                                       { int taille;
+                                         taille = 40;
                                          $$ = New_chaine( taille ); /* 10 caractères max */
-                                         g_snprintf( $$, taille, "%sTR%s(%d)",   /* alias->barre not used */
-                                                    ($1 == 1 ? "!" : ""),
-                                                    (is_counting == -1 ? "" : "Count"), alias->num );
+                                         g_snprintf( $$, taille, "%sT(%d)",
+                                                     ($1==1 ? "!" : ""), alias->num );
                                        }
                                       break;
                          case ENTREE: if ($4)
@@ -451,7 +447,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                   {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
                   }}
-                | TEMPO ENTIER liste_options
+                | T_TEMPO ENTIER liste_options
                   {{ $$=New_action_tempo($2, $3);
                      Liberer_options($3);
                   }}
@@ -485,7 +481,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                       options_d = g_list_copy( alias->options );
                       options = g_list_concat( options_g, options_d );/* Concaténation des listes d'options */
                       switch(alias->bit)
-                       { case TEMPO  : if ($1)
+                       { case T_TEMPO  : if ($1)
                                         { char *chaine;
                                           taille = strlen(alias->nom) + strlen(INTERDIT_BARRE_DROITE) + 1;
                                           chaine = New_chaine(taille);
@@ -627,15 +623,17 @@ une_option:     MODE EGAL ENTIER
                    $$->type = RATIO;
                    $$->entier = $3;
                 }}
-                | T_IS_COUNTING
+                | T_TYPE EGAL type_tempo
                 {{ $$=New_option();
-                   $$->type = T_IS_COUNTING;
-                   $$->entier = 1;
+                   $$->type = T_TYPE;
+                   $$->entier = $3;
                 }}
                 ;
 
 
 couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
+                ;
+type_tempo:     T_RETARD | T_CRENEAU
                 ;
 %%
 /**********************************************************************************************************/
@@ -668,7 +666,6 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAK
 /**********************************************************************************************************/
  gboolean Interpreter_source_dls ( gchar *source )
   { gchar chaine[80];
-    gint retour;
     FILE *rc;
 
     ligne_source_dls  = 1;                                       /* Initialisation des variables globales */
@@ -679,7 +676,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAK
      { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
        Dls_debug = 1;                                                        /* Debug de la traduction ?? */
        Dls_restart(rc);
-       retour = Dls_parse();
+       Dls_parse();
        Emettre(" }\n");
 
        fclose(rc);

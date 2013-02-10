@@ -40,13 +40,13 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           courbe.c histo_courbe.c
 
 Watchdog_client_LDADD  = $(top_srcdir)/Commun/libwatchdog.la \
-                         Config_cli/libconfig_cli.la \
-                         $(GNOME2_LIBS) -lm
+                         Config_cli/libconfig_cli.la
 
-#Watchdog_client_LDFLAGS = `pkg-config --libs openssl`
+Watchdog_client_LDFLAGS = `pkg-config --libs libgnomeui-2.0 openssl glib-2.0 goocanvas-2.0 gtksourceview-2.0 gtkdatabox` -lm
 
-INCLUDES=$(GNOME_INCLUDEDIR) `pkg-config --cflags openssl` -I$(top_srcdir)/Include \
-                             -IInclude \
-                             $(GNOME2_CFLAGS)
+Watchdog_client_CFLAGS= `pkg-config --cflags libgnomeui-2.0 openssl glib-2.0 goocanvas-2.0 gtksourceview-2.0 gtkdatabox`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -IInclude
 
 MAINTAINERCLEANFILES = Makefile.in

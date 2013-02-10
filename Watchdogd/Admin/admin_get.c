@@ -53,14 +53,13 @@
        Admin_write ( client, "  ch num                - Get CH[num]\n" );
        Admin_write ( client, "  help                  - This help\n" );
      } else
-    if ( ! strcmp ( commande, "tr" ) )
+    if ( ! strcmp ( commande, "t" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_TEMPO)
-        { g_snprintf( chaine, sizeof(chaine), " TR%03d = %d consigne %d, top=%d\n",
-                      num, TR(num), Partage->Tempo_R[num].consigne, Partage->top );
+        { g_snprintf( chaine, sizeof(chaine), "%s", Tdetail(num) );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " TR -> num '%d' out of range\n", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " T -> num '%d' out of range\n", num ); }
        Admin_write ( client, chaine );
      } else
     if ( ! strcmp ( commande, "i" ) )

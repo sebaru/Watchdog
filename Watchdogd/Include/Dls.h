@@ -75,7 +75,7 @@
  extern int EA_inrange( int num );
  extern float EA_ech( int num );
  extern int A( int num );
- extern char *TRdetail( int num );
+ extern char *Tdetail( int num );
  extern void SE( int num, int etat );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );

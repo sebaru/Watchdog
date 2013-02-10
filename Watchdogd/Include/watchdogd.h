@@ -135,7 +135,9 @@
   };
 
  struct TEMPO
-  { gint consigne;
+  { guint date_on;
+    guint date_off;
+    gboolean state;
   };
 
  struct PARTAGE                                                        /* Structure des données partagées */
