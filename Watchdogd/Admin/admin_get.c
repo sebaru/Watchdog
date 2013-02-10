@@ -57,7 +57,7 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_TEMPO)
-        { g_snprintf( chaine, sizeof(chaine), "%s", Tdetail(num) );
+        { g_snprintf( chaine, sizeof(chaine), "%s\n", Tdetail(num) );
         } else
         { g_snprintf( chaine, sizeof(chaine), " T -> num '%d' out of range\n", num ); }
        Admin_write ( client, chaine );

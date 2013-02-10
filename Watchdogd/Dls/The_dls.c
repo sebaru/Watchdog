@@ -154,9 +154,9 @@
 /**********************************************************************************************************/
  char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "TR%d date_on=%d(%03ds) date_off=%d(%03ds) state=%d", num,
-              Partage->Tempo_R[num].date_on,  Partage->top-Partage->Tempo_R[num].date_on,
-              Partage->Tempo_R[num].date_off, Partage->top-Partage->Tempo_R[num].date_off,
+    snprintf( chaine, sizeof(chaine), "TR%d date_on=%d(%08.1fs) date_off=%d(%08.1fs) state=%d", num,
+              Partage->Tempo_R[num].date_on,  (Partage->Tempo_R[num].date_on  - Partage->top)/10.0,
+              Partage->Tempo_R[num].date_off, (Partage->Tempo_R[num].date_off - Partage->top)/10.0,
               Partage->Tempo_R[num].state );
     return( chaine );
   }
@@ -346,7 +346,7 @@
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
- void STR( int num, int etat, int type, int delai_on, int delai_off )
+ void ST( int num, int etat, int type, int delai_on, int delai_off )
   { struct TEMPO *tempo;
 
     if (num<0 || num>=NBR_TEMPO)
@@ -384,7 +384,7 @@
                  (tempo->date_off == 0 || Partage->top < tempo->date_off ))               /* Analyse Etat */
              { tempo->state = TRUE; }
             else
-             { tempo->state = FALSE; }
+             { tempo->date_on = 0; tempo->date_off = 0; tempo->state = FALSE; }              /* RAZ Tempo */
             break;
      }
   }

@@ -268,9 +268,9 @@
     action = New_action();
     taille = 40;
     action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "STR(%d,1,%d,%d,%d);", num, type, delai_on, delai_off );
+    g_snprintf( action->alors, taille, "ST(%d,1,%d,%d,%d);", num, type, delai_on, delai_off );
     action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "STR(%d,0,%d,%d,%d);", num, type, delai_on, delai_off );
+    g_snprintf( action->sinon, taille, "ST(%d,0,%d,%d,%d);", num, type, delai_on, delai_off );
     return(action);
   }
 
