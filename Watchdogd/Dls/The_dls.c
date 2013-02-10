@@ -385,7 +385,7 @@
             if ( tempo->date_on != 0 && tempo->date_on <= Partage->top && 
                  (tempo->date_off == 0 || Partage->top < tempo->date_off ))               /* Analyse Etat */
              { tempo->state = TRUE; }
-            else
+            else if (Partage->top >= tempo->date_off)
              { tempo->date_on = 0; tempo->date_off = 0; tempo->state = FALSE; }              /* RAZ Tempo */
             break;
      }
