@@ -382,7 +382,7 @@
              } else if (etat == 0 && tempo->date_on != 0 && tempo->date_off == 0)
              { tempo->date_off = Partage->top + delai_off; }
 
-            if ( tempo->date_on <= Partage->top && 
+            if ( tempo->date_on != 0 && tempo->date_on <= Partage->top && 
                  (tempo->date_off == 0 || Partage->top < tempo->date_off ))               /* Analyse Etat */
              { tempo->state = TRUE; }
             else
