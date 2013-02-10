@@ -12,10 +12,14 @@ AM_YFLAGS = -p Dls_
 #Pour LEX et YACC
 libtradDLS_la_LIBADD  = @LEXLIB@
 
+libtradDLS_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                        `mysql_config --libs`
 
-INCLUDES= -I$(top_srcdir)/Include \
-	  -I../Include \
-          $(GLIB_CFLAGS) $(MYSQL_CFLAGS)
+libtradDLS_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                       `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include
 
 EXTRA_DIST = lignes.h
 CLEANFILES = lignes.h lignes.c mots.c

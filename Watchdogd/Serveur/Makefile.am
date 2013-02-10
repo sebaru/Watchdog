@@ -22,10 +22,11 @@ libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
                         accept.c liste.c envoi_histo_hard.c \
                         capteur.c
 
+libserveur_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                        `mysql_config --libs`
 
-INCLUDES= -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
-	  -I../Include \
-          $(MYSQL_CFLAGS) \
-	  `pkg-config --cflags glib-2.0`
+libserveur_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                    `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include

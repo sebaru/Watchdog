@@ -7,10 +7,12 @@
 noinst_LTLIBRARIES = libasterisk.la
 libasterisk_la_SOURCES = Asterisk.c
 
-INCLUDES= -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
-	  -I../Include \
-	  $(MYSQL_CFLAGS) \
-          $(GLIB_CFLAGS)
 
+libasterisk_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                         `mysql_config --libs`
+
+libasterisk_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                        `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include

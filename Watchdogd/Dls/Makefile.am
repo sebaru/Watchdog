@@ -7,12 +7,15 @@ SUBDIRS=
 
 lib_LTLIBRARIES      = libdls.la
 libdls_la_SOURCES    = plugins.c heure.c Dls_db.c The_dls.c
-libdls_la_LDFLAGS    = -rdynamic \
-                       -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-INCLUDES= -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          -I$(top_srcdir)/intl \
-	  -I../Include \
-	  $(MYSQL_CFLAGS) \
-          $(GLIB_CFLAGS)
+libdls_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                    `mysql_config --libs` \
+                    -rdynamic \
+                    -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
+
+
+libdls_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                   `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include

@@ -8,11 +8,13 @@ SUBDIRS=
 lib_LTLIBRARIES     = libwatchdog-server-ups.la
 libwatchdog_server_ups_la_SOURCES = Onduleur.c admin_onduleur.c Onduleur.h
 
-INCLUDES= `pkg-config --cflags glib-2.0 libupsclient` \
-          -I$(includedir) \
-          -I$(top_srcdir)/Include \
-	  $(MYSQL_CFLAGS) \
-	  -I../Include
+libwatchdog_server_ups_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libupsclient` \
+                                    `mysql_config --libs` \
+                                    -rdynamic \
+                                    -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_ups_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
-	                            `pkg-config --libs glib-2.0 libupsclient`
+libwatchdog_server_ups_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libupsclient` \
+                                   `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include

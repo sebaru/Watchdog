@@ -8,11 +8,13 @@ SUBDIRS=
 lib_LTLIBRARIES                      = libwatchdog-server-master.la
 libwatchdog_server_master_la_SOURCES    = Master.c Master.h admin_master.c 
 
-INCLUDES= `pkg-config --cflags glib-2.0` \
-          -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          $(MYSQL_CFLAGS) \
-          -I../Include
+libwatchdog_server_master_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                                       `mysql_config --libs` \
+                                       -rdynamic \
+                                       -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_master_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
-	                             `pkg-config --libs glib-2.0`
+libwatchdog_server_master_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                                      `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include

@@ -9,7 +9,11 @@ noinst_LTLIBRARIES     = libadmin.la
 libadmin_la_SOURCES    = Admin.c admin_running.c admin_process.c admin_dls.c \
 			 admin_set.c admin_get.c
 
-INCLUDES= `pkg-config --cflags glib-2.0` \
-          -I$(top_srcdir)/Include \
-	  $(MYSQL_CFLAGS) \
-	  -I../Include
+libadmin_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                      `mysql_config --libs`
+
+libadmin_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                     `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include

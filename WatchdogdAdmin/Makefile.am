@@ -9,10 +9,11 @@ bin_PROGRAMS = WatchdogdAdmin
 WatchdogdAdmin_SOURCES = WatchdogdAdmin.c
 WatchdogdAdmin_LDADD   = $(top_srcdir)/Commun/libwatchdog.la
 
-INCLUDES=-I$(top_srcdir)/Include \
-	 -IInclude/ \
-	 $(GLIB_CFLAGS)
+WatchdogdAdmin_CFLAGS = `pkg-config --cflags glib-2.0`
 
-WatchdogdAdmin_LDFLAGS = -lpopt -lreadline $(GLIB_LIBS)
+INCLUDES=-I$(top_srcdir)/Include \
+	 -IInclude
+
+WatchdogdAdmin_LDFLAGS = -lpopt -lreadline `pkg-config --libs glib-2.0`
 
 MAINTAINERCLEANFILES = Makefile.in

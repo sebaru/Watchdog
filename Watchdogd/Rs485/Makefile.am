@@ -8,12 +8,14 @@ SUBDIRS=
 lib_LTLIBRARIES     = libwatchdog-server-rs485.la
 libwatchdog_server_rs485_la_SOURCES    = Rs485.c Rs485.h admin_rs485.c
 
-INCLUDES= $(GNOME2_CFLAGS) \
-          -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-	  `pkg-config --cflags glib-2.0` \
-          $(MYSQL_CFLAGS) \
-          -I../Include
+libwatchdog_server_rs485_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                                      `mysql_config --libs` \
+                                      -rdynamic \
+                                      -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_rs485_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
-          `pkg-config --libs glib-2.0` 
+libwatchdog_server_rs485_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                                     `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include
+
