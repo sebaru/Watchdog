@@ -628,6 +628,16 @@ une_option:     MODE EGAL ENTIER
                    $$->type = T_TYPE;
                    $$->entier = $3;
                 }}
+                | T_DELAI_ON EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DELAI_ON;
+                   $$->entier = $3;
+                }}
+                | T_DELAI_OFF EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DELAI_OFF;
+                   $$->entier = $3;
+                }}
                 ;
 
 
