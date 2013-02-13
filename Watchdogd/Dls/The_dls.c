@@ -154,12 +154,13 @@
 /**********************************************************************************************************/
  char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "T%03d  = %d : date_on=%d(%08.1fs) date_off=%d(%08.1fs) state=%d", num,
-              Partage->Tempo_R[num].state, Partage->Tempo_R[num].date_on,
-              (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
+    snprintf( chaine, sizeof(chaine), "T%03d  = %d : started = %s, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+              Partage->Tempo_R[num].state, (Partage->Tempo_R[num].started ? "TRUE " : "FALSE"),
+              Partage->Tempo_R[num].date_on,
+             (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
               Partage->Tempo_R[num].date_off,
-              (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0),
-              Partage->Tempo_R[num].state );
+             (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0)
+            );
     return( chaine );
   }
 
@@ -389,7 +390,7 @@
              { if ( tempo->date_on <= Partage->top && 
                    (tempo->date_off == 0 || Partage->top < tempo->date_off ))             /* Analyse Etat */
                 { tempo->state = TRUE; }
-               else if (tempo->date_off <= Partage->top)
+               else if (tempo->date_off != 0 && tempo->date_off <= Partage->top)
                 { tempo->date_off = tempo->date_on = 0;
                   tempo->started = FALSE;                                                    /* RAZ Tempo */
                   tempo->state   = FALSE;
