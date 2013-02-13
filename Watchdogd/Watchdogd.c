@@ -590,7 +590,7 @@
        sigaction( SIGUSR2, &sig, NULL );                               /* Reinitialisation DLS uniquement */
        sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
-       sigaction( SIGABRT, &sig, NULL );
+       /*sigaction( SIGABRT, &sig, NULL );*/
        sigaction( SIGPIPE, &sig, NULL );                           /* Pour prevenir un segfault du client */
        sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
        sigdelset ( &sig.sa_mask, SIGALRM );
@@ -598,7 +598,7 @@
        sigdelset ( &sig.sa_mask, SIGUSR2 );
        sigdelset ( &sig.sa_mask, SIGINT  );
        sigdelset ( &sig.sa_mask, SIGTERM );
-       sigdelset ( &sig.sa_mask, SIGABRT );
+       /*sigdelset ( &sig.sa_mask, SIGABRT );*/
        sigdelset ( &sig.sa_mask, SIGPIPE );
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
