@@ -131,14 +131,14 @@
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
+       pthread_exit( -1 );
      }
 
     if ( ! Recuperer_histoDB( Config.log, db ) )                                 /* Si pas de histos (??) */
      { Client_mode( client, VALIDE );         /* Le client est maintenant valide aux yeux du sous-serveur */
        Libere_DB_SQL( Config.log, &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
+       pthread_exit( -1 );
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
@@ -153,7 +153,7 @@
           Libere_DB_SQL( Config.log, &db );
           Client_mode( client, VALIDE );      /* Le client est maintenant valide aux yeux du sous-serveur */
           Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit( NULL );
+          pthread_exit( 0 );
         }
 
        rezo_histo = Preparer_envoi_histo( histo );
