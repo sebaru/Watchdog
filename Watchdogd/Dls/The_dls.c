@@ -154,11 +154,11 @@
 /**********************************************************************************************************/
  char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "T%03d date_on=%d(%08.1fs) date_off=%d(%08.1fs) state=%d", num,
-              Partage->Tempo_R[num].date_on,
-              (Partage->Tempo_R[num].date_on  ? (Partage->Tempo_R[num].date_on  - Partage->top)/10.0 : 0.0),
+    snprintf( chaine, sizeof(chaine), "T%03d  = %d : date_on=%d(%08.1fs) date_off=%d(%08.1fs) state=%d", num,
+              Partage->Tempo_R[num].state, Partage->Tempo_R[num].date_on,
+              (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
               Partage->Tempo_R[num].date_off,
-              (Partage->Tempo_R[num].date_off ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0),
+              (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0),
               Partage->Tempo_R[num].state );
     return( chaine );
   }
