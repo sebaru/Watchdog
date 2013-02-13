@@ -154,7 +154,7 @@
 /**********************************************************************************************************/
  char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "TR%d date_on=%d(%08.1fs) date_off=%d(%08.1fs) state=%d", num,
+    snprintf( chaine, sizeof(chaine), "T%03d date_on=%d(%08.1fs) date_off=%d(%08.1fs) state=%d", num,
               Partage->Tempo_R[num].date_on,
               (Partage->Tempo_R[num].date_on  ? (Partage->Tempo_R[num].date_on  - Partage->top)/10.0 : 0.0),
               Partage->Tempo_R[num].date_off,
@@ -181,7 +181,7 @@
      { Partage->e[ num>>3 ] &= ~(1<<(num%8)); }
   }
 /**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
+/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
   { if (num<0 || num>=NBR_ENTRE_ANA)
@@ -191,7 +191,7 @@
     Partage->ea[num].inrange = range;
   }
 /**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                           */
+/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA( int num, float val_avant_ech )
   { if (num<0 || num>=NBR_ENTRE_ANA)
@@ -358,35 +358,43 @@
     tempo = &Partage->Tempo_R[num];                                       /* Récupération de la structure */
     switch(type)                                                             /* Tempo retard ou creneau ? */
      { case 1:                                                                         /* Tempo Creneau ? */
-            if (etat == 1)
-             { if (tempo->date_on == 0)                                        /* Demarrage du comptage ! */
-                { tempo->date_on = Partage->top + delai_on;
-                  tempo->date_off = tempo->date_on + delai_off;
+            if (tempo->started == FALSE && etat == 1)                                /* Doit-on starter ? */
+             { tempo->date_on  = Partage->top + delai_on;
+               tempo->date_off = tempo->date_on + delai_off;
+               tempo->started  = TRUE;
+             }
+
+            if ( tempo->started == 1 )
+             { if (tempo->date_on <= Partage->top && Partage->top < tempo->date_off)      /* Analyse Etat */
+                    { tempo->state = TRUE;  }
+               else { tempo->state = FALSE; }
+ 
+               if (tempo->date_off <= Partage->top && etat == 0)                        /* Fin de tempo ? */
+                { tempo->date_off = tempo->date_on = 0;
+                  tempo->state   = FALSE;
+                  tempo->started = FALSE;                                                    /* RAZ Tempo */
                 }
              }
-            if (tempo->date_off <= Partage->top)                                        /* Fin de tempo ? */
-             { tempo->date_off = tempo->date_on = 0;
-               tempo->state = FALSE;
-             }
-            if (tempo->date_on <= Partage->top && Partage->top < tempo->date_off)         /* Analyse Etat */
-             { tempo->state = TRUE; }
-            else
-             { tempo->state = FALSE; }
+
             break;
        case 0:                                                                          /* Tempo Retard ? */
-            if (etat == 1)
-             { if (tempo->date_on == 0)                                        /* Demarrage du comptage ! */
-                { tempo->date_on = Partage->top + delai_on;
-                  tempo->date_off = 0;                               /* Date off inconnue a ce temps la ! */
-                }
-             } else if (etat == 0 && tempo->date_on != 0 && tempo->date_off == 0)
+            if (tempo->started == FALSE && etat == 1)                                /* Doit-on starter ? */
+             { tempo->date_on  = Partage->top + delai_on;
+               tempo->date_off = 0;                                  /* Date off inconnue a ce temps la ! */
+               tempo->started  = TRUE;
+             } else if (tempo->started == TRUE && etat == 0 && tempo->date_off == 0)
              { tempo->date_off = Partage->top + delai_off; }
 
-            if ( tempo->date_on != 0 && tempo->date_on <= Partage->top && 
-                 (tempo->date_off == 0 || Partage->top < tempo->date_off ))               /* Analyse Etat */
-             { tempo->state = TRUE; }
-            else if (Partage->top >= tempo->date_off)
-             { tempo->date_on = 0; tempo->date_off = 0; tempo->state = FALSE; }              /* RAZ Tempo */
+            if ( tempo->started == 1 )
+             { if ( tempo->date_on <= Partage->top && 
+                   (tempo->date_off == 0 || Partage->top < tempo->date_off ))             /* Analyse Etat */
+                { tempo->state = TRUE; }
+               else if (tempo->date_off <= Partage->top)
+                { tempo->date_off = tempo->date_on = 0;
+                  tempo->started = FALSE;                                                    /* RAZ Tempo */
+                  tempo->state   = FALSE;
+                }
+             }
             break;
      }
   }
@@ -415,8 +423,8 @@
                                                       GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->a[num].changes++;                                              /* Un change de plus !! */
-        } else if ( ! (Partage->top % 600 ))             /* Si persistence on prévient toutes les minutes */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "SA: last_change trop tôt !", num ); }
+        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "SA: last_change trop tot pour A%d !", num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
@@ -526,8 +534,8 @@
            }
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].changes++;
-        } else if ( ! (Partage->top % 600) )                          /* On previent toutes les minutes ! */
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "MSG: last_change trop tot !", num ); }
+        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
+        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
        Partage->g[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }

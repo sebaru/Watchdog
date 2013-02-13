@@ -135,7 +135,8 @@
   };
 
  struct TEMPO
-  { guint date_on;
+  { gboolean started;
+    guint date_on;
     guint date_off;
     gboolean state;
   };
