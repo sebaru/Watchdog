@@ -28,23 +28,14 @@
 #ifndef _MASTER_H_
  #define _MASTER_H_
 
- #define TOP_MIN_ENVOI_MASTER     1200                           /* 2 minutes sans envoi de MASTER au démarrage */
- #define TAILLE_MASTERBOX_USERNAME   32                                /* Nombre de caractere du user MASTERBOX */
- #define TAILLE_MASTERBOX_PASSWORD   32                        /* Nombre de caractere du mot de passe MASTERBOX */
- #define DEFAUT_MASTERBOX_USERNAME         "user"
- #define DEFAUT_MASTERBOX_PASSWORD         "changeit"
-
  struct MASTER_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    GSList *Liste_master;                                             /* liste de struct MSGDB msg a envoyer */
-    gchar **recipients;
-    gchar masterbox_username[TAILLE_MASTERBOX_USERNAME+1];                                       /* User MASTERBOX */
-    gchar masterbox_password[TAILLE_MASTERBOX_PASSWORD+1];                         /* Mot de passe envoi MASTERBOX */
+    gboolean enable;                              /* True si la config indique que le thread doit tourner */
+    GSList *Liste_message;                                         /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_sortie;                                          /* liste de struct MSGDB msg a envoyer */
  } Cfg_master;
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Envoyer_master_masterbox_text ( gchar *texte );                                      /* Dans Sms.c */
- extern void Envoyer_master_gsm_text ( gchar *texte );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
