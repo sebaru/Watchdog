@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
-/* Watchdogd/Master/Master.h        Déclaration structure internes des MASTER                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    lun. 18 févr. 2013 20:06:29 CET */
+/* Include/Reseaux_master_slave.h:   Sous_tag des communications Master/Slave par lefevre Sebastien       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    lun. 18 févr. 2013 18:39:03 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * master.h
+ * Reseaux_master_slave.h
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,21 +24,22 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
-#ifndef _MASTER_H_
- #define _MASTER_H_
 
- struct MASTER_CONFIG
-  { struct LIBRAIRIE *lib;
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean enable;                              /* True si la config indique que le thread doit tourner */
-    GSList *Liste_message;                                         /* liste de struct MSGDB msg a envoyer */
-    GSList *Liste_sortie;                                          /* liste de struct MSGDB msg a envoyer */
-    GSList *Slaves;                                                /* Leste des clients (slave) connectés */
-    gint Fd_ecoute;                                                  /* File descriptor de l'ecoute admin */
-    gint port;
- } Cfg_master;
+#ifndef _RESEAUX_MASTER_SLAVE_H_
+ #define _RESEAUX_MASTER_SLAVE_H_
 
-/*************************************** Définitions des prototypes ***************************************/
+ struct CMD_TYPE_MASTER_SLAVE
+  { 
+  };
+
+/************************************************* Tag de communication ***********************************/
+ enum 
+  { SSTAG_SLAVE_IDENT,                                                            /* Le slave s'identifie */
+    SSTAG_SLAVE_OFF,                                                            /* Le slave se deconnecte */
+    SSTAG_SLAVE_GIVE_INPUT,                                  /* Le slave nous donne l'etat de ses entrées */
+    SSTAG_MASTER_SET_OUTPUT,                                    /* Le master envoie les sorties aux slave */
+  };
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
+

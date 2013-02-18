@@ -47,7 +47,6 @@
   { struct sockaddr_in local;
     gint opt, ecoute;
 
-    signal( SIGPIPE, SIG_IGN );
     if ( (ecoute = socket ( AF_INET, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
      { Info_new( Config.log, Config.log_all, LOG_ERR, "Socket failure (%s)", strerror(errno) ); return(-1); }
 

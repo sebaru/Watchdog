@@ -48,6 +48,7 @@
  #include "Reseaux_fichier.h"
  #include "Reseaux_scenario.h"
  #include "Reseaux_admin.h"
+ #include "Reseaux_master_slave.h"
 
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
@@ -99,7 +100,7 @@
     TAG_SCENARIO,                                                                 /* Gestion des scenario */
     TAG_CAMERA,                                                                     /* Gestion des camera */
     TAG_ADMIN,                                /* Utilisation des commandes d'admin depuis le client lourd */
-
+    TAG_MASTER_SLAVE,                                   /* Echange des informations entre Slave et Master */
   };
 
  enum
