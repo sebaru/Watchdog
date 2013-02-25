@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Serveur Dls TraductionDLS Utilisateur Synoptiques Archive \
-	  Rs485 Sms Modbus Audio Admin Onduleur Lirc Asterisk Rfxcom Imsg Master
+	  Rs485 Sms Modbus Audio Admin Onduleur Lirc Asterisk Rfxcom Imsg Master TeleinfoEDFUSB
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \

@@ -187,6 +187,18 @@ This is the server side of Watchdog - Instant Messaging Module
 %defattr(644,root,root)
 /usr/lib/libwatchdog-server-imsg*
 
+#----------------------------- Package Server-teleinfoedfusb ----------------------------------
+%package server-teleinfoedfusb
+Summary: The Watchdogd Server - Teleinfo EDF USB Thread
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-teleinfoedfusb
+This is the server side of Watchdog - Teleinfo EDF USB Module
+
+%files server-teleinfoedfusb
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-teleinfoedfusbg*
+
 #----------------------------- Package Server-Master ----------------------------------
 %package server-master
 Summary: The Watchdogd Server - Master Thread for Slave Connexion
