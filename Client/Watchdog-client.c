@@ -288,6 +288,7 @@
 
     gtk_widget_set_size_request (F_client, 800, 600);
     gtk_widget_realize( F_client );                                     /* Pour pouvoir creer les pixmaps */
+    if (Config_cli.gui_fullscreen) gtk_window_maximize ( GTK_WINDOW(F_client) );
     Rouge  = gdk_pixmap_create_from_xpm_d( F_client->window, &Rmask, NULL, boule_rouge_xpm );
     Verte  = gdk_pixmap_create_from_xpm_d( F_client->window, &Vmask, NULL, boule_verte_xpm );
     Bleue  = gdk_pixmap_create_from_xpm_d( F_client->window, &Bmask, NULL, boule_bleue_xpm );
