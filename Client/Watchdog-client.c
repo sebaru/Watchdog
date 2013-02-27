@@ -255,6 +255,12 @@
      }
 
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                    /* Init msgs d'erreurs */
+
+    prg = gnome_program_init( PROGRAMME, VERSION, LIBGNOMEUI_MODULE, argc, argv,            /* Init gnome */
+                              GNOME_PARAM_POPT_TABLE, Options, GNOME_PARAM_NONE );
+    client = gnome_master_client();
+    g_signal_connect( GTK_OBJECT( client ), "save_yourself", GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
     Lire_config_cli( &Config_cli, file );                           /* Lecture sur le fichier ~/.watchdog */
     if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host),    "%s", host   );
     if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
@@ -266,12 +272,6 @@
 
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
     Print_config_cli( &Config_cli );
-
-
-    prg = gnome_program_init( PROGRAMME, VERSION, LIBGNOMEUI_MODULE, argc, argv,            /* Init gnome */
-                              GNOME_PARAM_POPT_TABLE, Options, GNOME_PARAM_NONE );
-    client = gnome_master_client();
-    g_signal_connect( GTK_OBJECT( client ), "save_yourself", GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
     F_client = gnome_app_new( PROGRAMME, TITRE_F_CONFIG );                      /* Création de la fenetre */
     g_signal_connect( G_OBJECT( F_client ), "delete_event",

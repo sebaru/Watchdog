@@ -35,12 +35,13 @@
  
  struct CONFIG_CLI
   { gint  port;                                                    /* Port d'ecoute des requetes clientes */
-    gchar host[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
+    gchar host[TAILLE_NOM_SERVEUR+1];                                         /* Serveur Watchdog distant */
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
-    gchar passwd[TAILLE_NOM_SERVEUR+1];                                      /* Serveur Watchdog distant */
+    gchar passwd[TAILLE_NOM_SERVEUR+1];                                       /* Serveur Watchdog distant */
     guint log_override;                                     /* Pour afficher tous les informations de log */
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean gui_tech;                               /* True si la GUI doit présenter l'aspect Technicien */
+    gboolean gui_fullscreen;                                 /* True si la GUI doit etre sur tout l'ecran */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
   };
 

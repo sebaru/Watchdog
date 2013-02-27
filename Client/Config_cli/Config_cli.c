@@ -91,6 +91,7 @@
 
 /********************************************* Partie GUI *************************************************/
        config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
+       config_cli->gui_fullscreen = g_key_file_get_boolean ( gkf, "GUI", "fullscreen", NULL );
      }
     g_key_file_free(gkf);
   }

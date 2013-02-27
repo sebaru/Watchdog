@@ -243,16 +243,6 @@
      }
     return(FALSE);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Admin_write : Concatene la chaine en parametre dans le buffer de reponse                               */
-/* Entrée : le buffer et la chaine                                                                        */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Master_write ( struct CLIENT *client, gchar *response )
-  { Envoi_client (client, TAG_MASTER, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );
-  }
-#endif
 /**********************************************************************************************************/
 /* Ecouter_slave: Ecoute ce que dis le client                                                             */
 /* Entrée: le client                                                                                      */
