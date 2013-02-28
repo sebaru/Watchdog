@@ -177,7 +177,10 @@
   }
 
  static void CB_envoyer_commande_admin ( char *ligne )
-  { return;
+  { struct CMD_TYPE_ADMIN admin;
+    g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );
+    Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
+                    (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale de l'outil d'admin Watchdog                                                  */
