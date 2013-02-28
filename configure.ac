@@ -97,7 +97,7 @@ Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Imsg/Makefile \
 Watchdogd/Master/Makefile \
-Watchdogd/TeleinfoEDFUSB/Makefile \
+Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Lirc/Makefile \
 Watchdogd/Asterisk/Makefile \
 Watchdogd/Utilisateur/Makefile \

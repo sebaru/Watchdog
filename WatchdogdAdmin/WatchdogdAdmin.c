@@ -37,6 +37,7 @@
  #include <stdio.h>
  #include <readline/readline.h>
  #include <readline/history.h>
+ #include <errno.h>
 
  #include "Reseaux.h"
  #include "config.h"
@@ -164,6 +165,8 @@
                       { switch( recu )
                          { case RECU_ERREUR_CONNRESET: printf ( "Ecouter_admin: Reset connexion\n" );
                                                        break;
+                           default: printf ( "Ecouter_admin: Recu erreur\n" );
+                                    break;
                          }
                         Deconnecter_admin ();
                       }
@@ -172,15 +175,22 @@
        default: printf ("Recu signal %d ", num ); break;
      }
   }
+
+ static void CB_envoyer_commande_admin ( char *ligne )
+  { return;
+  }
 /**********************************************************************************************************/
 /* Main: Fonction principale de l'outil d'admin Watchdog                                                  */
 /* Entrée: argc, argv                                                                                     */
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  int main ( int argc, char *argv[] )
-  { gint taille, taille_old;
+  { struct timeval tv;
+    fd_set fd;
+    gint taille, taille_old, retour;
     struct sigaction sig;
     gchar *commande, commande_old[128];
+    gboolean Arret;
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
@@ -208,8 +218,26 @@
 
     printf("  --  WatchdogdAdmin  v%s ('quit' to end session)\n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
-    for ( ; ; )
-     { commande = readline ( PROMPT );
+    rl_callback_handler_install ( PROMPT, &CB_envoyer_commande_admin );
+    for (Arret=FALSE;Arret==FALSE; )
+     { FD_ZERO(&fd);
+       FD_SET( 0, &fd );
+       tv.tv_sec=1;
+       tv.tv_usec=0;
+       retour = select( 1, NULL, &fd, NULL, &tv );
+       if (retour==-1)
+        { gint err;
+          err = errno;
+          printf("Erreur select %d=(%s), shuting down\n", err, strerror(errno) );
+          Arret = TRUE;
+        }
+       if (retour==0)                            /* Traiter ensuite les signaux du genre relais brisé */
+        { printf("Recu nu char\n");
+          rl_callback_read_char();
+        }
+
+#ifdef bouh
+       commande = readline ( PROMPT );
        taille = strlen(commande);
        if ( taille )
         { if (strncmp ( commande, commande_old, (taille < taille_old ? taille : taille_old)))
@@ -227,8 +255,9 @@
            }
         }
        g_free (commande);
+#endif
      }
-
+    rl_callback_handler_remove();
     Fermer_connexion ( Connexion );
     write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
     return(0);

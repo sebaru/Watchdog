@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Teleinfo/Teleinfo.c  Gestion des capteurs TELEINFOUSB Watchdog 2.0                           */
+/* Watchdogd/Teleinfo/Teleinfo.c  Gestion des capteurs TELEINFO Watchdog 2.0                           */
 /* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 27 mai 2012 12:52:37 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -54,10 +54,10 @@
        return;
      }
                                                                                /* Positionnement du debug */
-    Cfg_teleinfo.lib->Thread_debug = g_key_file_get_boolean ( gkf, "TELEINFO_USB", "debug", NULL ); 
+    Cfg_teleinfo.lib->Thread_debug = g_key_file_get_boolean ( gkf, "TELEINFO", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
 
-    chaine = g_key_file_get_string ( gkf, "TELEINFO_USB", "port", NULL );
+    chaine = g_key_file_get_string ( gkf, "TELEINFO", "port", NULL );
     if (!chaine)
      { Info_new ( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
                   "Teleinfo_Lire_config: port is missing. Using default." );
@@ -68,7 +68,7 @@
        g_free(chaine);
      }
 
-    Cfg_teleinfo.min_ea = g_key_file_get_integer ( gkf, "TELEINFO_USB", "min_ea", NULL );
+    Cfg_teleinfo.min_ea = g_key_file_get_integer ( gkf, "TELEINFO", "min_ea", NULL );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
@@ -244,7 +244,7 @@
     struct timeval tv;
     fd_set fdselect;
 
-    prctl(PR_SET_NAME, "W-TINFOEDFUSB", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-TINFOEDF", 0, 0, 0 );
     memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );               /* Mise a zero de la structure de travail */
     Cfg_teleinfo.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
     Teleinfo_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
@@ -253,8 +253,8 @@
               "Run_thread: Demarrage . . . TID = %d", pthread_self() );
     Cfg_teleinfo.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "teleinfousb" );
-    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFO USB sensor" );
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "teleinfo" );
+    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFO sensor" );
 
     Cfg_teleinfo.fd = Init_teleinfo();
     if (Cfg_teleinfo.fd<0)                                                   /* On valide l'acces aux ports */
