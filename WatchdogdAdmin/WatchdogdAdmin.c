@@ -247,7 +247,7 @@ do { recu = Recevoir_reseau( Connexion );
        while ( recu == RECU_EN_COURS );
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
-           { break; }
+           { }
           else if ( Reseau_tag(Connexion) != TAG_ADMIN )
            { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
           else                                           /* Il s'agit donc d'un TAG_ADMIN ! */
