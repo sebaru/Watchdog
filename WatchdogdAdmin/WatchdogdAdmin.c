@@ -142,7 +142,9 @@
        case SIGUSR1: printf( "Recu SIGUSR1" ); break;
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
-       case SIGIO:   do { recu = Recevoir_reseau( Connexion );
+       case SIGIO:   
+#ifdef bouh
+do { recu = Recevoir_reseau( Connexion );
                         }
                      while ( recu == RECU_EN_COURS );
                      if (recu==RECU_OK)
@@ -171,6 +173,7 @@
                         Deconnecter_admin ();
                       }
                      fflush(stdout);
+#endif
                      break;
        default: printf ("Recu signal %d ", num ); break;
      }
@@ -190,7 +193,7 @@
  int main ( int argc, char *argv[] )
   { struct timeval tv;
     fd_set fd;
-    gint taille, taille_old, retour;
+    gint taille, taille_old, retour, recu;
     struct sigaction sig;
     gchar *commande, commande_old[128];
     gboolean Arret;
@@ -234,10 +237,40 @@
           printf("Erreur select %d=(%s), shuting down\n", err, strerror(errno) );
           Arret = TRUE;
         }
-       if (retour==0)                            /* Traiter ensuite les signaux du genre relais brisé */
+       if (retour==1)                                /* Traiter ensuite les signaux du genre relais brisé */
         { printf("Recu nu char\n");
           rl_callback_read_char();
         }
+
+       do { recu = Recevoir_reseau( Connexion );
+          }
+       while ( recu == RECU_EN_COURS );
+       if (recu==RECU_OK)
+        { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
+           { break; }
+          else if ( Reseau_tag(Connexion) != TAG_ADMIN )
+           { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
+          else                                           /* Il s'agit donc d'un TAG_ADMIN ! */
+           { struct CMD_TYPE_ADMIN *admin;
+             admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
+             switch ( Reseau_ss_tag (Connexion) )
+              { case SSTAG_SERVEUR_RESPONSE_START:  printf("\n" ); break;
+                case SSTAG_SERVEUR_RESPONSE_BUFFER: printf("%s", admin->buffer );       fflush(stdout);
+                                                    break;
+                case SSTAG_SERVEUR_RESPONSE_STOP:   printf("end\n" ); break;
+                default: printf("Wrong SSTAG\n");
+              }
+           }
+        }
+       else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
+        { switch( recu )
+           { case RECU_ERREUR_CONNRESET: printf ( "Ecouter_admin: Reset connexion\n" );
+                                         break;
+             default: printf ( "Ecouter_admin: Recu erreur\n" );
+                      break;
+           }
+          Arret=TRUE;
+       }
 
 #ifdef bouh
        commande = readline ( PROMPT );
@@ -260,6 +293,7 @@
        g_free (commande);
 #endif
      }
+    Deconnecter_admin ();
     rl_callback_handler_remove();
     Fermer_connexion ( Connexion );
     write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
