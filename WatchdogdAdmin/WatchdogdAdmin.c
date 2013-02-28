@@ -238,7 +238,7 @@ do { recu = Recevoir_reseau( Connexion );
           Arret = TRUE;
         }
        if (retour==1)                                /* Traiter ensuite les signaux du genre relais brisé */
-        { printf("Recu nu char\n");
+        { printf("Recu un char\n");
           rl_callback_read_char();
         }
 
@@ -295,7 +295,6 @@ do { recu = Recevoir_reseau( Connexion );
      }
     Deconnecter_admin ();
     rl_callback_handler_remove();
-    Fermer_connexion ( Connexion );
     write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
     return(0);
   }
