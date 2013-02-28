@@ -225,7 +225,7 @@ do { recu = Recevoir_reseau( Connexion );
     printf("  --  WatchdogdAdmin  v%s ('quit' to end session)\n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
     rl_callback_handler_install ( PROMPT, &CB_envoyer_commande_admin );
-    for (Arret=FALSE;Arret==FALSE; )
+    for (Arret=FALSE;Arret!=TRUE; )
      { FD_ZERO(&fd);
        FD_SET( 0, &fd );
        tv.tv_sec=1;
