@@ -51,10 +51,16 @@
        if ( ! strcmp ( thread, "arch" ) )
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
+          else { g_snprintf( chaine, sizeof(chaine), " ARCH started\n" );
+                 Admin_write ( client, chaine );
+               }
         } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
+          else { g_snprintf( chaine, sizeof(chaine), " D.L.S started\n" );
+                 Admin_write ( client, chaine );
+               }
         }  else
        if ( ! strcmp ( thread, "ssrv" ) )
         { if (num<0 || num>=Config.max_serveur)
@@ -63,6 +69,9 @@
            }
           else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SSRV -> Arret" ); }
+          else { g_snprintf( chaine, sizeof(chaine), " SSRV started\n" );
+                 Admin_write ( client, chaine );
+               }
           sleep(1);                  /* On attend une seconde pour donner le temps au thread de demarrer, */
 /* sinon 'Gerer_jeton' va detecter un manque de thread et en demarrer un, avec potentiellement le meme id */
           Gerer_jeton();                                   /* Affectation du jeton a un des sous-serveurs */
