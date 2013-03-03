@@ -45,6 +45,7 @@
  #define PROMPT   "#Watchdogd*CLI> "
  static struct CONNEXION *Connexion;                                              /* connexion au serveur */
  static gchar Socket_file[128];
+ static gboolean Arret;
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin                                                               */
 /* Entrée: Néant                                                                                          */
@@ -182,6 +183,7 @@ do { recu = Recevoir_reseau( Connexion );
  static void CB_envoyer_commande_admin ( char *ligne )
   { struct CMD_TYPE_ADMIN admin;
 printf("envoi commande admin %s\n", ligne );
+    if ( ! strcmp( "quit", ligne ) ) Arret = TRUE;
     g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );
     Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
                     (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
@@ -197,7 +199,6 @@ printf("envoi commande admin %s\n", ligne );
     gint taille, taille_old, retour, recu;
     struct sigaction sig;
     gchar *commande, commande_old[128];
-    gboolean Arret;
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
