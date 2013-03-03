@@ -217,11 +217,14 @@ printf("envoi commande admin %s\n", ligne );
           Arret = TRUE;
         }
        if (retour==1)                                /* Traiter ensuite les signaux du genre relais brisé */
-        { printf("Recu un char\n");
+        { printf("Debut un char\n");
           rl_callback_read_char();
+          printf("Fin un char\n");
+          
         }
-
+printf("TEst ecoute -1\n");
        recu = Recevoir_reseau( Connexion );                            /* Ecoute de ce que dis le serveur */
+printf("TEst ecoute -2\n");
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
            { }
@@ -248,27 +251,6 @@ printf("envoi commande admin %s\n", ligne );
            }
           Arret=TRUE;
        }
-
-#ifdef bouh
-       commande = readline ( PROMPT );
-       taille = strlen(commande);
-       if ( taille )
-        { if (strncmp ( commande, commande_old, (taille < taille_old ? taille : taille_old)))
-           { g_snprintf( commande_old, sizeof(commande_old), "%s", commande );
-             taille_old = taille;                         /* On n'ajoute pas de doublon dans l'historique */
-             add_history(commande);                                  /* Ajoute la commande à l'historique */
-           }
-
-          if ( ! strncmp ( commande, "quit", taille ) ) break;                           /* On s'arrete ? */
-          else
-           { struct CMD_TYPE_ADMIN admin;
-             g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", commande );
-             Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
-                             (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
-           }
-        }
-       g_free (commande);
-#endif
      }
     Deconnecter_admin ();
     rl_callback_handler_remove();
