@@ -83,9 +83,6 @@
        return(FALSE);       
      }
 
-/*    fcntl( Connexion->socket, F_SETOWN, getpid() );      /* Active la reception du signal SIGIO sur ce FD */
-/*    fcntl( Connexion->socket, F_SETFL, O_ASYNC );/* Mode non bloquant, ça aide pour une telle application */
-
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -132,12 +129,10 @@
 /* Entrée: numero du signal à gerer                                                                       */
 /**********************************************************************************************************/
  static void Traitement_signaux( int num )                                        /* Accrochage du signal */
-  { gint recu;
-    switch (num)
+  { switch (num)
      { case SIGQUIT:
        case SIGINT:  
-       case SIGTERM: write_history ( NULL );        /* Ecriture de l'historique des commandes précédentes */
-                     Arret = TRUE; break;
+       case SIGTERM: Arret = TRUE; break;
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGALRM: printf( "Recu SIGALRM" ); break;
        case SIGUSR1: printf( "Recu SIGUSR1" ); break;
@@ -148,11 +143,13 @@
        default: printf ("Recu signal %d ", num ); break;
      }
   }
-
+/**********************************************************************************************************/
+/* CB_envoyer_commande_admin: appelé par la librairie readline lorsque une ligne est prete                */
+/* Entrée: la ligne a envoyer au serveur                                                                  */
+/**********************************************************************************************************/
  static void CB_envoyer_commande_admin ( char *ligne )
   { struct CMD_TYPE_ADMIN admin;
     gchar commande_old[128];
-printf("envoi commande admin %s\n", ligne );
     if ( ! strcmp( "quit", ligne ) ) Arret = TRUE;
     else
      { if ( strcmp ( ligne, commande_old ) )
@@ -160,7 +157,7 @@ printf("envoi commande admin %s\n", ligne );
           add_history(ligne);                                        /* Ajoute la commande à l'historique */
         }
 
-       g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );
+       g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );                 /* Envoi au serveur */
        Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
                        (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
      }
@@ -173,9 +170,8 @@ printf("envoi commande admin %s\n", ligne );
  int main ( int argc, char *argv[] )
   { struct timeval tv;
     fd_set fd;
-    gint taille, taille_old, retour, recu;
+    gint retour, recu;
     struct sigaction sig;
-    gchar *commande, commande_old[128];
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
@@ -197,8 +193,6 @@ printf("envoi commande admin %s\n", ligne );
     sigdelset ( &sig.sa_mask, SIGPIPE );
     sigprocmask(SIG_SETMASK, &sig.sa_mask, NULL);
 
-    g_snprintf( commande_old, sizeof(commande_old), "nocde" );
-    taille_old = 5;
     read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
 
     printf("  --  WatchdogdAdmin  v%s ('quit' to end session)\n", VERSION );
@@ -216,15 +210,11 @@ printf("envoi commande admin %s\n", ligne );
           printf("Erreur select %d=(%s), shuting down\n", err, strerror(errno) );
           Arret = TRUE;
         }
-       if (retour==1 && FD_ISSET(0, &fd))            /* Traiter ensuite les signaux du genre relais brisé */
-        { printf("Debut un char\n");
-          rl_callback_read_char();
-          printf("Fin un char\n");
-          
-        }
-printf("TEst ecoute -1\n");
-       recu = Recevoir_reseau( Connexion );                            /* Ecoute de ce que dis le serveur */
-printf("TEst ecoute -2\n");
+
+       if (retour==1 && FD_ISSET(0, &fd))
+        { rl_callback_read_char(); }                                 /* Lecture du character qui est pret */
+
+       recu = Recevoir_reseau( Connexion );                            /* Ecoute de ce que dit le serveur */
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
            { }
