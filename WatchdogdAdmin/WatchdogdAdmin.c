@@ -246,6 +246,7 @@ ecoute_encore:
      }
     Deconnecter_admin ();
     rl_callback_handler_remove();
+    printf("\n");
     write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
     return(0);
   }
