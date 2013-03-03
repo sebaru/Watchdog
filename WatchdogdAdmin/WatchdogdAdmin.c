@@ -209,14 +209,14 @@ printf("envoi commande admin %s\n", ligne );
        FD_SET( 0, &fd );
        tv.tv_sec=1;
        tv.tv_usec=0;
-       retour = select( 1, NULL, &fd, NULL, &tv );
+       retour = select( 1, &fd, NULL, NULL, &tv );
        if (retour==-1)
         { gint err;
           err = errno;
           printf("Erreur select %d=(%s), shuting down\n", err, strerror(errno) );
           Arret = TRUE;
         }
-       if (retour==1)                                /* Traiter ensuite les signaux du genre relais brisé */
+       if (retour==1 && FD_ISSET(0, &fd))            /* Traiter ensuite les signaux du genre relais brisé */
         { printf("Debut un char\n");
           rl_callback_read_char();
           printf("Fin un char\n");
