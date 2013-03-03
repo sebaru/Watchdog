@@ -202,7 +202,7 @@
      { FD_ZERO(&fd);
        FD_SET( 0, &fd );
        tv.tv_sec=0;
-       tv.tv_usec=100000;
+       tv.tv_usec=10000;
        retour = select( 1, &fd, NULL, NULL, &tv );
        if (retour==-1)
         { gint err;
