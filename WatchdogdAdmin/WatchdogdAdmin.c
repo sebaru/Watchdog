@@ -135,9 +135,9 @@
   { gint recu;
     switch (num)
      { case SIGQUIT:
-       case SIGINT:  write_history ( NULL );        /* Ecriture de l'historique des commandes précédentes */
-                     break;
-       case SIGTERM: printf( "Recu SIGTERM" ); break;
+       case SIGINT:  
+       case SIGTERM: write_history ( NULL );        /* Ecriture de l'historique des commandes précédentes */
+                     Arret = TRUE; break;
        case SIGCHLD: printf( "Recu SIGCHLD" ); break;
        case SIGALRM: printf( "Recu SIGALRM" ); break;
        case SIGUSR1: printf( "Recu SIGUSR1" ); break;
