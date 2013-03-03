@@ -94,7 +94,7 @@
        return(-1);
      }
     memset(&oldtio, 0, sizeof(oldtio) );
-    oldtio.c_cflag = B9600 | CS7 | CREAD | CLOCAL;
+    oldtio.c_cflag = B9600 | CS7 | CREAD | CLOCAL | PARENB;
     oldtio.c_oflag = 0;
     oldtio.c_iflag = 0;
     oldtio.c_lflag = 0;
