@@ -83,8 +83,8 @@
        return(FALSE);       
      }
 
-    fcntl( Connexion->socket, F_SETOWN, getpid() );      /* Active la reception du signal SIGIO sur ce FD */
-    fcntl( Connexion->socket, F_SETFL, O_ASYNC );/* Mode non bloquant, ça aide pour une telle application */
+/*    fcntl( Connexion->socket, F_SETOWN, getpid() );      /* Active la reception du signal SIGIO sur ce FD */
+/*    fcntl( Connexion->socket, F_SETFL, O_ASYNC );/* Mode non bloquant, ça aide pour une telle application */
 
     return(TRUE);
   }
