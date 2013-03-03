@@ -144,37 +144,6 @@
        case SIGPIPE: printf( "Recu SIGPIPE" ); break;
        case SIGBUS:  printf( "Recu SIGBUS" );  break;
        case SIGIO:   
-#ifdef bouh
-do { recu = Recevoir_reseau( Connexion );
-                        }
-                     while ( recu == RECU_EN_COURS );
-                     if (recu==RECU_OK)
-                      { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
-                         { break; }
-                        else if ( Reseau_tag(Connexion) != TAG_ADMIN )
-                         { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
-                        else                                           /* Il s'agit donc d'un TAG_ADMIN ! */
-                         { struct CMD_TYPE_ADMIN *admin;
-                           admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
-                           switch ( Reseau_ss_tag (Connexion) )
-                            { case SSTAG_SERVEUR_RESPONSE_START:  printf("\n" ); break;
-                              case SSTAG_SERVEUR_RESPONSE_BUFFER: printf("%s", admin->buffer ); break;
-                              case SSTAG_SERVEUR_RESPONSE_STOP:   printf( PROMPT ); break;
-                              default: printf("Wrong SSTAG\n");
-                            }
-                         }
-                      }
-                     else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
-                      { switch( recu )
-                         { case RECU_ERREUR_CONNRESET: printf ( "Ecouter_admin: Reset connexion\n" );
-                                                       break;
-                           default: printf ( "Ecouter_admin: Recu erreur\n" );
-                                    break;
-                         }
-                        Deconnecter_admin ();
-                      }
-                     fflush(stdout);
-#endif
                      break;
        default: printf ("Recu signal %d ", num ); break;
      }
@@ -182,11 +151,19 @@ do { recu = Recevoir_reseau( Connexion );
 
  static void CB_envoyer_commande_admin ( char *ligne )
   { struct CMD_TYPE_ADMIN admin;
+    gchar commande_old[128];
 printf("envoi commande admin %s\n", ligne );
     if ( ! strcmp( "quit", ligne ) ) Arret = TRUE;
-    g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );
-    Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
-                    (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
+    else
+     { if ( strcmp ( ligne, commande_old ) )
+        { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne );
+          add_history(ligne);                                        /* Ajoute la commande à l'historique */
+        }
+
+       g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );
+       Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
+                       (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
+     }
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale de l'outil d'admin Watchdog                                                  */
@@ -244,9 +221,7 @@ printf("envoi commande admin %s\n", ligne );
           rl_callback_read_char();
         }
 
-       do { recu = Recevoir_reseau( Connexion );
-          }
-       while ( recu == RECU_EN_COURS );
+       recu = Recevoir_reseau( Connexion );                            /* Ecoute de ce que dis le serveur */
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
            { }
