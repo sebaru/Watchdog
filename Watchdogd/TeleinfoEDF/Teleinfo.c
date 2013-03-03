@@ -293,8 +293,7 @@
 
           cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu, 1 );
           if (cpt>0)
-           { printf("Octet recu = %d, %c\n", Cfg_teleinfo.buffer[nbr_octet_lu], Cfg_teleinfo.buffer[nbr_octet_lu] );
-             if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')
+           { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')
               { Processer_trame();
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
