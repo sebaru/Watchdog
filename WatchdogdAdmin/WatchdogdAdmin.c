@@ -201,8 +201,8 @@
     for (Arret=FALSE;Arret!=TRUE; )
      { FD_ZERO(&fd);
        FD_SET( 0, &fd );
-       tv.tv_sec=1;
-       tv.tv_usec=0;
+       tv.tv_sec=0;
+       tv.tv_usec=100000;
        retour = select( 1, &fd, NULL, NULL, &tv );
        if (retour==-1)
         { gint err;
@@ -214,6 +214,7 @@
        if (retour==1 && FD_ISSET(0, &fd))
         { rl_callback_read_char(); }                                 /* Lecture du character qui est pret */
 
+ecoute_encore:
        recu = Recevoir_reseau( Connexion );                            /* Ecoute de ce que dit le serveur */
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
@@ -225,12 +226,13 @@
              admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
              switch ( Reseau_ss_tag (Connexion) )
               { case SSTAG_SERVEUR_RESPONSE_START:  printf("\n" ); break;
-                case SSTAG_SERVEUR_RESPONSE_BUFFER: printf("%s", admin->buffer );       fflush(stdout);
+                case SSTAG_SERVEUR_RESPONSE_BUFFER: printf("%s", admin->buffer );
                                                     break;
-                case SSTAG_SERVEUR_RESPONSE_STOP:   printf("end\n" ); break;
+                case SSTAG_SERVEUR_RESPONSE_STOP:   printf("%s", PROMPT ); fflush(stdout); break;
                 default: printf("Wrong SSTAG\n");
               }
            }
+          goto ecoute_encore;
         }
        else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
         { switch( recu )
