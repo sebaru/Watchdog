@@ -240,7 +240,7 @@
 /* Main: Fonction principale du thread Teleinfo                                                             */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { gint retval;
+  { gint retval, nbr_octet_lu;
     struct timeval tv;
     fd_set fdselect;
 
@@ -267,6 +267,7 @@
      }
     else { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,"Acces TELEINFO FD=%d", Cfg_teleinfo.fd ); }
 
+    nbr_octet_lu = 0;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
@@ -290,10 +291,13 @@
        if (retval>=0 && FD_ISSET(Cfg_teleinfo.fd, &fdselect) )
         { int cpt;
 
-          cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer, TAILLE_BUFFER_TELEINFO );
+          cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu, 1 );
           if (cpt>0)
-           { Processer_trame();
-             memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
+           { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')
+              { Processer_trame();
+                nbr_octet_lu = 0;
+                memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
+              } else nbr_octet_lu += cpt;
            }
         }
      }
