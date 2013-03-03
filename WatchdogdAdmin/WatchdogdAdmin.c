@@ -181,6 +181,7 @@ do { recu = Recevoir_reseau( Connexion );
 
  static void CB_envoyer_commande_admin ( char *ligne )
   { struct CMD_TYPE_ADMIN admin;
+printf("envoi commande admin %s\n", ligne );
     g_snprintf( admin.buffer, sizeof(admin.buffer), "%s", ligne );
     Envoyer_reseau( Connexion, TAG_ADMIN, SSTAG_CLIENT_REQUEST,
                     (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
