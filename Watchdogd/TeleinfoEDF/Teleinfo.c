@@ -111,130 +111,31 @@
 /* Entrée: la trame a recue                                                                               */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static int Processer_trame( void )
+ static void Processer_trame( void )
   { 
-
-    Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame %s", Cfg_teleinfo.buffer );
-#ifdef bouh
-
-    if (trame->type == 0x01 && trame->sous_type == 0x00)
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame get_status Cmd= %d (0x%2X)", trame->data[0], trame->data[0] );
-       if (trame->data[1] == 0x52) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                             "Processer_trame get_status 433MHz receiver only" );   
-       if (trame->data[1] == 0x53) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                             "Processer_trame get_status 433MHz transceiver" );   
-       Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame get_status firmware %d (0x%2X)", trame->data[2], trame->data[2] );
-       if (trame->data[3] & 0x80) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Unencoded Frame" );   
-       if (trame->data[3] & 0x40) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU6" );   
-       if (trame->data[3] & 0x20) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU5" );   
-       if (trame->data[3] & 0x10) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU4" );   
-       if (trame->data[3] & 0x08) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU3" );   
-       if (trame->data[3] & 0x04) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FineOffset/Viking" );   
-       if (trame->data[3] & 0x02) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Rubicson" );   
-       if (trame->data[3] & 0x01) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AE" );   
-       if (trame->data[4] & 0x80) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto BlindsT1" );   
-       if (trame->data[4] & 0x40) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto BlindsT0" );   
-       if (trame->data[4] & 0x20) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ProGuard" );   
-       if (trame->data[4] & 0x10) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FS20" );   
-       if (trame->data[4] & 0x08) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LaCrosse" );   
-       if (trame->data[4] & 0x04) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Hideki" );   
-       if (trame->data[4] & 0x02) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LightwaveRF" );   
-       if (trame->data[4] & 0x01) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Mertik" );   
-       if (trame->data[5] & 0x80) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Visonic" );   
-       if (trame->data[5] & 0x40) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ATI" );   
-       if (trame->data[5] & 0x20) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto OregonScientific" );   
-       if (trame->data[5] & 0x10) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto MeianTech" );   
-       if (trame->data[5] & 0x08) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto HomeEasy/EU" );   
-       if (trame->data[5] & 0x04) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AC" );   
-       if (trame->data[5] & 0x02) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ARC" );   
-       if (trame->data[5] & 0x01) Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto X10" );   
+    if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
+     { SEA( Cfg_teleinfo.min_ea, atoi( Cfg_teleinfo.buffer + 5 ) );
      }
-    else if (trame->type == 0x02)
-     { switch (trame->sous_type)
-        { case 0x00: Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                              "Processer_trame : Transceiver message : Error, receiver did not lock" );
-                     break;
-          case 0x01: switch (trame->data[0])
-                      { case 0x00: Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : ACK, transmit OK" );
-                                   break;
-                        case 0x01: Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : ACK, "
-                                            "but transmit started after 3 seconds delay anyway with RF receive data" );
-                                   break;
-                        case 0x02: Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : NAK, transmitter "
-                                            "did not lock on the requested transmit frequency" );
-                                   break;
-                        case 0x03: Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : NAK, "
-                                            "AC address zero in id1-id4 not allowed" );
-                                   break;
-                        default  : Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : Unknown message..." );
-                                   break;
-                      }
-                     break;
-          default :  Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                              "Processer_trame : Transceiver message : unknown packet ssous_type %d", trame->sous_type);
-        }
-     } 
-    else if (trame->type == 0x52 && trame->sous_type == 0x01)
-     { struct MODULE_TELEINFO *module;
-       Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
-                 "signe=%02d, low=%03d, hum=%02d, humstatus=%02d, battery=%02d, rssi=%02d",
-                 trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0], trame->data[1],
-                 trame->data[2] & 0x7F, trame->data[2] & 0x80, trame->data[3], trame->data[4], trame->data[5],
-                 trame->data[6] >> 4, trame->data[6] & 0x0F
-               );   
-       module = Chercher_teleinfo( trame->type, trame->sous_type, TRUE, trame->data[0], TRUE, trame->data[1],
-                                 FALSE, 0, FALSE, 0, FALSE, 0, FALSE, 0 );
-       if (module)
-        { SEA( module->teleinfo.ea_min,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( (trame->data[2] & 0x7F) + trame->data[3])
-                                           / 10.0 );                                              /* Temp */
-          SEA( module->teleinfo.ea_min + 1,  trame->data[4] );                                  /* Humidity */
-          SEA( module->teleinfo.ea_min + 2,  trame->data[6] >> 4);                               /* Battery */
-          SEA( module->teleinfo.ea_min + 3,  trame->data[6] & 0x0F );                               /* RSSI */
-
-          module->date_last_view = Partage->top;
-        }
-       else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
-                      trame->type, trame->type, trame->sous_type, trame->sous_type );
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
+     { SEA( Cfg_teleinfo.min_ea + 1, atoi( Cfg_teleinfo.buffer + 6 ) );
      }
-    else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,
-                   "Processer_trame unknown packet type %02d(0x%02X), sous_type=%02d(0x%02X)",
-                   trame->type, trame->type, trame->sous_type, trame->sous_type );
-#endif
-    return(TRUE);
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
+     { SEA( Cfg_teleinfo.min_ea + 2, atoi( Cfg_teleinfo.buffer + 5 ) );
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
+     { SEA( Cfg_teleinfo.min_ea + 3, atoi( Cfg_teleinfo.buffer + 5 ) );
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
+     { SEA( Cfg_teleinfo.min_ea + 4, atoi( Cfg_teleinfo.buffer + 6 ) );
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
+     { SEA( Cfg_teleinfo.min_ea + 5, atoi( Cfg_teleinfo.buffer + 5 ) );
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
+     { SEA( Cfg_teleinfo.min_ea + 6, atoi( Cfg_teleinfo.buffer + 5 ) );
+     }
+    else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
+                   "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                             */
