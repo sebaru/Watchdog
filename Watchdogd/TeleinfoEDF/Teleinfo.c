@@ -114,25 +114,25 @@
  static void Processer_trame( void )
   { 
     if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea, atoi( Cfg_teleinfo.buffer + 5 ) );
+     { SEA( Cfg_teleinfo.min_ea, atof( Cfg_teleinfo.buffer + 5 ) );
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
-     { SEA( Cfg_teleinfo.min_ea + 1, atoi( Cfg_teleinfo.buffer + 6 ) );
+     { SEA( Cfg_teleinfo.min_ea + 1, atof( Cfg_teleinfo.buffer + 6 ) );
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 2, atoi( Cfg_teleinfo.buffer + 5 ) );
+     { SEA( Cfg_teleinfo.min_ea + 2, atof( Cfg_teleinfo.buffer + 5 ) );
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 3, atoi( Cfg_teleinfo.buffer + 5 ) );
+     { SEA( Cfg_teleinfo.min_ea + 3, atof( Cfg_teleinfo.buffer + 5 ) );
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
-     { SEA( Cfg_teleinfo.min_ea + 4, atoi( Cfg_teleinfo.buffer + 6 ) );
+     { SEA( Cfg_teleinfo.min_ea + 4, atof( Cfg_teleinfo.buffer + 6 ) );
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 5, atoi( Cfg_teleinfo.buffer + 5 ) );
+     { SEA( Cfg_teleinfo.min_ea + 5, atof( Cfg_teleinfo.buffer + 5 ) );
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 6, atoi( Cfg_teleinfo.buffer + 5 ) );
+     { SEA( Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5 ) );
      }
     else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
                    "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
