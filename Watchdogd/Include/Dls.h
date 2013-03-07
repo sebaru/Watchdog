@@ -42,6 +42,14 @@
     float conso;                                                     /* Consommation temporelle du plugin */
   };
 
+ struct TEMPO                                                           /* Définition d'une temporisation */
+  { guint status;                                                           /* Statut de la temporisation */
+    guint date_on;                                          /* date a partir de laquelle la tempo sera ON */
+    guint min_on;                                     /* Durée minimale pendant laquelle la tempo sera ON */
+    guint max_on;                                     /* Durée maximale pendant laquelle la tempo sera ON */
+    guint date_off;                                        /* date a partir de laquelle la tempo sera OFF */
+    gboolean state;
+  };
 
  struct COM_DLS                                             /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                               /* Identifiant du thread */

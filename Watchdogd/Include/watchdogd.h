@@ -134,13 +134,6 @@
     gint changes;
   };
 
- struct TEMPO
-  { gboolean started;
-    guint date_on;
-    guint date_off;
-    gboolean state;
-  };
-
  struct PARTAGE                                                        /* Structure des données partagées */
   { gint taille_partage;
     gint shmid;
