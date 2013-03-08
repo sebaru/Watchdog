@@ -154,13 +154,14 @@
 /**********************************************************************************************************/
  char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "T%03d  = %d : started = %s, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+    snprintf( chaine, sizeof(chaine), "To be implemented" );
+/*    snprintf( chaine, sizeof(chaine), "T%03d  = %d : started = %s, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
               Partage->Tempo_R[num].state, (Partage->Tempo_R[num].started ? "TRUE " : "FALSE"),
               Partage->Tempo_R[num].date_on,
              (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
               Partage->Tempo_R[num].date_off,
              (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0)
-            );
+            );*/
     return( chaine );
   }
 
@@ -357,47 +358,61 @@
        return;
      }
     tempo = &Partage->Tempo_R[num];                                       /* Récupération de la structure */
-    switch(type)                                                             /* Tempo retard ou creneau ? */
-     { case 1:                                                                         /* Tempo Creneau ? */
-            if (tempo->started == FALSE && etat == 1)                                /* Doit-on starter ? */
-             { tempo->date_on  = Partage->top + delai_on;
-               tempo->date_off = tempo->date_on + delai_off;
-               tempo->started  = TRUE;
-             }
 
-            if ( tempo->started == 1 )
-             { if (tempo->date_on <= Partage->top && Partage->top < tempo->date_off)      /* Analyse Etat */
-                    { tempo->state = TRUE;  }
-               else { tempo->state = FALSE; }
- 
-               if (tempo->date_off <= Partage->top && etat == 0)                        /* Fin de tempo ? */
-                { tempo->date_off = tempo->date_on = 0;
-                  tempo->state   = FALSE;
-                  tempo->started = FALSE;                                                    /* RAZ Tempo */
-                }
-             }
-
-            break;
-       case 0:                                                                          /* Tempo Retard ? */
-            if (tempo->started == FALSE && etat == 1)                                /* Doit-on starter ? */
-             { tempo->date_on  = Partage->top + delai_on;
-               tempo->date_off = 0;                                  /* Date off inconnue a ce temps la ! */
-               tempo->started  = TRUE;
-             } else if (tempo->started == TRUE && etat == 0 && tempo->date_off == 0)
-             { tempo->date_off = Partage->top + delai_off; }
-
-            if ( tempo->started == 1 )
-             { if ( tempo->date_on <= Partage->top && 
-                   (tempo->date_off == 0 || Partage->top < tempo->date_off ))             /* Analyse Etat */
-                { tempo->state = TRUE; }
-               else if (tempo->date_off != 0 && tempo->date_off <= Partage->top)
-                { tempo->date_off = tempo->date_on = 0;
-                  tempo->started = FALSE;                                                    /* RAZ Tempo */
-                  tempo->state   = FALSE;
-                }
-             }
-            break;
+    if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
+     { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
+       tempo->date_on = Partage->top + tempo->delai_on;
      }
+
+    if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
+     { tempo->status = TEMPO_NOT_COUNTING; }
+
+    if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
+     { tempo->status = TEMPO_WAIT_FOR_MIN_ON;
+       tempo->state = TRUE;
+     }
+
+    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+        Partage->top < tempo->date_on + tempo->min_on )
+     { if (Partage->top+tempo->delai_off <= tempo->date_on + tempo->min_on)
+            { tempo->date_off = tempo->date_on+tempo->min_on; }
+       else { tempo->date_off = Partage->top+tempo->delai_off; }
+       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+     }
+    
+    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+        tempo->date_on + tempo->min_on <= Partage->top )
+     { tempo->date_off = Partage->top+tempo->delai_off;
+       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+     }
+
+    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
+        tempo->date_on + tempo->min_on <= Partage->top )
+     { tempo->status = TEMPO_WAIT_FOR_MAX_ON;
+     }
+
+    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
+     { if (tempo->max_on)
+            { if (Partage->top+tempo->delai_off < tempo->date_on+tempo->max_on)
+                   { tempo->date_off = Partage->top + tempo->delai_off; }
+              else { tempo->date_off = tempo->date_on+tempo->max_on; }
+            }
+       else { tempo->date_off = Partage->top+tempo->delai_off; }
+       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+     }
+
+    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->max_on &&
+        tempo->date_on + tempo->max_on <= Partage->top )
+     { tempo->date_off = tempo->date_on+tempo->max_on;
+       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+     }
+
+    if (tempo->status == TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
+     { tempo->date_on = tempo->date_off = 0;
+       tempo->status = TEMPO_NOT_COUNTING;
+       tempo->state = FALSE;
+     }
+
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */

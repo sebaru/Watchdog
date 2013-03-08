@@ -42,11 +42,22 @@
     float conso;                                                     /* Consommation temporelle du plugin */
   };
 
+ enum                                                              /* différent statut des temporisations */
+  { TEMPO_NOT_COUNTING,                                                 /* La tempo ne compte pas du tout */
+    TEMPO_WAIT_FOR_DELAI_ON,                       /* La tempo compte, en attendant le delai de mise à un */
+    TEMPO_WAIT_FOR_MIN_ON,                         /* Delai de MAU dépassé, en attente du creneau minimum */
+    TEMPO_WAIT_FOR_MAX_ON,                      /* Creneau minimum atteint, en attente du creneau maximum */
+    TEMPO_WAIT_FOR_DELAI_OFF,                /* Creneau max atteint, en attente du delai de remise a zero */
+  };
+
  struct TEMPO                                                           /* Définition d'une temporisation */
-  { guint status;                                                           /* Statut de la temporisation */
+  { guint delai_on;                                 /* delai avant mise à un (fixé par option mnémonique) */
+    guint delai_off;                              /* delai avant mise à zero (fixé par option mnémonique) */
+    guint min_on;        /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint max_on;        /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+                                                                            /* Variables de travail (run) */
+    guint status;                                                           /* Statut de la temporisation */
     guint date_on;                                          /* date a partir de laquelle la tempo sera ON */
-    guint min_on;                                     /* Durée minimale pendant laquelle la tempo sera ON */
-    guint max_on;                                     /* Durée maximale pendant laquelle la tempo sera ON */
     guint date_off;                                        /* date a partir de laquelle la tempo sera OFF */
     gboolean state;
   };
