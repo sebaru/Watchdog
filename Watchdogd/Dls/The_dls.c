@@ -361,7 +361,7 @@
 
     if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
-       tempo->date_on = Partage->top + tempo->delai_on;
+       tempo->date_on = Partage->top + tempo->option_tempo.delai_on;
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
@@ -373,37 +373,37 @@
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
-        Partage->top < tempo->date_on + tempo->min_on )
-     { if (Partage->top+tempo->delai_off <= tempo->date_on + tempo->min_on)
-            { tempo->date_off = tempo->date_on+tempo->min_on; }
-       else { tempo->date_off = Partage->top+tempo->delai_off; }
+        Partage->top < tempo->date_on + tempo->option_tempo.min_on )
+     { if (Partage->top+tempo->option_tempo.delai_off <= tempo->date_on + tempo->option_tempo.min_on)
+            { tempo->date_off = tempo->date_on+tempo->option_tempo.min_on; }
+       else { tempo->date_off = Partage->top+tempo->option_tempo.delai_off; }
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
     
     if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
-        tempo->date_on + tempo->min_on <= Partage->top )
-     { tempo->date_off = Partage->top+tempo->delai_off;
+        tempo->date_on + tempo->option_tempo.min_on <= Partage->top )
+     { tempo->date_off = Partage->top+tempo->option_tempo.delai_off;
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
-        tempo->date_on + tempo->min_on <= Partage->top )
+        tempo->date_on + tempo->option_tempo.min_on <= Partage->top )
      { tempo->status = TEMPO_WAIT_FOR_MAX_ON;
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
-     { if (tempo->max_on)
-            { if (Partage->top+tempo->delai_off < tempo->date_on+tempo->max_on)
-                   { tempo->date_off = Partage->top + tempo->delai_off; }
-              else { tempo->date_off = tempo->date_on+tempo->max_on; }
+     { if (tempo->option_tempo.max_on)
+            { if (Partage->top+tempo->option_tempo.delai_off < tempo->date_on+tempo->option_tempo.max_on)
+                   { tempo->date_off = Partage->top + tempo->option_tempo.delai_off; }
+              else { tempo->date_off = tempo->date_on+tempo->option_tempo.max_on; }
             }
-       else { tempo->date_off = Partage->top+tempo->delai_off; }
+       else { tempo->date_off = Partage->top+tempo->option_tempo.delai_off; }
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->max_on &&
-        tempo->date_on + tempo->max_on <= Partage->top )
-     { tempo->date_off = tempo->date_on+tempo->max_on;
+    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->option_tempo.max_on &&
+        tempo->date_on + tempo->option_tempo.max_on <= Partage->top )
+     { tempo->date_off = tempo->date_on+tempo->option_tempo.max_on;
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
@@ -412,7 +412,6 @@
        tempo->status = TEMPO_NOT_COUNTING;
        tempo->state = FALSE;
      }
-
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */

@@ -35,6 +35,67 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 /**********************************************************************************************************/
+/* Proto_editer_option_tempo: Le client desire editer les options d'une tempo                             */
+/* Entrée: le client demandeur et le entree en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
+  { struct CMD_TYPE_OPTION_BIT_INTERNE option;
+    struct CMD_TYPE_OPTION_TEMPO *tempo;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    tempo = Rechercher_tempoDB( Config.log, Db_watchdog, rezo_mnemo->id );
+
+    if (tempo)
+     { option.type = MNEMO_TEMPO;
+       memcpy( &option.tempo, tempo, sizeof( struct CMD_TYPE_OPTION_TEMPO ) );
+       Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
+                     (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
+       g_free(tempo);                                                               /* liberation mémoire */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to locate tempo %s", rezo_mnemo->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_valider_editer_option_tempo: Le client valide l'edition des options tempo                        */
+/* Entrée: le client demandeur et le entree en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_OPTION_TEMPO *rezo_tempo )
+  { struct CMD_TYPE_OPTION_ENTREEANA *result;
+    gboolean retour;
+    struct DB *Db_watchdog;
+    Db_watchdog = client->Db_watchdog;
+
+    retour = Modifier_tempoDB ( Config.log, Db_watchdog, rezo_tempo );
+    if (retour==FALSE)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to edit tempo %s", rezo_tempo->libelle);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { result = Rechercher_tempoDB( Config.log, Db_watchdog, rezo_tempo->id_mnemo );
+           if (result)
+            { g_free(result);
+              Charger_tempo ();                                            /* Update de la running config */
+            }
+           else
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate entree %s", rezo_tempo->libelle);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+         }
+  }
+/**********************************************************************************************************/
 /* Proto_editer_entree: Le client desire editer un entree                                                 */
 /* Entrée: le client demandeur et le entree en question                                                   */
 /* Sortie: Niet                                                                                           */
@@ -208,6 +269,7 @@
                { case MNEMO_ENTREE_ANA :  Charger_eana ();    break;       /* Update de la running config */
                  case MNEMO_CPT_IMP    :  Charger_cpt_imp (); break;       /* Update de la running config */
                  case MNEMO_CPTH       :  Charger_cpth ();    break;       /* Update de la running config */
+                 case MNEMO_TEMPO      :  Charger_tempo ();   break;       /* Update de la running config */
                }
               g_free(result);
             }
@@ -295,13 +357,13 @@
        g_free(mnemo);
      }
     else
-     { struct CMD_TYPE_MNEMONIQUE unconnu;
-       unconnu.id = 0;
-       unconnu.type = critere->type;
-       unconnu.num = critere->num;
-       g_snprintf( unconnu.libelle, sizeof(unconnu.libelle), "Unknown" );
+     { struct CMD_TYPE_MNEMONIQUE inconnu;
+       inconnu.id = 0;
+       inconnu.type = critere->type;
+       inconnu.num = critere->num;
+       g_snprintf( inconnu.libelle, sizeof(inconnu.libelle), "Unknown" );
        Envoi_client ( client, tag, ss_tag,
-                      (gchar *)&unconnu, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                      (gchar *)&inconnu, sizeof(struct CMD_TYPE_MNEMONIQUE) );
      }
   }
 /**********************************************************************************************************/
@@ -359,7 +421,8 @@
 
        if ( (mnemo == NULL) || mnemos->nbr_mnemos == max_enreg ) /* Si depassement de tampon ou plus d'enreg */
         { Envoi_client ( client, tag, sstag, (gchar *)mnemos,
-                         sizeof(struct CMD_TYPE_MNEMONIQUES) + mnemos->nbr_mnemos * sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                         sizeof(struct CMD_TYPE_MNEMONIQUES) +
+                         mnemos->nbr_mnemos * sizeof(struct CMD_TYPE_MNEMONIQUE) );
           mnemos->nbr_mnemos = 0;
         }
      }

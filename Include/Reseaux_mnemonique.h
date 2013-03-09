@@ -39,6 +39,7 @@
 
  #include "Reseaux_option_entreeana.h"
  #include "Reseaux_option_compteur_imp.h"
+ #include "Reseaux_option_tempo.h"
 
  enum
   { MNEMO_BISTABLE,                                               /* Definitions des types de mnemoniques */
@@ -81,6 +82,7 @@
   { guint type;
     union { struct CMD_TYPE_OPTION_ENTREEANA eana;
             struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
+            struct CMD_TYPE_OPTION_TEMPO tempo;
           };
   };
  enum 

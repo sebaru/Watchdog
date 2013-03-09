@@ -92,6 +92,8 @@
                                            break;
                   case MNEMO_CPT_IMP     : Proto_editer_option_compteur_imp( client, rezo_mnemo );
                                            break;
+                  case MNEMO_TEMPO       : Proto_editer_option_tempo( client, rezo_mnemo );
+                                           break;
                   default: { struct CMD_GTK_MESSAGE erreur;
                              g_snprintf( erreur.message, sizeof(erreur.message),
                                          "No options for this object %s", rezo_mnemo->libelle);
@@ -108,6 +110,8 @@
                 { case MNEMO_ENTREE_ANA  : Proto_valider_editer_option_entreeANA( client, &option->eana );
                                            break;
                   case MNEMO_CPT_IMP     : Proto_valider_editer_option_compteur_imp( client, &option->cpt_imp );
+                                           break;
+                  case MNEMO_TEMPO       : Proto_valider_editer_option_tempo( client, &option->tempo );
                                            break;
                 }
              }

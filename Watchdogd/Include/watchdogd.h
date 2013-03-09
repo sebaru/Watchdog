@@ -29,9 +29,6 @@
  #define _WATCHDOGD_H_
 
  #include <glib.h>
-#if GLIB_MAJOR_VERSION <= 2 && GLIB_MINOR_VERSION < 32
- #include <glib/gthread.h>
-#endif
  #include <pthread.h>
  #include <errno.h>
 
@@ -44,6 +41,7 @@
  #include "Admin.h"
  #include "Cpth_DB.h"
  #include "Cpt_imp_DB.h"
+ #include "Tempo_DB.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
  #include "Asterisk_DB.h"

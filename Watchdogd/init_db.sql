@@ -720,6 +720,21 @@ CREATE TABLE IF NOT EXISTS `rs485` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `tempo`
+--
+
+CREATE TABLE IF NOT EXISTS `tempo` (
+  `id_mnemo` int(11) NOT NULL,
+  `delai_on` int(11) NOT NULL DEFAULT '0',
+  `delai_off` tinyint(1) NOT NULL DEFAULT '0',
+  `min_on` int(11) NOT NULL DEFAULT '0',
+  `min_off` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id_mnemo`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `rfxcom`
 --
 

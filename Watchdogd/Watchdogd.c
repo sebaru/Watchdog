@@ -75,7 +75,8 @@
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_all, LOG_INFO, "Importer : Data Import %s... Checking size", FICHIER_EXPORT );
+                Info_new( Config.log, Config.log_all, LOG_INFO,
+                         "Importer : Data Import %s... Checking size", FICHIER_EXPORT );
                 if (Partage->taille_partage != sizeof(struct PARTAGE) )
                  { memset( Partage, 0, sizeof(struct PARTAGE) );
                    Info_new( Config.log, Config.log_all, LOG_WARNING, "Importer: Wrong size .. zeroing ..." );
@@ -110,6 +111,10 @@
     Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs impulsion" );
     Charger_cpt_imp();
     Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs impulsion fait" );
+
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des temporisations" );
+    Charger_tempo();
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des temporisations fait" );
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
@@ -501,7 +506,6 @@
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
     write( fd_lock, strpid, strlen(strpid) );
 
-    g_thread_init(NULL);   /* Initialisation de la glib en environnement multi-threadé (obsolete en 2.32) */
     Config.log = Info_init( "Watchdogd", Config.log_level );                       /* Init msgs d'erreurs */
 
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Start" );

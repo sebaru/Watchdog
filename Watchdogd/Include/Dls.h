@@ -51,10 +51,7 @@
   };
 
  struct TEMPO                                                           /* Définition d'une temporisation */
-  { guint delai_on;                                 /* delai avant mise à un (fixé par option mnémonique) */
-    guint delai_off;                              /* delai avant mise à zero (fixé par option mnémonique) */
-    guint min_on;        /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
-    guint max_on;        /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+  { struct CMD_TYPE_OPTION_TEMPO option_tempo;
                                                                             /* Variables de travail (run) */
     guint status;                                                           /* Statut de la temporisation */
     guint date_on;                                          /* date a partir de laquelle la tempo sera ON */

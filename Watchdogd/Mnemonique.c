@@ -62,6 +62,11 @@
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPTH, mnemo_a_virer->id );
                Lancer_requete_SQL ( log, db, requete );
                break;
+          case MNEMO_TEMPO:
+               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_TEMPO, mnemo_a_virer->id );
+               Lancer_requete_SQL ( log, db, requete );
+               break;
           default:
                break;
         }
@@ -84,18 +89,21 @@
 
     libelle = Normaliser_chaine ( log, mnemo->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_mnemoDB: Normalisation impossible libelle" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Ajouter_mnemoDB: Normalisation impossible libelle" );
        return(-1);
      }
     acro = Normaliser_chaine ( log, mnemo->acronyme );                   /* Formatage correct des chaines */
     if (!acro)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_mnemoDB: Normalisation impossible acronyme" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Ajouter_mnemoDB: Normalisation impossible acronyme" );
        g_free(libelle);
        return(-1);
      }
     command_text = Normaliser_chaine ( log, mnemo->command_text );       /* Formatage correct des chaines */
     if (!command_text)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_mnemoDB: Normalisation impossible command_text" );
+     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+                "Ajouter_mnemoDB: Normalisation impossible command_text" );
        g_free(acro);
        g_free(libelle);
        return(-1);
@@ -131,6 +139,12 @@
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(val,id_mnemo) VALUES "
                         "('%d','%d')", NOM_TABLE_CPTH, 0, last_id );
+            Lancer_requete_SQL ( log, db, requete );
+            break;
+       case MNEMO_TEMPO:
+            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                        "INSERT INTO %s(id_mnemo,delai_on,min_on,max_on,delai_off) VALUES "
+                        "('%d','%d','%d','%d','%d')", NOM_TABLE_TEMPO, last_id, 10, 0, 0, 0 );
             Lancer_requete_SQL ( log, db, requete );
             break;
        default:
