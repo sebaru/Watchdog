@@ -543,6 +543,25 @@
                       "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
                       trame->type, trame->type, trame->sous_type, trame->sous_type );
      }
+    else if (trame->type == 0x17 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
+     { struct MODULE_RFXCOM *module;
+       Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                 "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "
+                 "id3=%03d, id4=%03d, unitcode=%03d, cmnd=%03d, level=%03d rssi=%02d",
+                 trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
+                 trame->data[2], trame->data[3], trame->data[4], trame->data[5],
+                 trame->data[6], trame->data[7] & 0x0F
+               );   
+       module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0] & 0x03, TRUE, trame->data[1],
+                                 TRUE, trame->data[2], TRUE, trame->data[3], FALSE, 0, FALSE, 0 );
+       if (module)
+        { /*SEA( module->rfxcom.ea_min,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( (trame->data[2] & 0x7F) + trame->data[3])*/
+          module->date_last_view = Partage->top;
+        }
+       else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                      "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
+                      trame->type, trame->type, trame->sous_type, trame->sous_type );
+     }
     else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                    "Processer_trame unknown packet type %02d(0x%02X), sous_type=%02d(0x%02X)",
                    trame->type, trame->type, trame->sous_type, trame->sous_type );
