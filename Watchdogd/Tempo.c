@@ -45,7 +45,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.libelle,%s.groupe,%s.page,%s.name,"
-                "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off,"
+                "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
                 " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.type=%d ORDER BY %s.num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
@@ -137,7 +137,7 @@
     
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.libelle,%s.groupe,%s.page,%s.name,"
-                "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off,"
+                "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
                 " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.id_mnemo=%d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
