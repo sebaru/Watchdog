@@ -309,8 +309,14 @@
  static int Init_rfxcom ( void )
   { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 0x80, 0x08, 0x2B, 00, 00, 00, 00 };
-                                                           /* Allow only Oregon & ARC protocols & LaCrosse */
+    gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 0x80, 0x08, 0x26, 00, 00, 00, 00 };
+                                                                         /* 0x20 Oregon */
+                                                                         /* 0x08 HomEasy */
+                                                                         /* 0x04 AC */
+                                                                         /* 0x02 ARC */
+                                                                         /* 0x01 X10 */
+                                                                   /* 0x08 Lacrosse Frame */
+                                                             /* 0x80 Undecoded Frame */
     struct termios oldtio;
     int fd;
 
