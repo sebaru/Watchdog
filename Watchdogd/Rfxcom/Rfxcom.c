@@ -561,7 +561,9 @@
        module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0] & 0x03, TRUE, trame->data[1],
                                  TRUE, trame->data[2], TRUE, trame->data[3], FALSE, 0, FALSE, 0 );
        if (module)
-        { SEA( module->rfxcom.e_min, trame->data[5] );
+        { SE( module->rfxcom.e_min, trame->data[5] );
+          Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+                    "Processer_trame : Module found (%s), Setting E%03d=%d", module->rfxcom.libelle, module->rfxcom.e_min, trame->data[5] );
           module->date_last_view = Partage->top;
         }
        else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
