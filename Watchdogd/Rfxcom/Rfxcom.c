@@ -309,7 +309,7 @@
  static int Init_rfxcom ( void )
   { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 0x80, 0x08, 0x26, 00, 00, 00, 00 };
+    gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 0x80, 0x00, 0x26, 00, 00, 00, 00 };
                                                                          /* 0x20 Oregon */
                                                                          /* 0x08 HomEasy */
                                                                          /* 0x04 AC */
@@ -549,7 +549,7 @@
                       "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
                       trame->type, trame->type, trame->sous_type, trame->sous_type );
      }
-    else if (trame->type == 0x17 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
+    else if (trame->type == 0x11 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
      { struct MODULE_RFXCOM *module;
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "
