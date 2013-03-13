@@ -155,13 +155,13 @@
  char *Tdetail( int num )
   { static char chaine[90];
     snprintf( chaine, sizeof(chaine), "To be implemented" );
-/*    snprintf( chaine, sizeof(chaine), "T%03d  = %d : started = %s, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
-              Partage->Tempo_R[num].state, (Partage->Tempo_R[num].started ? "TRUE " : "FALSE"),
+    snprintf( chaine, sizeof(chaine), "T%03d  = %d : status = %s, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+              Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
               Partage->Tempo_R[num].date_on,
              (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
               Partage->Tempo_R[num].date_off,
              (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0)
-            );*/
+            );
     return( chaine );
   }
 
@@ -409,9 +409,12 @@
 
     if (tempo->status == TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
      { tempo->date_on = tempo->date_off = 0;
-       tempo->status = TEMPO_NOT_COUNTING;
+       tempo->status = TEMPO_WAIT_FOR_COND_OFF;
        tempo->state = FALSE;
      }
+
+    if (tempo->status == TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
+     { tempo->status = TEMPO_NOT_COUNTING; }
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */

@@ -80,6 +80,8 @@
                                           break;
                   case MNEMO_CPT_IMP    : Proto_editer_option_cpt_imp( option );
                                           break;
+                  case MNEMO_TEMPO      : Proto_editer_option_tempo( option );
+                                          break;
                 }
              }
             break;

@@ -466,6 +466,9 @@
                                                                                  /* Dans option_cpt_imp.c */
  extern void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_cpt_imp );
 
+                                                                                   /* Dans option_tempo.c */
+ extern void Proto_editer_option_tempo ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_tempo );
+
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
  extern void Begin_print (GtkPrintOperation *operation,
                           GtkPrintContext   *context,
