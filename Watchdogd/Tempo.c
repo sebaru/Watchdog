@@ -145,7 +145,7 @@
                 NOM_TABLE_TEMPO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
                 NOM_TABLE_TEMPO, NOM_TABLE_MNEMO, /* Where */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MNEMO, NOM_TABLE_DLS,
-                NOM_TABLE_MNEMO, id /* And */
+                NOM_TABLE_TEMPO, id /* And */
               );
 
     if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )

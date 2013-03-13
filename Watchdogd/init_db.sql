@@ -728,7 +728,7 @@ CREATE TABLE IF NOT EXISTS `tempo` (
   `delai_on` int(11) NOT NULL DEFAULT '0',
   `delai_off` tinyint(1) NOT NULL DEFAULT '0',
   `min_on` int(11) NOT NULL DEFAULT '0',
-  `min_off` int(11) NOT NULL DEFAULT '0',
+  `max_on` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
