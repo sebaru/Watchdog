@@ -48,7 +48,7 @@
                 "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
                 " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.type=%d ORDER BY %s.num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,
                 NOM_TABLE_TEMPO, NOM_TABLE_TEMPO, NOM_TABLE_TEMPO, NOM_TABLE_TEMPO,
                 NOM_TABLE_TEMPO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
                 NOM_TABLE_TEMPO, NOM_TABLE_MNEMO, /* Where */
@@ -140,7 +140,7 @@
                 "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
                 " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.id_mnemo=%d",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,
                 NOM_TABLE_TEMPO, NOM_TABLE_TEMPO, NOM_TABLE_TEMPO, NOM_TABLE_TEMPO,
                 NOM_TABLE_TEMPO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
                 NOM_TABLE_TEMPO, NOM_TABLE_MNEMO, /* Where */
