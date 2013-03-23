@@ -65,9 +65,9 @@ int erreur;                                                             /* Compt
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD T_CRENEAU T_DELAI_ON T_DELAI_OFF
+%token <val>    BI MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
 %token <val>    T_MSG ICONE CPT_H CPT_IMP EANA T_START
-%type  <val>    alias_bit type_tempo
+%type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
 %type  <val>    couleur
@@ -623,27 +623,10 @@ une_option:     MODE EGAL ENTIER
                    $$->type = RATIO;
                    $$->entier = $3;
                 }}
-                | T_TYPE EGAL type_tempo
-                {{ $$=New_option();
-                   $$->type = T_TYPE;
-                   $$->entier = $3;
-                }}
-                | T_DELAI_ON EGAL ENTIER
-                {{ $$=New_option();
-                   $$->type = T_DELAI_ON;
-                   $$->entier = $3;
-                }}
-                | T_DELAI_OFF EGAL ENTIER
-                {{ $$=New_option();
-                   $$->type = T_DELAI_OFF;
-                   $$->entier = $3;
-                }}
                 ;
 
 
 couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
-                ;
-type_tempo:     T_RETARD | T_CRENEAU
                 ;
 %%
 /**********************************************************************************************************/

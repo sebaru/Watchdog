@@ -87,11 +87,6 @@ blanc         [\t ]+
 "kaki"                     { Dls_lval.val = KAKI;        return KAKI;        }
  /************************************************* Options ************************************************/
 "mode"                     { Dls_lval.val = MODE;        return MODE;        }
-"type"                     { Dls_lval.val = T_TYPE;      return T_TYPE;      }
-"retard"                   { Dls_lval.val = T_RETARD;    return T_RETARD;    }
-"creneau"                  { Dls_lval.val = T_CRENEAU;   return T_CRENEAU;   }
-"delai_on"                 { Dls_lval.val = T_DELAI_ON;  return T_DELAI_ON;  }
-"delai_off"                { Dls_lval.val = T_DELAI_OFF; return T_DELAI_OFF; }
 "reset"                    { Dls_lval.val = RESET;       return RESET;       }
 "ratio"                    { Dls_lval.val = RATIO;       return RATIO;       }
 "color"                    { Dls_lval.val = COLOR;       return COLOR;       }

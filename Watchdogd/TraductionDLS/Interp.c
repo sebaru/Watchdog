@@ -253,24 +253,14 @@
 /**********************************************************************************************************/
  struct ACTION *New_action_tempo( int num, GList *options )
   { struct ACTION *action;
-    int taille, type, delai_on, delai_off;
-
-    type      = Get_option_entier( options, T_TYPE );
-    delai_on  = Get_option_entier( options, T_DELAI_ON  );
-    delai_off = Get_option_entier( options, T_DELAI_OFF );
-
-    if (type      == -1)        type = 0;                                                  /* type RETARD */
-    else if (type == T_RETARD)  type = 0;
-    else if (type == T_CRENEAU) type = 1;                                                 /* Type Creneau */
-    if (delai_on  == -1)        delai_on  = 0;
-    if (delai_off == -1)        delai_off = 0;
+    int taille;
 
     action = New_action();
     taille = 40;
     action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "ST(%d,1,%d,%d,%d);", num, type, delai_on, delai_off );
+    g_snprintf( action->alors, taille, "ST(%d,1);", num );
     action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "ST(%d,0,%d,%d,%d);", num, type, delai_on, delai_off );
+    g_snprintf( action->sinon, taille, "ST(%d,0);", num );
     return(action);
   }
 

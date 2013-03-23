@@ -349,7 +349,7 @@
 /* Entrée: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
- void ST( int num, int etat, int type, int delai_on, int delai_off )
+ void ST( int num, int etat )
   { struct TEMPO *tempo;
 
     if (num<0 || num>=NBR_TEMPO)
