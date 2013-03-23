@@ -154,8 +154,7 @@
 /**********************************************************************************************************/
  char *Tdetail( int num )
   { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "To be implemented" );
-    snprintf( chaine, sizeof(chaine), "T%03d  = %d : status = %s, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+    snprintf( chaine, sizeof(chaine), "T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
               Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
               Partage->Tempo_R[num].date_on,
              (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),

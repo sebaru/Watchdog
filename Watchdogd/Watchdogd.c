@@ -394,7 +394,7 @@
 
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
-     { printf("Warning, user %s not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
+     { printf("Warning, user '%s' not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
        exit(-1);
      }
     setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
