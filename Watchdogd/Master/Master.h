@@ -27,6 +27,7 @@
  
 #ifndef _MASTER_H_
  #define _MASTER_H_
+ #include <libsoup/soup.h>
 
  struct MASTER_CONFIG
   { struct LIBRAIRIE *lib;
@@ -37,6 +38,8 @@
     GSList *Slaves;                                                /* Leste des clients (slave) connectés */
     gint Fd_ecoute;                                                  /* File descriptor de l'ecoute admin */
     gint port;
+    GMainContext *context;
+    SoupServer *server;
  } Cfg_master;
 
 /*************************************** Définitions des prototypes ***************************************/

@@ -132,7 +132,7 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     if (plugins == NULL)
      { Info_new( Config.log, Config.log_all, LOG_INFO,
-                "Decharger_un_plugin_by_id: plugin %04d not found", plugin->plugindb.id );
+                "Decharger_un_plugin_by_id: plugin %04d not found", id );
      }
   }
 /**********************************************************************************************************/

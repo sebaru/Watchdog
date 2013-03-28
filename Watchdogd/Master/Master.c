@@ -29,12 +29,7 @@
  #include <sys/prctl.h>
  #include <string.h>
  #include <unistd.h>
- #include <sys/socket.h>
- #include <netinet/tcp.h>
- #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
- #include <sys/wait.h>
- #include <netinet/in.h>                                          /* Pour les structures d'entrées SOCKET */
- #include <fcntl.h>
+ #include <libsoup/soup.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -115,161 +110,16 @@
     Cfg_master.Liste_sortie = g_slist_prepend( Cfg_master.Liste_sortie, GINT_TO_POINTER(num_a) );
     pthread_mutex_unlock( &Cfg_master.lib->synchro );
   }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- static gint Activer_ecoute_slave ( void )
-  { struct sockaddr_in local;
-    gint opt, ecoute;
-
-    if ( (ecoute = socket ( AF_INET, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR, "Socket failure (%s)", strerror(errno) ); return(-1); }
-
-    opt = 1;
-    if ( setsockopt( ecoute, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE,
-                     (char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                "Set option failed (%s)", strerror(errno) );
-       return(-1);
-     }
-
-    opt = 16834;
-    if ( setsockopt( ecoute, SOL_SOCKET, SO_SNDBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                "SO_SNDBUF failed (%s)", strerror(errno) );
-       return(-1);
-     }
-    if ( setsockopt( ecoute, SOL_SOCKET, SO_RCVBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                "SO_RCVBUF failed (%s)", strerror(errno) );
-       return(-1);
-     }
-
-    opt = 1;
-    if ( setsockopt( ecoute, SOL_TCP, TCP_NODELAY,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                "TCP_NODELAY failed (%s)", strerror(errno) );
-       return(-1);
-     }
-
-    memset( &local, 0, sizeof(local) );
-    local.sin_family = AF_INET;
-    local.sin_addr.s_addr = htonl(INADDR_ANY);
-    local.sin_port = htons(Cfg_master.port);                  /* Attention: en mode network, pas host !!! */
-    if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                "Bind failure (%s)", strerror(errno) );
-       close(ecoute);
-       return(-1);
-     }
-
-    if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                "Listen failure (%s)", strerror(errno));
-       close(ecoute);
-       return(-1);
-     }
-    fcntl( ecoute, F_SETFL, O_NONBLOCK );        /* Mode non bloquant, ça aide pour une telle application */
-    Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO,
-              "Ecoute du port %d with socket %d", Config.port, ecoute );
-    return( ecoute );                                                            /* Tout s'est bien passé */
-  }
-/**********************************************************************************************************/
-/* Desactiver_ecoute_master: Ferme la socker fifo d'masteristration                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Desactiver_ecoute_slave ( void )
-  { close (Cfg_master.Fd_ecoute);
-    Cfg_master.Fd_ecoute = 0;
-    Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO, "Desactiver_ecoute_slave: socket disabled" );
-  }
-/**********************************************************************************************************/
-/* Deconnecter_un_slave: Ferme la socket master en parametre                                                  */
-/* Entrée: le client                                                                                      */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Deconnecter_un_slave ( struct CLIENT *client )
-  { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
-    Fermer_connexion( client->connexion );
-    Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO,
-              "Deconnecter_un_slave : connection closed with client %d", client->connexion->socket );
-    Cfg_master.Slaves = g_slist_remove ( Cfg_master.Slaves, client );
-    g_free(client);
-  }
-/**********************************************************************************************************/
-/* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
-/* Entrée: rien                                                                                           */
-/* Sortie: TRUE si un nouveau client est arrivé                                                           */
-/**********************************************************************************************************/
- static gboolean Accueillir_un_slave( void )
-  { struct CLIENT *client;
-    struct sockaddr_in distant;
-    guint taille_distant, id;
- 
-    taille_distant = sizeof(distant);
-    if ( (id=accept( Cfg_master.Fd_ecoute, (struct sockaddr *)&distant, &taille_distant )) != -1)         /* demande ?? */
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO,
-                 "Accueillir_un_slave: Connexion wanted. ID=%d", id );
-
-       client = g_try_malloc0( sizeof(struct CLIENT) );  /* On alloue donc une nouvelle structure cliente */
-       if (!client) { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                                "Accueillir_un_slave: Not enought memory to connect slave %d", id );
-                      close(id);
-                      return(FALSE);                                    /* On traite bien sûr les erreurs */
-                    }
-
-       client->connexion = Nouvelle_connexion( Config.log, id, Config.taille_bloc_reseau );
-
-       if (!client->connexion)
-        { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
-                   "Accueillir_un_slave: Not enought memory for %d", id );
-          close(id);
-          g_free( client );
-          return(FALSE);
-        }
-
-       Cfg_master.Slaves = g_slist_prepend( Cfg_master.Slaves, client );
-       Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO,
-                 "Accueillir_un_slave: Connexion granted to ID=%d", id );
-       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,         /* Envoi des infos internes */
-                     NULL, client->connexion->taille_bloc );
-       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
-                     NULL, 0 );
-
-       return(TRUE);
-     }
-    return(FALSE);
-  }
-/**********************************************************************************************************/
-/* Ecouter_slave: Ecoute ce que dis le client                                                             */
-/* Entrée: le client                                                                                      */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Ecouter_slave ( struct CLIENT *client )
-  { gint recu;
-
-    recu = Recevoir_reseau( client->connexion );
-    if (recu==RECU_OK)
-     { if ( Reseau_tag(client->connexion) == TAG_MASTER_SLAVE )
-        { switch ( Reseau_ss_tag(client->connexion) )
-           { default : Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_DEBUG,
-                                "Ecouter_slave: SSTAG unknown" );
-           }
-        } else
-        { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_DEBUG, "Ecouter_slave: Wrong TAG" ); }
-     }
-    else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
-     { switch( recu )
-        { case RECU_ERREUR_CONNRESET: Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_DEBUG,
-                                               "Ecouter_slave: Reset connexion" );
-                                      break;
-        }
-       Deconnecter_un_slave ( client );
-     }             
-  }
+static void
+Master_CB (SoupServer        *server,
+         SoupMessage       *msg, 
+         const char        *path,
+         GHashTable        *query,
+         SoupClientContext *client,
+         gpointer           user_data)
+{
+soup_message_set_status (msg, 0 ); /* On renvoie 0 all is good */
+}
 
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
@@ -277,9 +127,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_MESSAGE *msg;
-
-    prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
+  { prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
     memset( &Cfg_master, 0, sizeof(Cfg_master) );               /* Mise a zero de la structure de travail */
     Cfg_master.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
     Master_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
@@ -292,17 +140,24 @@
 
     if (!Cfg_master.enable)
      { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread not enable in config. Shuting Down %d", pthread_self() );
+                "Run_thread: Thread not enable in config. Shutting Down %d", pthread_self() );
        goto end;
      }
 
-    Cfg_master.Fd_ecoute = Activer_ecoute_slave ();
-    if ( Cfg_master.Fd_ecoute < 0 )
-     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_CRIT,
-              "Run_thread: Unable to open Socket -> Stop" );
+    Cfg_master.context = g_main_context_new ();
+    Cfg_master.server  = soup_server_new ( SOUP_SERVER_PORT, Cfg_master.port,
+                                           SOUP_SERVER_ASYNC_CONTEXT, Cfg_master.context,
+                                           NULL
+                                         );
+    if (!Cfg_master.server)
+     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: SoupServer creation error. Shutting Down %d", pthread_self() );
        goto end;
      }
-    Cfg_master.Slaves = NULL;                                             /* Initialisation des variables du thread */
+
+    soup_server_add_handler ( Cfg_master.server, "/set_internal_bit", Master_CB, NULL, NULL );
+    soup_server_run_async   ( Cfg_master.server );
+
     Cfg_master.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
     Abonner_distribution_message ( Master_Gerer_message );      /* Abonnement à la diffusion des messages */
@@ -325,11 +180,15 @@
           Cfg_master.lib->Thread_sigusr1 = FALSE;
         }
 
+       g_main_context_iteration ( Cfg_master.context, FALSE );
      }
 
-    Desactiver_ecoute_slave ();                                          /* Arret de l'ecoute du port TCP */
     Desabonner_distribution_sortie  ( Master_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
     Desabonner_distribution_message ( Master_Gerer_message );/* Desabonnement de la diffusion des messages */
+
+    soup_server_disconnect ( Cfg_master.server);
+    g_main_context_unref (Cfg_master.context );
+
 
 end:
     Master_Liberer_config();                                  /* Liberation de la configuration du thread */
