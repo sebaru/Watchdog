@@ -697,6 +697,27 @@ CREATE TABLE IF NOT EXISTS `onduleurs` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `slaves`
+--
+
+CREATE TABLE IF NOT EXISTS `slaves` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `enable` tinyint(1) NOT NULL DEFAULT '0',
+  `ea_min` int(11) NOT NULL DEFAULT '-1',
+  `ea_max` int(11) NOT NULL DEFAULT '-1',
+  `e_min` int(11) NOT NULL DEFAULT '-1',
+  `e_max` int(11) NOT NULL DEFAULT '-1',
+  `s_min` int(11) NOT NULL DEFAULT '-1',
+  `s_max` int(11) NOT NULL DEFAULT '-1',
+  `sa_min` int(11) NOT NULL DEFAULT '-1',
+  `sa_max` int(11) NOT NULL DEFAULT '-1',
+  `bit_comm` int(11) NOT NULL DEFAULT '0',
+  `libelle` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+--
 -- Structure de la table `rs485`
 --
 

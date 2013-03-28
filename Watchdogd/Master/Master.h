@@ -29,6 +29,27 @@
  #define _MASTER_H_
  #include <libsoup/soup.h>
 
+ #define NOM_TABLE_SLAVES  "slaves"
+
+ struct SLAVEDB
+  { guint id;                                                                    /* ID unique de la rs485 */
+    guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
+    gboolean enable;                                                            /* Module Start at boot ? */
+    gint ea_min, ea_max;
+    gint e_min, e_max;
+    gint s_min, s_max;
+    gint sa_min, sa_max;
+    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
+  };
+
+ struct SLAVE
+  { struct SLAVEDB slave;
+
+    gboolean started;                                                           /* Module Start at boot ? */
+    guint  nbr_query;
+    guint  last_request;
+  };
+
  struct MASTER_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
@@ -36,7 +57,6 @@
     GSList *Liste_message;                                         /* liste de struct MSGDB msg a envoyer */
     GSList *Liste_sortie;                                          /* liste de struct MSGDB msg a envoyer */
     GSList *Slaves;                                                /* Leste des clients (slave) connectés */
-    gint Fd_ecoute;                                                  /* File descriptor de l'ecoute admin */
     gint port;
     GMainContext *context;
     SoupServer *server;

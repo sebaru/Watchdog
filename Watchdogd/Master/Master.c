@@ -110,17 +110,136 @@
     Cfg_master.Liste_sortie = g_slist_prepend( Cfg_master.Liste_sortie, GINT_TO_POINTER(num_a) );
     pthread_mutex_unlock( &Cfg_master.lib->synchro );
   }
-static void
-Master_CB (SoupServer        *server,
-         SoupMessage       *msg, 
-         const char        *path,
-         GHashTable        *query,
-         SoupClientContext *client,
-         gpointer           user_data)
-{
-soup_message_set_status (msg, 0 ); /* On renvoie 0 all is good */
-}
+/**********************************************************************************************************/
+/* Recuperer_liste_id_slaveDB: Recupération de la liste des ids des slave                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static gboolean Recuperer_slaveDB ( struct DB *db )
+  { gchar requete[256];
 
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
+                "sa_min,sa_max,s_min,s_max"
+                " FROM %s ORDER BY num", NOM_TABLE_SLAVES );
+
+    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_slaveDB: Recupération de la liste des ids des slave                                */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static struct SLAVEDB *Recuperer_slaveDB_suite( struct DB *db )
+  { struct SLAVEDB *slave;
+
+    Recuperer_ligne_SQL (Config.log, db);                              /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( Config.log, db );
+       return(NULL);
+     }
+
+    slave = (struct SLAVEDB *)g_try_malloc0( sizeof(struct SLAVEDB) );
+    if (!slave) Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
+                          "Recuperer_slaveDB_suite: Erreur allocation mémoire" );
+    else
+     { memcpy( &slave->libelle, db->row[2], sizeof(slave->libelle) );
+       slave->id                = atoi(db->row[0]);
+       slave->bit_comm          = atoi(db->row[1]);
+       slave->enable            = atoi(db->row[3]);
+       slave->ea_min            = atoi(db->row[4]);
+       slave->ea_max            = atoi(db->row[5]);
+       slave->e_min             = atoi(db->row[6]);
+       slave->e_max             = atoi(db->row[7]);
+       slave->sa_min            = atoi(db->row[8]);
+       slave->sa_max            = atoi(db->row[9]);
+       slave->s_min             = atoi(db->row[10]);
+       slave->s_max             = atoi(db->row[11]);
+     }
+    return(slave);
+  }
+/**********************************************************************************************************/
+/* Charger_tous_slave: Requete la DB pour charger les modules et les bornes slave                         */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static gboolean Charger_tous_slave ( void  )
+  { struct DB *db;
+
+    db = Init_DB_SQL( Config.log );
+    if ( !db )
+     { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_WARNING, "Charger_tous_slave: Database Connection Failed" );
+       return(-1);
+     }
+
+/********************************************** Chargement des modules ************************************/
+    if ( ! Recuperer_slaveDB( db ) )
+     { Libere_DB_SQL( Config.log, &db );
+       return(FALSE);
+     }
+
+    Cfg_master.Slaves = NULL;
+    for ( ; ; )
+     { struct SLAVE *module;
+       struct SLAVEDB *slave;
+
+       slave = Recuperer_slaveDB_suite( db );
+       if (!slave) break;
+
+       module = (struct SLAVE *)g_try_malloc0( sizeof(struct SLAVE) );
+       if (!module)                                                   /* Si probleme d'allocation mémoire */
+        { Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_ERR,
+                    "Charger_tous_slave: Erreur allocation mémoire struct SLAVE" );
+          g_free(slave);
+          Libere_DB_SQL( Config.log, &db );
+          return(FALSE);
+        }
+       memcpy( &module->slave, slave, sizeof(struct SLAVEDB) );
+       if (module->slave.enable) module->started = TRUE;          /* Si enable at boot... et bien Start ! */
+       g_free(slave);
+                                                                        /* Ajout dans la liste de travail */
+       pthread_mutex_lock ( &Cfg_master.lib->synchro );
+       Cfg_master.Slaves = g_slist_prepend ( Cfg_master.Slaves, module );
+       pthread_mutex_unlock ( &Cfg_master.lib->synchro );
+
+       Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO,
+                 "Charger_tous_slave: id = %d, enable = %d", module->slave.id, module->slave.enable );
+     }
+    pthread_mutex_lock ( &Cfg_master.lib->synchro );
+    Info_new( Config.log, Cfg_master.lib->Thread_debug, LOG_INFO,
+              "Charger_tous_slave: %03d module SLAVES found  !", g_slist_length(Cfg_master.Slaves) );
+    pthread_mutex_unlock ( &Cfg_master.lib->synchro );
+
+    Libere_DB_SQL( Config.log, &db );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_tous_slave ( void  )
+  { struct SLAVE *module;
+
+    pthread_mutex_lock ( &Cfg_master.lib->synchro );
+    while ( Cfg_master.Slaves )
+     { module = (struct SLAVE *)Cfg_master.Slaves->data;
+       Cfg_master.Slaves = g_slist_remove ( Cfg_master.Slaves, module );
+       g_free(module);
+     }
+    pthread_mutex_unlock ( &Cfg_master.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Master Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)             */
+/* Entrées : le contexte, le message, l'URL                                                               */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Master_CB (SoupServer        *server,  SoupMessage       *msg, 
+                        const char        *path,  GHashTable        *query,
+                        SoupClientContext *client, gpointer           user_data)
+  {
+    soup_message_set_status (msg, 0 ); /* On renvoie 0 all is good */
+  }  
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
 /* Entrée: une structure LIBRAIRIE                                                                        */
@@ -155,14 +274,14 @@ soup_message_set_status (msg, 0 ); /* On renvoie 0 all is good */
        goto end;
      }
 
+    Charger_tous_slave();
     soup_server_add_handler ( Cfg_master.server, "/set_internal_bit", Master_CB, NULL, NULL );
     soup_server_run_async   ( Cfg_master.server );
-
-    Cfg_master.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
     Abonner_distribution_message ( Master_Gerer_message );      /* Abonnement à la diffusion des messages */
     Abonner_distribution_sortie  ( Master_Gerer_sortie );        /* Abonnement à la diffusion des sorties */
 
+    Cfg_master.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
     while(Cfg_master.lib->Thread_run == TRUE)                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
@@ -189,6 +308,7 @@ soup_message_set_status (msg, 0 ); /* On renvoie 0 all is good */
     soup_server_disconnect ( Cfg_master.server);
     g_main_context_unref (Cfg_master.context );
 
+    Decharger_tous_slave();
 
 end:
     Master_Liberer_config();                                  /* Liberation de la configuration du thread */
