@@ -25,8 +25,6 @@
  * Boston, MA  02110-1301  USA
  */
 
- #include <openssl/ssl.h>
- #include <openssl/err.h>
  #include <sys/prctl.h>
  #include <unistd.h>
  #include <string.h>
@@ -44,9 +42,6 @@
 
  #include "watchdogd.h"
 
- gint Socket_ecoute;                                         /* Socket de connexion (d'écoute) du serveur */
-
- extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
  struct CONFIG Config;                   /* Parametre de configuration du serveur via /etc/watchdogd.conf */
  struct PARTAGE *Partage;                                    /* Accès aux données partagées des processes */
 
@@ -196,18 +191,17 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Traiter_sigusr1 ( void )
-  { guint nbr_i, nbr_msg_on, nbr_msg_off, nbr_msg_repeat;
+  { guint nbr_i, nbr_msg, nbr_msg_repeat;
     gchar chaine[256];
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     nbr_i          = g_slist_length( Partage->com_msrv.liste_i );
-    nbr_msg_off    = g_slist_length( Partage->com_msrv.liste_msg_off );    /* Recuperation du numero de i */
-    nbr_msg_on     = g_slist_length( Partage->com_msrv.liste_msg_on );     /* Recuperation du numero de i */
+    nbr_msg        = g_slist_length( Partage->com_msrv.liste_msg );        /* Recuperation du numero de i */
     nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );            /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG_ON, %d MSG_OFF, %d MSG_REPEAT",
-                nbr_i, nbr_msg_on, nbr_msg_off, nbr_msg_repeat );
+    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT",
+                nbr_i, nbr_msg, nbr_msg_repeat );
     Info_new( Config.log, Config.log_all, LOG_INFO, chaine );
   }
 /**********************************************************************************************************/
@@ -239,12 +233,9 @@
        Gerer_arrive_Axxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
-        { guint i;
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: RELOAD" );
+        { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: RELOAD" );
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
-          for (i=0; i<Config.max_serveur; i++)
-           { Partage->Sous_serveur[i].Thread_reload = TRUE; }
 
           Lire_config( NULL );                              /* Lecture sur le fichier /etc/watchdogd.conf */
           Print_config();
@@ -256,15 +247,11 @@
        if (Partage->com_msrv.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
         { struct LIBRAIRIE *lib;
           GSList *liste;
-          guint i;
 
           Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: SIGUSR1" );
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR1: jeton to server id %d", Partage->jeton );
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_admin.Thread_sigusr1     = TRUE;
-          for (i=0; i<Config.max_serveur; i++)
-           { Partage->Sous_serveur[i].Thread_sigusr1 = TRUE; }
 
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
@@ -287,17 +274,17 @@
        if (cpt_1_minute < Partage->top)                                   /* Update DB toutes les minutes */
         { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
            { Checker_scenario( cpt ); }
-          Gerer_manque_process();                            /* Detection du manque de serveurs en ecoute */
           Gerer_message_repeat(db);
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
+#ifdef bouh
        if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
         { Camera_check_motion( Config.log, db );
-          Asterisk_check_call( Config.log, db );
-          Gerer_jeton();                                       /* Don du jeton au serveur le moins chargé */
+/*          Asterisk_check_call( Config.log, db );*/
           cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
         }
+#endif
 
        if (Partage->com_msrv.reset_motion_detect)
         { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Reset_motion_detect" );
@@ -327,9 +314,7 @@
     gchar *chaine;
     FILE *fd;
     struct poptOption Options[]= 
-     { { "port", 'p',       POPT_ARG_INT,
-         &port,             0, "Port to listen to", "PORT" },
-       { "foreground", 'f', POPT_ARG_NONE,
+     { { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
        { "initrsa",    'r', POPT_ARG_NONE,
          &initrsa,          0, "RSA initialisation", NULL },
@@ -357,7 +342,6 @@
     home   = NULL;
     file   = NULL;
     run_as = NULL;
-    port           = -1;
     max_client     = -1;
     log_level      = -1;
     initrsa        = 0;
@@ -385,9 +369,7 @@
     Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
 
     if (single)          Config.single      = TRUE;                        /* Demarrage en mode single ?? */
-    if (port!=-1)        Config.port        = port;                    /* Priorite à la ligne de commande */
     if (log_level!=-1)   Config.log_level   = log_level;
-    if (max_client!=-1)  Config.max_client  = max_client;
     if (compil)          Config.compil      = 1;               /* Compilation de tous les plugins D.L.S ? */
     if (home)            g_snprintf( Config.home,   sizeof(Config.home),   "%s", home );
     if (run_as)          g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
@@ -401,61 +383,6 @@
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
-
-    if (initrsa)
-     { RSA *rsa;
-
-       nbr_bytes = Config.taille_clef_rsa>>3;
-       chaine = g_try_malloc0( nbr_bytes );
-       if (!chaine)
-        { printf( " Not enough memory\n" );
-          exit(EXIT_OK);
-        }
-
-       rsa = RSA_generate_key( Config.taille_clef_rsa, 65537, NULL, NULL );
-       if (!rsa)
-        { printf( " Could not generate RSA keys: %s\n", ERR_error_string( ERR_get_error(), NULL ) );
-        }
-       else 
-        { printf( " RSA keys generation OK\n" );
-          fd = fopen( FICHIER_CLEF_SEC_RSA, "w+" );
-          if (!fd)
-           { printf( "Could not open file %s\n", FICHIER_CLEF_SEC_RSA ); }
-          else
-           { gint ok;
-             ok = PEM_write_RSAPrivateKey( fd, rsa, NULL, NULL, 0, NULL, NULL );
-             if (!ok) printf( "Could not write into %s\n", FICHIER_CLEF_SEC_RSA );
-             fclose(fd);
-           }
-
-          fd = fopen( FICHIER_CLEF_PUB_RSA, "w+" );
-          if (!fd)
-           { printf( "Could not open file %s\n", FICHIER_CLEF_PUB_RSA ); }
-          else
-           { gint ok;
-             ok = PEM_write_RSAPublicKey( fd, rsa );
-             if (!ok) printf( "Could not write into %s\n", FICHIER_CLEF_PUB_RSA );
-             fclose(fd);
-           }
-        }
-       g_free(chaine);
-       exit(EXIT_OK);
-     }
-     
-    Config.rsa = NULL;
-    fd = fopen( FICHIER_CLEF_PUB_RSA, "r" );
-    if (!fd)
-     { printf( "Could not open file %s\n", FICHIER_CLEF_PUB_RSA ); exit(EXIT_OK); }
-    Config.rsa = PEM_read_RSAPublicKey( fd, NULL, NULL, NULL );
-    if (!Config.rsa) printf("Unable to load %s\n", FICHIER_CLEF_PUB_RSA );
-    fclose(fd); 
-
-    fd = fopen( FICHIER_CLEF_SEC_RSA, "r" );
-    if (!fd)
-     { printf( "Could not open file %s\n", FICHIER_CLEF_SEC_RSA ); exit(EXIT_OK); }
-    Config.rsa = PEM_read_RSAPrivateKey( fd, &Config.rsa, NULL, NULL );
-    if (!Config.rsa) printf("Unable to load %s\n", FICHIER_CLEF_SEC_RSA );
-    fclose(fd); 
 
     return(fg);
   }
@@ -511,12 +438,6 @@
     Info_new( Config.log, Config.log_all, LOG_NOTICE, "Start" );
     Print_config();
 
-    Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
-    if ( Socket_ecoute<0 )            
-     { Info_new( Config.log, Config.log_all, LOG_CRIT, "Network down, foreign connexions disabled" );
-       return(EXIT_OK);
-     }
-
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
@@ -532,8 +453,6 @@
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
 
-       Partage->jeton            = -1;                           /* Initialisation de la mémoire partagée */
-       
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
@@ -542,12 +461,6 @@
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
  
-       Partage->Sous_serveur = &Partage->ss_serveur;                 /* Initialisation du pointeur global */
-       for (i=0; i<Config.max_serveur; i++)
-        { memset( &Partage->Sous_serveur[i], 0, sizeof(struct SOUS_SERVEUR) );
-          pthread_mutex_init( &Partage->Sous_serveur[i].synchro, &attr );
-        }
-
        sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
@@ -558,12 +471,6 @@
         } else Info_new( Config.log, Config.log_all, LOG_INFO, "Import => pas de clear histo" );
 
        Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
-
-       if (Config.ssl_crypt) { Ssl_ctx = Init_ssl();                                /* Initialisation SSL */
-                               if (!Ssl_ctx)
-                                { Info_new( Config.log, Config.log_all, LOG_ERR, "Init ssl failed" ); }
-                             }
-                        else { Ssl_ctx = NULL; }
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
@@ -613,7 +520,6 @@
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
        Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
        Decharger_librairies();
-       if (Config.ssl_crypt) SSL_CTX_free( Ssl_ctx );                               /* Libération mémoire */
      }
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
@@ -621,13 +527,8 @@
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
-    for (i=0; i<Config.max_serveur; i++)
-     { pthread_mutex_destroy( &Partage->Sous_serveur[i].synchro ); }
 
     close(fd_lock);                       /* Fermeture du FileDescriptor correspondant au fichier de lock */
-
-    if (Socket_ecoute>0) close(Socket_ecoute);
-    if (Config.rsa) RSA_free( Config.rsa );
 
     if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();       /* Tente d'exporter les données */
     else { Info_new( Config.log, Config.log_all, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );

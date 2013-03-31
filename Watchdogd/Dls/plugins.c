@@ -29,9 +29,19 @@
  #include <string.h>
  #include <stdio.h>
  #include <dlfcn.h>
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <sys/file.h>                                            /* Gestion des verrous sur les fichiers */
+ #include <sys/wait.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
+
+ #ifndef REP_INCLUDE_GLIB
+ #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
+ #endif
 
 /**********************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                          */
@@ -201,7 +211,7 @@
           g_free(plugin);
 
                                                                       /* Si option "compil" au demarrage" */
-          if (Config.compil == 1) Compiler_source_dls( NULL, dls->plugindb.id );
+          if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id );
           if (Charger_un_plugin( dls )==TRUE)
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
         } while ( TRUE );
@@ -235,5 +245,102 @@
        plugins = plugins->next;
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/**********************************************************************************************************/
+/* Proto_compiler_source_dls: Compilation de la source DLS                                                */
+/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ gint Compiler_source_dls( gboolean new, gboolean reset, gint id )
+  { gint retour;
+
+    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+             "THRCompil: Compiler_source_dls: Compilation module DLS %d", id );
+    retour = Traduire_DLS( Config.log, new, id );
+    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+             "THRCompil: Compiler_source_dls: fin traduction %d", retour );
+
+    if (retour == TRAD_DLS_ERROR_FILE)                            /* Retour de la traduction D.L.S vers C */
+     { return( DLS_COMPIL_ERROR_LOAD_SOURCE );
+/*       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+               "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S %d", id );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open file for compilation ID %d", id );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );*/
+     }
+
+    if ( (retour == TRAD_DLS_ERROR || retour == TRAD_DLS_WARNING) )
+     { gint id_fichier;
+       gchar log[20];
+
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+               "THRCompil: Compiler_source_dls: envoi erreur/warning Traduction D.L.S %d", id );
+       g_snprintf( log, sizeof(log), "%d.log", id );
+
+       id_fichier = open( log, O_RDONLY, 0 );
+       if (id_fichier<0)
+        { return(DLS_COMPIL_ERROR_LOAD_LOG);
+/*          g_snprintf( erreur.message, sizeof(erreur.message), "Impossible d'ouvrir le\nfichier de log de compilation" );
+          Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );*/
+        }
+       else { int nbr_car;
+              nbr_car = 0; 
+              /*while ( (nbr_car = read (id_fichier, erreur.message + index_buffer_erreur,
+                                       sizeof(erreur.message)-1-index_buffer_erreur )) > 0 )
+               { index_buffer_erreur+=nbr_car; }
+              close(id_fichier);*/
+            }
+     }
+
+    if (retour == TRAD_DLS_WARNING || retour == TRAD_DLS_OK)
+     { gint pidgcc;
+       pidgcc = fork();
+       if (pidgcc<0)
+        { struct CMD_GTK_MESSAGE erreur;
+          Info_new( Config.log, Config.log_all, LOG_WARNING,
+                   "THRCompilFils: Compiler_source_dls: envoi erreur Fork GCC %d", id );
+          return(DLS_COMPIL_ERROR_FORK_GCC);
+/*           if (client)
+           { g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
+             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(erreur) );
+           }*/
+        }
+       else if (!pidgcc)
+        { struct CMD_GTK_MESSAGE erreur;
+          gchar source[80], cible[80];
+          g_snprintf( source, sizeof(source), "%d.c", id );
+          g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
+          execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
+                  "-Wall", "-ldls", source, "-fPIC", "-o", cible, NULL );
+          Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
+          _exit(0);
+        }
+
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+               "THRCompil: Proto_compiler_source_dls: Waiting for gcc to finish pid %d", pidgcc );
+       wait4(pidgcc, NULL, 0, NULL );
+       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+               "THRCompil: Proto_compiler_source_dls: gcc is down, OK %d", pidgcc );
+
+       if (reset)
+        { pthread_mutex_lock( &Partage->com_dls.synchro );             /* Demande le reset du plugin à D.L.S */
+          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                                                GINT_TO_POINTER(id) );
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
+        }
+
+       Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompil: Compiler_source_dls: end of %d", id );
+       if (retour == TRAD_DLS_WARNING)
+        { return( DLS_COMPIL_OK_WITH_WARNINGS );
+          /*g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
+                      "\n -> Compilation OK with Warnings\nReset plugin OK" );*/
+        }
+       else
+        { return( DLS_COMPIL_OK );
+         /* g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,
+                      "\n -> Compilation OK\nReset plugin OK" );*/
+        }
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

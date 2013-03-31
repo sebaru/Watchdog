@@ -33,7 +33,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_effacer_entree: Retrait du entree en parametre                                                   */
 /* Entrée: le client demandeur et le entree en question                                                   */
@@ -95,7 +95,7 @@
     courbe = (struct CMD_TYPE_COURBE *)g_try_malloc0( sizeof( struct CMD_TYPE_COURBE ) );
     if (!courbe)
      { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_courbe_thread: Pb d'allocation memoire" );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_courbe_thread: Pb d'allocation memoire" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -105,10 +105,10 @@
     memcpy ( courbe, &rezo_courbe, sizeof( struct CMD_TYPE_COURBE ) );
         
 /******************************************** Préparation structure d'envoi *******************************/
-    envoi_courbe = (struct CMD_START_COURBE *)g_try_malloc0( Config.taille_bloc_reseau );
+    envoi_courbe = (struct CMD_START_COURBE *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
     if (!envoi_courbe)
      { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_courbe_thread: Pb d'allocation memoire envoi_courbe" );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_courbe_thread: Pb d'allocation memoire envoi_courbe" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
@@ -123,7 +123,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_courbe_thread: Unable to open database (dsn)" );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_courbe_thread: Unable to open database (dsn)" );
        g_free(courbe);
        g_free(envoi_courbe);
        pthread_exit( NULL );
@@ -135,8 +135,8 @@
 /******************************************** Préparation des buffers d'envoi *****************************/
     date = time(NULL);                                                    /* On recupere la date actuelle */
 
-    Info_new( Config.log, Config.log_all, LOG_DEBUG, "Proto_ajouter_courbe_thread: début d'envoi" );
-    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_ajouter_courbe_thread: début d'envoi" );
+    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
     Recuperer_archDB ( Config.log, db, courbe->type, courbe->num, (date - COURBE_NBR_HEURE_ARCHIVE*3600), date );
     do
      { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend le premier enreg. */
@@ -150,7 +150,7 @@
        if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
         { Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_START_COURBE, (gchar *)envoi_courbe,
                         sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "Proto_ajouter_courbe_thread: taille donnees=%d", envoi_courbe->taille_donnees );
           envoi_courbe->taille_donnees = 0;
         }

@@ -37,9 +37,8 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_effacer_message_mp3: Suppression du mp3 associé à un message avant reception du nouveau          */
 /* Entrée: le client demandeur et le numéro du fichier mp3                                                */
@@ -66,7 +65,7 @@
        g_snprintf( chaine, sizeof(chaine), "Son/%d.mp3", msg_mp3->num );
        id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
        if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                     "Proto_valider_message_mp3: append impossible for %d", msg_mp3->num );
           return;
         }
@@ -226,11 +225,11 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGES)) / sizeof(struct CMD_TYPE_MESSAGE);
-    msgs = (struct CMD_TYPE_MESSAGES *)g_try_malloc0( Config.taille_bloc_reseau );    
+    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MESSAGES)) / sizeof(struct CMD_TYPE_MESSAGE);
+    msgs = (struct CMD_TYPE_MESSAGES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
     if (!msgs)
      { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Config.log_all, LOG_ERR,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                  "Envoyer_messages_tag: not enought memory" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

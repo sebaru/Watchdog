@@ -32,8 +32,8 @@
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Envoyer_entreeANA_tag : Envoie les entreANA au client. Attention, c'est un thread !                    */
 /* Entrée: Néant                                                                                          */

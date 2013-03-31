@@ -85,25 +85,18 @@
 
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
           Admin_write ( client, chaine );
-          Compiler_source_dls ( NULL, dls->plugindb.id );
+          Compiler_source_dls ( FALSE, TRUE, dls->plugindb.id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
           Admin_write ( client, chaine );
-
-          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                                                GINT_TO_POINTER(id) );
           liste_dls = liste_dls->next;
         }
        pthread_mutex_unlock( &Partage->com_dls.synchro );
      } else
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
           Admin_write ( client, chaine );
-          Compiler_source_dls ( NULL, id );
+          Compiler_source_dls ( FALSE, TRUE, id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
           Admin_write ( client, chaine );
-          pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Lock du mutex */
-          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                                                GINT_TO_POINTER(id) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );    
         }
   }
 /**********************************************************************************************************/

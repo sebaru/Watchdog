@@ -32,8 +32,8 @@
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_editer_option_tempo: Le client desire editer les options d'une tempo                             */
 /* Entrée: le client demandeur et le entree en question                                                   */
@@ -396,11 +396,11 @@
     g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d mnemos", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
-    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMONIQUE);
-    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Config.taille_bloc_reseau );    
+    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMONIQUE);
+    mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Config.log_all, LOG_ERR,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                  "Envoyer_mnemoniques_tag: Pb d'allocation memoire mnemos" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

@@ -8,15 +8,14 @@ SUBDIRS = Include Serveur Dls TraductionDLS Utilisateur Synoptiques Archive \
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
-                    ecoute.c shm.c Config.c \
-                    db.c ssl.c Mnemonique.c Message.c \
+                    shm.c Config.c \
+                    db.c Mnemonique.c Message.c \
 		    Compteur_horaire.c Compteur_impulsion.c \
 		    Icones.c classe.c Scenario.c \
 		    EntreeANA.c Tempo.c Histo.c Histo_hard.c Camera.c \
                     distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c 
 
-Watchdogd_LDADD   = Serveur/libserveur.la \
-		    Dls/libdls.la \
+Watchdogd_LDADD   = Dls/libdls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Archive/libarchive.la \
 		    Admin/libadmin.la \

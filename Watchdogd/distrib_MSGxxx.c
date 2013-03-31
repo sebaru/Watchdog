@@ -38,7 +38,7 @@
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
+ void Abonner_distribution_message ( void (*Gerer_message) (guint num) )
   { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
     Partage->com_msrv.Liste_abonne_msg = g_slist_prepend( Partage->com_msrv.Liste_abonne_msg, Gerer_message );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
@@ -48,7 +48,7 @@
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
+ void Desabonner_distribution_message ( void (*Gerer_message) (guint num) )
   { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
     Partage->com_msrv.Liste_abonne_msg = g_slist_remove( Partage->com_msrv.Liste_abonne_msg, Gerer_message );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
@@ -58,20 +58,15 @@
 /* Entrée : le message a envoyer                                                                          */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_message_aux_abonnes ( struct CMD_TYPE_MESSAGE *msg )
+ static void Envoyer_message_aux_abonnes ( guint num )
   { GSList *liste;
 
     pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
     liste = Partage->com_msrv.Liste_abonne_msg;
     while (liste)                                                              /* Pour chacun des abonnes */
-     { void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg);
-       struct CMD_TYPE_MESSAGE *dup_msg;
-       dup_msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0(sizeof(struct CMD_TYPE_MESSAGE));
-       if (dup_msg)
-        { Gerer_message = liste->data;
-          memcpy ( dup_msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
-          Gerer_message (dup_msg);
-        }
+     { void (*Gerer_message) (guint num);
+       Gerer_message = liste->data;
+       Gerer_message ( num );
        liste = liste->next;
      }
     pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
@@ -81,8 +76,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_message_repeat ( struct DB *Db_watchdog )
-  { struct CMD_TYPE_MESSAGE *msg;
-    GSList *liste;
+  { GSList *liste;
     gint num;
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -91,10 +85,11 @@
      { num = GPOINTER_TO_INT(liste->data);                               /* Recuperation du numero de msg */
 
        if (Partage->g[num].next_repeat <= Partage->top)
-        { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
-          Envoyer_message_aux_abonnes ( msg );
-          g_free(msg);
+        { Envoyer_message_aux_abonnes ( num );
+#warning To Clean !!
+#ifdef bouh
           Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
+#endif
         }
        liste = liste->next;
      }
@@ -108,6 +103,7 @@
   { struct CMD_TYPE_HISTO *new_histo;
     struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
+    struct timeval tv;
 
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
@@ -121,9 +117,6 @@
        return;
      }
 
-/********************************************* Envoi du message aux librairies abonnées *******************/
-    Envoyer_message_aux_abonnes ( msg );
-
 /***************************************** Envoi de SMS/AUDIO le cas echeant ******************************/
     if (msg->time_repeat) 
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -133,51 +126,19 @@
        Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                   /* En minutes */
      }
 /***************************** Création de la structure interne de stockage *******************************/   
-    new_histo = (struct CMD_TYPE_HISTO *) g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
-    if (new_histo)
-     { struct timeval tv;
-       guint i;
-       gettimeofday( &tv, NULL );
-       new_histo->date_create_sec  = tv.tv_sec;
-       new_histo->date_create_usec = tv.tv_usec;
-       new_histo->type             = msg->type;
-       new_histo->num_syn          = msg->num_syn;
-       new_histo->id               = msg->num;
-       memcpy( &new_histo->libelle, msg->libelle, sizeof(msg->libelle) );
-       memcpy( &new_histo->groupe,  msg->groupe,  sizeof(msg->groupe ) );
-       memcpy( &new_histo->page,    msg->page,    sizeof(msg->page   ) );
+    gettimeofday( &tv, NULL );
 
-/********************************************* Envoi du message aux sous serveurs *************************/
-       for (i=0; i<Config.max_serveur; i++)
-        { struct CMD_TYPE_HISTO *histo_ssrv;
-          if (Partage->Sous_serveur[i].Thread_run == TRUE)
-           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
-             if (histo_ssrv)
-              { memcpy ( histo_ssrv, new_histo, sizeof(struct CMD_TYPE_HISTO) );               /* Recopie */
-                pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-                Partage->Sous_serveur[i].new_histo = g_list_append ( Partage->Sous_serveur[i].new_histo,
-                                                                     histo_ssrv );
-                pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-              }
-             else
-              { Info_new( Config.log, Config.log_all, LOG_ERR,
-                         "Gerer_arrive_message_dls_on: not enought memory to handle %03d", msg->num ); }
-           }
-        }
+    memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );                       /* Ajout dans la DB */
+    memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
+    histo.date_create_sec  = tv.tv_sec;
+    histo.date_create_usec = tv.tv_usec;
+    histo.date_fixe = 0;
 
-       memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );                    /* Ajout dans la DB */
-       memset( &histo.nom_ack, 0, sizeof(histo.nom_ack) );
-       histo.date_create_sec  = new_histo->date_create_sec;
-       histo.date_create_usec = new_histo->date_create_usec;
-       histo.date_fixe = 0;
+    Ajouter_histoDB( Config.log, Db_watchdog, &histo );                            /* Si ajout dans DB OK */
 
-       Ajouter_histoDB( Config.log, Db_watchdog, &histo );                         /* Si ajout dans DB OK */
-       g_free (new_histo);
-     }
-    else
-     { Info_new( Config.log, Config.log_all, LOG_ERR, 
-               "Gerer_arrive_message_dls_on: Not enought memory for MSG%03d", num );
-     }
+/********************************************* Envoi du message aux librairies abonnées *******************/
+    Envoyer_message_aux_abonnes ( num );
+
     g_free( msg );                                                 /* On a plus besoin de cette reference */
   }
 /**********************************************************************************************************/
@@ -196,6 +157,9 @@
                                                           GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
+/********************************************* Envoi du message aux librairies abonnées *******************/
+    Envoyer_message_aux_abonnes ( num );
+
     histo = Rechercher_histoDB( Config.log, Db_watchdog, num );
     if (!histo) return;
 
@@ -204,63 +168,28 @@
     Ajouter_histo_hardDB( Config.log, Db_watchdog, &histo_hard );
     g_free(histo);
 
-    del_histo = (struct CMD_TYPE_HISTO *) g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
-    if (del_histo)
-     { del_histo->id = num;
-
-       for (i=0; i<Config.max_serveur; i++)
-        { struct CMD_TYPE_HISTO *histo_ssrv;
-          if (Partage->Sous_serveur[i].Thread_run == TRUE)
-           { histo_ssrv = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
-             if (histo_ssrv)
-              { memcpy ( histo_ssrv, del_histo, sizeof(struct CMD_TYPE_HISTO) );               /* Recopie */
-                pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-                Partage->Sous_serveur[i].del_histo = g_list_append ( Partage->Sous_serveur[i].del_histo,
-                                                                     histo_ssrv );
-                pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-              }
-             else
-              { Info_new( Config.log, Config.log_all, LOG_ERR,
-                         "Gerer_arrive_message_dls_off: not enough memory" ); }
-           }
-        }
-
-       Retirer_histoDB( Config.log, Db_watchdog, del_histo );
-       g_free (del_histo);
-     }
-    else
-     { Info_new( Config.log, Config.log_all, LOG_ERR, 
-                "Gerer_arrive_message_dls_off: Not enought memory for MSG%03d", num );
-     }
+    Retirer_histoDB( Config.log, Db_watchdog, num );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog )
-  { gint num;
+  { gint num, val;
 
-    if (Partage->com_msrv.liste_msg_off)                        /* Priorité à la disparition des messages */
+    if (Partage->com_msrv.liste_msg)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_off->data);     /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_msg_off = g_slist_remove ( Partage->com_msrv.liste_msg_off,
-                                                          GINT_TO_POINTER(num) );
+       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg->data);         /* Recuperation du numero de msg */
+       val = Partage->g[num].etat;
+       Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg,
+                                                      GINT_TO_POINTER(num) );
        Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                "Gerer_arrive_message_dls: Handle MSG%03d=0, Reste a %d a traiter",
-               num, g_slist_length(Partage->com_msrv.liste_msg_off) );
+                "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
+               num, val, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
-     }
-    else if (Partage->com_msrv.liste_msg_on)
-     { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg_on->data);      /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_msg_on = g_slist_remove ( Partage->com_msrv.liste_msg_on,
-                                                         GINT_TO_POINTER(num) );
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
-                "Gerer_arrive_message_dls: Handle MSG%03d=1, Reste a %d a traiter",
-               num, g_slist_length(Partage->com_msrv.liste_msg_on) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
+
+            if (val == 0) Gerer_arrive_MSGxxx_dls_off( Db_watchdog, num );
+       else if (val == 1) Gerer_arrive_MSGxxx_dls_on( Db_watchdog, num );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

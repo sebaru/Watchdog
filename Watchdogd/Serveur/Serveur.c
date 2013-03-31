@@ -47,9 +47,70 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 
- extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
+/**********************************************************************************************************/
+/* Ssrv_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Ssrv_Lire_config ( void )
+  { gchar *chaine;
+    GKeyFile *gkf;
 
+    gkf = g_key_file_new();
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Ssrv_Lire_config : unable to load config file %s", Config.config_file );
+       return;
+     }
+                                                                               /* Positionnement du debug */
+    Cfg_ssrv.lib->Thread_debug = g_key_file_get_boolean ( gkf, "SERVER", "debug", NULL ); 
+                                                                 /* Recherche des champs de configuration */
+
+/********************************************* Partie SERVER **********************************************/
+    Cfg_ssrv.ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
+
+    Cfg_ssrv.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
+    if (!Cfg_ssrv.port) Cfg_ssrv.port = DEFAUT_PORT;
+
+    Cfg_ssrv.max_client         = g_key_file_get_integer ( gkf, "SERVER", "max_client", NULL );
+    if (!Cfg_ssrv.max_client) Cfg_ssrv.max_client = DEFAUT_MAX_CLIENT;
+
+    Cfg_ssrv.min_serveur        = g_key_file_get_integer ( gkf, "SERVER", "min_serveur", NULL );
+    if (!Cfg_ssrv.min_serveur) Cfg_ssrv.min_serveur = DEFAUT_MIN_SERVEUR;
+
+    Cfg_ssrv.max_serveur        = g_key_file_get_integer ( gkf, "SERVER", "max_serveur", NULL );
+    if (!Cfg_ssrv.max_serveur) Cfg_ssrv.max_serveur = DEFAUT_MAX_SERVEUR;
+
+    Cfg_ssrv.max_inactivite     = g_key_file_get_integer ( gkf, "SERVER", "max_inactivite", NULL );
+    if (!Cfg_ssrv.max_inactivite) Cfg_ssrv.max_inactivite = DEFAUT_MAX_INACTIVITE;
+
+    Cfg_ssrv.max_login_failed   = g_key_file_get_integer ( gkf, "SERVER", "max_login_failed", NULL );
+    if (!Cfg_ssrv.max_login_failed) Cfg_ssrv.max_login_failed = DEFAUT_MAX_LOGIN_FAILED;
+
+    Cfg_ssrv.timeout_connexion  = g_key_file_get_integer ( gkf, "SERVER", "timeout_connexion", NULL );
+    if (!Cfg_ssrv.timeout_connexion) Cfg_ssrv.timeout_connexion = DEFAUT_TIMEOUT_CONNEXION;
+
+    Cfg_ssrv.taille_clef_dh     = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_dh", NULL );
+    if (!Cfg_ssrv.taille_clef_dh) Cfg_ssrv.taille_clef_dh = DEFAUT_TAILLE_CLEF_DH;
+
+    Cfg_ssrv.taille_clef_rsa    = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_rsa", NULL );
+    if (!Cfg_ssrv.taille_clef_rsa) Cfg_ssrv.taille_clef_rsa = DEFAUT_TAILLE_CLEF_RSA;
+
+    Cfg_ssrv.taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
+    if (!Cfg_ssrv.taille_bloc_reseau) Cfg_ssrv.taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
+
+    g_key_file_free(gkf);
+  }
+/**********************************************************************************************************/
+/* Ssrv_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                 */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Ssrv_Liberer_config ( void )
+  {
+  }
 /**********************************************************************************************************/
 /* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                 */
 /* Entrée: un client                                                                                      */
@@ -59,6 +120,32 @@
   { pthread_mutex_lock( &client->mutex_struct_used );
     if (client->struct_used) client->struct_used--;
     pthread_mutex_unlock( &client->mutex_struct_used );
+
+    if (client->struct_used == 0)
+     { pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+       Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+    
+       Fermer_connexion( client->connexion );
+       pthread_mutex_destroy( &client->mutex_write );
+       pthread_mutex_destroy( &client->mutex_struct_used );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Deconnecter: Connexion %d stopped", client->connexion->socket );
+       if (client->util)         { g_free( client->util ); }
+       if (client->bit_syns)     { g_list_free(client->bit_syns); }
+       if (client->bit_init_syn) { g_list_free(client->bit_init_syn); }
+       if (client->bit_capteurs) { g_list_foreach( client->bit_capteurs, (GFunc) g_free, NULL );
+                                   g_list_free(client->bit_capteurs);
+                                 }
+       if (client->bit_init_capteur)
+                                 { g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
+                                   g_list_free(client->bit_init_capteur);
+                                 }
+       if (client->courbes)      { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
+                                   g_list_free(client->courbes);
+                                 }
+       if (client->Db_watchdog)  { Libere_DB_SQL( Config.log, &client->Db_watchdog ); }    /* Deconnexion DB */
+       g_free(client);
+     }
   }
 /**********************************************************************************************************/
 /* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                 */
@@ -122,7 +209,7 @@
 /**********************************************************************************************************/
  void Client_mode ( struct CLIENT *client, gint mode )
   { if (client->mode == DECONNECTE)
-     { Info_new( Config.log, Config.log_all, LOG_INFO,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                 "Client_mode: positionnement impossible pour %s car mode = DECONNECTE", client->util->nom);
        return;
      }
@@ -130,7 +217,7 @@
     if (client->mode == VALIDE_NON_ROOT && mode == VALIDE)                    /* Nous prevenons le client */
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 ); }
     client->mode = mode;
-    Info_new( Config.log, Config.log_all, LOG_INFO,
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                 "Client_mode: client %s en mode %s", client->machine, Mode_vers_string(mode) );
   }
 /**********************************************************************************************************/
@@ -138,66 +225,42 @@
 /* Entrée: un client                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Deconnecter ( struct CLIENT *client )
-  {
-    client->mode = VALIDE;                            /* Envoi un dernier paquet "OFF" avant deconnexion" */
+ void Deconnecter ( struct CLIENT *client )
+  { client->mode = VALIDE;                            /* Envoi un dernier paquet "OFF" avant deconnexion" */
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
-
-    pthread_mutex_lock( &Partage->Sous_serveur[client->Id_serveur].synchro );
-    Partage->Sous_serveur[client->Id_serveur].Clients = g_list_remove( Partage->Sous_serveur[client->Id_serveur].Clients, client );
-    pthread_mutex_unlock( &Partage->Sous_serveur[client->Id_serveur].synchro );
-    
-    Fermer_connexion( client->connexion );
-    pthread_mutex_destroy( &client->mutex_write );
-    pthread_mutex_destroy( &client->mutex_struct_used );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Deconnecter: Connexion %d stopped", client->connexion->socket );
-    if (client->util)         { g_free( client->util ); }
-    if (client->bit_syns)     { g_list_free(client->bit_syns); }
-    if (client->bit_init_syn) { g_list_free(client->bit_init_syn); }
-    if (client->bit_capteurs) { g_list_foreach( client->bit_capteurs, (GFunc) g_free, NULL );
-                                g_list_free(client->bit_capteurs);
-                              }
-    if (client->bit_init_capteur)
-                              { g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
-                                g_list_free(client->bit_init_capteur);
-                              }
-    if (client->courbes)      { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
-                                g_list_free(client->courbes);
-                              }
-    if (client->Db_watchdog)  { Libere_DB_SQL( Config.log, &client->Db_watchdog ); }    /* Deconnexion DB */
-    g_free( client );
+    Unref_client( client ); 
   }
 /**********************************************************************************************************/
 /* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
 /* Entrée: rien                                                                                           */
 /* Sortie: TRUE si un nouveau client est arrivé                                                           */
 /**********************************************************************************************************/
- static gboolean Accueillir_un_client( guint ss_id )
+ static struct CLIENT *Accueillir_un_client( void )
   { struct sockaddr_in distant;
     guint taille_distant, id;
     struct CLIENT *client;
     struct hostent *host;
 
     taille_distant = sizeof(distant);
-    if ( (id=accept( Socket_ecoute, (struct sockaddr *)&distant, &taille_distant )) != -1)  /* demande ?? */
-     { Info_new( Config.log, Config.log_all, LOG_INFO,
+    if ( (id=accept( Cfg_ssrv.Socket_ecoute, (struct sockaddr *)&distant, &taille_distant )) != -1)  /* demande ?? */
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
                 "Accueillir_nouveaux_client: Connexion wanted. ID=%d", id );
 
        client = g_try_malloc0( sizeof(struct CLIENT) );  /* On alloue donc une nouvelle structure cliente */
-       if (!client) { Info_new( Config.log, Config.log_all, LOG_ERR,
+       if (!client) { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                                "Accueillir_nouveaux_client: Not enought memory to connect %d", id );
                       close(id);
-                      return(FALSE);                                    /* On traite bien sûr les erreurs */
+                      return(NULL);                                     /* On traite bien sûr les erreurs */
                     }
 
-       client->connexion = Nouvelle_connexion( Config.log, id, Config.taille_bloc_reseau );
+       client->connexion = Nouvelle_connexion( Config.log, id, Cfg_ssrv.taille_bloc_reseau );
        if (!client->connexion)
-        { Info_new( Config.log, Config.log_all, LOG_ERR,
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                    "Accueillir_nouveaux_client: Not enought memory for %d", id );
           close(id);
           g_free( client );
-          return(FALSE);
+          return(NULL);
         }
 
        host = gethostbyaddr( (char*)&distant.sin_addr, sizeof(distant.sin_addr), AF_INET );/*InfosClients */
@@ -207,433 +270,97 @@
                  }
        time( &client->date_connexion );                /* Enregistrement de la date de debut de connexion */
        client->pulse = Partage->top;
-       client->Id_serveur = ss_id;
        client->courbe.num = -1;                           /* Init: pas de courbe a envoyer pour le moment */
        pthread_mutex_init( &client->mutex_write, NULL );
        pthread_mutex_init( &client->mutex_struct_used, NULL );
-       client->struct_used = 0;                            /* Par défaut, personne n'utilise la structure */
+       client->struct_used = 1;/* Par défaut, personne la structure est utilisée par le thread de surveilance */
 
        client->Db_watchdog = Init_DB_SQL( Config.log );
        if (!client->Db_watchdog)
-        { Info_new( Config.log, Config.log_all, LOG_ERR,
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                   "Accueillir_nouveaux_client: Unable to open database" );
           Deconnecter( client );
         }
        else
-        { pthread_mutex_lock( &Partage->Sous_serveur[ss_id].synchro );
-          Partage->Sous_serveur[ss_id].Clients = g_list_append( Partage->Sous_serveur[ss_id].Clients, client );
-          pthread_mutex_unlock( &Partage->Sous_serveur[ss_id].synchro );
-          Info_new( Config.log, Config.log_all, LOG_INFO,
+        { pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+          Cfg_ssrv.Clients = g_slist_prepend( Cfg_ssrv.Clients, client );
+          pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                    "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
           Client_mode( client, ENVOI_INTERNAL );
-          return(TRUE);
+          return(client);
         }
      }
-    return(FALSE);
+    return(NULL);
   }
 /**********************************************************************************************************/
-/* Run_serveur boucle principale d'un serveur Watchdog                                                    */
+/* Run_serveur boucle principale d'un sous-serveur Watchdog                                               */
 /* Entree: l'id du serveur et le pid du pere                                                              */
 /* Sortie: un code d'erreur EXIT_xxx                                                                      */
 /**********************************************************************************************************/
- void Run_serveur ( gint id )
-  { time_t version_d_serveur;
-    struct sigaction sig;
-    pthread_t tid;
-    gchar nom[16];
-
-    g_snprintf(nom, sizeof(nom), "W-SRV%03d", id );
+ void Run_thread ( struct LIBRAIRIE *lib )
+  { gchar nom[32];
+    
+    g_snprintf(nom, sizeof(nom), "W-SSRV-LISTEN" );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
-    sig.sa_handler = SIG_IGN;
-    sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-    sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
-    sigaction( SIGINT, &sig, NULL );                                               /* On ignore le SIGINT */
 
                                                   /* Initialisation de la zone interne et comm du serveur */
-    Partage->Sous_serveur[id].inactivite = Partage->top;                     /* On prend l'heure actuelle */
-    Partage->Sous_serveur[id].Thread_run = TRUE;                                    /* Le thread tourne ! */
-    Partage->Sous_serveur[id].Clients = NULL;                     /* Au départ, nous n'avons aucun client */
+    memset( &Cfg_ssrv, 0, sizeof(Cfg_ssrv) );                   /* Mise a zero de la structure de travail */
+    Cfg_ssrv.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Ssrv_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_serveur: Enable", id );
-         
-    while( Partage->Sous_serveur[id].Thread_run == TRUE )                /* On tourne tant que necessaire */
-     { if (Partage->jeton == id)                                                /* Avons nous le jeton ?? */
-        { if (Accueillir_un_client( id ) == TRUE)                         /* Un client vient d'arriver ?? */
-           { Partage->jeton = -1;                                /* On signale que l'on accepte le client */
-             Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: jeton rendu (%d)", id );
-           }
-        }
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+    Cfg_ssrv.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
 
-       if (Partage->Sous_serveur[id].Thread_sigusr1)                          /* Gestion des signaux USR1 */
-        { pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: id %d, pid %d, nbr_client %d",
-                      id, (guint)Partage->Sous_serveur[id].pid, g_list_length(Partage->Sous_serveur[id].Clients) );
-          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
-          Partage->Sous_serveur[id].Thread_sigusr1 = FALSE;
-        }
+    g_snprintf( Cfg_ssrv.lib->admin_prompt, sizeof(Cfg_ssrv.lib->admin_prompt), "ssrv" );
+    g_snprintf( Cfg_ssrv.lib->admin_help,   sizeof(Cfg_ssrv.lib->admin_help),   "Manage SSRV Modules" );
 
-       if (Partage->Sous_serveur[id].Thread_reload)                         /* Gestion des signaux RELOAD */
-        { Partage->Sous_serveur[id].Thread_reload = FALSE;
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: RELOAD (%d)", id );
-        }
+    Init_RSA();                                             /* Initialisation des clefs RSA et chargement */
+    if (Cfg_ssrv.ssl_crypt) { Cfg_ssrv.Ssl_ctx = Init_ssl();                        /* Initialisation SSL */
+                              if (!Cfg_ssrv.Ssl_ctx)
+                               { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                                           "Init ssl failed but needed. Stopping..." );
+                               }
+                              goto end;
+                            }
+                       else { Cfg_ssrv.Ssl_ctx = NULL; }
 
-       if (Partage->Sous_serveur[id].Clients)                                    /* Si il y a des clients */
-        { gint new_mode;
-          GList *liste;
-
-          Partage->Sous_serveur[id].inactivite = Partage->top;
-          liste = Partage->Sous_serveur[id].Clients;
-          while(liste)                                                /* Parcours de la liste des clients */
-           { struct CLIENT *client;
-             client = (struct CLIENT *)liste->data;
-
-             if (client->mode == DECONNECTE && client->struct_used == 0)      /* Deconnection des clients */
-              { Deconnecter( client );
-                break;
-              }
-
-             switch (client->mode)
-              { case ENVOI_INTERNAL:
-                     Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
-                                   NULL, client->connexion->taille_bloc );
-                     if (Config.ssl_crypt)
-                      { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED, NULL, 0 ); 
-                        Client_mode ( client, ATTENTE_CONNEXION_SSL );
-                      }
-                     else
-                      { Client_mode ( client, ATTENTE_IDENT ); }
-                     Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
-                                   NULL, 0 );
-                     break;                 
-                case ATTENTE_CONNEXION_SSL:
-                     Connecter_ssl ( client );                        /* Tentative de connexion securisée */
-                     break;
-                case ENVOI_AUTORISATION :
-                     new_mode = Tester_autorisation( id, client );
-                     if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */
-                      { version_d_serveur = Lire_version_donnees( Config.log );
-                        if ( version_d_serveur > client->ident.version_d )
-                         {  gint taille;
-                            taille = 0;
-                            taille += Ajouter_repertoire_liste( client, "Gif", client->ident.version_d );
-                            client->transfert.taille = taille;
-                         }
-                      }
-                     Client_mode ( client, new_mode );
-                     break;
-                case ENVOI_DONNEES      :
-                     if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
-                     break;
-                case ENVOI_HISTO        :
-                     Client_mode( client, VALIDE_NON_ROOT );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
-                     pthread_detach( tid );
-                     break;
-
-                case VALIDE_NON_ROOT    : /*Client_mode(client, VALIDE); */           /* Etat transitoire */
-                     break;
-                case ENVOI_GROUPE_FOR_UTIL:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_GROUPE_FOR_SYNOPTIQUE:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_synoptique_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_SOURCE_DLS   :
-                     if(Envoyer_source_dls( client )) Client_mode(client, VALIDE);
-                     break;
-                case ENVOI_MNEMONIQUE_FOR_COURBE:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_courbe_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_MNEMONIQUE_FOR_HISTO_COURBE:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_histo_courbe_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_MOTIF_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_motif_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_COMMENT_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_comment_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_PASSERELLE_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_passerelle_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_CAPTEUR_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_capteur_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_CAMERA_SUP_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-
-                case ENVOI_MOTIF_SUPERVISION:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_motif_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;   
-                case ENVOI_COMMENT_SUPERVISION:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_comment_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_PASSERELLE_SUPERVISION:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_passerelle_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;   
-                case ENVOI_PALETTE_SUPERVISION:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_palette_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;   
-                case ENVOI_CAPTEUR_SUPERVISION:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_capteur_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;   
-                case ENVOI_CAMERA_SUP_SUPERVISION:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_IXXX_SUPERVISION :
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );  /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_bit_init_supervision_thread, client );
-                     pthread_detach( tid );
-                     break;   
-                case ENVOI_ICONE_FOR_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_icones_pour_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_CLASSE_FOR_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_classes_pour_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_SYNOPTIQUE_FOR_ATELIER:
-                     Client_mode( client, VALIDE );
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE:
-                     Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
-                     pthread_detach( tid );
-                     break;
-                case ENVOI_PALETTE_FOR_ATELIER_PALETTE:
-                     Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-                     Ref_client( client );                       /* Indique que la structure est utilisée */
-                     pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
-                     pthread_detach( tid );
-                     break;
-              }
-/****************************************** Envoi des chaines capteurs ************************************/
-             if (client->mode == VALIDE && client->bit_capteurs && client->date_next_send_capteur < Partage->top)
-              { struct CAPTEUR *capteur;
-                GList *liste_capteur;
-                client->date_next_send_capteur = Partage->top + TEMPS_UPDATE_CAPTEUR;
-                liste_capteur = client->bit_capteurs;
-                while (liste_capteur)                                 /* Pour tous les capteurs du client */
-                 { capteur = (struct CAPTEUR *)liste_capteur->data;
-
-                   if (Tester_update_capteur(capteur))             /* Doit-on updater le capteur client ? */
-                    { struct CMD_ETAT_BIT_CAPTEUR *etat;
-                      etat = Formater_capteur(capteur);                /* Formatage de la chaine associée */
-                      if (etat)                                                           /* envoi client */
-                       { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                                       (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
-                         g_free(etat);                                            /* On libere la mémoire */
-                       }
-                      else Info_new( Config.log, Config.log_all, LOG_ERR, "Not enought memory envoi capteur" );
-                    }
-                   liste_capteur = liste_capteur->next;                    /* On passe au capteur suivant */
-                 }
-              }
-/****************************************** Envoi des courbes analogiques *********************************/
-             if (client->mode == VALIDE && client->courbes)
-              { static gint update;
-                struct CMD_TYPE_COURBE *courbe;
-                GList *liste_courbe;
-
-                if (update < Partage->top)
-                 { struct CMD_APPEND_COURBE envoi_courbe;
-                   update = Partage->top + COURBE_TEMPS_TOP*10;/* Refresh toutes les 5 secondes au client */
-                   envoi_courbe.date = time(NULL);
-
-                   liste_courbe = client->courbes;
-                   while (liste_courbe)
-                    { courbe = (struct CMD_TYPE_COURBE *)liste_courbe->data;
-
-                      envoi_courbe.slot_id = courbe->slot_id;
-                      envoi_courbe.type    = courbe->type;
-                              
-                      switch (courbe->type)
-                       { case MNEMO_SORTIE:
-                              envoi_courbe.val_avant_ech = 1.0*A(courbe->num);
-                              Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                            (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                              break;
-                         case MNEMO_ENTREE:
-                              envoi_courbe.val_avant_ech = 1.0*E(courbe->num);
-                              Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                            (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                              break;
-                         case MNEMO_ENTREE_ANA:
-                              envoi_courbe.val_avant_ech = Partage->ea[courbe->num].val_avant_ech;
-                              Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                            (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                              break;
-                         default: printf("type courbe inconnu\n");
-                       }
-                      liste_courbe = liste_courbe->next;
-                    }
-                 }
-              }
-
-
-             if (client->mode >= ATTENTE_IDENT) Ecouter_client( id, client );
-
-             if (Partage->top > client->pulse && client->mode == VALIDE)          /* Gestion du KEEPALIVE */
-              { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );
-                SQL_ping ( Config.log, client->Db_watchdog );/* A remplacer plus tard par des connexions furtives */
-                client->pulse = Partage->top + TEMPS_PULSE;
-              }
-
-             liste = liste->next;
-           }
-        }
-       else
-       if ( Partage->Sous_serveur[id].inactivite + 10*Config.max_inactivite < Partage->top )/* Inactivite ? */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Inactivity time reached" );
-          Partage->Sous_serveur[id].Thread_run = FALSE;                       /* Arret "Local" du process */
-        }
-/****************************************** Ecoute des messages histo  ************************************/
-       if (Partage->Sous_serveur[id].new_histo)
-        { struct CMD_TYPE_HISTO *histo;
-
-          pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
-          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].new_histo->data;
-          Partage->Sous_serveur[id].new_histo = g_list_remove ( Partage->Sous_serveur[id].new_histo, histo );
-          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
-       
-          Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                         (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-          g_free(histo);
-        }
-
-       if (Partage->Sous_serveur[id].del_histo)
-        { struct CMD_TYPE_HISTO *histo;
-
-          pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
-          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_serveur[id].del_histo->data;
-          Partage->Sous_serveur[id].del_histo = g_list_remove ( Partage->Sous_serveur[id].del_histo, histo );
-          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
-       
-          Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                         (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-          g_free(histo);
-        }
-
-       if (Partage->Sous_serveur[id].new_motif)
-        { GList *liste_clients;
-          struct CLIENT *client;
-          struct CMD_ETAT_BIT_CTRL *motif;
-
-          pthread_mutex_lock( &Partage->Sous_serveur[id].synchro );
-          motif = (struct CMD_ETAT_BIT_CTRL *) Partage->Sous_serveur[id].new_motif->data;
-          Partage->Sous_serveur[id].new_motif = g_list_remove ( Partage->Sous_serveur[id].new_motif, motif );
-          pthread_mutex_unlock( &Partage->Sous_serveur[id].synchro );
-
-          liste_clients = Partage->Sous_serveur[id].Clients;
-          while (liste_clients)
-           { client = (struct CLIENT *)liste_clients->data;
-             if ( g_list_find( client->bit_syns, GINT_TO_POINTER(motif->num) ) )
-              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                              (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
-              }
-             liste_clients = liste_clients->next;
-           }
-          g_free(motif);
-        }
-
-       usleep(1000); sched_yield();                                /* On ne sature pas le microprocesseur */
-     }
-/********************************************* Arret du serveur *******************************************/
-    if (Partage->jeton == id)
-     { Partage->jeton = -1;                                            /* On rend le jeton le cas échéant */
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: jeton rendu (%d)", id );
+    Cfg_ssrv.Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
+    if ( Cfg_ssrv.Socket_ecoute<0 )            
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_CRIT, "Network down, foreign connexions disabled" );
+       goto end;
      }
 
-    while(Partage->Sous_serveur[id].Clients)                          /* Parcours de la liste des clients */
-     { struct CLIENT *client;                                         /* Deconnection de tous les clients */
-       client = (struct CLIENT *)Partage->Sous_serveur[id].Clients->data;
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Run_serveur: deconnexion client from %s", client->machine );
-       Deconnecter(client);
-     }
+    while(lib->Thread_run == TRUE)                                       /* On tourne tant que necessaire */
+     { struct CLIENT *client;
+       pthread_t tid;
+       sched_yield();
+       sleep(1);
 
-    Partage->Sous_serveur[id].Clients   = NULL;
-    Partage->Sous_serveur[id].pid       = 0;
-    if (Partage->Sous_serveur[id].new_histo)
-     { g_list_foreach( Partage->Sous_serveur[id].new_histo, (GFunc) g_free, NULL );
-       g_list_free ( Partage->Sous_serveur[id].new_histo );
-       Partage->Sous_serveur[id].new_histo = NULL;
-     }
-    if (Partage->Sous_serveur[id].del_histo)
-     { g_list_foreach( Partage->Sous_serveur[id].del_histo, (GFunc) g_free, NULL );
-       g_list_free ( Partage->Sous_serveur[id].del_histo );
-       Partage->Sous_serveur[id].del_histo = NULL;
-     }
-    if (Partage->Sous_serveur[id].new_motif)
-     { g_list_foreach( Partage->Sous_serveur[id].new_motif, (GFunc) g_free, NULL );
-       g_list_free ( Partage->Sous_serveur[id].new_motif );
-       Partage->Sous_serveur[id].new_motif = NULL;
-     }
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_serveur: Down (id=%d)", id );
-    pthread_exit( NULL );
-  }
+       if (lib->Thread_sigusr1 == TRUE)
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: Run_ssrv: SIGUSR1" );
+          lib->Thread_sigusr1 = FALSE;
+        }
+
+       client =Accueillir_un_client();
+       if (client)                                                        /* Un client vient d'arriver ?? */
+        { pthread_create( &tid, NULL, (void *)Run_handle_client, client );
+          pthread_detach( tid );
+        }
+      }                                                                    /* Fin du while partage->arret */
+
+end:
+    Ssrv_Liberer_config ();                             /* Lecture de la configuration logiciel du thread */
+    Liberer_SSL ();                                                                 /* Libération mémoire */
+    if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);
+    if (Cfg_ssrv.rsa) RSA_free( Cfg_ssrv.rsa );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_ssrv.lib->TID = 0;                                /* On indique au master que le thread est mort. */
+    pthread_exit(GINT_TO_POINTER(0));
+ }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -32,8 +32,8 @@
  #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                       */
 /* Entrée: le client demandeur et le syn en question                                                      */

@@ -33,7 +33,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_ajouter_entree: Un client nous demande d'ajouter un entree Watchdog                              */
 /* Entrée: le entree à créer                                                                              */
@@ -51,10 +51,10 @@
                  /* La sauvegarde en local a été effectuée, nous indiquons au master qu'il peut continuer */
     client->courbe.num=-1;
 /******************************************** Préparation structure d'envoi *******************************/
-    envoi_courbe = (struct CMD_START_COURBE *)g_try_malloc0( Config.taille_bloc_reseau );
+    envoi_courbe = (struct CMD_START_COURBE *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
     if (!envoi_courbe)
      { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Config.log_all, LOG_ERR, 
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, 
                 "Proto_ajouter_histo_courbe_thread: Pb d'allocation memoire envoi_courbe" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -69,7 +69,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_histo_courbe_thread: Unable to open database (dsn)" );
        g_free(envoi_courbe);
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -82,8 +82,8 @@
        client->histo_courbe.date_first = client->histo_courbe.date_last - 3600;
      }
 
-    Info_new( Config.log, Config.log_all, LOG_ERR, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
-    max_enreg = (Config.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
+    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
 
     Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.num,                  /* Requete SQL */
                        client->histo_courbe.date_first,
@@ -100,7 +100,7 @@
        if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
         { Envoi_client( client, TAG_HISTO_COURBE, SSTAG_SERVEUR_START_HISTO_COURBE, (gchar *)envoi_courbe,
                         sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "Proto_ajouter_histo_courbe_thread: taille donnees=%d", envoi_courbe->taille_donnees );
           envoi_courbe->taille_donnees = 0;
         }

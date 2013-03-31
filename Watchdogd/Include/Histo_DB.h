@@ -51,7 +51,7 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Clear_histoDB ( void );
- extern gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo );
+ extern gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Ajouter_histoDB ( struct LOG *log, struct DB *db, struct HISTODB *histo );
  extern gboolean Recuperer_histoDB ( struct LOG *log, struct DB *db );
  extern struct HISTODB *Recuperer_histoDB_suite( struct LOG *log, struct DB *db );

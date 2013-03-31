@@ -39,8 +39,7 @@
   { struct PARTAGE *partage;
     gint taille;
 
-    taille = sizeof( struct PARTAGE ) +                                     /* Le jeton, les comms, les I */
-             sizeof( struct SOUS_SERVEUR ) * Config.max_serveur;         /* Nombre de connexions par fils */
+    taille = sizeof( struct PARTAGE );                                      /* Le jeton, les comms, les I */
     Info_new( Config.log, Config.log_all, LOG_INFO, "Shm_init: size required", taille );
 
     partage = g_try_malloc0( taille );

@@ -30,7 +30,7 @@
  
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Autoriser_client: Autorise le client à se connecter                                                    */
 /* Entrée/Sortie: rien                                                                                    */

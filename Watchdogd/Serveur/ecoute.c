@@ -37,7 +37,9 @@
  #include <stdio.h>
  #include <errno.h>
 
- #include "watchdogd.h"                                      /* Mise en place des prototypes de fonctions */
+/******************************************** Prototypes de fonctions *************************************/
+ #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -48,41 +50,41 @@
     gint opt, ecoute;
 
     if ( (ecoute = socket ( AF_INET, SOCK_STREAM, 0 )) == -1)                           /* Protocol = TCP */
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Socket failure (%s)", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Socket failure (%s)", strerror(errno) ); return(-1); }
 
     opt = 1;
     if ( setsockopt( ecoute, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE,
                      (char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Set option failed (%s)", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Set option failed (%s)", strerror(errno) ); return(-1); }
 
     opt = 16834;
     if ( setsockopt( ecoute, SOL_SOCKET, SO_SNDBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "SO_SNDBUF failed (%s)", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "SO_SNDBUF failed (%s)", strerror(errno) ); return(-1); }
     if ( setsockopt( ecoute, SOL_SOCKET, SO_RCVBUF,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "SO_RCVBUF failed (%s)", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "SO_RCVBUF failed (%s)", strerror(errno) ); return(-1); }
 
     opt = 1;
     if ( setsockopt( ecoute, SOL_TCP, TCP_NODELAY,(char*)&opt, sizeof(opt) ) == -1 )
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "TCP_NODELAY failed (%s)", strerror(errno) ); return(-1); }
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "TCP_NODELAY failed (%s)", strerror(errno) ); return(-1); }
 
     memset( &local, 0, sizeof(local) );
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = htonl(INADDR_ANY);
-    local.sin_port = htons(Config.port);                      /* Attention: en mode network, pas host !!! */
+    local.sin_port = htons(Cfg_ssrv.port);                      /* Attention: en mode network, pas host !!! */
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Bind failure (%s)", strerror(errno) );
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Bind failure (%s)", strerror(errno) );
        close(ecoute);
        return(-1);
      }
 
     if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Listen failure (%s)", strerror(errno));
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Listen failure (%s)", strerror(errno));
        close(ecoute);
        return(-1);
      }
     fcntl( ecoute, F_SETFL, O_NONBLOCK );        /* Mode non bloquant, ça aide pour une telle application */
-    Info_new( Config.log, Config.log_all, LOG_INFO,
-              "Ecoute du port %d with socket %d", Config.port, ecoute );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+              "Ecoute du port %d with socket %d", Cfg_ssrv.port, ecoute );
     return( ecoute );                                                            /* Tout s'est bien passé */
   }
 /*--------------------------------------------------------------------------------------------------------*/

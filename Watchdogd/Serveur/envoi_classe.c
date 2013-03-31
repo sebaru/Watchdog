@@ -33,9 +33,8 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_classe: convertit une structure MSG en structure CMD_TYPE_CLASSE                        */
 /* Entrée: un client et un utilisateur                                                                    */

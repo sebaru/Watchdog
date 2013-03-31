@@ -32,8 +32,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
-
- extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Connecter_ssl: Tentative de connexion sécurisée                                                        */
 /* Entrée: le pointeur du client                                                                          */
@@ -46,7 +45,7 @@
     connexion = client->connexion;
   
     if (!connexion->ssl)                                                  /* Premier appel de la fonction */
-     { connexion->ssl = SSL_new( Ssl_ctx );                                    /* Creation d'une instance */
+     { connexion->ssl = SSL_new( Cfg_ssrv.Ssl_ctx );                           /* Creation d'une instance */
        if (!connexion->ssl)                                                   /* Si réussite d'allocation */
         { Info_new( Config.log, Config.log_all, LOG_WARNING,  "Connecter_ssl: unable to create a ssl object" );
           client->mode = DECONNECTE;  

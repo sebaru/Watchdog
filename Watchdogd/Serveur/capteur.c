@@ -29,8 +29,8 @@
  #include "Module_dls.h"                                                                /* Acces à E et B */
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Tester_update_capteur renvoie TRUE si le capteur doit etre updaté sur le client                        */
 /* Entrée: un capteur                                                                                     */

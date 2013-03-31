@@ -102,38 +102,6 @@
         { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
-/********************************************* Partie SERVER **********************************************/
-       Config.ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
-
-       Config.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
-       if (!Config.port) Config.port = DEFAUT_PORT;
-
-       Config.max_client         = g_key_file_get_integer ( gkf, "SERVER", "max_client", NULL );
-       if (!Config.max_client) Config.max_client = DEFAUT_MAX_CLIENT;
-
-       Config.min_serveur        = g_key_file_get_integer ( gkf, "SERVER", "min_serveur", NULL );
-       if (!Config.min_serveur) Config.min_serveur = DEFAUT_MIN_SERVEUR;
-
-       Config.max_serveur        = g_key_file_get_integer ( gkf, "SERVER", "max_serveur", NULL );
-       if (!Config.max_serveur) Config.max_serveur = DEFAUT_MAX_SERVEUR;
-
-       Config.max_inactivite     = g_key_file_get_integer ( gkf, "SERVER", "max_inactivite", NULL );
-       if (!Config.max_inactivite) Config.max_inactivite = DEFAUT_MAX_INACTIVITE;
-
-       Config.max_login_failed   = g_key_file_get_integer ( gkf, "SERVER", "max_login_failed", NULL );
-       if (!Config.max_login_failed) Config.max_login_failed = DEFAUT_MAX_LOGIN_FAILED;
-
-       Config.timeout_connexion  = g_key_file_get_integer ( gkf, "SERVER", "timeout_connexion", NULL );
-       if (!Config.timeout_connexion) Config.timeout_connexion = DEFAUT_TIMEOUT_CONNEXION;
-
-       Config.taille_clef_dh     = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_dh", NULL );
-       if (!Config.taille_clef_dh) Config.taille_clef_dh = DEFAUT_TAILLE_CLEF_DH;
-
-       Config.taille_clef_rsa    = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_rsa", NULL );
-       if (!Config.taille_clef_rsa) Config.taille_clef_rsa = DEFAUT_TAILLE_CLEF_RSA;
-
-       Config.taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
-       if (!Config.taille_bloc_reseau) Config.taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
 
 /********************************************** Partie TELLSTICK ******************************************/
        Config.tellstick_a_min    = g_key_file_get_integer ( gkf, "TELLSTICK", "min_a", NULL );
@@ -176,18 +144,7 @@
     if (!Config.log) return;
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config file                 %s", Config.config_file );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config run_as               %s", Config.run_as );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config port                 %d", Config.port );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max client           %d", Config.max_client );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config min serveur          %d", Config.min_serveur );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max serveur          %d", Config.max_serveur );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max inactivite       %d", Config.max_inactivite );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config taille_clef_dh       %d", Config.taille_clef_dh );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config taille_clef_rsa      %d", Config.taille_clef_rsa );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config ssl crypt            %d", Config.ssl_crypt );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config log_level            %d", Config.log_level );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config taille_bloc_reseau   %d", Config.taille_bloc_reseau );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config timeout connexion    %d", Config.timeout_connexion );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config max login failed     %d", Config.max_login_failed );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config home                 %s", Config.home );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_all, LOG_INFO, "Config db host              %s", Config.db_host );

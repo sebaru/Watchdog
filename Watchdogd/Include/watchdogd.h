@@ -53,7 +53,6 @@
  #include "Icones_DB.h"
  #include "EntreeANA_DB.h"
  #include "Proto_traductionDLS.h"
- #include "Sous_serveur.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
 
@@ -62,11 +61,6 @@
  #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
 
  #define VERROU_SERVEUR              "watchdogd.lock"
- #define FICHIER_CERTIF_CA           "cacert.pem"
- #define FICHIER_CERTIF_SERVEUR      "serveursigne.pem"
- #define FICHIER_CERTIF_CLEF_SERVEUR "serveurkey.pem"
- #define FICHIER_CLEF_PUB_RSA        "watchdogd.pub.rsa" 
- #define FICHIER_CLEF_SEC_RSA        "watchdogd.sec.rsa" 
  #define FICHIER_FIFO_ADMIN_READ     "admin.fifo.read"
  #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
  #define FICHIER_EXPORT              "export.wdg"
@@ -97,8 +91,7 @@
 
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GSList *liste_msg_repeat;                                      /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_msg_on;                                          /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_msg_off;                                         /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_msg;                                             /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                               /* liste de struct MSGDB msg a envoyer */
     GSList *liste_a;                                          /* liste de A a traiter dans la ditribution */
 
@@ -159,9 +152,6 @@
     struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                               /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                           /* DLS=rw, Sserveur=r */
     struct TEMPO Tempo_R[NBR_TEMPO];
-
-    struct SOUS_SERVEUR *Sous_serveur;
-    struct SOUS_SERVEUR ss_serveur;                                            /* !! Tableau dynamique !! */
   };
 
 /*************************************** Définitions des prototypes ***************************************/
@@ -187,17 +177,14 @@
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );
- extern void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
- extern void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
+ extern void Abonner_distribution_message ( void (*Gerer_message) (guint num) );
+ extern void Desabonner_distribution_message ( void (*Gerer_message) (guint num) );
 
  extern void Abonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );      /* Dans distrib_Axxx.c */
  extern void Desabonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );
  extern void Gerer_arrive_Axxx_dls ( void );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                       /* Dans distrib_Ixxx.c */
-
- extern SSL_CTX *Init_ssl ( void );                                                         /* Dans ssl.c */
- extern void Connecter_ssl( struct CLIENT *client );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

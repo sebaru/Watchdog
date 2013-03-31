@@ -36,7 +36,7 @@
  static GSList *Liste_clients_sortie = NULL;
 
 /**********************************************************************************************************/
-/* Abonner_distribution_sortie: Abonnement d'un thread aux diffusions d'un sortie                       */
+/* Abonner_distribution_sortie: Abonnement d'un thread aux diffusions d'un sortie                         */
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
@@ -46,7 +46,7 @@
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
-/* Desabonner_distribution_sortie: Desabonnement d'un thread aux diffusions d'un sortie                 */
+/* Desabonner_distribution_sortie: Desabonnement d'un thread aux diffusions d'un sortie                   */
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/

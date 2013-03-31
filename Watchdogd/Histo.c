@@ -63,11 +63,11 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo )
+ gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, guint id )
   { gchar requete[1024];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_HISTO, histo->id );
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_HISTO, id );
 
     return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
   }

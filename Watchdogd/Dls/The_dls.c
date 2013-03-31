@@ -541,14 +541,8 @@
 
        if ( Partage->g[num].changes <= 5 ) 
         { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
-          if (etat) 
-           { Partage->com_msrv.liste_msg_on  = g_slist_append( Partage->com_msrv.liste_msg_on,
-                                                               GINT_TO_POINTER(num) );
-           }
-          else
-           { Partage->com_msrv.liste_msg_off = g_slist_append( Partage->com_msrv.liste_msg_off,
-                                                               GINT_TO_POINTER(num) );
-           }
+          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg,
+                                                         GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].changes++;
         } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */

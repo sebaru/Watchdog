@@ -1,32 +1,34 @@
 #**********************************************************************************************************/
 #* Watchdogd/Serveur/Makefile.am          Profil de compilation d'un sous serveur                         */
-#* Projet WatchDog version 2.1       Gestion d'habitat                       dim 14 mar 2004 18:54:28 CET */
+#* Projet WatchDog version 2.6       Gestion d'habitat                       dim 31 mar 2013 18:54:28 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS= 
 
-noinst_LTLIBRARIES   = libserveur.la
-libserveur_la_SOURCES = Serveur.c protocole.c ident.c envoi.c \
+lib_LTLIBRARIES     = libwatchdog-server-ssrv.la
+libwatchdog_server_ssrv_la_SOURCES    = Serveur.c protocole.c ident.c envoi.c \
                         protocole_utilisateur.c protocole_dls.c protocole_message.c \
                         protocole_histo_courbe.c protocole_admin.c \
                         protocole_mnemonique.c protocole_supervision.c protocole_atelier.c \
                         protocole_icone.c protocole_histo.c protocole_courbe.c  \
-			protocole_scenario.c protocole_synoptique.c protocole_camera.c \
+                        protocole_scenario.c protocole_synoptique.c protocole_camera.c \
                         envoi_groupe.c envoi_util.c envoi_dls.c envoi_histo.c envoi_message.c \
                         envoi_synoptique.c envoi_synoptique_motifs.c envoi_synoptique_palettes.c \
                         envoi_synoptique_comments.c envoi_synoptique_passerelles.c \
- 		        envoi_synoptique_capteur.c envoi_synoptique_camera_sup.c envoi_camera.c \
+                        envoi_synoptique_capteur.c envoi_synoptique_camera_sup.c envoi_camera.c \
                         envoi_bit_init.c envoi_scenario.c envoi_synoptique_scenario.c \
                         envoi_mnemonique.c envoi_classe.c envoi_icone.c \
-			envoi_courbe.c envoi_histo_courbe.c envoi_entreeana.c \
+                        envoi_courbe.c envoi_histo_courbe.c envoi_entreeana.c \
                         accept.c liste.c envoi_histo_hard.c \
-                        capteur.c
+                        capteur.c ecoute.c ssl.c handle_client \
+                        Sous_serveur.h
 
-libserveur_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
-                        `mysql_config --libs`
+libwatchdog_server_ssrv_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                                      `mysql_config --libs` \
+                                      -rdynamic \
+                                      -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libserveur_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
-                    `mysql_config --cflags`
+libwatchdog_server_ssrv_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                                     `mysql_config --cflags`
 
 INCLUDES=-I$(top_srcdir)/Include \
          -I../Include

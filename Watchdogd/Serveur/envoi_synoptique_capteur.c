@@ -33,7 +33,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_effacer_syn: Retrait du syn en parametre                                                         */
 /* Entrée: le client demandeur et le syn en question                                                      */

@@ -28,8 +28,8 @@
  #include <glib.h>
  #include <unistd.h>
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */

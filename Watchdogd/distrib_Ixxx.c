@@ -33,8 +33,48 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
 
+ static GSList *Liste_clients_motif = NULL;
+
 /**********************************************************************************************************/
-/* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
+/* Abonner_distribution_motif: Abonnement d'un thread aux diffusions d'un motif                           */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Abonner_distribution_motif ( void (*Gerer_motif) (gint num) )
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    Liste_clients_motif = g_slist_prepend( Liste_clients_motif, Gerer_motif );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Desabonner_distribution_motif: Desabonnement d'un thread aux diffusions d'un motif                     */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ void Desabonner_distribution_motif ( void (*Gerer_motif) (gint num) )
+  { pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    Liste_clients_motif = g_slist_remove( Liste_clients_motif, Gerer_motif );
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                 */
+/* Entrée : le message a envoyer                                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Envoyer_motif_aux_abonnes ( gint num )
+  { GSList *liste;
+
+    pthread_mutex_lock ( &Partage->com_msrv.synchro );
+    liste = Liste_clients_motif;
+    while (liste)                                                              /* Pour chacun des abonnes */
+     { void (*Gerer_motif) (gint num);
+       Gerer_motif = liste->data;
+       Gerer_motif ( num );
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Partage->com_msrv.synchro );
+  }
+/**********************************************************************************************************/
+/* Gerer_arrive_Ixxx_dls: Gestion de l'arrive des motifs depuis DLS                                       */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
@@ -44,7 +84,7 @@
     if (!Partage->com_msrv.liste_i) return;                                   /* Si pas de i, on se barre */
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );             /* Ajout dans la liste de msg a traiter */
-    num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);                /* Recuperation du numero de i */
+    num = GPOINTER_TO_INT(Partage->com_msrv.liste_i->data);                /* Recuperation du numero de a */
     Partage->com_msrv.liste_i = g_slist_remove ( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
     reste = g_slist_length(Partage->com_msrv.liste_i);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
@@ -54,39 +94,6 @@
               num, Partage->i[num].etat,
               Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu, reste
             );
-
-/***************************** Création de la structure passée aux clients ********************************/
-    new_motif = (struct CMD_ETAT_BIT_CTRL *) g_try_malloc0( sizeof(struct CMD_ETAT_BIT_CTRL) );
-    if (new_motif)
-     { guint i;
-
-       new_motif->num    = num;
-       new_motif->etat   = Partage->i[num].etat;
-       new_motif->rouge  = Partage->i[num].rouge;
-       new_motif->vert   = Partage->i[num].vert;
-       new_motif->bleu   = Partage->i[num].bleu;
-       new_motif->cligno = Partage->i[num].cligno;
-
-       for (i=0; i<Config.max_serveur; i++)
-        { struct CMD_ETAT_BIT_CTRL *motif_ssrv;
-          if (Partage->Sous_serveur[i].Thread_run == TRUE)
-           { motif_ssrv = (struct CMD_ETAT_BIT_CTRL *)g_try_malloc0( sizeof( struct CMD_ETAT_BIT_CTRL ) );
-             if (motif_ssrv)
-              { memcpy ( motif_ssrv, new_motif, sizeof(struct CMD_ETAT_BIT_CTRL) );            /* Recopie */
-                pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-                Partage->Sous_serveur[i].new_motif = g_list_append ( Partage->Sous_serveur[i].new_motif,
-                                                                     motif_ssrv );
-                pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-              }
-             else
-              { Info_new( Config.log, Config.log_all, LOG_ERR, "Gerer_arrive_Ixxx_dls: not enough memory" ); }
-           }
-        }
-       g_free (new_motif);
-     }
-    else
-     { Info_new( Config.log, Config.log_all, LOG_ERR, 
-                "Gerer_arrive_Ixxx_dls: Not enough memory to hangle I%03d", num );
-     }
+    Envoyer_motif_aux_abonnes ( num );
   }
 /*--------------------------------------------------------------------------------------------------------*/

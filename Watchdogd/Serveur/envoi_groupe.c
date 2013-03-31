@@ -30,9 +30,8 @@
  #include <string.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_groupe: convertit une structure GROUPE en structure CMD_TYPE_GROUPE                     */
 /* Entrée: un client et un utilisateur                                                                    */

@@ -31,7 +31,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                            */
 /* Entrée: L'element                                                                                      */

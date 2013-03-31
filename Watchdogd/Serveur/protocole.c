@@ -36,6 +36,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */

@@ -33,9 +33,8 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_editer_camera: Le client desire editer un camera                                                 */
 /* Entrée: le client demandeur et le camera en question                                                   */

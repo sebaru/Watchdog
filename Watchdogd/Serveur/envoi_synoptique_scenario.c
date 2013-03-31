@@ -33,8 +33,8 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Proto_editer_sc: Le client desire editer un sc                                                         */
 /* Entrée: le client demandeur et le sc en question                                                       */

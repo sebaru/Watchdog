@@ -108,7 +108,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Deconnecter_admin ( struct CLIENT *client )
-  { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
+  { /*Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );*/
     Fermer_connexion( client->connexion );
     Info_new( Config.log, FALSE, LOG_INFO,
               "Deconnecter_admin : connection closed with client %d", client->connexion->socket );
@@ -137,7 +137,7 @@
                       return(FALSE);                                    /* On traite bien sûr les erreurs */
                     }
 
-       client->connexion = Nouvelle_connexion( Config.log, id, Config.taille_bloc_reseau );
+       client->connexion = Nouvelle_connexion( Config.log, id, 16384 );
 
        if (!client->connexion)
         { Info_new( Config.log, FALSE, LOG_ERR,
@@ -150,10 +150,10 @@
        Clients = g_slist_prepend( Clients, client );
        Info_new( Config.log, FALSE, LOG_INFO,
                  "Accueillir_un_admin: Connexion granted to ID=%d", id );
-       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,         /* Envoi des infos internes */
-                     NULL, client->connexion->taille_bloc );
+/*       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,         /* Envoi des infos internes */
+  /*                   NULL, client->connexion->taille_bloc );
        Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
-                     NULL, 0 );
+    /*                 NULL, 0 );*/
 
        return(TRUE);
      }
@@ -165,7 +165,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_write ( struct CLIENT *client, gchar *response )
-  { Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );
+  { /*Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );*/
   }
 /**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */
@@ -188,7 +188,7 @@
                  ligne );
      }
 
-    Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );      /* Debut de la reponse */
+  /*  Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );      /* Debut de la reponse */
     g_snprintf( chaine, sizeof(chaine), "#Watchdogd*%010.1f*CLI> %s\n",
                 (gdouble)Partage->top/10.0, ligne );
     Admin_write ( client, chaine );
@@ -211,7 +211,7 @@
                }
               if (found == FALSE) { Admin_running ( client, ligne ); }
             }
-    Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );       /* Debut de la reponse */
+/*    Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );       /* Debut de la reponse */
   }
 /**********************************************************************************************************/
 /* Ecouter_admin: Ecoute ce que dis le client                                                             */

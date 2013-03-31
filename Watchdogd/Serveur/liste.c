@@ -36,8 +36,8 @@
  #include <time.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Liberer_liste: Liberation de la liste de fichiers                                                      */
 /* Entrée: la liste en cours                                                                              */

@@ -78,6 +78,7 @@
        g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
        Admin_write ( client, chaine );
      } else
+#ifdef bouh
     if ( ! strcmp ( commande, "ssrv" ) )
      { int i;
 
@@ -142,6 +143,7 @@
             }
          }
      } else
+#endif
     if ( ! strcmp ( commande, "setrootpasswd" ) )
      { struct CMD_TYPE_UTILISATEUR util;
        gchar password[80];
@@ -196,15 +198,9 @@
        Admin_write ( client, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = g_slist_length( Partage->com_msrv.liste_msg_off );            /* Recuperation du numero de i */
+       num = g_slist_length( Partage->com_msrv.liste_msg );                /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg OFF: reste %d\n", num );
-       Admin_write ( client, chaine );
-
-       pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = g_slist_length( Partage->com_msrv.liste_msg_on );             /* Recuperation du numero de i */
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg ON : reste %d\n", num );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg: reste %d\n", num );
        Admin_write ( client, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */

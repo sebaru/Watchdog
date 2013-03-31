@@ -31,9 +31,8 @@
  #include <pthread.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
-
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_histo: convertit une structure HISTO en structure CMD_TYPE_HISTO                        */
 /* Entrée: un client et un utilisateur                                                                    */

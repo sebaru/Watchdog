@@ -61,20 +61,6 @@
           else { g_snprintf( chaine, sizeof(chaine), " D.L.S started\n" );
                  Admin_write ( client, chaine );
                }
-        }  else
-       if ( ! strcmp ( thread, "ssrv" ) )
-        { if (num<0 || num>=Config.max_serveur)
-           { g_snprintf( chaine, sizeof(chaine), " num %d out of range\n", num );
-             Admin_write ( client, chaine );
-           }
-          else if (!Demarrer_sous_serveur(num))                                    /* Démarrage d'un SSRV */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb SSRV -> Arret" ); }
-          else { g_snprintf( chaine, sizeof(chaine), " SSRV started\n" );
-                 Admin_write ( client, chaine );
-               }
-          sleep(1);                  /* On attend une seconde pour donner le temps au thread de demarrer, */
-/* sinon 'Gerer_jeton' va detecter un manque de thread et en demarrer un, avec potentiellement le meme id */
-          Gerer_jeton();                                   /* Affectation du jeton a un des sous-serveurs */
         }
        else
         { GSList *liste;
@@ -170,13 +156,6 @@
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
        Admin_write ( client, chaine );
 
-       for (i=0; i<Config.max_serveur; i++)
-        { g_snprintf( chaine, sizeof(chaine), " Built-in SSRV[%d]  -> ------------- running = %s, TID = %d\n", i,
-                      (Partage->Sous_serveur[i].Thread_run ? "YES" : " NO"), (gint)Partage->Sous_serveur[i].pid
-                    );
-          Admin_write ( client, chaine );
-        }
-
        g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %d\n",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (gint)Partage->com_dls.TID
                  );
@@ -241,8 +220,8 @@
      { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
        Admin_write ( client, "  load thread          - Load a library (but not start it !)\n" );
        Admin_write ( client, "  unload thread        - Unload a library\n" );
-       Admin_write ( client, "  start thread         - Start a thread (arch,modbus,dls,ssrv num, or library name)\n" );
-       Admin_write ( client, "  stop                 - Stop thread (all,arch,modbus,dls,ssrv num, or library name)\n" );
+       Admin_write ( client, "  start thread         - Start a thread (arch,modbus,dls, or library name)\n" );
+       Admin_write ( client, "  stop                 - Stop thread (all,arch,modbus,dls, or library name)\n" );
        Admin_write ( client, "  list                 - Liste les statut des threads\n" );
        Admin_write ( client, "  RELOAD               - Reload configuration\n" );
        Admin_write ( client, "  REBOOT               - Restart all processes\n" );

@@ -42,6 +42,14 @@
     float conso;                                                     /* Consommation temporelle du plugin */
   };
 
+ enum
+  { DLS_COMPIL_ERROR_LOAD_SOURCE,
+    DLS_COMPIL_ERROR_LOAD_LOG,
+    DLS_COMPIL_ERROR_FORK_GCC,
+    DLS_COMPIL_OK_WITH_WARNINGS,
+    DLS_COMPIL_OK
+  };
+
  enum                                                              /* différent statut des temporisations */
   { TEMPO_NOT_COUNTING,                                                 /* La tempo ne compte pas du tout */
     TEMPO_WAIT_FOR_DELAI_ON,                       /* La tempo compte, en attendant le delai de mise à un */
@@ -87,6 +95,7 @@
  extern void Decharger_plugins ( void );
  extern void Charger_plugins ( void );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
+ extern gint Compiler_source_dls( gboolean new, gboolean reset, gint id );
 
  extern void Run_dls ( void );                                                          /* Dans The_dls.c */
  extern int EA_inrange( int num );

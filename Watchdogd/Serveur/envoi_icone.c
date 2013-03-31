@@ -36,8 +36,8 @@
  #include <fcntl.h>
 
 /******************************************** Prototypes de fonctions *************************************/
- #include "Reseaux.h"
  #include "watchdogd.h"
+ #include "Sous_serveur.h"
 /**********************************************************************************************************/
 /* Preparer_envoi_icone: convertit une structure MSG en structure CMD_TYPE_ICONE                          */
 /* Entrée: un client et un utilisateur                                                                    */

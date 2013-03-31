@@ -371,27 +371,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Demarrer_sous_serveur: Fork un sous_serveur                                                            */
-/* Entrée: l'id du fils                                                                                   */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_sous_serveur ( int id )
-  { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Demarrer_sous_serveur: Demande de demarrage %d", id );
-    if (Partage->Sous_serveur[id].Thread_run == TRUE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Demarrer_sous_serveur: An instance is already running",
-               Partage->Sous_serveur[id].pid );
-       return(FALSE);
-     }
-
-    if ( pthread_create( &Partage->Sous_serveur[id].pid, NULL, (void *)Run_serveur, GINT_TO_POINTER(id) ) )
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Demarrer_sous_serveur: pthread_create failed %s", strerror(errno) );
-       return(FALSE);
-     }
-    else pthread_detach( Partage->Sous_serveur[id].pid );            /* On détache le thread Sous-Serveur */
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Demarrer_sous_serveur: thread (%d) seems to be running", id );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Demarrer_dls: Thread un process DLS                                                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
@@ -457,156 +436,12 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Rechercher_empl_libre: recherche un emplacement libre dans la zone partagée Sous_serveur               */
-/* Entrée: rien                                                                                           */
-/* Sortie: la place libre, ou -1 si erreur                                                                */
-/**********************************************************************************************************/
- static gint Rechercher_empl_libre ( void )
-  { gint i;
-    for (i=0; i<Config.max_serveur; i++)      /* Recherche d'un emplacement libre pour le nouveau serveur */
-     { if (Partage->Sous_serveur[i].Thread_run == FALSE) return(i); }
-    return(-1);
-  }
-/**********************************************************************************************************/
-/* Rechercher_serveur_inactif: Recherche un serveur actuellement sans connexion cliente                   */
-/* Entrée: rien                                                                                           */
-/* Sortie: l'id du serveur inactif, ou -1 si il n'y en a pas                                              */
-/**********************************************************************************************************/
- static gint Rechercher_serveur_inactif ( void )
-  { gint i, nb_client;
-    for (i=0; i<Config.max_serveur; i++)                                /* Recherche d'un serveur inactif */
-     { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-       nb_client = g_list_length( Partage->Sous_serveur[i].Clients );
-       pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-          
-       if (Partage->Sous_serveur[i].Thread_run == TRUE && nb_client == 0) return(i);
-     }
-    return(-1);
-  }
-/**********************************************************************************************************/
-/* Rechercher_moins_occupe: Recherche un serveur legerement chargé                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: l'id du serveur ou -1 si il n'y en a pas                                                       */
-/**********************************************************************************************************/
- static gint Rechercher_moins_occupe ( void )
-  { gint i, choix, nb_client_i, nb_client_choix;
-    choix = -1;                                                     /* On début, nous n'avons rien choisi */
-    for (i=0; i<Config.max_serveur; i++)            /* Recherche d'un serveur moins chargé que les autres */
-     { if (Partage->Sous_serveur[i].Thread_run == TRUE)
-        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-          nb_client_i = g_list_length( Partage->Sous_serveur[i].Clients );
-          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-       
-          if (choix==-1) choix = i;                                                   /* Premier choix !! */
-          else { pthread_mutex_lock( &Partage->Sous_serveur[choix].synchro );
-                 nb_client_choix = g_list_length( Partage->Sous_serveur[choix].Clients );
-                 pthread_mutex_unlock( &Partage->Sous_serveur[choix].synchro );
-                 if (nb_client_i < nb_client_choix) { choix = i; }
-               }
-        }
-     }
-    return(choix);
-  }
-/**********************************************************************************************************/
-/* Nb_clients: Nombre de clients connectés au système                                                     */
-/* Entrée: rien                                                                                           */
-/* Sortie: un entier !!                                                                                   */
-/**********************************************************************************************************/
- static gint Nb_clients ( void )
-  { gint i, nb;
-    nb = 0;                                                         /* On début, nous n'avons rien choisi */
-    for (i=0; i<Config.max_serveur; i++)                                /* Recherche de tous les serveurs */
-     { if (Partage->Sous_serveur[i].Thread_run == TRUE)
-        { gint nb_client;
-          pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-          nb_client = g_list_length( Partage->Sous_serveur[i].Clients );
-          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-       
-          nb += nb_client;
-        }
-     }
-    return(nb);
-  }
-
-/**********************************************************************************************************/
-/* Gerer_jeton: Donne le jeton au process le moins chargé.                                                */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Gerer_jeton ( void )
-  { gint i;
-/*************************************** Calcul du nouveau jeton ******************************************/
-    if (Partage->jeton == -1 && Nb_clients() < Config.max_client )             /* Calcul du nouveau jeton */
-     { i = Rechercher_serveur_inactif();                           /* A la recherche d'un serveur inactif */
-       if (i!=-1)                                             /* Si c'est le cas, on lui assigne le jeton */
-        { Partage->jeton = i;
-          Info_new( Config.log, Config.log_all, LOG_INFO,
-                   "Gerer_jeton: serveur sans client trouve id=%d", i );
-        }
-       else                  /* Tous nos serveurs sont utilisés, il faut donc soit créer un autre serveur */
-        {                                            /* soit donner la connexion à un serveur deja occupé */
-          Info_new( Config.log, Config.log_all, LOG_DEBUG, "Gerer_jeton: Recherche d'un emplacement libre" );
-          i = Rechercher_empl_libre();
-          if (i != -1)
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE,
-                       "Gerer_jeton: Creation d'un nouveau ssrv id = %d", i );
-             if (Demarrer_sous_serveur(i))
-              { Partage->jeton = i;                                              /* On lui donne le jeton */
-              }
-             else
-              { Info_new( Config.log, Config.log_all, LOG_WARNING, "Gerer_jeton: creation nouveau ssrv failed" ); }
-           }
-          else         /* On ne peut plus creer de sous serveur, on attribue la connexion au moins occupé */
-           { Info_new( Config.log, Config.log_all, LOG_DEBUG, "Gerer_jeton: Recherche du ssrv le moins chargé" );
-             i = Rechercher_moins_occupe();
-             if (i != -1)
-              { Partage->jeton = i;                                              /* On lui donne le jeton */
-              }
-             else
-              { Info_new( Config.log, Config.log_all, LOG_WARNING, "Gerer_jeton: rechercher_moins_occupe failed" );
-              }
-           }
-        }
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Gerer_jeton: jeton to server %d", i );
-     }
-  }
-/**********************************************************************************************************/
-/* Gerer_manque_process: Gestion des ss en cas de manque à l'écoute                                       */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Gerer_manque_process ( void )
-  { gint i, nbr_ssrv;
-
-    nbr_ssrv=0;
-    for (i=0; i<Config.max_serveur; i++)                                /* Recherche de tous les serveurs */
-     { if (Partage->Sous_serveur[i].Thread_run == TRUE) nbr_ssrv++;
-     }
-
-    if (nbr_ssrv >= Config.min_serveur) return;               /* Si nous avons trop peu de serveur online */
-
-    i = Rechercher_empl_libre();
-    if (i!=-1)
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
-                 "Gerer_manque_process: Too few servers, we create a new one (id=%d)", i );
-       Demarrer_sous_serveur(i);
-     }
-  }
-/**********************************************************************************************************/
 /* Stopper_fils: arret de tous les fils Watchdog                                                          */
 /* Entrée/Sortie: flag = TRUE si on demande aussi l'arret du thread Admin                                 */
 /**********************************************************************************************************/
  void Stopper_fils ( gint flag )
   { gint i;
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Debut stopper_fils" );
-
-    for (i=0; i<Config.max_serveur; i++)                   /* Arret de tous les fils en cours d'execution */
-     { if (Partage->Sous_serveur[i].Thread_run == TRUE)                    /* Attente de la fin du fils i */
-        { Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for SSRV (%d) to finish",
-                                          Partage->Sous_serveur[i].pid );
-          Partage->Sous_serveur[i].Thread_run = FALSE;             /* Attention, les thread sont detach ! */
-          while (Partage->Sous_serveur[i].pid) sched_yield();
-          Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: ok, SSRV (%d) down", i );
-        }
-     }
 
     Info_new( Config.log, Config.log_all, LOG_WARNING, "Stopper_fils: Waiting for DLS (%d) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;

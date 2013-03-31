@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi.c        Procedures d'envoi de données au(x) client(s) connecté(s)             */
+/* Watchdogd/envoi.c        Procedures d'envoi de données au(x) client(s) connecté(s)                     */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       ven 04 mar 2005 10:16:04 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -76,6 +76,7 @@
     else client->defaut=0;                                                    /* Ok, pas de defaut client */
     return(retour);
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Envoi_clients: Envoi le buffer à tous les clients connectés au système                                 */
 /* Entrée: le buffer à envoyer                                                                            */
@@ -90,6 +91,7 @@
        liste=liste->next;
      }
   }
+#endif
 /**********************************************************************************************************/
 /* Envoyer_donnees: Transmet les données pour le fonctionnement correct du client distant                 */
 /* Entrée: structure cliente distante                                                                     */

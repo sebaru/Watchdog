@@ -27,20 +27,49 @@
  
  #ifndef _PROTO_SRV_H_
  #define _PROTO_SRV_H_
- #include <glib.h>
+ #include <openssl/rsa.h>
+ #include <openssl/ssl.h>
+ #include <openssl/err.h>
 
- struct SOUS_SERVEUR
-  { pthread_t pid;
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    GList *Clients;                                         /* La liste des clients qui se sont connectés */
-    guint inactivite;                                            /* Dernier top d'activité avec un client */
-    GList *new_histo;                                                     /* Envoi d'un histo aux clients */
-    GList *del_histo;                                                    /* Destruction d'un histo client */
-    GList *new_motif;                                                        /* Changement lié à un motif */
-  };
+ #include "Client.h"
+
+ #define DEFAUT_PORT                    5558
+ #define DEFAUT_MAX_CLIENT              100
+ #define DEFAUT_MIN_SERVEUR             1
+ #define DEFAUT_MAX_SERVEUR             3
+ #define DEFAUT_MAX_INACTIVITE          600
+ #define DEFAUT_TAILLE_CLEF_DH          512
+ #define DEFAUT_TAILLE_CLEF_RSA         2048
+ #define DEFAUT_SSL_CRYPT               0
+ #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */
+ #define DEFAUT_TAILLE_BLOC_RESEAU      8192
+ #define DEFAUT_MAX_LOGIN_FAILED        3
+ #define FICHIER_CERTIF_CA             "cacert.pem"
+ #define FICHIER_CERTIF_SERVEUR        "serveursigne.pem"
+ #define FICHIER_CERTIF_CLEF_SERVEUR   "serveurkey.pem"
+ #define FICHIER_CLEF_PUB_RSA          "watchdogd.pub.rsa" 
+ #define FICHIER_CLEF_SEC_RSA          "watchdogd.sec.rsa" 
+
+ struct SSRV_CONFIG
+  { struct LIBRAIRIE *lib;
+    gint Socket_ecoute;                                      /* Socket de connexion (d'écoute) du serveur */
+    SSL_CTX *Ssl_ctx;                                              /* Contexte de cryptage des connexions */
+    gint  port;                                                    /* Port d'ecoute des requetes clientes */
+    gint  max_client;                  /* Nombre maximum de client qui peuvent se connecter en meme temps */
+    gint  min_serveur;                                     /* Nombre de server min à lancer en même temps */
+    gint  max_serveur;                                     /* Nombre de server max à lancer en même temps */
+    gint  max_inactivite;                                            /* temps max d'inactivite du serveur */
+    gint  max_login_failed;                      /* Nombre de tentative de connexion failed avant blocage */
+    gint  taille_clef_dh;                                       /* Taille en bits de la clef DH de codage */
+    gint  taille_clef_rsa;                                     /* Taille en bits de la clef RSA de codage */
+    gint  taille_bloc_reseau;
+    gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
+    gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
+    RSA *rsa;                                                      /* Clefs publique et privée du serveur */
+    GSList *Clients;                                             /* Liste des clients en cours de gestion */
+    GList *Liste_msg;                                                     /* Envoi d'un histo aux clients */
+    GList *Liste_motif;                                                  /* Destruction d'un histo client */
+  } Cfg_ssrv;
 
  struct CAPTEUR
   { gint   type;                                                               /* type du bit de controle */
@@ -53,9 +82,12 @@
                                                                                         /* Dans serveur.c */
  extern void Unref_client ( struct CLIENT *client );
  extern void Ref_client ( struct CLIENT *client );
- extern void Run_serveur ( gint id );                                                   /* Dans serveur.c */
+ extern void Run_handle_client ( struct CLIENT *client );
 
  extern void Ecouter_client ( gint Id_serveur, struct CLIENT *client );               /* Dans protocole.c */
+
+ extern void Liberer_SSL ( void );                                                          /* Dans ssl.c */ 
+ extern void Init_RSA ( void );
 
                                                                                   /* Dans protocole_***.c */
  extern void Gerer_protocole_atelier( gint Id_serveur, struct CLIENT *client );
@@ -79,6 +111,11 @@
  gboolean Envoyer_gif( struct CLIENT *client );
 
  extern gboolean Envoyer_palette( struct CLIENT *client );                            /* Dans envoi_syn.c */
+
+ extern SSL_CTX *Init_ssl ( void );                                                         /* Dans ssl.c */
+
+ extern void Connecter_ssl( struct CLIENT *client );                                     /* Dans accept.c */
+
 
  extern gint Ajouter_repertoire_liste( struct CLIENT *client, gchar *Repertoire,          /* Dans liste.c */
                                        time_t version_d_client );
@@ -116,7 +153,6 @@
  extern gboolean Envoyer_source_dls ( struct CLIENT *client );
  extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
                                        gchar *buffer );
- extern void Compiler_source_dls( struct CLIENT *client, gint id );
  extern void *Proto_compiler_source_dls( struct CLIENT *client );
  extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls );
  extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );

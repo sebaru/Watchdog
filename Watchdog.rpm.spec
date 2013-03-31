@@ -78,6 +78,18 @@ This is the server side of Watchdog
 %doc /usr/share/Watchdog/motion.conf
 %doc /usr/share/Watchdog/cam0001.conf
 
+#----------------------------- Package Server-ssrv ----------------------------------
+%package server-ssrv
+Summary: The Watchdogd Server - Module SSRV
+Group:                  Development/Tools
+requires: Watchdog-server
+%description server-ssrv
+This is the server side of Watchdog - SSRV Module
+
+%files server-ssrv
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-ssrv*
+
 #----------------------------- Package Server-sms ----------------------------------
 %package server-sms
 Summary: The Watchdogd Server - Module SMS

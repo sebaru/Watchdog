@@ -41,7 +41,7 @@
  #include "Rs485.h"
 
 /**********************************************************************************************************/
-/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                              */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -74,7 +74,7 @@
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
-/* Rs485_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                  */
+/* Rs485_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                 */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
