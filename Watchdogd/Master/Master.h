@@ -40,6 +40,8 @@
     gint s_min, s_max;
     gint sa_min, sa_max;
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
+    gchar ip[32];                                                                  /* Adresse IP du slave */
+    guint port;
   };
 
  struct SLAVE
@@ -54,6 +56,7 @@
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
+    gboolean master_enable;                                            /* True si le thread est un master */
     GSList *Liste_message;                                         /* liste de struct MSGDB msg a envoyer */
     GSList *Liste_sortie;                                          /* liste de struct MSGDB msg a envoyer */
     GSList *Slaves;                                                /* Leste des clients (slave) connectés */

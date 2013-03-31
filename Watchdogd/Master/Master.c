@@ -54,8 +54,9 @@
     Cfg_master.lib->Thread_debug = g_key_file_get_boolean ( gkf, "MASTER", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
 
-    Cfg_master.enable = g_key_file_get_boolean ( gkf, "MASTER", "enable", NULL ); 
-    Cfg_master.port   = g_key_file_get_integer ( gkf, "MASTER", "port", NULL );
+    Cfg_master.enable        = g_key_file_get_boolean ( gkf, "MASTER", "enable", NULL ); 
+    Cfg_master.master_enable = g_key_file_get_boolean ( gkf, "MASTER", "master_enable", NULL ); 
+    Cfg_master.port          = g_key_file_get_integer ( gkf, "MASTER", "port", NULL );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
@@ -120,7 +121,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
-                "sa_min,sa_max,s_min,s_max"
+                "sa_min,sa_max,s_min,s_max,ip,port"
                 " FROM %s ORDER BY num", NOM_TABLE_SLAVES );
 
     return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
@@ -144,6 +145,7 @@
                           "Recuperer_slaveDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &slave->libelle, db->row[2], sizeof(slave->libelle) );
+       memcpy( &slave->ip,      db->row[12], sizeof(slave->ip) );
        slave->id                = atoi(db->row[0]);
        slave->bit_comm          = atoi(db->row[1]);
        slave->enable            = atoi(db->row[3]);
@@ -155,6 +157,7 @@
        slave->sa_max            = atoi(db->row[9]);
        slave->s_min             = atoi(db->row[10]);
        slave->s_max             = atoi(db->row[11]);
+       slave->port              = atoi(db->row[13]);
      }
     return(slave);
   }
@@ -241,6 +244,20 @@
     soup_message_set_status (msg, 0 ); /* On renvoie 0 all is good */
   }  
 /**********************************************************************************************************/
+/* Envoyer_les_sorties_aux_slaves : se connecte à tous les slaves pour leur envoyer les sorties           */
+/* Entrée : rien, sortie : rien                                                                           */
+/**********************************************************************************************************/
+ static void Envoyer_les_sorties_aux_slaves ( void )
+  { guint num_a;
+
+    while (Cfg_master.Liste_sortie)
+     { pthread_mutex_lock( &Cfg_master.lib->synchro );              /* Ajout dans la liste de tell a traiter */
+       num_a = GPOINTER_TO_INT(Cfg_master.Liste_sortie->data);
+       Cfg_master.Liste_sortie = g_slist_remove( Cfg_master.Liste_sortie, GINT_TO_POINTER(num_a) );
+       pthread_mutex_unlock( &Cfg_master.lib->synchro );
+     }
+  }
+/**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
 /* Entrée: une structure LIBRAIRIE                                                                        */
 /* Sortie: Niet                                                                                           */
@@ -274,12 +291,17 @@
        goto end;
      }
 
-    Charger_tous_slave();
     soup_server_add_handler ( Cfg_master.server, "/set_internal_bit", Master_CB, NULL, NULL );
     soup_server_run_async   ( Cfg_master.server );
 
-    Abonner_distribution_message ( Master_Gerer_message );      /* Abonnement à la diffusion des messages */
-    Abonner_distribution_sortie  ( Master_Gerer_sortie );        /* Abonnement à la diffusion des sorties */
+    if (Cfg_master.master_enable)                                              /* Sommes-nous un maitre ? */
+     { Charger_tous_slave();
+       Abonner_distribution_message ( Master_Gerer_message );   /* Abonnement à la diffusion des messages */
+       Abonner_distribution_sortie  ( Master_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
+     } else /* Sinon, on est un slave !! */
+     {/* Abonner_distribution_entree ( Master_Gerer_message );   /* Abonnement à la diffusion des messages */
+      /* Abonner_distribution_entreeANA ( Master_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
+     }
 
     Cfg_master.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
     while(Cfg_master.lib->Thread_run == TRUE)                            /* On tourne tant que necessaire */
@@ -299,16 +321,23 @@
           Cfg_master.lib->Thread_sigusr1 = FALSE;
         }
 
+       Envoyer_les_sorties_aux_slaves();
+
        g_main_context_iteration ( Cfg_master.context, FALSE );
      }
 
-    Desabonner_distribution_sortie  ( Master_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
-    Desabonner_distribution_message ( Master_Gerer_message );/* Desabonnement de la diffusion des messages */
+    if (Cfg_master.master_enable)                                              /* Sommes-nous un maitre ? */
+     { Desabonner_distribution_sortie  ( Master_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
+       Desabonner_distribution_message ( Master_Gerer_message );/* Desabonnement de la diffusion des messages */
+     } else /* Sinon, on est un slave !! */
+     {/* Desabonner_distribution_entree ( Master_Gerer_message );   /* Abonnement à la diffusion des messages */
+      /* Desabonner_distribution_entreeANA ( Master_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
+     }
 
     soup_server_disconnect ( Cfg_master.server);
     g_main_context_unref (Cfg_master.context );
 
-    Decharger_tous_slave();
+    if (Cfg_master.master_enable) Decharger_tous_slave();
 
 end:
     Master_Liberer_config();                                  /* Liberation de la configuration du thread */

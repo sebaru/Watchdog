@@ -713,6 +713,8 @@ CREATE TABLE IF NOT EXISTS `slaves` (
   `sa_max` int(11) NOT NULL DEFAULT '-1',
   `bit_comm` int(11) NOT NULL DEFAULT '0',
   `libelle` text NOT NULL,
+  `ip` text NOT NULL,
+  `port` int(11) NOT NULL DEFAULT '5559',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
