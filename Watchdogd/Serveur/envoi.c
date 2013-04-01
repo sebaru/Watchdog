@@ -34,7 +34,7 @@
  #define DEFAUT_MAX 3
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
- #include "Client.h"
+ #include "Sous_serveur.h"
 
 /**********************************************************************************************************/
 /* Envoi_client: Envoi le buffer au client id                                                             */

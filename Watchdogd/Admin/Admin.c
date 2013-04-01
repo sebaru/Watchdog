@@ -265,7 +265,8 @@
            { connexion = (struct CONNEXION *)liste->data;
 
              if ( time(NULL) > connexion->last_use + 300 )    /* Deconnexion = 300 secondes si inactivité */
-              { Deconnecter_admin ( connexion ); 
+              { Info_new( Config.log, FALSE, LOG_INFO, "Run_admin: Deconnexion Admin sur inactivite" );
+                Deconnecter_admin ( connexion ); 
                 liste = Clients;
                 continue;
               }

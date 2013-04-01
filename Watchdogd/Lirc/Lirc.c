@@ -61,11 +61,11 @@
   {
   }
 /**********************************************************************************************************/
-/* Admin_command : Fonction appelé lorsque le client envoi une commande d'admin pour LIRC                 */
-/* Entrée: Le client d'admin et la ligne de commande                                                      */
+/* Admin_command : Fonction appelé lorsque le connexion envoi une commande d'admin pour LIRC                 */
+/* Entrée: Le connexion d'admin et la ligne de commande                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_command ( struct CLIENT_ADMIN *client, gchar *ligne )
+ static void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   {
   }
 /**********************************************************************************************************/

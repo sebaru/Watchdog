@@ -101,6 +101,7 @@ one_again:
     connexion->taille_bloc   = taille_bloc;
     connexion->ssl           = NULL;
     connexion->log           = Log;
+    connexion->last_use = time(NULL);
 
     pthread_mutex_init( &connexion->mutex_write, NULL );                  /* Init mutex d'ecriture reseau */
     if (taille_bloc != -1)           /* taille != -1 pour le cote serveur Watchdog, -1 pour les clients ! */

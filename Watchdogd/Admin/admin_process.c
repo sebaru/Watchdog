@@ -151,7 +151,6 @@
      } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar chaine[128];
-       guint i;
 
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
        Admin_write ( connexion, chaine );
