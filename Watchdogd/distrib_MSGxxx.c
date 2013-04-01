@@ -38,7 +38,7 @@
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Abonner_distribution_message ( void (*Gerer_message) (guint num) )
+ void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
   { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
     Partage->com_msrv.Liste_abonne_msg = g_slist_prepend( Partage->com_msrv.Liste_abonne_msg, Gerer_message );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
@@ -48,7 +48,7 @@
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Desabonner_distribution_message ( void (*Gerer_message) (guint num) )
+ void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) )
   { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
     Partage->com_msrv.Liste_abonne_msg = g_slist_remove( Partage->com_msrv.Liste_abonne_msg, Gerer_message );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
@@ -58,15 +58,20 @@
 /* Entrée : le message a envoyer                                                                          */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_message_aux_abonnes ( guint num )
+ static void Envoyer_message_aux_abonnes ( struct CMD_TYPE_MESSAGE *msg )
   { GSList *liste;
 
     pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
     liste = Partage->com_msrv.Liste_abonne_msg;
     while (liste)                                                              /* Pour chacun des abonnes */
-     { void (*Gerer_message) (guint num);
-       Gerer_message = liste->data;
-       Gerer_message ( num );
+     { void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg);
+       struct CMD_TYPE_MESSAGE *dup_msg;
+       dup_msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0(sizeof(struct CMD_TYPE_MESSAGE));
+       if (dup_msg)
+        { Gerer_message = liste->data;
+          memcpy ( dup_msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );
+          Gerer_message (dup_msg);
+        }
        liste = liste->next;
      }
     pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
@@ -76,7 +81,8 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_message_repeat ( struct DB *Db_watchdog )
-  { GSList *liste;
+  { struct CMD_TYPE_MESSAGE *msg;
+    GSList *liste;
     gint num;
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
@@ -85,11 +91,10 @@
      { num = GPOINTER_TO_INT(liste->data);                               /* Recuperation du numero de msg */
 
        if (Partage->g[num].next_repeat <= Partage->top)
-        { Envoyer_message_aux_abonnes ( num );
-#warning To Clean !!
-#ifdef bouh
+        { msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
+          Envoyer_message_aux_abonnes ( msg );
           Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
-#endif
+          g_free(msg);
         }
        liste = liste->next;
      }
@@ -100,8 +105,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_on ( struct DB *Db_watchdog, gint num )
-  { struct CMD_TYPE_HISTO *new_histo;
-    struct CMD_TYPE_MESSAGE *msg;
+  { struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
     struct timeval tv;
 
@@ -137,7 +141,7 @@
     Ajouter_histoDB( Config.log, Db_watchdog, &histo );                            /* Si ajout dans DB OK */
 
 /********************************************* Envoi du message aux librairies abonnées *******************/
-    Envoyer_message_aux_abonnes ( num );
+    Envoyer_message_aux_abonnes ( msg );
 
     g_free( msg );                                                 /* On a plus besoin de cette reference */
   }
@@ -147,10 +151,16 @@
 /**********************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_off ( struct DB *Db_watchdog, gint num )
   { /* Le virer de la base histoDB */
-    struct CMD_TYPE_HISTO *del_histo;
+    struct CMD_TYPE_MESSAGE *msg;
     struct HISTO_HARDDB histo_hard;
     struct HISTODB *histo;
-    guint i;
+
+    msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
+    if (!msg)
+     { Info_new( Config.log, Config.log_all, LOG_INFO, 
+                "Gerer_arrive_message_dls_off: Message %03d not found", num );
+       return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
+     }
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Retrait de la liste des messages en REPEAT */
     Partage->com_msrv.liste_msg_repeat = g_slist_remove ( Partage->com_msrv.liste_msg_repeat,
@@ -158,7 +168,8 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
 /********************************************* Envoi du message aux librairies abonnées *******************/
-    Envoyer_message_aux_abonnes ( num );
+    Envoyer_message_aux_abonnes ( msg );
+    g_free(msg);
 
     histo = Rechercher_histoDB( Config.log, Db_watchdog, num );
     if (!histo) return;

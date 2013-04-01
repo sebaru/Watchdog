@@ -57,7 +57,7 @@
        case SSTAG_CLIENT_REQUEST:
              { struct CMD_TYPE_ADMIN *admin;
                admin = (struct CMD_TYPE_ADMIN *)connexion->donnees;
-               Processer_commande_admin ( client, admin->buffer );
+               Processer_commande_admin ( client->connexion, client->util->nom, client->machine, admin->buffer );
              }
             break;
 

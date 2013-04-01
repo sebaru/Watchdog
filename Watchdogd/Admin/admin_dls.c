@@ -30,26 +30,26 @@
 
 /**********************************************************************************************************/
 /* Admin_dls_reload: Demande le rechargement des conf DLS                                                 */
-/* Entrée: le client                                                                                      */
+/* Entrée: le connexion                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_dls_reload ( struct CLIENT *client )
+ static void Admin_dls_reload ( struct CONNEXION *connexion )
   { Partage->com_dls.Thread_reload = TRUE;
-    Admin_write ( client, " DLS Reloading in progress\n" );
+    Admin_write ( connexion, " DLS Reloading in progress\n" );
     while (Partage->com_dls.Thread_reload) sched_yield();
-    Admin_write ( client, " DLS Reloading done\n" );
+    Admin_write ( connexion, " DLS Reloading done\n" );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_list ( struct CLIENT *client )
+ static void Admin_dls_list ( struct CONNEXION *connexion )
   { GList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
      
     pthread_mutex_lock( &Partage->com_dls.synchro );
     liste_dls = Partage->com_dls.Plugins;
@@ -59,7 +59,7 @@
 
        g_snprintf( chaine, sizeof(chaine), " DLS[%03d] -> actif=%d, conso=%4.03f, nom=%s\n",
                            dls->plugindb.id, dls->plugindb.on, dls->conso, dls->plugindb.nom );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
        liste_dls = liste_dls->next;
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -69,12 +69,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_gcc ( struct CLIENT *client, gint id )
+ static void Admin_dls_gcc ( struct CONNEXION *connexion, gint id )
   { GList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     if (id == -1)
      { pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Lock du mutex */
@@ -84,19 +84,19 @@
           dls = (struct PLUGIN_DLS *)liste_dls->data;
 
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
           Compiler_source_dls ( FALSE, TRUE, dls->plugindb.id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
           liste_dls = liste_dls->next;
         }
        pthread_mutex_unlock( &Partage->com_dls.synchro );
      } else
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
           Compiler_source_dls ( FALSE, TRUE, id );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
   }
 /**********************************************************************************************************/
@@ -104,12 +104,12 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_start ( struct CLIENT *client, gint id )
+ static void Admin_dls_start ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un plugin D.L.S\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     while (Partage->com_dls.admin_start) sched_yield();
     Partage->com_dls.admin_start = id;
@@ -133,19 +133,19 @@
     Libere_DB_SQL( Config.log, &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d started\n", id );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_dls_stop ( struct CLIENT *client, gint id )
+ static void Admin_dls_stop ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128], requete[128];
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " -- Arret d'un plugin D.L.S\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     while (Partage->com_dls.admin_stop) sched_yield();
     Partage->com_dls.admin_stop = id;
@@ -169,14 +169,14 @@
     Libere_DB_SQL( Config.log, &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d stopped\n", id );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_dls: Appellée lorsque l'admin envoie une commande en mode dls dans la ligne de commande          */
-/* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_dls ( struct CLIENT *client, gchar *ligne )
+ void Admin_dls ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -184,36 +184,36 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_dls_start ( client, num );
+       Admin_dls_start ( connexion, num );
      }
     else if ( ! strcmp ( commande, "gcc" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_dls_gcc ( client, num );
+       Admin_dls_gcc ( connexion, num );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_dls_stop ( client, num );
+       Admin_dls_stop ( connexion, num );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_dls_list ( client );
+     { Admin_dls_list ( connexion );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_dls_reload( client );
+     { Admin_dls_reload( connexion );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n" );
-       Admin_write ( client, "  start id                               - Demarre le module id\n" );
-       Admin_write ( client, "  stop id                                - Stop le module id\n" );
-       Admin_write ( client, "  list                                   - D.L.S. Status\n" );
-       Admin_write ( client, "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
-       Admin_write ( client, "  reload                                 - Recharge la configuration\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n" );
+       Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
+       Admin_write ( connexion, "  stop id                                - Stop le module id\n" );
+       Admin_write ( connexion, "  list                                   - D.L.S. Status\n" );
+       Admin_write ( connexion, "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
+       Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown DLS command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

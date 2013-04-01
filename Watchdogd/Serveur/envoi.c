@@ -34,6 +34,7 @@
  #define DEFAUT_MAX 3
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
+ #include "Client.h"
 
 /**********************************************************************************************************/
 /* Envoi_client: Envoi le buffer au client id                                                             */
@@ -53,9 +54,7 @@
     while (Attendre_envoi_disponible( client->connexion )) sched_yield();
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           
-    pthread_mutex_lock( &client->mutex_write );
     retour = Envoyer_reseau( client->connexion, tag, ss_tag, buffer, taille );
-    pthread_mutex_unlock( &client->mutex_write );
     if (retour)
      { client->defaut++;
        Info_new( Config.log, Config.log_all, LOG_WARNING,

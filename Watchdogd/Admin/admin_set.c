@@ -31,24 +31,24 @@
 
 /**********************************************************************************************************/
 /* Admin_set: Gere une commande 'admin set' depuis une connexion admin                                    */
-/* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_set ( struct CLIENT *client, gchar *ligne )
+ void Admin_set ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
-       Admin_write ( client, "  e num val             - Set E[num]   = val\n" );
-       Admin_write ( client, "  m num val             - Set M[num]   = val\n" );
-       Admin_write ( client, "  b num val             - Set B[num]   = val\n" );
-       Admin_write ( client, "  a num val             - Set A[num]   = val\n" );
-       Admin_write ( client, "  msg num val           - Set MSG[num] = val\n" );
-       Admin_write ( client, "  i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno\n" );
-       Admin_write ( client, "  ch num val actif      - Set CH[num]  = val, actif\n" );
-       Admin_write ( client, "  ci num val            - Set CI[num]  = val\n" );
-       Admin_write ( client, "  help                  - This help\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
+       Admin_write ( connexion, "  e num val             - Set E[num]   = val\n" );
+       Admin_write ( connexion, "  m num val             - Set M[num]   = val\n" );
+       Admin_write ( connexion, "  b num val             - Set B[num]   = val\n" );
+       Admin_write ( connexion, "  a num val             - Set A[num]   = val\n" );
+       Admin_write ( connexion, "  msg num val           - Set MSG[num] = val\n" );
+       Admin_write ( connexion, "  i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno\n" );
+       Admin_write ( connexion, "  ch num val actif      - Set CH[num]  = val, actif\n" );
+       Admin_write ( connexion, "  ci num val            - Set CI[num]  = val\n" );
+       Admin_write ( connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num, val, actif;
@@ -59,7 +59,7 @@
           g_snprintf( chaine, sizeof(chaine), " CH%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ci" ) )
      { int num, val;
@@ -71,7 +71,7 @@
           g_snprintf( chaine, sizeof(chaine), " CI%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CI -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num, etat, rouge, vert, bleu, cligno;                     /* Découpage de la ligne de commande */
@@ -87,7 +87,7 @@
                       Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " I -> num '%d' out of range\n", num ); }
-        Admin_write ( client, chaine );
+        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { int num, val;
@@ -97,7 +97,7 @@
           g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num, val;
@@ -107,7 +107,7 @@
           g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " E -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num, val;
@@ -118,7 +118,7 @@
           g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " M -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num, val;
@@ -128,7 +128,7 @@
           g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " B -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "a" ) )
      { int num, val;
@@ -138,10 +138,10 @@
           g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " A -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

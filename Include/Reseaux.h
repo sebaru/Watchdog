@@ -29,6 +29,7 @@
  #define _RESEAUX_H_
 
  #include <glib.h>
+ #include <pthread.h>
  #include <openssl/ssl.h>
  #include "Erreur.h"
  #include "Reseaux_gtk_message.h"
@@ -67,11 +68,12 @@
  struct CONNEXION
   { struct ENTETE_CONNEXION entete;
     gchar  *donnees;
-    gint32   index_entete;
-    gint32   index_donnees;
-    gint32   taille_bloc;
-    gint32   socket;
-    gint32   emetteur;
+    gint32  index_entete;
+    gint32  index_donnees;
+    gint32  taille_bloc;
+    gint32  socket;
+    pthread_mutex_t mutex_write;              /* Zone critique: envoi des données au client par le reseau */
+    time_t last_use;
     SSL    *ssl;
     struct LOG *log;
   };

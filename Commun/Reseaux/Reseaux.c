@@ -102,6 +102,7 @@ one_again:
     connexion->ssl           = NULL;
     connexion->log           = Log;
 
+    pthread_mutex_init( &connexion->mutex_write, NULL );                  /* Init mutex d'ecriture reseau */
     if (taille_bloc != -1)           /* taille != -1 pour le cote serveur Watchdog, -1 pour les clients ! */
      { connexion->donnees = g_try_malloc0( taille_bloc );
        if (!connexion->donnees)
@@ -127,6 +128,7 @@ one_again:
     if (connexion->ssl) { SSL_shutdown( connexion->ssl );
                           SSL_free( connexion->ssl );
                         }
+    pthread_mutex_destroy( &connexion->mutex_write );
     close ( connexion->socket );
     g_free(connexion);
   }
@@ -220,6 +222,7 @@ one_again:
           connexion->index_donnees = 0;
           Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue %d donnees", connexion->entete.taille_donnees );
+          connexion->last_use = time(NULL);
           return(RECU_OK);
         }
        if (connexion->ssl)
@@ -287,6 +290,7 @@ one_again:
              connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
+    pthread_mutex_lock( &connexion->mutex_write );
     while(cpt)
      {
 encore_entete:
@@ -304,12 +308,12 @@ encore_entete:
                        ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
            }
           if (err == EAGAIN) goto encore_entete;
-          return(err);
+          break;                                                                    /* Si erreur, on sort */
         }          
        cpt -= retour;
      }
 
-    if (buffer && tag != TAG_INTERNAL)                                /* Preparation de l'envoi du buffer */
+    if (retour && buffer && (tag != TAG_INTERNAL))                    /* Preparation de l'envoi du buffer */
      {  cpt = 0;
        while(cpt < Entete.taille_donnees)
         {
@@ -335,12 +339,15 @@ encore_buffer:
                           ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
               }
              if (err == EAGAIN) goto encore_buffer;
-             return(err);
+             break;                                                                    /* Si erreur, on sort */
            } 
           cpt += retour;
         }
      }
-    return(0);
+    pthread_mutex_unlock( &connexion->mutex_write );
+
+    if (retour<=0) return(err);
+    else           return(0);
   }
 /**********************************************************************************************************/
 /* Reseau_tag: Renvoi le numero de tag correspondant au paquet recu                                       */

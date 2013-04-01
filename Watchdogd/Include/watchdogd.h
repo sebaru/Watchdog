@@ -37,7 +37,6 @@
  #include "Db.h"
  #include "Config.h"
  #include "Archive.h"
- #include "Client.h"
  #include "Admin.h"
  #include "Cpth_DB.h"
  #include "Cpt_imp_DB.h"
@@ -79,7 +78,7 @@
 
     void (*Run_thread)( struct LIBRAIRIE *lib );              /* Fonction principale de gestion du thread */
                                                              /* Fonction de gestion des commandes d'admin */
-    void (*Admin_command)( struct CLIENT *client, gchar *ligne );
+    void (*Admin_command)( struct CONNEXION *connexion, gchar *ligne );
   };
 
  struct COM_MSRV                                        /* Communication entre DLS et le serveur Watchdog */
@@ -177,8 +176,8 @@
 
  extern void Gerer_arrive_MSGxxx_dls ( struct DB *Db_watchdog );                 /* Dans distrib_MSGxxx.c */
  extern void Gerer_message_repeat ( struct DB *Db_watchdog );
- extern void Abonner_distribution_message ( void (*Gerer_message) (guint num) );
- extern void Desabonner_distribution_message ( void (*Gerer_message) (guint num) );
+ extern void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
+ extern void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
 
  extern void Abonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );      /* Dans distrib_Axxx.c */
  extern void Desabonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );

@@ -30,10 +30,10 @@
 
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
-/* Entrée: Le client d'admin, la ligne a traiter                                                          */
+/* Entrée: Le connexion d'admin, la ligne a traiter                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command( struct CLIENT *client, gchar *ligne )
+ void Admin_command( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -43,7 +43,7 @@
        sscanf ( ligne, "%s %s", commande, to );                      /* Découpage de la ligne de commande */
        Imsg_Envoi_message_to ( to, ligne + strlen (to) + 6 );
        g_snprintf( chaine, sizeof(chaine), " Message '%s' send to %s\n", ligne + strlen (to) + 6, to );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
      { gchar chaine[128];
@@ -56,7 +56,7 @@
           g_snprintf( chaine, sizeof(chaine), " User %s is %s\n",
                       contact->nom, (contact->available ? "available" : "UNavailable") 
                     );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
           liste = liste->next;
         }
        pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
@@ -80,35 +80,35 @@
              default:
                   g_snprintf( chaine, sizeof(chaine), " Connexion Status Unknown.\n"); break;
            }
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
           if (Cfg_imsg.date_retente)
            { g_snprintf( chaine, sizeof(chaine), " Re-trying in %03ds.\n",
                          (Cfg_imsg.date_retente - Partage->top)/10);
-             Admin_write ( client, chaine );
+             Admin_write ( connexion, chaine );
            }
         }
        else 
         { g_snprintf( chaine, sizeof(chaine), " No connexion ... strange ! \n" );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
      }
     else if ( ! strcmp ( commande, "presence" ) )
      { g_snprintf( Cfg_imsg.new_status, sizeof(Cfg_imsg.new_status), "%s", commande + 9 );
        Cfg_imsg.set_status = TRUE;
        g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
-       Admin_write ( client, "  send user@domain/resource message      - Send a message to user\n" );
-       Admin_write ( client, "  list                                   - List contact and availability\n" );
-       Admin_write ( client, "  presence status                        - Change Presence status\n" );
-       Admin_write ( client, "  status                                 - See connexion status\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
+       Admin_write ( connexion, "  send user@domain/resource message      - Send a message to user\n" );
+       Admin_write ( connexion, "  list                                   - List contact and availability\n" );
+       Admin_write ( connexion, "  presence status                        - Change Presence status\n" );
+       Admin_write ( connexion, "  status                                 - See connexion status\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown IMSG command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

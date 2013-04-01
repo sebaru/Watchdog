@@ -104,24 +104,23 @@
   }
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin en parametre                                                  */
-/* Entrée: le client                                                                                      */
+/* Entrée: le CLIENT                                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Deconnecter_admin ( struct CLIENT *client )
-  { /*Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );*/
-    Fermer_connexion( client->connexion );
+ static void Deconnecter_admin ( struct CONNEXION *connexion )
+  { Envoyer_reseau( connexion, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
+    Clients = g_slist_remove ( Clients, connexion );
     Info_new( Config.log, FALSE, LOG_INFO,
-              "Deconnecter_admin : connection closed with client %d", client->connexion->socket );
-    Clients = g_slist_remove ( Clients, client );
-    g_free(client);
+              "Deconnecter_admin : connection closed with CLIENT %d", connexion->socket );
+    Fermer_connexion( connexion );
   }
 /**********************************************************************************************************/
 /* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
 /* Entrée: rien                                                                                           */
-/* Sortie: TRUE si un nouveau client est arrivé                                                           */
+/* Sortie: TRUE si un nouveau CLIENT est arrivé                                                     */
 /**********************************************************************************************************/
  static gboolean Accueillir_un_admin( gint ecoute )
-  { struct CLIENT *client;
+  { struct CONNEXION *connexion;
     struct sockaddr_un distant;
     guint taille_distant, id;
  
@@ -130,31 +129,22 @@
      { Info_new( Config.log, FALSE, LOG_INFO,
                  "Accueillir_un_admin: Connexion wanted. ID=%d", id );
 
-       client = g_try_malloc0( sizeof(struct CLIENT) );  /* On alloue donc une nouvelle structure cliente */
-       if (!client) { Info_new( Config.log, FALSE, LOG_ERR,
-                                "Accueillir_un_admin: Not enought memory to connect client %d", id );
-                      close(id);
-                      return(FALSE);                                    /* On traite bien sûr les erreurs */
-                    }
+       connexion = Nouvelle_connexion( Config.log, id, 16384 );
 
-       client->connexion = Nouvelle_connexion( Config.log, id, 16384 );
-
-       if (!client->connexion)
+       if (!connexion)
         { Info_new( Config.log, FALSE, LOG_ERR,
                    "Accueillir_un_admin: Not enought memory for %d", id );
           close(id);
-          g_free( client );
           return(FALSE);
         }
 
-       Clients = g_slist_prepend( Clients, client );
+       Clients = g_slist_prepend( Clients, connexion );
        Info_new( Config.log, FALSE, LOG_INFO,
-                 "Accueillir_un_admin: Connexion granted to ID=%d", id );
-/*       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,         /* Envoi des infos internes */
-  /*                   NULL, client->connexion->taille_bloc );
-       Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
-    /*                 NULL, 0 );*/
-
+                "Accueillir_un_admin: Connexion granted to ID=%d", id );
+       Envoyer_reseau( connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,/* Envoi des infos internes */
+                       NULL, connexion->taille_bloc );
+       Envoyer_reseau( connexion, TAG_INTERNAL, SSTAG_INTERNAL_END,                 /* Tag de fin */
+                       NULL, 0 );
        return(TRUE);
      }
     return(FALSE);
@@ -164,69 +154,64 @@
 /* Entrée : le buffer et la chaine                                                                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_write ( struct CLIENT *client, gchar *response )
-  { /*Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );*/
+ void Admin_write ( struct CONNEXION *connexion, gchar *response )
+  { Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );
   }
 /**********************************************************************************************************/
-/* Ecouter_admin: Ecoute ce que dis le client                                                             */
-/* Entrée: le client                                                                                      */
+/* Ecouter_admin: Ecoute ce que dis le CLIENT                                                       */
+/* Entrée: le CLIENT                                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Processer_commande_admin ( struct CLIENT *client, gchar *ligne )
+ void Processer_commande_admin ( struct CONNEXION *connexion, gchar *user, gchar *host, gchar *ligne )
   { gchar commande[128], chaine[256];
     struct LIBRAIRIE *lib;
     GSList *liste;
 
-    if (client->util)
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
-                "Processer_commande_admin: Commande Received from %s@%s : %s",
-                 client->util->nom, client->machine, ligne );
-     }
-    else
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
-                 "Processer_commande_admin: Commande Received from localuser : %s",
-                 ligne );
-     }
+    if (! (user && host)) return;
 
-  /*  Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );      /* Debut de la reponse */
+    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+             "Processer_commande_admin: Commande Received from %s@%s : %s",
+              user, host, ligne );
+
+    Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );/* Debut de la reponse */
     g_snprintf( chaine, sizeof(chaine), "#Watchdogd*%010.1f*CLI> %s\n",
                 (gdouble)Partage->top/10.0, ligne );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     sscanf ( ligne, "%s", commande );                                   /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( client, ligne + 8 ); }
-       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( client, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( client, ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( client, ligne + 4);  }
+            if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( connexion, ligne + 8 ); }
+       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( connexion, ligne + 4 ); }
+       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( connexion, ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( connexion, ligne + 4);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
               while(liste)
                { lib = (struct LIBRAIRIE *)liste->data;
                  if ( ! strcmp( commande, lib->admin_prompt ) )
-                  { lib->Admin_command ( client, ligne + strlen(lib->admin_prompt)+1 );
+                  { lib->Admin_command ( connexion, ligne + strlen(lib->admin_prompt)+1 );
                     found = TRUE;
                   }
                  liste = liste->next;
                }
-              if (found == FALSE) { Admin_running ( client, ligne ); }
+              if (found == FALSE) { Admin_running ( connexion, ligne ); }
             }
-/*    Envoi_client (client, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );       /* Debut de la reponse */
+    Envoyer_reseau (connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );  /* Debut de la reponse */
   }
 /**********************************************************************************************************/
-/* Ecouter_admin: Ecoute ce que dis le client                                                             */
-/* Entrée: le client                                                                                      */
+/* Ecouter_admin: Ecoute ce que dis le CLIENT                                                             */
+/* Entrée: le CLIENT                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Ecouter_admin ( struct CLIENT *client )
+ static void Ecouter_admin ( struct CONNEXION *connexion )
   { gint recu;
 
-    recu = Recevoir_reseau( client->connexion );
+    recu = Recevoir_reseau( connexion );
     if (recu==RECU_OK)
-     { if ( Reseau_tag(client->connexion) == TAG_ADMIN && Reseau_ss_tag (client->connexion) == SSTAG_CLIENT_REQUEST )
+     { if ( Reseau_tag(connexion) == TAG_ADMIN && Reseau_ss_tag (connexion) == SSTAG_CLIENT_REQUEST )
         { struct CMD_TYPE_ADMIN *admin;
-          admin = (struct CMD_TYPE_ADMIN *)client->connexion->donnees;
-          Processer_commande_admin ( client, admin->buffer );
+          admin = (struct CMD_TYPE_ADMIN *)connexion->donnees;
+          Processer_commande_admin ( connexion, "localuser", "localhost", admin->buffer );
         } else
         { Info_new( Config.log, FALSE, LOG_DEBUG, "Ecouter_admin: Wrong TAG" ); }
      }
@@ -236,7 +221,7 @@
                                                "Ecouter_admin: Reset connexion" );
                                       break;
         }
-       Deconnecter_admin ( client );
+       Deconnecter_admin ( connexion );
      }             
   }
 /**********************************************************************************************************/
@@ -272,21 +257,19 @@
        Accueillir_un_admin( Fd_ecoute );                  /* Accueille les nouveaux admin */
 
        if ( Clients )                                          /* Ecoutons nos clients */
-        { struct CLIENT *client;
+        { struct CONNEXION *connexion;
           GSList *liste;
 
           liste = Clients;
           while (liste)
-           { client = (struct CLIENT *)liste->data;
-#ifdef bouh
-             if ( Partage->top > client->last_use + 3000 )    /* Deconnexion = 300 secondes si inactivité */
-              { write( client->connexion, "timeout\n", 9 );
-                Deconnecter_admin ( client ); 
+           { connexion = (struct CONNEXION *)liste->data;
+
+             if ( time(NULL) > connexion->last_use + 300 )    /* Deconnexion = 300 secondes si inactivité */
+              { Deconnecter_admin ( connexion ); 
                 liste = Clients;
                 continue;
               }
-#endif
-             Ecouter_admin( client );
+             Ecouter_admin( connexion );
              liste = liste->next;
            }
         }
@@ -295,9 +278,9 @@
      }
 
     while(Clients)                                                    /* Parcours de la liste des clients */
-     { struct CLIENT *client;                                   /* Deconnection de tous les clients */
-       client = (struct CLIENT *)Clients->data;
-       Deconnecter_admin ( client );
+     { struct CONNEXION *connexion;                                   /* Deconnection de tous les clients */
+       connexion = ( struct CONNEXION *)Clients->data;
+       Deconnecter_admin ( connexion ); 
      }
 
     Desactiver_ecoute_admin ();

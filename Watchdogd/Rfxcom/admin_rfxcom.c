@@ -31,16 +31,16 @@
 
 /**********************************************************************************************************/
 /* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                           */
-/* Entrée: le client                                                                                      */
+/* Entrée: le connexion                                                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_list ( struct CLIENT *client )
+ static void Admin_rfxcom_list ( struct CONNEXION *connexion )
   { GSList *liste_modules;
     gchar chaine[512];
 
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules/capteurs RFXCOM\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
     liste_modules = Cfg_rfxcom.Modules_RFXCOM;
@@ -60,70 +60,70 @@
                    module->rfxcom.libelle, 
                    (Partage->top - module->date_last_view)/10
                  );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_del: Retire le capteur/module rfxcom dont l'id est en parametre                           */
-/* Entrée: le client et l'id                                                                              */
+/* Entrée: le connexion et l'id                                                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_del ( struct CLIENT *client, gint id )
+ static void Admin_rfxcom_del ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Suppression du module rfxcom %03d\n", id );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     if ( Retirer_rfxcomDB( id ) )
      { g_snprintf( chaine, sizeof(chaine), " Module %03d erased.\n", id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.\n", id ); }
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_add: Ajoute un capteur/module RFXCOM                                                      */
-/* Entrée: le client et la structure de reference du capteur                                              */
+/* Entrée: le connexion et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_add ( struct CLIENT *client, struct RFXCOMDB *rfxcom )
+ static void Admin_rfxcom_add ( struct CONNEXION *connexion, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
     gint last_id;
 
     g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module rfxcom\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     last_id = Ajouter_rfxcomDB( rfxcom );
     if ( last_id != -1 )
      { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%03d.\n", last_id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_change: Modifie la configuration d'un capteur RFXCOM                                      */
-/* Entrée: le client et la structure de reference du capteur                                              */
+/* Entrée: le connexion et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_change ( struct CLIENT *client, struct RFXCOMDB *rfxcom )
+ static void Admin_rfxcom_change ( struct CONNEXION *connexion, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Modification du module rfxcom %03d\n", rfxcom->id );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     if ( Modifier_rfxcomDB( rfxcom ) )
      { g_snprintf( chaine, sizeof(chaine), " Module %03d changed.\n", rfxcom->id ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.\n", rfxcom->id ); }
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom          */
-/* Entrée: le client d'admin et la ligne de commande                                                      */
+/* Entrée: le connexion d'admin et la ligne de commande                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command( struct CLIENT *client, gchar *ligne )
+ void Admin_command( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -136,7 +136,7 @@
                 (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
                 (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
-       Admin_rfxcom_add ( client, &rfxcom );
+       Admin_rfxcom_add ( connexion, &rfxcom );
      }
     else if ( ! strcmp ( commande, "change" ) )
      { struct RFXCOMDB rfxcom;
@@ -146,7 +146,7 @@
                 (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
                 (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
-       Admin_rfxcom_change ( client, &rfxcom );
+       Admin_rfxcom_change ( connexion, &rfxcom );
      }
     else if ( ! strcmp ( commande, "light1" ) )
      { gchar trame_send_AC[] = { 0x07, 0x10, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
@@ -189,28 +189,28 @@
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_rfxcom_del ( client, num );
+       Admin_rfxcom_del ( connexion, num );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_rfxcom_list ( client );
+     { Admin_rfxcom_list ( connexion );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
-       Admin_write ( client, "  add type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
+       Admin_write ( connexion, "  add type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Ajoute un module\n" );
-       Admin_write ( client, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( connexion, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
-       Admin_write ( client, "  del ID                                 - Retire le module ID\n" );
-       Admin_write ( client, "  light1 proto,housecode,unitcode,cmdnumber\n" );
-       Admin_write ( client, "                                         - Envoie une commande RFXCOM\n" );
-       Admin_write ( client, "  light2 id1,id2,id3,id4,unitcode,cmdnumber,level\n" );
-       Admin_write ( client, "                                         - Envoie une commande RFXCOM\n" );
-       Admin_write ( client, "  list                                   - Affiche les status des equipements RFXCOM\n" );
+       Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
+       Admin_write ( connexion, "  light1 proto,housecode,unitcode,cmdnumber\n" );
+       Admin_write ( connexion, "                                         - Envoie une commande RFXCOM\n" );
+       Admin_write ( connexion, "  light2 id1,id2,id3,id4,unitcode,cmdnumber,level\n" );
+       Admin_write ( connexion, "                                         - Envoie une commande RFXCOM\n" );
+       Admin_write ( connexion, "  list                                   - Affiche les status des equipements RFXCOM\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown RFXCOM command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

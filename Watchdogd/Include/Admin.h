@@ -31,11 +31,6 @@
  #include <pthread.h>
  #define NOM_SOCKET "socket.wdg"
 
- struct CLIENT_ADMIN
-  { gint connexion;
-    gint last_use;
-  };
-
  struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
@@ -45,13 +40,13 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_admin ( void );                                                          /* Dans Admin.c */
- extern void Admin_running ( struct CLIENT *client, gchar *ligne );
- extern void Admin_process ( struct CLIENT *client, gchar *ligne );
- extern void Admin_dls ( struct CLIENT *client, gchar *ligne );
- extern void Admin_set ( struct CLIENT *client, gchar *ligne );
- extern void Admin_get ( struct CLIENT *client, gchar *ligne );
- extern void Admin_write ( struct CLIENT *client, gchar *chaine );
- extern void Processer_commande_admin ( struct CLIENT *client, gchar *commande );
+ extern void Admin_running ( struct CONNEXION *connexion, gchar *ligne );
+ extern void Admin_process ( struct CONNEXION *connexion, gchar *ligne );
+ extern void Admin_dls ( struct CONNEXION *connexion, gchar *ligne );
+ extern void Admin_set ( struct CONNEXION *connexion, gchar *ligne );
+ extern void Admin_get ( struct CONNEXION *connexion, gchar *ligne );
+ extern void Admin_write ( struct CONNEXION *connexion, gchar *chaine );
+ extern  void Processer_commande_admin ( struct CONNEXION *connexion, gchar *user, gchar *host, gchar *ligne );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

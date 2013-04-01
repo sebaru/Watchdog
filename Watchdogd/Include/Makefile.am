@@ -7,7 +7,7 @@ noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h \
                     Utilisateur_DB.h Config.h \
 		    Icones_DB.h EntreeANA_DB.h \
 		    Synoptiques_DB.h Camera_DB.h \
-		    Mnemonique_DB.h Client.h \
+		    Mnemonique_DB.h \
 		    Proto_traductionDLS.h \
                     watchdogd.h Dls.h Admin.h \
 		    Cpth_DB.h Cpt_imp_DB.h Tempo_DB.h \

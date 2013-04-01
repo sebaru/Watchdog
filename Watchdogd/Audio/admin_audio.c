@@ -30,10 +30,10 @@
 
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
-/* Entrée: Le client d'admin, la ligne a traiter                                                          */
+/* Entrée: Le connexion d'admin, la ligne a traiter                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command( struct CLIENT *client, gchar *ligne )
+ void Admin_command( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[80];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -43,25 +43,25 @@
        sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
        Jouer_mp3 ( &msg );
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent (mp3)\n", msg.num );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "tell_espeak" ) )
      { struct CMD_TYPE_MESSAGE msg;
        sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
        Jouer_espeak ( &msg );
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent (espeak)\n", msg.num );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
-       Admin_write ( client, "  tell_mp3 num          - Send message num with mp3 format\n" );
-       Admin_write ( client, "  tell_espeak num       - Send message num with espeak format\n" );
-       Admin_write ( client, "  help                  - This help\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
+       Admin_write ( connexion, "  tell_mp3 num          - Send message num with mp3 format\n" );
+       Admin_write ( connexion, "  tell_espeak num       - Send message num with espeak format\n" );
+       Admin_write ( connexion, "  help                  - This help\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -30,10 +30,10 @@
 
 /**********************************************************************************************************/
 /* Admin_process: Appellée lorsque l'admin envoie une commande 'process' dans la ligne de commande        */
-/* Entrée: La connexion cliente et la ligne de commande, et le buffer de sortie                           */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_process ( struct CLIENT *client, gchar *ligne )
+ void Admin_process ( struct CONNEXION *connexion, gchar *ligne )
   { struct LIBRAIRIE *lib;
     gchar commande[128];
     GSList *liste;
@@ -46,20 +46,20 @@
        sscanf ( ligne, "%s %s %d", commande, thread, &num );
 
        g_snprintf( chaine, sizeof(chaine), " Trying to start %s\n", thread );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
 
        if ( ! strcmp ( thread, "arch" ) )
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
           else { g_snprintf( chaine, sizeof(chaine), " ARCH started\n" );
-                 Admin_write ( client, chaine );
+                 Admin_write ( connexion, chaine );
                }
         } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
           else { g_snprintf( chaine, sizeof(chaine), " D.L.S started\n" );
-                 Admin_write ( client, chaine );
+                 Admin_write ( connexion, chaine );
                }
         }
        else
@@ -77,12 +77,12 @@
                  }
                 else
                  { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
-                   Admin_write ( client, chaine );
+                   Admin_write ( connexion, chaine );
               }
              liste = liste->next;
            }
           g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) started : %d\n", found );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
      } else
     if ( ! strcmp ( commande, "load" ) )
@@ -99,7 +99,7 @@
         }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while loading library %s\n", thread ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "unload" ) )
      { gchar thread[128], chaine[128];
@@ -108,14 +108,14 @@
         { g_snprintf( chaine, sizeof(chaine), " Library %s stopped and unloaded\n", thread ); }
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while unloading library %s\n", thread ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "stop" ) )
      { gchar thread[128], chaine[128];
        sscanf ( ligne, "%s %s", commande, thread );
 
        g_snprintf( chaine, sizeof(chaine), " Trying to stop %s\n", thread );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
 
        if ( ! strcmp ( thread, "all" ) )
         { Stopper_fils(FALSE);                           /* Termine tous les process sauf le thread ADMIN */
@@ -140,12 +140,12 @@
                  { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) \n",
                                lib->admin_prompt, lib->nom_fichier );
                  }
-                Admin_write ( client, chaine );
+                Admin_write ( connexion, chaine );
               }
              liste = liste->next;
            }
           g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) stopped : %d\n", found );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
 
      } else
@@ -154,17 +154,17 @@
        guint i;
 
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %d\n",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (gint)Partage->com_dls.TID
                  );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
                  );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -179,14 +179,14 @@
            { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
           g_snprintf( chaine, sizeof(chaine), "%d (%s)\n", (gint) lib->TID, lib->nom_fichier );
           memcpy( result + 47, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
-          Admin_write ( client, result );
+          Admin_write ( connexion, result );
           liste = liste->next;
         }
 
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
-       Admin_write ( client, "SHUTDOWN in progress\n" );
+       Admin_write ( connexion, "SHUTDOWN in progress\n" );
        SB( 7, TRUE );                                                     /* Message audio avant Shutdown */
        sleep(5);
        Partage->com_msrv.Thread_run = FALSE;
@@ -194,7 +194,7 @@
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : REBOOT demandé" );
-       Admin_write ( client, "REBOOT in progress\n" );
+       Admin_write ( connexion, "REBOOT in progress\n" );
        SB( 8, TRUE );                                                       /* Message audio avant Reboot */
        sleep(5);
        Partage->com_msrv.Thread_reboot = TRUE;
@@ -203,7 +203,7 @@
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
-       Admin_write ( client, "CLEAR-REBOOT in progress\n" );
+       Admin_write ( connexion, "CLEAR-REBOOT in progress\n" );
        SB( 8, TRUE );                                                       /* Message audio avant Reboot */
        sleep(5);
        Partage->com_msrv.Thread_clear_reboot = TRUE;
@@ -213,25 +213,25 @@
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
      { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : RELOAD demandé" );
-       Admin_write ( client, "RELOAD in progress\n" );
+       Admin_write ( connexion, "RELOAD in progress\n" );
        Partage->com_msrv.Thread_reload = TRUE;
      } else
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
-       Admin_write ( client, "  load thread          - Load a library (but not start it !)\n" );
-       Admin_write ( client, "  unload thread        - Unload a library\n" );
-       Admin_write ( client, "  start thread         - Start a thread (arch,modbus,dls, or library name)\n" );
-       Admin_write ( client, "  stop                 - Stop thread (all,arch,modbus,dls, or library name)\n" );
-       Admin_write ( client, "  list                 - Liste les statut des threads\n" );
-       Admin_write ( client, "  RELOAD               - Reload configuration\n" );
-       Admin_write ( client, "  REBOOT               - Restart all processes\n" );
-       Admin_write ( client, "  CLEAR-REBOOT         - Restart all processes with no DATA import/export\n" );
-       Admin_write ( client, "  SHUTDOWN             - Stop processes\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
+       Admin_write ( connexion, "  load thread          - Load a library (but not start it !)\n" );
+       Admin_write ( connexion, "  unload thread        - Unload a library\n" );
+       Admin_write ( connexion, "  start thread         - Start a thread (arch,modbus,dls, or library name)\n" );
+       Admin_write ( connexion, "  stop                 - Stop thread (all,arch,modbus,dls, or library name)\n" );
+       Admin_write ( connexion, "  list                 - Liste les statut des threads\n" );
+       Admin_write ( connexion, "  RELOAD               - Reload configuration\n" );
+       Admin_write ( connexion, "  REBOOT               - Restart all processes\n" );
+       Admin_write ( connexion, "  CLEAR-REBOOT         - Restart all processes with no DATA import/export\n" );
+       Admin_write ( connexion, "  SHUTDOWN             - Stop processes\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown PROCESS command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

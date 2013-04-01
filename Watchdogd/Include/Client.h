@@ -106,9 +106,6 @@
      } transfert;
     struct CONNEXION *connexion;                       /* Connexion distante pour dialogue client-serveur */
 
-    pthread_mutex_t mutex_write;              /* Zone critique: envoi des données au client par le reseau */
-    gint Id_serveur;                                               /* Numero du serveur servant ce client */
-
     pthread_mutex_t mutex_struct_used;/* Zone critique: Compteurs du nombre d'utilisation de la structure */
     guint struct_used;                                 /* Nombre de process utilisant la structure CLIENT */
 

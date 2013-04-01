@@ -30,31 +30,31 @@
 
 /**********************************************************************************************************/
 /* Admin_modbus_reload: Demande le rechargement des conf MODBUS                                           */
-/* Entrée: le client                                                                                      */
+/* Entrée: le connexion                                                                                      */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Admin_modbus_reload ( struct CLIENT *client )
+ static void Admin_modbus_reload ( struct CONNEXION *connexion )
   { if (Cfg_modbus.lib->Thread_run == FALSE)
-     { Admin_write ( client, " Thread MODBUS is not running\n" );
+     { Admin_write ( connexion, " Thread MODBUS is not running\n" );
        return;
      }
     
     Cfg_modbus.reload = TRUE;
-    Admin_write ( client, " MODBUS Reloading in progress\n" );
+    Admin_write ( connexion, " MODBUS Reloading in progress\n" );
     while (Cfg_modbus.reload) sched_yield();
-    Admin_write ( client, " MODBUS Reloading done\n" );
+    Admin_write ( connexion, " MODBUS Reloading done\n" );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_list ( struct CLIENT *client )
+ static void Admin_modbus_list ( struct CONNEXION *connexion )
   { GSList *liste_modules;
     gchar chaine[512];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules MODBUS\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
@@ -77,7 +77,7 @@
                   (module->date_retente   ? (module->date_retente   - Partage->top)/10 : -1),
                   (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
                  );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
        liste_modules = liste_modules->next;                                  /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
@@ -87,39 +87,39 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_start ( struct CLIENT *client, gint id )
+ static void Admin_modbus_start ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module MODBUS\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     Cfg_modbus.admin_start = id;
 
     g_snprintf( chaine, sizeof(chaine), " Module MODBUS %d started\n", id );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- static void Admin_modbus_stop ( struct CLIENT *client, gint id )
+ static void Admin_modbus_stop ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module MODBUS\n" );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
 
     Cfg_modbus.admin_stop = id;
 
     g_snprintf( chaine, sizeof(chaine), " Module MODBUS %d stopped\n", id );
-    Admin_write ( client, chaine );
+    Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- void Admin_command ( struct CLIENT *client, gchar *ligne )
+ void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -127,18 +127,18 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_start ( client, num );
+       Admin_modbus_start ( connexion, num );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_modbus_list ( client );
+     { Admin_modbus_list ( connexion );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_stop ( client, num );
+       Admin_modbus_stop ( connexion, num );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_modbus_reload(client);
+     { Admin_modbus_reload(connexion);
      }
     else if ( ! strcmp ( commande, "add" ) )
      { struct MODBUSDB modbus;
@@ -151,11 +151,11 @@
               );
        retour = Ajouter_modbusDB ( &modbus );
        if (retour == -1)
-        { Admin_write ( client, "Error, MODBUS not added\n" ); }
+        { Admin_write ( connexion, "Error, MODBUS not added\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " MODBUS %s added. New ID=%d\n", modbus.ip, retour );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
      }
     else if ( ! strcmp ( commande, "change" ) )
@@ -168,11 +168,11 @@
               );
        retour = Modifier_modbusDB ( &modbus );
        if (retour == FALSE)
-        { Admin_write ( client, "Error, MODBUS not changed\n" ); }
+        { Admin_write ( connexion, "Error, MODBUS not changed\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " MODBUS %s changed\n", modbus.ip );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
      }
     else if ( ! strcmp ( commande, "del" ) )
@@ -181,29 +181,29 @@
        sscanf ( ligne, "%s %d", commande, &modbus.id );              /* Découpage de la ligne de commande */
        retour = Retirer_modbusDB ( &modbus );
        if (retour == FALSE)
-        { Admin_write ( client, "Error, MODBUS not erased\n" ); }
+        { Admin_write ( connexion, "Error, MODBUS not erased\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " MODBUS %d erased\n", modbus.id );
-          Admin_write ( client, chaine );
+          Admin_write ( connexion, chaine );
         }
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Admin_write ( client, "  add enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
-       Admin_write ( client, "                                         - Ajoute un module modbus\n" );
-       Admin_write ( client, "  change id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
-       Admin_write ( client, "                                         - Modifie le module id\n" );
-       Admin_write ( client, "  del id                                 - Supprime le module id\n" );
-       Admin_write ( client, "  start id                               - Demarre le module id\n" );
-       Admin_write ( client, "  stop id                                - Demarre le module id\n" );
-       Admin_write ( client, "  list                                   - Liste les modules MODBUS\n" );
-       Admin_write ( client, "  reload                                 - Recharge la configuration\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
+       Admin_write ( connexion, "  add enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Admin_write ( connexion, "                                         - Ajoute un module modbus\n" );
+       Admin_write ( connexion, "  change id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Admin_write ( connexion, "                                         - Modifie le module id\n" );
+       Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
+       Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
+       Admin_write ( connexion, "  stop id                                - Demarre le module id\n" );
+       Admin_write ( connexion, "  list                                   - Liste les modules MODBUS\n" );
+       Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown MODBUS command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

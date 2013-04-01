@@ -31,27 +31,27 @@
 
 /**********************************************************************************************************/
 /* Admin_get: Gere une commande 'admin get' depuis une connexion admin                                    */
-/* Entrée: le client et la ligne de commande                                                              */
+/* Entrée: le connexion et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_get ( struct CLIENT *client, gchar *ligne )
+ void Admin_get ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
 
-       Admin_write ( client, "  e num                 - Get E[num]\n" );
-       Admin_write ( client, "  ea num                - Get EA[num]\n" );
-       Admin_write ( client, "  m num                 - Get M[num]\n" );
-       Admin_write ( client, "  b num                 - Get B[num]\n" );
-       Admin_write ( client, "  a num                 - Get A[num]\n" );
-       Admin_write ( client, "  msg num               - Get MSG[num]\n" );
-       Admin_write ( client, "  tr num                - Get TR[num]\n" );
-       Admin_write ( client, "  i num                 - Get I[num]\n" );
-       Admin_write ( client, "  ci num                - Get CI[num]\n" );
-       Admin_write ( client, "  ch num                - Get CH[num]\n" );
-       Admin_write ( client, "  help                  - This help\n" );
+       Admin_write ( connexion, "  e num                 - Get E[num]\n" );
+       Admin_write ( connexion, "  ea num                - Get EA[num]\n" );
+       Admin_write ( connexion, "  m num                 - Get M[num]\n" );
+       Admin_write ( connexion, "  b num                 - Get B[num]\n" );
+       Admin_write ( connexion, "  a num                 - Get A[num]\n" );
+       Admin_write ( connexion, "  msg num               - Get MSG[num]\n" );
+       Admin_write ( connexion, "  tr num                - Get TR[num]\n" );
+       Admin_write ( connexion, "  i num                 - Get I[num]\n" );
+       Admin_write ( connexion, "  ci num                - Get CI[num]\n" );
+       Admin_write ( connexion, "  ch num                - Get CH[num]\n" );
+       Admin_write ( connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "t" ) )
      { int num;
@@ -60,7 +60,7 @@
         { g_snprintf( chaine, sizeof(chaine), "%s\n", Tdetail(num) );
         } else
         { g_snprintf( chaine, sizeof(chaine), " T -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num;
@@ -74,7 +74,7 @@
                       Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " I -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { int num;
@@ -85,19 +85,19 @@
                       Partage->g[num].last_change, Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, M(num) );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ea" ) )
      { int num;
@@ -111,19 +111,19 @@
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, B(num) );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "a" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, A(num) );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ci" ) )
      { int num;
@@ -136,7 +136,7 @@
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CI -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num;
@@ -147,10 +147,10 @@
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range\n", num ); }
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( client, chaine );
+       Admin_write ( connexion, chaine );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
