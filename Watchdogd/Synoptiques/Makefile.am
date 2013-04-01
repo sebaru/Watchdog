@@ -7,9 +7,12 @@
 noinst_LTLIBRARIES = libsyn.la
 libsyn_la_SOURCES = Synoptiques.c motifs.c comment.c passerelle.c palette.c capteur.c camera_sup.c
 
-libsyn_la_LDFLAGS =  -rdynamic
+libsyn_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
+                    `mysql_config --libs`
 
-INCLUDES= `pkg-config --cflags glib-2.0` \
-	  `mysql_config --cflags` \
-          -I$(top_srcdir)/Include \
- 	  -I../Include
+libsyn_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+                   `mysql_config --cflags`
+
+INCLUDES=-I$(top_srcdir)/Include \
+         -I../Include
+
