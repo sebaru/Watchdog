@@ -167,6 +167,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiCAMERA", 0, 0, 0 );
 
+#ifdef bouh
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
@@ -198,6 +199,7 @@
        Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
        g_free(camera);
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */

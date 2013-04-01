@@ -43,8 +43,8 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
+#ifdef bouh
     retour = Retirer_camera_supDB( Config.log, Db_watchdog, rezo_camera_sup );
-
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,
                      (gchar *)rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
@@ -56,6 +56,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_comment_atelier: Ajout d'un commentaire dans un synoptique                               */
@@ -68,6 +69,7 @@
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
+#ifdef bouh
     id = Ajouter_camera_supDB ( Config.log, Db_watchdog, rezo_camera_sup );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -90,6 +92,7 @@
               g_free(result);
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_editer_syn: Le client desire editer un syn                                                       */
@@ -101,7 +104,7 @@
   { gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
-
+#ifdef bouh
     retour = Modifier_camera_supDB ( Config.log, Db_watchdog, rezo_camera_sup );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
@@ -110,6 +113,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -122,6 +126,7 @@
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
+#ifdef bouh
 
     db = Init_DB_SQL( Config.log );
     if (!db)
@@ -155,6 +160,7 @@
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
        g_free(camera_sup);
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -165,6 +171,8 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
+
+#ifdef bouh
 
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
 
@@ -202,5 +210,6 @@
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
        g_free(camera_sup);
      }
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

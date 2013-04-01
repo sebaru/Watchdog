@@ -39,6 +39,7 @@
     pthread_t tid;
     connexion = client->connexion;
 
+#ifdef bouh
     if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SYNOPTIQUE) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied" );
@@ -87,5 +88,6 @@
              }
             break;
      }
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
