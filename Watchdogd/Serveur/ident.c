@@ -35,7 +35,7 @@
 /* Autoriser_client: Autorise le client à se connecter                                                    */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static void Autoriser_client ( gint Id_serveur, struct CLIENT *client )
+ static void Autoriser_client ( struct CLIENT *client )
   { struct REZO_SRV_IDENT ident;
     g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog %s", VERSION );
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
@@ -50,7 +50,7 @@
 /* Proto_set_password: changement de password                                                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Proto_set_password ( gint Id_serveur, struct CLIENT *client, struct CMD_UTIL_SETPASSWORD *util )
+ void Proto_set_password ( struct CLIENT *client, struct CMD_UTIL_SETPASSWORD *util )
   { if (util->id != client->util->id)
      { Client_mode ( client, DECONNECTE );
        return;
@@ -63,7 +63,7 @@
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                          */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- gint Tester_autorisation ( gint Id_serveur, struct CLIENT *client )
+ gint Tester_autorisation ( struct CLIENT *client )
   { struct CMD_TYPE_UTILISATEUR util;
     gchar *clef, *crypt;
     gint id;
@@ -131,7 +131,7 @@
      }
     Info_new( Config.log, Config.log_all, LOG_DEBUG,
              "Tester_autorisation: Envoi Autorisation for %s", client->util->nom );
-    Autoriser_client ( Id_serveur, client );
+    Autoriser_client ( client );
     Info_new( Config.log, Config.log_all, LOG_INFO,
              "Tester_autorisation: Autorisation sent for %s", client->util->nom );
     return( ENVOI_DONNEES );

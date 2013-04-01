@@ -84,26 +84,26 @@
  extern void Ref_client ( struct CLIENT *client );
  extern void Run_handle_client ( struct CLIENT *client );
 
- extern void Ecouter_client ( gint Id_serveur, struct CLIENT *client );               /* Dans protocole.c */
+ extern void Ecouter_client ( struct CLIENT *client );                                /* Dans protocole.c */
 
  extern void Liberer_SSL ( void );                                                          /* Dans ssl.c */ 
  extern void Init_RSA ( void );
 
                                                                                   /* Dans protocole_***.c */
- extern void Gerer_protocole_atelier( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_scenario( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_icone( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_dls( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_utilisateur( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_message( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_mnemonique( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_supervision( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_histo( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_courbe( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_histo_courbe( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_synoptique( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_camera( gint Id_serveur, struct CLIENT *client );
- extern void Gerer_protocole_admin( gint Id_serveur, struct CLIENT *client );
+ extern void Gerer_protocole_atelier( struct CLIENT *client );
+ extern void Gerer_protocole_scenario( struct CLIENT *client );
+ extern void Gerer_protocole_icone( struct CLIENT *client );
+ extern void Gerer_protocole_dls( struct CLIENT *client );
+ extern void Gerer_protocole_utilisateur( struct CLIENT *client );
+ extern void Gerer_protocole_message( struct CLIENT *client );
+ extern void Gerer_protocole_mnemonique( struct CLIENT *client );
+ extern void Gerer_protocole_supervision( struct CLIENT *client );
+ extern void Gerer_protocole_histo( struct CLIENT *client );
+ extern void Gerer_protocole_courbe( struct CLIENT *client );
+ extern void Gerer_protocole_histo_courbe( struct CLIENT *client );
+ extern void Gerer_protocole_synoptique( struct CLIENT *client );
+ extern void Gerer_protocole_camera( struct CLIENT *client );
+ extern void Gerer_protocole_admin( struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
  extern void Envoi_clients( gint ss_id, gint tag, gint sstag, gchar *buffer, gint taille );
@@ -124,8 +124,8 @@
  extern gboolean Tester_update_capteur( struct CAPTEUR *capteur );                      /* Dans capteur.c */
  extern struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur );
 
- extern gint Tester_autorisation ( gint Id_serveur, struct CLIENT *client );              /* Dans ident.c */
- extern void Proto_set_password ( gint Id_serveur, struct CLIENT *client, struct CMD_UTIL_SETPASSWORD *util );
+ extern gint Tester_autorisation ( struct CLIENT *client );              /* Dans ident.c */
+ extern void Proto_set_password ( struct CLIENT *client, struct CMD_UTIL_SETPASSWORD *util );
 
  extern void Client_mode ( struct CLIENT *client, gint mode );                          /* Dans Serveur.c */
 

@@ -34,7 +34,7 @@
 /* Entrée: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
- void Gerer_protocole_admin( gint Id_serveur, struct CLIENT *client )
+ void Gerer_protocole_admin( struct CLIENT *client )
   { struct CONNEXION *connexion;
     connexion = client->connexion;
 

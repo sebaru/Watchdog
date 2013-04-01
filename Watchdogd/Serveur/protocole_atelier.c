@@ -34,7 +34,7 @@
 /* Entrée: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
- void Gerer_protocole_atelier( gint Id_serveur, struct CLIENT *client )
+ void Gerer_protocole_atelier( struct CLIENT *client )
   { struct CONNEXION *connexion;
     pthread_t tid;
     connexion = client->connexion;

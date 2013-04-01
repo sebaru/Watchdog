@@ -43,7 +43,7 @@
 /* Entrée: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
- static void Gerer_protocole ( gint Id_serveur, struct CLIENT *client )
+ static void Gerer_protocole ( struct CLIENT *client )
   { struct CONNEXION *connexion;
     connexion = client->connexion;
 
@@ -54,25 +54,25 @@
           { 
 /********************************* Client en VALIDE, gestion des groupes **********************************/
             switch ( Reseau_tag(connexion) )
-             { case TAG_ICONE       : Gerer_protocole_icone        ( Id_serveur, client ); break;
-               case TAG_DLS         : Gerer_protocole_dls          ( Id_serveur, client ); break;
-               case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( Id_serveur, client ); break;
-               case TAG_MESSAGE     : Gerer_protocole_message      ( Id_serveur, client ); break;
-               case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( Id_serveur, client ); break;
-               case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( Id_serveur, client ); break;
-               case TAG_SUPERVISION : Gerer_protocole_supervision  ( Id_serveur, client ); break;
-               case TAG_HISTO       : Gerer_protocole_histo        ( Id_serveur, client ); break;
-               case TAG_ATELIER     : Gerer_protocole_atelier      ( Id_serveur, client ); break;
-               case TAG_COURBE      : Gerer_protocole_courbe       ( Id_serveur, client ); break;
-               case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( Id_serveur, client ); break;
-               case TAG_SCENARIO    : Gerer_protocole_scenario     ( Id_serveur, client ); break;
-               case TAG_CAMERA      : Gerer_protocole_camera       ( Id_serveur, client ); break;
-               case TAG_ADMIN       : Gerer_protocole_admin        ( Id_serveur, client ); break;
+             { case TAG_ICONE       : Gerer_protocole_icone        ( client ); break;
+               case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
+               case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( client ); break;
+               case TAG_MESSAGE     : Gerer_protocole_message      ( client ); break;
+               case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( client ); break;
+               case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( client ); break;
+               case TAG_SUPERVISION : Gerer_protocole_supervision  ( client ); break;
+               case TAG_HISTO       : Gerer_protocole_histo        ( client ); break;
+               case TAG_ATELIER     : Gerer_protocole_atelier      ( client ); break;
+               case TAG_COURBE      : Gerer_protocole_courbe       ( client ); break;
+               case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( client ); break;
+               case TAG_SCENARIO    : Gerer_protocole_scenario     ( client ); break;
+               case TAG_CAMERA      : Gerer_protocole_camera       ( client ); break;
+               case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_UTIL_SETPASSWORD *util;
                                          util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
                                          printf("Set password for %d: %s\n", util->id, util->code_en_clair );
-                                         Proto_set_password( Id_serveur, client, util );
+                                         Proto_set_password( client, util );
                                        }
              }
           }
@@ -109,7 +109,7 @@
                                                    && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
           { struct CMD_UTIL_SETPASSWORD *util;
             util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
-            Proto_set_password( Id_serveur, client, util );
+            Proto_set_password( client, util );
           }
   }
 /**********************************************************************************************************/
@@ -117,14 +117,14 @@
 /* Entrées: data, source, type    inutilisé                                                               */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Ecouter_client ( gint Id_serveur, struct CLIENT *client )
+ void Ecouter_client ( struct CLIENT *client )
   { gint recu;
 
     recu = Recevoir_reseau( client->connexion );
     if (recu==RECU_OK)
      { /*switch( client->connexion->entete.destinataire )
         { case W_SERVEUR: */
-       Gerer_protocole( Id_serveur, client );
+       Gerer_protocole( client );
         /* break;
           default: printf("Ecouter_client: destinataire inconnu\n");
         }*/
