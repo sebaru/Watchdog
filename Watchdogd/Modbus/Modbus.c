@@ -774,15 +774,6 @@
   { module->nbr_oct_lu = 0;
     module->request = FALSE;                                                 /* Une requete a été traitée */
 
-    if (ntohs(module->response.transaction_id) != module->transaction_id)             /* Mauvaise reponse */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "Processer_trame: wrong transaction_id  attendu %d, recu %d",
-                 module->transaction_id, ntohs(module->response.transaction_id) );
-                                            /* On laisse tomber la trame recue, et on attends la suivante */
-       memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
-       return;
-     }
-
     if ( (guint16) module->response.proto_id )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Processer_trame: wrong proto_id" );
        Deconnecter_module( module );
@@ -792,6 +783,11 @@
        gint16 chaine[17];
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
+       if (ntohs(module->response.transaction_id) != module->transaction_id)             /* Mauvaise reponse */
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                   "Processer_trame: wrong transaction_id  attendu %d, recu %d",
+                    module->transaction_id, ntohs(module->response.transaction_id) );
+        }
        if ( module->response.fct >=0x80 )
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "Processer_trame: Erreur Reponse Module %d, Error %d, Exception code %d",
