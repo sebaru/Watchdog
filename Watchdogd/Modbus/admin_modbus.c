@@ -74,7 +74,7 @@
                    module->modbus.min_s_ana, module->nbr_sortie_ana,
                    module->transaction_id, module->nbr_deconnect,
                   (Partage->top - module->date_last_reponse)/10,                   
-                  (module->date_retente   ? (module->date_retente   - Partage->top)/10 : -1),
+                  (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1),
                   (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
                  );
        Admin_write ( connexion, chaine );

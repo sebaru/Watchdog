@@ -298,7 +298,7 @@
     module->started = FALSE;
     module->request = FALSE;
     module->nbr_deconnect++;
-    module->date_retente = 0;
+    module->date_retente = Partage->top + MODBUS_RETRY;
     for ( cpt = module->modbus.min_e_ana; cpt<module->nbr_entree_ana; cpt++)
      { SEA_range( cpt, 0 ); }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Deconnecter_module %d", module->modbus.id );
@@ -338,7 +338,9 @@
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                          /* Sauvegarde du fd */
     module->date_last_reponse = Partage->top;
+    module->date_retente = 0;
     module->transaction_id=1;
+    module->started = TRUE;
     module->mode = MODBUS_GET_DESCRIPTION;
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "Connecter_module %d (%s)", module->modbus.id, module->modbus.ip );
@@ -1014,15 +1016,13 @@
 
        if (Cfg_modbus.admin_start)
         { module = Chercher_module_by_id ( Cfg_modbus.admin_start );
-          if (module) { module->date_retente = Partage->top;
-                        module->modbus.enable = 1;
-                      }
+          module->modbus.enable = TRUE;
           Cfg_modbus.admin_start = 0;
         }
 
        if (Cfg_modbus.admin_stop)
         { module = Chercher_module_by_id ( Cfg_modbus.admin_stop );
-          if (module) module->modbus.enable = 0;
+          if (module) module->modbus.enable = FALSE;
           Deconnecter_module  ( module );
           Cfg_modbus.admin_stop = 0;
         }
@@ -1042,12 +1042,9 @@
 
 /*********************************** Début de l'interrogation du module ***********************************/
           if ( ! module->started )                                           /* Communication OK ou non ? */
-           { if ( Connecter_module( module ) )
-              { module->date_retente = 0;
-                module->started = TRUE;
-              }
-             else
-              { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Run_modbus: Module DOWN %03d", module->modbus.id );
+           { if ( ! Connecter_module( module ) )
+              { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                          "Run_modbus: Module %03d DOWN. retrying in %d", module->modbus.id, MODBUS_RETRY/10 );
                 module->date_retente = Partage->top + MODBUS_RETRY;
               }
            }
