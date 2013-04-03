@@ -1014,7 +1014,9 @@
 
        if (Cfg_modbus.admin_start)
         { module = Chercher_module_by_id ( Cfg_modbus.admin_start );
-          if (module) module->modbus.enable = 1;
+          if (module) { module->date_retente = Partage->top;
+                        module->modbus.enable = 1;
+                      }
           Cfg_modbus.admin_start = 0;
         }
 
