@@ -25,7 +25,7 @@ Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
-Watchdogd_LDFLAGS = -rdynamic -export-dynamic -lpopt \
+Watchdogd_LDFLAGS = -rdynamic -lpopt \
                    `pkg-config --libs glib-2.0 gthread-2.0` \
                    `mysql_config --libs`
 
