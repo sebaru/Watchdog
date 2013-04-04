@@ -1,14 +1,13 @@
 #**********************************************************************************************************/
-#* Watchdogd/Db/Utilisateur/Makefile.am    Profil de compilation de la librairies de gestion utilisateurs */
-#* Projet WatchDog version 2.0       Gestion d'habitat                      lun 07 avr 2003 22:43:42 CEST */
+#* Commun/Message/Makefile.am          Profil de compilation de la librairies de gestion message          */
+#* Projet WatchDog version 1.7       Gestion d'habitat                       lun 28 fév 2005 09:22:39 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-noinst_LTLIBRARIES = libwatchdog-util.la
-libwatchdog_util_la_SOURCES = Utilisateur.c groupe.c login_failed.c \
-                     clef.c actif.c proto_util.h
+noinst_LTLIBRARIES = libwatchdog-syn.la
+libwatchdog_syn_la_SOURCES = Synoptiques.c motifs.c comment.c passerelle.c palette.c capteur.c camera_sup.c
 
-libwatchdog_util_la_LDFLAGS =  -rdynamic -export-dynamic
+libwatchdog_syn_la_LDFLAGS =  -rdynamic -export-dynamic
 
 INCLUDES= `pkg-config --cflags glib-2.0` \
 	  `mysql_config --cflags` \
