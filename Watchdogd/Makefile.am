@@ -15,7 +15,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 		    EntreeANA.c Tempo.c Histo.c Histo_hard.c Camera.c \
                     distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c \
                     Utilisateur.c Util_groupe.c Util_login_failed.c Util_clef.c Util_actif.c \
-                    Synoptiques.c motifs.c comment.c passerelle.c palette.c capteur.c camera_sup.c
+                    Synoptiques.c Syn_motifs.c Syn_comment.c Syn_passerelle.c Syn_palette.c Syn_capteur.c Syn_camera_sup.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \
