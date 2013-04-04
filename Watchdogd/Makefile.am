@@ -3,7 +3,7 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Serveur Dls TraductionDLS Utilisateur Synoptiques Archive \
+SUBDIRS = Include Serveur Dls TraductionDLS Archive \
 	  Rs485 Sms Modbus Audio Admin Onduleur Lirc Asterisk Rfxcom Imsg Master TeleinfoEDF
 
 bin_PROGRAMS = Watchdogd
@@ -13,14 +13,15 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 		    Compteur_horaire.c Compteur_impulsion.c \
 		    Icones.c classe.c Scenario.c \
 		    EntreeANA.c Tempo.c Histo.c Histo_hard.c Camera.c \
-                    distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c 
+                    distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c \
+                    Utilisateur.c groupe.c login_failed.c \
+                    clef.c actif.c proto_util.h \
+                    Synoptiques.c motifs.c comment.c passerelle.c palette.c capteur.c camera_sup.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Archive/libarchive.la \
 		    Admin/libadmin.la \
-                    Utilisateur/libwatchdog-util.la \
-                    Synoptiques/libwatchdog-syn.la \
 		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 

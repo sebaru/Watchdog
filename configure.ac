@@ -100,8 +100,6 @@ Watchdogd/Master/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Lirc/Makefile \
 Watchdogd/Asterisk/Makefile \
-Watchdogd/Utilisateur/Makefile \
-Watchdogd/Synoptiques/Makefile \
 Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
