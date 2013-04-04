@@ -28,12 +28,8 @@
  #include <glib.h>
  #include <stdlib.h>
 
- #include "watchdogd.h"
- #include "Erreur.h"
- #include "Utilisateur_DB.h"
- 
 /************************************ Prototypes des fonctions ********************************************/
- #include "proto_util.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Set_compte_actif: positionne le flag enable du compte à vrai ou faux                                   */

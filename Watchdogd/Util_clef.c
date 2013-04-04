@@ -29,12 +29,8 @@
  #include <stdlib.h>
  #include <openssl/evp.h>                                                        /* Procedure de cryptage */
 
+/************************************ Prototypes des fonctions ********************************************/
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Utilisateur_DB.h"
-
-/********************************* Définitions des prototypes programme ***********************************/
- #include "proto_util.h"
 
 /**********************************************************************************************************/
 /* Set_password: Correspond au changement de password de l'utilisateur                                    */

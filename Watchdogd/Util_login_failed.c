@@ -28,12 +28,8 @@
  #include <glib.h>
  #include <stdlib.h>
 
- #include "watchdogd.h"
- #include "Erreur.h"
- #include "Utilisateur_DB.h"
-
 /************************************ Prototypes des fonctions ********************************************/
- #include "proto_util.h"
+ #include "watchdogd.h"
 
 /**********************************************************************************************************/
 /* Get_login_failed: Recupere la valeur du login failed                                                   */

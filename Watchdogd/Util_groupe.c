@@ -31,6 +31,7 @@
  #include <time.h>
  #include <stdlib.h>
 
+/************************************ Prototypes des fonctions ********************************************/
  #include "watchdogd.h"
 
  static gchar *GROUPE_RESERVE[NBR_GROUPE_RESERVE][2]=
@@ -44,9 +45,6 @@
     { "Admin-histoDB",    "Members can ack/query histo" },
     { "Admin-scenarioDB", "Members can add/remove Scenario" }
   };
-/************************************ Prototypes des fonctions ********************************************/
- #include "proto_util.h"
-
 /**********************************************************************************************************/
 /* Nom_groupe_reserve: renvoie le nom en clair du groupe reserve d'id id                                  */
 /* Entrée: l'id du groupe                                                                                 */

@@ -32,16 +32,12 @@
  #include <string.h>
  #include <time.h>
 
+/************************************ Prototypes des fonctions ********************************************/
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Utilisateur_DB.h"
 
  static gchar *UTILISATEURDB_RESERVE[NBR_UTILISATEUR_RESERVE][2]=
   { { "root", "Watchdog administrator" }
   };
-
-/************************************ Prototypes des fonctions ********************************************/
- #include "proto_util.h"
 
 /**********************************************************************************************************/
 /* Nom_groupe_reserve: renvoie le nom en clair du groupe reserve d'id id                                  */
