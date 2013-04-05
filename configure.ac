@@ -90,7 +90,6 @@ Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \
 Watchdogd/Sms/Makefile \
 Watchdogd/Audio/Makefile \
-Watchdogd/Admin/Makefile \
 Watchdogd/Rs485/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \

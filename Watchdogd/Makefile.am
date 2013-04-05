@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Serveur Dls TraductionDLS Archive \
-	  Rs485 Sms Modbus Audio Admin Onduleur Lirc Asterisk Rfxcom Imsg Master TeleinfoEDF
+	  Rs485 Sms Modbus Audio Onduleur Lirc Asterisk Rfxcom Imsg Master TeleinfoEDF
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -14,13 +14,13 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 		    Icones.c classe.c Scenario.c \
 		    EntreeANA.c Tempo.c Histo.c Histo_hard.c Camera.c \
                     distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c \
+                    Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c \
                     Utilisateur.c Util_groupe.c Util_login_failed.c Util_clef.c Util_actif.c \
                     Synoptiques.c Syn_motifs.c Syn_comment.c Syn_passerelle.c Syn_palette.c Syn_capteur.c Syn_camera_sup.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Archive/libarchive.la \
-		    Admin/libadmin.la \
 		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
