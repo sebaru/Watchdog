@@ -218,8 +218,13 @@
 
     repertoire = opendir ( Config.librairie_dir );                    /* Ouverture du répertoire des librairies */
     if (!repertoire)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_librairies: Directory %s Unknown", "/usr/local/lib" );
+     { Info_new( Config.log, Config.log_all, LOG_ERR,
+                "Charger_librairies: Directory %s Unknown", Config.librairie_dir );
        return;
+     }
+    else
+     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
+                "Charger_librairies: Loading Directory %s in progress", Config.librairie_dir );
      }
 
     while( (fichier = readdir( repertoire )) )                  /* Pour chacun des fichiers du répertoire */
@@ -233,7 +238,7 @@
      }
     closedir( repertoire );                             /* Fermeture du répertoire a la fin du traitement */
 
-    Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_librairies: %d Library loaded",
+    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_librairies: %d Library loaded",
               g_slist_length( Partage->com_msrv.Librairies ) );
   }
 /**********************************************************************************************************/
