@@ -34,8 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "EntreeANA_DB.h"
- #include "Mnemonique_DB.h"
 
 /**********************************************************************************************************/
 /* Charger_eana: Chargement des infos sur les Entrees analogiques                                         */
@@ -47,7 +45,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_eana: Connexion DB failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_eana: Connexion DB failed" );
        return;
      }                                                                                  /* Si pas d'accès */
 
@@ -69,7 +67,7 @@
           Partage->ea[entree->num].last_arch = 0;    /* Mise à zero du champ de la derniere date d'archivage */
         }
        else
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                    "Charger_eana: entree->num (%d) out of range (max=%d)", entree->num, NBR_ENTRE_ANA ); }
        g_free(entree);
      }
@@ -114,7 +112,7 @@
      }
 
     entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
-    if (!entreeana) Info_new( Config.log, Config.log_all, LOG_ERR,
+    if (!entreeana) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                              "Recuperer_entreeANADB_suite: Erreur allocation mémoire" );
     else
      { entreeana->id_mnemo = atoi(db->row[0]);
@@ -159,14 +157,14 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Rechercher_entreeanaDB: EntreANA %d not found in DB", id );
        return(NULL);
      }
 
     entreeana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
     if (!entreeana)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_entreeanaDB: Mem error" ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_entreeanaDB: Mem error" ); }
     else
      { entreeana->id_mnemo = id;
        entreeana->num      = atoi(db->row[1]);
@@ -194,7 +192,7 @@
 
     unite = Normaliser_chaine ( log, entreeana->unite );                 /* Formatage correct des chaines */
     if (!unite)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_entreeANADB: Normalisation unite impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_entreeANADB: Normalisation unite impossible" );
        return(FALSE);
      }
 

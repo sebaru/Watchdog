@@ -75,7 +75,7 @@
      }
 
     arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
-    if (!arch) Info_new( Config.log, Config.log_all, LOG_ERR,
+    if (!arch) Info_new( Config.log, Config.log_arch, LOG_ERR,
                         "Recuperer_archDB_suite: Memory error" );
     else
      { arch->date_sec  = atoi(db->row[2]);

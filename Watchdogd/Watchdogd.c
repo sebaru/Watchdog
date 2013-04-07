@@ -56,9 +56,9 @@
     Partage->taille_partage = sizeof(struct PARTAGE);
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_all, LOG_INFO, "Exporter: Data Export to %s", FICHIER_EXPORT );
+                Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Data Export to %s", FICHIER_EXPORT );
               }
-    else      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Exporter: Could not export to %s", strerror(errno) ); }
+    else      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Exporter: Could not export to %s", strerror(errno) ); }
     close (fd);
   }
 /**********************************************************************************************************/
@@ -70,19 +70,19 @@
   { int fd;
     fd = open( FICHIER_EXPORT, O_RDONLY );
     if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_all, LOG_INFO,
+                Info_new( Config.log, Config.log_msrv, LOG_INFO,
                          "Importer : Data Import %s... Checking size", FICHIER_EXPORT );
                 if (Partage->taille_partage != sizeof(struct PARTAGE) )
                  { memset( Partage, 0, sizeof(struct PARTAGE) );
-                   Info_new( Config.log, Config.log_all, LOG_WARNING, "Importer: Wrong size .. zeroing ..." );
+                   Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Importer: Wrong size .. zeroing ..." );
                  }
                 else
-                 { Info_new( Config.log, Config.log_all, LOG_INFO, "Importer: Size OK" ); }
+                 { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK" ); }
                 close (fd);
                 return(1);
               }
     else      { memset( Partage, 0, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_all, LOG_INFO, "Import: no file .. zeroing ..." );
+                Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import: no file .. zeroing ..." );
               }
    return(0);
   }
@@ -91,25 +91,25 @@
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  static void Charger_config_bit_interne( void )
-  { Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des EANA" );
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA" );
     Charger_eana();
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des EANA fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA fait" );
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des SCENARIO" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des SCENARIO" );
     Charger_scenario();
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des SCENARIO fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des SCENARIO fait" );
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs horaires" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires" );
     Charger_cpth();
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs horaires fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires fait" );
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs impulsion" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs impulsion" );
     Charger_cpt_imp();
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des compteurs impulsion fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs impulsion fait" );
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des temporisations" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des temporisations" );
     Charger_tempo();
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Chargement des temporisations fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des temporisations fait" );
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
@@ -120,7 +120,7 @@
     if (num == SIGALRM)
      { Partage->top++;
        if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
        if (!(Partage->top%5))                                          /* Cligno toutes les demi-secondes */
         { SB(5, !B(5)); }
        if (!(Partage->top%3))                                             /* Cligno toutes les 3 dixièmes */
@@ -142,37 +142,37 @@
 
        Partage->top_cdg_plugin_dls++;                                        /* Chien de garde plugin DLS */
        if (Partage->top_cdg_plugin_dls>200)                     /* Si pas de réponse D.L.S en 20 secondes */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement signaux: CDG plugin DLS !!" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement signaux: CDG plugin DLS !!" );
           Partage->top_cdg_plugin_dls = 0;
         }
        return;
      }
 
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Traitement_signaux: handled by %s", chaine );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement_signaux: handled by %s", chaine );
 
     switch (num)
      { case SIGQUIT:
-       case SIGINT:  Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGINT" );
+       case SIGINT:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGINT" );
                      Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
-       case SIGTERM: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGTERM" );
+       case SIGTERM: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGTERM" );
                      Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
                      break;
-       case SIGABRT: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGABRT" );
+       case SIGABRT: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGABRT" );
                      break;
-       case SIGCHLD: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGCHLD" );
+       case SIGCHLD: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGCHLD" );
                      break;
-       case SIGPIPE: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGPIPE" ); break;
-       case SIGBUS:  Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGBUS" ); break;
-       case SIGIO:   Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGIO" ); break;
-       case SIGUSR1: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR1: dumping infos" );
+       case SIGPIPE: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGPIPE" ); break;
+       case SIGBUS:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGBUS" ); break;
+       case SIGIO:   Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGIO" ); break;
+       case SIGUSR1: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR1: dumping infos" );
                      Partage->com_msrv.Thread_sigusr1 = TRUE;
                      break;
-       case SIGUSR2: Info_new( Config.log, Config.log_all, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
+       case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->com_msrv.Thread_reload = TRUE;
                      break;
-       default: Info_new( Config.log, Config.log_all, LOG_NOTICE, "Recu signal", num ); break;
+       default: Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Recu signal", num ); break;
      }
   }
 /**********************************************************************************************************/
@@ -202,7 +202,7 @@
 
     g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT",
                 nbr_i, nbr_msg, nbr_msg_repeat );
-    Info_new( Config.log, Config.log_all, LOG_INFO, chaine );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, chaine );
   }
 /**********************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
@@ -216,10 +216,10 @@
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Debut boucle sans fin" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Debut boucle sans fin" );
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Connexion DB impossible" ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Connexion DB impossible" ); }
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -233,7 +233,7 @@
        Gerer_arrive_Axxx_dls();                             /* Distribution des changements d'etats motif */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: RELOAD" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: RELOAD" );
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
 
@@ -248,7 +248,7 @@
         { struct LIBRAIRIE *lib;
           GSList *liste;
 
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: SIGUSR1" );
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: SIGUSR1" );
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_admin.Thread_sigusr1     = TRUE;
@@ -265,7 +265,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Sauvegarde des CPT" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Sauvegarde des CPT" );
           Sauver_compteur( db );
           Exporter();
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
@@ -287,7 +287,7 @@
 #endif
 
        if (Partage->com_msrv.reset_motion_detect)
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: Reset_motion_detect" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Reset_motion_detect" );
           Demarrer_motion_detect();
           Partage->com_msrv.reset_motion_detect = FALSE;
         }
@@ -297,7 +297,7 @@
 
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
     Sauver_compteur( db );                                             /* Dernière sauvegarde avant arret */
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
     Libere_DB_SQL( Config.log, &db );
     pthread_exit( NULL );
   }
@@ -435,14 +435,14 @@
 
     Config.log = Info_init( "Watchdogd", Config.log_level );                       /* Init msgs d'erreurs */
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Start" );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start" );
     Print_config();
 
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
-     { Info_new( Config.log, Config.log_all, LOG_CRIT, "Shared memory failed to allocate" ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
@@ -465,31 +465,31 @@
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
        if (!import)
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Clear Histo" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo" );
           Clear_histoDB ();                                            /* Clear de la table histo au boot */
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Clear Histo fait" );
-        } else Info_new( Config.log, Config.log_all, LOG_INFO, "Import => pas de clear histo" );
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo fait" );
+        } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import => pas de clear histo" );
 
        Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb ARCH" ); }
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb ARCH" ); }
 
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb DLS" ); }
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb DLS" ); }
 
           if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
-           { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb MOTION_DETECT" ); }
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb MOTION_DETECT" ); }
 
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
 
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Pb Admin -> Arret" ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
 
        if ( pthread_create( &TID, NULL, (void *)Boucle_pere, NULL ) )
-        { Info_new( Config.log, Config.log_all, LOG_ERR,
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                    "Demarrage boucle sans fin pthread_create failed %s", strerror(errno) );
         }
 
@@ -531,21 +531,21 @@
     close(fd_lock);                       /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
     if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();       /* Tente d'exporter les données */
-    else { Info_new( Config.log, Config.log_all, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
+    else { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
 
     if (Partage->com_msrv.Thread_reboot == TRUE)                     /* Devons-nous rebooter le process ? */
      { gint pid;
-       Info_new( Config.log, Config.log_all, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
        pid = fork();
-       if (pid<0) { Info_new( Config.log, Config.log_all, LOG_CRIT, "Fork Failed on reboot" );
+       if (pid<0) { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Fork Failed on reboot" );
                     printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
        if (pid>0)                                                                      /* On kill le père */
         { sleep(5); }         /* En attendant que le fils ait loggué ses messages d'erreur le cas échéant */
        else
         { execvp ( argv[0], argv );
-          Info_new( Config.log, Config.log_all, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
+          Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Rebooting ERROR (%s) !", strerror(errno) );
           exit(EXIT_ERREUR);
         }
      }
@@ -554,7 +554,7 @@
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
     Shm_stop( Partage );                                                   /* Libération mémoire partagée */
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Stopped" );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);
   }
 /*--------------------------------------------------------------------------------------------------------*/

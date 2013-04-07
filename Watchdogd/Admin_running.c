@@ -45,18 +45,14 @@
        Admin_write ( connexion, "  ident                 - ID du serveur Watchdog\n" );
        Admin_write ( connexion, "  ping                  - Ping Watchdog\n" );
        Admin_write ( connexion, "  audit                 - Audit bit/s\n" );
-       Admin_write ( connexion, "  ssrv                  - SousServers Status\n" );
-       Admin_write ( connexion, "  connexion                - Client Status\n" );
-       Admin_write ( connexion, "  kick nom_machine      - Kick connexion nom@machine\n" );
        Admin_write ( connexion, "  clear_histo           - Clear Histo DB\n" );
        Admin_write ( connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Admin_write ( connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
-       Admin_write ( connexion, "  msgs message          - Envoi d'un message a tous les connexions\n" );
        Admin_write ( connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Admin_write ( connexion, "  dls                   - D.L.S. Status\n" );
        Admin_write ( connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n" );
-       Admin_write ( connexion, "  log switch            - Switch log (list, all, none, process name or library name)\n" );
+       Admin_write ( connexion, "  log switch            - Switch log (list, all, none, dls, arch, db, msrv or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -78,72 +74,6 @@
        g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
        Admin_write ( connexion, chaine );
      } else
-#ifdef bouh
-    if ( ! strcmp ( commande, "ssrv" ) )
-     { int i;
-
-       g_snprintf( chaine, sizeof(chaine), " Jeton au SSRV %02d\n", Partage->jeton );
-       Admin_write ( connexion, chaine );
-
-       for (i=0; i<Config.max_serveur; i++)
-        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-          g_snprintf( chaine, sizeof(chaine), " SSRV[%02d] -> %02d connexions\n",
-                      i, g_list_length(Partage->Sous_serveur[i].Clients) );
-          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-          Admin_write ( connexion, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "connexion" ) )
-     { GList *liste;
-       gint i;
-        
-       g_snprintf( chaine, sizeof(chaine), " -- Liste des connexions connectés au serveur\n" );
-       Admin_write ( connexion, chaine );
-       for (i=0; i<Config.max_serveur; i++)
-         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
-
-           pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-           liste = Partage->Sous_serveur[i].Clients;
-           while(liste)                                               /* Parcours de la liste des connexions */
-            { struct CONNEXION *connexion_srv;
-              connexion_srv = (struct CONNEXION *)liste->data;
-
-              g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s",
-                          i, connexion_srv->ident.version, connexion_srv->util->nom, connexion_srv->machine,
-                          connexion_srv->mode, connexion_srv->defaut, ctime(&connexion_srv->date_connexion) );
-              Admin_write ( connexion, chaine );     /* ctime ajoute un \n à la fin !! */
-
-              liste = liste->next;
-            }
-           pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-         }
-     } else
-    if ( ! strcmp ( commande, "msgs" ) )
-     { GList *liste;
-       gint i;
-
-       g_snprintf( chaine, sizeof(chaine), " -- Liste des connexions recevant le message\n" );
-       Admin_write ( connexion, chaine );
-       for (i=0; i<Config.max_serveur; i++)
-         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
-           liste = Partage->Sous_serveur[i].Clients;
-           while(liste)                                               /* Parcours de la liste des connexions */
-            { struct CMD_GTK_MESSAGE erreur;
-              struct CONNEXION *connexion_wat;
-              connexion_wat = (struct CONNEXION *)liste->data;
-
-              g_snprintf( erreur.message, sizeof(erreur.message), "AdminMSG : %s", ligne + 5 );
-              Envoi_connexion( connexion_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-
-              g_snprintf( chaine, sizeof(chaine), " - %s@%s\n",
-                          connexion_wat->util->nom, connexion_wat->machine );
-              Admin_write ( connexion, chaine );
-              liste = liste->next;
-            }
-         }
-     } else
-#endif
     if ( ! strcmp ( commande, "setrootpasswd" ) )
      { struct CMD_TYPE_UTILISATEUR util;
        gchar password[80];
@@ -232,8 +162,10 @@
        sscanf ( ligne, "%s %s", commande, debug );
 
        if ( ! strcmp ( debug, "all"       ) )
-        { Config.log_all = TRUE;
-          Config.log_db  = TRUE;
+        { Config.log_msrv = TRUE;
+          Config.log_db   = TRUE;
+          Config.log_dls  = TRUE;
+          Config.log_arch = TRUE;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
@@ -245,8 +177,10 @@
            }
         } else
        if ( ! strcmp ( debug, "none"      ) )
-        { Config.log_all = FALSE;
-          Config.log_db  = FALSE;
+        { Config.log_msrv = FALSE;
+          Config.log_db   = FALSE;
+          Config.log_dls  = FALSE;
+          Config.log_arch = FALSE;
           liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
@@ -270,8 +204,14 @@
           g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for all\n",
-                      (Config.log_all ? " enabled" : "disabled") );
+          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for dls\n",
+                      (Config.log_dls ? " enabled" : "disabled") );
+          Admin_write ( connexion, chaine );
+          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for arch\n",
+                      (Config.log_arch ? " enabled" : "disabled") );
+          Admin_write ( connexion, chaine );
+          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for msrv\n",
+                      (Config.log_msrv ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         } else
        if ( ! strcmp ( debug, "db"   ) )
@@ -279,6 +219,27 @@
           else Config.log_db = TRUE;
           g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
+          Admin_write ( connexion, chaine );
+        }
+       if ( ! strcmp ( debug, "dls"   ) )
+        { if (Config.log_dls == TRUE) Config.log_dls = FALSE;
+          else Config.log_dls = TRUE;
+          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for dls\n",
+                      (Config.log_dls ? " enabled" : "disabled") );
+          Admin_write ( connexion, chaine );
+        }
+       if ( ! strcmp ( debug, "arch"   ) )
+        { if (Config.log_arch == TRUE) Config.log_arch = FALSE;
+          else Config.log_arch = TRUE;
+          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for arch\n",
+                      (Config.log_arch ? " enabled" : "disabled") );
+          Admin_write ( connexion, chaine );
+        }
+       if ( ! strcmp ( debug, "msrv"   ) )
+        { if (Config.log_msrv == TRUE) Config.log_msrv = FALSE;
+          else Config.log_msrv = TRUE;
+          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for msrv\n",
+                      (Config.log_msrv ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         }
        else

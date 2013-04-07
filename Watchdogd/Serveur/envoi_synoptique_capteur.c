@@ -151,7 +151,7 @@
           pthread_exit ( NULL );
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_capteur_atelier: pass %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
@@ -209,12 +209,12 @@
 
        if ( ! g_list_find_custom(client->bit_init_capteur, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
         { client->bit_init_capteur = g_list_append( client->bit_init_capteur, capteur_new );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "liste des bit_init_capteur ", capteur->id );
         }
        else g_free(capteur_new);
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_capteur_supervision: pass %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,

@@ -145,7 +145,7 @@
           return;
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_palette_atelier: envoi pass %d (%s) to client %d",
                 palette->id, palette->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, sstag,
@@ -204,7 +204,7 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_palette_supervision: envoi pass %d (%s) to client %d",
                 palette->id, palette->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,

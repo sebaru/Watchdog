@@ -64,7 +64,7 @@
 
     libelle = Normaliser_chaine ( log, classe->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_classeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_classeDB: Normalisation impossible" );
        return(-1);
      }
 
@@ -106,7 +106,7 @@
      }
 
     classe = (struct CLASSEDB *)g_try_malloc0( sizeof(struct CLASSEDB) );
-    if (!classe) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_classeDB_suite: Erreur allocation mémoire" );
+    if (!classe) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_classeDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &classe->libelle, db->row[1], sizeof(classe->libelle) );      /* Recopie dans la structure */
        classe->id          = atoi(db->row[0]);
@@ -131,12 +131,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_classeDB: Classe %d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_classeDB: Classe %d not found in DB", id );
        return(NULL);
      }
 
     classe = (struct CLASSEDB *)g_try_malloc0( sizeof(struct CLASSEDB) );
-    if (!classe) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_classeDB: Mem error" );
+    if (!classe) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_classeDB: Mem error" );
     else
      { memcpy( &classe->libelle, db->row[0], sizeof(classe->libelle) );      /* Recopie dans la structure */
        classe->id          = id;
@@ -154,7 +154,7 @@
 
     libelle = Normaliser_chaine ( log, classe->libelle );
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_classeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_classeDB: Normalisation impossible" );
        return(FALSE);
      }
 

@@ -64,7 +64,7 @@
 
     libelle = Normaliser_chaine ( log, icone->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_iconeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_iconeDB: Normalisation impossible" );
        return(-1);
      }
 
@@ -106,7 +106,7 @@
      }
 
     icone = (struct ICONEDB *)g_try_malloc0( sizeof(struct ICONEDB) );
-    if (!icone) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_iconeDB_suite: Erreur allocation mémoire" );
+    if (!icone) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_iconeDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &icone->libelle, db->row[1], sizeof(icone->libelle) );        /* Recopie dans la structure */
        icone->id          = atoi(db->row[0]);
@@ -132,12 +132,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_iconeDB: Icone %d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_iconeDB: Icone %d not found in DB", id );
        return(NULL);
      }
 
     icone = (struct ICONEDB *)g_try_malloc0( sizeof(struct ICONEDB) );
-    if (!icone) { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_iconeDB: Mem error" ); }
+    if (!icone) { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_iconeDB: Mem error" ); }
     else
      { memcpy( &icone->libelle, db->row[0], sizeof(icone->libelle) );        /* Recopie dans la structure */
        icone->id          = id;
@@ -156,7 +156,7 @@
 
     libelle = Normaliser_chaine ( log, icone->libelle );
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_iconeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_iconeDB: Normalisation impossible" );
        return(FALSE);
      }
 

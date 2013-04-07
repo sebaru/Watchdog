@@ -45,7 +45,9 @@
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
     guint log_level;                                                      /* Niveau de debug du programme */
-    gboolean log_all;                                                             /* TRUE si log_override */
+    gboolean log_msrv;                                                            /* TRUE si log_override */
+    gboolean log_dls;                                                             /* TRUE si log_override */
+    gboolean log_arch;                                                            /* TRUE si log_override */
     gboolean log_db;                                                          /* TRUE si log des acces DB */
     guint max_login_failed;                                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */

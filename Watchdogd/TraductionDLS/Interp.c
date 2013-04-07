@@ -63,7 +63,7 @@
  void Emettre( char *chaine )
   { int taille;
     taille = strlen(chaine);
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Emettre %s", chaine );
+    Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre %s", chaine );
     write( Id_cible, chaine, taille );
   }
 /**********************************************************************************************************/
@@ -74,7 +74,7 @@
  void Emettre_erreur( char *chaine )
   { int taille;
     taille = strlen(chaine);
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Emettre_erreur %s", chaine );
+    Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur %s", chaine );
     write( Id_log, chaine, taille );
   }
 /**********************************************************************************************************/
@@ -368,18 +368,18 @@
     unlink ( cible );
     unlink ( log );
     Log = log_erreur;                                               /* Sauvegarde pour utilisation future */
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );
+    Info_new( Config.log, Config.log_dls, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );
 
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Target creation failed %s (%s)", cible, strerror(errno) ); 
        return(TRAD_DLS_ERROR_FILE);
      }
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Log creation failed %s (%s)", cible, strerror(errno) ); 
        close(Id_cible);
        return(TRAD_DLS_ERROR_FILE);

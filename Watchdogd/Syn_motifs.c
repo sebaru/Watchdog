@@ -61,7 +61,7 @@
 
     libelle = Normaliser_chaine ( log, motif->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_motifDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_motifDB: Normalisation impossible" );
        return(-1);
      }
 
@@ -112,7 +112,7 @@
      }
 
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_motifDB_suite: Erreur allocation mémoire" );
+    if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_motifDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );        /* Recopie dans la structure */
        motif->id           = atoi(db->row[0]);
@@ -158,12 +158,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_motifDB: Motif %d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_motifDB: Motif %d not found in DB", id );
        return(NULL);
      }
 
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif) Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_motifDB: Erreur allocation mémoire" );
+    if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_motifDB: Erreur allocation mémoire" );
     else
      { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );        /* Recopie dans la structure */
        motif->id           = atoi(db->row[0]);
@@ -199,7 +199,7 @@
 
     libelle = Normaliser_chaine ( log, motif->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_motifDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_motifDB: Normalisation impossible" );
        return(-1);
      }
 

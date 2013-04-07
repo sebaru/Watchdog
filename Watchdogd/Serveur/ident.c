@@ -41,7 +41,7 @@
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
-    Info_new( Config.log, Config.log_all, LOG_INFO,
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Autoriser_autorisation: RAZ 'login failed' for %d", client->util->id );
     
     Raz_login_failed( Config.log, client->Db_watchdog, client->util->id );
@@ -71,7 +71,7 @@
     clef = Recuperer_clef( Config.log, client->Db_watchdog,
                            client->ident.nom, &id );
     if (!clef)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                "Tester_autorisation: Unable to retrieve the key of user %s", client->ident.nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
@@ -79,7 +79,7 @@
           
     client->util = Rechercher_utilisateurDB( Config.log, client->Db_watchdog, id );
     if (!client->util)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                "Tester_autorisation: Unable to retrieve the user %s", client->ident.nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
@@ -89,14 +89,14 @@
 /***************************************** Identification du client ***************************************/
     crypt = Crypter( Config.log, Config.crypto_key, client->ident.password );
     if (!crypt)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                "Tester_autorisation: Password encryption error for user %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        return(DECONNECTE);
      }
 
     if (memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,  
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
                "Tester_autorisation: Password error for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        g_free(crypt);
@@ -108,31 +108,31 @@
 
 /********************************************* Compte du client *******************************************/
     if (!client->util->actif)                              /* Est-ce que son compte est toujours actif ?? */
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,  
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
                 "Tester_autorisation: Account disabled for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_DISABLED, NULL, 0 );
        return(DECONNECTE);
      }
 
     if (client->util->expire && client->util->date_expire<time(NULL) )   /* Expiration temporel du compte */
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, 
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                 "Tester_autorisation: Account expired for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_EXPIRED, NULL, 0 );
        return(DECONNECTE);
      }
 
     if (client->util->changepass)                       /* L'utilisateur doit-il changer son mot de passe */
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,  
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
                 "Tester_autorisation: User %s have to change his password", client->util->nom );
        util.id = client->util->id;
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CHANGEPASS,
                      (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        return(ATTENTE_NEW_PASSWORD);
      }
-    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
              "Tester_autorisation: Envoi Autorisation for %s", client->util->nom );
     Autoriser_client ( client );
-    Info_new( Config.log, Config.log_all, LOG_INFO,
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Tester_autorisation: Autorisation sent for %s", client->util->nom );
     return( ENVOI_DONNEES );
   }

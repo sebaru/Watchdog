@@ -111,12 +111,12 @@
 
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, 
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
                 "Gerer_arrive_message_dls_on: Message %03d not found", num );
        return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     else if (!msg->enable)                                   /* Distribution du message aux sous serveurs */
-     { Info_new( Config.log, Config.log_all, LOG_INFO, 
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
                 "Gerer_arrive_message_dls_on: Message %03d not enabled !", num );
        return;
      }
@@ -157,7 +157,7 @@
 
     msg = Rechercher_messageDB( Config.log, Db_watchdog, num );
     if (!msg)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, 
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
                 "Gerer_arrive_message_dls_off: Message %03d not found", num );
        return;                                        /* On n'a pas trouvé le message, alors on s'en va ! */
      }
@@ -194,7 +194,7 @@
        val = Partage->g[num].etat;
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg,
                                                       GINT_TO_POINTER(num) );
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
                num, val, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );

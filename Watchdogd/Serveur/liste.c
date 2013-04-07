@@ -86,7 +86,7 @@
     taille = 0;
     repertoire = opendir ( Repertoire );
     if (!repertoire)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "Ajouter_repertoire_liste: Directory %s unknown", Repertoire );
        return(0);
      }

@@ -39,27 +39,70 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
 #ifdef bouh
-    if ( ! strcmp ( commande, "tell_mp3" ) )
-     { struct CMD_TYPE_MESSAGE msg;
-       sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
-       Jouer_mp3 ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent (mp3)\n", msg.num );
+    if ( ! strcmp ( commande, "ssrv" ) )
+     { int i;
+
+       g_snprintf( chaine, sizeof(chaine), " Jeton au SSRV %02d\n", Partage->jeton );
        Admin_write ( connexion, chaine );
+
+       for (i=0; i<Config.max_serveur; i++)
+        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+          g_snprintf( chaine, sizeof(chaine), " SSRV[%02d] -> %02d connexions\n",
+                      i, g_list_length(Partage->Sous_serveur[i].Clients) );
+          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+          Admin_write ( connexion, chaine );
+        }
      } else
-    if ( ! strcmp ( commande, "tell_espeak" ) )
-     { struct CMD_TYPE_MESSAGE msg;
-       sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
-       Jouer_espeak ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent (espeak)\n", msg.num );
+    if ( ! strcmp ( commande, "connexion" ) )
+     { GList *liste;
+       gint i;
+        
+       g_snprintf( chaine, sizeof(chaine), " -- Liste des connexions connectés au serveur\n" );
        Admin_write ( connexion, chaine );
+       for (i=0; i<Config.max_serveur; i++)
+         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
+
+           pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
+           liste = Partage->Sous_serveur[i].Clients;
+           while(liste)                                               /* Parcours de la liste des connexions */
+            { struct CONNEXION *connexion_srv;
+              connexion_srv = (struct CONNEXION *)liste->data;
+
+              g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s",
+                          i, connexion_srv->ident.version, connexion_srv->util->nom, connexion_srv->machine,
+                          connexion_srv->mode, connexion_srv->defaut, ctime(&connexion_srv->date_connexion) );
+              Admin_write ( connexion, chaine );     /* ctime ajoute un \n à la fin !! */
+
+              liste = liste->next;
+            }
+           pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
+         }
      } else
-    if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
-       Admin_write ( connexion, "  tell_mp3 num          - Send message num with mp3 format\n" );
-       Admin_write ( connexion, "  tell_espeak num       - Send message num with espeak format\n" );
-       Admin_write ( connexion, "  help                  - This help\n" );
-     }
-    else
+    if ( ! strcmp ( commande, "msgs" ) )
+     { GList *liste;
+       gint i;
+
+       g_snprintf( chaine, sizeof(chaine), " -- Liste des connexions recevant le message\n" );
+       Admin_write ( connexion, chaine );
+       for (i=0; i<Config.max_serveur; i++)
+         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
+           liste = Partage->Sous_serveur[i].Clients;
+           while(liste)                                               /* Parcours de la liste des connexions */
+            { struct CMD_GTK_MESSAGE erreur;
+              struct CONNEXION *connexion_wat;
+              connexion_wat = (struct CONNEXION *)liste->data;
+
+              g_snprintf( erreur.message, sizeof(erreur.message), "AdminMSG : %s", ligne + 5 );
+              Envoi_connexion( connexion_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+
+              g_snprintf( chaine, sizeof(chaine), " - %s@%s\n",
+                          connexion_wat->util->nom, connexion_wat->machine );
+              Admin_write ( connexion, chaine );
+              liste = liste->next;
+            }
+         }
+     } else
 #endif
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );

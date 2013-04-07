@@ -56,18 +56,18 @@
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );
-    if (!handle) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+    if (!handle) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                             "Charger_un_plugin: Candidat %04d failed (%s)", dls->plugindb.id, dlerror() );
                    return(FALSE);
                  }
     Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_new( Config.log, Config.log_all, LOG_WARNING,
+    if (!Go) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                         "Charger_un_plugin: Candidat %04d failed sur absence GO", dls->plugindb.id ); 
                dlclose( handle );
                return(FALSE);
              }
 
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Charger_un_plugin: plugin id = %04d (%s) loaded",
+    Info_new( Config.log, Config.log_dls, LOG_INFO, "Charger_un_plugin: plugin id = %04d (%s) loaded",
               dls->plugindb.id, dls->plugindb.nom );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
     dls->handle   = handle;
@@ -91,7 +91,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: Unable to open database" );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_un_plugin_by_id: Unable to open database" );
        return(FALSE);
      }
 
@@ -99,13 +99,13 @@
     Libere_DB_SQL( Config.log, &db );
 
     if (!plugin_dls)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %04d non trouvé", id );
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %04d non trouvé", id );
        return(FALSE);
      }
 
     dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%04d", id );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%04d", id );
        g_free(plugin_dls);
        return(FALSE);
      }
@@ -133,7 +133,7 @@
         { dlclose( plugin->handle );
           Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
-          Info_new( Config.log, Config.log_all, LOG_INFO,
+          Info_new( Config.log, Config.log_dls, LOG_INFO,
                    "Decharger_un_plugin_by_id: plugin %04d unloaded", plugin->plugindb.id );
           break;
         }
@@ -141,7 +141,7 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     if (plugins == NULL)
-     { Info_new( Config.log, Config.log_all, LOG_INFO,
+     { Info_new( Config.log, Config.log_dls, LOG_INFO,
                 "Decharger_un_plugin_by_id: plugin %04d not found", id );
      }
   }
@@ -151,7 +151,7 @@
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
  void Reseter_un_plugin ( gint id )
-  { Info_new( Config.log, Config.log_all, LOG_INFO, "Reseter_un_plugin: Reset plugin %04d", id );
+  { Info_new( Config.log, Config.log_dls, LOG_INFO, "Reseter_un_plugin: Reset plugin %04d", id );
 
     Decharger_un_plugin_by_id ( id );
     Charger_un_plugin_by_id ( id );
@@ -170,7 +170,7 @@
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Decharger_plugins: plugin %04d unloaded", plugin->plugindb.id );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Decharger_plugins: plugin %04d unloaded", plugin->plugindb.id );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -187,7 +187,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: Unable to open database" );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to open database" );
        return;
      }
 
@@ -202,7 +202,7 @@
    
           dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
           if (!dls)
-           { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: out of memory" );
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: out of memory" );
              g_free(plugin);
              return;
            }
@@ -213,10 +213,10 @@
                                                                       /* Si option "compil" au demarrage" */
           if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id );
           if (Charger_un_plugin( dls )==TRUE)
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
+           { Info_new( Config.log, Config.log_dls, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
         } while ( TRUE );
      }
-    else  { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_plugins: Unable to load plugins" );
+    else  { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to load plugins" );
             return;
           }
  }
@@ -238,7 +238,7 @@
         { plugin->plugindb.on = actif;
           plugin->conso = 0.0;
           plugin->starting = 1;
-          Info_new( Config.log, Config.log_all, LOG_INFO, "Activer_plugin_by_id: id %04d started (%s)",
+          Info_new( Config.log, Config.log_dls, LOG_INFO, "Activer_plugin_by_id: id %04d started (%s)",
                     plugin->plugindb.id, plugin->plugindb.nom );
           break;
         }
@@ -254,15 +254,15 @@
  gint Compiler_source_dls( gboolean new, gboolean reset, gint id )
   { gint retour;
 
-    Info_new( Config.log, Config.log_all, LOG_NOTICE,
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE,
              "THRCompil: Compiler_source_dls: Compilation module DLS %d", id );
     retour = Traduire_DLS( Config.log, new, id );
-    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
              "THRCompil: Compiler_source_dls: fin traduction %d", retour );
 
     if (retour == TRAD_DLS_ERROR_FILE)                            /* Retour de la traduction D.L.S vers C */
      { return( DLS_COMPIL_ERROR_LOAD_SOURCE );
-/*       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+/*       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S %d", id );
        g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open file for compilation ID %d", id );
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR, (gchar *)&erreur, sizeof(erreur) );*/
@@ -272,7 +272,7 @@
      { gint id_fichier;
        gchar log[20];
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Compiler_source_dls: envoi erreur/warning Traduction D.L.S %d", id );
        g_snprintf( log, sizeof(log), "%d.log", id );
 
@@ -296,7 +296,7 @@
        pidgcc = fork();
        if (pidgcc<0)
         { struct CMD_GTK_MESSAGE erreur;
-          Info_new( Config.log, Config.log_all, LOG_WARNING,
+          Info_new( Config.log, Config.log_dls, LOG_WARNING,
                    "THRCompilFils: Compiler_source_dls: envoi erreur Fork GCC %d", id );
           return(DLS_COMPIL_ERROR_FORK_GCC);
 /*           if (client)
@@ -310,17 +310,17 @@
           gchar source[80], cible[80];
           g_snprintf( source, sizeof(source), "%d.c", id );
           g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
           execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
                   "-Wall", "-ldls", source, "-fPIC", "-o", cible, NULL );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
           _exit(0);
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Proto_compiler_source_dls: Waiting for gcc to finish pid %d", pidgcc );
        wait4(pidgcc, NULL, 0, NULL );
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Proto_compiler_source_dls: gcc is down, OK %d", pidgcc );
 
        if (reset)
@@ -330,7 +330,7 @@
           pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG, "THRCompil: Compiler_source_dls: end of %d", id );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompil: Compiler_source_dls: end of %d", id );
        if (retour == TRAD_DLS_WARNING)
         { return( DLS_COMPIL_OK_WITH_WARNINGS );
           /*g_snprintf( erreur.message + index_buffer_erreur, sizeof(erreur.message) - index_buffer_erreur,

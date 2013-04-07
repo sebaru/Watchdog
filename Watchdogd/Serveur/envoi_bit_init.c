@@ -60,7 +60,7 @@
     
           if ( ! g_list_find(client->bit_syns, GINT_TO_POINTER(bit_controle) ) )
            { client->bit_syns = g_list_append( client->bit_syns, GINT_TO_POINTER(bit_controle) );
-             Info_new( Config.log, Config.log_all, LOG_DEBUG,
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                       "Envoyer_bit_init_supervision_thread: liste des bit_syns %d", bit_controle );
            }
 

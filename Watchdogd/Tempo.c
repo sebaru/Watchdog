@@ -74,7 +74,7 @@
      }
 
     tempo = (struct CMD_TYPE_OPTION_TEMPO *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_TEMPO) );
-    if (!tempo) Info_new( Config.log, Config.log_all, LOG_ERR,
+    if (!tempo) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                              "Recuperer_tempoDB_suite: Erreur allocation mémoire" );
     else
      { tempo->id_mnemo  = atoi(db->row[0]);
@@ -100,7 +100,7 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Charger_tempo: Connexion DB failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_tempo: Connexion DB failed" );
        return;
      }                                                                                  /* Si pas d'accès */
 
@@ -121,7 +121,7 @@
         { memcpy( &Partage->Tempo_R[tempo->num].option_tempo, tempo, sizeof(struct CMD_TYPE_OPTION_TEMPO) );
         }
        else
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                    "Charger_tempo: tempo->num (%d) out of range (max=%d)", tempo->num, NBR_TEMPO ); }
        g_free(tempo);
      }
@@ -154,14 +154,14 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Rechercher_tempoDB: Tempo %d (id_mnemo) not found in DB", id );
        return(NULL);
      }
 
     tempo = (struct CMD_TYPE_OPTION_TEMPO *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_TEMPO) );
     if (!tempo)
-     { Info_new( Config.log, Config.log_all, LOG_ERR, "Rechercher_tempoDB: Mem error" ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_tempoDB: Mem error" ); }
     else
      { tempo->id_mnemo  = atoi(db->row[0]);
        tempo->num       = atoi(db->row[1]);

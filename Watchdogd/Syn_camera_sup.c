@@ -100,7 +100,7 @@
      }
 
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
-    if (!camera_sup) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
+    if (!camera_sup) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_camera_supDB_suite: Erreur allocation mémoire" );
     else
      { camera_sup->id           = atoi(db->row[0]);
        camera_sup->camera_src_id= atoi(db->row[1]);
@@ -138,12 +138,12 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Rechercher_camera_supDB: Camera %d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_camera_supDB: Camera %d not found in DB", id );
        return(NULL);
      }
 
     camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
-    if (!camera_sup) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_camera_supDB: Erreur allocation mémoire" );
+    if (!camera_sup) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_camera_supDB: Erreur allocation mémoire" );
     else
      { camera_sup->id           = id;
        camera_sup->camera_src_id= atoi(db->row[0]);

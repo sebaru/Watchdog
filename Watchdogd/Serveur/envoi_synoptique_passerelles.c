@@ -151,7 +151,7 @@
           pthread_exit ( NULL );
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_passerelle_atelier: pass %d (%s) to client %s",
                  pass->id, pass->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
@@ -204,25 +204,25 @@
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "liste des bit_init_syn pass %d", pass->bit_controle_1 );
         }
 
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_2) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_2) );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "liste des bit_init_syn pass %d", pass->bit_controle_2 );
         }
 
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) );
-          Info_new( Config.log, Config.log_all, LOG_DEBUG,
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "liste des bit_init_syn pass %d", pass->bit_controle_3 );
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_passerelle_supervision: pass %d (%s) to client %s",
                  pass->id, pass->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,

@@ -84,7 +84,7 @@
             struct REZO_CLI_IDENT *ident;
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
-            Info_new( Config.log, Config.log_all, LOG_INFO,
+            Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                      "Gerer_protocol: Identification du client (%d), nom=%s, version=%s, version_donnees=%d",
                       connexion->socket, ident->nom, ident->version, ident->version_d );
             memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );  /* Recopie pour sauvegarde */
@@ -100,7 +100,7 @@
                g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong version number" );
                Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                              (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-               Info_new( Config.log, Config.log_all, LOG_WARNING, "Wrong version number" );
+               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, "Wrong version number" );
                Client_mode ( client, DECONNECTE );
              }
           }
@@ -131,7 +131,7 @@
      }
     else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
      { switch( recu )
-        { case RECU_ERREUR_CONNRESET: Info_new( Config.log, Config.log_all, LOG_DEBUG,
+        { case RECU_ERREUR_CONNRESET: Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                                             "Ecouter_client: Reset connexion" );
                                       break;
         }

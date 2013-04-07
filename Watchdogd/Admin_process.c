@@ -50,14 +50,14 @@
 
        if ( ! strcmp ( thread, "arch" ) )
         { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
+           { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
           else { g_snprintf( chaine, sizeof(chaine), " ARCH started\n" );
                  Admin_write ( connexion, chaine );
                }
         } else
        if ( ! strcmp ( thread, "dls" ) )
         { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info_new( Config.log, Config.log_all, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
+           { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
           else { g_snprintf( chaine, sizeof(chaine), " D.L.S started\n" );
                  Admin_write ( connexion, chaine );
                }
@@ -184,7 +184,7 @@
 
      } else
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
        Admin_write ( connexion, "SHUTDOWN in progress\n" );
        SB( 7, TRUE );                                                     /* Message audio avant Shutdown */
        sleep(5);
@@ -192,7 +192,7 @@
        SB( 7, FALSE );                                                    /* Message audio avant Shutdown */
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : REBOOT demandé" );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : REBOOT demandé" );
        Admin_write ( connexion, "REBOOT in progress\n" );
        SB( 8, TRUE );                                                       /* Message audio avant Reboot */
        sleep(5);
@@ -201,7 +201,7 @@
        SB( 8, FALSE );                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
        Admin_write ( connexion, "CLEAR-REBOOT in progress\n" );
        SB( 8, TRUE );                                                       /* Message audio avant Reboot */
        sleep(5);
@@ -211,7 +211,7 @@
        SB( 8, FALSE );                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Admin_process : RELOAD demandé" );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : RELOAD demandé" );
        Admin_write ( connexion, "RELOAD in progress\n" );
        Partage->com_msrv.Thread_reload = TRUE;
      } else

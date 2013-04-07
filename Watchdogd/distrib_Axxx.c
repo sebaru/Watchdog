@@ -88,7 +88,7 @@
     reste = g_slist_length(Partage->com_msrv.liste_a);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    Info_new( Config.log, Config.log_all, LOG_DEBUG,
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
               "Gerer_arrive_Axxx_dls: Recu A(%03d)=%d. Reste a traiter %03d",
               num, A(num), reste
             );

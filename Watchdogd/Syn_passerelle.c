@@ -105,7 +105,7 @@
      }
 
     passerelle = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof(struct CMD_TYPE_PASSERELLE) );
-    if (!passerelle) Info_new( Config.log, Config.log_all, LOG_ERR, "Recuperer_passerelleDB_suite: Erreur allocation mémoire" );
+    if (!passerelle) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_passerelleDB_suite: Erreur allocation mémoire" );
     else
      { passerelle->id             = atoi(db->row[0]);
        passerelle->syn_id         = atoi(db->row[1]);           /* Synoptique ou est placée la passerelle */

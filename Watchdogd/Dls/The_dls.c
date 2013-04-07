@@ -58,7 +58,7 @@
 /**********************************************************************************************************/
  int E( int num )
   { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( ((Partage->e[ num>>3 ]) & (1<<(num%8)) ? 1 : 0) );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "E : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "E : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -66,7 +66,7 @@
 /**********************************************************************************************************/
  int EA_inrange( int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_range : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -74,7 +74,7 @@
 /**********************************************************************************************************/
  float EA_ech( int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num );
     return(0.0);
   }
 /**********************************************************************************************************/
@@ -82,7 +82,7 @@
 /**********************************************************************************************************/
  int EA_ech_inf( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_inf : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -90,7 +90,7 @@
 /**********************************************************************************************************/
  int EA_ech_inf_egal( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -98,7 +98,7 @@
 /**********************************************************************************************************/
  int EA_ech_sup( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_sup : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -106,7 +106,7 @@
 /**********************************************************************************************************/
  int EA_ech_sup_egal( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -114,7 +114,7 @@
 /**********************************************************************************************************/
  float CI( int num )
   { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "CI : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
     return(0.0);
   }
 /**********************************************************************************************************/
@@ -122,7 +122,7 @@
 /**********************************************************************************************************/
  int A( int num )
   { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "A : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "A : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -130,7 +130,7 @@
 /**********************************************************************************************************/
  int B( int num )
   { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "B : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "B : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -138,7 +138,7 @@
 /**********************************************************************************************************/
  int M( int num )
   { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "M : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "M : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -146,7 +146,7 @@
 /**********************************************************************************************************/
  int T( int num )
   { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
-    else Info_new( Config.log, Config.log_all, LOG_INFO, "TR : num %d out of range", num );
+    else Info_new( Config.log, Config.log_dls, LOG_INFO, "TR : num %d out of range", num );
     return(0);
   }
 /**********************************************************************************************************/
@@ -169,7 +169,7 @@
 /**********************************************************************************************************/
  void SE( int num, int etat )
   { if (num<0 || num>=NBR_ENTRE_TOR)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SE : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SE : num %d out of range", num );
        return;
      }
 
@@ -186,7 +186,7 @@
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
   { if (num<0 || num>=NBR_ENTRE_ANA)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SEA_range : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num );
        return;
      }
     Partage->ea[num].inrange = range;
@@ -196,7 +196,7 @@
 /**********************************************************************************************************/
  void SEA( int num, float val_avant_ech )
   { if (num<0 || num>=NBR_ENTRE_ANA)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SEA : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
        return;
      }
 
@@ -264,7 +264,7 @@
  void SB( int num, int etat )
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_BISTABLE)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SB : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SB : num %d out of range", num );
        return;
      }
     numero = num>>3;
@@ -286,7 +286,7 @@
  void SM( int num, int etat )
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_MONOSTABLE)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SM : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SM : num %d out of range", num );
        return;
      }
     numero = num>>3;
@@ -307,7 +307,7 @@
 /**********************************************************************************************************/
  void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
   { if ( num<0 || num>=NBR_BIT_CONTROLE )
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SI : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SI : num %d out of range", num );
        return;
      }
 
@@ -353,7 +353,7 @@
   { struct TEMPO *tempo;
 
     if (num<0 || num>=NBR_TEMPO)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "STR: num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num );
        return;
      }
     tempo = &Partage->Tempo_R[num];                                       /* Récupération de la structure */
@@ -423,7 +423,7 @@
  void SA( int num, int etat )
   { if (num<0 || num>=NBR_SORTIE_TOR)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "SA : num %d out of range", num ); }
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SA : num %d out of range", num ); }
        return;
      }
 
@@ -441,7 +441,7 @@
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->a[num].changes++;                                              /* Un change de plus !! */
         } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "SA: last_change trop tot pour A%d !", num ); }
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SA: last_change trop tot pour A%d !", num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
@@ -452,7 +452,7 @@
 /**********************************************************************************************************/
  void SCH( int num, int etat )
   { if (num<0 || num>=NBR_COMPTEUR_H)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "SCH : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SCH : num %d out of range", num );
        return;
      }
     if (etat)
@@ -479,7 +479,7 @@
 /**********************************************************************************************************/
  void SCI( int num, int etat, int reset, int ratio )
   { if (num<0 || num>=NBR_COMPTEUR_IMP)
-     { Info_new( Config.log, Config.log_all, LOG_INFO, "CI : num %d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
        return;
      }
     if (etat)
@@ -529,7 +529,7 @@
 /**********************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "MSG : num %03d out of range", num );
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "MSG : num %03d out of range", num );
        return;
      }
 
@@ -546,7 +546,7 @@
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].changes++;
         } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
        Partage->g[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
@@ -571,7 +571,7 @@
     while( liste )                                                               /* Reset des monostables */
      { gint num;
        num = GPOINTER_TO_INT(liste->data);
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Raz_cde_exterieure : Mise a zero du bit M%03d", num );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Raz_cde_exterieure : Mise a zero du bit M%03d", num );
        SM( num, 0 );
        liste = liste->next;
      }
@@ -592,7 +592,7 @@
     Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: Demarrage" );                /* Log Start */
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: Demarrage" );                /* Log Start */
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     sleep(30);/* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
@@ -602,14 +602,14 @@
      { struct timeval tv_avant, tv_apres;
 
        if (Partage->com_dls.Thread_reload)
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: RELOADING" );
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: RELOADING" );
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
         }
 
        if (Partage->com_dls.Thread_sigusr1)
-        { Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: SIGUSR1" );
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: SIGUSR1" );
           Partage->com_dls.Thread_sigusr1 = FALSE;
         }
 
@@ -622,7 +622,7 @@
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
-          Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: Mise a un du bit M%03d", num );
+          Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: Mise a un du bit M%03d", num );
           Partage->com_dls.liste_m = g_list_remove ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           SM( num, 1 );                                                    /* Mise a un du bit monostable */
@@ -680,7 +680,7 @@
        sched_yield();
      }
     Decharger_plugins();                                                  /* Dechargement des modules DLS */
-    Info_new( Config.log, Config.log_all, LOG_NOTICE, "Run_dls: DLS Down (%d)", pthread_self() );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: DLS Down (%d)", pthread_self() );
     Partage->com_dls.TID = 0;                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

@@ -149,7 +149,7 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         } 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_comment_atelier: envoi comment %d (%s) to client %d",
                  comment->id, comment->libelle, client->machine );
        Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
@@ -199,7 +199,7 @@
           pthread_exit( NULL );
         }
 
-       Info_new( Config.log, Config.log_all, LOG_DEBUG,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_comment_supervision: envoi comment %d (%s) to client %d",
                  comment->id, comment->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,

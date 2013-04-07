@@ -53,7 +53,7 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_INFO,
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Get_login_failed: Login_failed not found in BD for id=%d", id );
        return(0);
      }
@@ -79,7 +79,7 @@
 
     Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
     if (Get_login_failed( log, db, id )>=max_login_failed)                     /* Desactivation du compte */
-     { Info_new( Config.log, Config.log_all, LOG_NOTICE,
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                 "Ajouter_one_login_failed: Desactivation compte sur trop login failed for id=%d", id );
        Set_compte_actif( log, db, id, FALSE );
      }

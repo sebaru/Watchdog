@@ -46,7 +46,7 @@
 
     if ( !client ) return(0);
     if ( client->mode >= DECONNECTE )
-     { Info_new( Config.log, Config.log_all, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoi_client : envoi interdit to %d", client->connexion->socket);
        return(0);
      }
@@ -57,18 +57,18 @@
     retour = Envoyer_reseau( client->connexion, tag, ss_tag, buffer, taille );
     if (retour)
      { client->defaut++;
-       Info_new( Config.log, Config.log_all, LOG_WARNING,
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "Envoi_client: Failed sending to id=%d (%s), error %d",
                 client->connexion->socket, client->machine, retour);
 
        if (client->defaut>=DEFAUT_MAX)
-        { Info_new( Config.log, Config.log_all, LOG_INFO, "Envoi_client: Deconnexion client sur défaut" );
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Envoi_client: Deconnexion client sur défaut" );
           Client_mode ( client, DECONNECTE );
         }
        else switch(retour)
         { case EPIPE:
           case ECONNRESET: Client_mode ( client, DECONNECTE );          /* Connection resettée par le clt */
-                           Info_new( Config.log, Config.log_all, LOG_INFO, "decision: deconnexion client" );
+                           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "decision: deconnexion client" );
                            break;
         }
      }
@@ -144,10 +144,10 @@
        suivant:
        if (!client->transfert.fichiers) return(TRUE);
        liste = (struct LISTE_FICH *)(client->transfert.fichiers->data);
-       Info_new( Config.log, Config.log_all, LOG_INFO, "Envoyer_gif: Sending %s", liste->fichier_absolu );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Envoyer_gif: Sending %s", liste->fichier_absolu );
        client->transfert.fd = open( liste->fichier_absolu, O_RDONLY );
        if (client->transfert.fd<0)
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                    "Envoyer_gif: Sending failed for %s (%s)", liste->fichier, strerror(errno) );
           g_free(client->transfert.fichiers->data);
           client->transfert.fichiers = g_list_remove( client->transfert.fichiers, liste );

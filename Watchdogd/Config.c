@@ -130,8 +130,10 @@
           g_free(chaine);
         }
 
-       Config.log_all = g_key_file_get_boolean ( gkf, "LOG", "log_all", NULL );
-       Config.log_db  = g_key_file_get_boolean ( gkf, "LOG", "log_db", NULL );
+       Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "log_msrv", NULL );
+       Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "log_dls", NULL );
+       Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "log_ach", NULL );
+       Config.log_db   = g_key_file_get_boolean ( gkf, "LOG", "log_db", NULL );
      }
     g_key_file_free(gkf);
   }
@@ -142,22 +144,22 @@
  void Print_config ( void )
   { 
     if (!Config.log) return;
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config file                 %s", Config.config_file );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config run_as               %s", Config.run_as );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config log_level            %d", Config.log_level );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config home                 %s", Config.home );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db host              %s", Config.db_host );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db database          %s", Config.db_database );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db username          %s", Config.db_username );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db password          %s", Config.db_password );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config compil               %d", Config.compil );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config tellstick A(min)     %d", Config.tellstick_a_min );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config tellstick A(max)     %d", Config.tellstick_a_max );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config asterisk M(min)      %d", Config.asterisk_m_min );
-    Info_new( Config.log, Config.log_all, LOG_INFO, "Config asterisk M(max)      %d", Config.asterisk_m_max );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db host              %s", Config.db_host );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          %s", Config.db_password );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config tellstick A(min)     %d", Config.tellstick_a_min );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config tellstick A(max)     %d", Config.tellstick_a_max );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config asterisk M(min)      %d", Config.asterisk_m_min );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config asterisk M(max)      %d", Config.asterisk_m_max );
   }
 /*--------------------------------------------------------------------------------------------------------*/

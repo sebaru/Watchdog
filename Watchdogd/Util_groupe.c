@@ -77,7 +77,7 @@
 		NOM_TABLE_GIDS, id_util );
 
     if ( ! Lancer_requete_SQL ( log, db, requete ))
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Groupe_set_groupe_utilDB: Delete failed id=%d", id_util );
        return(FALSE);
      }
@@ -90,7 +90,7 @@
                    NOM_TABLE_GIDS, id_util, *(gids + cpt) );
 
        if ( ! Lancer_requete_SQL ( log, db, requete ))
-        { Info_new( Config.log, Config.log_all, LOG_WARNING,
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                    "Groupe_set_groupe_utilDB: set gids failed for id=%d", id_util );
           return(FALSE);
         }
@@ -145,13 +145,13 @@
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
-       Info_new( Config.log, Config.log_all, LOG_WARNING,
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Rechercher_groupeDB: Group not found in DB id=%d", id );
        return(NULL);
      }
 
     groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
-    if (!groupe) Info_new( Config.log, Config.log_all, LOG_ERR,
+    if (!groupe) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                            "Rechercher_groupeDB: memory error" );
     else
      { groupe->id = id;
@@ -188,7 +188,7 @@
      }
 
     groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
-    if (!groupe) Info_new( Config.log, Config.log_all, LOG_ERR,
+    if (!groupe) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                           "Recuperer_groupeDB_suite: memory error" );
     else
      { groupe->id = atoi(db->row[0]);
@@ -223,7 +223,7 @@
   { gchar requete[200];
 
     if (groupe->id < NBR_GROUPE_RESERVE)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING,
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Retirer_groupe: elimination failed: id reserve %s", groupe->nom );
        return(FALSE);
      }
@@ -245,12 +245,12 @@
   
     nom     = Normaliser_chaine ( log, groupe->nom );
     if (!nom)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
        return(-1);
      }
     comment = Normaliser_chaine ( log, groupe->commentaire );
     if (!comment)
-     { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
        g_free(nom);
        return(-1);
      }
