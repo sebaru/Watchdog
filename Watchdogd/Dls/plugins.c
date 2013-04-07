@@ -310,9 +310,11 @@
           gchar source[80], cible[80];
           g_snprintf( source, sizeof(source), "%d.c", id );
           g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: GCC start !" );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+                   "THRCompilFils: Proto_compiler_source_dls: GCC start (pid %d) source %s cible %s!",
+                    pidgcc, source, cible );
           execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
-                  "-Wall", "-ldls", source, "-fPIC", "-o", cible, NULL );
+                  "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
           _exit(0);
         }
