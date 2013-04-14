@@ -71,7 +71,7 @@
 /**********************************************************************************************************/
  static void Admin_dls_gcc ( struct CONNEXION *connexion, gint id )
   { GList *liste_dls;
-    gchar chaine[128];
+    gchar chaine[128], buffer[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
     Admin_write ( connexion, chaine );
@@ -85,7 +85,7 @@
 
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
           Admin_write ( connexion, chaine );
-          Compiler_source_dls ( FALSE, TRUE, dls->plugindb.id );
+          Compiler_source_dls ( FALSE, TRUE, dls->plugindb.id, buffer, sizeof(buffer) );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
           Admin_write ( connexion, chaine );
           liste_dls = liste_dls->next;
@@ -94,7 +94,7 @@
      } else
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
           Admin_write ( connexion, chaine );
-          Compiler_source_dls ( FALSE, TRUE, id );
+          Compiler_source_dls ( FALSE, TRUE, id, buffer, sizeof(buffer) );
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
           Admin_write ( connexion, chaine );
         }

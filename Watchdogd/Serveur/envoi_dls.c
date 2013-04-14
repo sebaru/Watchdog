@@ -209,10 +209,41 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void *Proto_compiler_source_dls( struct CLIENT *client )
-  { close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
+  { struct CMD_GTK_MESSAGE erreur;
+
+    close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
     client->id_creation_plugin_dls = 0;
 
-    Compiler_source_dls ( TRUE, TRUE, client->dls.id );
+    switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
+     { case DLS_COMPIL_ERROR_LOAD_SOURCE:
+            g_snprintf( erreur.message, sizeof(erreur.message),
+                       "Unable to open file for compilation ID %d", client->dls.id );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_ERROR_LOAD_LOG:
+            g_snprintf( erreur.message, sizeof(erreur.message),
+                       "Unable to open og file for DLS %d", client->dls.id );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_OK_WITH_WARNINGS:
+       case DLS_COMPIL_ERROR_TRAD:
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_ERROR_FORK_GCC:
+            g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_OK:
+            g_snprintf( erreur.message, sizeof(erreur.message),
+                      "-> Compilation OK\nReset plugin OK" );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+     }
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/

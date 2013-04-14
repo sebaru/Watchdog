@@ -45,6 +45,7 @@
  enum
   { DLS_COMPIL_ERROR_LOAD_SOURCE,
     DLS_COMPIL_ERROR_LOAD_LOG,
+    DLS_COMPIL_ERROR_TRAD,
     DLS_COMPIL_ERROR_FORK_GCC,
     DLS_COMPIL_OK_WITH_WARNINGS,
     DLS_COMPIL_OK
@@ -95,7 +96,7 @@
  extern void Decharger_plugins ( void );
  extern void Charger_plugins ( void );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
- extern gint Compiler_source_dls( gboolean new, gboolean reset, gint id );
+ extern gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer );
 
  extern void Run_dls ( void );                                                          /* Dans The_dls.c */
  extern int EA_inrange( int num );

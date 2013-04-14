@@ -41,7 +41,7 @@
  GList *Alias=NULL;
  static int Id_cible;                                           /* Pour la création du fichier temporaire */
  static int Id_log;                                                 /* Pour la creation du fichier de log */
- static struct LOG *Log;
+ static int nbr_erreur;
 
  extern gboolean Interpreter_source_dls ( gchar *source );
 /**********************************************************************************************************/
@@ -72,10 +72,19 @@
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
  void Emettre_erreur( char *chaine )
-  { int taille;
-    taille = strlen(chaine);
-    Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur %s", chaine );
-    write( Id_log, chaine, taille );
+  { static gchar *too_many="Too many errors...";
+    int taille;
+    if ( nbr_erreur < 15 )
+     { taille = strlen(chaine);
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur %s", chaine );
+       write( Id_log, chaine, taille );
+     } else
+    if ( nbr_erreur == 15 )
+     { taille = strlen(too_many);
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur: %s", too_many );
+       write( Id_log, too_many, taille );
+     }
+    nbr_erreur++;
   }
 /**********************************************************************************************************/
 /* New_option: Alloue une certaine quantité de mémoire pour les options                                   */
@@ -354,7 +363,7 @@
 /* Entrée: la structure de log, l'id du modul, new = true si il faut compiler le .dls.new                 */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                */
 /**********************************************************************************************************/
- gint Traduire_DLS( struct LOG *log_erreur, gboolean new, gint id )
+ gint Traduire_DLS( gboolean new, gint id )
   { gchar source[80], source_ok[80], cible[80], log[80];
     struct ALIAS *alias;
     gint retour;
@@ -367,7 +376,6 @@
     g_snprintf( log,       sizeof(log),       "%d.log", id );
     unlink ( cible );
     unlink ( log );
-    Log = log_erreur;                                               /* Sauvegarde pour utilisation future */
     Info_new( Config.log, Config.log_dls, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );
 
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
@@ -378,7 +386,7 @@
      }
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (Id_cible<0)
+    if (Id_log<0)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Log creation failed %s (%s)", cible, strerror(errno) ); 
        close(Id_cible);
@@ -386,23 +394,20 @@
      }
 
     Alias = NULL;                                                              /* Par défaut, pas d'alias */
-
+    nbr_erreur = 0;                                               /* Au départ, nous n'avons pas d'erreur */
     if ( Interpreter_source_dls( (new ? source : source_ok) ) )
          { retour = TRAD_DLS_OK; }
     else { retour = TRAD_DLS_ERROR; }
 
     if (retour==TRAD_DLS_OK)                                  /* Si pas d'erreur, on regarde les warnings */
-     { int i;
-       i = 0;
-       liste = Alias;
+     { liste = Alias;
        while(liste)
         { alias = (struct ALIAS *)liste->data;
-          if ( (!alias->used) && i<10 )
+          if ( (!alias->used) )
            { gchar chaine[128];
              g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
              Emettre_erreur( chaine ); 
              retour = TRAD_DLS_WARNING;
-             i++;
            }
           liste = liste->next;
         }

@@ -66,7 +66,7 @@
   };
 
 /*********************************************** Prototypes ***********************************************/
- extern gint Traduire_DLS( struct LOG *log, gboolean new, gint id );                     /* Dans Interp.c */
+ extern gint Traduire_DLS( gboolean new, gint id );                                      /* Dans Interp.c */
  extern char *New_chaine( int longueur );
  extern void Emettre( char *chaine );
  extern void Emettre_erreur( char *chaine );
