@@ -665,11 +665,11 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAK
 
        fclose(rc);
        if (erreur)
-        { g_snprintf(chaine, sizeof(chaine), "%d error%c found\n", erreur, (erreur>1 ? 's' : ' ') );
+        { g_snprintf(chaine, sizeof(chaine), "%d syntax error%c found\n", erreur, (erreur>1 ? 's' : ' ') );
           Emettre_erreur( chaine );
           return(FALSE);
         } else
-        { g_snprintf(chaine, sizeof(chaine), "No error found\n" );
+        { g_snprintf(chaine, sizeof(chaine), "No syntax error found\n" );
           Emettre_erreur( chaine );
         }
        return(TRUE);

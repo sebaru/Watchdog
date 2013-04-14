@@ -282,8 +282,6 @@
               while ( (nbr_car = read (id_fichier, buffer + index_buffer_erreur,
                                        taille_buffer-1-index_buffer_erreur )) > 0 )
                { index_buffer_erreur+=nbr_car; }
-              if (index_buffer_erreur<taille_buffer)
-               { buffer[index_buffer_erreur] = 0; }                             /* Caractère NULL d'arret */
               close(id_fichier);
             }
      }

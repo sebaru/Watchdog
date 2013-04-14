@@ -228,6 +228,9 @@
                            (gchar *)&erreur, sizeof(erreur) );
             break;
        case DLS_COMPIL_OK_WITH_WARNINGS:
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
        case DLS_COMPIL_ERROR_TRAD:
             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                            (gchar *)&erreur, sizeof(erreur) );
@@ -240,7 +243,7 @@
        case DLS_COMPIL_OK:
             g_snprintf( erreur.message, sizeof(erreur.message),
                       "-> Compilation OK\nReset plugin OK" );
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
      }
