@@ -174,7 +174,7 @@
     struct CMD_ENREG nbr;
     struct DB *db;
 
-    prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-EnvoiPalette", 0, 0, 0 );
     db = Init_DB_SQL( Config.log );
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */

@@ -74,7 +74,7 @@
   { gchar requete[2048];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.titre,%s.pos"
+                "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.libelle,%s.pos"
                 " FROM %s,%s WHERE %s.syn_id=%d AND %s.id=%s.syn_cible_id ORDER BY %s.pos",
                 NOM_TABLE_PALETTE, NOM_TABLE_PALETTE, NOM_TABLE_PALETTE,
                 NOM_TABLE_SYNOPTIQUE,

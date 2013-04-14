@@ -215,7 +215,7 @@
        else g_free(capteur_new);
 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_capteur_supervision: pass %d (%s) to client %s",
+                "Envoyer_capteur_supervision: capteur %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
                       (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );

@@ -200,7 +200,7 @@
         }
 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_comment_supervision: envoi comment %d (%s) to client %d",
+                "Envoyer_comment_supervision: envoi comment %d (%s) to client %s",
                  comment->id, comment->libelle, client->machine );
        Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                       (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
