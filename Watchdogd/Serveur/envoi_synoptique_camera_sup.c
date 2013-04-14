@@ -172,8 +172,6 @@
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
 
-#ifdef bouh
-
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
 
     db = Init_DB_SQL( Config.log );
@@ -210,6 +208,5 @@
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
        g_free(camera_sup);
      }
-#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
