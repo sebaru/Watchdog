@@ -665,7 +665,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAK
 
        fclose(rc);
        if (erreur)
-        { g_snprintf(chaine, sizeof(chaine), "%d syntax error%c found\n", erreur, (erreur>1 ? 's' : ' ') );
+        { g_snprintf(chaine, sizeof(chaine), "%d syntax error%s found\n", erreur, (erreur>1 ? "s" : "") );
           Emettre_erreur( chaine );
           return(FALSE);
         } else
