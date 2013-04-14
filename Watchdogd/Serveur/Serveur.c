@@ -321,8 +321,8 @@
                               if (!Cfg_ssrv.Ssl_ctx)
                                { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                                            "Init ssl failed but needed. Stopping..." );
+                                 goto end;
                                }
-                              goto end;
                             }
                        else { Cfg_ssrv.Ssl_ctx = NULL; }
 

@@ -38,72 +38,47 @@
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
-#ifdef bouh
-    if ( ! strcmp ( commande, "ssrv" ) )
-     { int i;
-
-       g_snprintf( chaine, sizeof(chaine), " Jeton au SSRV %02d\n", Partage->jeton );
-       Admin_write ( connexion, chaine );
-
-       for (i=0; i<Config.max_serveur; i++)
-        { pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-          g_snprintf( chaine, sizeof(chaine), " SSRV[%02d] -> %02d connexions\n",
-                      i, g_list_length(Partage->Sous_serveur[i].Clients) );
-          pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-          Admin_write ( connexion, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "connexion" ) )
-     { GList *liste;
-       gint i;
+    if ( ! strcmp ( commande, "clients" ) )
+     { struct CLIENT *client;
+       GSList *liste;
         
-       g_snprintf( chaine, sizeof(chaine), " -- Liste des connexions connectés au serveur\n" );
+       g_snprintf( chaine, sizeof(chaine), " -- Liste des clients connectés au serveur\n" );
        Admin_write ( connexion, chaine );
-       for (i=0; i<Config.max_serveur; i++)
-         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
 
-           pthread_mutex_lock( &Partage->Sous_serveur[i].synchro );
-           liste = Partage->Sous_serveur[i].Clients;
-           while(liste)                                               /* Parcours de la liste des connexions */
-            { struct CONNEXION *connexion_srv;
-              connexion_srv = (struct CONNEXION *)liste->data;
-
-              g_snprintf( chaine, sizeof(chaine), " SSRV%02d - v%s %s@%s - mode %d defaut %d date %s",
-                          i, connexion_srv->ident.version, connexion_srv->util->nom, connexion_srv->machine,
-                          connexion_srv->mode, connexion_srv->defaut, ctime(&connexion_srv->date_connexion) );
-              Admin_write ( connexion, chaine );     /* ctime ajoute un \n à la fin !! */
-
-              liste = liste->next;
-            }
-           pthread_mutex_unlock( &Partage->Sous_serveur[i].synchro );
-         }
+       pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+       liste = Cfg_ssrv.Clients;
+       while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
+        { client = (struct CLIENT *)liste->data;
+          g_snprintf( chaine, sizeof(chaine), " SSRV%06d - v%s %s@%s - mode %d defaut %d date %s",
+                          client->ssrv_id, client->ident.version,
+                         (client->util ? client->util->nom : "unknown"), client->machine,
+                          client->mode, client->defaut, ctime(&client->date_connexion) );
+          liste = g_slist_next(liste);
+        }
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
-     { GList *liste;
-       gint i;
+     { struct CMD_GTK_MESSAGE erreur;
+       struct CLIENT *client;
+       GSList *liste;
 
        g_snprintf( chaine, sizeof(chaine), " -- Liste des connexions recevant le message\n" );
        Admin_write ( connexion, chaine );
-       for (i=0; i<Config.max_serveur; i++)
-         { if (Partage->Sous_serveur[i].Thread_run == FALSE) continue;
-           liste = Partage->Sous_serveur[i].Clients;
-           while(liste)                                               /* Parcours de la liste des connexions */
-            { struct CMD_GTK_MESSAGE erreur;
-              struct CONNEXION *connexion_wat;
-              connexion_wat = (struct CONNEXION *)liste->data;
+       g_snprintf( erreur.message, sizeof(erreur.message), "AdminMSG : %s", ligne + 5 );
 
-              g_snprintf( erreur.message, sizeof(erreur.message), "AdminMSG : %s", ligne + 5 );
-              Envoi_connexion( connexion_wat, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-
-              g_snprintf( chaine, sizeof(chaine), " - %s@%s\n",
-                          connexion_wat->util->nom, connexion_wat->machine );
-              Admin_write ( connexion, chaine );
-              liste = liste->next;
-            }
-         }
+       pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+       liste = Cfg_ssrv.Clients;
+       while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
+        { client = (struct CLIENT *)liste->data;
+          Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
+                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+          g_snprintf( chaine, sizeof(chaine), " SSRV%06d - %s@%s\n", client->ssrv_id,
+                      (client->util ? client->util->nom : "unknown"), client->machine );
+          Admin_write ( connexion, chaine );
+          liste = g_slist_next(liste);
+        }
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
      } else
-#endif
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );

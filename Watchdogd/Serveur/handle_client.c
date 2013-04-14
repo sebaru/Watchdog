@@ -43,7 +43,8 @@
     pthread_t tid;
     gchar nom[16];
 
-    g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", thread_count++ );
+    client->ssrv_id = thread_count++;
+    g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
