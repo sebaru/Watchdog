@@ -268,17 +268,16 @@
        return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }
 
-    if ( (retour == TRAD_DLS_ERROR || retour == TRAD_DLS_WARNING) && buffer )
+    if ( buffer )
      { gint id_fichier;
        gchar log[20];
 
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "THRCompil: Compiler_source_dls: envoi erreur/warning Traduction D.L.S %d", id );
+                "THRCompil: Compiler_source_dls: Chargement du fichier de log D.L.S %d", id );
        g_snprintf( log, sizeof(log), "%d.log", id );
 
        id_fichier = open( log, O_RDONLY, 0 );
-       if (id_fichier<0)
-        { return(DLS_COMPIL_ERROR_LOAD_LOG); }
+       if (id_fichier<0) { return(DLS_COMPIL_ERROR_LOAD_LOG); }
        else { int nbr_car, index_buffer_erreur;
               nbr_car = index_buffer_erreur = 0; 
               while ( (nbr_car = read (id_fichier, buffer + index_buffer_erreur,
