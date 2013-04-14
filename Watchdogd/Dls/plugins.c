@@ -254,6 +254,8 @@
  gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer )
   { gint retour;
 
+    if (buffer) memset (buffer, 0, taille_buffer);                             /* RAZ du buffer de sortie */
+
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
              "THRCompil: Compiler_source_dls: Compilation module DLS %d", id );
     retour = Traduire_DLS( new, id );
@@ -282,8 +284,6 @@
               while ( (nbr_car = read (id_fichier, buffer + index_buffer_erreur,
                                        taille_buffer-1-index_buffer_erreur )) > 0 )
                { index_buffer_erreur+=nbr_car; }
-              if (index_buffer_erreur<taille_buffer)
-               { buffer[index_buffer_erreur] = 0; }                             /* Caractère NULL d'arret */
               close(id_fichier);
             }
      }

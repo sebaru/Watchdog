@@ -85,8 +85,9 @@
 
           g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", dls->plugindb.id );
           Admin_write ( connexion, chaine );
-          Compiler_source_dls ( FALSE, TRUE, dls->plugindb.id, buffer, sizeof(buffer) );
-          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", dls->plugindb.id );
+                                   /* Attention, demander un reset plugin utilise le mutex dls.synchro !! */
+          Compiler_source_dls ( FALSE, FALSE, dls->plugindb.id, buffer, sizeof(buffer) );
+          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done (no reset): %s\n", dls->plugindb.id, buffer );
           Admin_write ( connexion, chaine );
           liste_dls = liste_dls->next;
         }
@@ -94,8 +95,8 @@
      } else
         { g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] in progress\n", id );
           Admin_write ( connexion, chaine );
-          Compiler_source_dls ( FALSE, TRUE, id, buffer, sizeof(buffer) );
-          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done\n", id );
+          Compiler_source_dls ( FALSE, FALSE, id, buffer, sizeof(buffer) );
+          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%03d] done (no reset): %s\n", id, buffer );
           Admin_write ( connexion, chaine );
         }
   }
