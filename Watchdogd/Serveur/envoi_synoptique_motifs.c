@@ -265,7 +265,7 @@
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "liste des bit_init_syn ", motif->bit_controle );
+                   "liste des bit_init_syn %d", motif->bit_controle );
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
