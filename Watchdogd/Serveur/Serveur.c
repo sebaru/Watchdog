@@ -226,6 +226,8 @@
 /**********************************************************************************************************/
  void Deconnecter ( struct CLIENT *client )
   { client->mode = VALIDE;                            /* Envoi un dernier paquet "OFF" avant deconnexion" */
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+              "Deconnecter: deconnexion client %s", client->machine );
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
     Unref_client( client ); 

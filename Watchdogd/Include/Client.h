@@ -117,6 +117,9 @@
     GList *bit_capteurs;               /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
     GList *bit_init_capteur;   /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
 
+/* Gestion des histos et Motifs */
+    GSList *Liste_message;
+
 /* Courbes en temps réel */
     struct CMD_TYPE_COURBE courbe;                    /* Structure parametres Proto_ajouter_courbe_thread */
     GList *courbes;                          /* Ensemble des entrees analogiques monitorées par le client */

@@ -32,6 +32,69 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 
+ struct CLIENT *Client;
+
+/**********************************************************************************************************/
+/* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
+/* Entrées: le numéro de la sortie                                                                        */
+/**********************************************************************************************************/
+ void Ssrv_Gerer_message( struct CMD_TYPE_MESSAGE *msg )
+  { gint taille;
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                /* Ajout dans la liste de tell a traiter */
+    taille = g_slist_length( Client->Liste_message );
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Ssrv_Gerer_message: DROP (taille>150) msg=%d", msg->num );
+       g_free(msg);
+       return;
+     }
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );       /* Ajout dans la liste de tell a traiter */
+    Client->Liste_message = g_slist_prepend( Client->Liste_message, msg );
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
+/* Entrée : néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Envoyer_message ( void )
+  { struct CMD_TYPE_MESSAGE *msg;
+    struct CMD_TYPE_HISTO histo;
+    struct timeval tv;
+    
+    if ( Client->Liste_message == NULL ) return;
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+    msg = (struct CMD_TYPE_MESSAGE *) Client->Liste_message->data;
+    Client->Liste_message = g_slist_remove ( Client->Liste_message, msg );
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+       
+    gettimeofday( &tv, NULL );
+    histo.id               = msg->num;
+    histo.type             = msg->type;
+    histo.num_syn          = msg->num_syn;
+    histo.date_create_sec  = tv.tv_sec;
+    histo.date_create_usec = tv.tv_usec;
+    histo.date_fixe        = 0;
+/*    memcpy( &histo.nom_ack, nom_ack, sizeof(histo.nom_ack) );*/
+    memcpy( &histo.groupe,  msg->groupe,  sizeof(histo.groupe  ) );
+    memcpy( &histo.page,    msg->page,    sizeof(histo.page    ) );
+    memcpy( &histo.libelle, msg->libelle, sizeof(histo.libelle ) );
+
+    if (Partage->g[msg->num].etat)
+     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
+                     (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+     }
+    else
+     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
+                    (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+     }             
+    g_free(msg);
+  }
 /**********************************************************************************************************/
 /* Run_hangle_client boucle principale d'un sous-hangle_client Watchdog                                   */
 /* Entree: l'id du hangle_client et le pid du pere                                                        */
@@ -43,6 +106,7 @@
     pthread_t tid;
     gchar nom[16];
 
+    Client = client;                     /* Sauvegarde pour assurer les echanges de messages et de motifs */
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
@@ -307,43 +371,19 @@
 
 #ifdef bouh
 /****************************************** Ecoute des messages histo  ************************************/
-       if (Partage->Sous_hangle_client[id].new_histo)
-        { struct CMD_TYPE_HISTO *histo;
 
-          pthread_mutex_lock( &Partage->Sous_hangle_client[id].synchro );
-          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_hangle_client[id].new_histo->data;
-          Partage->Sous_hangle_client[id].new_histo = g_list_remove ( Partage->Sous_hangle_client[id].new_histo, histo );
-          pthread_mutex_unlock( &Partage->Sous_hangle_client[id].synchro );
-       
-          Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                         (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-          g_free(histo);
-        }
 
-       if (Partage->Sous_hangle_client[id].del_histo)
-        { struct CMD_TYPE_HISTO *histo;
-
-          pthread_mutex_lock( &Partage->Sous_hangle_client[id].synchro );
-          histo = (struct CMD_TYPE_HISTO *) Partage->Sous_hangle_client[id].del_histo->data;
-          Partage->Sous_hangle_client[id].del_histo = g_list_remove ( Partage->Sous_hangle_client[id].del_histo, histo );
-          pthread_mutex_unlock( &Partage->Sous_hangle_client[id].synchro );
-       
-          Envoi_clients( id, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                         (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-          g_free(histo);
-        }
-
-       if (Partage->Sous_hangle_client[id].new_motif)
+       if (Cfg_ssrv.new_motif)
         { GList *liste_clients;
           struct CLIENT *client;
           struct CMD_ETAT_BIT_CTRL *motif;
 
-          pthread_mutex_lock( &Partage->Sous_hangle_client[id].synchro );
-          motif = (struct CMD_ETAT_BIT_CTRL *) Partage->Sous_hangle_client[id].new_motif->data;
-          Partage->Sous_hangle_client[id].new_motif = g_list_remove ( Partage->Sous_hangle_client[id].new_motif, motif );
-          pthread_mutex_unlock( &Partage->Sous_hangle_client[id].synchro );
+          pthread_mutex_lock( &Cfg_ssrv.synchro );
+          motif = (struct CMD_ETAT_BIT_CTRL *) Cfg_ssrv.new_motif->data;
+          Cfg_ssrv.new_motif = g_list_remove ( Cfg_ssrv.new_motif, motif );
+          pthread_mutex_unlock( &Cfg_ssrv.synchro );
 
-          liste_clients = Partage->Sous_hangle_client[id].Clients;
+          liste_clients = Cfg_ssrv.Clients;
           while (liste_clients)
            { client = (struct CLIENT *)liste_clients->data;
              if ( g_list_find( client->bit_syns, GINT_TO_POINTER(motif->num) ) )
@@ -359,25 +399,23 @@
 /********************************************* Arret du hangle_client *******************************************/
 
     if (Cfg_ssrv.lib->Thread_run == FALSE)            /* Arret demandé par MSRV. Nous prevenons le client */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Run_hangle_client: deconnexion client from %s", client->machine );
-       Unref_client(client);
-     }
+     { Deconnecter(client); }
 
 #ifdef bouh
-    if (Partage->Sous_hangle_client[id].new_histo)
-     { g_list_foreach( Partage->Sous_hangle_client[id].new_histo, (GFunc) g_free, NULL );
-       g_list_free ( Partage->Sous_hangle_client[id].new_histo );
-       Partage->Sous_hangle_client[id].new_histo = NULL;
+    if (Cfg_ssrv.new_histo)
+     { g_list_foreach( Cfg_ssrv.new_histo, (GFunc) g_free, NULL );
+       g_list_free ( Cfg_ssrv.new_histo );
+       Cfg_ssrv.new_histo = NULL;
      }
-    if (Partage->Sous_hangle_client[id].del_histo)
-     { g_list_foreach( Partage->Sous_hangle_client[id].del_histo, (GFunc) g_free, NULL );
-       g_list_free ( Partage->Sous_hangle_client[id].del_histo );
-       Partage->Sous_hangle_client[id].del_histo = NULL;
+    if (Cfg_ssrv.del_histo)
+     { g_list_foreach( Cfg_ssrv.del_histo, (GFunc) g_free, NULL );
+       g_list_free ( Cfg_ssrv.del_histo );
+       Cfg_ssrv.del_histo = NULL;
      }
-    if (Partage->Sous_hangle_client[id].new_motif)
-     { g_list_foreach( Partage->Sous_hangle_client[id].new_motif, (GFunc) g_free, NULL );
-       g_list_free ( Partage->Sous_hangle_client[id].new_motif );
-       Partage->Sous_hangle_client[id].new_motif = NULL;
+    if (Cfg_ssrv.new_motif)
+     { g_list_foreach( Cfg_ssrv.new_motif, (GFunc) g_free, NULL );
+       g_list_free ( Cfg_ssrv.new_motif );
+       Cfg_ssrv.new_motif = NULL;
      }
 #endif
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
