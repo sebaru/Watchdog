@@ -39,7 +39,7 @@
 /* Entrée : néant                                                                                         */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_new_histo_aux_clients ( void )
+ static void Envoyer_new_histo_au_client ( void )
   { struct CMD_TYPE_HISTO *histo;
     
     if ( Client->Liste_new_histo == NULL ) return;
@@ -61,7 +61,7 @@
 /* Entrée : néant                                                                                         */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_del_histo_aux_clients ( void )
+ static void Envoyer_del_histo_au_client ( void )
   { struct CMD_TYPE_HISTO *histo;
     
     if ( Client->Liste_del_histo == NULL ) return;
@@ -284,7 +284,7 @@
                pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
                pthread_detach( tid );
                break;
-              }
+        }
 /****************************************** Envoi des chaines capteurs ************************************/
        if (client->mode == VALIDE && client->bit_capteurs && client->date_next_send_capteur < Partage->top)
         { struct CAPTEUR *capteur;
@@ -344,8 +344,13 @@
               }
            }
         }
+/****************************************** Envoi des histo ***********************************************/
+       if (client->mode == VALIDE)                            /* Envoi au suppression des histo au client */
+        { Envoyer_new_histo_au_client ();
+          Envoyer_del_histo_au_client ();
+        }
 
-
+/****************************************** Ecoute du client  *********************************************/
        if (client->mode >= ATTENTE_IDENT) Ecouter_client( client );
 
        if (Partage->top > client->pulse && client->mode == VALIDE)                /* Gestion du KEEPALIVE */

@@ -306,6 +306,8 @@
         }
        else memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO));
 
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Envoyer_histo_aux_threads: Envoi du MSG%d=%d aux thread", dup_histo->id, etat );
        if (etat)
         { client->Liste_new_histo = g_slist_append ( client->Liste_new_histo, dup_histo ); }
        else
@@ -313,16 +315,6 @@
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-/*    if (Partage->g[msg->num].etat)
-     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                     (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-     }
-    else
-     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                    (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-     }             
-*/
   }
 /**********************************************************************************************************/
 /* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
