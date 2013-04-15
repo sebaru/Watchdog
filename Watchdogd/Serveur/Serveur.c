@@ -250,6 +250,10 @@
        return;
      }
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Ssrv_Gerer_message: Message a traiter : msg=%d", msg->num );
+       
+
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                /* Ajout dans la liste de tell a traiter */
     Cfg_ssrv.Liste_message = g_slist_append( Cfg_ssrv.Liste_message, msg ); /* Append pour l'ordre d'arrive ! */
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
@@ -426,8 +430,8 @@
     while(lib->Thread_run == TRUE)                                       /* On tourne tant que necessaire */
      { struct CLIENT *client;
        pthread_t tid;
+       usleep(100000);
        sched_yield();
-       usleep(10000);
 
        if (lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,

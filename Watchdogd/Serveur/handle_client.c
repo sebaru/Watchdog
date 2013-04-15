@@ -49,11 +49,11 @@
     Client->Liste_new_histo = g_slist_remove ( Client->Liste_new_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Envoyer_new_histo: Histo traite : msg=%d, libelle=%s", histo->id, histo->libelle );
+
     Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
                   (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                    (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-     }             
     g_free(histo);
   }
 /**********************************************************************************************************/
@@ -70,7 +70,10 @@
     histo = (struct CMD_TYPE_HISTO *) Client->Liste_del_histo->data;
     Client->Liste_del_histo = g_slist_remove ( Client->Liste_del_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
+
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Envoyer_del_histo: Histo traite : msg=%d, libelle=%s", histo->id, histo->libelle );
+
     Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
                  (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
     g_free(histo);
@@ -95,7 +98,10 @@
               "Run_handle_client: Demarrage . . . TID = %d", pthread_self() );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
-     { if (client->mode == DECONNECTE)                                        /* Deconnection des clients */
+     { usleep(100000);
+       sched_yield();
+
+       if (client->mode == DECONNECTE)                                        /* Deconnection des clients */
         { Unref_client( client );
           break;
         }
