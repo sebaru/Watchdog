@@ -233,6 +233,94 @@
     Unref_client( client ); 
   }
 /**********************************************************************************************************/
+/* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
+/* Entrées: le numéro de la sortie                                                                        */
+/**********************************************************************************************************/
+ static void Ssrv_Gerer_message( struct CMD_TYPE_MESSAGE *msg )
+  { gint taille;
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                /* Ajout dans la liste de tell a traiter */
+    taille = g_slist_length( Cfg_ssrv.Liste_message );
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Ssrv_Gerer_message: DROP (taille>150) msg=%d", msg->num );
+       g_free(msg);
+       return;
+     }
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                /* Ajout dans la liste de tell a traiter */
+    Cfg_ssrv.Liste_message = g_slist_append( Cfg_ssrv.Liste_message, msg ); /* Append pour l'ordre d'arrive ! */
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
+/* Entrée : néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Envoyer_histo_aux_threads ( void )
+  { struct CMD_TYPE_MESSAGE *msg;
+    struct CMD_TYPE_HISTO histo;
+    struct timeval tv;
+    GSList *liste;
+    gint etat;
+    
+    if ( Cfg_ssrv.Liste_message == NULL ) return;
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+    msg = (struct CMD_TYPE_MESSAGE *) Cfg_ssrv.Liste_message->data;
+    Cfg_ssrv.Liste_message = g_slist_remove ( Cfg_ssrv.Liste_message, msg );
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+       
+    gettimeofday( &tv, NULL );
+    histo.id               = msg->num;
+    histo.type             = msg->type;
+    histo.num_syn          = msg->num_syn;
+    histo.date_create_sec  = tv.tv_sec;
+    histo.date_create_usec = tv.tv_usec;
+    histo.date_fixe        = 0;
+/*    memcpy( &histo.nom_ack, nom_ack, sizeof(histo.nom_ack) );*/
+    memcpy( &histo.groupe,  msg->groupe,  sizeof(histo.groupe  ) );
+    memcpy( &histo.page,    msg->page,    sizeof(histo.page    ) );
+    memcpy( &histo.libelle, msg->libelle, sizeof(histo.libelle ) );
+    etat = Partage->g[msg->num].etat;
+    g_free(msg);                                        /* On a plus besoin de la structure, on la libere */
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+    liste = Cfg_ssrv.Clients;
+    while (liste && Cfg_ssrv.lib->Thread_run)
+     { struct CLIENT *client;
+       struct CMD_TYPE_HISTO *dup_histo;
+       client = (struct CLIENT *)liste->data;
+
+       dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof ( struct CMD_TYPE_HISTO ) );
+       if (!dup_histo)
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                   "Envoyer_histo_aux_threads: Memory error" );
+          break;
+        }
+       else memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO));
+
+       if (etat)
+        { client->Liste_new_histo = g_slist_append ( client->Liste_new_histo, dup_histo ); }
+       else
+        { client->Liste_del_histo = g_slist_append ( client->Liste_del_histo, dup_histo ); }
+       liste = g_slist_next( liste );
+     }
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+
+/*    if (Partage->g[msg->num].etat)
+     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
+                     (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+     }
+    else
+     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
+                    (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+     }             
+*/
+  }
+/**********************************************************************************************************/
 /* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants     */
 /* Entrée: rien                                                                                           */
 /* Sortie: TRUE si un nouveau client est arrivé                                                           */
@@ -328,7 +416,8 @@
                             }
                        else { Cfg_ssrv.Ssl_ctx = NULL; }
 
-    Cfg_ssrv.Socket_ecoute = Activer_ecoute();                             /* Initialisation de l'écoute via TCPIP */
+    Cfg_ssrv.Socket_ecoute = Activer_ecoute();                    /* Initialisation de l'écoute via TCPIP */
+    Abonner_distribution_message ( Ssrv_Gerer_message );            /* Abonnement a la liste de diffusion */
     if ( Cfg_ssrv.Socket_ecoute<0 )            
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_CRIT, "Network down, foreign connexions disabled" );
        goto end;
@@ -338,7 +427,7 @@
      { struct CLIENT *client;
        pthread_t tid;
        sched_yield();
-       sleep(1);
+       usleep(10000);
 
        if (lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
@@ -346,13 +435,20 @@
           lib->Thread_sigusr1 = FALSE;
         }
 
-       client =Accueillir_un_client();
+       client = Accueillir_un_client();
        if (client)                                                        /* Un client vient d'arriver ?? */
         { pthread_create( &tid, NULL, (void *)Run_handle_client, client );
           pthread_detach( tid );
         }
+
+       Envoyer_histo_aux_threads();                            /* Envoi les histos aux thread s'il y en a */
       }                                                                    /* Fin du while partage->arret */
 
+    Desabonner_distribution_message ( Ssrv_Gerer_message );         /* Abonnement a la liste de diffusion */
+    if (Cfg_ssrv.Liste_message)                                          /* Si la liste est encore pleine */
+     { g_slist_foreach( Cfg_ssrv.Liste_message, (GFunc) g_free, NULL );
+       g_slist_free ( Cfg_ssrv.Liste_message );
+     }
 end:
     Ssrv_Liberer_config ();                             /* Lecture de la configuration logiciel du thread */
     Liberer_SSL ();                                                                 /* Libération mémoire */

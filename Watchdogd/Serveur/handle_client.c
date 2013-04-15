@@ -35,65 +35,45 @@
  struct CLIENT *Client;
 
 /**********************************************************************************************************/
-/* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
-/* Entrées: le numéro de la sortie                                                                        */
+/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
+/* Entrée : néant                                                                                         */
+/* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- void Ssrv_Gerer_message( struct CMD_TYPE_MESSAGE *msg )
-  { gint taille;
+ static void Envoyer_new_histo_aux_clients ( void )
+  { struct CMD_TYPE_HISTO *histo;
+    
+    if ( Client->Liste_new_histo == NULL ) return;
 
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Client->Liste_message );
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+    histo = (struct CMD_TYPE_HISTO *) Client->Liste_new_histo->data;
+    Client->Liste_new_histo = g_slist_remove ( Client->Liste_new_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Ssrv_Gerer_message: DROP (taille>150) msg=%d", msg->num );
-       g_free(msg);
-       return;
-     }
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );       /* Ajout dans la liste de tell a traiter */
-    Client->Liste_message = g_slist_prepend( Client->Liste_message, msg );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+       
+    Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
+                  (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
+                    (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+     }             
+    g_free(histo);
   }
 /**********************************************************************************************************/
 /* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
 /* Entrée : néant                                                                                         */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_message ( void )
-  { struct CMD_TYPE_MESSAGE *msg;
-    struct CMD_TYPE_HISTO histo;
-    struct timeval tv;
+ static void Envoyer_del_histo_aux_clients ( void )
+  { struct CMD_TYPE_HISTO *histo;
     
-    if ( Client->Liste_message == NULL ) return;
+    if ( Client->Liste_del_histo == NULL ) return;
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    msg = (struct CMD_TYPE_MESSAGE *) Client->Liste_message->data;
-    Client->Liste_message = g_slist_remove ( Client->Liste_message, msg );
+    histo = (struct CMD_TYPE_HISTO *) Client->Liste_del_histo->data;
+    Client->Liste_del_histo = g_slist_remove ( Client->Liste_del_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
-    gettimeofday( &tv, NULL );
-    histo.id               = msg->num;
-    histo.type             = msg->type;
-    histo.num_syn          = msg->num_syn;
-    histo.date_create_sec  = tv.tv_sec;
-    histo.date_create_usec = tv.tv_usec;
-    histo.date_fixe        = 0;
-/*    memcpy( &histo.nom_ack, nom_ack, sizeof(histo.nom_ack) );*/
-    memcpy( &histo.groupe,  msg->groupe,  sizeof(histo.groupe  ) );
-    memcpy( &histo.page,    msg->page,    sizeof(histo.page    ) );
-    memcpy( &histo.libelle, msg->libelle, sizeof(histo.libelle ) );
-
-    if (Partage->g[msg->num].etat)
-     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                     (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-     }
-    else
-     { Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                    (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
-     }             
-    g_free(msg);
+    Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
+                 (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+    g_free(histo);
   }
 /**********************************************************************************************************/
 /* Run_hangle_client boucle principale d'un sous-hangle_client Watchdog                                   */
@@ -362,7 +342,7 @@
 
        if (client->mode >= ATTENTE_IDENT) Ecouter_client( client );
 
-       if (Partage->top > client->pulse && client->mode == VALIDE)          /* Gestion du KEEPALIVE */
+       if (Partage->top > client->pulse && client->mode == VALIDE)                /* Gestion du KEEPALIVE */
         { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );
           SQL_ping ( Config.log, client->Db_watchdog );/* A remplacer plus tard par des connexions furtives */
           client->pulse = Partage->top + TEMPS_PULSE;
@@ -396,22 +376,22 @@
         }
 
 #endif
-/********************************************* Arret du hangle_client *******************************************/
+/********************************************* Arret du hangle_client *************************************/
 
     if (Cfg_ssrv.lib->Thread_run == FALSE)            /* Arret demandé par MSRV. Nous prevenons le client */
      { Deconnecter(client); }
 
+    if (client->Liste_new_histo)                                         /* Si la liste est encore pleine */
+     { g_slist_foreach( client->Liste_new_histo, (GFunc) g_free, NULL );
+       g_slist_free ( client->Liste_new_histo );
+     }
+
+    if (client->Liste_del_histo)                                         /* Si la liste est encore pleine */
+     { g_slist_foreach( client->Liste_del_histo, (GFunc) g_free, NULL );
+       g_slist_free ( client->Liste_del_histo );
+     }
+
 #ifdef bouh
-    if (Cfg_ssrv.new_histo)
-     { g_list_foreach( Cfg_ssrv.new_histo, (GFunc) g_free, NULL );
-       g_list_free ( Cfg_ssrv.new_histo );
-       Cfg_ssrv.new_histo = NULL;
-     }
-    if (Cfg_ssrv.del_histo)
-     { g_list_foreach( Cfg_ssrv.del_histo, (GFunc) g_free, NULL );
-       g_list_free ( Cfg_ssrv.del_histo );
-       Cfg_ssrv.del_histo = NULL;
-     }
     if (Cfg_ssrv.new_motif)
      { g_list_foreach( Cfg_ssrv.new_motif, (GFunc) g_free, NULL );
        g_list_free ( Cfg_ssrv.new_motif );

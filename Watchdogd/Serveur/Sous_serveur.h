@@ -67,8 +67,8 @@
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */
     GSList *Clients;                                             /* Liste des clients en cours de gestion */
-    GList *Liste_msg;                                                     /* Envoi d'un histo aux clients */
-    GList *Liste_motif;                                                  /* Destruction d'un histo client */
+    GSList *Liste_message;                                                     /* Envoi d'un histo aux clients */
+    GSList *Liste_motif;                                                  /* Destruction d'un histo client */
   } Cfg_ssrv;
 
  struct CAPTEUR
