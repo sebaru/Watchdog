@@ -121,6 +121,10 @@
     if (client->struct_used) client->struct_used--;
     pthread_mutex_unlock( &client->mutex_struct_used );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Unref_client: struct_used = %d for %s(SSRV%06d) ",
+              client->struct_used, client->machine, client->ssrv_id );
+
     if (client->struct_used == 0)
      { pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
        Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
@@ -168,7 +172,7 @@
     client->struct_used++;
     pthread_mutex_unlock( &client->mutex_struct_used );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Ref_client: struct_used = %d. closing  %s(SSRV%06d)... ",
+             "Ref_client: struct_used = %d for %s(SSRV%06d)... ",
               client->struct_used, client->machine, client->ssrv_id );
   }
 /**********************************************************************************************************/
