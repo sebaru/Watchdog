@@ -126,9 +126,11 @@
        Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
        pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
     
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Unref_client: struct_used = 0. closing  %s(SSRV%06d)... ",
+                 client->machine, client->ssrv_id );
        Fermer_connexion( client->connexion );
        pthread_mutex_destroy( &client->mutex_struct_used );
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Deconnecter: Connexion %d stopped", client->connexion->socket );
        if (client->util)            { g_free( client->util ); }
        if (client->Liste_bit_syns)  { g_slist_free(client->Liste_bit_syns); }
        if (client->bit_init_syn)    { g_list_free(client->bit_init_syn); }
@@ -165,6 +167,9 @@
   { pthread_mutex_lock( &client->mutex_struct_used );
     client->struct_used++;
     pthread_mutex_unlock( &client->mutex_struct_used );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Ref_client: struct_used = %d. closing  %s(SSRV%06d)... ",
+              client->struct_used, client->machine, client->ssrv_id );
   }
 /**********************************************************************************************************/
 /* Mode_vers_string: Conversion d'un mode vers une chaine de caracteres                                   */
