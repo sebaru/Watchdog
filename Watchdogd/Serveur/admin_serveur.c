@@ -38,7 +38,7 @@
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
-    if ( ! strcmp ( commande, "clients" ) )
+    if ( ! strcmp ( commande, "list" ) )
      { struct CLIENT *client;
        GSList *liste;
         
@@ -79,6 +79,13 @@
         }
        pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
      } else
+    if ( ! strcmp ( commande, "help" ) )
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SSRV'\n" );
+       Admin_write ( connexion, "  list                  - Listes les sous serveurs\n" );
+       Admin_write ( connexion, "  msgs                  - Send message to all connected client\n" );
+       Admin_write ( connexion, "  help                  - This help\n" );
+     }
+    else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );

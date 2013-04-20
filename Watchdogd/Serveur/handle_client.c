@@ -33,75 +33,73 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 
- struct CLIENT *Client;
-
 /**********************************************************************************************************/
-/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
-/* Entrée : néant                                                                                         */
+/* Envoyer_new_motif_au_client: Parcours la liste des motifs et les envoi                                 */
+/* Entrée : le client a gerer                                                                             */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_new_motif_au_client ( void )
+ static void Envoyer_new_motif_au_client ( struct CLIENT *client )
   { struct CMD_ETAT_BIT_CTRL *motif;
 
-    if ( Client->Liste_new_motif == NULL ) return;
+    if ( client->Liste_new_motif == NULL ) return;
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    motif = (struct CMD_ETAT_BIT_CTRL *) Client->Liste_new_motif->data;
-    Client->Liste_new_motif = g_slist_remove ( Client->Liste_new_motif, motif );
+    motif = (struct CMD_ETAT_BIT_CTRL *) client->Liste_new_motif->data;
+    client->Liste_new_motif = g_slist_remove ( client->Liste_new_motif, motif );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
              "Envoyer_new_motif: Motif traite : I%03d=%d rvbc %d/%d/%d/%d",
               motif->num, motif->etat, motif->rouge, motif->vert, motif->bleu, motif->cligno );
 
-    if ( g_slist_find( Client->Liste_bit_syns, GINT_TO_POINTER(motif->num) ) )
-     { Envoi_client( Client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+    if ( g_slist_find( client->Liste_bit_syns, GINT_TO_POINTER(motif->num) ) )
+     { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
                      (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
      }
     g_free(motif);
 
   }
 /**********************************************************************************************************/
-/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
-/* Entrée : néant                                                                                         */
+/* Envoyer_new_histo_au_client: Parcours la liste des histo et les envoi                                  */
+/* Entrée : le client a gerer                                                                             */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_new_histo_au_client ( void )
+ static void Envoyer_new_histo_au_client ( struct CLIENT *client )
   { struct CMD_TYPE_HISTO *histo;
     
-    if ( Client->Liste_new_histo == NULL ) return;
+    if ( client->Liste_new_histo == NULL ) return;
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    histo = (struct CMD_TYPE_HISTO *) Client->Liste_new_histo->data;
-    Client->Liste_new_histo = g_slist_remove ( Client->Liste_new_histo, histo );
+    histo = (struct CMD_TYPE_HISTO *) client->Liste_new_histo->data;
+    client->Liste_new_histo = g_slist_remove ( client->Liste_new_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
              "Envoyer_new_histo: Histo traite : msg=%d, libelle=%s", histo->id, histo->libelle );
 
-    Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
+    Envoi_client( client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
     g_free(histo);
   }
 /**********************************************************************************************************/
-/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
-/* Entrée : néant                                                                                         */
+/* Envoyer_del_histo_au_client: Parcours la liste des histo et les envoi                                  */
+/* Entrée : le client a gerer                                                                             */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_del_histo_au_client ( void )
+ static void Envoyer_del_histo_au_client ( struct CLIENT *client )
   { struct CMD_TYPE_HISTO *histo;
     
-    if ( Client->Liste_del_histo == NULL ) return;
+    if ( client->Liste_del_histo == NULL ) return;
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    histo = (struct CMD_TYPE_HISTO *) Client->Liste_del_histo->data;
-    Client->Liste_del_histo = g_slist_remove ( Client->Liste_del_histo, histo );
+    histo = (struct CMD_TYPE_HISTO *) client->Liste_del_histo->data;
+    client->Liste_del_histo = g_slist_remove ( client->Liste_del_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
              "Envoyer_del_histo: Histo traite : msg=%d, libelle=%s", histo->id, histo->libelle );
 
-    Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
+    Envoi_client( client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
                  (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
     g_free(histo);
   }
@@ -116,7 +114,6 @@
     pthread_t tid;
     gchar nom[16];
 
-    Client = client;                     /* Sauvegarde pour assurer les echanges de messages et de motifs */
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
@@ -373,9 +370,9 @@
         }
 /****************************************** Envoi des histos et des motifs ********************************/
        if (client->mode == VALIDE)                            /* Envoi au suppression des histo au client */
-        { Envoyer_new_histo_au_client ();
-          Envoyer_del_histo_au_client ();
-          Envoyer_new_motif_au_client ();
+        { Envoyer_new_histo_au_client (client);
+          Envoyer_del_histo_au_client (client);
+          Envoyer_new_motif_au_client (client);
         }
 /****************************************** Ecoute du client  *********************************************/
        if (client->mode >= ATTENTE_IDENT) Ecouter_client( client );

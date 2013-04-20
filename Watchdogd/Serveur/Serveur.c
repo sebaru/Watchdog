@@ -227,7 +227,8 @@
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 ); }
     client->mode = mode;
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                "Client_mode: client %s en mode %s", client->machine, Mode_vers_string(mode) );
+                "Client_mode: client %s (SSRV%06d) en mode %s",
+                 client->machine, client->ssrv_id, Mode_vers_string(mode) );
   }
 /**********************************************************************************************************/
 /* Deconnecter: Deconnection d'un client                                                                  */
