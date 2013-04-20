@@ -27,6 +27,7 @@
  
  #include <glib.h>
  #include <sys/prctl.h>
+ #include <unistd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -34,6 +35,32 @@
 
  struct CLIENT *Client;
 
+/**********************************************************************************************************/
+/* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
+/* Entrée : néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Envoyer_new_motif_au_client ( void )
+  { struct CMD_ETAT_BIT_CTRL *motif;
+
+    if ( Client->Liste_new_motif == NULL ) return;
+
+    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+    motif = (struct CMD_ETAT_BIT_CTRL *) Client->Liste_new_motif->data;
+    Client->Liste_new_motif = g_slist_remove ( Client->Liste_new_motif, motif );
+    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+       
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Envoyer_new_motif: Motif traite : I%03d=%d, etat=%d rvbc %d/%d/%d/%d",
+              motif->num, motif->etat, motif->rouge, motif->vert, motif->bleu, motif->cligno );
+
+    if ( g_slist_find( Client->Liste_bit_syns, GINT_TO_POINTER(motif->num) ) )
+     { Envoi_client( Client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                     (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
+     }
+    g_free(motif);
+
+  }
 /**********************************************************************************************************/
 /* Envoyer_message: Envoi des message en attente dans la file de message au client                        */
 /* Entrée : néant                                                                                         */
@@ -344,12 +371,12 @@
               }
            }
         }
-/****************************************** Envoi des histo ***********************************************/
+/****************************************** Envoi des histos et des motifs ********************************/
        if (client->mode == VALIDE)                            /* Envoi au suppression des histo au client */
         { Envoyer_new_histo_au_client ();
           Envoyer_del_histo_au_client ();
+          Envoyer_new_motif_au_client ();
         }
-
 /****************************************** Ecoute du client  *********************************************/
        if (client->mode >= ATTENTE_IDENT) Ecouter_client( client );
 
@@ -360,55 +387,11 @@
         }
      }
 
-#ifdef bouh
-/****************************************** Ecoute des messages histo  ************************************/
-
-
-       if (Cfg_ssrv.new_motif)
-        { GList *liste_clients;
-          struct CLIENT *client;
-          struct CMD_ETAT_BIT_CTRL *motif;
-
-          pthread_mutex_lock( &Cfg_ssrv.synchro );
-          motif = (struct CMD_ETAT_BIT_CTRL *) Cfg_ssrv.new_motif->data;
-          Cfg_ssrv.new_motif = g_list_remove ( Cfg_ssrv.new_motif, motif );
-          pthread_mutex_unlock( &Cfg_ssrv.synchro );
-
-          liste_clients = Cfg_ssrv.Clients;
-          while (liste_clients)
-           { client = (struct CLIENT *)liste_clients->data;
-             if ( g_list_find( client->bit_syns, GINT_TO_POINTER(motif->num) ) )
-              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                              (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
-              }
-             liste_clients = liste_clients->next;
-           }
-          g_free(motif);
-        }
-
-#endif
 /********************************************* Arret du hangle_client *************************************/
 
     if (Cfg_ssrv.lib->Thread_run == FALSE)            /* Arret demandé par MSRV. Nous prevenons le client */
      { Deconnecter(client); }
 
-    if (client->Liste_new_histo)                                         /* Si la liste est encore pleine */
-     { g_slist_foreach( client->Liste_new_histo, (GFunc) g_free, NULL );
-       g_slist_free ( client->Liste_new_histo );
-     }
-
-    if (client->Liste_del_histo)                                         /* Si la liste est encore pleine */
-     { g_slist_foreach( client->Liste_del_histo, (GFunc) g_free, NULL );
-       g_slist_free ( client->Liste_del_histo );
-     }
-
-#ifdef bouh
-    if (Cfg_ssrv.new_motif)
-     { g_list_foreach( Cfg_ssrv.new_motif, (GFunc) g_free, NULL );
-       g_list_free ( Cfg_ssrv.new_motif );
-       Cfg_ssrv.new_motif = NULL;
-     }
-#endif
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
               "Run_handle_client: Down . . . TID = %d", pthread_self() );
     pthread_exit( NULL );

@@ -58,10 +58,11 @@
        while(liste)
         { bit_controle = GPOINTER_TO_INT( liste->data );
     
-          if ( ! g_list_find(client->bit_syns, GINT_TO_POINTER(bit_controle) ) )
-           { client->bit_syns = g_list_append( client->bit_syns, GINT_TO_POINTER(bit_controle) );
+          if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )
+           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "Envoyer_bit_init_supervision_thread: liste des bit_syns %d", bit_controle );
+                      "Envoyer_bit_init_supervision_thread: ajout du bit_syn %03d dans la liste",
+                       bit_controle );
            }
 
           if (bit_controle>=NBR_BIT_CONTROLE) bit_controle=0;                  /* Verification des bornes */

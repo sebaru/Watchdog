@@ -81,7 +81,7 @@
              { struct CMD_ETAT_BIT_CTRL *etat;
                etat = (struct CMD_ETAT_BIT_CTRL *)connexion->donnees;
                printf("Le client n'a plus besoin du bit %d\n", etat->num );
-               client->bit_syns = g_list_remove ( client->bit_syns, GINT_TO_POINTER( etat->num ) );
+               client->Liste_bit_syns = g_slist_remove ( client->Liste_bit_syns, GINT_TO_POINTER( etat->num ) );
              }
             break;
        case SSTAG_CLIENT_ACTION_M:
