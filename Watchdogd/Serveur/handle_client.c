@@ -53,7 +53,7 @@
              "Envoyer_new_histo: Histo traite : msg=%d, libelle=%s", histo->id, histo->libelle );
 
     Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
-                  (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+                  (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
     g_free(histo);
   }
 /**********************************************************************************************************/
@@ -75,7 +75,7 @@
              "Envoyer_del_histo: Histo traite : msg=%d, libelle=%s", histo->id, histo->libelle );
 
     Envoi_client( Client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                 (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
+                 (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
     g_free(histo);
   }
 /**********************************************************************************************************/

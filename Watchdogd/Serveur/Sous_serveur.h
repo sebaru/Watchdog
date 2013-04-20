@@ -82,6 +82,7 @@
                                                                                         /* Dans serveur.c */
  extern void Unref_client ( struct CLIENT *client );
  extern void Ref_client ( struct CLIENT *client );
+ extern void Deconnecter ( struct CLIENT *client );
  extern void Run_handle_client ( struct CLIENT *client );
 
  extern void Ecouter_client ( struct CLIENT *client );                                /* Dans protocole.c */
