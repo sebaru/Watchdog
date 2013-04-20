@@ -51,7 +51,7 @@
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Envoyer_new_motif: Motif traite : I%03d=%d, etat=%d rvbc %d/%d/%d/%d",
+             "Envoyer_new_motif: Motif traite : I%03d=%d rvbc %d/%d/%d/%d",
               motif->num, motif->etat, motif->rouge, motif->vert, motif->bleu, motif->cligno );
 
     if ( g_slist_find( Client->Liste_bit_syns, GINT_TO_POINTER(motif->num) ) )

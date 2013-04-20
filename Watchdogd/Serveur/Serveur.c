@@ -392,10 +392,10 @@
        else memcpy ( dup_motif, &motif, sizeof(struct CMD_ETAT_BIT_CTRL));
 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_motif_aux_threads: Envoi du I%03d = %d, r%03d, v%03d, b%03d, c%d aux thread",
+                "Envoyer_motif_aux_threads: Envoi du I%03d = %d, r%03d, v%03d, b%03d, c%d au thread %06d",
                 dup_motif->num, dup_motif->etat,
                 dup_motif->rouge, dup_motif->vert, dup_motif->bleu,
-                dup_motif->cligno );
+                dup_motif->cligno, client->ssrv_id );
        client->Liste_new_motif = g_slist_append ( client->Liste_new_motif, dup_motif );
        liste = g_slist_next( liste );
      }
