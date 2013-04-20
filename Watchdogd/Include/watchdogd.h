@@ -184,6 +184,8 @@
  extern void Gerer_arrive_Axxx_dls ( void );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                       /* Dans distrib_Ixxx.c */
+ extern void Abonner_distribution_motif ( void (*Gerer_motif) (gint num) );
+ extern void Desabonner_distribution_motif ( void (*Gerer_motif) (gint num) );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

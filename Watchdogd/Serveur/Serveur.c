@@ -358,14 +358,13 @@
 /**********************************************************************************************************/
  static void Envoyer_motif_aux_threads ( void )
   { struct CMD_ETAT_BIT_CTRL motif;
-    struct timeval tv;
     GSList *liste;
     gint num;
     
     if ( Cfg_ssrv.Liste_motif == NULL ) return;
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    num = GPOINTER_TO_INT (Cfg_ssrv.Liste_message->data);
+    num = GPOINTER_TO_INT (Cfg_ssrv.Liste_motif->data);
     Cfg_ssrv.Liste_motif = g_slist_remove ( Cfg_ssrv.Liste_motif, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
 
