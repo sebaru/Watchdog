@@ -33,7 +33,6 @@
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
-    gboolean httpmobile_enable;                                            /* True si le thread est un httpmobile */
     gint port;
     GMainContext *context;
     SoupServer *server;

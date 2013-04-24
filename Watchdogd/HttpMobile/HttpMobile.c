@@ -55,7 +55,6 @@
                                                                  /* Recherche des champs de configuration */
 
     Cfg_httpmobile.enable        = g_key_file_get_boolean ( gkf, "HTTP", "enable", NULL ); 
-    Cfg_httpmobile.httpmobile_enable = g_key_file_get_boolean ( gkf, "HTTP", "http_enable", NULL ); 
     Cfg_httpmobile.port          = g_key_file_get_integer ( gkf, "HTTP", "port", NULL );
     g_key_file_free(gkf);
   }
@@ -195,6 +194,10 @@
                 "Run_thread: SoupServer creation error. Shutting Down %d", pthread_self() );
        goto end;
      }
+    else
+     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: SoupServer OK. Listening on port %d", Cfg_httpmobile.port );
+     }
 
     soup_server_add_handler ( Cfg_httpmobile.server, "/",           HttpMobile_slash_CB, NULL, NULL );
     soup_server_add_handler ( Cfg_httpmobile.server, "/get_status", HttpMobile_get_status_CB, NULL, NULL );
@@ -231,8 +234,10 @@
        g_main_context_iteration ( Cfg_httpmobile.context, FALSE );
      }
 
+#ifdef bouh
     Desabonner_distribution_sortie  ( HttpMobile_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
     Desabonner_distribution_message ( HttpMobile_Gerer_message );/* Desabonnement de la diffusion des messages */
+#endif
 
     soup_server_disconnect ( Cfg_httpmobile.server );
     g_main_context_unref (Cfg_httpmobile.context );
