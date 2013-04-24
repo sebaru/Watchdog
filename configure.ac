@@ -97,6 +97,7 @@ Watchdogd/Rfxcom/Makefile \
 Watchdogd/Imsg/Makefile \
 Watchdogd/Master/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
+Watchdogd/HttpMobile/Makefile \
 Watchdogd/Lirc/Makefile \
 Watchdogd/Asterisk/Makefile \
 Watchdogd/Serveur/Makefile \
