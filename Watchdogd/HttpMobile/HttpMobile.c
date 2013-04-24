@@ -240,9 +240,8 @@
 #endif
 
     soup_server_disconnect ( Cfg_httpmobile.server );
-    g_main_context_unref (Cfg_httpmobile.context );
-
 end:
+    g_main_context_unref ( Cfg_httpmobile.context );
     HttpMobile_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     Cfg_httpmobile.lib->TID = 0;                              /* On indique au httpmobile que le thread est mort. */
