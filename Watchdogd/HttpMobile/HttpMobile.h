@@ -27,15 +27,14 @@
  
 #ifndef _HTTP_H_
  #define _HTTP_H_
- #include <libsoup/soup.h>
+ #include <microhttpd.h>
 
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
     gint port;
-    GMainContext *context;
-    SoupServer *server;
+    struct MHD_Daemon *server;
  } Cfg_httpmobile;
 
 /*************************************** Définitions des prototypes ***************************************/

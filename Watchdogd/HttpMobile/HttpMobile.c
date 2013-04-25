@@ -29,7 +29,7 @@
  #include <sys/prctl.h>
  #include <string.h>
  #include <unistd.h>
- #include <libsoup/soup.h>
+ #include <microhttpd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -114,60 +114,39 @@
 #endif
   }
 /**********************************************************************************************************/
-/* HttpMobile _log_query : Log la query dans les logs systemes                                            */
-/* Entrées : le contexte, le msg                                                                          */
+/* HttpMobile Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
+/* Entrées : le contexte, le message, l'URL                                                               */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Print_query ( SoupClientContext *client, SoupMessage *msg )
-  { gchar *uri_text;
-    SoupURI *uri;
-    uri = soup_message_get_uri ( msg );
-    uri_text = soup_uri_to_string ( uri, FALSE );
+ static gint Http_request (void *cls, struct MHD_Connection *connection, 
+                           const char *url, 
+                           const char *method, const char *version, 
+                           const char *upload_data, 
+                           size_t *upload_data_size, void **con_cls)
+  { const char *page  = "<html><body>Hello, browser!</body></html>";
+    struct MHD_Response *response;
+    int ret;
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
-              "HttpMobile_/_CB: get MSG from %s (HTTP version 1.%d) for URI %s",
-              soup_client_context_get_host (client),
-              soup_message_get_http_version ( msg ),
-              uri_text
-            );
-    soup_uri_free( uri );
+              "New %s request for %s using version %s\n", method, url, version);
+
+    response = MHD_create_response_from_buffer (strlen (page),
+                                               (void*) page, MHD_RESPMEM_PERSISTENT);
+    ret = MHD_queue_response (connection, MHD_HTTP_OK, response);
+    MHD_destroy_response (response);
+    return ret;
   }
-/**********************************************************************************************************/
-/* HttpMobile Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
-/* Entrées : le contexte, le message, l'URL                                                               */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- static void HttpMobile_slash_CB (SoupServer        *server,  SoupMessage       *msg, 
-                                  const char        *path,  GHashTable          *query,
-                                  SoupClientContext *client, gpointer           user_data)
-  { gchar *response = "This is the end !!\n";
 
-    Print_query ( client, msg );
-
-    soup_message_set_response ( msg, "text/plain", SOUP_MEMORY_COPY, response, strlen(response) );
-    soup_message_set_status   ( msg, SOUP_STATUS_OK );
-
-  }  
-/**********************************************************************************************************/
-/* HttpMobile Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
-/* Entrées : le contexte, le message, l'URL                                                               */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- static void HttpMobile_get_status_CB (SoupServer        *server,  SoupMessage       *msg, 
-                                       const char        *path,  GHashTable        *query,
-                                       SoupClientContext *client, gpointer           user_data)
-  { gchar *response = "<xml> fait a la mimine !! </xml>";
-    Print_query ( client, msg );
-
-    soup_message_set_response ( msg, "text/xml", SOUP_MEMORY_COPY, response, strlen(response) );
-    soup_message_set_status   ( msg, SOUP_STATUS_OK );
-  }  
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
 /* Entrée: une structure LIBRAIRIE                                                                        */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+  { 
+  struct MHD_Daemon *daemon;
+
+
+    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_httpmobile, 0, sizeof(Cfg_httpmobile) );               /* Mise a zero de la structure de travail */
     Cfg_httpmobile.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
     HttpMobile_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
@@ -184,27 +163,32 @@
        goto end;
      }
 
+
+    Cfg_httpmobile.server = MHD_start_daemon (MHD_USE_SELECT_INTERNALLY, Cfg_httpmobile.port, NULL, NULL, 
+                                             &Http_request, NULL, MHD_OPTION_END);
+
+
    /* Cfg_httpmobile.context = g_main_context_new ();*/
-    Cfg_httpmobile.server  = soup_server_new ( SOUP_SERVER_PORT, Cfg_httpmobile.port,
+/*    Cfg_httpmobile.server  = soup_server_new ( SOUP_SERVER_PORT, Cfg_httpmobile.port,
                                                SOUP_SERVER_INTERFACE, NULL,
 /*                                               SOUP_SERVER_ASYNC_CONTEXT, Cfg_httpmobile.context,*/
-                                               NULL
-                                             );
+  /*                                             NULL
+                                             );*/
     if (!Cfg_httpmobile.server)
      { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: SoupServer creation error (%s). Shutting Down %d",
+                "Run_thread: MHDServer creation error (%s). Shutting Down %d",
                  strerror(errno), pthread_self() );
        goto end;
      }
     else
      { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO,
-                "Run_thread: SoupServer OK. Listening on port %d", Cfg_httpmobile.port );
+                "Run_thread: MHDServer OK. Listening on port %d", Cfg_httpmobile.port );
      }
-
+/*
     soup_server_add_handler ( Cfg_httpmobile.server, "/",           HttpMobile_slash_CB, NULL, NULL );
     soup_server_add_handler ( Cfg_httpmobile.server, "/get_status", HttpMobile_get_status_CB, NULL, NULL );
     soup_server_run_async   ( Cfg_httpmobile.server );
-
+*/
 #ifdef bouh
     Abonner_distribution_message ( HttpMobile_Gerer_message );   /* Abonnement à la diffusion des messages */
     Abonner_distribution_sortie  ( HttpMobile_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
@@ -233,7 +217,7 @@
 
       /* Envoyer_les_sorties_aux_slaves();*/
 
-       g_main_context_iteration ( Cfg_httpmobile.context, FALSE );
+  /*     g_main_context_iteration ( Cfg_httpmobile.context, FALSE );*/
      }
 
 #ifdef bouh
@@ -241,9 +225,9 @@
     Desabonner_distribution_message ( HttpMobile_Gerer_message );/* Desabonnement de la diffusion des messages */
 #endif
 
-    soup_server_disconnect ( Cfg_httpmobile.server );
+  MHD_stop_daemon (daemon);
+/*    soup_server_disconnect ( Cfg_httpmobile.server );*/
 end:
-    g_main_context_unref ( Cfg_httpmobile.context );
     HttpMobile_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     Cfg_httpmobile.lib->TID = 0;                              /* On indique au httpmobile que le thread est mort. */
