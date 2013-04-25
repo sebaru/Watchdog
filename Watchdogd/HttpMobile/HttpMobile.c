@@ -123,17 +123,26 @@
                            const char *method, const char *version, 
                            const char *upload_data, 
                            size_t *upload_data_size, void **con_cls)
-  { const char *page  = "<html><body>Hello, browser!</body></html>";
+  { const char *Wrong_method  = "<html><body>Wrong method. Sorry... </body></html>";
+    const char *Not_found     = "<html><body>URI not found on this server. Sorry... </body></html>";
     struct MHD_Response *response;
-    int ret;
+
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
               "New %s request for %s using version %s\n", method, url, version);
-
-    response = MHD_create_response_from_buffer (strlen (page),
-                                               (void*) page, MHD_RESPMEM_PERSISTENT);
-    ret = MHD_queue_response (connection, MHD_HTTP_OK, response);
-    MHD_destroy_response (response);
-    return ret;
+    if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
+     { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
+                                                   (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
+       MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
+       MHD_destroy_response (response);
+     }
+    else
+     { response = MHD_create_response_from_buffer ( strlen (Not_found),
+                                                   (void*) Not_found, MHD_RESPMEM_PERSISTENT);
+       MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
+       MHD_destroy_response (response);
+       return(MHD_NO);
+     }
+    return MHD_YES;
   }
 
 /**********************************************************************************************************/
@@ -142,11 +151,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { 
-  struct MHD_Daemon *daemon;
-
-
-    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+  { prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_httpmobile, 0, sizeof(Cfg_httpmobile) );               /* Mise a zero de la structure de travail */
     Cfg_httpmobile.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
     HttpMobile_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
@@ -164,16 +169,8 @@
      }
 
 
-    Cfg_httpmobile.server = MHD_start_daemon (MHD_USE_SELECT_INTERNALLY, Cfg_httpmobile.port, NULL, NULL, 
-                                             &Http_request, NULL, MHD_OPTION_END);
-
-
-   /* Cfg_httpmobile.context = g_main_context_new ();*/
-/*    Cfg_httpmobile.server  = soup_server_new ( SOUP_SERVER_PORT, Cfg_httpmobile.port,
-                                               SOUP_SERVER_INTERFACE, NULL,
-/*                                               SOUP_SERVER_ASYNC_CONTEXT, Cfg_httpmobile.context,*/
-  /*                                             NULL
-                                             );*/
+    Cfg_httpmobile.server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION, Cfg_httpmobile.port, NULL, NULL, 
+                                              &Http_request, NULL, MHD_OPTION_END);
     if (!Cfg_httpmobile.server)
      { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
                 "Run_thread: MHDServer creation error (%s). Shutting Down %d",
@@ -184,11 +181,7 @@
      { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO,
                 "Run_thread: MHDServer OK. Listening on port %d", Cfg_httpmobile.port );
      }
-/*
-    soup_server_add_handler ( Cfg_httpmobile.server, "/",           HttpMobile_slash_CB, NULL, NULL );
-    soup_server_add_handler ( Cfg_httpmobile.server, "/get_status", HttpMobile_get_status_CB, NULL, NULL );
-    soup_server_run_async   ( Cfg_httpmobile.server );
-*/
+
 #ifdef bouh
     Abonner_distribution_message ( HttpMobile_Gerer_message );   /* Abonnement à la diffusion des messages */
     Abonner_distribution_sortie  ( HttpMobile_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
@@ -214,10 +207,6 @@
 #endif
           Cfg_httpmobile.lib->Thread_sigusr1 = FALSE;
         }
-
-      /* Envoyer_les_sorties_aux_slaves();*/
-
-  /*     g_main_context_iteration ( Cfg_httpmobile.context, FALSE );*/
      }
 
 #ifdef bouh
@@ -225,8 +214,7 @@
     Desabonner_distribution_message ( HttpMobile_Gerer_message );/* Desabonnement de la diffusion des messages */
 #endif
 
-  MHD_stop_daemon (daemon);
-/*    soup_server_disconnect ( Cfg_httpmobile.server );*/
+    MHD_stop_daemon (Cfg_httpmobile.server);
 end:
     HttpMobile_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
