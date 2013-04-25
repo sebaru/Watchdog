@@ -31,6 +31,13 @@
  #include <unistd.h>
  #include <microhttpd.h>
 
+
+       #include <sys/types.h>
+       #include <sys/stat.h>
+       #include <fcntl.h>
+
+
+
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "HttpMobile.h"
@@ -123,8 +130,9 @@
                            const char *method, const char *version, 
                            const char *upload_data, 
                            size_t *upload_data_size, void **con_cls)
-  { const char *Wrong_method  = "<html><body>Wrong method. Sorry... </body></html>";
-    const char *Not_found     = "<html><body>URI not found on this server. Sorry... </body></html>";
+  { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
+    const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
+    const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
     struct MHD_Response *response;
 
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
@@ -132,15 +140,40 @@
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
                                                    (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
-       MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
-       MHD_destroy_response (response);
+       if (response)
+        { MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);  /* Method not allowed */
+          MHD_destroy_response (response);
+        }
+       else return MHD_NO;
+     }
+    else if ( ! strcasecmp ( url, "/gifile" ) )
+     { struct stat sbuf;
+       gint fd;
+       fd = open ("anna.jpg", O_RDONLY);
+       if ( fd == -1 || fstat (fd, &sbuf) != 0)
+        { if (fd!=-1) close(fd);
+          response = MHD_create_response_from_buffer ( strlen (Internal_error),
+                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response)
+           { MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+             MHD_destroy_response (response);
+             return(MHD_YES);
+           }
+          else return(MHD_NO);
+       }
+      response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+      MHD_add_response_header (response, "Content-Type", "image/jpg");
+      MHD_queue_response (connection, MHD_HTTP_OK, response);
+      MHD_destroy_response (response);
      }
     else
      { response = MHD_create_response_from_buffer ( strlen (Not_found),
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
-       MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
-       MHD_destroy_response (response);
-       return(MHD_NO);
+       if (response) 
+        { MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
+          MHD_destroy_response (response);
+        }
+       else return MHD_NO;
      }
     return MHD_YES;
   }
