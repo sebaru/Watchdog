@@ -186,16 +186,17 @@
 
     Cfg_httpmobile.context = g_main_context_new ();
     Cfg_httpmobile.server  = soup_server_new ( SOUP_SERVER_PORT, Cfg_httpmobile.port,
-                                               /*SOUP_SERVER_ASYNC_CONTEXT, Cfg_httpmobile.context,*/
+                                               SOUP_SERVER_ASYNC_CONTEXT, Cfg_httpmobile.context,
                                                NULL
                                              );
     if (!Cfg_httpmobile.server)
      { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: SoupServer creation error. Shutting Down %d", pthread_self() );
+                "Run_thread: SoupServer creation error (%s). Shutting Down %d",
+                 strerror(errno), pthread_self() );
        goto end;
      }
     else
-     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
+     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO,
                 "Run_thread: SoupServer OK. Listening on port %d", Cfg_httpmobile.port );
      }
 
