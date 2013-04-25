@@ -136,7 +136,7 @@
     struct MHD_Response *response;
 
     Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
-              "New %s request for %s using version %s\n", method, url, version);
+              "New %s request for %s using version %s", method, url, version);
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
                                                    (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
@@ -150,8 +150,10 @@
      { struct stat sbuf;
        gint fd;
        fd = open ("anna.jpg", O_RDONLY);
-       if ( fd == -1 || fstat (fd, &sbuf) != 0)
-        { if (fd!=-1) close(fd);
+       if ( fd == -1 || fstat (fd, &sbuf) == -1)
+        { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
+                   "Http_request : Error /gifile %s", strerror(errno) );
+          if (fd!=-1) close(fd);
           response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                        (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response)
