@@ -129,7 +129,6 @@
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     xmlChar *tmp;
-    FILE *fp;
 
     /* Create a new XML buffer, to which the XML document will be
      * written */
@@ -286,8 +285,6 @@
     }
 
     xmlFreeTextWriter(writer);
-
-    fprintf(fp, "%s", (const char *) buf->content);
 
       response = MHD_create_response_from_buffer (buf->use, buf->content, MHD_RESPMEM_PERSISTENT);
       MHD_add_response_header (response, "Content-Type", "application/xml");
