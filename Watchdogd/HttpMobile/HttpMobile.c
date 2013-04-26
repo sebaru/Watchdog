@@ -168,6 +168,28 @@
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
      }
+    else if ( ! strcasecmp ( url, "/xml" ) )
+     { struct stat sbuf;
+       gint fd;
+       fd = open ("test.xml", O_RDONLY);
+       if ( fd == -1 || fstat (fd, &sbuf) == -1)
+        { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
+                   "Http_request : Error /xml %s", strerror(errno) );
+          if (fd!=-1) close(fd);
+          response = MHD_create_response_from_buffer ( strlen (Internal_error),
+                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response)
+           { MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+             MHD_destroy_response (response);
+             return(MHD_YES);
+           }
+          else return(MHD_NO);
+       }
+      response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+      MHD_add_response_header (response, "Content-Type", "application/xml");
+      MHD_queue_response (connection, MHD_HTTP_OK, response);
+      MHD_destroy_response (response);
+     }
     else
      { response = MHD_create_response_from_buffer ( strlen (Not_found),
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
