@@ -216,7 +216,7 @@
     }
 
     /* Write an element named "X_ORDER_ID" as child of HEADER. */
-    rc = xmlTextWriterWriteFormatElement(writer, "parametre 1",
+    rc = xmlTextWriterWriteFormatElement(writer, "parametre1",
                                          "%010d", 22101980 );
     if (rc < 0) {
         printf
@@ -225,7 +225,7 @@
     }
 
     /* Write an element named "CUSTOMER_ID" as child of HEADER. */
-    rc = xmlTextWriterWriteFormatElement(writer, "viral alert",
+    rc = xmlTextWriterWriteFormatElement(writer, "viral_alert",
                                          "%d fois", i++);
     if (rc < 0) {
         printf
@@ -421,18 +421,18 @@
     Abonner_distribution_sortie  ( HttpMobile_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
 
 #endif
-
-    Cfg_httpmobile.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
-    while(Cfg_httpmobile.lib->Thread_run == TRUE)                            /* On tourne tant que necessaire */
+    xmlInitParser();                                                      /* Initialisation du parser xml */
+    Cfg_httpmobile.lib->Thread_run = TRUE;                                          /* Le thread tourne ! */
+    while(Cfg_httpmobile.lib->Thread_run == TRUE)                        /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
 
-       if (Cfg_httpmobile.lib->Thread_sigusr1)                                /* A-t'on recu un signal USR1 ? */
+       if (Cfg_httpmobile.lib->Thread_sigusr1)                            /* A-t'on recu un signal USR1 ? */
         { int nbr_msg, nbr_sortie;
 
           Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
 #ifdef bouh
-          pthread_mutex_lock( &Cfg_httpmobile.lib->synchro );     /* On recupere le nombre de msgs en attente */
+          pthread_mutex_lock( &Cfg_httpmobile.lib->synchro ); /* On recupere le nombre de msgs en attente */
           nbr_msg    = g_slist_length(Cfg_httpmobile.Liste_message);
           nbr_sortie = g_slist_length(Cfg_httpmobile.Liste_sortie);
           pthread_mutex_unlock( &Cfg_httpmobile.lib->synchro );
