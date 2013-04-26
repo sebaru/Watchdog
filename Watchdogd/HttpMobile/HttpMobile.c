@@ -286,7 +286,7 @@
 
     xmlFreeTextWriter(writer);
 
-      response = MHD_create_response_from_buffer (buf->use, buf->content, MHD_RESPMEM_PERSISTENT);
+      response = MHD_create_response_from_buffer (buf->use, buf->content, MHD_RESPMEM_MUST_COPY);
       MHD_add_response_header (response, "Content-Type", "application/xml");
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
