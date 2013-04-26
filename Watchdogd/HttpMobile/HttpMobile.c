@@ -30,7 +30,7 @@
  #include <string.h>
  #include <unistd.h>
  #include <microhttpd.h>
-
+ #include <libxml/xmlwriter.h>
 
        #include <sys/types.h>
        #include <sys/stat.h>
@@ -120,6 +120,183 @@
     pthread_mutex_unlock( &Cfg_httpmobile.lib->synchro );
 #endif
   }
+
+
+ static void Traiter_dynxml ( struct MHD_Connection *connection )
+  { static gint i = 1;
+    struct MHD_Response *response;
+    int rc;
+    xmlTextWriterPtr writer;
+    xmlBufferPtr buf;
+    xmlChar *tmp;
+    FILE *fp;
+
+    /* Create a new XML buffer, to which the XML document will be
+     * written */
+    buf = xmlBufferCreate();
+    if (buf == NULL) {
+        printf("testXmlwriterMemory: Error creating the xml buffer\n");
+        return;
+    }
+
+    /* Create a new XmlWriter for memory, with no compression.
+     * Remark: there is no compression for this kind of xmlTextWriter */
+    writer = xmlNewTextWriterMemory(buf, 0);
+    if (writer == NULL) {
+        printf("testXmlwriterMemory: Error creating the xml writer\n");
+        return;
+    }
+
+    /* Start the document with the xml default for the version,
+     * encoding ISO 8859-1 and the default for the standalone
+     * declaration. */
+    rc = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterStartDocument\n");
+        return;
+    }
+
+    /* Start an element named "EXAMPLE". Since thist is the first
+     * element, this will be the root element of the document. */
+    rc = xmlTextWriterStartElement(writer, "testbalise");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
+        return;
+    }
+
+    rc = xmlTextWriterWriteComment(writer, "commentaire !!");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteComment\n");
+        return;
+    }
+
+    /* Start an element named "ORDER" as child of EXAMPLE. */
+    rc = xmlTextWriterStartElement(writer, "element");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
+        return;
+    }
+
+    /* Add an attribute with name "version" and value "1.0" to ORDER. */
+    rc = xmlTextWriterWriteAttribute(writer, "version",
+                                     "1.0");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
+        return;
+    }
+
+    /* Add an attribute with name "xml:lang" and value "de" to ORDER. */
+    rc = xmlTextWriterWriteAttribute(writer, "xml:lang",
+                                     "de");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
+        return;
+    }
+
+    rc = xmlTextWriterWriteFormatComment(writer,
+		     "This is another comment with special chars: %d",
+                                         i++ );
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatComment\n");
+        return;
+    }
+
+    /* Start an element named "HEADER" as child of ORDER. */
+    rc = xmlTextWriterStartElement(writer, "sselement");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
+        return;
+    }
+
+    /* Write an element named "X_ORDER_ID" as child of HEADER. */
+    rc = xmlTextWriterWriteFormatElement(writer, "parametre 1",
+                                         "%010d", 22101980 );
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatElement\n");
+        return;
+    }
+
+    /* Write an element named "CUSTOMER_ID" as child of HEADER. */
+    rc = xmlTextWriterWriteFormatElement(writer, "viral alert",
+                                         "%d fois", i++);
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatElement\n");
+        return;
+    }
+
+    /* Close the element named HEADER. */
+    rc = xmlTextWriterEndElement(writer);
+    if (rc < 0) {
+        printf("testXmlwriterMemory: Error at xmlTextWriterEndElement\n");
+        return;
+    }
+
+    /* Start an element named "ENTRIES" as child of ORDER. */
+    rc = xmlTextWriterStartElement(writer, "testcoding");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
+        return;
+    }
+
+    /* Write an element named "ARTICLE" as child of ENTRY. */
+    rc = xmlTextWriterWriteElement(writer, "ARTICLE",
+                                   "<Test>");
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteElement\n");
+        return;
+    }
+
+    /* Write an element named "ENTRY_NO" as child of ENTRY. */
+    rc = xmlTextWriterWriteFormatElement(writer, "ENTRY_NO", "%d",
+                                         10);
+    if (rc < 0) {
+        printf
+            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatElement\n");
+        return;
+    }
+
+    /* Close the element named ENTRIES. */
+    rc = xmlTextWriterEndElement(writer);
+    if (rc < 0) {
+        printf("testXmlwriterMemory: Error at xmlTextWriterEndElement\n");
+        return;
+    }
+
+
+    /* Here we could close the elements ORDER and EXAMPLE using the
+     * function xmlTextWriterEndElement, but since we do not want to
+     * write any other elements, we simply call xmlTextWriterEndDocument,
+     * which will do all the work. */
+    rc = xmlTextWriterEndDocument(writer);
+    if (rc < 0) {
+        printf("testXmlwriterMemory: Error at xmlTextWriterEndDocument\n");
+        return;
+    }
+
+    xmlFreeTextWriter(writer);
+
+    fprintf(fp, "%s", (const char *) buf->content);
+
+      response = MHD_create_response_from_buffer (buf->use, buf->content, MHD_RESPMEM_PERSISTENT);
+      MHD_add_response_header (response, "Content-Type", "application/xml");
+      MHD_queue_response (connection, MHD_HTTP_OK, response);
+      MHD_destroy_response (response);
+
+    xmlBufferFree(buf);
+}
+
 /**********************************************************************************************************/
 /* HttpMobile Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
 /* Entrées : le contexte, le message, l'URL                                                               */
@@ -189,6 +366,9 @@
       MHD_add_response_header (response, "Content-Type", "application/xml");
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
+     }
+    else if ( ! strcasecmp ( url, "/dynxml" ) )
+     { Traiter_dynxml ( connection );
      }
     else
      { response = MHD_create_response_from_buffer ( strlen (Not_found),
