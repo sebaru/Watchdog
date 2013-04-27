@@ -516,7 +516,7 @@
         }
        else
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Run_thread: MHDServer HTTP OK. Listening on port %d", Cfg_http.https_port );
+                   "Run_thread: MHDServer HTTP OK. Listening on port %d", Cfg_http.http_port );
         }
      }
 
