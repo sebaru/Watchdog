@@ -29,12 +29,26 @@
  #define _HTTP_H_
  #include <microhttpd.h>
 
+ #define FICHIER_CERTIF_CA             "cacert.pem"
+ #define FICHIER_CERTIF_SERVEUR        "serveursigne.pem"
+ #define FICHIER_CERTIF_CLEF_SERVEUR   "serveurkey.pem"
+
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean enable;                              /* True si la config indique que le thread doit tourner */
-    gint port;
-    struct MHD_Daemon *server;
+    gint nbr_max_connexion;
+    gboolean http_enable;                         /* True si la config indique que le thread doit tourner */
+    gint http_port;
+    gboolean https_enable;                        /* True si la config indique que le thread doit tourner */
+    gint https_port;
+    gchar https_file_cert[80];
+    gchar *ssl_cert;
+    gchar https_file_key[80];
+    gchar *ssl_key;
+    gchar https_file_ca[80];
+    gchar *ssl_ca;
+    struct MHD_Daemon *http_server;
+    struct MHD_Daemon *https_server;
  } Cfg_http;
 
 /*************************************** Définitions des prototypes ***************************************/

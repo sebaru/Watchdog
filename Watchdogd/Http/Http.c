@@ -60,13 +60,34 @@
                                                                                /* Positionnement du debug */
     Cfg_http.lib->Thread_debug = g_key_file_get_boolean ( gkf, "HTTP", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
+    Cfg_http.nbr_max_connexion = g_key_file_get_integer ( gkf, "HTTP", "max_connexion", NULL );
+    Cfg_http.http_enable       = g_key_file_get_boolean ( gkf, "HTTP", "http_enable", NULL ); 
+    Cfg_http.http_port         = g_key_file_get_integer ( gkf, "HTTP", "http_port", NULL );
+    Cfg_http.https_enable      = g_key_file_get_boolean ( gkf, "HTTP", "https_enable", NULL ); 
+    Cfg_http.https_port        = g_key_file_get_integer ( gkf, "HTTP", "https_port", NULL );
 
-    Cfg_http.enable        = g_key_file_get_boolean ( gkf, "HTTP", "enable", NULL ); 
-    Cfg_http.port          = g_key_file_get_integer ( gkf, "HTTP", "port", NULL );
+    chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_cert", NULL );
+    if (chaine)
+     { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", chaine ); g_free(chaine); }
+    else
+     { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", FICHIER_CERTIF_SERVEUR  ); }
+
+    chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_key", NULL );
+    if (chaine)
+     { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", chaine ); g_free(chaine); }
+    else
+     { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", FICHIER_CERTIF_CLEF_SERVEUR  ); }
+
+    chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_ca", NULL );
+    if (chaine)
+     { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", chaine ); g_free(chaine); }
+    else
+     { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", FICHIER_CERTIF_CA  ); }
+
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
-/* Http_Liberer_config : Libere la mémoire allouer précédemment pour lire la config http      */
+/* Http_Liberer_config : Libere la mémoire allouer précédemment pour lire la config http                  */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -74,7 +95,87 @@
   {
   }
 /**********************************************************************************************************/
-/* Http_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                  */
+/* Charger_certificat : Charge les certificats en mémoire                                                 */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static gboolean Charger_certificat ( void )
+  { struct stat sbuf;
+    gint fd;
+
+    fd = open ( Cfg_http.https_file_cert, O_RDONLY);                          /* Chargement du certificat */
+    if ( fd == -1 || fstat (fd, &sbuf) == -1)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading file certif %s failed (%s)",
+                 Cfg_http.https_file_cert, strerror(errno) );
+       if (fd!=-1) close(fd);
+       return(FALSE);
+     }
+    Cfg_http.ssl_cert = (gchar *)g_try_malloc0( sbuf.st_size );
+    if (!Cfg_http.ssl_cert)
+     { close(fd);
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading certif %s into memory failed (%s)",
+                 Cfg_http.https_file_cert, strerror(errno) );
+       return(FALSE);
+     }
+    read ( fd, Cfg_http.ssl_cert, sbuf.st_size );
+    close(fd);
+
+    fd = open ( Cfg_http.https_file_key, O_RDONLY);                              /* Chargement de la clef */
+    if ( fd == -1 || fstat (fd, &sbuf) == -1)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading file key %s failed (%s)",
+                 Cfg_http.https_file_cert, strerror(errno) );
+       if (fd!=-1) close(fd);
+       return(FALSE);
+     }
+    Cfg_http.ssl_key = (gchar *)g_try_malloc0( sbuf.st_size );
+    if (!Cfg_http.ssl_key)
+     { close(fd);
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading key %s into memory failed (%s)",
+                 Cfg_http.https_file_key, strerror(errno) );
+       return(FALSE);
+     }
+    read ( fd, Cfg_http.ssl_key, sbuf.st_size );
+    close(fd);
+
+    fd = open ( Cfg_http.https_file_ca, O_RDONLY);           /* Chargement du CA pour truster les clients */
+    if ( fd == -1 || fstat (fd, &sbuf) == -1)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading file CA %s failed (%s)",
+                 Cfg_http.https_file_ca, strerror(errno) );
+       if (fd!=-1) close(fd);
+       return(FALSE);
+     }
+    Cfg_http.ssl_ca = (gchar *)g_try_malloc0( sbuf.st_size );
+    if (!Cfg_http.ssl_ca)
+     { close(fd);
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading CA %s into memory failed (%s)",
+                 Cfg_http.https_file_ca, strerror(errno) );
+       return(FALSE);
+     }
+    read ( fd, Cfg_http.ssl_ca, sbuf.st_size );
+    close(fd);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+             "Charger_certificat : Loading file CERT %s, KEY %s and CA %s successfull",
+              Cfg_http.https_file_cert, Cfg_http.https_file_key, Cfg_http.https_file_ca );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Http_Liberer_config : Libere la mémoire allouer précédemment pour lire la config http                  */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Liberer_certificat ( void )
+  { if ( Cfg_http.ssl_cert) g_free( Cfg_http.ssl_cert );
+    if ( Cfg_http.ssl_key ) g_free( Cfg_http.ssl_key );
+    if ( Cfg_http.ssl_ca )  g_free( Cfg_http.ssl_ca );
+  }
+/**********************************************************************************************************/
+/* Http_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                        */
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
@@ -396,25 +497,50 @@
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), "http" );
     g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage communications with Http Devices" );
 
-    if (!Cfg_http.enable)
+    if (!Cfg_http.http_enable && !Cfg_http.https_enable)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread not enable in config. Shutting Down %d", pthread_self() );
+                "Run_thread: Thread Http/Https not enable in config. Shutting Down %d", pthread_self() );
        goto end;
      }
 
+    if (Cfg_http.http_enable)
+     { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY,
+                                                 Cfg_http.http_port, NULL, NULL, 
+                                                &Http_request, NULL,
+                                                 MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
+                                                 MHD_OPTION_END);
+       if (!Cfg_http.http_server)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                   "Run_thread: MHDServer HTTP creation error (%s). Shutting Down %d",
+                    strerror(errno), pthread_self() );
+        }
+       else
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                   "Run_thread: MHDServer HTTP OK. Listening on port %d", Cfg_http.https_port );
+        }
+     }
 
-    Cfg_http.server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION, Cfg_http.port, NULL, NULL, 
-                                              &Http_request, NULL, MHD_OPTION_END);
-    if (!Cfg_http.server)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: MHDServer creation error (%s). Shutting Down %d",
-                 strerror(errno), pthread_self() );
-       goto end;
+    if (Cfg_http.https_enable && Charger_certificat() )
+     { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL,
+                                                  Cfg_http.https_port, NULL, NULL, 
+                                                 &Http_request, NULL,
+                                                  MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
+                                                  MHD_OPTION_HTTPS_MEM_CERT, Cfg_http.ssl_cert,
+                                                  MHD_OPTION_HTTPS_MEM_KEY,  Cfg_http.ssl_key,
+                                                  MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,
+                                                  MHD_OPTION_END);
+       if (!Cfg_http.https_server)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                   "Run_thread: MHDServer HTTPS creation error (%s). Shutting Down %d",
+                    strerror(errno), pthread_self() );
+        }
+       else
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                   "Run_thread: MHDServer HTTPS OK. Listening on port %d", Cfg_http.https_port );
+        }
      }
-    else
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                "Run_thread: MHDServer OK. Listening on port %d", Cfg_http.port );
-     }
+
+    if (!Cfg_http.http_server && !Cfg_http.https_server) goto end;             /* si erreur de chargement */
 
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );   /* Abonnement à la diffusion des messages */
@@ -447,8 +573,10 @@
     Desabonner_distribution_sortie  ( Http_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
     Desabonner_distribution_message ( Http_Gerer_message );/* Desabonnement de la diffusion des messages */
 #endif
+    if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);
+    if (Cfg_http.https_server) MHD_stop_daemon (Cfg_http.https_server);
+    Liberer_certificat();
     xmlCleanupParser();
-    MHD_stop_daemon (Cfg_http.server);
 end:
     Http_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
