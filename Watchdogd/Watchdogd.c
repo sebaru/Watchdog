@@ -39,6 +39,7 @@
  #include <pthread.h>
  #include <locale.h>
  #include <pwd.h>
+ #include <gcrypt.h>                                  /* Pour assurer le multithreading avec IMSG et HTTP */
 
  #include "watchdogd.h"
 
@@ -439,6 +440,7 @@
     Print_config();
 
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
+    gcry_check_version(NULL);                                     /* Initialisation de la librairie GCRYPT */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
