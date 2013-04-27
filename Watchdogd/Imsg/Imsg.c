@@ -61,6 +61,7 @@
                                                                                /* Positionnement du debug */
     Cfg_imsg.lib->Thread_debug = g_key_file_get_boolean ( gkf, "IMSG", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
+    Cfg_imsg.enable = g_key_file_get_boolean ( gkf, "IMSG", "enable", NULL ); 
     chaine = g_key_file_get_string ( gkf, "IMSG", "username", NULL );
     if (!chaine)
      { Info_new ( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
@@ -630,6 +631,12 @@
     g_snprintf( Cfg_imsg.lib->admin_prompt, sizeof(Cfg_imsg.lib->admin_prompt), "imsg" );
     g_snprintf( Cfg_imsg.lib->admin_help,   sizeof(Cfg_imsg.lib->admin_help),   "Manage Instant Messaging system" );
 
+    if (!Cfg_imsg.enable)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread IMSG not enable in config. Shutting Down %d", pthread_self() );
+       goto end;
+     }
+
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
     if ( Imsg_Ouvrir_connexion() == FALSE ) { Cfg_imsg.lib->Thread_run = FALSE; }      /* Arret du thread */
@@ -685,7 +692,7 @@
     g_main_context_unref (MainLoop);
     Imsg_Liberer_config();                        /* Liberation de la configuration de l'InstantMessaging */
     Imsg_Liberer_liste_contacts();                                     /* Liberation de la liste contacts */
-
+end:
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
     Cfg_imsg.lib->TID = 0;                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

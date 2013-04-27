@@ -46,6 +46,7 @@
     gchar server  [80];
     gchar password[80];
     gchar **recipients;
+    gboolean enable;
     LmConnection *connection;
     GSList *contacts;
     GSList *Messages;
