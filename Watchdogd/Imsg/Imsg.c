@@ -215,6 +215,13 @@
   { LmMessage *m;
     GError *error;
 
+    if ( lm_connection_get_state ( Cfg_imsg.connection ) != LM_CONNECTION_STATE_AUTHENTICATED )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Mode_presence: Not connected .. cannot send presence %s / %s / %s -> %s",
+                 type, show, status, error->message );
+       return;
+     }
+
     m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
     if (type)   lm_message_node_set_attribute (m->node, "type", type );
     if (show)   lm_message_node_add_child (m->node, "show", show );
@@ -235,18 +242,30 @@
   { GError *error;
     LmMessage *m;
 
-    if( ! Imsg_recipient_authorized ( dest ) ) return;
+    if( ! Imsg_recipient_authorized ( dest ) )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Envoi_message_to: %s not authorized. dropping message %s",
+                 dest, message );
+       return;
+     }
+
+    if ( lm_connection_get_state ( Cfg_imsg.connection ) != LM_CONNECTION_STATE_AUTHENTICATED )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Envoi_message_to: Not connected .. cannot send %s to %s",
+                 message, dest );
+       return;
+     }
 
     m = lm_message_new ( dest, LM_MESSAGE_TYPE_MESSAGE );
     lm_message_node_add_child (m->node, "body", message );
     if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
      { if (error)
         { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                   "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
+                   "Envoi_message_to: Unable to send message %s to %s -> %s", message, dest, error->message );
         }
        else
         { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                   "Envoi_message_to_ismg: Unable to send message %s to %s -> Unknown error", message, dest );
+                   "Envoi_message_to: Unable to send message %s to %s -> Unknown error", message, dest );
         }
      }
     lm_message_unref (m);
