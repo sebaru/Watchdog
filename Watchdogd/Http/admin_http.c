@@ -27,7 +27,7 @@
  
  #include <unistd.h>                                                                  /* Pour gethostname */
  #include "watchdogd.h"
- #include "HttpMobile.h"
+ #include "Http.h"
 
 /**********************************************************************************************************/
 /* Admin_httpmobile: Gere une commande 'admin httpmobile' depuis une connexion admin                              */

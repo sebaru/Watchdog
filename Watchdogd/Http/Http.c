@@ -40,7 +40,7 @@
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
- #include "HttpMobile.h"
+ #include "Http.h"
 
 /**********************************************************************************************************/
 /* HttpMobile_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
