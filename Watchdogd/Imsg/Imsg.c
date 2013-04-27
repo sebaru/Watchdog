@@ -240,8 +240,14 @@
     m = lm_message_new ( dest, LM_MESSAGE_TYPE_MESSAGE );
     lm_message_node_add_child (m->node, "body", message );
     if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
-                 "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
+     { if (error)
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                   "Envoi_message_to_ismg: Unable to send message %s to %s -> %s", message, dest, error->message );
+        }
+       else
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                   "Envoi_message_to_ismg: Unable to send message %s to %s -> Unknown error", message, dest );
+        }
      }
     lm_message_unref (m);
   }
