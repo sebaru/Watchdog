@@ -61,6 +61,7 @@
     Cfg_http.lib->Thread_debug = g_key_file_get_boolean ( gkf, "HTTP", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
     Cfg_http.nbr_max_connexion = g_key_file_get_integer ( gkf, "HTTP", "max_connexion", NULL );
+    if ( !Cfg_http.nbr_max_connexion) Cfg_http.nbr_max_connexion = DEFAUT_MAX_CONNEXION;
     Cfg_http.http_enable       = g_key_file_get_boolean ( gkf, "HTTP", "http_enable", NULL ); 
     Cfg_http.http_port         = g_key_file_get_integer ( gkf, "HTTP", "http_port", NULL );
     Cfg_http.https_enable      = g_key_file_get_boolean ( gkf, "HTTP", "https_enable", NULL ); 
@@ -573,8 +574,10 @@
     Desabonner_distribution_message ( Http_Gerer_message );/* Desabonnement de la diffusion des messages */
 #endif
     if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);
-    if (Cfg_http.https_server) MHD_stop_daemon (Cfg_http.https_server);
-    Liberer_certificat();
+    if (Cfg_http.https_server)
+     { MHD_stop_daemon (Cfg_http.https_server);
+       Liberer_certificat();
+     }
 end:
     Http_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );

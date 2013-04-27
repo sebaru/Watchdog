@@ -32,6 +32,7 @@
  #define FICHIER_CERTIF_CA             "cacert.pem"
  #define FICHIER_CERTIF_SERVEUR        "serveursigne.pem"
  #define FICHIER_CERTIF_CLEF_SERVEUR   "serveurkey.pem"
+ #define DEFAUT_MAX_CONNEXION          100
 
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
