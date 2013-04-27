@@ -547,7 +547,6 @@
     Abonner_distribution_sortie  ( Http_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
 
 #endif
-    xmlInitParser();                                                      /* Initialisation du parser xml */
     Cfg_http.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                              /* On tourne tant que necessaire */
      { usleep(10000);
@@ -576,7 +575,6 @@
     if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);
     if (Cfg_http.https_server) MHD_stop_daemon (Cfg_http.https_server);
     Liberer_certificat();
-    xmlCleanupParser();
 end:
     Http_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
