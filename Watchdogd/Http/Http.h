@@ -35,7 +35,7 @@
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
     gint port;
     struct MHD_Daemon *server;
- } Cfg_httpmobile;
+ } Cfg_http;
 
 /*************************************** Définitions des prototypes ***************************************/
 #endif

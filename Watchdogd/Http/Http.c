@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/HttpMobile/HttpMobile.c        Gestion des connexions HTTPMobile de watchdog */
+/* Watchdogd/Http/Http.c        Gestion des connexions HTTPMobile de watchdog */
 /* Projet WatchDog version 2.0       Gestion d'habitat                   mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * HttpMobile.c
+ * Http.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -43,81 +43,81 @@
  #include "Http.h"
 
 /**********************************************************************************************************/
-/* HttpMobile_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
+/* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void HttpMobile_Lire_config ( void )
+ static void Http_Lire_config ( void )
   { gchar *chaine;
     GKeyFile *gkf;
 
     gkf = g_key_file_new();
     if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
      { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "HttpMobile_Lire_config : unable to load config file %s", Config.config_file );
+                 "Http_Lire_config : unable to load config file %s", Config.config_file );
        return;
      }
                                                                                /* Positionnement du debug */
-    Cfg_httpmobile.lib->Thread_debug = g_key_file_get_boolean ( gkf, "HTTP", "debug", NULL ); 
+    Cfg_http.lib->Thread_debug = g_key_file_get_boolean ( gkf, "HTTP", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
 
-    Cfg_httpmobile.enable        = g_key_file_get_boolean ( gkf, "HTTP", "enable", NULL ); 
-    Cfg_httpmobile.port          = g_key_file_get_integer ( gkf, "HTTP", "port", NULL );
+    Cfg_http.enable        = g_key_file_get_boolean ( gkf, "HTTP", "enable", NULL ); 
+    Cfg_http.port          = g_key_file_get_integer ( gkf, "HTTP", "port", NULL );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
-/* HttpMobile_Liberer_config : Libere la mémoire allouer précédemment pour lire la config httpmobile      */
+/* Http_Liberer_config : Libere la mémoire allouer précédemment pour lire la config http      */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void HttpMobile_Liberer_config ( void )
+ static void Http_Liberer_config ( void )
   {
   }
 /**********************************************************************************************************/
-/* HttpMobile_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                  */
+/* Http_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                  */
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void HttpMobile_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
+ static void Http_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
   { gint taille;
 #ifdef bouh
-    pthread_mutex_lock( &Cfg_httpmobile.lib->synchro );                      /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_httpmobile.Liste_message );
-    pthread_mutex_unlock( &Cfg_httpmobile.lib->synchro );
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                      /* Ajout dans la liste a traiter */
+    taille = g_slist_length( Cfg_http.Liste_message );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
 
     if (taille > 150)
-     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_WARNING,
-                "HttpMobile_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
        g_free(msg);
        return;
      }
 
-    pthread_mutex_lock ( &Cfg_httpmobile.lib->synchro );
-    Cfg_httpmobile.Liste_message = g_slist_append ( Cfg_httpmobile.Liste_message, msg );      /* Ajout a la liste */
-    pthread_mutex_unlock ( &Cfg_httpmobile.lib->synchro );
+    pthread_mutex_lock ( &Cfg_http.lib->synchro );
+    Cfg_http.Liste_message = g_slist_append ( Cfg_http.Liste_message, msg );      /* Ajout a la liste */
+    pthread_mutex_unlock ( &Cfg_http.lib->synchro );
 
 #endif
   }
 /**********************************************************************************************************/
-/* HttpMobile_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
+/* Http_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
 /* Entrées: le numéro de la sortie                                                                        */
 /**********************************************************************************************************/
- void HttpMobile_Gerer_sortie( gint num_a )                                    /* Num_a est l'id de la sortie */
+ void Http_Gerer_sortie( gint num_a )                                    /* Num_a est l'id de la sortie */
   { gint taille;
 #ifdef bouh
-    pthread_mutex_lock( &Cfg_httpmobile.lib->synchro );              /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_httpmobile.Liste_sortie );
-    pthread_mutex_unlock( &Cfg_httpmobile.lib->synchro );
+    pthread_mutex_lock( &Cfg_http.lib->synchro );              /* Ajout dans la liste de tell a traiter */
+    taille = g_slist_length( Cfg_http.Liste_sortie );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
 
     if (taille > 150)
-     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_WARNING,
-                "HttpMobile_Gerer_sortie: DROP sortie %d (length = %d > 150)", num_a, taille );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Gerer_sortie: DROP sortie %d (length = %d > 150)", num_a, taille );
        return;
      }
 
-    pthread_mutex_lock( &Cfg_httpmobile.lib->synchro );       /* Ajout dans la liste de tell a traiter */
-    Cfg_httpmobile.Liste_sortie = g_slist_prepend( Cfg_httpmobile.Liste_sortie, GINT_TO_POINTER(num_a) );
-    pthread_mutex_unlock( &Cfg_httpmobile.lib->synchro );
+    pthread_mutex_lock( &Cfg_http.lib->synchro );       /* Ajout dans la liste de tell a traiter */
+    Cfg_http.Liste_sortie = g_slist_prepend( Cfg_http.Liste_sortie, GINT_TO_POINTER(num_a) );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
 #endif
   }
 
@@ -295,7 +295,7 @@
 }
 
 /**********************************************************************************************************/
-/* HttpMobile Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
+/* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
 /* Entrées : le contexte, le message, l'URL                                                               */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
@@ -309,7 +309,7 @@
     const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
     struct MHD_Response *response;
 
-    Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
               "New %s request for %s using version %s", method, url, version);
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
@@ -325,7 +325,7 @@
        gint fd;
        fd = open ("anna.jpg", O_RDONLY);
        if ( fd == -1 || fstat (fd, &sbuf) == -1)
-        { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                    "Http_request : Error /gifile %s", strerror(errno) );
           if (fd!=-1) close(fd);
           response = MHD_create_response_from_buffer ( strlen (Internal_error),
@@ -347,7 +347,7 @@
        gint fd;
        fd = open ("test.xml", O_RDONLY);
        if ( fd == -1 || fstat (fd, &sbuf) == -1)
-        { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_DEBUG,
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                    "Http_request : Error /xml %s", strerror(errno) );
           if (fd!=-1) close(fd);
           response = MHD_create_response_from_buffer ( strlen (Internal_error),
@@ -386,73 +386,73 @@
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
-    memset( &Cfg_httpmobile, 0, sizeof(Cfg_httpmobile) );               /* Mise a zero de la structure de travail */
-    Cfg_httpmobile.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
-    HttpMobile_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_http, 0, sizeof(Cfg_http) );               /* Mise a zero de la structure de travail */
+    Cfg_http.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
+    Http_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
-    Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %d", pthread_self() );
 
-    g_snprintf( Cfg_httpmobile.lib->admin_prompt, sizeof(Cfg_httpmobile.lib->admin_prompt), "http" );
-    g_snprintf( Cfg_httpmobile.lib->admin_help,   sizeof(Cfg_httpmobile.lib->admin_help),   "Manage communications with Http Devices" );
+    g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), "http" );
+    g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage communications with Http Devices" );
 
-    if (!Cfg_httpmobile.enable)
-     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
+    if (!Cfg_http.enable)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                 "Run_thread: Thread not enable in config. Shutting Down %d", pthread_self() );
        goto end;
      }
 
 
-    Cfg_httpmobile.server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION, Cfg_httpmobile.port, NULL, NULL, 
+    Cfg_http.server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION, Cfg_http.port, NULL, NULL, 
                                               &Http_request, NULL, MHD_OPTION_END);
-    if (!Cfg_httpmobile.server)
-     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE,
+    if (!Cfg_http.server)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                 "Run_thread: MHDServer creation error (%s). Shutting Down %d",
                  strerror(errno), pthread_self() );
        goto end;
      }
     else
-     { Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO,
-                "Run_thread: MHDServer OK. Listening on port %d", Cfg_httpmobile.port );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                "Run_thread: MHDServer OK. Listening on port %d", Cfg_http.port );
      }
 
 #ifdef bouh
-    Abonner_distribution_message ( HttpMobile_Gerer_message );   /* Abonnement à la diffusion des messages */
-    Abonner_distribution_sortie  ( HttpMobile_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
+    Abonner_distribution_message ( Http_Gerer_message );   /* Abonnement à la diffusion des messages */
+    Abonner_distribution_sortie  ( Http_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
 
 #endif
     xmlInitParser();                                                      /* Initialisation du parser xml */
-    Cfg_httpmobile.lib->Thread_run = TRUE;                                          /* Le thread tourne ! */
-    while(Cfg_httpmobile.lib->Thread_run == TRUE)                        /* On tourne tant que necessaire */
+    Cfg_http.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
+    while(Cfg_http.lib->Thread_run == TRUE)                              /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
 
-       if (Cfg_httpmobile.lib->Thread_sigusr1)                            /* A-t'on recu un signal USR1 ? */
+       if (Cfg_http.lib->Thread_sigusr1)                                  /* A-t'on recu un signal USR1 ? */
         { int nbr_msg, nbr_sortie;
 
-          Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
 #ifdef bouh
-          pthread_mutex_lock( &Cfg_httpmobile.lib->synchro ); /* On recupere le nombre de msgs en attente */
-          nbr_msg    = g_slist_length(Cfg_httpmobile.Liste_message);
-          nbr_sortie = g_slist_length(Cfg_httpmobile.Liste_sortie);
-          pthread_mutex_unlock( &Cfg_httpmobile.lib->synchro );
-          Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_INFO,
+          pthread_mutex_lock( &Cfg_http.lib->synchro );       /* On recupere le nombre de msgs en attente */
+          nbr_msg    = g_slist_length(Cfg_http.Liste_message);
+          nbr_sortie = g_slist_length(Cfg_http.Liste_sortie);
+          pthread_mutex_unlock( &Cfg_http.lib->synchro );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                     "Run_thread: In Queue : %d MSGS, %d A", nbr_msg, nbr_sortie );
 #endif
-          Cfg_httpmobile.lib->Thread_sigusr1 = FALSE;
+          Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
      }
 
 #ifdef bouh
-    Desabonner_distribution_sortie  ( HttpMobile_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
-    Desabonner_distribution_message ( HttpMobile_Gerer_message );/* Desabonnement de la diffusion des messages */
+    Desabonner_distribution_sortie  ( Http_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
+    Desabonner_distribution_message ( Http_Gerer_message );/* Desabonnement de la diffusion des messages */
 #endif
-
-    MHD_stop_daemon (Cfg_httpmobile.server);
+    xmlCleanupParser();
+    MHD_stop_daemon (Cfg_http.server);
 end:
-    HttpMobile_Liberer_config();                                  /* Liberation de la configuration du thread */
-    Info_new( Config.log, Cfg_httpmobile.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
-    Cfg_httpmobile.lib->TID = 0;                              /* On indique au httpmobile que le thread est mort. */
+    Http_Liberer_config();                                  /* Liberation de la configuration du thread */
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Cfg_http.lib->TID = 0;                                  /* On indique au http que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
