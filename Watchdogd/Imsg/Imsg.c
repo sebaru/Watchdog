@@ -665,7 +665,7 @@
           msg = Cfg_imsg.Messages->data;
           Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, msg );           /* Retrait de la liste */
           pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-          Imsg_Envoi_message_to_all_available ( msg->libelle );
+          if (Partage->g[msg->num].etat) Imsg_Envoi_message_to_all_available ( msg->libelle );
           g_free(msg);                       /* Fin d'utilisation de la structure donc liberation memoire */
         }
 
