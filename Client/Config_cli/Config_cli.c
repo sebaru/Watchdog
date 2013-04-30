@@ -93,7 +93,10 @@
 /********************************************* Partie GUI *************************************************/
        config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
        config_cli->gui_fullscreen = g_key_file_get_boolean ( gkf, "GUI", "fullscreen", NULL );
-     } else printf("Unable to parse config file %s, error %s\n", fichier, error->message );
+     } else 
+        { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
+          g_error_free( error );
+        }
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/

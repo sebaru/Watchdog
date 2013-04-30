@@ -42,13 +42,14 @@
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
     GKeyFile *gkf;
+    GError *error;
 
     if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;
                     else fichier = fichier_config;
-
+    printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
 
-    if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, NULL))
+    if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, &error))
      {
        g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier );
 /********************************************** Partie GLOBAL *********************************************/
@@ -134,7 +135,10 @@
        Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "log_dls", NULL );
        Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "log_ach", NULL );
        Config.log_db   = g_key_file_get_boolean ( gkf, "LOG", "log_db", NULL );
-     }
+     } else 
+        { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
+          g_error_free( error );
+        }
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
