@@ -40,6 +40,7 @@
  void Lire_config_cli ( struct CONFIG_CLI *config_cli, char *fichier_config_cli )
   { gchar *chaine, *fichier;
     GKeyFile *gkf;
+    GError *error;
 
     if (!config_cli) return;
 
@@ -50,7 +51,7 @@
 
     config_cli->log_level = DEFAUT_LOG_LEVEL;                                 /* Niveau de log par défaut */
     config_cli->log_override = TRUE;
-    if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, NULL))
+    if (g_key_file_load_from_file( gkf, fichier, G_KEY_FILE_NONE, &error ))
      {
 
 /********************************************* Partie SERVEUR *********************************************/
@@ -92,7 +93,7 @@
 /********************************************* Partie GUI *************************************************/
        config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
        config_cli->gui_fullscreen = g_key_file_get_boolean ( gkf, "GUI", "fullscreen", NULL );
-     } else printf("Unable to parse config file %s\n", fichier );
+     } else printf("Unable to parse config file %s, error %s\n", fichier, error->message );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
