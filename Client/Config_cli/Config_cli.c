@@ -73,6 +73,24 @@
        else
         { g_snprintf( config_cli->passwd, sizeof(config_cli->passwd), "%s", DEFAUT_PASSWD  ); }
 
+       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_ca", NULL );
+       if (chaine)
+        { g_snprintf( config_cli->ssl_ca, sizeof(config_cli->ssl_ca), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( config_cli->ssl_ca, sizeof(config_cli->ssl_ca), "%s", DEFAUT_SSL_CA  ); }
+
+       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_cert", NULL );
+       if (chaine)
+        { g_snprintf( config_cli->ssl_cert, sizeof(config_cli->ssl_cert), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( config_cli->ssl_cert, sizeof(config_cli->ssl_cert), "%s", DEFAUT_SSL_CERT ); }
+
+       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_key", NULL );
+       if (chaine)
+        { g_snprintf( config_cli->ssl_key, sizeof(config_cli->ssl_key), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( config_cli->ssl_key, sizeof(config_cli->ssl_key), "%s", DEFAUT_SSL_KEY  ); }
+
        config_cli->port = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
        if (!config_cli->port) config_cli->port = DEFAUT_PORT;
 

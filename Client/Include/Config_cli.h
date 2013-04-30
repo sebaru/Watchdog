@@ -38,6 +38,9 @@
     gchar host[TAILLE_NOM_SERVEUR+1];                                         /* Serveur Watchdog distant */
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
     gchar passwd[TAILLE_NOM_SERVEUR+1];                                       /* Serveur Watchdog distant */
+    gchar ssl_ca[80];                                                                   /* Paramètres SSL */
+    gchar ssl_cert[80]; 
+    gchar ssl_key[80]; 
     guint log_override;                                     /* Pour afficher tous les informations de log */
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean gui_tech;                               /* True si la GUI doit présenter l'aspect Technicien */
@@ -52,6 +55,9 @@
  #define DEFAUT_PORT                    5558
  #define DEFAUT_LOG_LEVEL               LOG_INFO
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
+ #define DEFAUT_SSL_CA                  "cacert.pem"     /* Certificat de l'autorite de certification */
+ #define DEFAUT_SSL_CERT                "clientsigne.pem"
+ #define DEFAUT_SSL_KEY                 "clientkey.pem"
 
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config_cli ( struct CONFIG_CLI *config, char *fichier_config );

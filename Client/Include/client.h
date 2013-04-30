@@ -39,9 +39,6 @@
  #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
 
  #define REPERTOIR_CONF    ".watchdog"         /* Repertoire ou sont stocké les fichiers de configuration */
- #define FICHIER_CERTIF_CA      "cacert.pem"                 /* Certificat de l'autorite de certification */
- #define FICHIER_CERTIF_CLIENT       "clientsigne.pem"
- #define FICHIER_CERTIF_CLEF_CLIENT  "clientkey.pem"
  
  enum
   { INERTE,

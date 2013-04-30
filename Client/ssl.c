@@ -69,11 +69,11 @@
 
     SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                /* Mode non bloquant */       
 
-    retour = SSL_CTX_load_verify_locations( ssl_ctx, FICHIER_CERTIF_CA, NULL );
+    retour = SSL_CTX_load_verify_locations( ssl_ctx, Config_cli.ssl_ca, NULL );
     if (retour != 1)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
                  "Init_ssl : load verify locations error (%s, file %s)",
-                 ERR_error_string( ERR_get_error(), NULL ), FICHIER_CERTIF_CA );
+                 ERR_error_string( ERR_get_error(), NULL ), Config_cli.ssl_ca );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
@@ -81,10 +81,10 @@
     SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER, NULL );         /* Type de verification des certificats */
 
                                                                                   /* Certificat du client */
-    fd = fopen( FICHIER_CERTIF_CLIENT, "r" );
+    fd = fopen( Config_cli.ssl_cert, "r" );
     if (!fd)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : failed to open file certif %s", FICHIER_CERTIF_CLIENT );
+                 "Init_ssl : failed to open file certif %s", Config_cli.ssl_cert );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
@@ -92,7 +92,7 @@
     fclose(fd);
     if (!certif)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : Certif loading failed %s", FICHIER_CERTIF_CLIENT );
+                 "Init_ssl : Certif loading failed %s", Config_cli.ssl_cert );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
@@ -107,10 +107,11 @@
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
               "Init_ssl : Use of certificate %s", Nom_certif(certif) );
                                                                                  /* Clef privée du client */
-    retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, FICHIER_CERTIF_CLEF_CLIENT, SSL_FILETYPE_PEM );
+    retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, Config_cli.ssl_key, SSL_FILETYPE_PEM );
     if (retour != 1)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : Error Use RSAPrivate key (%s)", ERR_error_string( ERR_get_error(), NULL ) );
+                 "Init_ssl : Error Use RSAPrivate key %s (%s)",
+                 Config_cli.ssl_key, ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
@@ -118,7 +119,8 @@
     retour = SSL_CTX_check_private_key( ssl_ctx );                         /* Verification du certif/clef */
     if (retour != 1)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Init_ssl : check private key failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
+                 "Init_ssl : check private key failed %s (%s)",
+                 Config_cli.ssl_key, ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
