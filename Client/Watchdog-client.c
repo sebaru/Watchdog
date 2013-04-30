@@ -248,11 +248,14 @@
 
     if (chdir( g_get_home_dir() ))                                  /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", g_get_home_dir() ); exit(EXIT_ERREUR); }
+    else
+     { printf( "Chdir %s OK\n", g_get_home_dir() ); }
 
     if (chdir( REPERTOIR_CONF ))                                    /* Positionnement à la bonne position */
-     { mkdir ( REPERTOIR_CONF, 0700 );
+     { printf ("Chdir %s NOK. Creating new directory\n", REPERTOIR_CONF );
+       mkdir ( REPERTOIR_CONF, 0700 );
        chdir ( REPERTOIR_CONF );
-     }
+     } else printf ("Chdir %s OK\n", REPERTOIR_CONF );
 
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                    /* Init msgs d'erreurs */
 
