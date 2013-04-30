@@ -45,7 +45,7 @@
 
     if (!fichier_config_cli) fichier = DEFAUT_FICHIER_CONFIG_CLI;
                         else fichier = fichier_config_cli;
-
+    printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
 
     config_cli->log_level = DEFAUT_LOG_LEVEL;                                 /* Niveau de log par défaut */
@@ -92,7 +92,7 @@
 /********************************************* Partie GUI *************************************************/
        config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
        config_cli->gui_fullscreen = g_key_file_get_boolean ( gkf, "GUI", "fullscreen", NULL );
-     }
+     } else printf("Unable to parse config file %s\n", fichier );
     g_key_file_free(gkf);
   }
 /**********************************************************************************************************/
