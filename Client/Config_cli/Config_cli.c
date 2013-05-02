@@ -128,11 +128,17 @@
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config host ------------- %s", config_cli->host );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config port ------------- %d", config_cli->port );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config user ------------- %s", config_cli->user );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config passwd ----------- %s", config_cli->passwd );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config port ------------- %d", config_cli->port );
+              "Config ssl_ca ----------- %s", config_cli->ssl_ca );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config ssl_cert --------- %s", config_cli->ssl_cert );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config ssl_key ---------- %s", config_cli->ssl_key );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config log_level -------- %d", config_cli->log_level );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
