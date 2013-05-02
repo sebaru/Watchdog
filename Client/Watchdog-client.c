@@ -273,7 +273,7 @@
     if (debug_level!=-1) Config_cli.log_level = debug_level;
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
 
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start") );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, _("Main : Start v%s"), VERSION );
     Print_config_cli( &Config_cli );
 
     F_client = gnome_app_new( PROGRAMME, TITRE_F_CONFIG );                      /* Création de la fenetre */
