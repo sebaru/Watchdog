@@ -436,7 +436,7 @@
 
     Config.log = Info_init( "Watchdogd", Config.log_level );                       /* Init msgs d'erreurs */
 
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start" );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", VERSION );
     Print_config();
 
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
