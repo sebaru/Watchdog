@@ -514,33 +514,35 @@
         }
 
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       Liste_sms = Cfg_sms.Liste_sms;                         /* Sauvegarde du ptr sms a envoyer */
+       Liste_sms = Cfg_sms.Liste_sms;                                  /* Sauvegarde du ptr sms a envoyer */
        msg = Liste_sms->data;
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                "Run_thread : Sending msg %d (%s)", msg->num, msg->libelle_sms );
+       if ( Partage->g[msg->num].etat )                                 /* On n'envoie que si MSGnum == 1 */
+        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
+                   "Run_thread : Sending msg %d (%s)", msg->num, msg->libelle_sms );
       
 /**************************************** Envoi en mode GSM ***********************************************/
 
-       if (Partage->top < TOP_MIN_ENVOI_SMS)
-        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                   "Envoi_sms_gsm: Envoi trop tot !! (%s)", msg->libelle_sms ); }
-       else 
-        { gchar **liste;
-          gint cpt = 0;
-          liste = Cfg_sms.recipients;
-          while (liste[cpt])
-           { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, liste[cpt] );
-             if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, liste[cpt] );
-             cpt++;
+          if (Partage->top < TOP_MIN_ENVOI_SMS)
+           { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
+                      "Envoi_sms_gsm: Envoi trop tot !! (%s)", msg->libelle_sms ); }
+          else 
+           { gchar **liste;
+             gint cpt = 0;
+             liste = Cfg_sms.recipients;
+             while (liste[cpt])
+              { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, liste[cpt] );
+                if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, liste[cpt] );
+                cpt++;
+              }
            }
-        }
 
-       pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, msg );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer",
-                 g_slist_length(Cfg_sms.Liste_sms) );
-       pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+          pthread_mutex_lock( &Cfg_sms.lib->synchro );
+          Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, msg );
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer",
+                    g_slist_length(Cfg_sms.Liste_sms) );
+          pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+        }
        g_free( msg );
      }
 
