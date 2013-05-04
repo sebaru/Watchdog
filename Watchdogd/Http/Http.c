@@ -411,7 +411,7 @@
   { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
     const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
     const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
-    gint ssl_algo, ssl_proto;
+    gint ssl_algo, ssl_proto, retour;
     struct sockaddr *client_addr;
     struct MHD_Response *response;
     void *client_cert, *tls_session;
@@ -419,8 +419,13 @@
     gchar client_host[80], client_service[20];
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
-    getnameinfo( client_addr, sizeof(client_addr), client_host, sizeof(client_host),
-                                                   client_service, sizeof(client_service), 0 );
+    retour = getnameinfo( client_addr, sizeof(client_addr), client_host, sizeof(client_host),
+                          client_service, sizeof(client_service),
+                          NI_NUMERICHOST | NI_NUMERICSERV );
+    if (retour) 
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_request : GetName failed : %s", gai_strerror(retour) );
+     }
 
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
     if ( info ) { ssl_algo = info->cipher_algorithm; }
@@ -438,8 +443,8 @@
     if ( info ) { client_cert = info->client_cert; }
            else { client_cert = NULL; }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-              "New %s %s %s request from %s for %s/%s (%s/%s).",
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+              "New %s %s %s request from Host=%s/Service=%s (Cipher=%s/Proto=%s).",
                method, url, version,
                client_host, client_service,
                gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto)
