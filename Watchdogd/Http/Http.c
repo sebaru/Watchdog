@@ -36,6 +36,7 @@
  #include <fcntl.h>
  #include <netdb.h>
  #include <gnutls/gnutls.h>
+ #include <gnutls/x509.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -397,28 +398,26 @@
 
     xmlBufferFree(buf);
 }
-
 /**********************************************************************************************************/
-/* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
-/* Entrées : le contexte, le message, l'URL                                                               */
-/* Sortie : néant                                                                                         */
+/* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
+/* Entrées : la session TLS                                                                               */
+/* Sortie  : le certificat, ou NULL si erreur                                                             */
 /**********************************************************************************************************/
- static gint Http_request (void *cls, struct MHD_Connection *connection, 
-                           const char *url, 
-                           const char *method, const char *version, 
-                           const char *upload_data, 
-                           size_t *upload_data_size, void **con_cls)
-  { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
-    const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
-    const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
+static void Print_request( struct MHD_Connection * connection, const char *url, 
+                           const char *method, const char *version )
+  { guint listsize;
+    const gnutls_datum_t * pcert;
+    gnutls_certificate_status_t client_cert_status;
+    gnutls_x509_crt_t client_cert;
     gint ssl_algo, ssl_proto, retour;
     struct sockaddr *client_addr;
-    struct MHD_Response *response;
-    void *client_cert, *tls_session;
+    void *tls_session;
     const union MHD_ConnectionInfo *info;
-    gchar client_host[80], client_service[20];
+    gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
+    memset( client_host, 0, sizeof(client_host) );
+    memset( client_service, 0, sizeof(client_service) );
     retour = getnameinfo( client_addr, sizeof(client_addr), client_host, sizeof(client_host),
                           client_service, sizeof(client_service),
                           NI_NUMERICHOST | NI_NUMERICSERV );
@@ -449,6 +448,56 @@
                client_host, client_service,
                gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto)
             );
+    if (tls_session)
+     { if (gnutls_certificate_verify_peers2(tls_session, &client_cert_status))
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                    "Failed to verify peers" );
+          return;
+        }
+
+       pcert = gnutls_certificate_get_peers(tls_session, &listsize);
+       if ( (pcert == NULL) || (listsize == 0))
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Failed to get peers" );
+          return;
+        }
+
+       if (gnutls_x509_crt_init(&client_cert))
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Failed to init cert" );
+          return;
+        }
+
+       if (gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) 
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Failed import cert" );
+          gnutls_x509_crt_deinit(client_cert);
+          return;
+        }  
+
+       gnutls_x509_crt_get_dn(client_cert, client_dn, (size_t) sizeof(client_dn) );
+       gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t) sizeof(issuer_dn) );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                 "Client DN = %s (issuer %s)", client_dn, issuer_dn );
+       gnutls_x509_crt_deinit(client_cert);
+     }
+  }
+/**********************************************************************************************************/
+/* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
+/* Entrées : le contexte, le message, l'URL                                                               */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static gint Http_request (void *cls, struct MHD_Connection *connection, 
+                           const char *url, 
+                           const char *method, const char *version, 
+                           const char *upload_data, 
+                           size_t *upload_data_size, void **con_cls)
+  { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
+    const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
+    const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
+    struct MHD_Response *response;
+
+    Print_request ( connection, url, method, version );
 
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
