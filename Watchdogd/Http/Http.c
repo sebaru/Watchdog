@@ -32,7 +32,9 @@
  #include <microhttpd.h>
  #include <libxml/xmlwriter.h>
  #include <sys/types.h>
+ #include <sys/socket.h>
  #include <sys/stat.h>
+ #include <netinet/in.h>
  #include <fcntl.h>
  #include <netdb.h>
  #include <gnutls/gnutls.h>
@@ -403,22 +405,30 @@
 /* Entrées : la session TLS                                                                               */
 /* Sortie  : le certificat, ou NULL si erreur                                                             */
 /**********************************************************************************************************/
-static void Print_request( struct MHD_Connection * connection, const char *url, 
-                           const char *method, const char *version )
+ static void Print_request( struct MHD_Connection * connection, const char *url, 
+                            const char *method, const char *version )
   { guint listsize;
     const gnutls_datum_t * pcert;
     gnutls_certificate_status_t client_cert_status;
     gnutls_x509_crt_t client_cert;
-    gint ssl_algo, ssl_proto, retour;
+    gint ssl_algo, ssl_proto, retour, size;
     struct sockaddr *client_addr;
     void *tls_session;
     const union MHD_ConnectionInfo *info;
     gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
+    if (client_addr->sa_family == AF_INET)  size = sizeof(struct sockaddr_in);
+    else
+    if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
+    else
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_request : GetName failed, wrong family" );
+       return;
+     }
     memset( client_host, 0, sizeof(client_host) );
     memset( client_service, 0, sizeof(client_service) );
-    retour = getnameinfo( client_addr, sizeof(client_addr), client_host, sizeof(client_host),
+    retour = getnameinfo( client_addr, size, client_host, sizeof(client_host),
                           client_service, sizeof(client_service),
                           NI_NUMERICHOST | NI_NUMERICSERV );
     if (retour) 
@@ -475,8 +485,10 @@ static void Print_request( struct MHD_Connection * connection, const char *url,
           return;
         }  
 
-       gnutls_x509_crt_get_dn(client_cert, client_dn, (size_t) sizeof(client_dn) );
-       gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t) sizeof(issuer_dn) );
+       size = sizeof(client_dn);
+       gnutls_x509_crt_get_dn(client_cert, client_dn, (size_t *)&size );
+       size = sizeof(issuer_dn);
+       gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                  "Client DN = %s (issuer %s)", client_dn, issuer_dn );
        gnutls_x509_crt_deinit(client_cert);
