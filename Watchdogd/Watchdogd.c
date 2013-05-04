@@ -211,7 +211,7 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
-  { gint cpt_5_minutes, cpt_1_minute, cpt_1_seconde;
+  { gint cpt_5_minutes, cpt_1_minute;
     struct DB *db;
     gint cpt;
 
@@ -224,7 +224,6 @@
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
-    cpt_1_seconde = Partage->top + 10;
 
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
@@ -279,14 +278,6 @@
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
-#ifdef bouh
-       if (cpt_1_seconde < Partage->top)           /* Toutes les secondes vérification des motion cameras */
-        { Camera_check_motion( Config.log, db );
-/*          Asterisk_check_call( Config.log, db );*/
-          cpt_1_seconde = Partage->top + 10;                                        /* Dans une seconde ! */
-        }
-#endif
-
        if (Partage->com_msrv.reset_motion_detect)
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Reset_motion_detect" );
           Demarrer_motion_detect();
@@ -308,12 +299,9 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, port, log_level, max_client, fg, initrsa, single, compil;
+  { gint help, log_level, max_client, fg, initrsa, single, compil;
     gchar *home, *file, *run_as;
     struct passwd *pwd;
-    gint nbr_bytes;
-    gchar *chaine;
-    FILE *fd;
     struct poptOption Options[]= 
      { { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
@@ -396,7 +384,7 @@
   { struct itimerval timer;
     struct sigaction sig;
     gchar strpid[12];
-    gint fd_lock, i;
+    gint fd_lock;
     pthread_t TID;
     gint import=0;
     gboolean fg;

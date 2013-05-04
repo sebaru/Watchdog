@@ -625,8 +625,6 @@
 
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %d", pthread_self() );
-    Cfg_imsg.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
-    Cfg_imsg.date_retente = 0;
 
     g_snprintf( Cfg_imsg.lib->admin_prompt, sizeof(Cfg_imsg.lib->admin_prompt), "imsg" );
     g_snprintf( Cfg_imsg.lib->admin_help,   sizeof(Cfg_imsg.lib->admin_help),   "Manage Instant Messaging system" );
@@ -637,6 +635,8 @@
        goto end;
      }
 
+    Cfg_imsg.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
+    Cfg_imsg.date_retente = 0;
     MainLoop = g_main_context_new();
                                                                  /* Preparation de la connexion au server */
     if ( Imsg_Ouvrir_connexion() == FALSE ) { Cfg_imsg.lib->Thread_run = FALSE; }      /* Arret du thread */

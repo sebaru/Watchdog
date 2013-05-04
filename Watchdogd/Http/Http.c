@@ -31,12 +31,11 @@
  #include <unistd.h>
  #include <microhttpd.h>
  #include <libxml/xmlwriter.h>
-
-       #include <sys/types.h>
-       #include <sys/stat.h>
-       #include <fcntl.h>
-
-
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <netdb.h>
+ #include <gnutls/gnutls.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -223,14 +222,17 @@
 #endif
   }
 
-
+/**********************************************************************************************************/
+/* Traiter_dynxml: Traite une requete sur l'URI dynxml                                                    */
+/* Entrées: la connexion MHD                                                                              */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
  static void Traiter_dynxml ( struct MHD_Connection *connection )
   { static gint i = 1;
     struct MHD_Response *response;
     int rc;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
-    xmlChar *tmp;
 
     /* Create a new XML buffer, to which the XML document will be
      * written */
@@ -409,10 +411,27 @@
   { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
     const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
     const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
+    gint ssl_algo, ssl_proto;
+    struct sockaddr *client_addr;
     struct MHD_Response *response;
+    void *client_cert, *tls_session;
+    gchar client_host[80], client_service[20];
+
+    client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
+    getnameinfo( client_addr, sizeof(client_addr), client_host, sizeof(client_host),
+                                                   client_service, sizeof(client_service), 0 );
+    ssl_algo    = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO )->cipher_algorithm;
+    ssl_proto   = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL )->protocol;
+    tls_session = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION )->tls_session;
+    client_cert = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT )->client_cert;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-              "New %s request for %s using version %s", method, url, version);
+              "New %s %s %s request from %s for %s/%s (%s/%s).",
+               method, url, version,
+               client_host, client_service,
+               gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto)
+            );
+
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
                                                    (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
@@ -528,7 +547,7 @@
                                                   MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
                                                   MHD_OPTION_HTTPS_MEM_CERT, Cfg_http.ssl_cert,
                                                   MHD_OPTION_HTTPS_MEM_KEY,  Cfg_http.ssl_key,
-                                                  MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,
+                                                  MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,/* Require Client SSL */
                                                   MHD_OPTION_END);
        if (!Cfg_http.https_server)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
