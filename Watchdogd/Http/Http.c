@@ -452,12 +452,6 @@
     if ( info ) { client_cert = info->client_cert; }
            else { client_cert = NULL; }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-              "New %s %s %s request from Host=%s/Service=%s (Cipher=%s/Proto=%s).",
-               method, url, version,
-               client_host, client_service,
-               gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto)
-            );
     if (tls_session)
      { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -490,9 +484,18 @@
        size = sizeof(issuer_dn);
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                 "Client %s (issuer %s)", client_dn, issuer_dn );
+                "New HTTPS %s %s %s request from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s).",
+                 method, url, version,
+                 client_host, client_dn, client_service,
+                 gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn
+               );
        gnutls_x509_crt_deinit(client_cert);
      }
+    else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                  "New HTTP  %s %s %s request from Host=%s/Service=%s",
+                   method, url, version,
+                   client_host, client_service
+                );
     return(TRUE);
   }
 /**********************************************************************************************************/
