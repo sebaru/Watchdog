@@ -415,15 +415,28 @@
     struct sockaddr *client_addr;
     struct MHD_Response *response;
     void *client_cert, *tls_session;
+    const union MHD_ConnectionInfo *info;
     gchar client_host[80], client_service[20];
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
     getnameinfo( client_addr, sizeof(client_addr), client_host, sizeof(client_host),
                                                    client_service, sizeof(client_service), 0 );
-    ssl_algo    = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO )->cipher_algorithm;
-    ssl_proto   = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL )->protocol;
-    tls_session = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION )->tls_session;
-    client_cert = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT )->client_cert;
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
+    if ( info ) { ssl_algo = info->cipher_algorithm; }
+           else { ssl_algo = 0; }
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
+    if ( info ) { ssl_proto = info->protocol; }
+           else { ssl_proto = 0; }
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION );
+    if ( info ) { tls_session = info->tls_session; }
+           else { tls_session = NULL; }
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT );
+    if ( info ) { client_cert = info->client_cert; }
+           else { client_cert = NULL; }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
               "New %s %s %s request from %s for %s/%s (%s/%s).",
