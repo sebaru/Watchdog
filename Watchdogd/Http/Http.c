@@ -459,9 +459,9 @@
                gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto)
             );
     if (tls_session)
-     { if (gnutls_certificate_verify_peers2(tls_session, &client_cert_status))
+     { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                    "Failed to verify peers" );
+                    "Failed to verify peers : %s", gnutls_strerror(retour) );
           return;
         }
 
@@ -472,15 +472,15 @@
           return;
         }
 
-       if (gnutls_x509_crt_init(&client_cert))
+       if ( (retour = gnutls_x509_crt_init(&client_cert)) < 0 )
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Failed to init cert" );
+                   "Failed to init cert : %s", gnutls_strerror(retour) );
           return;
         }
 
-       if (gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) 
+       if ( (retour = gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) < 0 ) 
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Failed import cert" );
+                   "Failed import cert", gnutls_strerror(retour) );
           gnutls_x509_crt_deinit(client_cert);
           return;
         }  
