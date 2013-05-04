@@ -403,10 +403,10 @@
 /**********************************************************************************************************/
 /* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
 /* Entrées : la session TLS                                                                               */
-/* Sortie  : le certificat, ou NULL si erreur                                                             */
+/* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
 /**********************************************************************************************************/
- static void Print_request( struct MHD_Connection * connection, const char *url, 
-                            const char *method, const char *version )
+ static gboolean Verify_request( struct MHD_Connection * connection, const char *url, 
+                                 const char *method, const char *version )
   { guint listsize;
     const gnutls_datum_t * pcert;
     gnutls_certificate_status_t client_cert_status;
@@ -424,7 +424,7 @@
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "Http_request : GetName failed, wrong family" );
-       return;
+       return(FALSE);
      }
     memset( client_host, 0, sizeof(client_host) );
     memset( client_service, 0, sizeof(client_service) );
@@ -462,27 +462,27 @@
      { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                     "Failed to verify peers : %s", gnutls_strerror(retour) );
-          return;
+          return(FALSE);
         }
 
        pcert = gnutls_certificate_get_peers(tls_session, &listsize);
        if ( (pcert == NULL) || (listsize == 0))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "Failed to get peers" );
-          return;
+          return(FALSE);
         }
 
        if ( (retour = gnutls_x509_crt_init(&client_cert)) < 0 )
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "Failed to init cert : %s", gnutls_strerror(retour) );
-          return;
+          return(FALSE);
         }
 
        if ( (retour = gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) < 0 ) 
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "Failed import cert", gnutls_strerror(retour) );
           gnutls_x509_crt_deinit(client_cert);
-          return;
+          return(FALSE);
         }  
 
        size = sizeof(client_dn);
@@ -490,9 +490,10 @@
        size = sizeof(issuer_dn);
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                 "Client DN = %s (issuer %s)", client_dn, issuer_dn );
+                 "Client %s (issuer %s)", client_dn, issuer_dn );
        gnutls_x509_crt_deinit(client_cert);
      }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
@@ -507,9 +508,19 @@
   { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
     const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
     const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
+    const char *Authent_error  = "<html><body>Authentification error!..</body></html>";
     struct MHD_Response *response;
 
-    Print_request ( connection, url, method, version );
+    if (Verify_request ( connection, url, method, version ) == FALSE)
+     { response = MHD_create_response_from_buffer ( strlen (Authent_error),
+                                                    (void*) Authent_error, MHD_RESPMEM_PERSISTENT);
+       if (response)
+        { MHD_queue_response ( connection, MHD_HTTP_UNAUTHORIZED, response);
+          MHD_destroy_response (response);
+          return(MHD_YES);
+        }
+       else return MHD_NO;
+     }
 
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
