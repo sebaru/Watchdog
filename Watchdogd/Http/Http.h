@@ -53,5 +53,6 @@
  } Cfg_http;
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection, gint syn_id );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

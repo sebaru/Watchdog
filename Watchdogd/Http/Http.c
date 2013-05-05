@@ -528,11 +528,18 @@
     if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
                                                    (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
-       if (response)
-        { MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);  /* Method not allowed */
+       if (response == NULL) return(MHD_NO);
+       MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
+       MHD_destroy_response (response);
+     }
+    else if ( ! strcasecmp ( url, "/getsyn" ) )
+     { if ( Http_Traiter_request_getsyn ( connection, 1 ) == FALSE)           /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error),
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
-       else return MHD_NO;
      }
     else if ( ! strcasecmp ( url, "/gifile" ) )
      { struct stat sbuf;
@@ -544,12 +551,10 @@
           if (fd!=-1) close(fd);
           response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                        (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response)
-           { MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-             MHD_destroy_response (response);
-             return(MHD_YES);
-           }
-          else return(MHD_NO);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+          return(MHD_YES);
        }
       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
       MHD_add_response_header (response, "Content-Type", "image/jpg");
@@ -566,12 +571,10 @@
           if (fd!=-1) close(fd);
           response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                        (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response)
-           { MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-             MHD_destroy_response (response);
-             return(MHD_YES);
-           }
-          else return(MHD_NO);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+          return(MHD_YES);
        }
       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
       MHD_add_response_header (response, "Content-Type", "application/xml");
@@ -584,15 +587,12 @@
     else
      { response = MHD_create_response_from_buffer ( strlen (Not_found),
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
-       if (response) 
-        { MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
-          MHD_destroy_response (response);
-        }
-       else return MHD_NO;
+       if (response == NULL) return(MHD_NO);
+       MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
+       MHD_destroy_response (response);
      }
     return MHD_YES;
   }
-
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
 /* Entrée: une structure LIBRAIRIE                                                                        */
