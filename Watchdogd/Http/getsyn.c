@@ -62,6 +62,7 @@
      }
 
     writer = xmlNewTextWriterMemory(buf, 0);                                     /* Creation du write XML */
+    if (writer == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Writer creation failed" );
        xmlBufferFree(buf);
