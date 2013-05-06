@@ -211,15 +211,11 @@
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
-    struct DB *db;
     gint cpt;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Debut boucle sans fin" );
-    db = Init_DB_SQL( Config.log );
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Connexion DB impossible" ); }
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -289,7 +285,6 @@
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
     Sauver_compteur();                                                 /* Dernière sauvegarde avant arret */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
-    Libere_DB_SQL( Config.log, &db );
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/
