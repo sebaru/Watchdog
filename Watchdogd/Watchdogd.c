@@ -227,7 +227,7 @@
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
     while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
-     { Gerer_arrive_MSGxxx_dls( db );         /* Redistrib des messages DLS vers les clients + Historique */ 
+     { Gerer_arrive_MSGxxx_dls();             /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                             /* Distribution des changements d'etats motif */
 
@@ -273,7 +273,7 @@
        if (cpt_1_minute < Partage->top)                                   /* Update DB toutes les minutes */
         { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
            { Checker_scenario( cpt ); }
-          Gerer_message_repeat(db);
+          Gerer_message_repeat();
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 

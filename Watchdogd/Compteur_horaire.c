@@ -125,7 +125,9 @@
 
     db = Init_DB_SQL( Config.log );
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Updater_cpthDB: Connexion DB impossible" ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Updater_cpthDB: Connexion DB impossible" );
+       return;
+     }
 
     for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
      { cpth = &Partage->ch[cpt].cpthdb;
