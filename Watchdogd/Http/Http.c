@@ -533,7 +533,7 @@
        MHD_destroy_response (response);
      }
     else if ( ! strcasecmp ( url, "/getsyn" ) )
-     { if ( Http_Traiter_request_getsyn ( connection, 1 ) == FALSE)           /* Traitement de la requete */
+     { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);

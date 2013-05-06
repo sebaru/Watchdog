@@ -38,13 +38,18 @@
 /* Entrées: la connexion MHD                                                                              */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection, gint syn_id )
+ gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection )
   { struct CMD_TYPE_SYNOPTIQUE *syndb;
     struct MHD_Response *response;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
+    gchar *syn_id_char;
     struct DB *db;
-    gint retour;
+    gint retour, syn_id;
+
+    syn_id_char = MHD_lookup_connection_value ( connection, MHD_HEADER_KIND, "syn_id" );
+    if (!syn_id_char) { syn_id = 1; }
+                 else { syn_id = atoi(syn_id_char); }
 
     db = Init_DB_SQL( Config.log );
     if (!db)
