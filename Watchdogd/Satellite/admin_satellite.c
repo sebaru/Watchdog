@@ -27,7 +27,7 @@
  
  #include <unistd.h>                                                                  /* Pour gethostname */
  #include "watchdogd.h"
- #include "Master.h"
+ #include "Satellite.h"
 
 /**********************************************************************************************************/
 /* Admin_master: Gere une commande 'admin master' depuis une connexion admin                              */
