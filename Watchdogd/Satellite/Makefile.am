@@ -5,16 +5,16 @@
 #**********************************************************************************************************/
 SUBDIRS= 
 
-lib_LTLIBRARIES                      = libwatchdog-server-master.la
-libwatchdog_server_master_la_SOURCES    = Master.c Master.h admin_master.c 
+lib_LTLIBRARIES                      = libwatchdog-server-satellite.la
+libwatchdog_server_satellite_la_SOURCES    = Satellite.c Satellite.h admin_satellite.c 
 
-libwatchdog_server_master_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libsoup-2.4` \
+libwatchdog_server_satellite_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libcurl libxml-2.0` \
                                        `mysql_config --libs` \
                                        -rdynamic \
                                        -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_master_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libsoup-2.4` \
-                                      `mysql_config --cflags`
+libwatchdog_server_satellite_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl libxml-2.0` \
+                                         `mysql_config --cflags`
 
 INCLUDES=-I$(top_srcdir)/Include \
          -I../Include

@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/Master/Master.h        Déclaration structure internes des MASTER                             */
+/* Watchdogd/Satellite/Satellite.h        Déclaration structure internes des SATELLITE                             */
 /* Projet WatchDog version 2.0       Gestion d'habitat                    lun. 18 févr. 2013 20:06:29 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * master.h
+ * satellite.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -25,45 +25,25 @@
  * Boston, MA  02110-1301  USA
  */
  
-#ifndef _MASTER_H_
- #define _MASTER_H_
- #include <libsoup/soup.h>
+#ifndef _SATELLITE_H_
+ #define _SATELLITE_H_
 
- #define NOM_TABLE_SLAVES  "slaves"
+ #define SATELLITE_DEFAUT_FILE_CA         "cacert.pem"
+ #define SATELLITE_DEFAUT_FILE_SERVER     "serveursigne.pem"
+ #define SATELLITE_DEFAUT_FILE_KEY        "serveurkey.pem"
+ #define SATELLITE_DEFAUT_MAX_CONNEXION   100
 
- struct SLAVEDB
-  { guint id;                                                                    /* ID unique de la rs485 */
-    guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
-    gboolean enable;                                                            /* Module Start at boot ? */
-    gint ea_min, ea_max;
-    gint e_min, e_max;
-    gint s_min, s_max;
-    gint sa_min, sa_max;
-    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
-    gchar ip[32];                                                                  /* Adresse IP du slave */
-    guint port;
-  };
-
- struct SLAVE
-  { struct SLAVEDB slave;
-
-    gboolean started;                                                           /* Module Start at boot ? */
-    guint  nbr_query;
-    guint  last_request;
-  };
-
- struct MASTER_CONFIG
+ struct SATELLITE_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
-    gboolean master_enable;                                            /* True si le thread est un master */
-    GSList *Liste_message;                                         /* liste de struct MSGDB msg a envoyer */
-    GSList *Liste_sortie;                                          /* liste de struct MSGDB msg a envoyer */
-    GSList *Slaves;                                                /* Leste des clients (slave) connectés */
-    gint port;
-    GMainContext *context;
-    SoupServer *server;
- } Cfg_master;
+    GSList *Liste_entretor;                                        /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_entreana;                                        /* liste de struct MSGDB msg a envoyer */
+    gchar master_url[128];
+    gchar https_file_cert[80];
+    gchar https_file_key[80];
+    gchar https_file_ca[80];
+ } Cfg_satellite;
 
 /*************************************** Définitions des prototypes ***************************************/
 #endif

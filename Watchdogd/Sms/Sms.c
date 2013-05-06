@@ -456,13 +456,14 @@
         }
        else
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                   "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL (%s)", erreur); }
+                   "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL (%s)", erreur);
+        }
+       curl_easy_cleanup(curl);
      }
     else
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL Init");
      }
-    curl_easy_cleanup(curl);
     curl_formfree(formpost);
   }
 /**********************************************************************************************************/

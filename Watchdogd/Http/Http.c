@@ -63,29 +63,31 @@
     Cfg_http.lib->Thread_debug = g_key_file_get_boolean ( gkf, "HTTP", "debug", NULL ); 
                                                                  /* Recherche des champs de configuration */
     Cfg_http.nbr_max_connexion = g_key_file_get_integer ( gkf, "HTTP", "max_connexion", NULL );
-    if ( !Cfg_http.nbr_max_connexion) Cfg_http.nbr_max_connexion = DEFAUT_MAX_CONNEXION;
+    if ( !Cfg_http.nbr_max_connexion) Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
     Cfg_http.http_enable       = g_key_file_get_boolean ( gkf, "HTTP", "http_enable", NULL ); 
     Cfg_http.http_port         = g_key_file_get_integer ( gkf, "HTTP", "http_port", NULL );
     Cfg_http.https_enable      = g_key_file_get_boolean ( gkf, "HTTP", "https_enable", NULL ); 
     Cfg_http.https_port        = g_key_file_get_integer ( gkf, "HTTP", "https_port", NULL );
 
+    Cfg_http.slave_enable      = g_key_file_get_boolean ( gkf, "HTTP", "slave_enable", NULL );
+
     chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_cert", NULL );
     if (chaine)
      { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", chaine ); g_free(chaine); }
     else
-     { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", FICHIER_CERTIF_SERVEUR  ); }
+     { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_SERVER ); }
 
     chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_key", NULL );
     if (chaine)
      { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", chaine ); g_free(chaine); }
     else
-     { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", FICHIER_CERTIF_CLEF_SERVEUR  ); }
+     { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", HTTP_DEFAUT_FILE_KEY ); }
 
     chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_ca", NULL );
     if (chaine)
      { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", chaine ); g_free(chaine); }
     else
-     { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", FICHIER_CERTIF_CA  ); }
+     { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", HTTP_DEFAUT_FILE_CA  ); }
 
     g_key_file_free(gkf);
   }
@@ -168,7 +170,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Http_Liberer_config : Libere la mémoire allouer précédemment pour lire la config http                  */
+/* Liberer_certificat: Libere la mémoire allouée précédemment pour stocker les certificats                */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -224,182 +226,6 @@
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
 #endif
   }
-
-/**********************************************************************************************************/
-/* Traiter_dynxml: Traite une requete sur l'URI dynxml                                                    */
-/* Entrées: la connexion MHD                                                                              */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- static void Traiter_dynxml ( struct MHD_Connection *connection )
-  { static gint i = 1;
-    struct MHD_Response *response;
-    int rc;
-    xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
-
-    /* Create a new XML buffer, to which the XML document will be
-     * written */
-    buf = xmlBufferCreate();
-    if (buf == NULL) {
-        printf("testXmlwriterMemory: Error creating the xml buffer\n");
-        return;
-    }
-
-    /* Create a new XmlWriter for memory, with no compression.
-     * Remark: there is no compression for this kind of xmlTextWriter */
-    writer = xmlNewTextWriterMemory(buf, 0);
-    if (writer == NULL) {
-        printf("testXmlwriterMemory: Error creating the xml writer\n");
-        return;
-    }
-
-    /* Start the document with the xml default for the version,
-     * encoding ISO 8859-1 and the default for the standalone
-     * declaration. */
-    rc = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterStartDocument\n");
-        return;
-    }
-
-    /* Start an element named "EXAMPLE". Since thist is the first
-     * element, this will be the root element of the document. */
-    rc = xmlTextWriterStartElement(writer, "testbalise");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
-        return;
-    }
-
-    rc = xmlTextWriterWriteComment(writer, "commentaire !!");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteComment\n");
-        return;
-    }
-
-    /* Start an element named "ORDER" as child of EXAMPLE. */
-    rc = xmlTextWriterStartElement(writer, "element");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
-        return;
-    }
-
-    /* Add an attribute with name "version" and value "1.0" to ORDER. */
-    rc = xmlTextWriterWriteAttribute(writer, "version",
-                                     "1.0");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
-        return;
-    }
-
-    /* Add an attribute with name "xml:lang" and value "de" to ORDER. */
-    rc = xmlTextWriterWriteAttribute(writer, "xml:lang",
-                                     "de");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
-        return;
-    }
-
-    rc = xmlTextWriterWriteFormatComment(writer,
-		     "This is another comment with special chars: %d",
-                                         i++ );
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatComment\n");
-        return;
-    }
-
-    /* Start an element named "HEADER" as child of ORDER. */
-    rc = xmlTextWriterStartElement(writer, "sselement");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
-        return;
-    }
-
-    /* Write an element named "X_ORDER_ID" as child of HEADER. */
-    rc = xmlTextWriterWriteFormatElement(writer, "parametre1",
-                                         "%010d", 22101980 );
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatElement\n");
-        return;
-    }
-
-    /* Write an element named "CUSTOMER_ID" as child of HEADER. */
-    rc = xmlTextWriterWriteFormatElement(writer, "viral_alert",
-                                         "%d fois", i++);
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatElement\n");
-        return;
-    }
-
-    /* Close the element named HEADER. */
-    rc = xmlTextWriterEndElement(writer);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterEndElement\n");
-        return;
-    }
-
-    /* Start an element named "ENTRIES" as child of ORDER. */
-    rc = xmlTextWriterStartElement(writer, "testcoding");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterStartElement\n");
-        return;
-    }
-
-    /* Write an element named "ARTICLE" as child of ENTRY. */
-    rc = xmlTextWriterWriteElement(writer, "ARTICLE",
-                                   "<Test>");
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteElement\n");
-        return;
-    }
-
-    /* Write an element named "ENTRY_NO" as child of ENTRY. */
-    rc = xmlTextWriterWriteFormatElement(writer, "ENTRY_NO", "%d",
-                                         10);
-    if (rc < 0) {
-        printf
-            ("testXmlwriterMemory: Error at xmlTextWriterWriteFormatElement\n");
-        return;
-    }
-
-    /* Close the element named ENTRIES. */
-    rc = xmlTextWriterEndElement(writer);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterEndElement\n");
-        return;
-    }
-
-
-    /* Here we could close the elements ORDER and EXAMPLE using the
-     * function xmlTextWriterEndElement, but since we do not want to
-     * write any other elements, we simply call xmlTextWriterEndDocument,
-     * which will do all the work. */
-    rc = xmlTextWriterEndDocument(writer);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterEndDocument\n");
-        return;
-    }
-
-    xmlFreeTextWriter(writer);
-
-      response = MHD_create_response_from_buffer (buf->use, buf->content, MHD_RESPMEM_MUST_COPY);
-      MHD_add_response_header (response, "Content-Type", "application/xml");
-      MHD_queue_response (connection, MHD_HTTP_OK, response);
-      MHD_destroy_response (response);
-
-    xmlBufferFree(buf);
-}
 /**********************************************************************************************************/
 /* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
 /* Entrées : la session TLS                                                                               */
@@ -423,7 +249,7 @@
     if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_request : GetName failed, wrong family" );
+                "Verify_request : GetName failed, wrong family" );
        return(FALSE);
      }
     memset( client_host, 0, sizeof(client_host) );
@@ -433,7 +259,7 @@
                           NI_NUMERICHOST | NI_NUMERICSERV );
     if (retour) 
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_request : GetName failed : %s", gai_strerror(retour) );
+                "Verify_request : GetName failed : %s", gai_strerror(retour) );
      }
 
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
@@ -455,26 +281,26 @@
     if (tls_session)
      { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                    "Failed to verify peers : %s", gnutls_strerror(retour) );
+                    "Verify_request: Failed to verify peers : %s", gnutls_strerror(retour) );
           return(FALSE);
         }
 
        pcert = gnutls_certificate_get_peers(tls_session, &listsize);
        if ( (pcert == NULL) || (listsize == 0))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Failed to get peers" );
+                   "Verify_request: Failed to get peers" );
           return(FALSE);
         }
 
        if ( (retour = gnutls_x509_crt_init(&client_cert)) < 0 )
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Failed to init cert : %s", gnutls_strerror(retour) );
+                   "Verify_request: Failed to init cert : %s", gnutls_strerror(retour) );
           return(FALSE);
         }
 
        if ( (retour = gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) < 0 ) 
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Failed import cert", gnutls_strerror(retour) );
+                   "Verify_request: Failed import cert", gnutls_strerror(retour) );
           gnutls_x509_crt_deinit(client_cert);
           return(FALSE);
         }  
@@ -499,7 +325,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)         */
+/* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)               */
 /* Entrées : le contexte, le message, l'URL                                                               */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
@@ -534,6 +360,15 @@
      }
     else if ( ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error),
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
+     }
+    else if ( Cfg_http.slave_enable && ! strcasecmp ( url, "/set_internal" ) )
+     { if ( Http_Traiter_request_set_internal ( connection ) == FALSE)        /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
@@ -581,9 +416,6 @@
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
      }
-    else if ( ! strcasecmp ( url, "/dynxml" ) )
-     { Traiter_dynxml ( connection );
-     }
     else
      { response = MHD_create_response_from_buffer ( strlen (Not_found),
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
@@ -623,7 +455,7 @@
                                                  MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
                                                  MHD_OPTION_END);
        if (!Cfg_http.http_server)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "Run_thread: MHDServer HTTP creation error (%s). Shutting Down %d",
                     strerror(errno), pthread_self() );
         }
@@ -643,7 +475,7 @@
                                                   MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,/* Require Client SSL */
                                                   MHD_OPTION_END);
        if (!Cfg_http.https_server)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "Run_thread: MHDServer HTTPS creation error (%s). Shutting Down %d",
                     strerror(errno), pthread_self() );
         }
@@ -654,7 +486,10 @@
      }
 
     if (!Cfg_http.http_server && !Cfg_http.https_server) goto end;             /* si erreur de chargement */
-
+    if (Cfg_http.slave_enable)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                "Run_thread: MHDServer is handling SetInternal Request as SLAVE" );
+     }
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );   /* Abonnement à la diffusion des messages */
     Abonner_distribution_sortie  ( Http_Gerer_sortie );     /* Abonnement à la diffusion des sorties */

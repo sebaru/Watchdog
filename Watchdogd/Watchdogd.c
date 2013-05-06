@@ -40,6 +40,7 @@
  #include <locale.h>
  #include <pwd.h>
  #include <gcrypt.h>                                  /* Pour assurer le multithreading avec IMSG et HTTP */
+ #include <curl/curl.h>                                      /* Pour le multithreading avec Master et SMS */
 
  #include "watchdogd.h"
 
@@ -422,7 +423,8 @@
     Print_config();
 
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
-    gcry_check_version(NULL);                                     /* Initialisation de la librairie GCRYPT */
+    gcry_check_version(NULL);                                    /* Initialisation de la librairie GCRYPT */
+    curl_global_init (CURL_GLOBAL_ALL);                             /* Initialisation de la libraire CURL */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
@@ -536,7 +538,7 @@
 
     sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
-
+    curl_global_cleanup();
     Shm_stop( Partage );                                                   /* Libération mémoire partagée */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);

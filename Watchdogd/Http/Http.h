@@ -29,14 +29,15 @@
  #define _HTTP_H_
  #include <microhttpd.h>
 
- #define FICHIER_CERTIF_CA             "cacert.pem"
- #define FICHIER_CERTIF_SERVEUR        "serveursigne.pem"
- #define FICHIER_CERTIF_CLEF_SERVEUR   "serveurkey.pem"
- #define DEFAUT_MAX_CONNEXION          100
+ #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
+ #define HTTP_DEFAUT_FILE_SERVER       "http_serveursigne.pem"
+ #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
+ #define HTTP_DEFAUT_MAX_CONNEXION     100
 
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean slave_enable;
     gint nbr_max_connexion;
     gboolean http_enable;                         /* True si la config indique que le thread doit tourner */
     gint http_port;
@@ -54,5 +55,6 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
+ extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

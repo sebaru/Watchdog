@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Serveur Dls TraductionDLS Archive \
-	  Rs485 Sms Modbus Audio Onduleur Lirc Asterisk Rfxcom Imsg Master TeleinfoEDF Http
+	  Rs485 Sms Modbus Audio Onduleur Lirc Asterisk Rfxcom Imsg Satellite TeleinfoEDF Http
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
@@ -26,11 +26,11 @@ Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt \
-                   `pkg-config --libs glib-2.0 gthread-2.0` \
+                   `pkg-config --libs glib-2.0 gthread-2.0 libcurl` \
                    `libgcrypt-config --libs` \
                    `mysql_config --libs`
 
-Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
+Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl` \
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 

@@ -95,7 +95,7 @@ Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Imsg/Makefile \
-Watchdogd/Master/Makefile \
+Watchdogd/Satellite/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
 Watchdogd/Lirc/Makefile \

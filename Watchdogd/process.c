@@ -445,8 +445,7 @@
 /* Entrée/Sortie: flag = TRUE si on demande aussi l'arret du thread Admin                                 */
 /**********************************************************************************************************/
  void Stopper_fils ( gint flag )
-  { gint i;
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Debut stopper_fils" );
+  { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Debut stopper_fils" );
 
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for DLS (%d) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;

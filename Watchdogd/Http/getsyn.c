@@ -4,7 +4,7 @@
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * Http.c
+ * getsyn.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
