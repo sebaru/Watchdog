@@ -108,6 +108,7 @@
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", syndb->libelle );
     g_free(syndb);                                           /* On a terminé avec la structure synoptique */
 
+/*------------------------------------------- Dumping Passerelle -----------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping passerelles !!");
     if ( Recuperer_passerelleDB( Config.log, db, syn_id ) )
      { for ( ; ; )
@@ -115,7 +116,7 @@
           pass = Recuperer_passerelleDB_suite( Config.log, db );
           if (!pass) break;                                                                 /* Terminé ?? */
 
-          xmlTextWriterStartElement(writer, (const unsigned char *)"passerelle");                            /* Start Passerelle */
+          xmlTextWriterStartElement(writer, (const unsigned char *)"passerelle");     /* Start Passerelle */
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",           "%d", pass->id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"syn_cible_id", "%d", pass->syn_cible_id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle",      "%s", pass->libelle );
@@ -125,7 +126,24 @@
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping passerelles !!");
 
-    Libere_DB_SQL( Config.log, &db ); /* On a plus besoin de la base de données */
+/*------------------------------------------- Dumping capteur --------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping capteurs !!");
+    if ( Recuperer_capteurDB( Config.log, db, syn_id ) )
+     { for ( ; ; )
+        { struct CMD_TYPE_CAPTEUR *capteur;
+          capteur = Recuperer_capteurDB_suite( Config.log, db );
+          if (!capteur) break;                                                              /* Terminé ?? */
+
+          xmlTextWriterStartElement(writer, (const unsigned char *)"capteur");           /* Start Capteur */
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", capteur->id );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", capteur->libelle );
+          xmlTextWriterEndElement(writer);                                              /* End passerelle */
+          g_free(capteur);
+        }
+     }
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
+
+    Libere_DB_SQL( Config.log, &db );                           /* On a plus besoin de la base de données */
 
     retour = xmlTextWriterEndElement(writer);                                           /* End synoptique */
     if (retour < 0)
