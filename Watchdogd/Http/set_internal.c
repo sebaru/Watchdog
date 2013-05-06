@@ -49,14 +49,29 @@
     gint retour, syn_id;
 
     type = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"type" );
-    if (!type) { return(FALSE); }
+    if (!type)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Traiter_request_set_internal: type not found in URL argument." );
+       return(FALSE);
+     }
 
     value = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"value" );
-    if (!value) { return(FALSE); }
+    if (!value)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Traiter_request_set_internal: value not found in URL argument." );
+       return(FALSE);
+     }
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+             "Http_Traiter_request_set_internal: Setting Internal bit %s to %s", type, value );
 
     response = MHD_create_response_from_buffer ( strlen (Handled_OK),
                                                 (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);
-    if (response == NULL) return(FALSE);       /* Si erreur de creation de la reponse, on sort une erreur */
+    if (response == NULL)                      /* Si erreur de creation de la reponse, on sort une erreur */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Traiter_request_set_internal: Response Creation Error." );
+       return(FALSE);
+     }
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(TRUE);

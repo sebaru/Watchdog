@@ -239,21 +239,21 @@
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
     if (curl)
      { struct curl_slist *slist = NULL;
-       curl_easy_setopt(curl, CURLOPT_URL, "https://raspi3:5561/set_internals" );
+       gchar url[128];
+       g_snprintf( url, sizeof(url), "%s/set_internal?type=%s&value=%s",
+                   Cfg_satellite.master_url, "bouh", "tricotte" );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
+       curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");
 
 
-	slist = curl_slist_append(slist, "Accept: */*");
+/*ist = curl_slist_append(slist, "Accept: */
 // slist = curl_slist_append(slist, "Content-Type: application/x-www-form-urlencoded");
-slist = curl_slist_append(slist, "Content-Type: text/xml");
+/*slist = curl_slist_append(slist, "Content-Type: text/xml");
 curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
 curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-curl_easy_setopt(curl, CURLOPT_HEADER, 1);
-curl_easy_setopt(curl, CURLOPT_USERAGENT, "Linux C libcurl");
-curl_easy_setopt(curl, CURLOPT_URL, Cfg_satellite.master_url);
-curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30);
+curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
 /*curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post);*/
 
       res = curl_easy_perform(curl);
@@ -272,7 +272,7 @@ curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30);
      }
     else
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                "Envoyer_les_infos_au_master: Sending Update Request to %s failed cURL init",
+                "Envoyer_les_infos_au_master: Sending Update Request to %s failed with cURL init",
                  Cfg_satellite.master_url );
      }
     curl_formfree(formpost);
@@ -325,7 +325,7 @@ curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30);
           Cfg_satellite.lib->Thread_sigusr1 = FALSE;
         }
 
-       Envoyer_les_infos_au_master();
+       Envoyer_les_infos_au_master(); sleep(10); /* Pour test.. */
      }
 
 /* Desabonner_distribution_entree ( Satellite_Gerer_message );   /* Abonnement à la diffusion des messages */
