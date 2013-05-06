@@ -74,14 +74,24 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure cpt_imp                       */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- void Updater_cpt_impDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp )
-  { gchar requete[200];
+ void Updater_cpt_impDB ( void )
+  { struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp;
+    gchar requete[200];
+    struct DB *db;
+    gint cpt;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET val='%f' WHERE id_mnemo='%d';", NOM_TABLE_CPT_IMP,
-                cpt_imp->valeur, cpt_imp->id_mnemo );
+    db = Init_DB_SQL( Config.log );
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Updater_cpt_impDB: Connexion DB impossible" ); }
 
-    Lancer_requete_SQL ( log, db, requete );
+    for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++)
+     { cpt_imp = &Partage->ci[cpt].cpt_impdb;
+       g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                   "UPDATE %s SET val='%f' WHERE id_mnemo='%d';", NOM_TABLE_CPT_IMP,
+                   cpt_imp->valeur, cpt_imp->id_mnemo );
+       Lancer_requete_SQL ( Config.log, db, requete );
+     }
+    Libere_DB_SQL( Config.log, &db );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */

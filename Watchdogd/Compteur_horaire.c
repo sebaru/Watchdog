@@ -113,16 +113,26 @@
     Libere_DB_SQL( Config.log, &db );
   }
 /**********************************************************************************************************/
-/* Ajouter_cpthDB: Ajout ou edition d'un entreeANA                                                        */
+/* Updater_cpthDB : Met à jour l'ensemble des CompteurHoraire dans la base de données                     */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure cpth                          */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- void Updater_cpthDB ( struct LOG *log, struct DB *db, struct CPTH_DB *cpth )
-  { gchar requete[200];
+ void Updater_cpthDB ( void )
+  { struct CPTH_DB *cpth;
+    gchar requete[200];
+    struct DB *db;
+    gint cpt;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET val=%d WHERE id_mnemo=%d;", NOM_TABLE_CPTH, cpth->valeur, cpth->id_mnemo );
+    db = Init_DB_SQL( Config.log );
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Updater_cpthDB: Connexion DB impossible" ); }
 
-    Lancer_requete_SQL ( log, db, requete );
+    for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
+     { cpth = &Partage->ch[cpt].cpthdb;
+       g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                   "UPDATE %s SET val=%d WHERE id_mnemo=%d;", NOM_TABLE_CPTH, cpth->valeur, cpth->id_mnemo );
+       Lancer_requete_SQL ( Config.log, db, requete );
+     }
+    Libere_DB_SQL( Config.log, &db );
   }
 /*--------------------------------------------------------------------------------------------------------*/

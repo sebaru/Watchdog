@@ -181,10 +181,9 @@
 /* Entrée : Néant                                                                                         */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Sauver_compteur ( struct DB *db )
-  { gint cpt;
-    for( cpt=0; cpt<NBR_COMPTEUR_H;   cpt++) { Updater_cpthDB( Config.log, db, &Partage->ch[cpt].cpthdb); }     
-    for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++) { Updater_cpt_impDB( Config.log, db, &Partage->ci[cpt].cpt_impdb); }     
+ static void Sauver_compteur ( void )
+  { Updater_cpthDB();                                                 /* Sauvegarde des compteurs Horaire */
+    Updater_cpt_impDB();                                          /* Sauvegarde des compteurs d'impulsion */
   }
 /**********************************************************************************************************/
 /* Tatiter_sigusr1 : Print les variable importante dans les lgos                                          */
@@ -266,7 +265,7 @@
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Sauvegarde des CPT" );
-          Sauver_compteur( db );
+          Sauver_compteur();
           Exporter();
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
         }
@@ -288,7 +287,7 @@
      }
 
 /**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
-    Sauver_compteur( db );                                             /* Dernière sauvegarde avant arret */
+    Sauver_compteur();                                                 /* Dernière sauvegarde avant arret */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
     Libere_DB_SQL( Config.log, &db );
     pthread_exit( NULL );

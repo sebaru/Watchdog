@@ -46,7 +46,7 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_cpth ( void );
- extern void Updater_cpthDB ( struct LOG *log, struct DB *db, struct CPTH_DB *val );
+ extern void Updater_cpthDB ( void );
  extern struct CPTH_DB *Rechercher_cpthDB( struct LOG *log, struct DB *db, guint id );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
