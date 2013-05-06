@@ -47,7 +47,7 @@
     struct DB *db;
     gint retour, syn_id;
 
-    syn_id_char = MHD_lookup_connection_value ( connection, MHD_HEADER_KIND, "syn_id" );
+    syn_id_char = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "syn_id" );
     if (!syn_id_char) { syn_id = 1; }
                  else { syn_id = atoi(syn_id_char); }
 
