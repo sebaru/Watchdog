@@ -119,8 +119,8 @@
        return;
      }
 
-    pthread_mutex_lock ( &Cfg_satellite.lib->synchro );
-    Cfg_satellite.Liste_entreeANA = g_slist_append ( Cfg_satellite.Liste_entreeANA, num_ea );/* Ajout a la liste */
+    pthread_mutex_lock ( &Cfg_satellite.lib->synchro );                               /* Ajout a la liste */
+    Cfg_satellite.Liste_entreeANA = g_slist_append ( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
     pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -155,7 +155,7 @@
     struct curl_httppost *lastptr;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
-    guint num_a, retour;
+    guint retour;
     CURLcode res;
     CURL *curl;
 
@@ -194,20 +194,20 @@
 
 /*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping EAxxx !!");
-#ifdef bouh
+
     while (Cfg_satellite.Liste_entreeANA)
-     { pthread_mutex_lock( &Cfg_satellite.lib->synchro );           /* Ajout dans la liste de tell a traiter */
+     { gint num_ea;
+       pthread_mutex_lock( &Cfg_satellite.lib->synchro );               /* Récupération de l'EA a traiter */
        num_ea = GPOINTER_TO_INT(Cfg_satellite.Liste_entreeANA->data);
        Cfg_satellite.Liste_entreeANA = g_slist_remove( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
-       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");     /* Start Passerelle */
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", num_a );
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%d", Partage->EA[num_ea].val_avant_ech );
-       xmlTextWriterEndElement(writer);                                              /* End passerelle */
+       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", num_ea );
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", Partage->ea[num_ea].val_avant_ech );
+       xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
      }
-#endif
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping Axxx !!");
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping EAxxx !!");
 
     retour = xmlTextWriterEndElement(writer);                                          /* End SatelliteInfos */
     if (retour < 0)
