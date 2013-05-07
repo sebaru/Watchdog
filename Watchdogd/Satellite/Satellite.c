@@ -244,9 +244,9 @@
        curl_easy_setopt(curl, CURLOPT_URL, url );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
-       curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");
-       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1 );
+       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L );
+/*       curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");*/
+       /*curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1 );*/
        curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
        curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
        curl_easy_setopt(curl, CURLOPT_SSLCERT, Cfg_satellite.https_file_cert );
