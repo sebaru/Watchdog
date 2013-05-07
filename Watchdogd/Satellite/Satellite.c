@@ -66,9 +66,10 @@
     Cfg_satellite.enable        = g_key_file_get_boolean ( gkf, "SATELLITE", "enable", NULL ); 
 
     chaine = g_key_file_get_string  ( gkf, "SATELLITE", "send_to_url", NULL );
-    if (!chaine || strcasecmp ( chaine, "satellite" ))
+    if (!chaine)
      { Info_new( Config.log, TRUE, LOG_ERR,
                  "Satellite_Lire_config : No 'Send_to' URL in config !" );
+       g_snprintf( Cfg_satellite.send_to_url, sizeof(Cfg_satellite.send_to_url), "Unknown" );
      }
     else
      { g_snprintf( Cfg_satellite.send_to_url, sizeof(Cfg_satellite.send_to_url), "%s", chaine ); g_free(chaine); }
