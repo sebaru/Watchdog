@@ -69,7 +69,7 @@
     Cfg_http.https_enable      = g_key_file_get_boolean ( gkf, "HTTP", "https_enable", NULL ); 
     Cfg_http.https_port        = g_key_file_get_integer ( gkf, "HTTP", "https_port", NULL );
 
-    Cfg_http.slave_enable      = g_key_file_get_boolean ( gkf, "HTTP", "slave_enable", NULL );
+    Cfg_http.satellite_enable      = g_key_file_get_boolean ( gkf, "HTTP", "satellite_enable", NULL );
 
     chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_cert", NULL );
     if (chaine)
@@ -367,7 +367,7 @@
           MHD_destroy_response (response);
         }
      }
-    else if ( Cfg_http.slave_enable && ! strcasecmp ( url, "/set_internal" ) )
+    else if ( Cfg_http.satellite_enable && ! strcasecmp ( url, "/set_internal" ) )
      { if ( Http_Traiter_request_set_internal ( connection ) == FALSE)        /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
@@ -496,9 +496,9 @@
      }
 
     if (!Cfg_http.http_server && !Cfg_http.https_server) goto end;             /* si erreur de chargement */
-    if (Cfg_http.slave_enable)
+    if (Cfg_http.satellite_enable)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                "Run_thread: MHDServer is handling SetInternal Request as SLAVE" );
+                "Run_thread: MHDServer is handling SetInternal Request to SATELLITE" );
      }
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );   /* Abonnement à la diffusion des messages */

@@ -37,7 +37,7 @@
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean slave_enable;
+    gboolean satellite_enable;
     gint nbr_max_connexion;
     gboolean http_enable;                         /* True si la config indique que le thread doit tourner */
     gint http_port;
