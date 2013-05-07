@@ -46,7 +46,7 @@
  #include "Satellite.h"
 
 /**********************************************************************************************************/
-/* Satellite_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
+/* Satellite_Lire_config : Lit la config Watchdog et rempli la structure mémoire                          */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -65,13 +65,13 @@
                                                                  /* Recherche des champs de configuration */
     Cfg_satellite.enable        = g_key_file_get_boolean ( gkf, "SATELLITE", "enable", NULL ); 
 
-    chaine = g_key_file_get_string  ( gkf, "SATELLITE", "master_url", NULL );
+    chaine = g_key_file_get_string  ( gkf, "SATELLITE", "send_to_url", NULL );
     if (!chaine || strcasecmp ( chaine, "satellite" ))
      { Info_new( Config.log, TRUE, LOG_ERR,
-                 "Satellite_Lire_config : No Master URL in config !" );
+                 "Satellite_Lire_config : No 'Send_to' URL in config !" );
      }
     else
-     { g_snprintf( Cfg_satellite.master_url, sizeof(Cfg_satellite.master_url), "%s", chaine ); g_free(chaine); }
+     { g_snprintf( Cfg_satellite.send_to_url, sizeof(Cfg_satellite.send_to_url), "%s", chaine ); g_free(chaine); }
 
     chaine                     = g_key_file_get_string  ( gkf, "SATELLITE", "https_file_cert", NULL );
     if (chaine)
@@ -241,7 +241,7 @@
      { struct curl_slist *slist = NULL;
        gchar url[128];
        g_snprintf( url, sizeof(url), "%s/set_internal?type=%s&value=%s",
-                   Cfg_satellite.master_url, "bouh", "tricotte" );
+                   Cfg_satellite.send_to_url, "bouh", "tricotte" );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
@@ -263,12 +263,12 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
        if (!res)
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
                    "Envoyer_les_infos_au_master: Sending Update Request to %s OK",
-                    Cfg_satellite.master_url );
+                    Cfg_satellite.send_to_url );
         }
        else
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                    "Envoyer_les_infos_au_master: Sending Update Request to %s failed (%s)",
-                    Cfg_satellite.master_url, erreur );
+                    Cfg_satellite.send_to_url, erreur );
         }
        curl_easy_cleanup(curl);
        curl_slist_free_all(slist);
@@ -276,7 +276,7 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
     else
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                 "Envoyer_les_infos_au_master: Sending Update Request to %s failed with cURL init",
-                 Cfg_satellite.master_url );
+                 Cfg_satellite.send_to_url );
      }
     curl_formfree(formpost);
     xmlBufferFree(buf);                                                       /* Libération du buffer XML */
