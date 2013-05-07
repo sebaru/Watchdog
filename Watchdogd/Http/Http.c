@@ -426,6 +426,15 @@
     return MHD_YES;
   }
 /**********************************************************************************************************/
+/* Http_MHD_debug : fonction appellé pour debugger le Daemon MHD                                          */
+/**********************************************************************************************************/
+ static void Http_MHD_debug( void *arg, const char *fmt, va_list ap )
+  { gchar chaine[256];
+    g_snprintf(chaine, sizeof(chaine), "Http_MHD_debug : %s", fmt );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+              chaine, ap );
+  }
+/**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
 /* Entrée: une structure LIBRAIRIE                                                                        */
 /* Sortie: Niet                                                                                           */
@@ -466,13 +475,14 @@
      }
 
     if (Cfg_http.https_enable && Charger_certificat() )
-     { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL,
+     { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL | MHD_USE_DEBUG,
                                                   Cfg_http.https_port, NULL, NULL, 
                                                  &Http_request, NULL,
                                                   MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
                                                   MHD_OPTION_HTTPS_MEM_CERT, Cfg_http.ssl_cert,
                                                   MHD_OPTION_HTTPS_MEM_KEY,  Cfg_http.ssl_key,
                                                   MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,/* Require Client SSL */
+                                                  MHD_OPTION_EXTERNAL_LOGGER, Http_MHD_debug, NULL,
                                                   MHD_OPTION_END);
        if (!Cfg_http.https_server)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
