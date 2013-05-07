@@ -241,6 +241,7 @@
        gchar url[128];
        g_snprintf( url, sizeof(url), "%s/set_internal?type=%s&value=%s",
                    Cfg_satellite.send_to_url, "bouh", "tricotte" );
+       curl_easy_setopt(curl, CURLOPT_URL, url );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
