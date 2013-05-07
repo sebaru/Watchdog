@@ -244,14 +244,18 @@
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
                break;
           case ENTREEANA_WAGO_750461:
-               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);                /* Valeur à l'echelle */ 
+               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur à l'echelle */ 
                break;
           default:
-               Partage->ea[num].val_ech = 0.0;
+               Partage->ea[ num ].val_ech = 0.0;
         }
+       pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
+       Partage->com_msrv.liste_ea = g_slist_prepend( Partage->com_msrv.liste_ea,
+                                                     GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );               /* Archive au pire toutes les 10 min */
+     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );         /* Archive au pire toutes les 10 min */
        Partage->ea[ num ].last_arch = Partage->top;   
      }
                                                                      /* Gestion historique interne Valana */
@@ -435,7 +439,7 @@
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
         { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );
-          pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+          pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de A a traiter */
           Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
                                                       GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );

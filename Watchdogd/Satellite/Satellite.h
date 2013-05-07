@@ -38,7 +38,7 @@
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
     GSList *Liste_entretor;                                        /* liste de struct MSGDB msg a envoyer */
-    GSList *Liste_entreana;                                        /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_entreeANA;                                       /* liste de struct MSGDB msg a envoyer */
     gchar send_to_url[128];
     gchar https_file_cert[80];
     gchar https_file_key[80];

@@ -93,6 +93,7 @@
     GSList *liste_msg;                                             /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                               /* liste de struct MSGDB msg a envoyer */
     GSList *liste_a;                                          /* liste de A a traiter dans la ditribution */
+    GSList *liste_ea;                                        /* liste de EA a traiter dans la ditribution */
 
     pthread_mutex_t synchro_Liste_abonne_msg;                         /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
@@ -186,6 +187,10 @@
  extern void Gerer_arrive_Ixxx_dls ( void );                                       /* Dans distrib_Ixxx.c */
  extern void Abonner_distribution_motif ( void (*Gerer_motif) (gint num) );
  extern void Desabonner_distribution_motif ( void (*Gerer_motif) (gint num) );
+
+ extern void Abonner_distribution_entreeANA ( void (*Gerer_EANA) (gint num) );    /* Dans distrib_EAxxx.c */
+ extern void Desabonner_distribution_entreeANA ( void (*Gerer_EANA) (gint num) );
+ extern void Gerer_arrive_EAxxx_dls ( void );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

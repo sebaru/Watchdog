@@ -226,7 +226,8 @@
     while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
      { Gerer_arrive_MSGxxx_dls();             /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
-       Gerer_arrive_Axxx_dls();                             /* Distribution des changements d'etats motif */
+       Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
+       Gerer_arrive_EAxxx_dls();              /* Distribution des changements d'etats entrees Analogiques */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: RELOAD" );

@@ -40,13 +40,12 @@
 /**********************************************************************************************************/
  gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection )
   { const char *Handled_OK = "<html><body>OK</body></html>";
-    struct CMD_TYPE_SYNOPTIQUE *syndb;
+    gint retour, type_int, value_int;
     struct MHD_Response *response;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gchar *type, *value;
     struct DB *db;
-    gint retour, syn_id;
 
     type = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"type" );
     if (!type)

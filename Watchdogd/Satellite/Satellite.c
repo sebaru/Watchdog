@@ -102,28 +102,26 @@
   {
   }
 /**********************************************************************************************************/
-/* Satellite_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                   */
-/* Entrée: une structure CMD_TYPE_HISTO                                                                   */
+/* Satellite_Gerer_message: Fonction d'abonné appellé lorsqu'une EANA est modifiée.                       */
+/* Entrée: le numéro de EANA                                                                              */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Satellite_Gerer_entreetor ( struct CMD_TYPE_MESSAGE *msg )
+ static void Satellite_Gerer_entreeANA ( gint num_ea )
   { gint taille;
-#ifdef bouh
+
     pthread_mutex_lock( &Cfg_satellite.lib->synchro );                   /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_satellite.Liste_message );
+    taille = g_slist_length( Cfg_satellite.Liste_entreeANA );
     pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
     if (taille > 150)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                "Satellite_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
-       g_free(msg);
+                "Satellite_Gerer_entreeANA: DROP EANA %d (length = %d > 150)", num_ea, taille);
        return;
      }
 
     pthread_mutex_lock ( &Cfg_satellite.lib->synchro );
-    Cfg_satellite.Liste_message = g_slist_append ( Cfg_satellite.Liste_message, msg );      /* Ajout a la liste */
+    Cfg_satellite.Liste_entreeANA = g_slist_append ( Cfg_satellite.Liste_entreeANA, num_ea );/* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
-#endif
   }
 /**********************************************************************************************************/
 /* Satellite_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
@@ -194,18 +192,18 @@
 
 /*    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", syndb->id );*/
 
-/*------------------------------------------- Dumping Axxx -----------------------------------------------*/
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping Axxx !!");
+/*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping EAxxx !!");
 #ifdef bouh
-    while (Cfg_satellite.Liste_sortie)
+    while (Cfg_satellite.Liste_entreeANA)
      { pthread_mutex_lock( &Cfg_satellite.lib->synchro );           /* Ajout dans la liste de tell a traiter */
-       num_a = GPOINTER_TO_INT(Cfg_satellite.Liste_sortie->data);
-       Cfg_satellite.Liste_sortie = g_slist_remove( Cfg_satellite.Liste_sortie, GINT_TO_POINTER(num_a) );
+       num_ea = GPOINTER_TO_INT(Cfg_satellite.Liste_entreeANA->data);
+       Cfg_satellite.Liste_entreeANA = g_slist_remove( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
-       xmlTextWriterStartElement(writer, (const unsigned char *)"SortieAxxx");     /* Start Passerelle */
+       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");     /* Start Passerelle */
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", num_a );
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"value", "%d", A(num_a) );
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%d", Partage->EA[num_ea].val_avant_ech );
        xmlTextWriterEndElement(writer);                                              /* End passerelle */
      }
 #endif
@@ -305,8 +303,10 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
        goto end;
      }
 
- /* Abonner_distribution_entree ( Satellite_Gerer_message );   /* Abonnement à la diffusion des messages */
- /* Abonner_distribution_entreeANA ( Satellite_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
+/*  Abonner_distribution_sortie    ( Satellite_Gerer_sortie );   /* Abonnement à la diffusion des entrees */
+/*  Abonner_distribution_sortieANA ( Satellite_Gerer_sortieANA );/* Abonnement à la diffusion des entrees */
+/*  Abonner_distribution_entree    ( Satellite_Gerer_entree );   /* Abonnement à la diffusion des entrees */
+    Abonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
 
     Cfg_satellite.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
     while(Cfg_satellite.lib->Thread_run == TRUE)                            /* On tourne tant que necessaire */
@@ -319,7 +319,7 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
           Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
 #ifdef bouh
           pthread_mutex_lock( &Cfg_satellite.lib->synchro );     /* On recupere le nombre de msgs en attente */
-          nbr_msg    = g_slist_length(Cfg_satellite.Liste_message);
+          nbr_msg    = g_slist_length(Cfg_satellite.Liste_entreeANA);
           nbr_sortie = g_slist_length(Cfg_satellite.Liste_sortie);
           pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
           Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
@@ -331,8 +331,8 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
        Envoyer_les_infos_au_master(); sleep(10); /* Pour test.. */
      }
 
-/* Desabonner_distribution_entree ( Satellite_Gerer_message );   /* Abonnement à la diffusion des messages */
-/* Desabonner_distribution_entreeANA ( Satellite_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
+   Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
+/* Desabonner_distribution_sortie ( Satellite_Gerer_sortie );    /* Abonnement à la diffusion des sorties */
 
 end:
     Satellite_Liberer_config();                                  /* Liberation de la configuration du thread */
