@@ -261,7 +261,7 @@
        curl_easy_setopt(curl, CURLOPT_HEADER, 1);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Satellite_Receive_response );
-       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L );
+       curl_easy_setopt(curl, CURLOPT_VERBOSE, Cfg_satellite.lib->Thread_debug );
        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");
        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );
        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                   /* Warning ! */
