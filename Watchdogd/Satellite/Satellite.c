@@ -260,7 +260,7 @@
        slist = curl_slist_append(slist, "Content-Type: application/xml");
        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &Satellite_Receive_response );
+       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Satellite_Receive_response );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L );
        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");
        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );
