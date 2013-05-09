@@ -473,7 +473,6 @@
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_MESSAGE *msg;
-    GSList *Liste_sms;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     memset( &Cfg_sms, 0, sizeof(Cfg_sms) );                     /* Mise a zero de la structure de travail */
@@ -515,8 +514,10 @@
         }
 
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       Liste_sms = Cfg_sms.Liste_sms;                                  /* Sauvegarde du ptr sms a envoyer */
-       msg = Liste_sms->data;
+       msg = Cfg_sms.Liste_sms->data;
+       Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, msg );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer apres le msg %d",
+                 g_slist_length(Cfg_sms.Liste_sms), msg->num );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        if ( Partage->g[msg->num].etat )                                 /* On n'envoie que si MSGnum == 1 */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
@@ -537,12 +538,6 @@
                 cpt++;
               }
            }
-
-          pthread_mutex_lock( &Cfg_sms.lib->synchro );
-          Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, msg );
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer",
-                    g_slist_length(Cfg_sms.Liste_sms) );
-          pthread_mutex_unlock( &Cfg_sms.lib->synchro );
         }
        g_free( msg );
      }
