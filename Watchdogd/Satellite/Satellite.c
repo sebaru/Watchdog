@@ -238,7 +238,7 @@
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
     if (curl)
      { struct curl_slist *slist = NULL;
-       gchar url[128];
+       gchar url[128], chaine[128];
        g_snprintf( url, sizeof(url), "%s/set_internal?type=%s&value=%s",
                    Cfg_satellite.send_to_url, "bouh", "tricotte" );
        curl_easy_setopt(curl, CURLOPT_URL, url );
@@ -250,7 +250,8 @@
        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                   /* Warning ! */
        curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
        curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
-       curl_easy_setopt(curl, CURLOPT_SSLCERT, Cfg_satellite.https_file_cert );
+       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
+       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );
 
 /*ist = curl_slist_append(slist, "Accept: */
 // slist = curl_slist_append(slist, "Content-Type: application/x-www-form-urlencoded");
@@ -268,8 +269,10 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
         }
        else
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                   "Envoyer_les_infos_au_master: Sending Update Request to %s failed (%s)",
-                    Cfg_satellite.send_to_url, erreur );
+                   "Envoyer_les_infos_au_master: Sending Update Request to %s failed (%s), CA %s, Cert %s, Key %s",
+                    Cfg_satellite.send_to_url, erreur,
+                    Cfg_satellite.https_file_ca, Cfg_satellite.https_file_cert,Cfg_satellite.https_file_key
+                  );
         }
        curl_easy_cleanup(curl);
        curl_slist_free_all(slist);
