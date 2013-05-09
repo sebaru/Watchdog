@@ -251,14 +251,14 @@
     if (curl)
      { struct curl_slist *slist = NULL;
        gchar url[128], chaine[128];
-       g_snprintf( url, sizeof(url), "%s/set_internal?type=%s&value=%s",
-                   Cfg_satellite.send_to_url, "bouh", "tricotte" );
+       g_snprintf( url, sizeof(url), "%s/set_internal" );
        curl_easy_setopt(curl, CURLOPT_URL, url );
        curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);
        slist = curl_slist_append(slist, "Content-Type: application/xml");
        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+       curl_easy_setopt(curl, CURLOPT_HEADER, 1);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Satellite_Receive_response );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L );
@@ -270,13 +270,7 @@
        g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
        curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );
 
-/*ist = curl_slist_append(slist, "Accept: */
-// slist = curl_slist_append(slist, "Content-Type: application/x-www-form-urlencoded");
-/*slist = curl_slist_append(slist, "Content-Type: text/xml");
-curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
-
-      res = curl_easy_perform(curl);
+       res = curl_easy_perform(curl);
        if (!res)
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
                    "Envoyer_les_infos_au_master: Sending Update Request to %s OK",
@@ -354,7 +348,7 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
           Cfg_satellite.lib->Thread_sigusr1 = FALSE;
         }
 
-       Envoyer_les_infos_au_master(); sleep(10); /* Pour test.. */
+       Envoyer_les_infos_au_master();
      }
 
    Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
