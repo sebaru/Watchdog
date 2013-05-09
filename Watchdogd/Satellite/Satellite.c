@@ -152,7 +152,7 @@
 /**********************************************************************************************************/
  static size_t Satellite_Receive_response( char *ptr, size_t size, size_t nmemb, void *userdata )
   { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
-              "Satellite_Receive_response: Récupération de %d octets depuis le master", size );
+              "Satellite_Receive_response: Récupération de %d*%d octets depuis le master", size, nmemb );
     Cfg_satellite.received_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
                                                     Cfg_satellite.received_size +  size*nmemb );
     if (!Cfg_satellite.received_buffer)                              /* Si erreur, on arrete le transfert */
@@ -251,7 +251,7 @@
     if (curl)
      { struct curl_slist *slist = NULL;
        gchar url[128], chaine[128];
-       g_snprintf( url, sizeof(url), "%s/set_internal" );
+       g_snprintf( url, sizeof(url), "%s/set_internal", Cfg_satellite.send_to_url );
        curl_easy_setopt(curl, CURLOPT_URL, url );
        curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
