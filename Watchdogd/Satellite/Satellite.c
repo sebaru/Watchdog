@@ -147,13 +147,28 @@
 #endif
   }
 /**********************************************************************************************************/
-/* Envoyer_les_sorties_aux_slaves : se connecte à tous les slaves pour leur envoyer les sorties           */
+/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
+/* Entrée : Les informations à sauvegarder                                                                */
+/**********************************************************************************************************/
+ static size_t Satellite_Receive_response( char *ptr, size_t size, size_t nmemb, void *userdata )
+  { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
+              "Satellite_Receive_response: Récupération de %s octets depuis le master", size );
+    Cfg_satellite.received_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
+                                                    Cfg_satellite.received_size +  size*nmemb );
+    if (!Cfg_satellite.received_buffer)                              /* Si erreur, on arrete le transfert */
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
+                "Satellite_Receive_response: Memory Error realloc (%s).", strerror(errno) );
+       return(-1);
+     }
+    memcpy( Cfg_satellite.received_buffer + Cfg_satellite.received_size, ptr, size*nmemb );
+    return(size*nmemb);
+  }
+/**********************************************************************************************************/
+/* Envoyer_les_infos_au_master : se connecte au master pour lui envoyer les infos                         */
 /* Entrée : rien, sortie : rien                                                                           */
 /**********************************************************************************************************/
  static void Envoyer_les_infos_au_master ( void )
   { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_httppost *formpost;
-    struct curl_httppost *lastptr;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     guint retour;
@@ -196,16 +211,6 @@
 /*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping EAxxx !!");
 
-       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", 12 );
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", 8.25 );
-       xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
-       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", 15 );
-       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", 20.22 );
-       xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
-
-#ifdef bouh
     while (Cfg_satellite.Liste_entreeANA)
      { gint num_ea;
        pthread_mutex_lock( &Cfg_satellite.lib->synchro );               /* Récupération de l'EA a traiter */
@@ -218,7 +223,6 @@
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", Partage->ea[num_ea].val_avant_ech );
        xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
      }
-#endif
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping EAxxx !!");
 
 
@@ -241,6 +245,8 @@
     xmlFreeTextWriter(writer);                                                /* Libération du writer XML */
 
 /*------------------------------------------- Le buffer XML est pret -------------------------------------*/
+    Cfg_satellite.received_buffer = NULL;                           /* Init du tampon de reception à NULL */
+    Cfg_satellite.received_size = 0;                                /* Init du tampon de reception à NULL */
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
     if (curl)
      { struct curl_slist *slist = NULL;
@@ -249,11 +255,12 @@
                    Cfg_satellite.send_to_url, "bouh", "tricotte" );
        curl_easy_setopt(curl, CURLOPT_URL, url );
        curl_easy_setopt(curl, CURLOPT_POST, 1 );
-       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buf->content);
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);
        slist = curl_slist_append(slist, "Content-Type: application/xml");
        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, Satellite_Receive_response );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L );
        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");
        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );
@@ -284,6 +291,12 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
         }
        curl_easy_cleanup(curl);
        curl_slist_free_all(slist);
+       if (Cfg_satellite.received_buffer)
+        { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
+                   "Envoyer_les_infos_au_master: Master Response : %s",
+                    Cfg_satellite.received_buffer);
+          g_free(Cfg_satellite.received_buffer);
+        }
      }
     else
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
