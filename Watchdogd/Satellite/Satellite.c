@@ -150,7 +150,7 @@
 /* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
 /* Entrée : Les informations à sauvegarder                                                                */
 /**********************************************************************************************************/
- static size_t Satellite_Receive_response( char *ptr, size_t size, size_t nmemb, void *userdata )
+ size_t Satellite_Receive_response( char *ptr, size_t size, size_t nmemb, void *userdata )
   { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
               "Satellite_Receive_response: Récupération de %s octets depuis le master", size );
     Cfg_satellite.received_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
