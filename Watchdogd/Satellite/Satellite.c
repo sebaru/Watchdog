@@ -196,6 +196,16 @@
 /*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping EAxxx !!");
 
+       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", 12 );
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", 8.25 );
+       xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
+       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", 15 );
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", 20.22 );
+       xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
+
+#ifdef bouh
     while (Cfg_satellite.Liste_entreeANA)
      { gint num_ea;
        pthread_mutex_lock( &Cfg_satellite.lib->synchro );               /* Récupération de l'EA a traiter */
@@ -208,9 +218,11 @@
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", Partage->ea[num_ea].val_avant_ech );
        xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
      }
+#endif
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping EAxxx !!");
 
-    retour = xmlTextWriterEndElement(writer);                                          /* End SatelliteInfos */
+
+    retour = xmlTextWriterEndElement(writer);                                       /* End SatelliteInfos */
     if (retour < 0)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_ERR,
                  "Satellite_Envoyer_les_infos_aux_slaves : Failed to end element SatelliteInfos" );
@@ -229,12 +241,6 @@
     xmlFreeTextWriter(writer);                                                /* Libération du writer XML */
 
 /*------------------------------------------- Le buffer XML est pret -------------------------------------*/
-    formpost = lastptr = NULL;
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "test",
-                  CURLFORM_COPYCONTENTS, "testseb",
-                  CURLFORM_END); 
-
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
     if (curl)
      { struct curl_slist *slist = NULL;
@@ -242,7 +248,11 @@
        g_snprintf( url, sizeof(url), "%s/set_internal?type=%s&value=%s",
                    Cfg_satellite.send_to_url, "bouh", "tricotte" );
        curl_easy_setopt(curl, CURLOPT_URL, url );
-       curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+       curl_easy_setopt(curl, CURLOPT_POST, 1 );
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buf->content);
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);
+       slist = curl_slist_append(slist, "Content-Type: application/xml");
+       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L );
        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Satellite - libcurl");
@@ -256,10 +266,8 @@
 /*ist = curl_slist_append(slist, "Accept: */
 // slist = curl_slist_append(slist, "Content-Type: application/x-www-form-urlencoded");
 /*slist = curl_slist_append(slist, "Content-Type: text/xml");
-curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
 curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
-/*curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post);*/
 
       res = curl_easy_perform(curl);
        if (!res)
@@ -282,7 +290,6 @@ curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
                 "Envoyer_les_infos_au_master: Sending Update Request to %s failed with cURL init",
                  Cfg_satellite.send_to_url );
      }
-    curl_formfree(formpost);
     xmlBufferFree(buf);                                                       /* Libération du buffer XML */
   }
 /**********************************************************************************************************/
