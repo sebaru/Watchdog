@@ -49,7 +49,7 @@
     gchar *type, *value;
     struct DB *db;
 
-    if (!con_cls)
+    if (!*con_cls)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                 "Http_Traiter_request_set_internal: Preparation reception payload" );
        infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
