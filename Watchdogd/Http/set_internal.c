@@ -82,6 +82,7 @@
                          "Http_Traiter_XML_set_internal: setting EA%03d = %08.2f",
                           atoi( (char *)num ), atof( (char *)val_avant_ech )
                         );
+                SEA_real(atoi( (char *)num ), atof( (char *)val_avant_ech ));/* Sans bouclage (pas SEA !) */
               }
              if(num)           xmlMemFree(num);
              if(val_avant_ech) xmlMemFree(val_avant_ech);
