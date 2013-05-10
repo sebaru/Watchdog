@@ -84,8 +84,8 @@
                         );
                 SEA_real(atoi( (char *)num ), atof( (char *)val_avant_ech ));/* Sans bouclage (pas SEA !) */
               }
-             if(num)           xmlMemFree(num);
-             if(val_avant_ech) xmlMemFree(val_avant_ech);
+             if(num)           free(num);
+             if(val_avant_ech) free(val_avant_ech);
            }
         }
      }
