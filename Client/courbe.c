@@ -655,6 +655,7 @@
 
     append_courbe->date -= COURBE_ORIGINE_TEMPS; 
 
+    if (!courbe->X || !courbe->Y) return(FALSE);
     if (courbe->X[0] < append_courbe->date - COURBE_NBR_HEURE_ARCHIVE*3600)/* Si premier enreg trop vieux */
      { memmove( courbe->X, courbe->X+1, (courbe->taille_donnees-1)*sizeof(gfloat));
        memmove( courbe->Y, courbe->Y+1, (courbe->taille_donnees-1)*sizeof(gfloat));
@@ -671,7 +672,7 @@
        new_Y = g_try_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
 
        printf(" index = %d : New taille = %d(gfloat), %d(gdouble)\n", 
-               courbe->index, courbe->taille_donnees * sizeof(gfloat), courbe->taille_donnees * sizeof(gdouble) );
+               -1, courbe->taille_donnees * sizeof(gfloat), courbe->taille_donnees * sizeof(gdouble) );
 
        if (new_X && new_Y)
         { courbe->X = new_X;
