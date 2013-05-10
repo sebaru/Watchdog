@@ -55,46 +55,39 @@
        infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
        if (!infos)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Http_Traiter_request_set_internal: Memory Alloc ERROR" );
+                   "Http_Traiter_request_set_internal: Memory Alloc ERROR infos" );
           return(FALSE);
         }
 
        *con_cls = (void *) infos;
        return(TRUE);
-     }
-#ifdef bouh
-    type = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"type" );
-    if (!type)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_set_internal: type not found in URL argument." );
-       return(FALSE);
-     }
+     } else infos = (struct HTTP_CONNEXION_INFO *)*con_cls;     /* Récupération de la structure de suivie */
 
-    value = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"value" );
-    if (!value)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_set_internal: value not found in URL argument." );
-       return(FALSE);
-     }
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "Http_Traiter_request_set_internal: Setting Internal bit %s to %s", type, value );
-#endif
-
-    if (*upload_data_size == 0)                                                     /* Fin de transfert ? */
-     { response = MHD_create_response_from_buffer ( strlen (Handled_OK),
-                                                   (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);
-       if (response == NULL)                   /* Si erreur de creation de la reponse, on sort une erreur */
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                   "Http_Traiter_request_set_internal: Response Creation Error." );
+    if (*upload_data_size != 0)                                                   /* Transfert en cours ? */
+     { gchar *new_buffer;
+       new_buffer = g_try_realloc( infos->buffer, infos->buffer_size + *upload_data_size );
+       if (!new_buffer)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Http_Traiter_request_set_internal: Memory Alloc ERROR realloc buffer" );
+          g_free(infos->buffer);
+          infos->buffer = NULL;
           return(FALSE);
-        }
-       MHD_queue_response (connection, MHD_HTTP_OK, response);
-       MHD_destroy_response (response);
+        } else infos->buffer = new_buffer;
+       memcpy ( infos->buffer + infos->buffer_size, upload_data, *upload_data_size );          /* Recopie */
+       infos->buffer_size += upload_data_size;
+       *upload_data_size = 0;              /* Indique à MHD que l'on a traité l'ensemble des octets recus */
        return(TRUE);
      }
-
-    *upload_data_size = 0;                 /* Indique à MHD que l'on a traité l'ensemble des octets recus */
+                                                            /* Fin de transfert. On envoie une reponse OK */
+    response = MHD_create_response_from_buffer ( strlen (Handled_OK),
+                                                (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);
+    if (response == NULL)                      /* Si erreur de creation de la reponse, on sort une erreur */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Traiter_request_set_internal: Response Creation Error." );
+       return(FALSE);
+     }
+    MHD_queue_response (connection, MHD_HTTP_OK, response);
+    MHD_destroy_response (response);
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

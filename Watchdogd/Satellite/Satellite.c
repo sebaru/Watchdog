@@ -151,15 +151,18 @@
 /* Entrée : Les informations à sauvegarder                                                                */
 /**********************************************************************************************************/
  static size_t Satellite_Receive_response( char *ptr, size_t size, size_t nmemb, void *userdata )
-  { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
+  { gchar *new_buffer;
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
               "Satellite_Receive_response: Récupération de %d*%d octets depuis le master", size, nmemb );
-    Cfg_satellite.received_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
-                                                    Cfg_satellite.received_size +  size*nmemb );
-    if (!Cfg_satellite.received_buffer)                              /* Si erreur, on arrete le transfert */
+    new_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
+                                 Cfg_satellite.received_size +  size*nmemb );
+    if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
                 "Satellite_Receive_response: Memory Error realloc (%s).", strerror(errno) );
+       g_free(Cfg_satellite.received_buffer);
+       Cfg_satellite.received_buffer = NULL;
        return(-1);
-     }
+     } else Cfg_satellite.received_buffer = new_buffer;
     memcpy( Cfg_satellite.received_buffer + Cfg_satellite.received_size, ptr, size*nmemb );
     return(size*nmemb);
   }

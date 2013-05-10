@@ -55,6 +55,8 @@
 
  struct HTTP_CONNEXION_INFO
   { gint type;
+    gchar *buffer;
+    gint buffer_size;
   };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );

@@ -45,7 +45,7 @@
  #include "Http.h"
 
 /**********************************************************************************************************/
-/* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
+/* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -178,53 +178,6 @@
   { if ( Cfg_http.ssl_cert) g_free( Cfg_http.ssl_cert );
     if ( Cfg_http.ssl_key ) g_free( Cfg_http.ssl_key );
     if ( Cfg_http.ssl_ca )  g_free( Cfg_http.ssl_ca );
-  }
-/**********************************************************************************************************/
-/* Http_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                        */
-/* Entrée: une structure CMD_TYPE_HISTO                                                                   */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- static void Http_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
-  { gint taille;
-#ifdef bouh
-    pthread_mutex_lock( &Cfg_http.lib->synchro );                      /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_http.Liste_message );
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
-       g_free(msg);
-       return;
-     }
-
-    pthread_mutex_lock ( &Cfg_http.lib->synchro );
-    Cfg_http.Liste_message = g_slist_append ( Cfg_http.Liste_message, msg );      /* Ajout a la liste */
-    pthread_mutex_unlock ( &Cfg_http.lib->synchro );
-
-#endif
-  }
-/**********************************************************************************************************/
-/* Http_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
-/* Entrées: le numéro de la sortie                                                                        */
-/**********************************************************************************************************/
- void Http_Gerer_sortie( gint num_a )                                    /* Num_a est l'id de la sortie */
-  { gint taille;
-#ifdef bouh
-    pthread_mutex_lock( &Cfg_http.lib->synchro );              /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_http.Liste_sortie );
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Gerer_sortie: DROP sortie %d (length = %d > 150)", num_a, taille );
-       return;
-     }
-
-    pthread_mutex_lock( &Cfg_http.lib->synchro );       /* Ajout dans la liste de tell a traiter */
-    Cfg_http.Liste_sortie = g_slist_prepend( Cfg_http.Liste_sortie, GINT_TO_POINTER(num_a) );
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
-#endif
   }
 /**********************************************************************************************************/
 /* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
@@ -432,7 +385,12 @@
 /**********************************************************************************************************/
  static void Http_cleanup ( void *cls, struct MHD_Connection *connection, void **con_cls,
                              enum MHD_RequestTerminationCode tcode )
-  { if (*con_cls) g_free(*con_cls);                                  /* Libération mémoire le cas échéant */
+  { if (*con_cls)
+     { struct HTTP_CONNEXION_INFO *infos;
+       infos = *con_cls;
+       if (infos->buffer) g_free(infos->buffer);
+       g_free(infos);                                                /* Libération mémoire le cas échéant */
+     }
   }
 /**********************************************************************************************************/
 /* Http_MHD_debug : fonction appellé pour debugger le Daemon MHD                                          */

@@ -195,17 +195,18 @@
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA( int num, float val_avant_ech )
-  { if (num<0 || num>=NBR_ENTRE_ANA)
+  { gboolean need_arch;
+    if (num<0 || num>=NBR_ENTRE_ANA)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
        return;
      }
 
+    need_arch = FALSE;
     if (Partage->ea[ num ].val_avant_ech != val_avant_ech)
      { Partage->ea[ num ].val_avant_ech = val_avant_ech;        /* Archive au mieux toutes les 5 secondes */
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
-        { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );
-          Partage->ea[ num ].last_arch = Partage->top;   
-        }
+        { need_arch = TRUE; }
+
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
@@ -249,16 +250,18 @@
           default:
                Partage->ea[ num ].val_ech = 0.0;
         }
+     }
+    else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+     { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
+
+    if (need_arch)
+     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );
+       Partage->ea[ num ].last_arch = Partage->top;   
        pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
        Partage->com_msrv.liste_ea = g_slist_prepend( Partage->com_msrv.liste_ea,
                                                      GINT_TO_POINTER(num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
      }
-    else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );         /* Archive au pire toutes les 10 min */
-       Partage->ea[ num ].last_arch = Partage->top;   
-     }
-                                                                     /* Gestion historique interne Valana */
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
