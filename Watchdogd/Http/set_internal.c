@@ -81,15 +81,20 @@
              "Http_Traiter_request_set_internal: Setting Internal bit %s to %s", type, value );
 #endif
 
-    response = MHD_create_response_from_buffer ( strlen (Handled_OK),
-                                                (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);
-    if (response == NULL)                      /* Si erreur de creation de la reponse, on sort une erreur */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_set_internal: Response Creation Error." );
-       return(FALSE);
+    if (*upload_data_size == 0)                                                     /* Fin de transfert ? */
+     { response = MHD_create_response_from_buffer ( strlen (Handled_OK),
+                                                   (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);
+       if (response == NULL)                   /* Si erreur de creation de la reponse, on sort une erreur */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                   "Http_Traiter_request_set_internal: Response Creation Error." );
+          return(FALSE);
+        }
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
+       MHD_destroy_response (response);
+       return(TRUE);
      }
-    MHD_queue_response (connection, MHD_HTTP_OK, response);
-    MHD_destroy_response (response);
+
+    *upload_data_size = 0;                 /* Indique à MHD que l'on a traité l'ensemble des octets recus */
     return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

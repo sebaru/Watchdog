@@ -325,15 +325,15 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Http Callback : Renvoi une reponse suite a une demande d'un slave (appellée par libsoup)               */
+/* Http request_CB : Renvoi une reponse suite a une demande d'un client (appellée par libmicrohttpd)      */
 /* Entrées : le contexte, le message, l'URL                                                               */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static gint Http_request (void *cls, struct MHD_Connection *connection, 
-                           const char *url, 
-                           const char *method, const char *version, 
-                           const char *upload_data, 
-                           size_t *upload_data_size, void **con_cls)
+ static gint Http_request_CB ( void *cls, struct MHD_Connection *connection, 
+                               const char *url, 
+                               const char *method, const char *version, 
+                               const char *upload_data, 
+                               size_t *upload_data_size, void **con_cls )
   { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
     const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
     const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
@@ -426,6 +426,15 @@
     return MHD_YES;
   }
 /**********************************************************************************************************/
+/* Http cleanup_CB : Termine une connexion cliente (appellée par libmicrohttpd)                           */
+/* Entrées : le contexte, le message, l'URL                                                               */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Http_cleanup ( void *cls, struct MHD_Connection *connection, void **con_cls,
+                             enum MHD_RequestTerminationCode tcode )
+  { if (*con_cls) g_free(*con_cls);                                  /* Libération mémoire le cas échéant */
+  }
+/**********************************************************************************************************/
 /* Http_MHD_debug : fonction appellé pour debugger le Daemon MHD                                          */
 /**********************************************************************************************************/
  static void Http_MHD_debug( void *arg, const char *fmt, va_list ap )
@@ -458,10 +467,14 @@
      }
 
     if (Cfg_http.http_enable)
-     { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY,
+     { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_DEBUG,
                                                  Cfg_http.http_port, NULL, NULL, 
-                                                &Http_request, NULL,
+                                                &Http_request_CB, NULL,
+                                                 MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup, NULL,
                                                  MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
+                                                 MHD_OPTION_PER_IP_CONNECTION_LIMIT, 2,
+                                                 MHD_OPTION_CONNECTION_TIMEOUT, 20,
+                                                 MHD_OPTION_EXTERNAL_LOGGER, Http_MHD_debug, NULL,
                                                  MHD_OPTION_END);
        if (!Cfg_http.http_server)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -477,8 +490,11 @@
     if (Cfg_http.https_enable && Charger_certificat() )
      { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL | MHD_USE_DEBUG,
                                                   Cfg_http.https_port, NULL, NULL, 
-                                                 &Http_request, NULL,
+                                                 &Http_request_CB, NULL,
+                                                  MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup, NULL,
                                                   MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
+                                                  MHD_OPTION_PER_IP_CONNECTION_LIMIT, 2,
+                                                  MHD_OPTION_CONNECTION_TIMEOUT, 20,
                                                   MHD_OPTION_HTTPS_MEM_CERT, Cfg_http.ssl_cert,
                                                   MHD_OPTION_HTTPS_MEM_KEY,  Cfg_http.ssl_key,
                                                   MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,/* Require Client SSL */
