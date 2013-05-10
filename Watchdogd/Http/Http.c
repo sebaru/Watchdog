@@ -504,6 +504,20 @@
                     "Run_thread: In Queue : %d XML Docs to process", nbr );
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
+
+       if (Cfg_http.Liste_XML_docs)
+        { struct HTTP_CONNEXION_INFO *infos;
+          pthread_mutex_lock( &Cfg_http.lib->synchro );             /* On envoie au thread HTTP pour traitement */
+          infos = (struct HTTP_CONNEXION_INFO *)Cfg_http.Liste_XML_docs->data;
+          Cfg_http.Liste_XML_docs = g_slist_remove ( Cfg_http.Liste_XML_docs, infos );
+          pthread_mutex_unlock( &Cfg_http.lib->synchro );
+          switch (infos->type)
+           { case HTTP_CONNEXION_SET_INTERNAL : Http_Traiter_XML_set_internal ( infos );
+                                                break;
+             default : break;
+           }
+          Http_Liberer_infos ( infos );
+        }
      }
 
     if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);          /* Arret des serveurs MHD */

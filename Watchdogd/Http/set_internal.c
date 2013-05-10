@@ -28,13 +28,46 @@
  #include <string.h>
  #include <unistd.h>
  #include <microhttpd.h>
- #include <libxml/xmlwriter.h>
+ #include <libxml/xmlreader.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Http.h"
 /**********************************************************************************************************/
-/* Traiter_dynxml: Traite une requete sur l'URI dynxml                                                    */
+/* Http_Traiter_XML_set_internal: Traite le document XML recu de la requete MHD                           */
+/* Entrées: la structure de connexion info                                                                */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ void Http_Traiter_XML_set_internal ( struct HTTP_CONNEXION_INFO *infos )
+  { const xmlChar *name, *value;
+    xmlTextReaderPtr reader;
+    reader =  xmlReaderForMemory( infos->buffer, infos->buffer_size, "set_internal.xml", NULL, XML_PARSE_NONET );
+    if (reader == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_Traiter_XML_set_internal: Error Readin XML from buffer" );
+       return;
+     }
+
+    while ( xmlTextReaderRead(reader) == 1 )
+     { name = xmlTextReaderConstName(reader);
+       if (name != NULL)
+	{ value = xmlTextReaderConstValue(reader);
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Http_Traiter_XML_set_internal: depth %d type %d name %s is_empty %d has value %d %s", 
+                    xmlTextReaderDepth(reader),
+                    xmlTextReaderNodeType(reader),
+                    name,
+                    xmlTextReaderIsEmptyElement(reader),
+                    xmlTextReaderHasValue(reader),
+                    (value ? value : (xmlChar *)"None")
+                  );
+        }
+     }
+    xmlFreeTextReader(reader);
+                                                                       /* infos est libéré par l'appelant */
+  }
+/**********************************************************************************************************/
+/* Http_Traiter_request_set_internal: Traite la requete XML en cours de recuperation par MHD              */
 /* Entrées: la connexion MHD                                                                              */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
@@ -42,12 +75,7 @@
                                               size_t *upload_data_size, void **con_cls )
   { const char *Handled_OK = "<html><body>OK</body></html>";
     struct HTTP_CONNEXION_INFO *infos;
-    gint retour, type_int, value_int;
     struct MHD_Response *response;
-    xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
-    gchar *type, *value;
-    struct DB *db;
 
     if (!*con_cls)
      { infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );

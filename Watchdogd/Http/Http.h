@@ -69,6 +69,6 @@
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
                                                      size_t *upload_data_size, void **con_cls );
- extern void Http_Liberer_infos ( struct HTTP_CONNEXION_INFO *infos );
+ extern void Http_Traiter_XML_set_internal ( struct HTTP_CONNEXION_INFO *infos );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
