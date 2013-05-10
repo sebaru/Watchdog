@@ -47,6 +47,7 @@
     gchar *type, *value;
     struct DB *db;
 
+#ifdef bouh
     type = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"type" );
     if (!type)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
@@ -63,6 +64,7 @@
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "Http_Traiter_request_set_internal: Setting Internal bit %s to %s", type, value );
+#endif
 
     response = MHD_create_response_from_buffer ( strlen (Handled_OK),
                                                 (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);

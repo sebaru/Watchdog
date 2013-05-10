@@ -232,7 +232,7 @@
 /* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
 /**********************************************************************************************************/
  static gboolean Verify_request( struct MHD_Connection * connection, const char *url, 
-                                 const char *method, const char *version )
+                                 const char *method, const char *version, size_t upload_data_size )
   { guint listsize;
     const gnutls_datum_t * pcert;
     gnutls_certificate_status_t client_cert_status;
@@ -310,16 +310,16 @@
        size = sizeof(issuer_dn);
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                "New HTTPS %s %s %s request from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s).",
-                 method, url, version,
+                "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s).",
+                 method, url, version, upload_data_size,
                  client_host, client_dn, client_service,
                  gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn
                );
        gnutls_x509_crt_deinit(client_cert);
      }
     else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                  "New HTTP  %s %s %s request from Host=%s/Service=%s",
-                   method, url, version,
+                  "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s",
+                   method, url, version, upload_data_size,
                    client_host, client_service
                 );
     return(TRUE);
@@ -340,7 +340,7 @@
     const char *Authent_error  = "<html><body>Authentification error!..</body></html>";
     struct MHD_Response *response;
 
-    if (Verify_request ( connection, url, method, version ) == FALSE)
+    if (Verify_request ( connection, url, method, version, upload_data_size ) == FALSE)
      { response = MHD_create_response_from_buffer ( strlen (Authent_error),
                                                     (void*) Authent_error, MHD_RESPMEM_PERSISTENT);
        if (response)
@@ -351,14 +351,7 @@
        else return MHD_NO;
      }
 
-    if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
-     { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
-                                                   (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
-       if (response == NULL) return(MHD_NO);
-       MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
-       MHD_destroy_response (response);
-     }
-    else if ( ! strcasecmp ( url, "/getsyn" ) )
+    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
@@ -367,7 +360,7 @@
           MHD_destroy_response (response);
         }
      }
-    else if ( Cfg_http.satellite_enable && ! strcasecmp ( url, "/set_internal" ) )
+    else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
      { if ( Http_Traiter_request_set_internal ( connection ) == FALSE)        /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error),
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
@@ -376,7 +369,7 @@
           MHD_destroy_response (response);
         }
      }
-    else if ( ! strcasecmp ( url, "/gifile" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
      { struct stat sbuf;
        gint fd;
        fd = open ("anna.jpg", O_RDONLY);
@@ -396,7 +389,7 @@
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
      }
-    else if ( ! strcasecmp ( url, "/xml" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/xml" ) )
      { struct stat sbuf;
        gint fd;
        fd = open ("test.xml", O_RDONLY);
@@ -415,6 +408,13 @@
       MHD_add_response_header (response, "Content-Type", "application/xml");
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
+     }
+    else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) && strcasecmp( method, MHD_HTTP_METHOD_POST ) )
+     { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
+                                                   (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
+       if (response == NULL) return(MHD_NO);
+       MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
+       MHD_destroy_response (response);
      }
     else
      { response = MHD_create_response_from_buffer ( strlen (Not_found),

@@ -286,9 +286,9 @@
        curl_easy_cleanup(curl);
        curl_slist_free_all(slist);
        if (Cfg_satellite.received_buffer)
-        { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
+        { /*Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
                    "Envoyer_les_infos_au_master: Master Response : %s",
-                    Cfg_satellite.received_buffer);
+                    Cfg_satellite.received_buffer);*/
           g_free(Cfg_satellite.received_buffer);
         }
      }
