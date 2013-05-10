@@ -262,7 +262,7 @@
        gnutls_x509_crt_get_dn(client_cert, client_dn, (size_t *)&size );
        size = sizeof(issuer_dn);
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                 "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s).",
                  method, url, version, *upload_data_size,
                  client_host, client_dn, client_service,
@@ -270,7 +270,7 @@
                );
        gnutls_x509_crt_deinit(client_cert);
      }
-    else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+    else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                   "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s",
                    method, url, version, *upload_data_size,
                    client_host, client_service
@@ -379,17 +379,26 @@
     return MHD_YES;
   }
 /**********************************************************************************************************/
-/* Http cleanup_CB : Termine une connexion cliente (appellée par libmicrohttpd)                           */
+/* Http Liberer_infos : Libere la mémoire réservée par la structure infos de reception de la requete      */
+/* Entrées : les infos à libérer                                                                          */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ void Http_Liberer_infos ( struct HTTP_CONNEXION_INFO *infos )
+  {  if (infos->buffer) g_free(infos->buffer);
+     g_free(infos);                                                  /* Libération mémoire le cas échéant */
+  }
+/**********************************************************************************************************/
+/* Http cleanup : Termine une connexion cliente (appellée par libmicrohttpd)                              */
 /* Entrées : le contexte, le message, l'URL                                                               */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Http_cleanup ( void *cls, struct MHD_Connection *connection, void **con_cls,
-                             enum MHD_RequestTerminationCode tcode )
+ static void Http_cleanup_CB ( void *cls, struct MHD_Connection *connection, void **con_cls,
+                               enum MHD_RequestTerminationCode tcode )
   { if (*con_cls)
      { struct HTTP_CONNEXION_INFO *infos;
        infos = *con_cls;
-       if (infos->buffer) g_free(infos->buffer);
-       g_free(infos);                                                /* Libération mémoire le cas échéant */
+       if (infos->request_processed == FALSE)             /* Si erreur pendant la reception de la requete */
+        { Http_Liberer_infos ( infos ); }                                  /*  liberation mémoire par MHD */
      }
   }
 /**********************************************************************************************************/
@@ -428,7 +437,7 @@
      { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_DEBUG,
                                                  Cfg_http.http_port, NULL, NULL, 
                                                 &Http_request_CB, NULL,
-                                                 MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup, NULL,
+                                                 MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup_CB, NULL,
                                                  MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
                                                  MHD_OPTION_PER_IP_CONNECTION_LIMIT, 2,
                                                  MHD_OPTION_CONNECTION_TIMEOUT, 20,
@@ -449,7 +458,7 @@
      { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL | MHD_USE_DEBUG,
                                                   Cfg_http.https_port, NULL, NULL, 
                                                  &Http_request_CB, NULL,
-                                                  MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup, NULL,
+                                                  MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup_CB, NULL,
                                                   MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
                                                   MHD_OPTION_PER_IP_CONNECTION_LIMIT, 2,
                                                   MHD_OPTION_CONNECTION_TIMEOUT, 20,
@@ -485,26 +494,19 @@
        sched_yield();
 
        if (Cfg_http.lib->Thread_sigusr1)                                  /* A-t'on recu un signal USR1 ? */
-        { int nbr_msg, nbr_sortie;
+        { int nbr;
 
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
-#ifdef bouh
           pthread_mutex_lock( &Cfg_http.lib->synchro );       /* On recupere le nombre de msgs en attente */
-          nbr_msg    = g_slist_length(Cfg_http.Liste_message);
-          nbr_sortie = g_slist_length(Cfg_http.Liste_sortie);
+          nbr = g_slist_length(Cfg_http.Liste_XML_docs);
           pthread_mutex_unlock( &Cfg_http.lib->synchro );
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: In Queue : %d MSGS, %d A", nbr_msg, nbr_sortie );
-#endif
+                    "Run_thread: In Queue : %d XML Docs to process", nbr );
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
      }
 
-#ifdef bouh
-    Desabonner_distribution_sortie  ( Http_Gerer_sortie ); /* Desabonnement de la diffusion des sorties */
-    Desabonner_distribution_message ( Http_Gerer_message );/* Desabonnement de la diffusion des messages */
-#endif
-    if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);
+    if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);          /* Arret des serveurs MHD */
     if (Cfg_http.https_server)
      { MHD_stop_daemon (Cfg_http.https_server);
        Liberer_certificat();

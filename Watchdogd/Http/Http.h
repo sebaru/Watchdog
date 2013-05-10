@@ -51,17 +51,24 @@
     gchar *ssl_ca;
     struct MHD_Daemon *http_server;
     struct MHD_Daemon *https_server;
+    GSList *Liste_XML_docs;                      /* Une liste de document XML recu de la part des clients */
  } Cfg_http;
 
+ enum HTTP_CONNEXION_TYPE
+  { HTTP_CONNEXION_SET_INTERNAL = 1
+  };
+
  struct HTTP_CONNEXION_INFO
-  { gint type;
-    gchar *buffer;
-    gint buffer_size;
+  { gint     type;
+    gboolean request_processed;                 /* TRUE si la requete est complete et doit etre processée */
+    gchar   *buffer;                                   /* Le buffer recu dans le corps de la requete HTTP */
+    gint     buffer_size;                                                    /* La taille utile du buffer */
   };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
                                                      size_t *upload_data_size, void **con_cls );
+ extern void Http_Liberer_infos ( struct HTTP_CONNEXION_INFO *infos );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

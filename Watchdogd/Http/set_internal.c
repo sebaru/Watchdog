@@ -50,9 +50,7 @@
     struct DB *db;
 
     if (!*con_cls)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Http_Traiter_request_set_internal: Preparation reception payload" );
-       infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
+     { infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
        if (!infos)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                    "Http_Traiter_request_set_internal: Memory Alloc ERROR infos" );
@@ -79,6 +77,12 @@
        return(TRUE);
      }
 /*-------------------------------- Fin de transfert. On envoie une reponse OK ----------------------------*/
+    pthread_mutex_lock( &Cfg_http.lib->synchro );             /* On envoie au thread HTTP pour traitement */
+    Cfg_http.Liste_XML_docs = g_slist_prepend ( Cfg_http.Liste_XML_docs, infos );
+    infos->type = HTTP_CONNEXION_SET_INTERNAL;
+    infos->request_processed = TRUE;           /* Indique que la requete est traitée, pas de free mémoire */
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+
     response = MHD_create_response_from_buffer ( strlen (Handled_OK),
                                                 (void*)Handled_OK, MHD_RESPMEM_PERSISTENT);
     if (response == NULL)                      /* Si erreur de creation de la reponse, on sort une erreur */
