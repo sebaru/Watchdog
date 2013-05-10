@@ -49,21 +49,33 @@
        return;
      }
 
+    if (xmlTextReaderRead(reader) != 1 ) goto end;             /* On se positionne sur le premier element */
+
+    name = xmlTextReaderConstName(reader);
+    if ( name == NULL || (!xmlStrEqual ( name, (xmlChar*) "SatelliteInfos" )) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_Traiter_XML_set_internal: Error First Element <> SatelliteInfos (name=%s)",
+                 (name ? name : (xmlChar *)"none") );
+       goto end;
+     }
+
     while ( xmlTextReaderRead(reader) == 1 )
      { name = xmlTextReaderConstName(reader);
        if (name != NULL)
 	{ value = xmlTextReaderConstValue(reader);
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Http_Traiter_XML_set_internal: depth %d type %d name %s is_empty %d has value %d %s", 
+                   "Http_Traiter_XML_set_internal: depth %d type %d name %s is_empty %d has value %d has attr %d value %s", 
                     xmlTextReaderDepth(reader),
                     xmlTextReaderNodeType(reader),
                     name,
                     xmlTextReaderIsEmptyElement(reader),
                     xmlTextReaderHasValue(reader),
+                    xmlTextReaderHasAttributes (reader),
                     (value ? value : (xmlChar *)"None")
                   );
         }
      }
+end:
     xmlFreeTextReader(reader);
                                                                        /* infos est libéré par l'appelant */
   }
