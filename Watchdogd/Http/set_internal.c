@@ -101,7 +101,7 @@
           return(FALSE);
         } else infos->buffer = new_buffer;
        memcpy ( infos->buffer + infos->buffer_size, upload_data, *upload_data_size );          /* Recopie */
-       infos->buffer_size += upload_data_size;
+       infos->buffer_size += *upload_data_size;
        *upload_data_size = 0;              /* Indique à MHD que l'on a traité l'ensemble des octets recus */
        return(TRUE);
      }
