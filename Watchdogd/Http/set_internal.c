@@ -38,8 +38,10 @@
 /* Entrées: la connexion MHD                                                                              */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection )
+ gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection, const char *upload_data, 
+                                              size_t *upload_data_size, void **con_cls )
   { const char *Handled_OK = "<html><body>OK</body></html>";
+    struct HTTP_CONNEXION_INFO *infos;
     gint retour, type_int, value_int;
     struct MHD_Response *response;
     xmlTextWriterPtr writer;
@@ -47,6 +49,19 @@
     gchar *type, *value;
     struct DB *db;
 
+    if (!con_cls)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "Http_Traiter_request_set_internal: Preparation reception payload" );
+       infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
+       if (!infos)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Http_Traiter_request_set_internal: Memory Alloc ERROR" );
+          return(FALSE);
+        }
+
+       *con_cls = (void *) infos;
+       return(TRUE);
+     }
 #ifdef bouh
     type = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, (const char *)"type" );
     if (!type)

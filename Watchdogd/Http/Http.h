@@ -53,8 +53,13 @@
     struct MHD_Daemon *https_server;
  } Cfg_http;
 
+ struct HTTP_CONNEXION_INFO
+  { gint type;
+  };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
- extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection );
+ extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
+                                                     const char *upload_data, 
+                                                     size_t *upload_data_size, void **con_cls );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

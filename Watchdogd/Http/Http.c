@@ -341,7 +341,7 @@
     struct MHD_Response *response;
 
     if (Verify_request ( connection, url, method, version, upload_data_size ) == FALSE)
-     { response = MHD_create_response_from_buffer ( strlen (Authent_error),
+     { response = MHD_create_response_from_buffer ( strlen (Authent_error)+1,
                                                     (void*) Authent_error, MHD_RESPMEM_PERSISTENT);
        if (response)
         { MHD_queue_response ( connection, MHD_HTTP_UNAUTHORIZED, response);
@@ -353,7 +353,7 @@
 
     if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error),
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
@@ -361,8 +361,8 @@
         }
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
-     { if ( Http_Traiter_request_set_internal ( connection ) == FALSE)        /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error),
+     { if ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, con_cls ) == FALSE)        /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
@@ -377,7 +377,7 @@
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                    "Http_request : Error /gifile %s", strerror(errno) );
           if (fd!=-1) close(fd);
-          response = MHD_create_response_from_buffer ( strlen (Internal_error),
+          response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                        (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
@@ -397,7 +397,7 @@
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                    "Http_request : Error /xml %s", strerror(errno) );
           if (fd!=-1) close(fd);
-          response = MHD_create_response_from_buffer ( strlen (Internal_error),
+          response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                        (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
@@ -410,14 +410,14 @@
       MHD_destroy_response (response);
      }
     else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) && strcasecmp( method, MHD_HTTP_METHOD_POST ) )
-     { response = MHD_create_response_from_buffer ( strlen (Wrong_method),
+     { response = MHD_create_response_from_buffer ( strlen (Wrong_method)+1,
                                                    (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
        MHD_destroy_response (response);
      }
     else
-     { response = MHD_create_response_from_buffer ( strlen (Not_found),
+     { response = MHD_create_response_from_buffer ( strlen (Not_found)+1,
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
