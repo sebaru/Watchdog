@@ -232,7 +232,7 @@
 /* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
 /**********************************************************************************************************/
  static gboolean Verify_request( struct MHD_Connection * connection, const char *url, 
-                                 const char *method, const char *version, size_t upload_data_size )
+                                 const char *method, const char *version, size_t *upload_data_size )
   { guint listsize;
     const gnutls_datum_t * pcert;
     gnutls_certificate_status_t client_cert_status;
@@ -311,7 +311,7 @@
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                 "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s).",
-                 method, url, version, upload_data_size,
+                 method, url, version, *upload_data_size,
                  client_host, client_dn, client_service,
                  gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn
                );
@@ -319,7 +319,7 @@
      }
     else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                   "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s",
-                   method, url, version, upload_data_size,
+                   method, url, version, *upload_data_size,
                    client_host, client_service
                 );
     return(TRUE);
