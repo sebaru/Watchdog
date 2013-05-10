@@ -137,25 +137,27 @@
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_ajouter_courbe_thread: début d'envoi" );
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
-    Recuperer_archDB ( Config.log, db, courbe->type, courbe->num, (date - COURBE_NBR_HEURE_ARCHIVE*3600), date );
-    do
-     { arch = Recuperer_archDB_suite( Config.log, db );                     /* On prend le premier enreg. */
-       if (arch)                                               /* Si enregegistrement, alors on le pousse */
-        { envoi_courbe->valeurs[envoi_courbe->taille_donnees].date          = arch->date_sec;
-          envoi_courbe->valeurs[envoi_courbe->taille_donnees].val_avant_ech = arch->valeur;
-          envoi_courbe->taille_donnees++;/* Nous avons 1 enregistrement de plus dans la structure d'envoi */
-          g_free(arch);
-        }
+    if (Recuperer_archDB ( Config.log, db, courbe->type, courbe->num,
+                          (date - COURBE_NBR_HEURE_ARCHIVE*3600), date ))
+     { do
+        { arch = Recuperer_archDB_suite( Config.log, db );                  /* On prend le premier enreg. */
+          if (arch)                                            /* Si enregegistrement, alors on le pousse */
+           { envoi_courbe->valeurs[envoi_courbe->taille_donnees].date          = arch->date_sec;
+             envoi_courbe->valeurs[envoi_courbe->taille_donnees].val_avant_ech = arch->valeur;
+             envoi_courbe->taille_donnees++;/* Nous avons 1 enregistrement de plus dans la structure d'envoi */
+             g_free(arch);
+           }
 
-       if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
-        { Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_START_COURBE, (gchar *)envoi_courbe,
-                        sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "Proto_ajouter_courbe_thread: taille donnees=%d", envoi_courbe->taille_donnees );
-          envoi_courbe->taille_donnees = 0;
+          if ( (arch == NULL) || envoi_courbe->taille_donnees == max_enreg )
+           { Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_START_COURBE, (gchar *)envoi_courbe,
+                           sizeof(struct CMD_START_COURBE) + envoi_courbe->taille_donnees * sizeof(struct CMD_START_COURBE_VALEUR) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "Proto_ajouter_courbe_thread: taille donnees=%d", envoi_courbe->taille_donnees );
+             envoi_courbe->taille_donnees = 0;
+           }
         }
+       while (arch);                                       /* On tourne tant qu'il y a des enregistrement */
      }
-    while (arch);                                          /* On tourne tant qu'il y a des enregistrement */
 
     g_free(envoi_courbe);                             /* Nous n'avons plus besoin de la structure d'envoi */
     client->courbes = g_list_append ( client->courbes, courbe ); /* Ajout dans la liste des courbes a updater */
