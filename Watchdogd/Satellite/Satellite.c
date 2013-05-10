@@ -351,7 +351,8 @@
           Cfg_satellite.lib->Thread_sigusr1 = FALSE;
         }
 
-       Envoyer_les_infos_au_master();
+       if (Cfg_satellite.Liste_entreeANA)                               /* Si changement, envoi au master */
+        { Envoyer_les_infos_au_master(); } 
      }
 
    Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
