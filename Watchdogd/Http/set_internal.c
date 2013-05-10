@@ -44,7 +44,8 @@
     reader =  xmlReaderForMemory( infos->buffer, infos->buffer_size, "set_internal.xml", NULL, XML_PARSE_NONET );
     if (reader == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Traiter_XML_set_internal: Error Readin XML from buffer" );
+                "Http_Traiter_XML_set_internal: Error Reading XML from buffer (size=%d, buffer=%s)",
+                 infos->buffer_size, infos->buffer );
        return;
      }
 
