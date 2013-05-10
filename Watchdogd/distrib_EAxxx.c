@@ -84,8 +84,8 @@
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );              /* Ajout dans la liste de ea a traiter */
     num = GPOINTER_TO_INT(Partage->com_msrv.liste_ea->data);              /* Recuperation du numero de ea */
+    reste = g_slist_length(Partage->com_msrv.liste_ea) - 1;
     Partage->com_msrv.liste_ea = g_slist_remove ( Partage->com_msrv.liste_ea, GINT_TO_POINTER(num) );
-    reste = g_slist_length(Partage->com_msrv.liste_ea);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,

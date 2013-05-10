@@ -200,13 +200,13 @@ one_again:
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
-                 _("Connecter_au_serveur: connexion refused by server %s"), Config_cli.host );
+                 _("Connecter_au_serveur: connexion refused by server %s"), Client_en_cours.host );
        Log(_("connexion refused by server"));
        close(connexion);
        return(FALSE);
      }
     else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                   _("Connecter_au_serveur: Connect OK") );
+                   _("Connecter_au_serveur: Connect OK to %s"), Client_en_cours.host );
 
     Connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );          /* Creation de la structure */
     if (!Connexion)

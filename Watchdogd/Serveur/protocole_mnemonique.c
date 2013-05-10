@@ -80,7 +80,8 @@
              }
             break;
        case SSTAG_CLIENT_WANT_DLS_FOR_MNEMO:
-             { pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_pour_mnemo_thread, client );
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_pour_mnemo_thread, client );
                pthread_detach( tid );
              }
             break;
