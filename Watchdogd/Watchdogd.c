@@ -362,12 +362,15 @@
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
      { printf("Warning, user '%s' not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
-       exit(-1);
+       exit(EXIT_ERREUR);
      }
+    else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
     setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
+    else
+     { printf( "Chdir %s successfull\n", Config.home ); exit(EXIT_ERREUR); }
 
     return(fg);
   }
