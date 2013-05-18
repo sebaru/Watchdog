@@ -79,10 +79,9 @@
 /**********************************************************************************************************/
  gboolean Stop_librairie ( struct LIBRAIRIE *lib )
   { if (!lib) return(FALSE);
-    if (lib->Thread_run == FALSE)
+    if ( lib->TID != 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_INFO,
-               "Stop_librairie: thread %s already stopped", lib->nom_fichier );
-       return(FALSE);
+                "Stop_librairie: thread %s, stopping in progress", lib->nom_fichier );
      }
 
     lib->Thread_run = FALSE;                                         /* On demande au thread de s'arreter */

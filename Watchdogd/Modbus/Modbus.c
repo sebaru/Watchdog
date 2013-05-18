@@ -357,7 +357,7 @@
     Deconnecter_module  ( module );                                  /* Deconnexion du module en question */
     Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-             "Decharger_un_MODBUS: Dechergement module %d (%s)", module->modbus.id, module->modbus.ip );
+             "Decharger_un_MODBUS: Dechargement module %d (%s)", module->modbus.id, module->modbus.ip );
     g_free(module);
   }
 /**********************************************************************************************************/
@@ -1089,7 +1089,7 @@
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
      }
-
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "Run_thread: Preparing to stop . . . TID = %d", pthread_self() );
     Decharger_tous_MODBUS();
     Modbus_Liberer_config();                                  /* Liberation de la configuration de Modbus */
 
