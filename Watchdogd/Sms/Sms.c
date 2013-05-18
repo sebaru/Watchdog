@@ -45,12 +45,13 @@
  static void Sms_Lire_config ( void )
   { gchar *chaine;
     GKeyFile *gkf;
+    GError *error;
 
     gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
      { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Sms_Lire_config : unable to load config file %s", Config.config_file );
-       return;
+                 "Sms_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
+       g_error_free(error);       return;
      }
                                                                                /* Positionnement du debug */
     Cfg_sms.lib->Thread_debug = g_key_file_get_boolean ( gkf, "SMS", "debug", NULL ); 

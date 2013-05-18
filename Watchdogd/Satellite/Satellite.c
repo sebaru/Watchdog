@@ -53,12 +53,13 @@
  static void Satellite_Lire_config ( void )
   { gchar *chaine;
     GKeyFile *gkf;
+    GError *error;
 
     gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
      { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Satellite_Lire_config : unable to load config file %s", Config.config_file );
-       return;
+                 "Satellite_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
+       g_error_free(error);       return;
      }
                                                                                /* Positionnement du debug */
     Cfg_satellite.lib->Thread_debug = g_key_file_get_boolean ( gkf, "SATELLITE", "debug", NULL ); 

@@ -43,12 +43,13 @@
 /**********************************************************************************************************/
  static void Audio_Lire_config ( void )
   { GKeyFile *gkf;
+    GError *error;
 
     gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
+    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
      { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Audio_Lire_config : unable to load config file %s", Config.config_file );
-       return;
+                 "Audio_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
+       g_error_free(error);       return;
      }
                                                                                /* Positionnement du debug */
     Cfg_audio.lib->Thread_debug = g_key_file_get_boolean ( gkf, "IMSG", "debug", NULL ); 
