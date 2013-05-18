@@ -219,9 +219,12 @@ ecoute_encore:
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
            { }
-          else if ( Reseau_tag(Connexion) != TAG_ADMIN )
-           { printf( "Ecouter_admin: Wrong TAG\n" ); break; }
-          else                                           /* Il s'agit donc d'un TAG_ADMIN ! */
+          else if ( Reseau_tag(Connexion) == TAG_CONNEXION && Reseau_ss_tag(Connexion) == SSTAG_SERVEUR_OFF )
+           { printf( "\n You've been deconnected\n" );
+             Arret=TRUE;
+             break;
+           }
+          else if ( Reseau_tag(Connexion) == TAG_ADMIN )               /* Il s'agit donc d'un TAG_ADMIN ! */
            { struct CMD_TYPE_ADMIN *admin;
              admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
              switch ( Reseau_ss_tag (Connexion) )
