@@ -370,7 +370,7 @@
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
-     { printf( "Chdir %s successfull\n", Config.home ); exit(EXIT_ERREUR); }
+     { printf( "Chdir %s successfull\n", Config.home ); }
 
     return(fg);
   }
