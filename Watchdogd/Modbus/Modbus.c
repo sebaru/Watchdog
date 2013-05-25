@@ -51,7 +51,7 @@
 /**********************************************************************************************************/
  static void Modbus_Lire_config ( void )
   { GKeyFile *gkf;
-    GError *error;
+    GError *error = NULL;
 
     gkf = g_key_file_new();
     if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
