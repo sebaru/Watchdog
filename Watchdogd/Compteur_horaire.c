@@ -93,7 +93,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if (!Recuperer_cpthDB( Config.log, db ))
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }                                                                         /* Si pas d'enregistrement */
 
@@ -101,7 +101,7 @@
      { struct CPTH_DB *cpth;
        cpth = Recuperer_cpthDB_suite( Config.log, db );
        if (!cpth)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           return;
         }
        if (cpth->num < NBR_COMPTEUR_H)
@@ -110,7 +110,7 @@
         { Info_new( Config.log, FALSE, LOG_WARNING, "Charger_cpth: cpth->num (%d) out of range", cpth->num ); }
        g_free(cpth);
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Updater_cpthDB : Met à jour l'ensemble des CompteurHoraire dans la base de données                     */
@@ -135,6 +135,6 @@
                    "UPDATE %s SET val=%d WHERE id_mnemo=%d;", NOM_TABLE_CPTH, cpth->valeur, cpth->id_mnemo );
        Lancer_requete_SQL ( Config.log, db, requete );
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /*--------------------------------------------------------------------------------------------------------*/

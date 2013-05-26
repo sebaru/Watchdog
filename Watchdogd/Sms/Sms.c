@@ -261,7 +261,7 @@
           g_free(result_mnemo);
         }
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                           */

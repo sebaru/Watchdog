@@ -108,14 +108,14 @@
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                       */
 /* Entrée: La DB                                                                                          */
 /**********************************************************************************************************/
- void Libere_DB_SQL( struct LOG *log, struct DB **adr_db )
+ void Libere_DB_SQL( struct DB **adr_db )
   { struct DB *db;
     if (!(adr_db && *adr_db)) return;
 
     db = *adr_db;
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Libere_DB_SQL: Reste un result a FREEer !" );
-       Liberer_resultat_SQL ( log, db );
+       Liberer_resultat_SQL ( Config.log, db );
      }
     mysql_close( db->mysql );
     Info_new( Config.log, Config.log_db, LOG_INFO, "Libere_DB_SQL: Deconnexion effective" );

@@ -105,7 +105,7 @@
      }                                                                                  /* Si pas d'accès */
 
     if (!Recuperer_tempoDB( Config.log, db ))
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }                                                                         /* Si pas d'enregistrement */
 
@@ -113,7 +113,7 @@
      { struct CMD_TYPE_OPTION_TEMPO *tempo;
        tempo = Recuperer_tempoDB_suite( Config.log, db );
        if (!tempo)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           return;
         }
 

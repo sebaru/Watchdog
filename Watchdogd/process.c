@@ -257,7 +257,7 @@
      }                                                                                  /* Si pas d'accès */
 
     if ( !Recuperer_cameraDB( Config.log, db ) )                      /* Préparation du chargement camera */
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return(FALSE);
      }                                                                         /* Si pas d'enregistrement */
 
@@ -311,7 +311,7 @@
        gint id_camera;
        camera = Recuperer_cameraDB_suite( Config.log, db );
        if (!camera)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           break;
         }
        g_snprintf(nom_fichier, sizeof(nom_fichier), "Camera/camera%04d.conf", camera->id);

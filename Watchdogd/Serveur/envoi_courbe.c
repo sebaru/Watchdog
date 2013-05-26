@@ -161,7 +161,7 @@
 
     g_free(envoi_courbe);                             /* Nous n'avons plus besoin de la structure d'envoi */
     client->courbes = g_list_append ( client->courbes, courbe ); /* Ajout dans la liste des courbes a updater */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(NULL);
   }

@@ -102,7 +102,7 @@
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RS485, rs485->id );
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
@@ -125,7 +125,7 @@
     if (!libelle)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                  "Ajouter_rs485DB: Normalisation libelle impossible" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(-1);
      }
 
@@ -140,11 +140,11 @@
     g_free(libelle);
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    if (retour == FALSE)  { Libere_DB_SQL( Config.log, &db );
+    if (retour == FALSE)  { Libere_DB_SQL( &db );
                             return(-1);
                           }
     last_id = Recuperer_last_ID_SQL( Config.log, db );
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( last_id );
   }
@@ -166,7 +166,7 @@
     if (!libelle)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                  "Modifier_rs485DB: Normalisation libelle impossible" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(-1);
      }
 
@@ -183,7 +183,7 @@
                 rs485->id );
     g_free(libelle);
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
   }
@@ -273,7 +273,7 @@
 
 /********************************************** Chargement des modules ************************************/
     if ( ! Recuperer_rs485DB( db ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -290,7 +290,7 @@
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                     "Charger_tous_RS485: Erreur allocation mémoire struct MODULE_RS485" );
           g_free(rs485);
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           return(FALSE);
         }
        memcpy( &module->rs485, rs485, sizeof(struct RS485DB) );
@@ -309,7 +309,7 @@
               "Charger_tous_RS485: %03d module RS485 found  !", g_slist_length(Cfg_rs485.Modules_RS485) );
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
 
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     return(TRUE);
   }
 /**********************************************************************************************************/

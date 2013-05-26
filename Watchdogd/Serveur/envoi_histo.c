@@ -135,7 +135,7 @@
 
     if ( ! Recuperer_histoDB( Config.log, db ) )                                 /* Si pas de histos (??) */
      { Client_mode( client, VALIDE );         /* Le client est maintenant valide aux yeux du sous-serveur */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -149,7 +149,7 @@
      { histo = Recuperer_histoDB_suite( Config.log, db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Client_mode( client, VALIDE );      /* Le client est maintenant valide aux yeux du sous-serveur */
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

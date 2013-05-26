@@ -232,7 +232,7 @@
      { util = Recuperer_utilsDB_suite( Config.log, db );
        if (!util)
         { Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL_FIN, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

@@ -129,7 +129,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_capteurDB( Config.log, db, client->syn.id ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -144,7 +144,7 @@
     for( ; ; )
      { capteur = Recuperer_capteurDB_suite( Config.log, db );
        if (!capteur)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -179,7 +179,7 @@
 
     if ( ! Recuperer_capteurDB( Config.log, db, client->num_supervision ) )
      { Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -196,7 +196,7 @@
        capteur = Recuperer_capteurDB_suite( Config.log, db );
        if (!capteur)                                                                        /* Terminé ?? */
         { Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

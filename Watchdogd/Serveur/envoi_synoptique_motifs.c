@@ -135,7 +135,7 @@
 
     if ( ! Recuperer_motifDB( Config.log, db, client->syn.id ) )
      { Client_mode( client, ENVOI_COMMENT_ATELIER );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -156,7 +156,7 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -190,7 +190,7 @@
     while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
     g_free(motifs);
 
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Client_mode( client, ENVOI_COMMENT_ATELIER );
     Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN, NULL, 0 );
     Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -225,7 +225,7 @@
 
     if ( ! Recuperer_motifDB( Config.log, db, client->num_supervision ) )
      { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -246,7 +246,7 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -279,7 +279,7 @@
     while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
     g_free(motifs);
 
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Client_mode( client, ENVOI_COMMENT_SUPERVISION );
     Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN, NULL, 0 );
     Unref_client( client );                                     /* Déréférence la structure cliente */

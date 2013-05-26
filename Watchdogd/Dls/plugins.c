@@ -96,7 +96,7 @@
      }
 
     plugin_dls = Rechercher_plugin_dlsDB( Config.log, db, id );
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
 
     if (!plugin_dls)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %04d non trouvé", id );
@@ -195,7 +195,7 @@
      { do
         { plugin = Recuperer_plugins_dlsDB_suite( Config.log, db );
           if (!plugin)
-           { Libere_DB_SQL( Config.log, &db );
+           { Libere_DB_SQL( &db );
              Config.compil = 0;
              return;
            }

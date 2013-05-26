@@ -128,10 +128,10 @@
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d started\n", id );
     Admin_write ( connexion, chaine );
@@ -164,10 +164,10 @@
               );
 
     if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
 
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d stopped\n", id );
     Admin_write ( connexion, chaine );

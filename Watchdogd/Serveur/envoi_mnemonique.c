@@ -388,7 +388,7 @@
 
     if ( ! Recuperer_mnemoDB( Config.log, db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return;
      }
 
@@ -405,7 +405,7 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }
@@ -428,7 +428,7 @@
      }
     while (mnemo);
     g_free(mnemos);
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     Unref_client( client );                                           /* Déréférence la structure cliente */
   }
@@ -452,7 +452,7 @@
 
     if ( ! Recuperer_mnemoDB_for_courbe( Config.log, db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -464,7 +464,7 @@
      { mnemo = Recuperer_mnemoDB_for_courbe_suite( Config.log, db );
        if (!mnemo)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

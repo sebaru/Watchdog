@@ -93,7 +93,7 @@
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_MODBUS, modbus->id );
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_modbus.reload = TRUE;                    /* Rechargement des modules MODBUS en mémoire de travail */
     return(retour);
   }
@@ -124,7 +124,7 @@
     ip = Normaliser_chaine ( modbus->ip );                   /* Formatage correct des chaines */
     if (!ip)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Normalisation ip impossible" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        g_free(libelle);
        return(-1);
      }
@@ -157,7 +157,7 @@
        else retour = 0;
      }
     else retour = -1;
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_modbus.reload = TRUE;                    /* Rechargement des modules MODBUS en mémoire de travail */
     return ( retour );                                            /* Pas d'erreur lors de la modification */
   }
@@ -250,7 +250,7 @@
 
 /********************************************** Chargement des modules ************************************/
     if ( ! Recuperer_modbusDB( db ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -268,7 +268,7 @@
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                    "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
           g_free(modbus);
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           return(FALSE);
         }
        memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
@@ -282,7 +282,7 @@
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "Charger_tous_MODBUS: %d modules MODBUS found  !", cpt );
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     return(TRUE);
   }
 /**********************************************************************************************************/

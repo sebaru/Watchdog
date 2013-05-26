@@ -176,7 +176,7 @@
 
     if ( ! Recuperer_cameraDB( Config.log, db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        pthread_exit( NULL );
      }
 
@@ -191,7 +191,7 @@
      { camera = Recuperer_cameraDB_suite( Config.log, db );
        if (!camera)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

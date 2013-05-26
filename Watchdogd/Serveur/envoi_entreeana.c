@@ -54,7 +54,7 @@
 
     if (!Recuperer_entreeANADB( Config.log, db ))
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -69,7 +69,7 @@
      { entree = Recuperer_entreeANADB_suite( Config.log, db );
        if (!entree)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

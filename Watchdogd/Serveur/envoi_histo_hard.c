@@ -77,7 +77,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Rechercher_histo_hardDB( Config.log, db, &requete ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
@@ -91,7 +91,7 @@
      { histo = Rechercher_histo_hardDB_suite( Config.log, db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

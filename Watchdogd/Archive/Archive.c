@@ -121,7 +121,7 @@
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
        g_free(arch);
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%d)", pthread_self() );
     Partage->com_arch.TID = 0;                            /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

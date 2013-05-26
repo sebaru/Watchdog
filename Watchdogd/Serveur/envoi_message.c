@@ -214,7 +214,7 @@
 
     if ( ! Recuperer_messageDB( Config.log, db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        pthread_exit( NULL );
      }
 
@@ -234,7 +234,7 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -256,7 +256,7 @@
      }
     while (msg);                                              /* Tant que l'on a des messages e envoyer ! */
     g_free(msgs);
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );

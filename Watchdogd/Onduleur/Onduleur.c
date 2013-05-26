@@ -88,7 +88,7 @@
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_UPS, ups->id );
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_ups.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
@@ -224,7 +224,7 @@
        else retour = 0;
      }
     else retour = -1;
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_ups.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
     return ( retour );                                            /* Pas d'erreur lors de la modification */
   }
@@ -282,7 +282,7 @@
 
 /********************************************** Chargement des modules ************************************/
     if ( ! Recuperer_upsDB( db ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Charger_tous_ups: Recuperer_ups Failed" );
        return(FALSE);
      }
@@ -301,7 +301,7 @@
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR,
                    "Charger_tous_Erreur allocation mémoire struct MODULE_UPS" );
           g_free(ups);
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           return(FALSE);
         }
        memcpy( &module->ups, ups, sizeof(struct UPSDB) );
@@ -317,7 +317,7 @@
      }
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Charger_tous_ups: %03d UPS found  !", cpt );
 
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     return(TRUE);
   }
 /**********************************************************************************************************/

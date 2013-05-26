@@ -127,7 +127,7 @@
 
 
     if ( ! Recuperer_paletteDB( Config.log, db, client->syn.id ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }
 
@@ -140,7 +140,7 @@
     for( ; ; )
      { palette = Recuperer_paletteDB_suite( Config.log, db );
        if (!palette)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Envoi_client ( client, TAG_ATELIER, sstag_fin, NULL, 0 );
           return;
         }
@@ -183,7 +183,7 @@
 
     if ( ! Recuperer_paletteDB( Config.log, db, client->num_supervision ) )
      { Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -198,7 +198,7 @@
     for( ; ; )
      { palette = Recuperer_paletteDB_suite( Config.log, db );
        if (!palette)                                                                        /* Terminé ?? */
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */

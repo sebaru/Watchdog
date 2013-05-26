@@ -107,7 +107,7 @@
        liste = liste->next;
      }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
@@ -218,7 +218,7 @@
    
             if (val == 0) Gerer_arrive_MSGxxx_dls_off( db, num );
        else if (val == 1) Gerer_arrive_MSGxxx_dls_on( db, num );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

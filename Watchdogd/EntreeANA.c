@@ -50,7 +50,7 @@
      }                                                                                  /* Si pas d'accès */
 
     if (!Recuperer_entreeANADB( Config.log, db ))
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }                                                                         /* Si pas d'enregistrement */
 
@@ -58,7 +58,7 @@
      { struct CMD_TYPE_OPTION_ENTREEANA *entree;
        entree = Recuperer_entreeANADB_suite( Config.log, db );
        if (!entree)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           return;
         }
 

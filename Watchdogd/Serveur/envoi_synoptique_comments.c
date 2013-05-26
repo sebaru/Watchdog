@@ -129,7 +129,7 @@
 
     if ( ! Recuperer_commentDB( Config.log, db, client->syn.id ) )
      { Client_mode( client, ENVOI_PASSERELLE_ATELIER );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );                                                    /* Si pas de histos (??) */
      }
@@ -143,7 +143,7 @@
     for( ; ; )
      { comment = Recuperer_commentDB_suite( Config.log, db );
        if (!comment)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Client_mode( client, ENVOI_PASSERELLE_ATELIER );
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -177,7 +177,7 @@
 
     if ( ! Recuperer_commentDB( Config.log, db, client->num_supervision ) )
      { Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );                     /* Si pas de comments ... */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -192,7 +192,7 @@
     for( ; ; )
      { comment = Recuperer_commentDB_suite( Config.log, db );
        if (!comment)                                                                        /* Terminé ?? */
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */

@@ -129,7 +129,7 @@
 
     if ( ! Recuperer_passerelleDB( Config.log, db, client->syn.id ) )
      { Client_mode( client, ENVOI_CAPTEUR_ATELIER );                            /* Si pas de comments ... */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -144,7 +144,7 @@
     for( ; ; )
      { pass = Recuperer_passerelleDB_suite( Config.log, db );
        if (!pass)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Client_mode( client, ENVOI_CAPTEUR_ATELIER );               /* Si pas de comments ... */
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -179,7 +179,7 @@
 
     if ( ! Recuperer_passerelleDB( Config.log, db, client->num_supervision ) )
      { Client_mode( client, ENVOI_PALETTE_SUPERVISION );                        /* Si pas de comments ... */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -194,7 +194,7 @@
     for( ; ; )
      { pass = Recuperer_passerelleDB_suite( Config.log, db );
        if (!pass)                                                                           /* Terminé ?? */
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           Client_mode( client, ENVOI_PALETTE_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */

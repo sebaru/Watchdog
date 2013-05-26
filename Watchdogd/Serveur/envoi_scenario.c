@@ -182,7 +182,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_scenarioDB( Config.log, db ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
@@ -196,7 +196,7 @@
      { sc = Recuperer_scenarioDB_suite( Config.log, db );
        if (!sc)
         { Envoi_client ( client, TAG_SCENARIO, SSTAG_SERVEUR_ADDPROGRESS_SCENARIO_FIN, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

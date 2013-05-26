@@ -320,7 +320,7 @@
 
     if ( ! Recuperer_plugins_dlsDB( Config.log, db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
@@ -333,7 +333,7 @@
      { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
        if (!dls)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

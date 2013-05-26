@@ -157,7 +157,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_scenarioDB_par_bitm( Config.log, db, &client->sce ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
@@ -173,7 +173,7 @@
      { sc = Recuperer_scenarioDB_suite( Config.log, db );
        if (!sc)
         { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

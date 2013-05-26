@@ -381,7 +381,7 @@
           g_free(result_mnemo);
         }
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
 /**********************************************************************************************************/

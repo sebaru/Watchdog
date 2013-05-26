@@ -103,7 +103,7 @@
           g_free(sc);
         } else Partage->scenario[i].actif = FALSE;
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Ajouter_scenarioDB: Ajout ou edition d'un message                                                           */

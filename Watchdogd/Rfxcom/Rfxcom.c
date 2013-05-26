@@ -96,7 +96,7 @@
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RFXCOM, id );
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_rfxcom.reload = TRUE;
     return(retour);
   }
@@ -122,7 +122,7 @@
     if (!libelle)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                  "Ajouter_rfxcomDB: Normalisation libelle impossible" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -136,11 +136,11 @@
     g_free(libelle);
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    if (retour == FALSE)  { Libere_DB_SQL( Config.log, &db );
+    if (retour == FALSE)  { Libere_DB_SQL( &db );
                             return(-1);
                           }
     last_id = Recuperer_last_ID_SQL( Config.log, db );
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_rfxcom.reload = TRUE;
     return( last_id );
   }
@@ -213,7 +213,7 @@
     if (!libelle)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                  "Modifier_rfxcomDB: Normalisation libelle impossible" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -230,7 +230,7 @@
     g_free(libelle);
 
     retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Cfg_rfxcom.reload = TRUE;
     return( retour );
   }
@@ -251,7 +251,7 @@
     if ( ! Recuperer_rfxcomDB( Config.log, db ) )
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
                 "Charger_tous_rfxcom: Erreur de requete SQL" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -268,7 +268,7 @@
         { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                     "Charger_tous_Erreur allocation mémoire struct MODULE_RFXCOM" );
           g_free(rfxcom);
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           return(FALSE);
         }
        memcpy( &module->rfxcom, rfxcom, sizeof(struct RFXCOMDB) );
@@ -285,7 +285,7 @@
               "Charger_tous_module : %d RFXCOM Modules found !", g_slist_length( Cfg_rfxcom.Modules_RFXCOM ) );
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
 
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     return(TRUE);
   }
 /**********************************************************************************************************/

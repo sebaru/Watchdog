@@ -108,7 +108,7 @@
     while (arch);                                          /* On tourne tant qu'il y a des enregistrement */
 
     g_free(envoi_courbe);                             /* Nous n'avons plus besoin de la structure d'envoi */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(NULL);
   }

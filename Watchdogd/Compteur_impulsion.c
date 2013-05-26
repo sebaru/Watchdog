@@ -49,7 +49,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if (!Recuperer_cpt_impDB( Config.log, db ))
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }                                                                         /* Si pas d'enregistrement */
 
@@ -57,7 +57,7 @@
      { struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp;
        cpt_imp = Recuperer_cpt_impDB_suite( Config.log, db );
        if (!cpt_imp)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           return;
         }
        if (cpt_imp->num < NBR_COMPTEUR_IMP)
@@ -93,7 +93,7 @@
                    cpt_imp->valeur, cpt_imp->id_mnemo );
        Lancer_requete_SQL ( Config.log, db, requete );
      }
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */

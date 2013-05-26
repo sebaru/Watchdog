@@ -226,7 +226,7 @@
      { classe = Recuperer_classeDB_suite( Config.log, db );
        if (!classe)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

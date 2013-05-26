@@ -274,7 +274,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
      { icone = Recuperer_iconeDB_suite( Config.log, db );
        if (!icone)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

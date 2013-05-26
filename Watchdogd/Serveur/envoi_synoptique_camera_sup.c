@@ -135,7 +135,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_camera_supDB( Config.log, db, client->syn.id ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -150,7 +150,7 @@
     for( ; ; )
      { camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
        if (!camera_sup)
-        { Libere_DB_SQL( Config.log, &db );
+        { Libere_DB_SQL( &db );
           /* Test 19/09/2009 Client_mode( client, ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE );*/
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -182,7 +182,7 @@
 
     if ( ! Recuperer_camera_supDB( Config.log, db, client->num_supervision ) )
      { Client_mode( client, ENVOI_IXXX_SUPERVISION );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -198,7 +198,7 @@
      { camera_sup = Recuperer_camera_supDB_suite( Config.log, db );
        if (!camera_sup)                                                                     /* Terminé ?? */
         { Client_mode( client, ENVOI_IXXX_SUPERVISION );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

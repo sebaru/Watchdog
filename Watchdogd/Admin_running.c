@@ -102,7 +102,7 @@
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
           Admin_write ( connexion, chaine );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
         }
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )

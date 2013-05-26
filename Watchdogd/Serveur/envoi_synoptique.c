@@ -169,7 +169,7 @@
      }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_synoptiqueDB( Config.log, db ) )
-     { Libere_DB_SQL( Config.log, &db );
+     { Libere_DB_SQL( &db );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -184,7 +184,7 @@
      { syn = Recuperer_synoptiqueDB_suite( Config.log, db );
        if (!syn)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( Config.log, &db );
+          Libere_DB_SQL( &db );
           return;
         }
 

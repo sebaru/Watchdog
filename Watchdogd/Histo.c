@@ -55,7 +55,7 @@
                 "DELETE FROM %s", NOM_TABLE_HISTO );
 
     Lancer_requete_SQL ( Config.log, db, requete );                               /* Execution de la requete SQL */
-    Libere_DB_SQL( Config.log, &db );
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Retirer_msgDB: Elimination d'un message                                                                */

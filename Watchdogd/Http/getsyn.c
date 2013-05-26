@@ -62,7 +62,7 @@
     if (buf == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Buffer creation failed" );
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -71,7 +71,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Writer creation failed" );
        xmlBufferFree(buf);
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -80,7 +80,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Start document failed" );
        xmlBufferFree(buf);
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -89,7 +89,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                  "Http_Traiter_request_getsyn : Synoptique %d not found in DB", syn_id );
        xmlBufferFree(buf);
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -98,7 +98,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Failed to Start element synoptique" );
        xmlBufferFree(buf);
-       Libere_DB_SQL( Config.log, &db );
+       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -143,7 +143,7 @@
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
 
-    Libere_DB_SQL( Config.log, &db );                           /* On a plus besoin de la base de données */
+    Libere_DB_SQL( &db );                           /* On a plus besoin de la base de données */
 
     retour = xmlTextWriterEndElement(writer);                                           /* End synoptique */
     if (retour < 0)
