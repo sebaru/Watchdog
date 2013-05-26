@@ -116,9 +116,8 @@
      { taille = read( client->transfert.fd, client->transfert.buffer + sizeof(struct CMD_FICHIER),
                                             client->connexion->taille_bloc - sizeof(struct CMD_FICHIER) );
        if (taille>=0)                                            /* On n'est tjrs pas a la fin du fichier */
-        { gint retour;
-          retour = Envoi_client( client, TAG_FICHIER, SSTAG_SERVEUR_FICHIER, client->transfert.buffer,
-                                 taille + sizeof(struct CMD_FICHIER) );
+        { Envoi_client( client, TAG_FICHIER, SSTAG_SERVEUR_FICHIER, client->transfert.buffer,
+                        taille + sizeof(struct CMD_FICHIER) );
         }
 
        if (taille != client->connexion->taille_bloc - sizeof(struct CMD_FICHIER) )

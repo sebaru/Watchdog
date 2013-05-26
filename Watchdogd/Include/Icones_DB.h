@@ -53,11 +53,11 @@
  extern gboolean Retirer_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone );
  extern gboolean Modifier_iconeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone );
 
- extern struct CLASSEDB *Rechercher_classeDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Recuperer_classeDB ( struct LOG *log, struct DB *db );
- extern struct CLASSEDB *Recuperer_classeDB_suite( struct LOG *log, struct DB *db );
- extern gint Ajouter_classeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CLASSE *classe );
- extern gboolean Retirer_classeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CLASSE *classe );
- extern gboolean Modifier_classeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CLASSE *classe );
+ extern struct CLASSEDB *Rechercher_classeDB ( guint id );
+ extern gboolean Recuperer_classeDB ( struct DB **db );
+ extern struct CLASSEDB *Recuperer_classeDB_suite( struct DB **db );
+ extern gint Ajouter_classeDB ( struct CMD_TYPE_CLASSE *classe );
+ extern gboolean Retirer_classeDB ( struct CMD_TYPE_CLASSE *classe );
+ extern gboolean Modifier_classeDB( struct CMD_TYPE_CLASSE *classe );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

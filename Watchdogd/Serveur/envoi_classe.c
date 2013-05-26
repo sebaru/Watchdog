@@ -58,10 +58,8 @@
  void Proto_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { struct CMD_TYPE_CLASSE edit_classe;
     struct CLASSEDB *classe;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    classe = Rechercher_classeDB( Config.log, Db_watchdog, rezo_classe->id );
+    classe = Rechercher_classeDB( rezo_classe->id );
 
     if (classe)
      { edit_classe.id         = classe->id;                                 /* Recopie des info editables */
@@ -87,10 +85,8 @@
  void Proto_valider_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { struct CLASSEDB *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_classeDB ( Config.log, Db_watchdog, rezo_classe );
+    retour = Modifier_classeDB ( rezo_classe );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -98,7 +94,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_classeDB( Config.log, Db_watchdog, rezo_classe->id );
+    else { result = Rechercher_classeDB( rezo_classe->id );
            if (result) 
             { struct CMD_TYPE_CLASSE *classe;
               classe = Preparer_envoi_classe ( result );
@@ -131,11 +127,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    if (rezo_classe->id == 0) return;                          /* La classe 'Default' n'est pas effacable */
-    retour = Retirer_classeDB( Config.log, Db_watchdog, rezo_classe );
+    retour = Retirer_classeDB( rezo_classe );
 
     if (retour)
      { Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_DEL_CLASSE_OK,
@@ -157,10 +150,8 @@
  void Proto_ajouter_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe )
   { struct CLASSEDB *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_classeDB ( Config.log, Db_watchdog, rezo_classe );
+    id = Ajouter_classeDB ( rezo_classe );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -168,7 +159,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_classeDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_classeDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -207,13 +198,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiCLASSE", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_classeDB( Config.log, db ) )
+    if ( ! Recuperer_classeDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
@@ -223,10 +208,9 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { classe = Recuperer_classeDB_suite( Config.log, db );
+     { classe = Recuperer_classeDB_suite( &db );
        if (!classe)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

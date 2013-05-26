@@ -43,6 +43,7 @@
  void Proto_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
   { struct CMD_TYPE_CAMERA *camera;
     struct DB *Db_watchdog;
+#ifdef bouh
     Db_watchdog = client->Db_watchdog;
 
     camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
@@ -59,6 +60,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_camera: Le client valide l'edition d'un camera                                    */
@@ -69,6 +71,7 @@
   { struct CMD_TYPE_CAMERA *result;
     gboolean retour;
     struct DB *Db_watchdog;
+#ifdef bouh
     Db_watchdog = client->Db_watchdog;
 
     retour = Modifier_cameraDB ( Config.log, Db_watchdog, rezo_camera );
@@ -94,6 +97,7 @@
                 }
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_effacer_camera: Retrait du camera en parametre                                                   */
@@ -103,6 +107,7 @@
  void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
   { gboolean retour;
     struct DB *Db_watchdog;
+#ifdef bouh
     Db_watchdog = client->Db_watchdog;
 
     retour = Retirer_cameraDB( Config.log, Db_watchdog, rezo_camera );
@@ -119,6 +124,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_camera: Un client nous demande d'ajouter un camera Watchdog                              */
@@ -129,6 +135,7 @@
   { struct CMD_TYPE_CAMERA *camera;
     struct DB *Db_watchdog;
     gint id;
+#ifdef bouh
     Db_watchdog = client->Db_watchdog;
 
     id = Ajouter_cameraDB ( Config.log, Db_watchdog, rezo_camera );
@@ -154,6 +161,7 @@
               g_free(camera);
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
