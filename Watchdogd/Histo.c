@@ -54,7 +54,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s", NOM_TABLE_HISTO );
 
-    Lancer_requete_SQL ( Config.log, db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
@@ -68,7 +68,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_HISTO, id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
@@ -103,7 +103,7 @@
     g_free(libelle);
     g_free(nom_ack);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );
+    return ( Lancer_requete_SQL ( db, requete ) );
   }
 /**********************************************************************************************************/
 /* Modifier_histoDB: Modification des champs editables d'un histo                                         */
@@ -125,7 +125,7 @@
                 NOM_TABLE_HISTO, nom_ack, (gint)histo->date_fixe, histo->id );
     g_free(nom_ack);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -145,7 +145,7 @@
                 NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE /* Where */
               );
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -199,7 +199,7 @@
                 NOM_TABLE_HISTO, id
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */

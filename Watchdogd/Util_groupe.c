@@ -76,7 +76,7 @@
                 "DELETE FROM %s WHERE id_util=%d;",
 		NOM_TABLE_GIDS, id_util );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ))
+    if ( ! Lancer_requete_SQL ( db, requete ))
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Groupe_set_groupe_utilDB: Delete failed id=%d", id_util );
        return(FALSE);
@@ -89,7 +89,7 @@
 	           "VALUES (%d, %d);",
                    NOM_TABLE_GIDS, id_util, *(gids + cpt) );
 
-       if ( ! Lancer_requete_SQL ( log, db, requete ))
+       if ( ! Lancer_requete_SQL ( db, requete ))
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                    "Groupe_set_groupe_utilDB: set gids failed for id=%d", id_util );
           return(FALSE);
@@ -110,7 +110,7 @@
     g_snprintf( requete, sizeof(requete), "SELECT gids FROM %s WHERE id_util=%d ORDER BY gids DESC",
                 NOM_TABLE_GIDS, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(FALSE); }
 
     memset ( gids, 0, sizeof(guint)*NBR_MAX_GROUPE_PAR_UTIL );
@@ -139,7 +139,7 @@
     g_snprintf( requete, sizeof(requete), "SELECT name, comment FROM %s WHERE id=%d",
                 NOM_TABLE_GROUPE, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -171,7 +171,7 @@
 
     g_snprintf( requete, sizeof(requete), "SELECT id, name, comment FROM %s ORDER BY name", NOM_TABLE_GROUPE );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_groupesDB_suite: Recupération de l'enregistrement suivant                                    */
@@ -232,7 +232,7 @@
                 "DELETE FROM %s WHERE id=%d",
                 NOM_TABLE_GROUPE, groupe->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_groupeDB: ajoute un groupe à la database                                                       */
@@ -260,7 +260,7 @@
                  NOM_TABLE_GROUPE, nom, comment );
     g_free(nom); g_free(comment);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -281,6 +281,6 @@
                 NOM_TABLE_GROUPE, comment, groupe->id );
     g_free(comment);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

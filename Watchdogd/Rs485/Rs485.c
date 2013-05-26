@@ -101,7 +101,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RS485, rs485->id );
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
@@ -139,7 +139,7 @@
               );
     g_free(libelle);
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     if (retour == FALSE)  { Libere_DB_SQL( &db );
                             return(-1);
                           }
@@ -182,7 +182,7 @@
                 rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max,
                 rs485->id );
     g_free(libelle);
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
@@ -200,7 +200,7 @@
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
 
-    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */

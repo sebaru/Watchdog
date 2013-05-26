@@ -48,7 +48,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_PASSERELLE, passerelle->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
@@ -65,7 +65,7 @@
                 passerelle->bit_controle_1, passerelle->bit_controle_2, passerelle->bit_controle_3,
                 passerelle->position_x, passerelle->position_y, passerelle->angle );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -88,7 +88,7 @@
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,                                       /* From */
                 NOM_TABLE_PASSERELLE, id_syn, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE );   /* Jointure */
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -140,7 +140,7 @@
                 NOM_TABLE_PASSERELLE, NOM_TABLE_SYNOPTIQUE,                                       /* From */
                 NOM_TABLE_PASSERELLE, id, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     return ( Recuperer_passerelleDB_suite ( log, db ) );
@@ -162,6 +162,6 @@
                 passerelle->position_x, passerelle->position_y, passerelle->angle,
                 passerelle->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

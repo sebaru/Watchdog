@@ -74,7 +74,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination ok" ); }
 
@@ -82,7 +82,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_id=%d", NOM_TABLE_CAPTEUR, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination capteur failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination capteur ok" ); }
 
@@ -90,7 +90,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_id=%d", NOM_TABLE_COMMENT, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination comment failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination comment ok" ); }
 
@@ -98,7 +98,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn=%d", NOM_TABLE_MOTIF, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination syn failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination syn ok" ); }
 
@@ -106,7 +106,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_cible_id=%d", NOM_TABLE_PALETTE, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination palette failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination palette ok" ); }
 
@@ -114,7 +114,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE syn_cible_id=%d", NOM_TABLE_PASSERELLE, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination passerelle failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination passerelle ok" ); }
 
@@ -122,7 +122,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET num_syn=1 WHERE num_syn=%d", NOM_TABLE_DLS, syn->id );
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ) )
+    if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: re-affectation plugin D.L.S failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: re-affectation plugin D.L.S passerelle ok" ); }
 
@@ -166,7 +166,7 @@
     g_free(page);
     g_free(groupe);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -182,7 +182,7 @@
                 "SELECT id,libelle,page,access_groupe,groupe"
                 " FROM %s ORDER BY groupe,page,libelle", NOM_TABLE_SYNOPTIQUE );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -222,7 +222,7 @@
                 "SELECT id,libelle,page,access_groupe,groupe"
                 " FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -283,6 +283,6 @@
     g_free(page);
     g_free(groupe);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

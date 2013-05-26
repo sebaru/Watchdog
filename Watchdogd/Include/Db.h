@@ -48,7 +48,7 @@
  extern gchar *Normaliser_chaine( gchar *pre_comment );
  extern struct DB *Init_DB_SQL ( void );
  extern void Libere_DB_SQL( struct DB **adr_db );
- extern gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete );
+ extern gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete );
  extern MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db );
  extern void Liberer_resultat_SQL ( struct LOG *log, struct DB *db );
  extern guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db );

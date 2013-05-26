@@ -95,7 +95,7 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */
@@ -151,7 +151,7 @@
                 NOM_TABLE_ENTREEANA, id
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -202,6 +202,6 @@
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max, unite, entreeana->type,
                 entreeana->id_mnemo );
     g_free(unite);
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

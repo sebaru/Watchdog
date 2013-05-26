@@ -73,11 +73,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_UTIL, util->id );
-    Lancer_requete_SQL ( log, db, requete );
+    Lancer_requete_SQL ( db, requete );
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id_util=%d", NOM_TABLE_GIDS, util->id );
-    Lancer_requete_SQL ( log, db, requete );
+    Lancer_requete_SQL ( db, requete );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -124,7 +124,7 @@
        g_free(code_crypt);
        g_free(comment);
 
-       Lancer_requete_SQL ( log, db, requete );
+       Lancer_requete_SQL ( db, requete );
        id = Recuperer_last_ID_SQL ( log, db );
        Groupe_set_groupe_utilDB ( log, db, id, (guint *)&util->gids );      /* Positionnement des groupes */ 
        return(id);
@@ -186,7 +186,7 @@
     g_snprintf( chaine, sizeof(chaine), " WHERE id='%d'", util->id ); 
     g_strlcat ( requete, chaine, sizeof(requete) );
 
-    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
     Groupe_set_groupe_utilDB ( log, db, util->id, (guint *)&util->gids );
     return(TRUE);
   }
@@ -203,7 +203,7 @@
                 "enable_expire,date_expire,cansetpass,date_modif "
                 "FROM %s", NOM_TABLE_UTIL );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Rechercher_utilsDB: Recuperation de tous les champs des utilisateurs                                   */
@@ -250,7 +250,7 @@
                 "date_create,enable_expire,date_expire,cansetpass,date_modif "
                 "FROM %s WHERE id=%d", NOM_TABLE_UTIL, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */

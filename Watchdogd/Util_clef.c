@@ -59,7 +59,7 @@
                 NOM_TABLE_UTIL, code_crypt, util->id );
     g_free(code_crypt);
 
-    if ( ! Lancer_requete_SQL ( log, db, requete ))
+    if ( ! Lancer_requete_SQL ( db, requete ))
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Set_password: update failed %s", util->id );
        g_free(crypt);
@@ -84,7 +84,7 @@
                 " FROM %s WHERE name=\'%s\'",
                  NOM_TABLE_UTIL, nom );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */

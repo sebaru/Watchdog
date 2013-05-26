@@ -46,12 +46,12 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_ICONE, icone->id );
 
-    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE icone=%d", NOM_TABLE_MOTIF, icone->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
@@ -73,7 +73,7 @@
                 "('%s',%d)", NOM_TABLE_ICONE, libelle, icone->id_classe );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -89,7 +89,7 @@
                 "SELECT id,libelle,id_classe"
                 " FROM %s WHERE id_classe=%d ORDER BY libelle", NOM_TABLE_ICONE, classe );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -126,7 +126,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle,id_classe FROM %s WHERE id=%d", NOM_TABLE_ICONE, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -166,6 +166,6 @@
                 NOM_TABLE_ICONE, libelle, icone->id_classe, icone->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

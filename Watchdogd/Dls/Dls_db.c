@@ -46,13 +46,13 @@
     g_snprintf( (gchar *)requete, sizeof(requete),                                         /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d",
                 NOM_TABLE_DLS, dls->id );
-    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
 
 /*************************************** Re-affectation des mnémoniques ***********************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MNEMO, dls->id );
 
-    Lancer_requete_SQL ( log, db, requete );
+    Lancer_requete_SQL ( db, requete );
 
     g_snprintf( (gchar *)requete, sizeof(requete), "%d.dls", dls->id );
     unlink( (gchar *)requete );
@@ -82,7 +82,7 @@
                    NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, dls->num_syn );
     g_free(nom);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -104,7 +104,7 @@
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* Where */
               );
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_plugins_dlsDB_suite: poursuite de la recherche des plugins DLS                               */
@@ -153,7 +153,7 @@
                 NOM_TABLE_DLS, id
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -197,6 +197,6 @@
                 NOM_TABLE_DLS, nom, dls->on, dls->type, dls->num_syn, dls->id );
     g_free(nom);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

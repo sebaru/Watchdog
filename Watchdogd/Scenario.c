@@ -139,7 +139,7 @@
 
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -175,7 +175,7 @@
                 scenario->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Retirer_scDB: Elimination d'un message                                                                */
@@ -188,7 +188,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_SCENARIO, sc->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_scDB: Recupération de la liste des ids des messages                                */
@@ -205,7 +205,7 @@
                 "septembre,octobre,novembre,decembre,id"
                 " FROM %s ORDER BY libelle", NOM_TABLE_SCENARIO );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_scDB: Recupération de la liste des ids des messages                                */
@@ -223,7 +223,7 @@
                 " FROM %s WHERE bitm=%d OR bitm=%d ORDER BY libelle",
                 NOM_TABLE_SCENARIO, sce->bit_clic, sce->bit_clic2 );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_scDB: Recupération de la liste des ids des messages                                */
@@ -288,7 +288,7 @@
                 "septembre,octobre,novembre,decembre"
                 " FROM %s WHERE id=%d", NOM_TABLE_SCENARIO, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */

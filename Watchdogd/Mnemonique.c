@@ -50,22 +50,22 @@
         { case MNEMO_ENTREE_ANA:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_ENTREEANA, mnemo_a_virer->id );
-               Lancer_requete_SQL ( log, db, requete );
+               Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_CPT_IMP:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPT_IMP, mnemo_a_virer->id );
-               Lancer_requete_SQL ( log, db, requete );
+               Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_CPTH:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPTH, mnemo_a_virer->id );
-               Lancer_requete_SQL ( log, db, requete );
+               Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_TEMPO:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_TEMPO, mnemo_a_virer->id );
-               Lancer_requete_SQL ( log, db, requete );
+               Lancer_requete_SQL ( db, requete );
                break;
           default:
                break;
@@ -75,7 +75,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MNEMO, mnemo->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_mnemoDB: Ajout ou edition d'un mnemo                                                           */
@@ -117,7 +117,7 @@
     g_free(acro);
     g_free(command_text);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
 
     last_id = Recuperer_last_ID_SQL( log, db );
@@ -127,25 +127,25 @@
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
                         "('%f','%f','%d','%d')", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
-            Lancer_requete_SQL ( log, db, requete );
+            Lancer_requete_SQL ( db, requete );
             break;
        case MNEMO_CPT_IMP:
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(val,id_mnemo,type_ci,multi,unite) VALUES "
                         "('%d','%d','%d','%f','%s')", NOM_TABLE_CPT_IMP, 0, last_id, 0, 1.0, "n/a" );
-            Lancer_requete_SQL ( log, db, requete );
+            Lancer_requete_SQL ( db, requete );
             break;
        case MNEMO_CPTH:
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(val,id_mnemo) VALUES "
                         "('%d','%d')", NOM_TABLE_CPTH, 0, last_id );
-            Lancer_requete_SQL ( log, db, requete );
+            Lancer_requete_SQL ( db, requete );
             break;
        case MNEMO_TEMPO:
             g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
                         "INSERT INTO %s(id_mnemo,delai_on,min_on,max_on,delai_off) VALUES "
                         "('%d','%d','%d','%d','%d')", NOM_TABLE_TEMPO, last_id, 10, 0, 0, 0 );
-            Lancer_requete_SQL ( log, db, requete );
+            Lancer_requete_SQL ( db, requete );
             break;
        default:
             break;
@@ -195,7 +195,7 @@
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO, commande_finale
               );                                                                /* order by test 25/01/06 */
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
@@ -218,7 +218,7 @@
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS
               );                                                                /* order by test 25/01/06 */
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
@@ -273,7 +273,7 @@
                 NOM_TABLE_MNEMO, id
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -324,7 +324,7 @@
                 NOM_TABLE_MNEMO, critere->type, NOM_TABLE_MNEMO, critere->num
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -391,7 +391,7 @@
     g_free(acronyme);
     g_free(command_text);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_mnemoDB_for_courbe: Recupération de la liste des ids des mnemos pour les courbes             */
@@ -416,7 +416,7 @@
                 NOM_TABLE_MNEMO, MNEMO_ENTREE, NOM_TABLE_MNEMO, MNEMO_SORTIE
               );                                                                /* order by test 25/01/06 */
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */

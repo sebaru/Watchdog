@@ -49,9 +49,9 @@
                 "UPDATE %s SET id_classe=0 WHERE id_classe=%d",
                 NOM_TABLE_ICONE, classe->id );
 
-    Lancer_requete_SQL ( log, db, requete );
+    Lancer_requete_SQL ( db, requete );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
@@ -73,7 +73,7 @@
                 "('%s')", NOM_TABLE_CLASSE, libelle );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -89,7 +89,7 @@
                 "SELECT id,libelle"
                 " FROM %s ORDER BY libelle", NOM_TABLE_CLASSE );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -125,7 +125,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle FROM %s WHERE id=%d", NOM_TABLE_CLASSE, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -164,6 +164,6 @@
                 NOM_TABLE_CLASSE, libelle, classe->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

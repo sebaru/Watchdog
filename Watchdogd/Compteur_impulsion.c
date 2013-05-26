@@ -91,7 +91,7 @@
        g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET val='%f' WHERE id_mnemo='%d';", NOM_TABLE_CPT_IMP,
                    cpt_imp->valeur, cpt_imp->id_mnemo );
-       Lancer_requete_SQL ( Config.log, db, requete );
+       Lancer_requete_SQL ( db, requete );
      }
     Libere_DB_SQL( &db );
   }
@@ -112,7 +112,7 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */
@@ -156,7 +156,7 @@
                 NOM_TABLE_MNEMO, NOM_TABLE_CPT_IMP, NOM_TABLE_MNEMO, id /* WHERE */
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -197,6 +197,6 @@
                 "unite='%s',multi='%f',type_ci='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_CPT_IMP, unite, cpt_imp->multi, cpt_imp->type, cpt_imp->id_mnemo );
     g_free(unite);
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

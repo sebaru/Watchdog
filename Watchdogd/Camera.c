@@ -46,7 +46,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, camera->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_cameraDB: Ajout ou edition d'un camera                                                         */
@@ -86,7 +86,7 @@
     g_free(objet);
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -104,7 +104,7 @@
                 NOM_TABLE_CAMERA                                                                  /* FROM */
               );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_cameraDB: Recupération de la liste des ids des cameras                              */
@@ -149,7 +149,7 @@
                 id                                                                               /* Where */
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -213,7 +213,7 @@
     g_free(location);
     g_free(objet);
     g_free(libelle);
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
@@ -229,7 +229,7 @@
                 NOM_TABLE_CAMERA_MOTION                                                                  /* FROM */
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -247,7 +247,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id = %d",
                 NOM_TABLE_CAMERA_MOTION, camera->id );
-    Lancer_requete_SQL ( log, db, requete );
+    Lancer_requete_SQL ( db, requete );
 
     return(camera);
   }

@@ -46,7 +46,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_PALETTE, palette->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
@@ -61,7 +61,7 @@
                 " VALUES (%d,%d,(SELECT MAX(pos)+1 FROM %s WHERE syn_id = %d))", NOM_TABLE_PALETTE,
                 palette->syn_id, palette->syn_cible_id, NOM_TABLE_PALETTE, palette->syn_id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -83,7 +83,7 @@
                 NOM_TABLE_PALETTE, id_syn, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PALETTE,           /* Jointure */
                 NOM_TABLE_PALETTE );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -127,7 +127,7 @@
                 NOM_TABLE_PALETTE, NOM_TABLE_SYNOPTIQUE,                                          /* From */
                 NOM_TABLE_PALETTE, id, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PALETTE );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -171,6 +171,6 @@
                 palette->id
               );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

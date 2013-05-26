@@ -92,7 +92,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_MODBUS, modbus->id );
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_modbus.reload = TRUE;                    /* Rechargement des modules MODBUS en mémoire de travail */
     return(retour);
@@ -151,7 +151,7 @@
     g_free(ip);
     g_free(libelle);
 
-    retour_sql = Lancer_requete_SQL ( Config.log, db, requete );               /* Lancement de la requete */
+    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
      { if (ajout==TRUE) retour = Recuperer_last_ID_SQL( Config.log, db );    /* Retourne le nouvel ID modbus */
        else retour = 0;
@@ -187,7 +187,7 @@
                 "SELECT id,enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana "
                 " FROM %s ORDER BY libelle", NOM_TABLE_MODULE_MODBUS );
 
-    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                              */

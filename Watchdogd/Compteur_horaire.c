@@ -53,7 +53,7 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_cpthDB_suite: Envoi du prochain enregistrement des cpth dans la liste                        */
@@ -133,7 +133,7 @@
      { cpth = &Partage->ch[cpt].cpthdb;
        g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET val=%d WHERE id_mnemo=%d;", NOM_TABLE_CPTH, cpth->valeur, cpth->id_mnemo );
-       Lancer_requete_SQL ( Config.log, db, requete );
+       Lancer_requete_SQL ( db, requete );
      }
     Libere_DB_SQL( &db );
   }

@@ -95,7 +95,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RFXCOM, id );
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_rfxcom.reload = TRUE;
     return(retour);
@@ -135,7 +135,7 @@
               );
     g_free(libelle);
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     if (retour == FALSE)  { Libere_DB_SQL( &db );
                             return(-1);
                           }
@@ -156,7 +156,7 @@
                 "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
                 " FROM %s ORDER BY type,sstype", NOM_TABLE_MODULE_RFXCOM );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rfxcomDB: Recupération de la liste des ids des rfxcoms                              */
@@ -229,7 +229,7 @@
                 rfxcom->id );
     g_free(libelle);
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_rfxcom.reload = TRUE;
     return( retour );

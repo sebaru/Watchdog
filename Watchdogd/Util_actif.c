@@ -46,6 +46,6 @@
                 "UPDATE %s SET enable = '%d', login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, enable, id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

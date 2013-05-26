@@ -41,7 +41,7 @@
                 "(%d,%d,%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
                 arch->type, arch->num, arch->valeur );
 
-    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_archDB: Initialise la récupération des archives bases de données                             */
@@ -58,7 +58,7 @@
                 " ORDER BY `date_sec`,`date_usec` ASC",
                 NOM_TABLE_ARCH, type, num, (gint)date_deb, (gint)date_fin );
 
-   return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+   return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_archDB_suite: Envoi un nouvel enregistrement archivé dans la Base de données                 */

@@ -69,7 +69,7 @@
     g_free(libelle);
     g_free(nom_ack);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );
+    return ( Lancer_requete_SQL ( db, requete ) );
   }
 /**********************************************************************************************************/
 /* Recuperer_histo_hardDB: Recupération de l'historique HARD du système, via requete                      */
@@ -138,7 +138,7 @@
 #endif
     g_strlcat( requete, " ORDER BY date_create_sec,date_create_usec LIMIT 500;", sizeof(requete) );
  
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */

@@ -127,7 +127,7 @@
                 NOM_TABLE_DLS, id
               );
 
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
        return;
      }
@@ -163,7 +163,7 @@
                 NOM_TABLE_DLS, id
               );
 
-    if ( Lancer_requete_SQL ( Config.log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
        return;
      }

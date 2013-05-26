@@ -57,7 +57,7 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_tempoDB_suite: Recupération de la liste des informations sur les temposids des               */
@@ -148,7 +148,7 @@
                 NOM_TABLE_TEMPO, id /* And */
               );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -191,6 +191,6 @@
                 "delai_on='%d', min_on='%d', max_on='%d', delai_off='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_TEMPO, tempo->delai_on, tempo->min_on, tempo->max_on, tempo->delai_off,
                 tempo->id_mnemo );
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

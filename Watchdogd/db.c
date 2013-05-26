@@ -127,7 +127,7 @@
 /* Entrée: La DB, la requete                                                                              */
 /* Sortie: TRUE si pas de souci                                                                           */
 /**********************************************************************************************************/
- gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete )
+ gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete )
   { if (!db) return(FALSE);
 
     if (db->free==FALSE)

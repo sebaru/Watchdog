@@ -48,7 +48,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERASUP, camera_sup->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
@@ -64,7 +64,7 @@
                 camera_sup->syn_id, camera_sup->camera_src_id,
                 camera_sup->position_x, camera_sup->position_y );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -83,7 +83,7 @@
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,                                            /* From */
                 id_syn, NOM_TABLE_CAMERA                                                         /* Where */
               );
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
@@ -131,7 +131,7 @@
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA,                                            /* FROM */
                 NOM_TABLE_CAMERASUP, id, NOM_TABLE_CAMERA );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL);
      }
 
@@ -174,6 +174,6 @@
                 camera_sup->position_x, camera_sup->position_y,
                 camera_sup->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -87,7 +87,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_UPS, ups->id );
 
-    retour = Lancer_requete_SQL ( Config.log, db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_ups.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
@@ -104,7 +104,7 @@
                 "SELECT id,host,ups,bit_comm,enable,ea_min,libelle,e_min,a_min,username,password "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
 
-    return ( Lancer_requete_SQL ( Config.log, db, requete ) );             /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_upsDB: Recupération de la liste des ids des upss                                    */
@@ -218,7 +218,7 @@
     g_free(username);
     g_free(password);
 
-    retour_sql = Lancer_requete_SQL ( Config.log, db, requete );               /* Lancement de la requete */
+    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
      { if (ajout==TRUE) retour = Recuperer_last_ID_SQL( Config.log, db );    /* Retourne le nouvel ID ups */
        else retour = 0;

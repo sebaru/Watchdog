@@ -47,7 +47,7 @@
                 "SELECT login_failed FROM %s WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(0); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -77,7 +77,7 @@
                 "UPDATE %s SET login_failed = login_failed+1 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    Lancer_requete_SQL ( log, db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
     if (Get_login_failed( log, db, id )>=max_login_failed)                     /* Desactivation du compte */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                 "Ajouter_one_login_failed: Desactivation compte sur trop login failed for id=%d", id );
@@ -97,6 +97,6 @@
                 "UPDATE %s SET login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -48,7 +48,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_COMMENT, comment->id );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Ajouter_commentDB: Ajout ou edition d'un message                                                       */
@@ -81,7 +81,7 @@
     g_free(libelle);
     g_free(font);
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
     return( Recuperer_last_ID_SQL( log, db ) );
   }
@@ -97,7 +97,7 @@
                 "SELECT id,syn_id,libelle,font,rouge,vert,bleu,posx,posy,angle"
                 " FROM %s WHERE syn_id=%d ORDER BY id", NOM_TABLE_COMMENT, id_syn );
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_commentDB: Recupération de la liste des ids des messages                            */
@@ -142,7 +142,7 @@
                 "SELECT syn_id,libelle,font,rouge,vert,bleu,posx,posy,angle "
                 "FROM %s WHERE id=%d", NOM_TABLE_COMMENT, id );
 
-    if ( Lancer_requete_SQL ( log, db, requete ) == FALSE )
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
     Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
@@ -201,6 +201,6 @@
     g_free(libelle);
     g_free(font);
 
-    return ( Lancer_requete_SQL ( log, db, requete ) );                    /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /*--------------------------------------------------------------------------------------------------------*/
