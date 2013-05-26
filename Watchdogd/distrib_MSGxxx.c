@@ -86,7 +86,7 @@
     GSList *liste;
     gint num;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Gerer_message_repeat: Connexion DB impossible" );
@@ -209,7 +209,7 @@
                num, val, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-       db = Init_DB_SQL( Config.log );
+       db = Init_DB_SQL();       
        if (!db)
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                    "Gerer_arrive_MSGxxx_dls: Connexion DB impossible" );

@@ -163,7 +163,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiSYN", 0, 0, 0 );
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { return;
      }                                                                           /* Si pas de histos (??) */

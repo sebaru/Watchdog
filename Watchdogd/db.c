@@ -71,7 +71,7 @@
 /* Entrée: toutes les infos necessaires a la connexion                                                    */
 /* Sortie: une structure DB de référence                                                                  */
 /**********************************************************************************************************/
- struct DB *Init_DB_SQL ( struct LOG *log )
+ struct DB *Init_DB_SQL ( void )
   { struct DB *db;
     my_bool reconnect;
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );

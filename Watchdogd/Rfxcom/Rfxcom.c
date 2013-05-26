@@ -89,7 +89,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) return(FALSE);
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -112,7 +112,7 @@
     struct DB *db;
     gint last_id;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
                          "Ajouter_rfxcomDB: Erreur connexion Database" );
                return(FALSE);
@@ -203,7 +203,7 @@
     gchar *libelle;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
                          "Modifier_rfxcomDB: Erreur connexion Database" );
                return(FALSE);
@@ -242,7 +242,7 @@
  static gboolean Charger_tous_rfxcom ( void  )
   { struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
                "Charger_tous_rfxcom: Erreur connexion Database" );
                return(FALSE);

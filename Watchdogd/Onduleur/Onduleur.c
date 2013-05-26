@@ -78,7 +78,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Retirer_upsDB: Database Connection Failed" );
        return(FALSE);
@@ -149,7 +149,7 @@
     struct DB *db;
     gint retour;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Database Connection Failed" );
        return(-1);
@@ -274,7 +274,7 @@
   { struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Charger_tous_ups: Database Connection Failed" );
        return(FALSE);

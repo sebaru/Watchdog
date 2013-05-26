@@ -92,7 +92,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Retirer_rs485DB: Database Connection Failed" );
        return(FALSE);
@@ -118,7 +118,7 @@
     struct DB *db;
     gint last_id;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) return(FALSE);
 
     libelle = Normaliser_chaine ( rs485->libelle );          /* Formatage correct des chaines */
@@ -159,7 +159,7 @@
     gchar *libelle;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) return(FALSE);
 
     libelle = Normaliser_chaine ( rs485->libelle );              /* Formatage correct des chaines */
@@ -265,7 +265,7 @@
  static gboolean Charger_tous_rs485 ( void  )
   { struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if ( !db )
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Charger_tous_rs485: Database Connection Failed" );
        return(-1);

@@ -86,7 +86,7 @@
  void Charger_cpth ( void )
   { struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, FALSE, LOG_ERR, "Charger_cpth: Connexion DB failed" );
        return;
@@ -123,7 +123,7 @@
     struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Updater_cpthDB: Connexion DB impossible" );
        return;

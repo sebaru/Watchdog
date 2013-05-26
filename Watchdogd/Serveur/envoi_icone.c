@@ -255,7 +255,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
     prctl(PR_SET_NAME, "W-EnvoiICO", 0, 0, 0 );
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;

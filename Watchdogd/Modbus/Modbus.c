@@ -83,7 +83,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Retirer_modbusDB: Database Connection Failed" );
        return(FALSE);
@@ -109,7 +109,7 @@
     struct DB *db;
     gint retour;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Database Connection Failed" );
        return(-1);
@@ -245,7 +245,7 @@
   { struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db) return(FALSE);
 
 /********************************************** Chargement des modules ************************************/

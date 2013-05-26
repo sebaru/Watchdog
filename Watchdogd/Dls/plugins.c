@@ -89,7 +89,7 @@
     struct PLUGIN_DLS *dls;
     struct DB *db;                                                                   /* Database Watchdog */
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_un_plugin_by_id: Unable to open database" );
        return(FALSE);
@@ -185,7 +185,7 @@
     struct PLUGIN_DLS *dls;
     struct DB *db;                                                                   /* Database Watchdog */
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to open database" );
        return;

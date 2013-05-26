@@ -51,7 +51,7 @@
     if (!syn_id_char) { syn_id = 1; }
                  else { syn_id = atoi(syn_id_char); }
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : DB Connexion failed" );

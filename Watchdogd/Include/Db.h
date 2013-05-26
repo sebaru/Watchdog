@@ -46,7 +46,7 @@
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Normaliser_chaine( gchar *pre_comment );
- extern struct DB *Init_DB_SQL ( struct LOG *log );
+ extern struct DB *Init_DB_SQL ( void );
  extern void Libere_DB_SQL( struct LOG *log, struct DB **adr_db );
  extern gboolean Lancer_requete_SQL ( struct LOG *log, struct DB *db, gchar *requete );
  extern MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db );

@@ -115,7 +115,7 @@
     while (Partage->com_dls.admin_start) sched_yield();
     Partage->com_dls.admin_start = id;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                  "Admin_dls_start: impossible d'ouvrir la Base de données %s",
@@ -151,7 +151,7 @@
     while (Partage->com_dls.admin_stop) sched_yield();
     Partage->com_dls.admin_stop = id;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                  "Admin_dls_stop: impossible d'ouvrir la Base de données %s",

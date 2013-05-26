@@ -454,7 +454,7 @@
        pthread_mutex_init( &client->mutex_struct_used, NULL );
        client->struct_used = 1;/* Par défaut, personne la structure est utilisée par le thread de surveilance */
 
-       client->Db_watchdog = Init_DB_SQL( Config.log );
+       client->Db_watchdog = Init_DB_SQL();       
        if (!client->Db_watchdog)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                   "Accueillir_nouveaux_client: Unable to open database" );

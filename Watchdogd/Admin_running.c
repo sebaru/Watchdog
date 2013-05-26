@@ -81,7 +81,7 @@
 
        sscanf ( ligne, "%s %s", commande, password );                /* Découpage de la ligne de commande */
 
-       db = Init_DB_SQL( Config.log );
+       db = Init_DB_SQL();       
        if (!db)
         { g_snprintf( chaine, sizeof(chaine), " Unable to connect to Database\n" );
           Admin_write ( connexion, chaine );

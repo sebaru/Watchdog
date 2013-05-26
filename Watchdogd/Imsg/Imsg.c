@@ -329,7 +329,7 @@
        return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
      }
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
                  "Imsg_Reception_message : Connexion DB failed. imsg not handled" );

@@ -250,7 +250,7 @@
     struct DB *db;
     gint id;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Creer_config_file_motion: Connexion DB failed" );
        return(FALSE);

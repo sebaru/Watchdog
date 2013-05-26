@@ -223,7 +223,7 @@
        return;
      }
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                  "Traiter_commande_sms : Connexion DB failed. sms not handled" );

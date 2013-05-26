@@ -45,7 +45,7 @@
   { struct DB *db;
     gchar requete[1024];
     
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_histoDB: Connexion DB failed" );
        return;

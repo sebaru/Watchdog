@@ -43,7 +43,7 @@
  void Charger_eana ( void )
   { struct DB *db;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_eana: Connexion DB failed" );
        return;

@@ -120,7 +120,7 @@
     envoi_courbe->type           = courbe->type;
     envoi_courbe->taille_donnees = 0;
 
-    db = Init_DB_SQL( Config.log );
+    db = Init_DB_SQL();       
     if (!db)
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_courbe_thread: Unable to open database (dsn)" );
