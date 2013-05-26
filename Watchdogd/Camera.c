@@ -57,18 +57,18 @@
   { gchar *location, *objet, *libelle;
     gchar requete[2048];
     
-    location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
+    location = Normaliser_chaine ( camera->location );              /* Formatage correct des chaines */
     if (!location)
      { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
-    objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
+    objet = Normaliser_chaine ( camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
        Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
-    libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);
@@ -183,18 +183,18 @@
   { gchar *location, *libelle, *objet;
     gchar requete[1024];
 
-    location = Normaliser_chaine ( log, camera->location );              /* Formatage correct des chaines */
+    location = Normaliser_chaine ( camera->location );              /* Formatage correct des chaines */
     if (!location)
      { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation location impossible" );
        return(-1);
      }
-    objet = Normaliser_chaine ( log, camera->objet );                    /* Formatage correct des chaines */
+    objet = Normaliser_chaine ( camera->objet );                    /* Formatage correct des chaines */
     if (!objet)
      { g_free(location);
        Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation objet impossible" );
        return(-1);
      }
-    libelle = Normaliser_chaine ( log, camera->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
        g_free(objet);

@@ -121,7 +121,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
-    libelle = Normaliser_chaine ( Config.log, rs485->libelle );          /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( rs485->libelle );          /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                  "Ajouter_rs485DB: Normalisation libelle impossible" );
@@ -162,7 +162,7 @@
     db = Init_DB_SQL( Config.log );
     if (!db) return(FALSE);
 
-    libelle = Normaliser_chaine ( Config.log, rs485->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( rs485->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                  "Modifier_rs485DB: Normalisation libelle impossible" );

@@ -118,7 +118,7 @@
                return(FALSE);
              }
 
-    libelle = Normaliser_chaine ( Config.log, rfxcom->libelle );         /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                  "Ajouter_rfxcomDB: Normalisation libelle impossible" );
@@ -209,7 +209,7 @@
                return(FALSE);
              }
 
-    libelle = Normaliser_chaine ( Config.log, rfxcom->libelle );         /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                  "Modifier_rfxcomDB: Normalisation libelle impossible" );

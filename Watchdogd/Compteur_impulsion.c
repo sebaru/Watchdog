@@ -187,7 +187,7 @@
  gboolean Modifier_cpt_impDB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp )
   { gchar requete[1024], *unite;
 
-    unite = Normaliser_chaine ( log, cpt_imp->unite );                   /* Formatage correct des chaines */
+    unite = Normaliser_chaine ( cpt_imp->unite );                   /* Formatage correct des chaines */
     if (!unite)
      { Info_new( Config.log, FALSE, LOG_WARNING, "Modifier_cpt_impDB: Normalisation unite impossible" );
        return(FALSE);

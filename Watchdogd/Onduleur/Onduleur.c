@@ -155,25 +155,25 @@
        return(-1);
      }
 
-    host = Normaliser_chaine ( Config.log, ups->host );                  /* Formatage correct des chaines */
+    host = Normaliser_chaine ( ups->host );                  /* Formatage correct des chaines */
     if (!host)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation host impossible" );
        return(-1);
      }
-    name = Normaliser_chaine ( Config.log, ups->ups );                   /* Formatage correct des chaines */
+    name = Normaliser_chaine ( ups->ups );                   /* Formatage correct des chaines */
     if (!name)
      { g_free(host);
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation name impossible" );
        return(-1);
      }
-    libelle = Normaliser_chaine ( Config.log, ups->libelle );            /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( ups->libelle );            /* Formatage correct des chaines */
     if (!libelle)
      { g_free(host);
        g_free(name);
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation libelle impossible" );
        return(-1);
      }
-    username = Normaliser_chaine ( Config.log, ups->username );          /* Formatage correct des chaines */
+    username = Normaliser_chaine ( ups->username );          /* Formatage correct des chaines */
     if (!username)
      { g_free(host);
        g_free(name);
@@ -181,7 +181,7 @@
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation username impossible" );
        return(-1);
      }
-    password = Normaliser_chaine ( Config.log, ups->password );          /* Formatage correct des chaines */
+    password = Normaliser_chaine ( ups->password );          /* Formatage correct des chaines */
     if (!password)
      { g_free(host);
        g_free(name);

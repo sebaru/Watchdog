@@ -46,13 +46,13 @@
   { gchar requete[1024];
     gchar *libelle, *nom_ack;
 
-    libelle = Normaliser_chaine ( log, histo->histo.msg.libelle );       /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( histo->histo.msg.libelle );       /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histo_hardDB: Normalisation impossible" );
        return(FALSE);
      }
 
-    nom_ack = Normaliser_chaine ( log, histo->histo.nom_ack );           /* Formatage correct des chaines */
+    nom_ack = Normaliser_chaine ( histo->histo.nom_ack );           /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histo_hardDB: Normalisation impossible" );
        g_free(libelle);
@@ -107,7 +107,7 @@
     if ( *(critere->nom_ack) )
      { gchar *norm;
        critere->nom_ack[sizeof(critere->nom_ack)-1] = 0;                          /* Anti buffer overflow */
-       norm = Normaliser_chaine(log, critere->nom_ack);
+       norm = Normaliser_chaine( critere->nom_ack);
        if (norm)
         { g_snprintf( critereSQL, sizeof(critereSQL), " AND nom_ack LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
@@ -117,7 +117,7 @@
     if ( *(critere->libelle) )
      { gchar *norm;
        critere->libelle[sizeof(critere->libelle)-1] = 0;                          /* Anti buffer overflow */
-       norm = Normaliser_chaine(log, critere->libelle);
+       norm = Normaliser_chaine( critere->libelle);
        if (norm)
         { g_snprintf( critereSQL, sizeof(critereSQL), " AND libelle LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
@@ -128,7 +128,7 @@
     if ( *(critere->objet) )
      { gchar *norm;
        critere->objet[sizeof(critere->objet)-1] = 0;                              /* Anti buffer overflow */
-       norm = Normaliser_chaine(log, critere->objet);
+       norm = Normaliser_chaine( critere->objet);
        if (norm)
         { g_snprintf( critereSQL, sizeof(critereSQL), " AND objet LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );

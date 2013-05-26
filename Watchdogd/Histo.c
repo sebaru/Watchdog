@@ -79,13 +79,13 @@
   { gchar requete[1024];
     gchar *libelle, *nom_ack;
 
-    libelle = Normaliser_chaine ( log, histo->msg.libelle );             /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( histo->msg.libelle );             /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histoDB: Normalisation impossible" );
        return(FALSE);
      }
 
-    nom_ack = Normaliser_chaine ( log, histo->nom_ack );                 /* Formatage correct des chaines */
+    nom_ack = Normaliser_chaine ( histo->nom_ack );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histoDB: Normalisation impossible" );
        g_free(libelle);
@@ -114,7 +114,7 @@
   { gchar requete[1024];
     gchar *nom_ack;
 
-    nom_ack = Normaliser_chaine ( log, histo->nom_ack );                 /* Formatage correct des chaines */
+    nom_ack = Normaliser_chaine ( histo->nom_ack );                 /* Formatage correct des chaines */
     if (!nom_ack)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_histoDB: Normalisation impossible" );
        return(FALSE);

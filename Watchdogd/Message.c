@@ -57,18 +57,18 @@
   { gchar *libelle, *libelle_audio, *libelle_sms;
     gchar requete[2048];
 
-    libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle impossible" );
        return(-1);
      }
-    libelle_audio = Normaliser_chaine ( log, msg->libelle_audio );       /* Formatage correct des chaines */
+    libelle_audio = Normaliser_chaine ( msg->libelle_audio );       /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
        Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle_audio impossible" );
        return(-1);
      }
-    libelle_sms = Normaliser_chaine ( log, msg->libelle_sms );           /* Formatage correct des chaines */
+    libelle_sms = Normaliser_chaine ( msg->libelle_sms );           /* Formatage correct des chaines */
     if (!libelle_sms)
      { g_free(libelle);
        g_free(libelle_audio);
@@ -260,18 +260,18 @@
   { gchar requete[2048];
     gchar *libelle, *libelle_audio, *libelle_sms;
 
-    libelle = Normaliser_chaine ( log, msg->libelle );                   /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_messageDB: Normalisation libelle impossible" );
        return(-1);
      }
-    libelle_audio = Normaliser_chaine ( log, msg->libelle_audio );       /* Formatage correct des chaines */
+    libelle_audio = Normaliser_chaine ( msg->libelle_audio );       /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
        Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_messageDB: Normalisation libelle_audio impossible" );
        return(-1);
      }
-    libelle_sms = Normaliser_chaine ( log, msg->libelle_sms );           /* Formatage correct des chaines */
+    libelle_sms = Normaliser_chaine ( msg->libelle_sms );           /* Formatage correct des chaines */
     if (!libelle_sms)
      { g_free(libelle);
        g_free(libelle_audio);

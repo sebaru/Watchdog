@@ -137,20 +137,20 @@
   { gchar requete[512];
     gchar *libelle, *page, *groupe;
 
-    libelle = Normaliser_chaine ( log, syn->libelle );                   /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( syn->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_synoptiqueDB: Normalisation impossible libelle" );
        return(-1);
      }
 
-    page = Normaliser_chaine ( log, syn->page );                       /* Formatage correct des chaines */
+    page = Normaliser_chaine ( syn->page );                       /* Formatage correct des chaines */
     if (!page)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_synoptiqueDB: Normalisation impossible page" );
        g_free(libelle);
        return(-1);
      }
 
-    groupe = Normaliser_chaine ( log, syn->groupe );                     /* Formatage correct des chaines */
+    groupe = Normaliser_chaine ( syn->groupe );                     /* Formatage correct des chaines */
     if (!groupe)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_synoptiqueDB: Normalisation impossible groupe" );
        g_free(libelle);
@@ -253,20 +253,20 @@
   { gchar requete[1024];
     gchar *libelle, *page, *groupe;
 
-    libelle = Normaliser_chaine ( log, syn->libelle );
+    libelle = Normaliser_chaine ( syn->libelle );
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_synoptiqueDB: Normalisation impossible libelle" );
        return(FALSE);
      }
 
-    page = Normaliser_chaine ( log, syn->page );
+    page = Normaliser_chaine ( syn->page );
     if (!page)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_synoptiqueDB: Normalisation impossible page" );
        g_free(libelle);
        return(FALSE);
      }
 
-    groupe = Normaliser_chaine ( log, syn->groupe );
+    groupe = Normaliser_chaine ( syn->groupe );
     if (!groupe)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_synoptiqueDB: Normalisation impossible groupe" );
        g_free(libelle);

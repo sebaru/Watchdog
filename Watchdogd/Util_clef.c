@@ -47,7 +47,7 @@
        return(FALSE);
      }
 
-    code_crypt = Normaliser_chaine ( log, crypt );
+    code_crypt = Normaliser_chaine ( crypt );
     g_free(crypt);
     if (!code_crypt)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Set_password: Normalisation code crypte impossible" );

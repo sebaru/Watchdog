@@ -243,12 +243,12 @@
   { gchar *nom, *comment;
     gchar requete[4096];
   
-    nom     = Normaliser_chaine ( log, groupe->nom );
+    nom     = Normaliser_chaine ( groupe->nom );
     if (!nom)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
        return(-1);
      }
-    comment = Normaliser_chaine ( log, groupe->commentaire );
+    comment = Normaliser_chaine ( groupe->commentaire );
     if (!comment)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
        g_free(nom);
@@ -273,7 +273,7 @@
   { gchar requete[200];
     gchar *comment;
 
-    comment = Normaliser_chaine( log, groupe->commentaire );
+    comment = Normaliser_chaine( groupe->commentaire );
     if (!comment) return(FALSE);
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

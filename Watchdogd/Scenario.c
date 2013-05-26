@@ -114,7 +114,7 @@
   { gchar requete[4096];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, scenario->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( scenario->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_scenarioDB: Normalisation impossible" );
        return(-1);
@@ -151,7 +151,7 @@
  gboolean Modifier_scenarioDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SCENARIO *scenario )
   { gchar requete[512], *libelle;
 
-    libelle = Normaliser_chaine ( log, scenario->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( scenario->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Udpate_scenarioDB: Normalisation impossible" );
        return(FALSE);

@@ -190,7 +190,7 @@
   { gchar requete[1024];
     gchar *unite;
 
-    unite = Normaliser_chaine ( log, entreeana->unite );                 /* Formatage correct des chaines */
+    unite = Normaliser_chaine ( entreeana->unite );                 /* Formatage correct des chaines */
     if (!unite)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_entreeANADB: Normalisation unite impossible" );
        return(FALSE);

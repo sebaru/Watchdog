@@ -98,9 +98,9 @@
     if (crypt)
      { gchar *nom, *comment, *code_crypt;
 
-       nom        = Normaliser_chaine ( log, util->nom );                /* Formatage correct des chaines */
-       comment    = Normaliser_chaine ( log, util->commentaire );
-       code_crypt = Normaliser_chaine ( log, crypt );
+       nom        = Normaliser_chaine ( util->nom );                /* Formatage correct des chaines */
+       comment    = Normaliser_chaine ( util->commentaire );
+       code_crypt = Normaliser_chaine ( crypt );
        g_free(crypt);
 
        if (!(nom && comment && code_crypt))
@@ -144,7 +144,7 @@
     gchar *comment;
     gchar *crypt;
 
-    comment = Normaliser_chaine ( log, util->commentaire );
+    comment = Normaliser_chaine ( util->commentaire );
     if (!comment)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation impossible" );
        return(FALSE);
@@ -172,7 +172,7 @@
           return(FALSE);
         }
 
-       code_crypt = Normaliser_chaine ( log, crypt );
+       code_crypt = Normaliser_chaine ( crypt );
        g_free(crypt);
        if (!code_crypt)
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation code crypte impossible" );

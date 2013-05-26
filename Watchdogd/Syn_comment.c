@@ -59,13 +59,13 @@
   { gchar requete[512];
     gchar *libelle, *font;
 
-    libelle = Normaliser_chaine ( log, comment->libelle );               /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( comment->libelle );               /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        return(-1);
      }
 
-    font = Normaliser_chaine ( log, comment->font );                     /* Formatage correct des chaines */
+    font = Normaliser_chaine ( comment->font );                     /* Formatage correct des chaines */
     if (!font)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        g_free(libelle);
@@ -178,13 +178,13 @@
     gchar *libelle, *font;
 
 
-    libelle = Normaliser_chaine ( log, comment->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( comment->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        return(FALSE);
      }
 
-    font = Normaliser_chaine ( log, comment->font );                     /* Formatage correct des chaines */
+    font = Normaliser_chaine ( comment->font );                     /* Formatage correct des chaines */
     if (!font)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
        g_free(libelle);

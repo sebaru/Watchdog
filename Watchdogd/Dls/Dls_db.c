@@ -69,7 +69,7 @@
   { gchar requete[1024];
     gchar *nom;
 
-    nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
+    nom = Normaliser_chaine ( dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING, "Ajouter_plugin_dlsDB: Normalisation nom impossible" );
        return(-1);
@@ -185,7 +185,7 @@
   { gchar requete[1024];
     gchar *nom;
 
-    nom = Normaliser_chaine ( log, dls->nom );                           /* Formatage correct des chaines */
+    nom = Normaliser_chaine ( dls->nom );                           /* Formatage correct des chaines */
     if (!nom)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING, "Modifier_plugin_dlsDB: Normalisation nom impossible" );
        return(-1);

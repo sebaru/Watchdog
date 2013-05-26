@@ -36,7 +36,7 @@
 /* Entrées: un commentaire (gchar *)                                                                      */
 /* Sortie: boolean false si probleme                                                                      */
 /**********************************************************************************************************/
- gchar *Normaliser_chaine( struct LOG *log, gchar *pre_comment )
+ gchar *Normaliser_chaine( gchar *pre_comment )
   { gchar *comment, *source, *cible;
     gunichar car;
 

@@ -59,7 +59,7 @@
   { gchar requete[1024];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, motif->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( motif->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_motifDB: Normalisation impossible" );
        return(-1);
@@ -197,7 +197,7 @@
   { gchar requete[1024];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, motif->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( motif->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_motifDB: Normalisation impossible" );
        return(-1);

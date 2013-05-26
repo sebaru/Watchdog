@@ -87,20 +87,20 @@
     gchar *libelle, *acro, *command_text;
     gint last_id;
 
-    libelle = Normaliser_chaine ( log, mnemo->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( mnemo->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_mnemoDB: Normalisation impossible libelle" );
        return(-1);
      }
-    acro = Normaliser_chaine ( log, mnemo->acronyme );                   /* Formatage correct des chaines */
+    acro = Normaliser_chaine ( mnemo->acronyme );                   /* Formatage correct des chaines */
     if (!acro)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_mnemoDB: Normalisation impossible acronyme" );
        g_free(libelle);
        return(-1);
      }
-    command_text = Normaliser_chaine ( log, mnemo->command_text );       /* Formatage correct des chaines */
+    command_text = Normaliser_chaine ( mnemo->command_text );       /* Formatage correct des chaines */
     if (!command_text)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_mnemoDB: Normalisation impossible command_text" );
@@ -164,7 +164,7 @@
     gboolean space;
     gint i, j;
 
-    commande = Normaliser_chaine ( log, commande_pure );
+    commande = Normaliser_chaine ( commande_pure );
     if (!commande)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                  "Recuperer_mnemo_by_command_text: Normalisation impossible commande" );
@@ -361,20 +361,20 @@
   { gchar requete[1024];
     gchar *libelle, *acronyme, *command_text;
 
-    libelle = Normaliser_chaine ( log, mnemo->libelle );
+    libelle = Normaliser_chaine ( mnemo->libelle );
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible libelle" );
        return(FALSE);
      }
 
-    acronyme = Normaliser_chaine ( log, mnemo->acronyme );
+    acronyme = Normaliser_chaine ( mnemo->acronyme );
     if (!acronyme)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible acronyme" );
        g_free(libelle);
        return(FALSE);
      }
 
-    command_text = Normaliser_chaine ( log, mnemo->command_text );       /* Formatage correct des chaines */
+    command_text = Normaliser_chaine ( mnemo->command_text );       /* Formatage correct des chaines */
     if (!command_text)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible" );
        g_free(acronyme);

@@ -115,13 +115,13 @@
        return(-1);
      }
 
-    libelle = Normaliser_chaine ( Config.log, modbus->libelle );         /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( modbus->libelle );         /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Normalisation libelle impossible" );
        return(-1);
      }
 
-    ip = Normaliser_chaine ( Config.log, modbus->ip );                   /* Formatage correct des chaines */
+    ip = Normaliser_chaine ( modbus->ip );                   /* Formatage correct des chaines */
     if (!ip)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Normalisation ip impossible" );
        Libere_DB_SQL( Config.log, &db );

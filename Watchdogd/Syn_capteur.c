@@ -57,7 +57,7 @@
   { gchar requete[512];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, capteur->libelle );               /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( capteur->libelle );               /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_capteurDB: Normalisation impossible" );
        return(-1);
@@ -164,7 +164,7 @@
   { gchar requete[1024];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, capteur->libelle );               /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( capteur->libelle );               /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_capteurDB: Normalisation impossible" );
        return(-1);

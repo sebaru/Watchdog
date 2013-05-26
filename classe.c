@@ -62,7 +62,7 @@
   { gchar requete[200];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, classe->libelle );                   /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( classe->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Ajouter_classeDB: Normalisation impossible" );
        return(-1);
@@ -152,7 +152,7 @@
   { gchar requete[1024];
     gchar *libelle;
 
-    libelle = Normaliser_chaine ( log, classe->libelle );
+    libelle = Normaliser_chaine ( classe->libelle );
     if (!libelle)
      { Info_new( Config.log, Config.log_all, LOG_WARNING, "Modifier_classeDB: Normalisation impossible" );
        return(FALSE);
