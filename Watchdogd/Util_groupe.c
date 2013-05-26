@@ -124,7 +124,7 @@
      }
     *(gids + cpt) = 0;                                         /* Fin de tableau = groupe "tout le monde" */
 
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return(TRUE);
   }	    
 /**********************************************************************************************************/
@@ -144,7 +144,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Rechercher_groupeDB: Group not found in DB id=%d", id );
        return(NULL);
@@ -158,7 +158,7 @@
        memcpy( &groupe->nom, db->row[0], sizeof(groupe->nom) );               /* Recopie dans la structure */
        memcpy( &groupe->commentaire, db->row[1], sizeof(groupe->commentaire) );
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return( groupe );
   }
 /**********************************************************************************************************/
@@ -183,7 +183,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 

@@ -101,7 +101,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -130,7 +130,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_classeDB: Classe %d not found in DB", id );
        return(NULL);
      }

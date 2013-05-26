@@ -215,7 +215,7 @@
   
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -257,7 +257,7 @@
     if ( ! db->row )
      { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Rechercher_utilisateurDB: User not found in BDD id=%d", id );
-       Liberer_resultat_SQL ( log, db );
+       Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -276,7 +276,7 @@
        util->cansetpass    = atoi(db->row[7]);
        util->date_modif    = atoi(db->row[8]);
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     if (util) Groupe_get_groupe_utilDB ( log, db, util->id, (guint *)&util->gids );
     return( util );
   }

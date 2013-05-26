@@ -212,7 +212,7 @@
 
     Recuperer_ligne_SQL(db);                              /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( Config.log, db );
+     { Liberer_resultat_SQL ( db );
        return(NULL);
      }
 

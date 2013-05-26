@@ -89,7 +89,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recuperer_clef: Key not found in DB for %s", nom );
        return(NULL);
      }
@@ -97,13 +97,13 @@
     crypt = (gchar *)g_try_malloc0( NBR_CARAC_CODE_CRYPTE );
     if (!crypt)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_clef: out of memory" );
-       Liberer_resultat_SQL ( log, db );
+       Liberer_resultat_SQL (db);
        return(NULL);
      }
    *id = atoi(db->row[0]);                                                      /* Conversion en entier */
     memcpy( crypt, db->row[1], NBR_CARAC_CODE_CRYPTE );
 
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return(crypt);
   }
 /**********************************************************************************************************/

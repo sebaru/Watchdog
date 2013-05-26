@@ -124,7 +124,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -161,7 +161,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cpt_impDB: Cpt_imp (%d) not found", id );
        return(NULL);
      }
@@ -176,7 +176,7 @@
        cpt_imp->multi    = atof(db->row[4]);
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return(cpt_imp);
   }
 /**********************************************************************************************************/

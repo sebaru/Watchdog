@@ -107,7 +107,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -156,7 +156,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Rechercher_entreeanaDB: EntreANA %d not found in DB", id );
        return(NULL);
@@ -177,7 +177,7 @@
        memcpy( &entreeana->page,       db->row[8], sizeof(entreeana->page   ) );
        memcpy( &entreeana->plugin_dls, db->row[9], sizeof(entreeana->plugin_dls) );
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
 
     return(entreeana);
   }

@@ -52,14 +52,14 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Get_login_failed: Login_failed not found in BD for id=%d", id );
        return(0);
      }
 
     nbr_login = atoi(db->row[0]);
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return( nbr_login );
   }
 /**********************************************************************************************************/

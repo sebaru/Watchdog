@@ -116,7 +116,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -154,7 +154,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cameraDB: CAMERA %d not found", id );
        return(NULL);
      }
@@ -171,7 +171,7 @@
        camera->bit        = atoi(db->row[2]);
        camera->id         = id;
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return(camera);
   }
 /**********************************************************************************************************/
@@ -234,7 +234,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 

@@ -115,7 +115,7 @@
     db = *adr_db;
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Libere_DB_SQL: Reste un result a FREEer !" );
-       Liberer_resultat_SQL ( Config.log, db );
+       Liberer_resultat_SQL ( db );
      }
     mysql_close( db->mysql );
     Info_new( Config.log, Config.log_db, LOG_INFO, "Libere_DB_SQL: Deconnexion effective" );
@@ -161,7 +161,7 @@
 /* Entrée: la DB                                                                                          */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
+ void Liberer_resultat_SQL ( struct DB *db )
   { if (db)
      { while( db->row ) Recuperer_ligne_SQL ( db );
        mysql_free_result( db->result );

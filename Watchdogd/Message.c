@@ -123,7 +123,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        return(NULL);
      }
 
@@ -172,7 +172,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_msgDB: MSG %03d not foudn in DB", num );
        return(NULL);
      }
@@ -197,7 +197,7 @@
        msg->vitesse_voc = atoi(db->row[13]);
        msg->time_repeat = atoi(db->row[14]);
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return(msg);
   }
 /**********************************************************************************************************/
@@ -223,7 +223,7 @@
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL ( log, db );
+     { Liberer_resultat_SQL (db);
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_msgDB_par_id: MSG %03d not found in DB", id );
        return(NULL);
      }
@@ -248,7 +248,7 @@
        msg->vitesse_voc = atoi(db->row[13]);
        msg->time_repeat = atoi(db->row[14]);
      }
-    Liberer_resultat_SQL ( log, db );
+    Liberer_resultat_SQL (db);
     return(msg);
   }
 /**********************************************************************************************************/
