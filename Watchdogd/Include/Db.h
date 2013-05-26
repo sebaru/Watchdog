@@ -51,7 +51,7 @@
  extern gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete );
  extern MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db );
  extern void Liberer_resultat_SQL ( struct DB *db );
- extern guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db );
+ extern guint Recuperer_last_ID_SQL ( struct DB *db );
  extern void SQL_ping ( struct LOG *log, struct DB *db );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

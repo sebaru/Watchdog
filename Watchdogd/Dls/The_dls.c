@@ -199,7 +199,7 @@
   { gboolean need_arch;
     if (num<0 || num>=NBR_ENTRE_ANA)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
-       return;
+       return(FALSE);
      }
 
     need_arch = FALSE;

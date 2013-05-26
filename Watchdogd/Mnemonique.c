@@ -120,7 +120,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
 
-    last_id = Recuperer_last_ID_SQL( log, db );
+    last_id = Recuperer_last_ID_SQL ( db );
 
     switch (mnemo->type)
      { case MNEMO_ENTREE_ANA:

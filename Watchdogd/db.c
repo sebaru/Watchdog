@@ -185,7 +185,7 @@
 /* Entrée: la DB                                                                                          */
 /* Sortie: Le dernier ID                                                                                  */
 /**********************************************************************************************************/
- guint Recuperer_last_ID_SQL ( struct LOG *log, struct DB *db )
+ guint Recuperer_last_ID_SQL ( struct DB *db )
   { if (!db) return(0);
     return ( mysql_insert_id(db->mysql) );
   }

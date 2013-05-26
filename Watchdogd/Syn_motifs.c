@@ -80,7 +80,7 @@
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(-1); }
-    return( Recuperer_last_ID_SQL( log, db ) );
+    return( Recuperer_last_ID_SQL ( db ) );
   }
 /**********************************************************************************************************/
 /* Recuperer_motifDB: Recupération de la liste des motifs d'un synoptique                                 */

@@ -143,7 +143,7 @@
     if (retour == FALSE)  { Libere_DB_SQL( &db );
                             return(-1);
                           }
-    last_id = Recuperer_last_ID_SQL( Config.log, db );
+    last_id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( last_id );

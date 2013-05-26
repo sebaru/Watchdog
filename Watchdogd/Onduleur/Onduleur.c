@@ -220,7 +220,7 @@
 
     retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL( Config.log, db );    /* Retourne le nouvel ID ups */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );    /* Retourne le nouvel ID ups */
        else retour = 0;
      }
     else retour = -1;

@@ -125,7 +125,7 @@
        g_free(comment);
 
        Lancer_requete_SQL ( db, requete );
-       id = Recuperer_last_ID_SQL ( log, db );
+       id = Recuperer_last_ID_SQL ( db );
        Groupe_set_groupe_utilDB ( log, db, id, (guint *)&util->gids );      /* Positionnement des groupes */ 
        return(id);
      }
