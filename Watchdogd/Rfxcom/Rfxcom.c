@@ -166,7 +166,7 @@
  static struct RFXCOMDB *Recuperer_rfxcomDB_suite( struct LOG *log, struct DB *db )
   { struct RFXCOMDB *rfxcom;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);

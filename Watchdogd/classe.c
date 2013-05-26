@@ -99,7 +99,7 @@
  struct CLASSEDB *Recuperer_classeDB_suite( struct LOG *log, struct DB *db )
   { struct CLASSEDB *classe;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
@@ -128,7 +128,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_classeDB: Classe %d not found in DB", id );

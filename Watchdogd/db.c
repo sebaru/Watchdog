@@ -163,7 +163,7 @@
 /**********************************************************************************************************/
  void Liberer_resultat_SQL ( struct LOG *log, struct DB *db )
   { if (db)
-     { while( db->row ) Recuperer_ligne_SQL ( log, db );
+     { while( db->row ) Recuperer_ligne_SQL ( db );
        mysql_free_result( db->result );
        db->result = NULL;
        db->free = TRUE;
@@ -175,7 +175,7 @@
 /* Entrée: la DB                                                                                          */
 /* Sortie: La ligne ou NULL si il n'y en en plus                                                          */
 /**********************************************************************************************************/
- MYSQL_ROW Recuperer_ligne_SQL ( struct LOG *log, struct DB *db )
+ MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db )
   { if (!db) return(NULL);
     db->row = mysql_fetch_row(db->result);
     return( db->row );

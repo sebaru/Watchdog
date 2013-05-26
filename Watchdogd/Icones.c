@@ -99,7 +99,7 @@
  struct ICONEDB *Recuperer_iconeDB_suite( struct LOG *log, struct DB *db )
   { struct ICONEDB *icone;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
@@ -129,7 +129,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_iconeDB: Icone %d not found in DB", id );

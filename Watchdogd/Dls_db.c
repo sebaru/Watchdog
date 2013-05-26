@@ -114,7 +114,7 @@
  struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_PLUGIN_DLS *dls;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
@@ -156,7 +156,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_dlsDB: DLS %03d not found in DB", id );

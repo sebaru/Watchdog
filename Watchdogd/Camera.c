@@ -114,7 +114,7 @@
  struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_CAMERA *camera;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
@@ -152,7 +152,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cameraDB: CAMERA %d not found", id );
@@ -232,7 +232,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);

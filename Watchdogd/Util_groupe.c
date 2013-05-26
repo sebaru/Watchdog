@@ -116,7 +116,7 @@
     memset ( gids, 0, sizeof(guint)*NBR_MAX_GROUPE_PAR_UTIL );
     cpt=0;
 
-    while ( Recuperer_ligne_SQL (log, db) != NULL && cpt<NBR_MAX_GROUPE_PAR_UTIL)
+    while ( Recuperer_ligne_SQL(db) != NULL && cpt<NBR_MAX_GROUPE_PAR_UTIL)
      { gint gid;
        gid = atoi(db->row[0]);
        *(gids + cpt) = gid;
@@ -142,7 +142,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, Config.log_msrv, LOG_WARNING,
@@ -181,7 +181,7 @@
  struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_GROUPE *groupe;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);

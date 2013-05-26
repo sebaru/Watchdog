@@ -105,7 +105,7 @@
  struct CMD_TYPE_OPTION_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_OPTION_ENTREEANA *entreeana;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
@@ -154,7 +154,7 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,

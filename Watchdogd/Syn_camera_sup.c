@@ -93,7 +93,7 @@
  struct CMD_TYPE_CAMERA_SUP *Recuperer_camera_supDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_CAMERA_SUP *camera_sup;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
@@ -135,7 +135,7 @@
      { return(NULL);
      }
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_camera_supDB: Camera %d not found in DB", id );

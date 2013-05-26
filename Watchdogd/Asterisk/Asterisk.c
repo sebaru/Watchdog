@@ -72,7 +72,7 @@
  static struct CMD_TYPE_ASTERISK *Recuperer_asteriskDB_suite( struct LOG *log, struct DB *db )
   { struct CMD_TYPE_ASTERISK *asterisk;
 
-    Recuperer_ligne_SQL (log, db);                                     /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( log, db );
        return(NULL);
