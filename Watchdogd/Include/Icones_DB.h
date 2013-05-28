@@ -46,12 +46,12 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern struct ICONEDB *Rechercher_iconeDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Recuperer_iconeDB ( struct LOG *log, struct DB *db, guint classe );
- extern struct ICONEDB *Recuperer_iconeDB_suite( struct LOG *log, struct DB *db );
- extern gint Ajouter_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone );
- extern gboolean Retirer_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone );
- extern gboolean Modifier_iconeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone );
+ extern struct ICONEDB *Rechercher_iconeDB ( guint id );
+ extern gboolean Recuperer_iconeDB ( struct DB **db, guint classe );
+ extern struct ICONEDB *Recuperer_iconeDB_suite( struct DB **db );
+ extern gint Ajouter_iconeDB ( struct CMD_TYPE_ICONE *icone );
+ extern gboolean Retirer_iconeDB ( struct CMD_TYPE_ICONE *icone );
+ extern gboolean Modifier_iconeDB( struct CMD_TYPE_ICONE *icone );
 
  extern struct CLASSEDB *Rechercher_classeDB ( guint id );
  extern gboolean Recuperer_classeDB ( struct DB **db );

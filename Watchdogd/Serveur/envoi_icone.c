@@ -62,10 +62,8 @@
  void Proto_editer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { struct CMD_TYPE_ICONE edit_icone;
     struct ICONEDB *icone;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    icone = Rechercher_iconeDB( Config.log, Db_watchdog, rezo_icone->id );
+    icone = Rechercher_iconeDB( rezo_icone->id );
 
     if (icone)
      { edit_icone.id         = icone->id;                                   /* Recopie des info editables */
@@ -92,10 +90,8 @@
  void Proto_valider_editer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { struct ICONEDB *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_iconeDB ( Config.log, Db_watchdog, rezo_icone );
+    retour = Modifier_iconeDB ( rezo_icone );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -103,7 +99,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_iconeDB( Config.log, Db_watchdog, rezo_icone->id );
+    else { result = Rechercher_iconeDB( rezo_icone->id );
            if (result) 
             { struct CMD_TYPE_ICONE *icone;
               icone = Preparer_envoi_icone ( result );
@@ -137,10 +133,8 @@
  void Proto_effacer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { gchar nom_fichier[80];
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_iconeDB( Config.log, Db_watchdog, rezo_icone );
+    retour = Retirer_iconeDB( rezo_icone );
 printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
     if (retour)
@@ -165,10 +159,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
  void Proto_ajouter_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone )
   { struct ICONEDB *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_iconeDB ( Config.log, Db_watchdog, rezo_icone );
+    id = Ajouter_iconeDB ( rezo_icone );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -176,7 +168,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_iconeDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_iconeDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -227,11 +219,11 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
  void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone,
                                 gint taille, gchar *buffer )
   { gchar nom_fichier[80];
-    gint id, test;
+    gint id;
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%s", icone->nom_fichier );
     id = open( nom_fichier, O_WRONLY | O_CREAT | O_APPEND, S_IWUSR | S_IRUSR );
     if (id<0) return;
-    test = write( id, buffer, taille );
+    write( id, buffer, taille );
     close(id);
   }
 /**********************************************************************************************************/
@@ -255,13 +247,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
     prctl(PR_SET_NAME, "W-EnvoiICO", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_iconeDB( Config.log, db, client->classe_icone ) )
+    if ( ! Recuperer_iconeDB( &db, client->classe_icone ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
@@ -271,10 +257,9 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { icone = Recuperer_iconeDB_suite( Config.log, db );
+     { icone = Recuperer_iconeDB_suite( &db );
        if (!icone)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

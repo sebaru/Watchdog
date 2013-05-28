@@ -40,31 +40,52 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone )
+ gboolean Retirer_iconeDB ( struct CMD_TYPE_ICONE *icone )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_iconeDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_ICONE, icone->id );
 
-    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
 
+/*************************************** Re-affectation des mnémoniques ***********************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE icone=%d", NOM_TABLE_MOTIF, icone->id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_iconeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone )
+ gint Ajouter_iconeDB ( struct CMD_TYPE_ICONE *icone )
   { gchar requete[200];
+    gboolean retour;
     gchar *libelle;
+    struct DB *db;
+    gint id;
 
     libelle = Normaliser_chaine ( icone->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_iconeDB: Normalisation impossible" );
+       return(-1);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_iconeDB: DB connexion failed" );
+       g_free(libelle);
        return(-1);
      }
 
@@ -73,35 +94,54 @@
                 "('%s',%d)", NOM_TABLE_ICONE, libelle, icone->id_classe );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_iconeDB ( struct LOG *log, struct DB *db, guint classe )
+ gboolean Recuperer_iconeDB ( struct DB **db_retour, guint classe )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_iconeDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,id_classe"
                 " FROM %s WHERE id_classe=%d ORDER BY libelle", NOM_TABLE_ICONE, classe );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct ICONEDB *Recuperer_iconeDB_suite( struct LOG *log, struct DB *db )
+ struct ICONEDB *Recuperer_iconeDB_suite( struct DB **db_orig )
   { struct ICONEDB *icone;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -119,20 +159,30 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct ICONEDB *Rechercher_iconeDB ( struct LOG *log, struct DB *db, guint id )
+ struct ICONEDB *Rechercher_iconeDB ( guint id )
   { struct ICONEDB *icone;
     gchar requete[200];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_iconeDB: DB connexion failed" );
+       return(NULL);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT libelle,id_classe FROM %s WHERE id=%d", NOM_TABLE_ICONE, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_iconeDB: Icone %d not found in DB", id );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_iconeDB: Icone %04d not found in DB", id );
        return(NULL);
      }
 
@@ -143,6 +193,7 @@
        icone->id          = id;
        icone->id_classe   = atoi(db->row[1]);
      }
+    Libere_DB_SQL( &db );
     return(icone);
   }
 /**********************************************************************************************************/
@@ -150,13 +201,22 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_iconeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_ICONE *icone )
+ gboolean Modifier_iconeDB( struct CMD_TYPE_ICONE *icone )
   { gchar requete[1024];
+    gboolean retour;
     gchar *libelle;
+    struct DB *db;
 
     libelle = Normaliser_chaine ( icone->libelle );
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_iconeDB: Normalisation impossible" );
+       return(FALSE);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_icone_dlsDB: DB connexion failed" );
+       g_free(libelle);
        return(FALSE);
      }
 
@@ -166,6 +226,8 @@
                 NOM_TABLE_ICONE, libelle, icone->id_classe, icone->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/
