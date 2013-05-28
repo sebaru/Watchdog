@@ -60,15 +60,13 @@
 /**********************************************************************************************************/
  void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
                                                           GINT_TO_POINTER(rezo_dls->id) );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 
-    retour = Retirer_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls );
+    retour = Retirer_plugin_dlsDB( rezo_dls );
     if (retour)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
                      (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
@@ -88,10 +86,8 @@
 /**********************************************************************************************************/
  void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *dls;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    dls = Rechercher_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls->id );
+    dls = Rechercher_plugin_dlsDB( rezo_dls->id );
 
     if (dls)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
@@ -114,10 +110,8 @@
  void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_plugin_dlsDB ( Config.log, Db_watchdog, rezo_dls );
+    retour = Modifier_plugin_dlsDB ( rezo_dls );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -125,7 +119,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_plugin_dlsDB( Config.log, Db_watchdog, rezo_dls->id );
+    else { result = Rechercher_plugin_dlsDB( rezo_dls->id );
            if (result) 
             { pthread_mutex_lock( &Partage->com_dls.synchro );
               Partage->com_dls.liste_plugin_reset =
@@ -257,10 +251,8 @@
  void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_plugin_dlsDB ( Config.log, Db_watchdog, rezo_dls );
+    id = Ajouter_plugin_dlsDB ( rezo_dls );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -268,7 +260,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_plugin_dlsDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_plugin_dlsDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -312,15 +304,8 @@
     
     prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
+    if ( ! Recuperer_plugins_dlsDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_plugins_dlsDB( Config.log, db ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( &db );
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
 
@@ -330,10 +315,9 @@
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { dls = Recuperer_plugins_dlsDB_suite( Config.log, db );
+     { dls = Recuperer_plugins_dlsDB_suite( &db );
        if (!dls)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

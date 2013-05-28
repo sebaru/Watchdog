@@ -95,7 +95,7 @@
        return(FALSE);
      }
 
-    plugin_dls = Rechercher_plugin_dlsDB( Config.log, db, id );
+    plugin_dls = Rechercher_plugin_dlsDB( id );
     Libere_DB_SQL( &db );
 
     if (!plugin_dls)
@@ -185,18 +185,11 @@
     struct PLUGIN_DLS *dls;
     struct DB *db;                                                                   /* Database Watchdog */
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to open database" );
-       return;
-     }
-
-    if (Recuperer_plugins_dlsDB( Config.log, db ))
+    if (Recuperer_plugins_dlsDB( &db ))
      { do
-        { plugin = Recuperer_plugins_dlsDB_suite( Config.log, db );
+        { plugin = Recuperer_plugins_dlsDB_suite( &db );
           if (!plugin)
-           { Libere_DB_SQL( &db );
-             Config.compil = 0;
+           { Config.compil = 0;
              return;
            }
    
@@ -209,7 +202,6 @@
    
           memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
           g_free(plugin);
-
                                                                       /* Si option "compil" au demarrage" */
           if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
           if (Charger_un_plugin( dls )==TRUE)

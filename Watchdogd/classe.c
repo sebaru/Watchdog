@@ -116,13 +116,14 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_classeDB: DB connexion failed" );
        return(FALSE);
      }
-    *db_retour = db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle"
                 " FROM %s ORDER BY libelle", NOM_TABLE_CLASSE );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
     return ( retour );
   }
 /**********************************************************************************************************/
@@ -138,6 +139,7 @@
     Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -147,7 +149,6 @@
      { memcpy( &classe->libelle, db->row[1], sizeof(classe->libelle) );      /* Recopie dans la structure */
        classe->id          = atoi(db->row[0]);
      }
-    Libere_DB_SQL( &db );
     return(classe);
   }
 /**********************************************************************************************************/
@@ -177,8 +178,8 @@
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_classeDB: Classe %d not found in DB", id );
        Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_classeDB: Classe %d not found in DB", id );
        return(NULL);
      }
 
