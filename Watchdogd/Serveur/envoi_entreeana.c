@@ -46,15 +46,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiANA", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
+    if (!Recuperer_entreeANADB( &db ))
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
-
-    if (!Recuperer_entreeANADB( Config.log, db ))
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( &db );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -66,10 +59,9 @@
      }
 
     for( ; ; )
-     { entree = Recuperer_entreeANADB_suite( Config.log, db );
+     { entree = Recuperer_entreeANADB_suite( &db );
        if (!entree)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

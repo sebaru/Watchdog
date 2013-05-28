@@ -68,7 +68,7 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_OPTION_TEMPO *rezo_tempo )
-  { struct CMD_TYPE_OPTION_ENTREEANA *result;
+  { struct CMD_TYPE_OPTION_TEMPO *result;
     gboolean retour;
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
@@ -103,10 +103,8 @@
  void Proto_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
   { struct CMD_TYPE_OPTION_BIT_INTERNE option;
     struct CMD_TYPE_OPTION_ENTREEANA *entree;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    entree = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_mnemo->id );
+    entree = Rechercher_entreeANADB( rezo_mnemo->id );
 
     if (entree)
      { option.type = MNEMO_ENTREE_ANA;
@@ -131,10 +129,8 @@
  void Proto_valider_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_OPTION_ENTREEANA *rezo_entree )
   { struct CMD_TYPE_OPTION_ENTREEANA *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_entreeANADB ( Config.log, Db_watchdog, rezo_entree );
+    retour = Modifier_entreeANADB ( rezo_entree );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -142,7 +138,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_entreeANADB( Config.log, Db_watchdog, rezo_entree->id_mnemo );
+    else { result = Rechercher_entreeANADB( rezo_entree->id_mnemo );
            if (result)
             { g_free(result);
               Charger_eana ();                                             /* Update de la running config */

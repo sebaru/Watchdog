@@ -43,28 +43,20 @@
  void Charger_eana ( void )
   { struct DB *db;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_eana: Connexion DB failed" );
-       return;
-     }                                                                                  /* Si pas d'accès */
-
-    if (!Recuperer_entreeANADB( Config.log, db ))
-     { Libere_DB_SQL( &db );
+    if (!Recuperer_entreeANADB( &db ))
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Charger_eana: DB Connexion Failed" );
        return;
      }                                                                         /* Si pas d'enregistrement */
 
     for( ; ; )
      { struct CMD_TYPE_OPTION_ENTREEANA *entree;
-       entree = Recuperer_entreeANADB_suite( Config.log, db );
-       if (!entree)
-        { Libere_DB_SQL( &db );
-          return;
-        }
+       entree = Recuperer_entreeANADB_suite( &db );
+       if (!entree) return;
 
        if (entree->num < NBR_ENTRE_ANA)
         { memcpy( &Partage->ea[entree->num].cmd_type_eana, entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
-          Partage->ea[entree->num].last_arch = 0;    /* Mise à zero du champ de la derniere date d'archivage */
+          Partage->ea[entree->num].last_arch = 0; /* Mise à zero du champ de la derniere date d'archivage */
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
@@ -77,8 +69,16 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_entreeANADB ( struct LOG *log, struct DB *db )
+ gboolean Recuperer_entreeANADB ( struct DB **db_retour )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_entreeANADB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.groupe,%s.page,%s.name"
@@ -95,19 +95,25 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_OPTION_ENTREEANA *Recuperer_entreeANADB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_OPTION_ENTREEANA *Recuperer_entreeANADB_suite( struct DB **db_orig )
   { struct CMD_TYPE_OPTION_ENTREEANA *entreeana;
+    struct DB *db;
 
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -133,10 +139,17 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_OPTION_ENTREEANA *Rechercher_entreeANADB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_OPTION_ENTREEANA *Rechercher_entreeANADB ( guint id )
   { struct CMD_TYPE_OPTION_ENTREEANA *entreeana;
     gchar requete[512];
-    
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_entreeANADB: DB connexion failed" );
+       return(NULL);
+     }
+ 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.min,%s.max,%s.type,%s.unite,%s.libelle,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s,%s WHERE %s.id_mnemo=%s.id AND %s.num_syn = %s.id AND %s.num_plugin = %s.id"
@@ -152,11 +165,14 @@
               );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Rechercher_entreeanaDB: EntreANA %d not found in DB", id );
        return(NULL);
@@ -177,8 +193,7 @@
        memcpy( &entreeana->page,       db->row[8], sizeof(entreeana->page   ) );
        memcpy( &entreeana->plugin_dls, db->row[9], sizeof(entreeana->plugin_dls) );
      }
-    Liberer_resultat_SQL (db);
-
+    Libere_DB_SQL( &db );
     return(entreeana);
   }
 /**********************************************************************************************************/
@@ -186,13 +201,22 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_entreeANADB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_ENTREEANA *entreeana )
+ gboolean Modifier_entreeANADB( struct CMD_TYPE_OPTION_ENTREEANA *entreeana )
   { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
     gchar *unite;
 
     unite = Normaliser_chaine ( entreeana->unite );                 /* Formatage correct des chaines */
     if (!unite)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_entreeANADB: Normalisation unite impossible" );
+       return(FALSE);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_entreeANADB: DB connexion failed" );
+       g_free(unite);
        return(FALSE);
      }
 
@@ -202,6 +226,8 @@
                 NOM_TABLE_ENTREEANA, entreeana->min, entreeana->max, unite, entreeana->type,
                 entreeana->id_mnemo );
     g_free(unite);
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/
