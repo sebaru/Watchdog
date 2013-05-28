@@ -34,13 +34,13 @@
  #define NOM_TABLE_MSG       "msgs"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( struct LOG *log, struct DB *db, guint num );
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Recuperer_messageDB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct LOG *log, struct DB *db );
- extern gint Ajouter_messageDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Retirer_messageDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Modifier_messageDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MESSAGE *msg );
+ extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
+ extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
+ extern gboolean Recuperer_messageDB ( struct DB **db );
+ extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
+ extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
+ extern gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg );
+ extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

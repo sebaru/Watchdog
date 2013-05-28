@@ -82,10 +82,8 @@
 /**********************************************************************************************************/
  void Proto_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { struct CMD_TYPE_MESSAGE *msg;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, rezo_msg->id );
+    msg = Rechercher_messageDB_par_id( rezo_msg->id );
 
     if (msg)
      { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_EDIT_MESSAGE_OK,
@@ -107,11 +105,9 @@
 /**********************************************************************************************************/
  void Proto_valider_editer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { struct CMD_TYPE_MESSAGE *msg;
-    struct DB *Db_watchdog;
     gboolean retour;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_messageDB ( Config.log, Db_watchdog, rezo_msg );
+    retour = Modifier_messageDB ( rezo_msg );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -119,7 +115,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, rezo_msg->id );
+    else { msg = Rechercher_messageDB_par_id( rezo_msg->id );
            if (msg) 
             { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,
                             (gchar *)msg, sizeof(struct CMD_TYPE_MESSAGE) );
@@ -141,10 +137,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_messageDB( Config.log, Db_watchdog, rezo_msg );
+    retour = Retirer_messageDB( rezo_msg );
 
     if (retour)
      { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_DEL_MESSAGE_OK,
@@ -165,11 +159,9 @@
 /**********************************************************************************************************/
  void Proto_ajouter_message ( struct CLIENT *client, struct CMD_TYPE_MESSAGE *rezo_msg )
   { struct CMD_TYPE_MESSAGE *msg;
-    struct DB *Db_watchdog;
     gint id;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_messageDB ( Config.log, Db_watchdog, rezo_msg );
+    id = Ajouter_messageDB ( rezo_msg );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -177,7 +169,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { msg = Rechercher_messageDB_par_id( Config.log, Db_watchdog, id );
+    else { msg = Rechercher_messageDB_par_id( id );
            if (!msg) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -206,15 +198,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiMSG", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
+    if ( ! Recuperer_messageDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_messageDB( Config.log, db ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( &db );
        pthread_exit( NULL );
      }
 
@@ -234,14 +219,13 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
     msgs->nbr_messages = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { msg = Recuperer_messageDB_suite( Config.log, db );         /* Récupération d'un message dans la DB */
+     { msg = Recuperer_messageDB_suite( &db );                    /* Récupération d'un message dans la DB */
        if (msg)                                                /* Si enregegistrement, alors on le pousse */
         { memcpy ( &msgs->msg[msgs->nbr_messages], msg, sizeof(struct CMD_TYPE_MESSAGE) );
           msgs->nbr_messages++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
@@ -256,7 +240,6 @@
      }
     while (msg);                                              /* Tant que l'on a des messages e envoyer ! */
     g_free(msgs);
-    Libere_DB_SQL( &db );
     Envoi_client ( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN, NULL, 0 );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );

@@ -82,24 +82,16 @@
 /**********************************************************************************************************/
  void Gerer_message_repeat ( void )
   { struct CMD_TYPE_MESSAGE *msg;
-    struct DB *db;
     GSList *liste;
     gint num;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Gerer_message_repeat: Connexion DB impossible" );
-       return;
-     }
-          
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     liste = Partage->com_msrv.liste_msg_repeat;
     while (liste)
      { num = GPOINTER_TO_INT(liste->data);                               /* Recuperation du numero de msg */
 
        if (Partage->g[num].next_repeat <= Partage->top)
-        { msg = Rechercher_messageDB( Config.log, db, num );
+        { msg = Rechercher_messageDB( num );
           Envoyer_message_aux_abonnes ( msg );
           Partage->g[num].next_repeat = Partage->top + msg->time_repeat*600;                /* En minutes */
           g_free(msg);
@@ -107,18 +99,17 @@
        liste = liste->next;
      }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static void Gerer_arrive_MSGxxx_dls_on ( struct DB *db, gint num )
+ static void Gerer_arrive_MSGxxx_dls_on ( gint num )
   { struct CMD_TYPE_MESSAGE *msg;
     struct HISTODB histo;
     struct timeval tv;
 
-    msg = Rechercher_messageDB( Config.log, db, num );
+    msg = Rechercher_messageDB( num );
     if (!msg)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
                 "Gerer_arrive_message_dls_on: Message %03d not found", num );
@@ -147,7 +138,7 @@
     histo.date_create_usec = tv.tv_usec;
     histo.date_fixe = 0;
 
-    Ajouter_histoDB( Config.log, db, &histo );                            /* Si ajout dans DB OK */
+    Ajouter_histoDB( Config.log, NULL, &histo );                            /* Si ajout dans DB OK */
 
 /********************************************* Envoi du message aux librairies abonnées *******************/
     Envoyer_message_aux_abonnes ( msg );
@@ -158,13 +149,13 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- static void Gerer_arrive_MSGxxx_dls_off ( struct DB *db, gint num )
+ static void Gerer_arrive_MSGxxx_dls_off ( gint num )
   { /* Le virer de la base histoDB */
     struct CMD_TYPE_MESSAGE *msg;
     struct HISTO_HARDDB histo_hard;
     struct HISTODB *histo;
 
-    msg = Rechercher_messageDB( Config.log, db, num );
+    msg = Rechercher_messageDB( num );
     if (!msg)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
                 "Gerer_arrive_message_dls_off: Message %03d not found", num );
@@ -180,15 +171,15 @@
     Envoyer_message_aux_abonnes ( msg );
     g_free(msg);
 
-    histo = Rechercher_histoDB( Config.log, db, num );
+    histo = Rechercher_histoDB( Config.log, NULL, num );
     if (!histo) return;
 
     memcpy( &histo_hard, histo, sizeof(struct HISTODB) );
     time ( &histo_hard.date_fin );
-    Ajouter_histo_hardDB( Config.log, db, &histo_hard );
+    Ajouter_histo_hardDB( Config.log, NULL, &histo_hard );
     g_free(histo);
 
-    Retirer_histoDB( Config.log, db, num );
+    Retirer_histoDB( Config.log, NULL, num );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */
@@ -196,7 +187,6 @@
 /**********************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( void )
   { gint num, val;
-    struct DB *db;
 
     if (Partage->com_msrv.liste_msg)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
@@ -209,16 +199,8 @@
                num, val, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-       db = Init_DB_SQL();       
-       if (!db)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                   "Gerer_arrive_MSGxxx_dls: Connexion DB impossible" );
-          return;
-        }
-   
-            if (val == 0) Gerer_arrive_MSGxxx_dls_off( db, num );
-       else if (val == 1) Gerer_arrive_MSGxxx_dls_on( db, num );
-       Libere_DB_SQL( &db );
+            if (val == 0) Gerer_arrive_MSGxxx_dls_off( num );
+       else if (val == 1) Gerer_arrive_MSGxxx_dls_on( num );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
