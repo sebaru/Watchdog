@@ -57,12 +57,12 @@
  extern struct CMD_TYPE_MOTIF *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_motifDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif );
 
- extern gboolean Retirer_commentDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment );
- extern gint Ajouter_commentDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment );
- extern gboolean Recuperer_commentDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CMD_TYPE_COMMENT *Recuperer_commentDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_COMMENT *Rechercher_commentDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_commentDB( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment );
+ extern gboolean Retirer_commentDB ( struct CMD_TYPE_COMMENT *comment );
+ extern gint Ajouter_commentDB ( struct CMD_TYPE_COMMENT *comment );
+ extern gboolean Recuperer_commentDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_COMMENT *Recuperer_commentDB_suite( struct DB **db );
+ extern struct CMD_TYPE_COMMENT *Rechercher_commentDB ( guint id );
+ extern gboolean Modifier_commentDB( struct CMD_TYPE_COMMENT *comment );
 
  extern gboolean Retirer_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *pass );
  extern gint Ajouter_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *pass );

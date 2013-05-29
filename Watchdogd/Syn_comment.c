@@ -42,22 +42,35 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_commentDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment )
+ gboolean Retirer_commentDB ( struct CMD_TYPE_COMMENT *comment )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_plugin_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_COMMENT, comment->id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_commentDB: Ajout ou edition d'un message                                                       */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure comment                       */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_commentDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment )
-  { gchar requete[512];
-    gchar *libelle, *font;
+ gint Ajouter_commentDB ( struct CMD_TYPE_COMMENT *comment )
+  { gchar *libelle, *font;
+    gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+    gint id;
 
     libelle = Normaliser_chaine ( comment->libelle );               /* Formatage correct des chaines */
     if (!libelle)
@@ -72,6 +85,14 @@
        return(-1);
      }
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_plugin_dlsDB: DB connexion failed" );
+       g_free(libelle);
+       g_free(font);
+       return(-1);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(syn_id,libelle,font,rouge,vert,bleu,posx,posy,angle) "
                 "VALUES (%d,'%s','%s',%d,%d,%d,%d,%d,'%f')", NOM_TABLE_COMMENT,
@@ -81,35 +102,54 @@
     g_free(libelle);
     g_free(font);
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_commentDB: Recupération de la liste des ids des messages                            */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_commentDB ( struct LOG *log, struct DB *db, gint id_syn )
+ gboolean Recuperer_commentDB ( struct DB **db_retour, gint id_syn )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,syn_id,libelle,font,rouge,vert,bleu,posx,posy,angle"
                 " FROM %s WHERE syn_id=%d ORDER BY id", NOM_TABLE_COMMENT, id_syn );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_commentDB: Recupération de la liste des ids des messages                            */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_COMMENT *Recuperer_commentDB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_COMMENT *Recuperer_commentDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_COMMENT *comment;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -134,21 +174,31 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_COMMENT *Rechercher_commentDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_COMMENT *Rechercher_commentDB ( guint id )
   { struct CMD_TYPE_COMMENT *comment;
     gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_plugin_dlsDB: DB connexion failed" );
+       return(NULL);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT syn_id,libelle,font,rouge,vert,bleu,posx,posy,angle "
                 "FROM %s WHERE id=%d", NOM_TABLE_COMMENT, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_commentDB: Comment %d not found in BD", id );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_dlsDB: DLS %03d not found in DB", id );
        return(NULL);
      }
 
@@ -166,6 +216,7 @@
        comment->bleu       = atoi(db->row[5]);
        comment->angle      = atof(db->row[8]);
      }
+    Libere_DB_SQL( &db );
     return(comment);
   }
 /**********************************************************************************************************/
@@ -173,9 +224,11 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_commentDB( struct LOG *log, struct DB *db, struct CMD_TYPE_COMMENT *comment )
+ gboolean Modifier_commentDB( struct CMD_TYPE_COMMENT *comment )
   { gchar requete[1024];
     gchar *libelle, *font;
+    gboolean retour;
+    struct DB *db;
 
 
     libelle = Normaliser_chaine ( comment->libelle );                 /* Formatage correct des chaines */
@@ -191,6 +244,14 @@
        return(FALSE);
      }
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_plugin_dlsDB: DB connexion failed" );
+       g_free(libelle);
+       g_free(font);
+       return(FALSE);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "libelle='%s',font='%s',rouge=%d,vert=%d,bleu=%d,posx=%d,posy=%d,angle='%f' "
@@ -201,6 +262,8 @@
     g_free(libelle);
     g_free(font);
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/
