@@ -43,8 +43,8 @@
  void Proto_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { struct CMD_TYPE_SCENARIO *sc;
     struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
+/*    Db_watchdog = client->Db_watchdog;*/
+#ifdef bouh
     sc = Rechercher_scenarioDB( Config.log, Db_watchdog, rezo_sc->id );
 
     if (sc)
@@ -59,6 +59,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_sc: Le client valide l'edition d'un sc                                          */
@@ -69,8 +70,8 @@
   { struct CMD_TYPE_SCENARIO *result;
     gboolean retour;
     struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
+/*    Db_watchdog = client->Db_watchdog;*/
+#ifdef bouh
     retour = Modifier_scenarioDB ( Config.log, Db_watchdog, rezo_sc );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
@@ -94,6 +95,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_sc: Un client nous demande d'ajouter un sc Watchdog                                    */
@@ -104,8 +106,8 @@
   { struct CMD_TYPE_SCENARIO *result;
     gint id;
     struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
+/*    Db_watchdog = client->Db_watchdog;*/
+#ifdef bouh
     id = Ajouter_scenarioDB ( Config.log, Db_watchdog, rezo_sc );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -129,6 +131,7 @@
               Charger_scenario ();
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_effacer_sc: Retrait du sc en parametre                                                           */
@@ -147,7 +150,7 @@
   { struct CMD_TYPE_SCENARIO *sc;
     struct CMD_ENREG nbr;
     struct DB *db;
-
+#ifdef bouh
     prctl(PR_SET_NAME, "W-EnvoiSUPSCE", 0, 0, 0 );
 
     db = Init_DB_SQL();       
@@ -182,5 +185,6 @@
                       (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
        g_free(sc);
      }
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
