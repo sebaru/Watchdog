@@ -34,7 +34,7 @@
 /* Entrée: le client et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command ( struct CLIENT *client, gchar *ligne )
+ void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 #ifdef bouh
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */

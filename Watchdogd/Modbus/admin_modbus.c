@@ -30,7 +30,7 @@
 
 /**********************************************************************************************************/
 /* Admin_modbus_reload: Demande le rechargement des conf MODBUS                                           */
-/* Entrée: le connexion                                                                                      */
+/* Entrée: le connexion                                                                                   */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_modbus_reload ( struct CONNEXION *connexion )

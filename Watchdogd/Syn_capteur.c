@@ -40,26 +40,46 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_capteurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur )
+ gboolean Retirer_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_capteurDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAPTEUR, capteur->id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_capteurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur )
+ gint Ajouter_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur )
   { gchar requete[512];
+    gboolean retour;
     gchar *libelle;
+    struct DB *db;
+    gint id;
 
     libelle = Normaliser_chaine ( capteur->libelle );               /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_capteurDB: Normalisation impossible" );
+       return(-1);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_capteurDB: DB connexion failed" );
+       g_free(libelle);
        return(-1);
      }
 
@@ -70,35 +90,54 @@
                 capteur->position_x, capteur->position_y, libelle, capteur->angle );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_capteurDB ( struct LOG *log, struct DB *db, gint id_syn )
+ gboolean Recuperer_capteurDB ( struct DB **db_retour, gint id_syn )
   { gchar requete[2048];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,syn_id,type,bitctrl,libelle,posx,posy,angle"
                 " FROM %s WHERE syn_id=%d",
                 NOM_TABLE_CAPTEUR, id_syn );
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_CAPTEUR *capteur;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -122,9 +161,16 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( guint id )
   { struct CMD_TYPE_CAPTEUR *capteur;
     gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_capteurDB: DB connexion failed" );
+       return(NULL);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT syn_id,bitctrl,type,libelle,posx,posy,angle "
@@ -132,12 +178,15 @@
                 NOM_TABLE_CAPTEUR, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_capteurDB: Capteur %d not found in DB", id );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_capteurDB: Capteur %03d not found in DB", id );
        return(NULL);
      }
 
@@ -153,6 +202,7 @@
        capteur->angle        = atof(db->row[6]);
        memcpy( &capteur->libelle, db->row[3], sizeof(capteur->libelle) );    /* Recopie dans la structure */
      }
+    Libere_DB_SQL( &db );
     return(capteur);
   }
 /**********************************************************************************************************/
@@ -160,14 +210,23 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_capteurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur )
+ gboolean Modifier_capteurDB( struct CMD_TYPE_CAPTEUR *capteur )
   { gchar requete[1024];
+    gboolean retour;
     gchar *libelle;
+    struct DB *db;
 
     libelle = Normaliser_chaine ( capteur->libelle );               /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_capteurDB: Normalisation impossible" );
        return(-1);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_capteurDB: DB connexion failed" );
+       g_free(libelle);
+       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -179,6 +238,8 @@
                 capteur->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

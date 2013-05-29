@@ -41,9 +41,7 @@
 /**********************************************************************************************************/
  void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-    retour = Retirer_capteurDB( Config.log, Db_watchdog, rezo_capteur );
+    retour = Retirer_capteurDB( rezo_capteur );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK,
@@ -65,10 +63,8 @@
  void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct CMD_TYPE_CAPTEUR *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_capteurDB ( Config.log, Db_watchdog, rezo_capteur );
+    id = Ajouter_capteurDB ( rezo_capteur );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -76,7 +72,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_capteurDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_capteurDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -98,10 +94,7 @@
 /**********************************************************************************************************/
  void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    retour = Modifier_capteurDB ( Config.log, Db_watchdog, rezo_capteur );
+    retour = Modifier_capteurDB ( rezo_capteur );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -115,23 +108,16 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_capteur_atelier_thread ( struct CLIENT *client )
+ static void Envoyer_capteur_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAPTEUR *capteur;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
+    if ( ! Recuperer_capteurDB( &db, client->syn.id ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_capteurDB( Config.log, db, client->syn.id ) )
-     { Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
+       return;
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
@@ -142,19 +128,33 @@
      }
 
     for( ; ; )
-     { capteur = Recuperer_capteurDB_suite( Config.log, db );
+     { capteur = Recuperer_capteurDB_suite( &db );
        if (!capteur)
-        { Libere_DB_SQL( &db );
-          Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN, NULL, 0 );
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
+          return;
         }
 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_capteur_atelier: pass %d (%s) to client %s",
+                "Envoyer_capteur_thread_tag: capteur %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
-       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
+       if (tag == TAG_SUPERVISION)
+        { struct CAPTEUR *capteur_new;
+          capteur_new = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
+          if (capteur_new)
+           { capteur_new->type = capteur->type;
+             capteur_new->bit_controle = capteur->bit_controle;
+
+             if ( ! g_list_find_custom(client->bit_init_capteur, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
+              { client->bit_init_capteur = g_list_append( client->bit_init_capteur, capteur_new );
+                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                         "liste des bit_init_capteur ", capteur->id );
+              }
+             else g_free(capteur_new);
+           }
+        }
+
+       Envoi_client ( client, tag, sstag,
                       (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
        g_free(capteur);
      }
@@ -164,62 +164,24 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
+ void *Envoyer_capteur_atelier_thread ( struct CLIENT *client )
+  { Envoyer_capteur_thread_tag ( client,  TAG_ATELIER, 
+                                          SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
+                                          SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN );
+    Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
+    pthread_exit(0);
+    pthread_exit(EXIT_SUCCESS);
+  }
+/**********************************************************************************************************/
+/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
  void *Envoyer_capteur_supervision_thread ( struct CLIENT *client )
-  { struct CMD_ENREG nbr;
-    struct CMD_TYPE_CAPTEUR *capteur;
-    struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_capteurDB( Config.log, db, client->num_supervision ) )
-     { Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
-       Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    nbr.num = db->nbr_result;
-    if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d capteurs", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-     }
-
-    for( ; ; )
-     { struct CAPTEUR *capteur_new;;
-       capteur = Recuperer_capteurDB_suite( Config.log, db );
-       if (!capteur)                                                                        /* Terminé ?? */
-        { Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
-          Libere_DB_SQL( &db );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit( NULL );
-        }
-
-       capteur_new = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
-       if (!capteur_new) continue;
-       capteur_new->type = capteur->type;
-       capteur_new->bit_controle = capteur->bit_controle;
-
-       if ( ! g_list_find_custom(client->bit_init_capteur, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
-        { client->bit_init_capteur = g_list_append( client->bit_init_capteur, capteur_new );
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "liste des bit_init_capteur ", capteur->id );
-        }
-       else g_free(capteur_new);
-
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_capteur_supervision: capteur %d (%s) to client %s",
-                 capteur->id, capteur->libelle, client->machine );
-       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
-                      (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
-       g_free(capteur);
-     }
+  { Envoyer_capteur_thread_tag ( client,  TAG_SUPERVISION, 
+                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
+                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
+    Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
+    pthread_exit(EXIT_SUCCESS);
   }
 /*--------------------------------------------------------------------------------------------------------*/

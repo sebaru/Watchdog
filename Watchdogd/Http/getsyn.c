@@ -51,13 +51,6 @@
     if (!syn_id_char) { syn_id = 1; }
                  else { syn_id = atoi(syn_id_char); }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : DB Connexion failed" );
-       return(FALSE);
-     }
-
     buf = xmlBufferCreate();                                                    /* Creation du buffer xml */
     if (buf == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -128,10 +121,10 @@
 
 /*------------------------------------------- Dumping capteur --------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping capteurs !!");
-    if ( Recuperer_capteurDB( Config.log, db, syn_id ) )
+    if ( Recuperer_capteurDB( &db, syn_id ) )
      { for ( ; ; )
         { struct CMD_TYPE_CAPTEUR *capteur;
-          capteur = Recuperer_capteurDB_suite( Config.log, db );
+          capteur = Recuperer_capteurDB_suite( &db );
           if (!capteur) break;                                                              /* Terminé ?? */
 
           xmlTextWriterStartElement(writer, (const unsigned char *)"capteur");           /* Start Capteur */
@@ -142,8 +135,6 @@
         }
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
-
-    Libere_DB_SQL( &db );                           /* On a plus besoin de la base de données */
 
     retour = xmlTextWriterEndElement(writer);                                           /* End synoptique */
     if (retour < 0)

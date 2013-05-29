@@ -78,12 +78,12 @@
  extern struct CMD_TYPE_PALETTE *Rechercher_paletteDB ( struct LOG *log, struct DB *db, guint id );
  extern gboolean Modifier_paletteDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *pass );
 
- extern gboolean Retirer_capteurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur );
- extern gint Ajouter_capteurDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur );
- extern gboolean Recuperer_capteurDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_capteurDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAPTEUR *capteur );
+ extern gboolean Retirer_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur );
+ extern gint Ajouter_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur );
+ extern gboolean Recuperer_capteurDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct DB **db );
+ extern struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( guint id );
+ extern gboolean Modifier_capteurDB( struct CMD_TYPE_CAPTEUR *capteur );
 
  extern gboolean Retirer_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern gint Ajouter_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
