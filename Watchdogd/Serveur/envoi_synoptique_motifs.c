@@ -41,10 +41,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_motifDB( Config.log, Db_watchdog, rezo_motif );
+    retour = Retirer_motifDB( rezo_motif );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_MOTIF_OK,
@@ -65,12 +63,10 @@
 /**********************************************************************************************************/
  void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { struct CMD_TYPE_MOTIF *result;
-    struct DB *Db_watchdog;
     gint id;
-    Db_watchdog = client->Db_watchdog;
 
     rezo_motif->gid = GID_TOUTLEMONDE;               /* Par défaut, tout le monde peut acceder a ce motif */
-    id = Ajouter_motifDB ( Config.log, Db_watchdog, rezo_motif );
+    id = Ajouter_motifDB ( rezo_motif );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -78,7 +74,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_motifDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_motifDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -100,10 +96,8 @@
 /**********************************************************************************************************/
  void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_motifDB ( Config.log, Db_watchdog, rezo_motif );
+    retour = Modifier_motifDB ( rezo_motif );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -112,7 +106,6 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
 /* Entrée: Néant                                                                                          */
@@ -127,15 +120,22 @@
 
     prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
+    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
+    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
+    if (!motifs)
+     { struct CMD_GTK_MESSAGE erreur;
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                "Envoyer_motif_atelier_thread: Pb d'allocation memoire motifs" );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit ( NULL );
+     }
 
-    if ( ! Recuperer_motifDB( Config.log, db, client->syn.id ) )
+    if ( ! Recuperer_motifDB( &db, client->syn.id ) )
      { Client_mode( client, ENVOI_COMMENT_ATELIER );
-       Libere_DB_SQL( &db );
+       g_free(motifs);
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -147,24 +147,10 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
-    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
-    if (!motifs)
-     { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Envoyer_motif_atelier_thread: Pb d'allocation memoire motifs" );
-       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }
-
     motifs->nbr_motifs = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { motif = Recuperer_motifDB_suite( Config.log, db );             /* Récupération du motif dans la DB */
+     { motif = Recuperer_motifDB_suite( &db );                        /* Récupération du motif dans la DB */
        if (motif)                                              /* Si enregegistrement, alors on le pousse */
         { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
           motifs->nbr_motifs++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
@@ -190,7 +176,6 @@
     while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
     g_free(motifs);
 
-    Libere_DB_SQL( &db );
     Client_mode( client, ENVOI_COMMENT_ATELIER );
     Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN, NULL, 0 );
     Unref_client( client );                                     /* Déréférence la structure cliente */
@@ -217,26 +202,6 @@
      }
     printf("2 - Recherche supervision %d\n", client->num_supervision);
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_motifDB( Config.log, db, client->num_supervision ) )
-     { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
-       Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    nbr.num = db->nbr_result;
-    if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d motifs", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-     }
-
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
     motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
     if (!motifs)
@@ -250,10 +215,24 @@
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
+
+    if ( ! Recuperer_motifDB( &db, client->num_supervision ) )
+     { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
+       Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit ( NULL );
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    if (nbr.num)
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d motifs", nbr.num );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+     }
+
     motifs->nbr_motifs = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { motif = Recuperer_motifDB_suite( Config.log, db );             /* Récupération du motif dans la DB */
+     { motif = Recuperer_motifDB_suite( &db );                        /* Récupération du motif dans la DB */
        if (motif)                                              /* Si enregegistrement, alors on le pousse */
         { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
           motifs->nbr_motifs++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
@@ -279,7 +258,6 @@
     while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
     g_free(motifs);
 
-    Libere_DB_SQL( &db );
     Client_mode( client, ENVOI_COMMENT_SUPERVISION );
     Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN, NULL, 0 );
     Unref_client( client );                                     /* Déréférence la structure cliente */

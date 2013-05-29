@@ -50,12 +50,12 @@
  extern gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn );
  extern gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn );
 
- extern gboolean Retirer_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif );
- extern gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif );
- extern gboolean Recuperer_motifDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_MOTIF *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_motifDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif );
+ extern gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif );
+ extern gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif );
+ extern gboolean Recuperer_motifDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct DB **db );
+ extern struct CMD_TYPE_MOTIF *Rechercher_motifDB ( guint id );
+ extern gboolean Modifier_motifDB( struct CMD_TYPE_MOTIF *motif );
 
  extern gboolean Retirer_commentDB ( struct CMD_TYPE_COMMENT *comment );
  extern gint Ajouter_commentDB ( struct CMD_TYPE_COMMENT *comment );

@@ -34,34 +34,52 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Synoptiques_DB.h"
 
 /**********************************************************************************************************/
 /* Retirer_msgDB: Elimination d'un motif                                                                  */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
+ gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_motifsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MOTIF, motif->id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_motifDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
+ gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif )
   { gchar requete[1024];
     gchar *libelle;
+    gboolean retour;
+    struct DB *db;
+    gint id;
 
     libelle = Normaliser_chaine ( motif->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_motifDB: Normalisation impossible" );
+       return(-1);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_motifsDB: DB connexion failed" );
+       g_free(libelle);
        return(-1);
      }
 
@@ -78,36 +96,55 @@
                 motif->layer );
     g_free(libelle);
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
   }
 /**********************************************************************************************************/
 /* Recuperer_motifDB: Recupération de la liste des motifs d'un synoptique                                 */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_motifDB ( struct LOG *log, struct DB *db, gint id_syn )
+ gboolean Recuperer_motifDB ( struct DB **db_retour, gint id_syn )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
                 " FROM %s WHERE syn='%d' ORDER BY layer", NOM_TABLE_MOTIF, id_syn );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_motifDB_suite : Contination de la recupération de la liste des motifs d'un synoptique        */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_MOTIF *Recuperer_motifDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_MOTIF *motif;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -142,10 +179,16 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_MOTIF *Rechercher_motifDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_MOTIF *Rechercher_motifDB ( guint id )
   { struct CMD_TYPE_MOTIF *motif;
     gchar requete[512];
+    struct DB *db;
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_motifsDB: DB connexion failed" );
+       return(NULL);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,icone,syn,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
@@ -153,12 +196,15 @@
                 " FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_motifDB: Motif %d not found in DB", id );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_motifsDB: DLS %03d not found in DB", id );
        return(NULL);
      }
 
@@ -186,6 +232,7 @@
        motif->rafraich     = atoi(db->row[18]);
        motif->layer        = atoi(db->row[19]);
      }
+    Libere_DB_SQL( &db );
     return(motif);
   }
 /**********************************************************************************************************/
@@ -193,14 +240,23 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_motifDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MOTIF *motif )
+ gboolean Modifier_motifDB( struct CMD_TYPE_MOTIF *motif )
   { gchar requete[1024];
     gchar *libelle;
+    gboolean retour;
+    struct DB *db;
 
     libelle = Normaliser_chaine ( motif->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_motifDB: Normalisation impossible" );
        return(-1);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_motifsDB: DB connexion failed" );
+       g_free(libelle);
+       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -218,6 +274,8 @@
                 motif->id );
     g_free(libelle);
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/
