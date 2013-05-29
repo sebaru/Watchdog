@@ -41,9 +41,7 @@
 /**********************************************************************************************************/
  void Proto_effacer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-    retour = Retirer_passerelleDB( Config.log, Db_watchdog, rezo_pass );
+    retour = Retirer_passerelleDB( rezo_pass );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_PASS_OK,
@@ -65,10 +63,7 @@
  void Proto_ajouter_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { struct CMD_TYPE_PASSERELLE *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-
-    id = Ajouter_passerelleDB ( Config.log, Db_watchdog, rezo_pass );
+    id = Ajouter_passerelleDB ( rezo_pass );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -76,7 +71,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_passerelleDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_passerelleDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -98,9 +93,7 @@
 /**********************************************************************************************************/
  void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-    retour = Modifier_passerelleDB ( Config.log, Db_watchdog, rezo_pass );
+    retour = Modifier_passerelleDB ( rezo_pass );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -121,15 +114,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiPass", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_passerelleDB( Config.log, db, client->syn.id ) )
+    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )
      { Client_mode( client, ENVOI_CAPTEUR_ATELIER );                            /* Si pas de comments ... */
-       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -142,10 +128,9 @@
      }
 
     for( ; ; )
-     { pass = Recuperer_passerelleDB_suite( Config.log, db );
+     { pass = Recuperer_passerelleDB_suite( &db );
        if (!pass)
-        { Libere_DB_SQL( &db );
-          Client_mode( client, ENVOI_CAPTEUR_ATELIER );               /* Si pas de comments ... */
+        { Client_mode( client, ENVOI_CAPTEUR_ATELIER );               /* Si pas de comments ... */
           Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
@@ -171,15 +156,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiPass", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_passerelleDB( Config.log, db, client->num_supervision ) )
+    if ( ! Recuperer_passerelleDB( &db, client->num_supervision ) )
      { Client_mode( client, ENVOI_PALETTE_SUPERVISION );                        /* Si pas de comments ... */
-       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }
@@ -192,10 +170,9 @@
      }
 
     for( ; ; )
-     { pass = Recuperer_passerelleDB_suite( Config.log, db );
+     { pass = Recuperer_passerelleDB_suite( &db );
        if (!pass)                                                                           /* Terminé ?? */
-        { Libere_DB_SQL( &db );
-          Client_mode( client, ENVOI_PALETTE_SUPERVISION );
+        { Client_mode( client, ENVOI_PALETTE_SUPERVISION );
           Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

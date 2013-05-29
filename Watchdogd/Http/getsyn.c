@@ -103,10 +103,10 @@
 
 /*------------------------------------------- Dumping Passerelle -----------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping passerelles !!");
-    if ( Recuperer_passerelleDB( Config.log, db, syn_id ) )
+    if ( Recuperer_passerelleDB( &db, syn_id ) )
      { for ( ; ; )
         { struct CMD_TYPE_PASSERELLE *pass;
-          pass = Recuperer_passerelleDB_suite( Config.log, db );
+          pass = Recuperer_passerelleDB_suite( &db );
           if (!pass) break;                                                                 /* Terminé ?? */
 
           xmlTextWriterStartElement(writer, (const unsigned char *)"passerelle");     /* Start Passerelle */

@@ -64,19 +64,19 @@
  extern struct CMD_TYPE_COMMENT *Rechercher_commentDB ( guint id );
  extern gboolean Modifier_commentDB( struct CMD_TYPE_COMMENT *comment );
 
- extern gboolean Retirer_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *pass );
- extern gint Ajouter_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *pass );
- extern gboolean Recuperer_passerelleDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_passerelleDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *pass );
+ extern gboolean Retirer_passerelleDB ( struct CMD_TYPE_PASSERELLE *pass );
+ extern gint Ajouter_passerelleDB ( struct CMD_TYPE_PASSERELLE *pass );
+ extern gboolean Recuperer_passerelleDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct DB **db );
+ extern struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( guint id );
+ extern gboolean Modifier_passerelleDB( struct CMD_TYPE_PASSERELLE *pass );
 
- extern gboolean Retirer_paletteDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *pass );
- extern gint Ajouter_paletteDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *pass );
- extern gboolean Recuperer_paletteDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CMD_TYPE_PALETTE *Recuperer_paletteDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_PALETTE *Rechercher_paletteDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_paletteDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PALETTE *pass );
+ extern gboolean Retirer_paletteDB ( struct CMD_TYPE_PALETTE *pass );
+ extern gint Ajouter_paletteDB ( struct CMD_TYPE_PALETTE *pass );
+ extern gboolean Recuperer_paletteDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_PALETTE *Recuperer_paletteDB_suite( struct DB **db );
+ extern struct CMD_TYPE_PALETTE *Rechercher_paletteDB ( guint id );
+ extern gboolean Modifier_paletteDB( struct CMD_TYPE_PALETTE *pass );
 
  extern gboolean Retirer_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur );
  extern gint Ajouter_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur );

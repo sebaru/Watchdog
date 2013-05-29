@@ -49,7 +49,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_commentDB: DB connexion failed" );
        return(FALSE);
      }
 
@@ -87,7 +87,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_commentDB: DB connexion failed" );
        g_free(libelle);
        g_free(font);
        return(-1);
@@ -123,7 +123,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_commentDB: DB connexion failed" );
        return(FALSE);
      }
 
@@ -181,7 +181,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_commentDB: DB connexion failed" );
        return(NULL);
      }
 
@@ -198,7 +198,7 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_dlsDB: DLS %03d not found in DB", id );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_commentDB: DLS %03d not found in DB", id );
        return(NULL);
      }
 
@@ -230,7 +230,6 @@
     gboolean retour;
     struct DB *db;
 
-
     libelle = Normaliser_chaine ( comment->libelle );                 /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_commentDB: Normalisation impossible" );
@@ -246,7 +245,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_commentDB: DB connexion failed" );
        g_free(libelle);
        g_free(font);
        return(FALSE);

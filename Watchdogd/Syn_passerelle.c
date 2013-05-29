@@ -34,29 +34,46 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Synoptiques_DB.h"
 
 /**********************************************************************************************************/
 /* Retirer_passerelleDB: Elimination d'une passerelle                                                     */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *passerelle )
+ gboolean Retirer_passerelleDB ( struct CMD_TYPE_PASSERELLE *passerelle )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_passerelleDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_PASSERELLE, passerelle->id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_passerelleDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *passerelle )
+ gint Ajouter_passerelleDB ( struct CMD_TYPE_PASSERELLE *passerelle )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+    gint id;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_passerelleDB: DB connexion failed" );
+       return(-1);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(syn_id,syn_cible_id,bitctrl,bitctrl1,bitctrl2,bitctrl3,posx,posy,angle)"
@@ -65,17 +82,30 @@
                 passerelle->bit_controle_1, passerelle->bit_controle_2, passerelle->bit_controle_3,
                 passerelle->position_x, passerelle->position_y, passerelle->angle );
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_passerelleDB ( struct LOG *log, struct DB *db, gint id_syn )
+ gboolean Recuperer_passerelleDB ( struct DB **db_retour, gint id_syn )
   { gchar requete[2048];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
@@ -88,19 +118,25 @@
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,                                       /* From */
                 NOM_TABLE_PASSERELLE, id_syn, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE );   /* Jointure */
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_PASSERELLE *Recuperer_passerelleDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_PASSERELLE *passerelle;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -126,8 +162,15 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( guint id )
   { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_passerelleDB: DB connexion failed" );
+       return(NULL);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.syn_cible_id,%s.page,%s.bitctrl,%s.bitctrl1,%s.bitctrl2,"
@@ -141,17 +184,27 @@
                 NOM_TABLE_PASSERELLE, id, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
-    return ( Recuperer_passerelleDB_suite ( log, db ) );
+    return ( Recuperer_passerelleDB_suite ( &db ) );
   }
 /**********************************************************************************************************/
 /* Modifier_passerelleDB: Modification d'un passerelle Watchdog                                           */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_passerelleDB( struct LOG *log, struct DB *db, struct CMD_TYPE_PASSERELLE *passerelle )
+ gboolean Modifier_passerelleDB( struct CMD_TYPE_PASSERELLE *passerelle )
   { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_passerelleDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
@@ -162,6 +215,8 @@
                 passerelle->position_x, passerelle->position_y, passerelle->angle,
                 passerelle->id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

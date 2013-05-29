@@ -41,9 +41,7 @@
 /**********************************************************************************************************/
  void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-    retour = Retirer_paletteDB( Config.log, Db_watchdog, rezo_palette );
+    retour = Retirer_paletteDB( rezo_palette );
 
     if (retour)
      { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_PALETTE_OK,
@@ -65,10 +63,8 @@
  void Proto_ajouter_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette )
   { struct CMD_TYPE_PALETTE *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_paletteDB ( Config.log, Db_watchdog, rezo_palette );
+    id = Ajouter_paletteDB ( rezo_palette );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -76,7 +72,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_paletteDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_paletteDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -98,9 +94,7 @@
 /**********************************************************************************************************/
  void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
-    retour = Modifier_paletteDB ( Config.log, Db_watchdog, rezo_palette );
+    retour = Modifier_paletteDB ( rezo_palette );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -114,21 +108,15 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Envoyer_palette_atelier_thread_tag ( struct CLIENT *client, gint sstag, gint sstag_fin )
+ static void Envoyer_palette_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_PALETTE *palette;
     struct CMD_ENREG nbr;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiPalette", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { return; }                                                                 /* Si pas de histos (??) */
-
-
-    if ( ! Recuperer_paletteDB( Config.log, db, client->syn.id ) )
-     { Libere_DB_SQL( &db );
-       return;
+    if ( ! Recuperer_paletteDB( &db, client->syn.id ) )
+     { return;
      }
 
     nbr.num = db->nbr_result;
@@ -138,17 +126,16 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
     for( ; ; )
-     { palette = Recuperer_paletteDB_suite( Config.log, db );
+     { palette = Recuperer_paletteDB_suite( &db );
        if (!palette)
-        { Libere_DB_SQL( &db );
-          Envoi_client ( client, TAG_ATELIER, sstag_fin, NULL, 0 );
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           return;
         }
 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_palette_atelier: envoi pass %d (%s) to client %d",
+                "Envoyer_palette_thread_tag: envoi pass %d (%s) to client %d",
                 palette->id, palette->libelle, client->machine );
-       Envoi_client ( client, TAG_ATELIER, sstag,
+       Envoi_client ( client, tag, sstag,
                       (gchar *)palette, sizeof(struct CMD_TYPE_PALETTE) );
        g_free(palette);
      }
@@ -159,8 +146,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_palette_atelier_thread ( struct CLIENT *client )
-  { Envoyer_palette_atelier_thread_tag ( client, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
-                                                 SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
+  { Envoyer_palette_thread_tag ( client, TAG_ATELIER,
+                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
+                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
@@ -170,46 +158,11 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_palette_supervision_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_PALETTE *palette;
-    struct CMD_ENREG nbr;
-    struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiPalette", 0, 0, 0 );
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_paletteDB( Config.log, db, client->num_supervision ) )
-     { Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
-       Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }
-
-    nbr.num = db->nbr_result;
-    if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d palettes", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-     }
-
-    for( ; ; )
-     { palette = Recuperer_paletteDB_suite( Config.log, db );
-       if (!palette)                                                                        /* Terminé ?? */
-        { Libere_DB_SQL( &db );
-          Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit( NULL );
-        }
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_palette_supervision: envoi pass %d (%s) to client %d",
-                palette->id, palette->libelle, client->machine );
-       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
-                      (gchar *)palette, sizeof(struct CMD_TYPE_PALETTE) );
-       g_free(palette);
-     }
+  { Envoyer_palette_thread_tag ( client, TAG_SUPERVISION,
+                                                 SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
+                                                 SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
+    Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/
