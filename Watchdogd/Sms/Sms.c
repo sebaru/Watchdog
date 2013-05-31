@@ -223,13 +223,7 @@
        return;
      }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                 "Traiter_commande_sms : Connexion DB failed. sms not handled" );
-       return;
-     }
-    if ( ! Recuperer_mnemoDB_by_command_text ( Config.log, db, (gchar *)texte ) )
+    if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)texte ) )
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                  "Traiter_commande_sms : Error searching Database" );
      }
@@ -237,7 +231,7 @@
      { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo;
           
        for ( result_mnemo = NULL ; ; )
-        { mnemo = Recuperer_mnemoDB_suite( Config.log, db );
+        { mnemo = Recuperer_mnemoDB_suite( &db );
           if (!mnemo) break;
           if (db->nbr_result!=1) g_free(mnemo);
                             else result_mnemo = mnemo;
@@ -261,7 +255,6 @@
           g_free(result_mnemo);
         }
      }
-    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                           */

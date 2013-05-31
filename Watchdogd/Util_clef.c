@@ -37,11 +37,13 @@
 /* Entrées: un log, une db, un id utilisateur, une clef, un password                                      */
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Set_password( struct LOG *log, struct DB *db, gchar *clef, struct CMD_UTIL_SETPASSWORD *util )
+ gboolean Set_password( gchar *clef, struct CMD_UTIL_SETPASSWORD *util )
   { gchar requete[200];
     gchar *crypt, *code_crypt;
+    gboolean retour;
+    struct DB *db;
 
-    crypt = Crypter( log, clef, util->code_en_clair );
+    crypt = Crypter( clef, util->code_en_clair );
     if (!crypt)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Set_password: cryptage password impossible" );
        return(FALSE);
@@ -59,15 +61,21 @@
                 NOM_TABLE_UTIL, code_crypt, util->id );
     g_free(code_crypt);
 
-    if ( ! Lancer_requete_SQL ( db, requete ))
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Set_password: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    if ( ! retour )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Set_password: update failed %s", util->id );
-       g_free(crypt);
        return(FALSE);
      }
     else Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                   "Set_password: update ok for id=%s", util->id );
-    g_free(crypt);
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -75,22 +83,32 @@
 /* Entrée: un log, une db, un nom, un entier accessible pour l'id                                         */
 /* Sortie: la clef freeable ou null si pb                                                                 */
 /**********************************************************************************************************/
- gchar *Recuperer_clef ( struct LOG *log, struct DB *db, gchar *nom, gint *id )
+ gchar *Recuperer_clef ( gchar *nom, gint *id )
   { gchar requete[200];
     gchar *crypt;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),
                 "SELECT id, crypt"
                 " FROM %s WHERE name=\'%s\'",
                  NOM_TABLE_UTIL, nom );
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_clef: DB connexion failed" );
+       return(NULL);
+     }
+
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recuperer_clef: Key not found in DB for %s", nom );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recuperer_clef: User %s not found in DB", nom );
        return(NULL);
      }
 
@@ -98,12 +116,14 @@
     if (!crypt)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_clef: out of memory" );
        Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
    *id = atoi(db->row[0]);                                                      /* Conversion en entier */
     memcpy( crypt, db->row[1], NBR_CARAC_CODE_CRYPTE );
 
     Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
     return(crypt);
   }
 /**********************************************************************************************************/
@@ -111,7 +131,7 @@
 /* Entrées: un log, un password, la clef                                                                  */
 /* Sortie: la chaine cryptée necessite d'etre frée                                                        */
 /**********************************************************************************************************/
- gchar *Crypter( struct LOG *log, gchar *clef, gchar *pass )
+ gchar *Crypter( guchar *clef, gchar *pass )
   { guchar iv[] = "Watchdog";                                                         /* IV par défaut !! */
     guchar outbuf[NBR_CARAC_CODE_CRYPTE];                                             /* On prévoit large */
     guchar password[NBR_CARAC_LOGIN_UTF8+1];                             /* Pour le formatage du password */

@@ -41,10 +41,8 @@
 /**********************************************************************************************************/
  void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
   { struct CMD_TYPE_SYNOPTIQUE *syn;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    syn = Rechercher_synoptiqueDB( Config.log, Db_watchdog, rezo_syn->id );
+    syn = Rechercher_synoptiqueDB( rezo_syn->id );
 
     if (syn)
      { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_EDIT_SYNOPTIQUE_OK,
@@ -67,10 +65,8 @@
  void Proto_valider_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
   { struct CMD_TYPE_SYNOPTIQUE *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_synoptiqueDB ( Config.log, Db_watchdog, rezo_syn );
+    retour = Modifier_synoptiqueDB ( rezo_syn );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -78,7 +74,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_synoptiqueDB( Config.log, Db_watchdog, rezo_syn->id );
+    else { result = Rechercher_synoptiqueDB( rezo_syn->id );
            if (result) 
             { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_VALIDE_EDIT_SYNOPTIQUE_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
@@ -100,10 +96,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_synoptiqueDB( Config.log, Db_watchdog, rezo_syn );
+    retour = Retirer_synoptiqueDB( rezo_syn );
 
     if (retour)
      { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_DEL_SYNOPTIQUE_OK,
@@ -125,10 +119,8 @@
  void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn )
   { struct CMD_TYPE_SYNOPTIQUE *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_synoptiqueDB ( Config.log, Db_watchdog, rezo_syn );
+    id = Ajouter_synoptiqueDB ( rezo_syn );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -136,7 +128,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_synoptiqueDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_synoptiqueDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -163,15 +155,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiSYN", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { return;
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_synoptiqueDB( Config.log, db ) )
-     { Libere_DB_SQL( &db );
-       return;
-     }                                                                           /* Si pas de histos (??) */
+    if ( ! Recuperer_synoptiqueDB( &db ) )
+     { return; }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
     if (nbr.num)
@@ -181,10 +166,9 @@
      }
 
     for( ; ; )
-     { syn = Recuperer_synoptiqueDB_suite( Config.log, db );
+     { syn = Recuperer_synoptiqueDB_suite( &db );
        if (!syn)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           return;
         }
 
@@ -202,7 +186,6 @@
                                                      SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
-    return(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -214,7 +197,6 @@
                                                   SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
-    return(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -227,7 +209,6 @@
     Unref_client( client );                                           /* Déréférence la structure cliente */
     Client_mode ( client, ENVOI_PALETTE_FOR_ATELIER_PALETTE );
     pthread_exit( NULL );
-    return(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -239,7 +220,6 @@
                                                   SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
-    return(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -251,7 +231,6 @@
                                                      SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
-    return(NULL);
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
@@ -263,6 +242,5 @@
                                               SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
-    return(NULL);
   }
 /*--------------------------------------------------------------------------------------------------------*/

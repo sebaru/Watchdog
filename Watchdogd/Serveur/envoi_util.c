@@ -56,10 +56,8 @@
  void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { struct CMD_TYPE_UTILISATEUR edit_util;
     struct UTILISATEURDB *util;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    util = Rechercher_utilisateurDB( Config.log, Db_watchdog, rezo_util->id );
+    util = Rechercher_utilisateurDB( rezo_util->id );
 
     if (util)
      { edit_util.id            = util->id;                                  /* Recopie des info editables */
@@ -95,10 +93,8 @@
  void Proto_valider_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { struct UTILISATEURDB *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_utilisateurDB ( Config.log, Db_watchdog, Config.crypto_key, rezo_util );
+    retour = Modifier_utilisateurDB ( Config.crypto_key, rezo_util );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -106,7 +102,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_utilisateurDB( Config.log, Db_watchdog, rezo_util->id );
+    else { result = Rechercher_utilisateurDB( rezo_util->id );
            if (result) 
             { struct CMD_TYPE_UTILISATEUR *util;
               util = Preparer_envoi_utilisateur ( result );
@@ -139,10 +135,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_utilisateurDB( Config.log, Db_watchdog, rezo_util );
+    retour = Retirer_utilisateurDB( rezo_util );
 
     if (retour)
      { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_DEL_UTIL_OK,
@@ -164,10 +158,8 @@
  void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
   { struct UTILISATEURDB *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_utilisateurDB ( Config.log, Db_watchdog, Config.crypto_key, rezo_util );
+    id = Ajouter_utilisateurDB ( Config.crypto_key, rezo_util );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -175,7 +167,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_utilisateurDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_utilisateurDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -213,12 +205,7 @@
     struct DB *db;
     prctl(PR_SET_NAME, "W-EnvoiUTIL", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-    if ( ! Recuperer_utilsDB( Config.log, db ) )
+    if ( ! Recuperer_utilsDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -229,10 +216,9 @@
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for ( ; ; )
-     { util = Recuperer_utilsDB_suite( Config.log, db );
+     { util = Recuperer_utilsDB_suite( &db );
        if (!util)
         { Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL_FIN, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

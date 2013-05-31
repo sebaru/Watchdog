@@ -42,10 +42,8 @@
  void Proto_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
   { struct CMD_TYPE_OPTION_BIT_INTERNE option;
     struct CMD_TYPE_OPTION_TEMPO *tempo;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    tempo = Rechercher_tempoDB( Config.log, Db_watchdog, rezo_mnemo->id );
+    tempo = Rechercher_tempoDB( rezo_mnemo->id );
 
     if (tempo)
      { option.type = MNEMO_TEMPO;
@@ -70,10 +68,8 @@
  void Proto_valider_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_OPTION_TEMPO *rezo_tempo )
   { struct CMD_TYPE_OPTION_TEMPO *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_tempoDB ( Config.log, Db_watchdog, rezo_tempo );
+    retour = Modifier_tempoDB ( rezo_tempo );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -81,7 +77,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_tempoDB( Config.log, Db_watchdog, rezo_tempo->id_mnemo );
+    else { result = Rechercher_tempoDB( rezo_tempo->id_mnemo );
            if (result)
             { g_free(result);
               Charger_tempo ();                                            /* Update de la running config */
@@ -160,10 +156,8 @@
  void Proto_editer_option_compteur_imp ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
   { struct CMD_TYPE_OPTION_BIT_INTERNE option;
     struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    cpt = Rechercher_cpt_impDB( Config.log, Db_watchdog, rezo_mnemo->id );
+    cpt = Rechercher_cpt_impDB( rezo_mnemo->id );
 
     if (cpt)
      { option.type = MNEMO_CPT_IMP;
@@ -189,10 +183,8 @@
                                                  struct CMD_TYPE_OPTION_COMPTEUR_IMP *rezo_cpt )
   { struct CMD_TYPE_OPTION_COMPTEUR_IMP *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_cpt_impDB ( Config.log, Db_watchdog, rezo_cpt );
+    retour = Modifier_cpt_impDB ( rezo_cpt );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -200,7 +192,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cpt_impDB( Config.log, Db_watchdog, rezo_cpt->id_mnemo );
+    else { result = Rechercher_cpt_impDB( rezo_cpt->id_mnemo );
            if (result)
             { g_free(result);
               Charger_cpt_imp ();                                          /* Update de la running config */
@@ -221,10 +213,8 @@
 /**********************************************************************************************************/
  void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
   { struct CMD_TYPE_MNEMONIQUE *mnemo;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    mnemo = Rechercher_mnemoDB( Config.log, Db_watchdog, rezo_mnemonique->id );
+    mnemo = Rechercher_mnemoDB( rezo_mnemonique->id );
     if (mnemo)
      { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,
                   (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
@@ -246,10 +236,8 @@
  void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
   { struct CMD_TYPE_MNEMONIQUE *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_mnemoDB ( Config.log, Db_watchdog, rezo_mnemonique );
+    retour = Modifier_mnemoDB ( rezo_mnemonique );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -257,7 +245,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_mnemoDB( Config.log, Db_watchdog, rezo_mnemonique->id );
+    else { result = Rechercher_mnemoDB( rezo_mnemonique->id );
            if (result) 
             { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_MNEMONIQUE) );
@@ -285,10 +273,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_mnemoDB( Config.log, Db_watchdog, rezo_mnemonique );
+    retour = Retirer_mnemoDB( rezo_mnemonique );
 
     if (retour)
      { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_DEL_MNEMONIQUE_OK,
@@ -310,10 +296,8 @@
  void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
   { struct CMD_TYPE_MNEMONIQUE *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_mnemoDB ( Config.log, Db_watchdog, rezo_mnemonique );
+    id = Ajouter_mnemoDB ( rezo_mnemonique );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -321,7 +305,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_mnemoDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_mnemoDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -344,10 +328,8 @@
  void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
                                         struct CMD_TYPE_NUM_MNEMONIQUE *critere )
   { struct CMD_TYPE_MNEMONIQUE *mnemo;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    mnemo = Rechercher_mnemoDB_type_num( Config.log, Db_watchdog, critere );
+    mnemo = Rechercher_mnemoDB_type_num( critere );
     if (mnemo)
      { Envoi_client ( client, tag, ss_tag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
        g_free(mnemo);
@@ -382,9 +364,8 @@
        return;
      }                                                                           /* Si pas de histos (??) */
 
-    if ( ! Recuperer_mnemoDB( Config.log, db ) )
+    if ( ! Recuperer_mnemoDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( &db );
        return;
      }
 
@@ -401,14 +382,13 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }
     mnemos->nbr_mnemos = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { mnemo = Recuperer_mnemoDB_suite( Config.log, db );           /* Récupération d'un mnemo dans la DB */
+     { mnemo = Recuperer_mnemoDB_suite( &db );                      /* Récupération d'un mnemo dans la DB */
        if (mnemo)                                              /* Si enregegistrement, alors on le pousse */
         { memcpy ( &mnemos->mnemo[mnemos->nbr_mnemos], mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
           mnemos->nbr_mnemos++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
@@ -446,9 +426,8 @@
        return;
      }                                                                           /* Si pas de histos (??) */
 
-    if ( ! Recuperer_mnemoDB_for_courbe( Config.log, db ) )
+    if ( ! Recuperer_mnemoDB_for_courbe( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       Libere_DB_SQL( &db );
        return;
      }                                                                           /* Si pas de histos (??) */
 
@@ -457,10 +436,9 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { mnemo = Recuperer_mnemoDB_for_courbe_suite( Config.log, db );
+     { mnemo = Recuperer_mnemoDB_suite( &db );
        if (!mnemo)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

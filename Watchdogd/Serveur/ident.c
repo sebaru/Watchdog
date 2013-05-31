@@ -44,7 +44,7 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Autoriser_autorisation: RAZ 'login failed' for %d", client->util->id );
     
-    Raz_login_failed( Config.log, client->Db_watchdog, client->util->id );
+    Raz_login_failed( client->util->id );
   }
 /**********************************************************************************************************/
 /* Proto_set_password: changement de password                                                             */
@@ -56,7 +56,7 @@
        return;
      }
 
-    Set_password( Config.log, client->Db_watchdog, Config.crypto_key, util );
+    Set_password( Config.crypto_key, util );
     Client_mode ( client, DECONNECTE );                        /* On deconnecte le client tout de suite ! */
   }
 /**********************************************************************************************************/
@@ -68,8 +68,7 @@
     gchar *clef, *crypt;
     gint id;
 
-    clef = Recuperer_clef( Config.log, client->Db_watchdog,
-                           client->ident.nom, &id );
+    clef = Recuperer_clef( client->ident.nom, &id );
     if (!clef)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                "Tester_autorisation: Unable to retrieve the key of user %s", client->ident.nom );
@@ -77,7 +76,7 @@
        return(DECONNECTE);
      }
           
-    client->util = Rechercher_utilisateurDB( Config.log, client->Db_watchdog, id );
+    client->util = Rechercher_utilisateurDB( id );
     if (!client->util)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                "Tester_autorisation: Unable to retrieve the user %s", client->ident.nom );
@@ -87,7 +86,7 @@
     memcpy( &client->util->code, clef, sizeof( client->util->code ) );    
     g_free(clef);
 /***************************************** Identification du client ***************************************/
-    crypt = Crypter( Config.log, Config.crypto_key, client->ident.password );
+    crypt = Crypter( Config.crypto_key, client->ident.password );
     if (!crypt)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                "Tester_autorisation: Password encryption error for user %s", client->util->nom );
@@ -100,8 +99,8 @@
                "Tester_autorisation: Password error for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
        g_free(crypt);
-       Ajouter_one_login_failed( Config.log, client->Db_watchdog,  /* Dommage ! */
-                                 client->util->id, Config.max_login_failed );
+       Ajouter_one_login_failed( client->util->id, Config.max_login_failed );                /* Dommage ! */
+                                 
        return(DECONNECTE);
      }
     g_free(crypt);

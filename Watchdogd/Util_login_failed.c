@@ -36,9 +36,10 @@
 /* Entrées: un log, une db et nom d'utilisateur                                                           */
 /* Sortie: le nombre de login failed, -1 si erreur                                                        */
 /**********************************************************************************************************/
- gint Get_login_failed( struct LOG *log, struct DB *db, guint id )
+ gint Get_login_failed( guint id )
   { gchar requete[200];
     gint nbr_login;
+    struct DB *db;
 
     if (id < NBR_UTILISATEUR_RESERVE) 
      { return(0); }
@@ -47,19 +48,26 @@
                 "SELECT login_failed FROM %s WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Get_login_failed: DB connexion failed" );
+       return(-1);
+     }
+
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(0); }
+     { Libere_DB_SQL( &db );
+       return(-1);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "Get_login_failed: Login_failed not found in BD for id=%d", id );
-       return(0);
+     { Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Get_login_failed: USER %03d not found in DB", id );
+       return(-1);
      }
 
     nbr_login = atoi(db->row[0]);
-    Liberer_resultat_SQL (db);
+    Libere_DB_SQL(&db);
     return( nbr_login );
   }
 /**********************************************************************************************************/
@@ -67,8 +75,10 @@
 /* Entrées: un log, une db et nom d'utilisateur, un max_login_failed                                      */
 /* Sortie: le nombre de login failed                                                                      */
 /**********************************************************************************************************/
- gboolean Ajouter_one_login_failed( struct LOG *log, struct DB *db, guint id, gint max_login_failed )
+ gboolean Ajouter_one_login_failed( guint id, gint max_login_failed )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
 
     if (id < NBR_UTILISATEUR_RESERVE) 
      { return(FALSE); }
@@ -77,26 +87,44 @@
                 "UPDATE %s SET login_failed = login_failed+1 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
-    if (Get_login_failed( log, db, id )>=max_login_failed)                     /* Desactivation du compte */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_one_login_failed: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+
+    if (Get_login_failed( id )>=max_login_failed)                              /* Desactivation du compte */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                 "Ajouter_one_login_failed: Desactivation compte sur trop login failed for id=%d", id );
-       Set_compte_actif( log, db, id, FALSE );
+       Set_compte_actif( id, FALSE );
      }
-    return(TRUE);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Raz_login_failed: Reset le login failed d'un utilisateur                                               */
 /* Entrées: un log, une db et nom d'utilisateur                                                           */
 /* Sortie: le nombre de login failed                                                                      */
 /**********************************************************************************************************/
- gboolean Raz_login_failed( struct LOG *log, struct DB *db, guint id )
+ gboolean Raz_login_failed( guint id )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Raz_login_failed: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

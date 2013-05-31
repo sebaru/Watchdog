@@ -138,7 +138,7 @@
     histo.date_create_usec = tv.tv_usec;
     histo.date_fixe = 0;
 
-    Ajouter_histoDB( Config.log, NULL, &histo );                            /* Si ajout dans DB OK */
+    Ajouter_histoDB( &histo );                                                     /* Si ajout dans DB OK */
 
 /********************************************* Envoi du message aux librairies abonnées *******************/
     Envoyer_message_aux_abonnes ( msg );
@@ -171,15 +171,15 @@
     Envoyer_message_aux_abonnes ( msg );
     g_free(msg);
 
-    histo = Rechercher_histoDB( Config.log, NULL, num );
+    histo = Rechercher_histoDB( num );
     if (!histo) return;
 
     memcpy( &histo_hard, histo, sizeof(struct HISTODB) );
     time ( &histo_hard.date_fin );
-    Ajouter_histo_hardDB( Config.log, NULL, &histo_hard );
+    Ajouter_histo_hardDB( &histo_hard );
     g_free(histo);
 
-    Retirer_histoDB( Config.log, NULL, num );
+    Retirer_histoDB( num );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                  */

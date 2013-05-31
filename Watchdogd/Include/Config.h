@@ -41,7 +41,7 @@
     gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
-    gchar crypto_key[TAILLE_CRYPTO_KEY+1];            /* Clef de cryptage des mots de passes utilisateurs */
+    guchar crypto_key[TAILLE_CRYPTO_KEY+1];           /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
     guint log_level;                                                      /* Niveau de debug du programme */

@@ -90,7 +90,6 @@
  struct CLIENT                /* Définition de la structure de travail et de gestion des clients distants */
   { gchar machine[TAILLE_MACHINE+1];                          /* Le nom (ou adrIP) de sa machine distante */
     gint  ssrv_id;                                                   /* Numero de sous serveur de gestion */
-    struct DB *Db_watchdog;                                               /* Lien avec la base de données */
     struct REZO_CLI_IDENT ident;                                 /* Nom complet de l'utilisateur en cours */
     struct UTILISATEURDB *util;
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */

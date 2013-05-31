@@ -44,8 +44,8 @@
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gchar *syn_id_char;
-    struct DB *db;
     gint retour, syn_id;
+    struct DB *db;
 
     syn_id_char = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "syn_id" );
     if (!syn_id_char) { syn_id = 1; }
@@ -55,7 +55,6 @@
     if (buf == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Buffer creation failed" );
-       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -77,12 +76,11 @@
        return(FALSE);
      }
 
-    syndb = Rechercher_synoptiqueDB ( Config.log, db, syn_id );
+    syndb = Rechercher_synoptiqueDB ( syn_id );
     if ( ! syndb )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                  "Http_Traiter_request_getsyn : Synoptique %d not found in DB", syn_id );
        xmlBufferFree(buf);
-       Libere_DB_SQL( &db );
        return(FALSE);
      }
 

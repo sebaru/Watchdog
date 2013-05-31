@@ -42,24 +42,12 @@
  void Charger_cpt_imp ( void )
   { struct DB *db;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, FALSE, LOG_ERR, "Charger_cpt_imp: Connexion DB failed" );
-       return;
-     }                                                                           /* Si pas de histos (??) */
-
-    if (!Recuperer_cpt_impDB( Config.log, db ))
-     { Libere_DB_SQL( &db );
-       return;
-     }                                                                         /* Si pas d'enregistrement */
+    if (!Recuperer_cpt_impDB( &db )) return;
 
     for( ; ; )
      { struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp;
-       cpt_imp = Recuperer_cpt_impDB_suite( Config.log, db );
-       if (!cpt_imp)
-        { Libere_DB_SQL( &db );
-          return;
-        }
+       cpt_imp = Recuperer_cpt_impDB_suite( &db );
+       if (!cpt_imp) return;
        if (cpt_imp->num < NBR_COMPTEUR_IMP)
         { memcpy ( &Partage->ci[cpt_imp->num].cpt_impdb, cpt_imp, sizeof(struct CMD_TYPE_OPTION_COMPTEUR_IMP) );
           Partage->ci[cpt_imp->num].val_en_cours2 = Partage->ci[cpt_imp->num].cpt_impdb.valeur;   /* Init */
@@ -100,8 +88,10 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_cpt_impDB ( struct LOG *log, struct DB *db )
+ gboolean Recuperer_cpt_impDB ( struct DB **db_retour )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,val,num,type_ci,multi,unite"
@@ -112,19 +102,26 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                        */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_OPTION_COMPTEUR_IMP *Recuperer_cpt_impDB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_OPTION_COMPTEUR_IMP *Recuperer_cpt_impDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    struct DB *db;
+
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -145,9 +142,16 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_OPTION_COMPTEUR_IMP *Rechercher_cpt_impDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_OPTION_COMPTEUR_IMP *Rechercher_cpt_impDB ( guint id )
   { struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp;
     gchar requete[200];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_cpt_impDB: DB connexion failed" );
+       return(NULL);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,val,num,type_ci,multi,unite"
@@ -157,12 +161,15 @@
               );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cpt_impDB: Cpt_imp (%d) not found", id );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_cpt_impDB: Cpt %03d not found in DB", id );
        return(NULL);
      }
 
@@ -177,6 +184,7 @@
        memcpy( &cpt_imp->unite, db->row[5], sizeof(cpt_imp->unite) );
      }
     Liberer_resultat_SQL (db);
+    Libere_DB_SQL( &db );
     return(cpt_imp);
   }
 /**********************************************************************************************************/
@@ -184,19 +192,31 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_cpt_impDB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp )
+ gboolean Modifier_cpt_impDB( struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp )
   { gchar requete[1024], *unite;
+    gboolean retour;
+    struct DB *db;
 
     unite = Normaliser_chaine ( cpt_imp->unite );                   /* Formatage correct des chaines */
     if (!unite)
      { Info_new( Config.log, FALSE, LOG_WARNING, "Modifier_cpt_impDB: Normalisation unite impossible" );
        return(FALSE);
      }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_cpt_impDB: DB connexion failed" );
+       g_free(unite);
+       return(FALSE);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "unite='%s',multi='%f',type_ci='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_CPT_IMP, unite, cpt_imp->multi, cpt_imp->type, cpt_imp->id_mnemo );
     g_free(unite);
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -36,8 +36,10 @@
 /* Entrées: un log, une db et un id d'utilisateur et un flag                                              */
 /* Sortie: boolean false si probleme                                                                      */
 /**********************************************************************************************************/
- gboolean Set_compte_actif( struct LOG *log, struct DB *db, guint id, gboolean enable )
+ gboolean Set_compte_actif( guint id, gboolean enable )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
 
     if (id < NBR_UTILISATEUR_RESERVE) 
      { return(TRUE); }
@@ -46,6 +48,14 @@
                 "UPDATE %s SET enable = '%d', login_failed = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, enable, id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Set_compte_actif: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

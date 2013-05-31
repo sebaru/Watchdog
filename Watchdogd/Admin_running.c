@@ -97,7 +97,7 @@
           util.expire = FALSE;
           util.changepass = FALSE;
           memset ( &util.gids, 0, sizeof(util.gids) );
-          if( Modifier_utilisateurDB( Config.log, db, Config.crypto_key, &util ) )
+          if( Modifier_utilisateurDB( Config.crypto_key, &util ) )
            { g_snprintf( chaine, sizeof(chaine), " Password set\n" ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }

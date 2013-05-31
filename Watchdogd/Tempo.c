@@ -40,8 +40,10 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static gboolean Recuperer_tempoDB ( struct LOG *log, struct DB *db )
+ static gboolean Recuperer_tempoDB ( struct DB **db_retour )
   { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.libelle,%s.groupe,%s.page,%s.name,"
@@ -57,19 +59,31 @@
                 NOM_TABLE_MNEMO /* Order by */
               );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_tempoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_tempoDB_suite: Recupération de la liste des informations sur les temposids des               */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static struct CMD_TYPE_OPTION_TEMPO *Recuperer_tempoDB_suite( struct LOG *log, struct DB *db )
+ static struct CMD_TYPE_OPTION_TEMPO *Recuperer_tempoDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_OPTION_TEMPO *tempo;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -98,24 +112,12 @@
  void Charger_tempo ( void )
   { struct DB *db;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_tempo: Connexion DB failed" );
-       return;
-     }                                                                                  /* Si pas d'accès */
-
-    if (!Recuperer_tempoDB( Config.log, db ))
-     { Libere_DB_SQL( &db );
-       return;
-     }                                                                         /* Si pas d'enregistrement */
+    if (!Recuperer_tempoDB( &db )) return;
 
     for( ; ; )
      { struct CMD_TYPE_OPTION_TEMPO *tempo;
-       tempo = Recuperer_tempoDB_suite( Config.log, db );
-       if (!tempo)
-        { Libere_DB_SQL( &db );
-          return;
-        }
+       tempo = Recuperer_tempoDB_suite( &db );
+       if (!tempo) return;
 
        if (tempo->num < NBR_TEMPO)
         { memcpy( &Partage->Tempo_R[tempo->num].option_tempo, tempo, sizeof(struct CMD_TYPE_OPTION_TEMPO) );
@@ -131,10 +133,10 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_OPTION_TEMPO *Rechercher_tempoDB ( struct LOG *log, struct DB *db, guint id )
-  { struct CMD_TYPE_OPTION_TEMPO *tempo;
-    gchar requete[512];
-    
+ struct CMD_TYPE_OPTION_TEMPO *Rechercher_tempoDB ( guint id )
+  { gchar requete[512];
+    struct DB *db;
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,%s.num,%s.libelle,%s.groupe,%s.page,%s.name,"
                 "%s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
@@ -148,49 +150,42 @@
                 NOM_TABLE_TEMPO, id /* And */
               );
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "Rechercher_tempoDB: Tempo %d (id_mnemo) not found in DB", id );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_tempoDB: DB connexion failed" );
        return(NULL);
      }
 
-    tempo = (struct CMD_TYPE_OPTION_TEMPO *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_TEMPO) );
-    if (!tempo)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_tempoDB: Mem error" ); }
-    else
-     { tempo->id_mnemo  = atoi(db->row[0]);
-       tempo->num       = atoi(db->row[1]);
-       memcpy( &tempo->libelle,    db->row[2], sizeof(tempo->libelle) );
-       memcpy( &tempo->groupe,     db->row[3], sizeof(tempo->groupe ) );
-       memcpy( &tempo->page,       db->row[4], sizeof(tempo->page   ) );
-       memcpy( &tempo->plugin_dls, db->row[5], sizeof(tempo->plugin_dls) );
-       tempo->delai_on  = atoi(db->row[6]);
-       tempo->min_on    = atoi(db->row[7]);
-       tempo->max_on    = atoi(db->row[8]);
-       tempo->delai_off = atoi(db->row[9]);
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
      }
-    Liberer_resultat_SQL (db);
 
-    return(tempo);
+    return( Recuperer_tempoDB_suite ( &db ) );
   }
 /**********************************************************************************************************/
 /* Modifier_tempoDB: Modification d'une tempo Watchdog                                                    */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Modifier_tempoDB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_TEMPO *tempo )
+ gboolean Modifier_tempoDB( struct CMD_TYPE_OPTION_TEMPO *tempo )
   { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "delai_on='%d', min_on='%d', max_on='%d', delai_off='%d' WHERE id_mnemo=%d",
                 NOM_TABLE_TEMPO, tempo->delai_on, tempo->min_on, tempo->max_on, tempo->delai_off,
                 tempo->id_mnemo );
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_tempoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

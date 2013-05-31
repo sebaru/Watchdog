@@ -51,18 +51,17 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Clear_histoDB ( void );
- extern gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Ajouter_histoDB ( struct LOG *log, struct DB *db, struct HISTODB *histo );
- extern gboolean Recuperer_histoDB ( struct LOG *log, struct DB *db );
- extern struct HISTODB *Recuperer_histoDB_suite( struct LOG *log, struct DB *db );
- extern gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo );
- extern struct HISTODB *Rechercher_histoDB( struct LOG *log, struct DB *db, gint id );
+ extern gboolean Retirer_histoDB ( guint id );
+ extern gboolean Ajouter_histoDB ( struct HISTODB *histo );
+ extern gboolean Recuperer_histoDB ( struct DB **db );
+ extern struct HISTODB *Recuperer_histoDB_suite( struct DB **db );
+ extern gboolean Modifier_histoDB ( struct CMD_TYPE_HISTO *histo );
+ extern struct HISTODB *Rechercher_histoDB( gint id );
 
- extern gboolean Ajouter_histo_hardDB ( struct LOG *log, struct DB *db, struct HISTO_HARDDB *histo );
- extern gboolean Creer_db_histo_hard ( struct LOG *log, struct DB *db );
- extern gboolean Rechercher_histo_hardDB ( struct LOG *log, struct DB *db,
+ extern gboolean Ajouter_histo_hardDB ( struct HISTO_HARDDB *histo );
+ extern gboolean Recuperer_histo_hardDB ( struct DB **db,
                                            struct CMD_REQUETE_HISTO_HARD *critere );
- extern struct HISTO_HARDDB *Rechercher_histo_hardDB_suite( struct LOG *log, struct DB *db );
+ extern struct HISTO_HARDDB *Recuperer_histo_hardDB_suite( struct DB **db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

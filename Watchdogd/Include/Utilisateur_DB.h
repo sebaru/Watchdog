@@ -75,44 +75,40 @@
   };
 
 /************************************** Prototypes de fonctions *******************************************/
- extern gboolean Recuperer_groupesDB( struct LOG *log, struct DB *db );                  /* Dans groupe.c */
- extern struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct LOG *log, struct DB *db );
+ extern gboolean Recuperer_groupesDB( struct DB **db );                                  /* Dans groupe.c */
+ extern struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct DB **db );
  extern gboolean Tester_groupe_util( guint id_util, guint *groupes, guint id_groupe );
  extern gchar *Nom_groupe_reserve( gint id );
- extern gboolean Retirer_groupeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe );
- extern gint Ajouter_groupeDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe );
- extern struct CMD_TYPE_GROUPE *Rechercher_groupeDB( struct LOG *log, struct DB *db, gint id );
- extern gboolean Modifier_groupeDB( struct LOG *log, struct DB *db, struct CMD_TYPE_GROUPE *groupe );
- extern gboolean Groupe_set_groupe_utilDB( struct LOG *log, struct DB *db, guint id_util, guint *gids );
- extern gboolean Groupe_get_groupe_utilDB( struct LOG *log, struct DB *db, guint id, guint *gids );
+ extern gboolean Retirer_groupeDB( struct CMD_TYPE_GROUPE *groupe );
+ extern gint Ajouter_groupeDB ( struct CMD_TYPE_GROUPE *groupe );
+ extern struct CMD_TYPE_GROUPE *Rechercher_groupeDB( gint id );
+ extern gboolean Modifier_groupeDB( struct CMD_TYPE_GROUPE *groupe );
+ extern gboolean Groupe_set_groupe_utilDB( guint id_util, guint *gids );
+ extern gboolean Groupe_get_groupe_utilDB( guint id, guint *gids );
 
- extern gboolean Recuperer_utilsDB( struct LOG *log, struct DB *db );
- extern struct UTILISATEURDB *Recuperer_utilsDB_suite( struct LOG *log, struct DB *db );
- extern gboolean Retirer_utilisateurDB( struct LOG *log, struct DB *db,
-                                        struct CMD_TYPE_UTILISATEUR *util );
- extern gint Ajouter_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,
+ extern gboolean Recuperer_utilisateurDB( struct DB **db );
+ extern struct UTILISATEURDB *Recuperer_utilisateurDB_suite( struct DB **db );
+ extern gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
+ extern gint Ajouter_utilisateurDB( gchar *clef,
                                     struct CMD_TYPE_UTILISATEUR *util );
- extern struct UTILISATEURDB *Rechercher_utilisateurDB( struct LOG *log, struct DB *db, gint id );
- extern gboolean Modifier_utilisateurDB( struct LOG *log, struct DB *db, gchar *clef,
-                                         struct CMD_TYPE_UTILISATEUR *util );
+ extern struct UTILISATEURDB *Rechercher_utilisateurDB( gint id );
+ extern gboolean Modifier_utilisateurDB( gchar *clef, struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Nom_utilisateur_reserve( gint id );
 
- extern gchar *Recuperer_clef ( struct LOG *log, struct DB *db, gchar *nom, gint *id );    /* Dans clef.c */
- extern gchar *Crypter( struct LOG *log, gchar *clef, gchar *pass );
- extern gboolean Set_password( struct LOG *log, struct DB *db,
-                               gchar *clef, struct CMD_UTIL_SETPASSWORD *util );
+ extern gchar *Recuperer_clef ( gchar *nom, gint *id );                                    /* Dans clef.c */
+ extern gchar *Crypter( guchar *clef, gchar *pass );
+ extern gboolean Set_password( gchar *clef, struct CMD_UTIL_SETPASSWORD *util );
 
- extern gboolean Raz_login_failed( struct LOG *log, struct DB *db, guint id );     /* Dans login_failed.c */
- extern gboolean Ajouter_one_login_failed( struct LOG *log, struct DB *db,
-                                           guint id, gint max_login_failed );
+ extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
+ extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );
 
 
  extern gchar *Groupes_vers_string ( guint *source );
- extern gint Get_login_failed( struct LOG *log, struct DB *db, guint id );
- extern gboolean Ajouter_one_login_failed( struct LOG *log, struct DB *db, guint id, gint max_login_failed );
- extern gboolean Set_compte_actif( struct LOG *log, struct DB *db, guint id, gboolean enable );
+ extern gint Get_login_failed( guint id );
+ extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );
+ extern gboolean Set_compte_actif( guint id, gboolean enable );
  extern guint *String_vers_groupes ( gchar *source );
- extern gboolean Set_compte_actif( struct LOG *log, struct DB *db, guint id, gboolean enable );
+ extern gboolean Set_compte_actif( guint id, gboolean enable );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

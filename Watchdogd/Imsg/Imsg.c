@@ -329,13 +329,7 @@
        return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
      }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
-                 "Imsg_Reception_message : Connexion DB failed. imsg not handled" );
-       return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
-     }
-    if ( ! Recuperer_mnemoDB_by_command_text ( Config.log, db, (gchar *)lm_message_node_get_value ( body ) ) )
+    if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)lm_message_node_get_value ( body ) ) )
      { Imsg_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
     else 
      { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo;
@@ -346,7 +340,7 @@
         { Imsg_Envoi_message_to( from, " Need to choose ... :" ); }
 
        for ( result_mnemo = NULL ; ; )
-        { mnemo = Recuperer_mnemoDB_suite( Config.log, db );
+        { mnemo = Recuperer_mnemoDB_suite( &db );
           if (!mnemo) break;
 
           if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->command_text );
@@ -381,7 +375,6 @@
           g_free(result_mnemo);
         }
      }
-    Libere_DB_SQL( &db );
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
 /**********************************************************************************************************/

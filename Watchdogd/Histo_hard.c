@@ -34,17 +34,17 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
- #include "Histo_DB.h"
 
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Ajouter_histo_hardDB ( struct LOG *log, struct DB *db, struct HISTO_HARDDB *histo )
+ gboolean Ajouter_histo_hardDB ( struct HISTO_HARDDB *histo )
   { gchar requete[1024];
     gchar *libelle, *nom_ack;
+    gboolean retour;
+    struct DB *db;
 
     libelle = Normaliser_chaine ( histo->histo.msg.libelle );       /* Formatage correct des chaines */
     if (!libelle)
@@ -69,16 +69,20 @@
     g_free(libelle);
     g_free(nom_ack);
 
-    return ( Lancer_requete_SQL ( db, requete ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Recuperer_histo_hardDB: Recupération de l'historique HARD du système, via requete                      */
 /* Entrée: un log et une database, et des champs de requete                                               */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Rechercher_histo_hardDB ( struct LOG *log, struct DB *db, struct CMD_REQUETE_HISTO_HARD *critere )
+ gboolean Recuperer_histo_hardDB ( struct DB **db_retour, struct CMD_REQUETE_HISTO_HARD *critere )
   { gchar requete[1024];
     gchar critereSQL[1024];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.libelle,type,num_syn,%s.groupe,%s.page,"
@@ -138,19 +142,31 @@
 #endif
     g_strlcat( requete, " ORDER BY date_create_sec,date_create_usec LIMIT 500;", sizeof(requete) );
  
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_histoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct HISTO_HARDDB *Rechercher_histo_hardDB_suite( struct LOG *log, struct DB *db )
+ struct HISTO_HARDDB *Recuperer_histo_hardDB_suite( struct DB **db_orig )
   { struct HISTO_HARDDB *histo_hard;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 

@@ -57,13 +57,11 @@
   { struct CMD_TYPE_GROUPE edit_groupe;
     struct CMD_TYPE_GROUPE *groupe;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
     retour = FALSE;
     groupe = NULL;
     if (rezo_groupe->id >= NBR_GROUPE_RESERVE)
-     { groupe = Rechercher_groupeDB( Config.log, Db_watchdog, rezo_groupe->id );
+     { groupe = Rechercher_groupeDB( rezo_groupe->id );
        if (groupe) retour = TRUE;                                                          /* Autorisé !! */
      } 
 
@@ -92,10 +90,8 @@
  void Proto_valider_editer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
   { struct CMD_TYPE_GROUPE *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_groupeDB ( Config.log, Db_watchdog, rezo_groupe );
+    retour = Modifier_groupeDB ( rezo_groupe );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -103,7 +99,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_groupeDB( Config.log, Db_watchdog, rezo_groupe->id );
+    else { result = Rechercher_groupeDB( rezo_groupe->id );
            if (result) 
             { struct CMD_TYPE_GROUPE *groupe;
               groupe = Preparer_envoi_groupe ( result );
@@ -136,10 +132,8 @@
 /**********************************************************************************************************/
  void Proto_effacer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_groupeDB( Config.log, Db_watchdog, rezo_groupe );
+    retour = Retirer_groupeDB( rezo_groupe );
 
     if (retour)
      { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_DEL_GROUPE_OK,
@@ -161,10 +155,8 @@
  void Proto_ajouter_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
   { struct CMD_TYPE_GROUPE *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_groupeDB ( Config.log, Db_watchdog, rezo_groupe );
+    id = Ajouter_groupeDB ( rezo_groupe );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -172,7 +164,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_groupeDB( Config.log, Db_watchdog, id );
+    else { result = Rechercher_groupeDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -210,12 +202,7 @@
     struct DB *db;
     prctl(PR_SET_NAME, "W-EnvoiGrp", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
-    if (! Recuperer_groupesDB( Config.log, db ) )
+    if (! Recuperer_groupesDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
     }                                                                           /* Si pas de histos (??) */
@@ -226,10 +213,9 @@
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for ( ; ; )
-     { groupe = Recuperer_groupesDB_suite( Config.log, db );
+     { groupe = Recuperer_groupesDB_suite( &db );
        if (!groupe)                                                               /* Fin de traitement ?? */
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }

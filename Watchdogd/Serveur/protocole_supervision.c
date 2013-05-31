@@ -53,14 +53,14 @@
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                printf("Le client desire le synoptique de supervision\n" );
 
-               if ( ! Tester_groupe_synoptique( Config.log, client->Db_watchdog, client->util, syn->id) )
+               if ( ! Tester_groupe_synoptique( client->util, syn->id) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
                   g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
                else { struct CMD_TYPE_SYNOPTIQUE *syndb;
-                      syndb = Rechercher_synoptiqueDB ( Config.log, client->Db_watchdog, syn->id );
+                      syndb = Rechercher_synoptiqueDB ( syn->id );
                       if ( ! syndb )
                        { struct CMD_GTK_MESSAGE gtkmessage;
                          g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Synoptique inconnu..." );

@@ -35,9 +35,9 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_tempo ( void );
- extern struct CMD_TYPE_OPTION_TEMPO *Rechercher_tempoDB ( struct LOG *log, struct DB *db, guint id );
+ extern struct CMD_TYPE_OPTION_TEMPO *Rechercher_tempoDB ( guint id );
 /* extern gboolean Recuperer_tempoDB ( struct LOG *log, struct DB *db );
  extern struct CMD_TYPE_OPTION_TEMPO *Recuperer_tempoDB_suite( struct LOG *log, struct DB *db );*/
- extern gboolean Modifier_tempoDB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_TEMPO *entreeana );
+ extern gboolean Modifier_tempoDB( struct CMD_TYPE_OPTION_TEMPO *tempo );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

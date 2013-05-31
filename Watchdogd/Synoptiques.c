@@ -40,13 +40,13 @@
 /* Entrées: un id utilisateur, une liste de groupe, un id de groupe                                       */
 /* Sortie: false si pb                                                                                    */
 /**********************************************************************************************************/
- gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db, struct UTILISATEURDB *util, guint syn_id )
+ gboolean Tester_groupe_synoptique( struct UTILISATEURDB *util, guint syn_id )
   { struct CMD_TYPE_SYNOPTIQUE *syn;
     gint cpt;
 
     if (util->id==UID_ROOT) return(TRUE);                            /* Le tech est dans tous les groupes */
 
-    syn = Rechercher_synoptiqueDB ( log, db, syn_id );
+    syn = Rechercher_synoptiqueDB ( syn_id );
     if (!syn) return(FALSE);
     if (syn->groupe == GID_TOUTLEMONDE) return(TRUE);
 
@@ -66,15 +66,24 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
+ gboolean Retirer_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[200];
-    
+    gboolean retour;
+    struct DB *db;
+
     if (syn->id == 1) return(TRUE);                                 /* Le synoptique 1 est indestructible */
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_synoptiqueDB: DB connexion failed" );
+       return(FALSE);
+     }
 /****************************************** Retrait de la base SYN ****************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, syn->id );
 
-    if ( ! Lancer_requete_SQL ( db, requete ) )
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( ! retour )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination ok" ); }
 
@@ -126,16 +135,20 @@
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: re-affectation plugin D.L.S failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: re-affectation plugin D.L.S passerelle ok" ); }
 
-    return(TRUE);
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
+ gint Ajouter_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[512];
     gchar *libelle, *page, *groupe;
+    gboolean retour;
+    struct DB *db;
+    gint id;
 
     libelle = Normaliser_chaine ( syn->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
@@ -166,35 +179,60 @@
     g_free(page);
     g_free(groupe);
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_synoptiqueDB: DB connexion failed" );
+       return(-1);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_synoptiqueDB ( struct LOG *log, struct DB *db )
+ gboolean Recuperer_synoptiqueDB ( struct DB **db_retour )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,page,access_groupe,groupe"
                 " FROM %s ORDER BY groupe,page,libelle", NOM_TABLE_SYNOPTIQUE );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_synoptiqueDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db )
+ struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_SYNOPTIQUE *syn;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -214,34 +252,36 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( struct LOG *log, struct DB *db, guint id )
+ struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id )
   { struct CMD_TYPE_SYNOPTIQUE *syn;
     gchar requete[200];
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,libelle,page,access_groupe,groupe"
                 " FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, id );
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_synoptiqueDB: DB connexion failed" );
+       return(NULL);
+     }
+
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
 
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_synoptiqueDB: Synoptique %d not found in DB", id );
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_synoptiqueDB: SYN %03d not found in DB", id );
        return(NULL);
      }
 
-    syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-    if (!syn)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_synoptiqueDB: Mem error" ); }
-    else
-     { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
-       memcpy( &syn->page,    db->row[2], sizeof(syn->page   ) );            /* Recopie dans la structure */
-       memcpy( &syn->groupe,  db->row[4], sizeof(syn->groupe ) );            /* Recopie dans la structure */
-       syn->id            = atoi(db->row[0]);
-       syn->access_groupe = atoi(db->row[3]);
-     }
+    syn = Recuperer_synoptiqueDB_suite( &db );
+    Libere_DB_SQL ( &db );
     return(syn);
   }
 /**********************************************************************************************************/
@@ -249,9 +289,11 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn )
+ gboolean Modifier_synoptiqueDB( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[1024];
     gchar *libelle, *page, *groupe;
+    gboolean retour;
+    struct DB *db;
 
     libelle = Normaliser_chaine ( syn->libelle );
     if (!libelle)
@@ -283,6 +325,14 @@
     g_free(page);
     g_free(groupe);
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_synoptiqueDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /*--------------------------------------------------------------------------------------------------------*/

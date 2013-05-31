@@ -41,8 +41,6 @@
 /**********************************************************************************************************/
  void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 #ifdef bouh
     retour = Retirer_camera_supDB( Config.log, Db_watchdog, rezo_camera_sup );
     if (retour)
@@ -66,8 +64,6 @@
  void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup )
   { struct CMD_TYPE_CAMERA_SUP *result;
     gint id;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
 #ifdef bouh
     id = Ajouter_camera_supDB ( Config.log, Db_watchdog, rezo_camera_sup );
@@ -102,8 +98,6 @@
  void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
                                                 struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup )
   { gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 #ifdef bouh
     retour = Modifier_camera_supDB ( Config.log, Db_watchdog, rezo_camera_sup );
     if (retour==FALSE)
@@ -171,7 +165,7 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
-
+#ifdef bouh
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
 
     db = Init_DB_SQL();       
@@ -208,5 +202,6 @@
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
        g_free(camera_sup);
      }
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

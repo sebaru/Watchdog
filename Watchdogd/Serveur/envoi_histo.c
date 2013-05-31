@@ -65,10 +65,8 @@
   { struct CMD_TYPE_HISTO edit_histo;
     struct HISTODB *result;
     gboolean retour;
-    struct DB *Db_watchdog;
-    Db_watchdog = client->Db_watchdog;
 
-    result = Rechercher_histoDB( Config.log, Db_watchdog, rezo_histo->id );
+    result = Rechercher_histoDB( rezo_histo->id );
     if (!result) return;
     if (result->date_fixe)                                                            /* Deja acquitté ?? */
      { g_free(result);
@@ -80,7 +78,7 @@
     time( (time_t *)&edit_histo.date_fixe );
     memcpy( &edit_histo.nom_ack, client->util->nom, sizeof(edit_histo.nom_ack) );
 
-    retour = Modifier_histoDB ( Config.log, Db_watchdog, &edit_histo );
+    retour = Modifier_histoDB ( &edit_histo );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -88,7 +86,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_histoDB( Config.log, Db_watchdog, rezo_histo->id );
+    else { result = Rechercher_histoDB( rezo_histo->id );
            if (result) 
             { struct CMD_TYPE_HISTO *histo;
               histo = Preparer_envoi_histo ( result );
@@ -127,15 +125,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiHISTO", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }
-
-    if ( ! Recuperer_histoDB( Config.log, db ) )                                 /* Si pas de histos (??) */
+    if ( ! Recuperer_histoDB( &db ) )                                            /* Si pas de histos (??) */
      { Client_mode( client, VALIDE );         /* Le client est maintenant valide aux yeux du sous-serveur */
-       Libere_DB_SQL( &db );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -146,10 +137,9 @@
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { histo = Recuperer_histoDB_suite( Config.log, db );
+     { histo = Recuperer_histoDB_suite( &db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
-          Libere_DB_SQL( &db );
           Client_mode( client, VALIDE );      /* Le client est maintenant valide aux yeux du sous-serveur */
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit( NULL );

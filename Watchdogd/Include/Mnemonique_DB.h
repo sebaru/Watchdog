@@ -35,18 +35,16 @@
  #define NOM_TABLE_MNEMO    "mnemos"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Recuperer_mnemoDB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_suite( struct LOG *log, struct DB *db );
- extern gboolean Recuperer_mnemoDB_for_courbe ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_for_courbe_suite( struct LOG *log, struct DB *db );
- extern gint Ajouter_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo );
- extern gboolean Retirer_mnemoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo );
- extern gboolean Modifier_mnemoDB( struct LOG *log, struct DB *db, struct CMD_TYPE_MNEMONIQUE *mnemo );
- extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct LOG *log, struct DB *db,
-                                                         struct CMD_TYPE_NUM_MNEMONIQUE *critere );
- extern gboolean Recuperer_mnemoDB_by_command_text ( struct LOG *log, struct DB *db,
+ extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( guint id );
+ extern gboolean Recuperer_mnemoDB ( struct DB **db );
+ extern gboolean Recuperer_mnemoDB_for_courbe ( struct DB **db );
+ extern gboolean Recuperer_mnemoDB_by_command_text ( struct DB **db,
                                                      gchar *commande_pure );
+ extern struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_suite( struct DB **db );
+ extern gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern gboolean Retirer_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern gboolean Modifier_mnemoDB( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

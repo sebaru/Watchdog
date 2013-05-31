@@ -41,14 +41,13 @@
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern gboolean Tester_groupe_synoptique( struct LOG *log, struct DB *db,
-                                           struct UTILISATEURDB *util, guint syn_id );
- extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Recuperer_synoptiqueDB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct LOG *log, struct DB *db );
- extern gint Ajouter_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn );
- extern gboolean Retirer_synoptiqueDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn );
- extern gboolean Modifier_synoptiqueDB( struct LOG *log, struct DB *db, struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern gboolean Tester_groupe_synoptique( struct UTILISATEURDB *util, guint syn_id );
+ extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id );
+ extern gboolean Recuperer_synoptiqueDB ( struct DB **db );
+ extern struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct DB **db );
+ extern gint Ajouter_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern gboolean Retirer_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern gboolean Modifier_synoptiqueDB( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern gboolean Retirer_motifDB ( struct CMD_TYPE_MOTIF *motif );
  extern gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif );

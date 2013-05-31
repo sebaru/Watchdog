@@ -60,6 +60,7 @@
  void Proto_valider_message_mp3( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3,
                                  gchar *buffer )
   { gchar chaine[80];
+    gint nbr;
     if (!client->id_creation_message_mp3)
      { gint id_fichier;
        g_snprintf( chaine, sizeof(chaine), "Son/%d.mp3", msg_mp3->num );
@@ -73,7 +74,7 @@
        client->id_creation_message_mp3 = id_fichier;
      }
     
-    write( client->id_creation_message_mp3, buffer, msg_mp3->taille );
+    nbr = write( client->id_creation_message_mp3, buffer, msg_mp3->taille );
   }
 /**********************************************************************************************************/
 /* Proto_editer_msg: Le client desire editer un msg                                                       */

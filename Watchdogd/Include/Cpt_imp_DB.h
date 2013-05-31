@@ -43,9 +43,9 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_cpt_imp ( void );
  extern void Updater_cpt_impDB ( void );
- extern gboolean Recuperer_cpt_impDB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_OPTION_COMPTEUR_IMP *Recuperer_cpt_impDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_OPTION_COMPTEUR_IMP *Rechercher_cpt_impDB( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_cpt_impDB( struct LOG *log, struct DB *db, struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp );
+ extern gboolean Recuperer_cpt_impDB ( struct DB **db );
+ extern struct CMD_TYPE_OPTION_COMPTEUR_IMP *Recuperer_cpt_impDB_suite( struct DB **db );
+ extern struct CMD_TYPE_OPTION_COMPTEUR_IMP *Rechercher_cpt_impDB( guint id );
+ extern gboolean Modifier_cpt_impDB( struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt_imp );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

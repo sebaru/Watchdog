@@ -36,7 +36,7 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Retirer_msgDB: Elimination d'un message                                                                */
+/* Retirer_messageDB: Elimination d'un message                                                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
@@ -45,22 +45,21 @@
     gboolean retour;
     struct DB *db;
 
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MSG, msg->id );
+
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_messageDB: DB connexion failed" );
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MSG, msg->id );
-
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
-    Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
     return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
+/* Ajouter_messageDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
@@ -90,15 +89,6 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_plugin_dlsDB: DB connexion failed" );
-       g_free(libelle);
-       g_free(libelle_audio);
-       g_free(libelle_sms);
-       return(-1);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
                 "type,num_syn,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat) VALUES "
@@ -111,6 +101,12 @@
     g_free(libelle_audio);
     g_free(libelle_sms);
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_messageDB: DB connexion failed" );
+       return(-1);
+     }
+
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     if ( retour == FALSE )
      { Libere_DB_SQL(&db); 
@@ -121,7 +117,7 @@
     return(id);
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -129,12 +125,6 @@
   { gchar requete[256];
     gboolean retour;
     struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_messageDB: DB connexion failed" );
-       return(FALSE);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
@@ -147,13 +137,19 @@
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* Where */
               );
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_messageDB: DB connexion failed" );
+       return(FALSE);
+     }
+
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -191,20 +187,14 @@
     return(msg);
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                 */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num )
-  { struct CMD_TYPE_MESSAGE *msg;
+  { struct CMD_TYPE_MESSAGE *message;
     gchar requete[256];
     struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_messageDB: DB connexion failed" );
-       return(NULL);
-     }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
@@ -216,6 +206,12 @@
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, num /* Where */
               );
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_messageDB: DB connexion failed" );
+       return(NULL);
+     }
+
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
        return(NULL);
@@ -225,33 +221,13 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_msgDB: MSG %03d not foudn in DB", num );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_messageDB: MSG %03d not found in DB", num );
        return(NULL);
      }
 
-    msg = g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_msgDB: Mem error" ); }
-    else
-     { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
-       memcpy( &msg->groupe,        db->row[7],  sizeof(msg->groupe  ) );
-       memcpy( &msg->page,          db->row[8],  sizeof(msg->page    ) );
-       memcpy( &msg->libelle_audio, db->row[10], sizeof(msg->libelle_audio) );
-       memcpy( &msg->libelle_sms,   db->row[11], sizeof(msg->libelle_sms) );
-       msg->id          = atoi(db->row[0]);
-       msg->num         = atoi(db->row[1]);
-       msg->type        = atoi(db->row[3]);
-       msg->num_syn     = atoi(db->row[4]);
-       msg->bit_voc     = atoi(db->row[5]);
-       msg->enable      = atoi(db->row[6]);
-       msg->sms         = atoi(db->row[9]);
-       msg->type_voc    = atoi(db->row[12]);
-       msg->vitesse_voc = atoi(db->row[13]);
-       msg->time_repeat = atoi(db->row[14]);
-     }
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-    return(msg);
+    message = Recuperer_messageDB_suite( &db );
+    Libere_DB_SQL ( &db );
+    return(message);
   }
 /**********************************************************************************************************/
 /* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                        */
@@ -259,9 +235,9 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id )
-  { gchar requete[200];
-    struct CMD_TYPE_MESSAGE *msg;
-     struct DB *db;
+  { struct CMD_TYPE_MESSAGE *message;
+    gchar requete[200];
+    struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
@@ -287,33 +263,13 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_msgDB_par_id: MSG %03d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_messageDB_par_id: MSG %03d not found in DB", id );
        return(NULL);
      }
 
-    msg = g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_msgDB_par_id: Mem error" ); }
-    else
-     { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
-       memcpy( &msg->groupe,        db->row[7],  sizeof(msg->groupe  ) );
-       memcpy( &msg->page,          db->row[8],  sizeof(msg->page    ) );
-       memcpy( &msg->libelle_audio, db->row[10], sizeof(msg->libelle_audio) );
-       memcpy( &msg->libelle_sms,   db->row[11], sizeof(msg->libelle_sms) );
-       msg->id          = atoi(db->row[0]);
-       msg->num         = atoi(db->row[1]);
-       msg->type        = atoi(db->row[3]);
-       msg->num_syn     = atoi(db->row[4]);
-       msg->bit_voc     = atoi(db->row[5]);
-       msg->enable      = atoi(db->row[6]);
-       msg->sms         = atoi(db->row[9]);
-       msg->type_voc    = atoi(db->row[12]);
-       msg->vitesse_voc = atoi(db->row[13]);
-       msg->time_repeat = atoi(db->row[14]);
-     }
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-    return(msg);
+    message = Recuperer_messageDB_suite( &db );
+    Libere_DB_SQL ( &db );
+    return(message);
   }
 /**********************************************************************************************************/
 /* Modifier_messageDB: Modification d'un message Watchdog                                                 */
@@ -345,15 +301,6 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_plugin_dlsDB: DB connexion failed" );
-       g_free(libelle);
-       g_free(libelle_audio);
-       g_free(libelle_sms);
-       return(FALSE);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "num=%d,libelle='%s',type=%d,num_syn=%d,bit_voc=%d,enable=%s,sms=%d,"
@@ -367,6 +314,12 @@
     g_free(libelle);
     g_free(libelle_audio);
     g_free(libelle_sms);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_messageDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);

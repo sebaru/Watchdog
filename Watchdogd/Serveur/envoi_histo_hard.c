@@ -70,15 +70,8 @@
 
     prctl(PR_SET_NAME, "W-EnvoiHISTOHARD", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
+    if ( ! Recuperer_histo_hardDB( &db, &requete ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Rechercher_histo_hardDB( Config.log, db, &requete ) )
-     { Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
 
@@ -88,10 +81,9 @@
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for ( ; ; )
-     { histo = Rechercher_histo_hardDB_suite( Config.log, db );
+     { histo = Recuperer_histo_hardDB_suite( &db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN, NULL, 0 );
-          Libere_DB_SQL( &db );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }

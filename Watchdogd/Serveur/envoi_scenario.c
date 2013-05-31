@@ -42,6 +42,8 @@
 /**********************************************************************************************************/
  void Proto_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { struct CMD_TYPE_SCENARIO *sc;
+
+#ifdef bouh
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -58,6 +60,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_sc: Le client valide l'edition d'un sc                                            */
@@ -67,6 +70,7 @@
  void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { struct CMD_TYPE_SCENARIO *result;
     gboolean retour;
+#ifdef bouh
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -93,6 +97,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_effacer_sc: Retrait du sc en parametre                                                           */
@@ -102,6 +107,7 @@
  void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc,
                                           gint tag, gint sstag )
   { gboolean retour;
+#ifdef bouh
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -119,6 +125,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_effacer_sc: Retrait du sc en parametre                                                           */
@@ -136,6 +143,7 @@
  void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc )
   { struct CMD_TYPE_SCENARIO *result;
     gint id;
+#ifdef bouh
     struct DB *Db_watchdog;
     Db_watchdog = client->Db_watchdog;
 
@@ -162,6 +170,7 @@
               Charger_scenario ();
             }
          }
+#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_scs: Envoi des scs au client GID_SCENARIO                                                      */
@@ -172,7 +181,7 @@
   { struct CMD_TYPE_SCENARIO *sc;
     struct CMD_ENREG nbr;
     struct DB *db;
-
+#ifdef bouh
     prctl(PR_SET_NAME, "W-EnvoiSUPSCE", 0, 0, 0 );
 
     db = Init_DB_SQL();       
@@ -205,5 +214,6 @@
                       (gchar *)sc, sizeof(struct CMD_TYPE_SCENARIO) );
        g_free(sc);
      }
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

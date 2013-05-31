@@ -34,7 +34,6 @@
  #include <string.h>
 
  #include "watchdogd.h"
- #include "Erreur.h"
 
 /**********************************************************************************************************/
 /* Clear_histoDB: Elimination des messages histo au boot systeme                                          */
@@ -58,26 +57,39 @@
     Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
-/* Retirer_msgDB: Elimination d'un message                                                                */
+/* Retirer_histoDB: Elimination d'un message                                                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_histoDB ( struct LOG *log, struct DB *db, guint id )
+ gboolean Retirer_histoDB ( guint id )
   { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_HISTO, id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_histoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
+/* Ajouter_histoDB: Ajout ou edition d'un message                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Ajouter_histoDB ( struct LOG *log, struct DB *db, struct HISTODB *histo )
+ gboolean Ajouter_histoDB ( struct HISTODB *histo )
   { gchar requete[1024];
     gchar *libelle, *nom_ack;
+    gboolean retour;
+    struct DB *db;
 
     libelle = Normaliser_chaine ( histo->msg.libelle );             /* Formatage correct des chaines */
     if (!libelle)
@@ -103,16 +115,20 @@
     g_free(libelle);
     g_free(nom_ack);
 
-    return ( Lancer_requete_SQL ( db, requete ) );
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Modifier_histoDB: Modification des champs editables d'un histo                                         */
 /* Entrée: un log et une database, une structure de controle de la modification                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Modifier_histoDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_HISTO *histo )
+ gboolean Modifier_histoDB ( struct CMD_TYPE_HISTO *histo )
   { gchar requete[1024];
     gchar *nom_ack;
+    gboolean retour;
+    struct DB *db;
 
     nom_ack = Normaliser_chaine ( histo->nom_ack );                 /* Formatage correct des chaines */
     if (!nom_ack)
@@ -125,15 +141,25 @@
                 NOM_TABLE_HISTO, nom_ack, (gint)histo->date_fixe, histo->id );
     g_free(nom_ack);
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_histoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_liste_id_histoDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_histoDB ( struct LOG *log, struct DB *db )
+ gboolean Recuperer_histoDB ( struct DB **db_retour )
   { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.libelle,%s.groupe,%s.page,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
@@ -145,19 +171,31 @@
                 NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_HISTO, NOM_TABLE_SYNOPTIQUE /* Where */
               );
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_histoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_liste_id_histoDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct HISTODB *Recuperer_histoDB_suite( struct LOG *log, struct DB *db )
+ struct HISTODB *Recuperer_histoDB_suite( struct DB **db_orig )
   { struct HISTODB *histo;
+    struct DB *db;
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -180,13 +218,13 @@
     return(histo);
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
+/* Recuperer_liste_id_histoDB: Recupération de la liste des ids des messages                              */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct HISTODB *Rechercher_histoDB( struct LOG *log, struct DB *db, gint id )
-  { struct HISTODB *histo;
-    gchar requete[1024];
+ struct HISTODB *Rechercher_histoDB( gint id )
+  { gchar requete[1024];
+    struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.libelle,%s.groupe,%s.page,type,num_syn,nom_ack,date_create_sec,date_create_usec,"
@@ -202,29 +240,25 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { return(NULL); }
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_histoDB: histo %d not found in DB", id );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_histoDB: DB connexion failed" );
        return(NULL);
      }
 
-    histo = (struct HISTODB *)g_try_malloc0( sizeof(struct HISTODB) );
-    if (!histo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_histoDB_suite: Erreur allocation mémoire" );
-    else
-     { memcpy( &histo->msg.libelle, db->row[1], sizeof(histo->msg.libelle) );/* Recopie dans la structure */
-       memcpy( &histo->msg.groupe,  db->row[2], sizeof(histo->msg.groupe ) );/* Recopie dans la structure */
-       memcpy( &histo->msg.page,    db->row[3], sizeof(histo->msg.page   ) );/* Recopie dans la structure */
-       memcpy( &histo->nom_ack,     db->row[6], sizeof(histo->nom_ack    ) );/* Recopie dans la structure */
-       histo->msg.id           = 0;                                /* l'id n'est pas dans la base histo ! */
-       histo->msg.num          = atoi(db->row[0]);
-       histo->msg.type         = atoi(db->row[4]);
-       histo->msg.num_syn      = atoi(db->row[5]);
-       histo->date_create_sec  = atoi(db->row[7]);
-       histo->date_create_usec = atoi(db->row[8]);
-       histo->date_fixe        = atoi(db->row[9]);
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
      }
-    Liberer_resultat_SQL (db);                                         /* Libération des résultats */
-    return(histo);
+
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_histoDB: Histo %03d not found in DB", id );
+       return(NULL);
+     }
+
+    return( Recuperer_histoDB_suite( &db ) );
   }
 /*--------------------------------------------------------------------------------------------------------*/
