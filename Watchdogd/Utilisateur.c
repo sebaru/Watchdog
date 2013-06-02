@@ -95,7 +95,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gint Ajouter_utilisateurDB( gchar *clef, struct CMD_TYPE_UTILISATEUR *util )
+ gint Ajouter_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util )
   { gchar *nom, *comment, *code_crypt, *crypt;
     gchar requete[1024];
     gboolean retour;
@@ -160,7 +160,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_utilisateurDB( gchar *clef, struct CMD_TYPE_UTILISATEUR *util )
+ gboolean Modifier_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util )
   { gchar requete[1024], chaine[100];
     gchar *comment;
     gchar *crypt;

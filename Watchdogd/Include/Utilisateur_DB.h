@@ -89,15 +89,14 @@
  extern gboolean Recuperer_utilisateurDB( struct DB **db );
  extern struct UTILISATEURDB *Recuperer_utilisateurDB_suite( struct DB **db );
  extern gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
- extern gint Ajouter_utilisateurDB( gchar *clef,
-                                    struct CMD_TYPE_UTILISATEUR *util );
+ extern gint Ajouter_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util );
  extern struct UTILISATEURDB *Rechercher_utilisateurDB( gint id );
- extern gboolean Modifier_utilisateurDB( gchar *clef, struct CMD_TYPE_UTILISATEUR *util );
+ extern gboolean Modifier_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Nom_utilisateur_reserve( gint id );
 
  extern gchar *Recuperer_clef ( gchar *nom, gint *id );                                    /* Dans clef.c */
  extern gchar *Crypter( guchar *clef, gchar *pass );
- extern gboolean Set_password( gchar *clef, struct CMD_UTIL_SETPASSWORD *util );
+ extern gboolean Set_password( guchar *clef, struct CMD_UTIL_SETPASSWORD *util );
 
  extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
  extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );

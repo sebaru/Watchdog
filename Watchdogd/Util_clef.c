@@ -37,7 +37,7 @@
 /* Entrées: un log, une db, un id utilisateur, une clef, un password                                      */
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Set_password( gchar *clef, struct CMD_UTIL_SETPASSWORD *util )
+ gboolean Set_password( guchar *clef, struct CMD_UTIL_SETPASSWORD *util )
   { gchar requete[200];
     gchar *crypt, *code_crypt;
     gboolean retour;

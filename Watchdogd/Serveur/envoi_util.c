@@ -205,7 +205,7 @@
     struct DB *db;
     prctl(PR_SET_NAME, "W-EnvoiUTIL", 0, 0, 0 );
 
-    if ( ! Recuperer_utilsDB( &db ) )
+    if ( ! Recuperer_utilisateurDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
      }                                                                           /* Si pas de histos (??) */
@@ -216,7 +216,7 @@
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for ( ; ; )
-     { util = Recuperer_utilsDB_suite( &db );
+     { util = Recuperer_utilisateurDB_suite( &db );
        if (!util)
         { Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
