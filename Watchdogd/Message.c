@@ -217,14 +217,6 @@
        return(NULL);
      }
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_messageDB: MSG %03d not found in DB", num );
-       return(NULL);
-     }
-
     message = Recuperer_messageDB_suite( &db );
     Libere_DB_SQL ( &db );
     return(message);
@@ -256,14 +248,6 @@
               );
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_messageDB_par_id: MSG %03d not found in DB", id );
        return(NULL);
      }
 
