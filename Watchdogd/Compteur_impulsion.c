@@ -93,6 +93,12 @@
     gboolean retour;
     struct DB *db;
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_cpt_impDB: Connexion DB impossible" );
+       return(FALSE);
+     }
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id_mnemo,val,num,type_ci,multi,unite"
                 " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.type=%d ORDER BY %s.num",
