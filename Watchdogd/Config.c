@@ -41,8 +41,8 @@
 /**********************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
+    GError *error = NULL;
     GKeyFile *gkf;
-    GError *error;
 
     if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;
                     else fichier = fichier_config;
@@ -100,9 +100,9 @@
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "crypto_key", NULL );
        if (chaine)
-        { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
+        { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
+        { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
 
 /********************************************** Partie TELLSTICK ******************************************/
        Config.tellstick_a_min    = g_key_file_get_integer ( gkf, "TELLSTICK", "min_a", NULL );

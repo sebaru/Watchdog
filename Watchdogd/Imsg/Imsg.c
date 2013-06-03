@@ -216,7 +216,7 @@
 /**********************************************************************************************************/
  void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status )
   { LmMessage *m;
-    GError *error;
+    GError *error = NULL;
 
     if ( lm_connection_get_state ( Cfg_imsg.connection ) != LM_CONNECTION_STATE_AUTHENTICATED )
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
@@ -242,7 +242,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Imsg_Envoi_message_to ( const gchar *dest, gchar *message )
-  { GError *error;
+  { GError *error= NULL;
     LmMessage *m;
 
     if( ! Imsg_recipient_authorized ( dest ) )
@@ -386,8 +386,8 @@
                                                   LmMessage *message, gpointer data )
   { LmMessageNode *node_presence, *node_show, *node_status;
     const gchar *type, *from, *show, *status;
+    GError *error = NULL;
     LmMessage *m;
-    GError *error;
 
     node_presence = lm_message_get_node ( message );
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
