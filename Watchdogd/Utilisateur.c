@@ -291,8 +291,8 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,changepass,comment,enable,"
-                "date_create,enable_expire,date_expire,cansetpass,date_modif "
+                "SELECT name,id,changepass,comment,enable,date_create,"
+                "enable_expire,date_expire,cansetpass,date_modif "
                 "FROM %s WHERE id=%d", NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
