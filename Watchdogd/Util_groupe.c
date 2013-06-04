@@ -157,7 +157,7 @@
     gchar requete[200];
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete), "SELECT name, comment FROM %s WHERE id=%d",
+    g_snprintf( requete, sizeof(requete), "SELECT id, name, comment FROM %s WHERE id=%d",
                 NOM_TABLE_GROUPE, id );
 
     db = Init_DB_SQL();       
@@ -168,14 +168,6 @@
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_groupeDB: GROUPE %03d not found in DB", id );
        return(NULL);
      }
 

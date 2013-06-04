@@ -290,6 +290,8 @@
                                                  gboolean edition )
   { guint *gids;
 
+    g_snprintf( Edit_util.nom, sizeof(Edit_util.nom),
+                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
     g_snprintf( Edit_util.code_en_clair, sizeof(Edit_util.code_en_clair),
@@ -490,7 +492,6 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_util->nom );
        gtk_editable_set_editable( GTK_EDITABLE( Entry_nom ), FALSE );
 
-       gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
        g_snprintf( chaine, sizeof(chaine), "%d", edit_util->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
        gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
