@@ -58,14 +58,18 @@
     struct CMD_TYPE_GROUPE *groupe;
     gboolean retour;
 
-    retour = FALSE;
-    groupe = NULL;
-    if (rezo_groupe->id >= NBR_GROUPE_RESERVE)
-     { groupe = Rechercher_groupeDB( rezo_groupe->id );
-       if (groupe) retour = TRUE;                                                          /* Autorisé !! */
+    if (rezo_groupe->id < NBR_GROUPE_RESERVE)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Edition of built-in group %s forbidden", rezo_groupe->nom);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       return;
      } 
 
-    if (retour)
+    groupe = Rechercher_groupeDB( rezo_groupe->id );
+
+    if (groupe)
      { edit_groupe.id = groupe->id;                                         /* Recopie des info editables */
        memcpy( &edit_groupe.nom, groupe->nom, sizeof(edit_groupe.nom) );
        memcpy( &edit_groupe.commentaire, groupe->commentaire, sizeof(edit_groupe.commentaire) );
