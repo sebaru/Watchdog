@@ -56,7 +56,6 @@
  void Proto_editer_groupe ( struct CLIENT *client, struct CMD_TYPE_GROUPE *rezo_groupe )
   { struct CMD_TYPE_GROUPE edit_groupe;
     struct CMD_TYPE_GROUPE *groupe;
-    gboolean retour;
 
     if (rezo_groupe->id < NBR_GROUPE_RESERVE)
      { struct CMD_GTK_MESSAGE erreur;

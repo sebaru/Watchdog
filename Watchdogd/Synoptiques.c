@@ -272,14 +272,6 @@
        return(NULL);
      }
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_synoptiqueDB: SYN %03d not found in DB", id );
-       return(NULL);
-     }
-
     syn = Recuperer_synoptiqueDB_suite( &db );
     Libere_DB_SQL ( &db );
     return(syn);
