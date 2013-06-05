@@ -134,7 +134,7 @@
           return;
         } 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_comment_atelier: envoi comment %d (%s) to client %d",
+                "Envoyer_comment_atelier: envoi comment %d (%s) to client %s",
                  comment->id, comment->libelle, client->machine );
        Envoi_client ( client, tag, sstag,
                       (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
@@ -158,8 +158,8 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_comment_supervision_thread ( struct CLIENT *client )
-  { Envoyer_comment_thread_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
-                                                      SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
+  { Envoyer_comment_thread_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
+                                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
     Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );
     pthread_exit(EXIT_SUCCESS);
   }
