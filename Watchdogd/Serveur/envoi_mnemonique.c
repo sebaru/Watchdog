@@ -358,12 +358,6 @@
 
     prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
-
     if ( ! Recuperer_mnemoDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
@@ -404,7 +398,6 @@
      }
     while (mnemo);
     g_free(mnemos);
-    Libere_DB_SQL( &db );
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     Unref_client( client );                                           /* Déréférence la structure cliente */
   }
@@ -419,12 +412,6 @@
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-MnemoCourbe", 0, 0, 0 );
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
 
     if ( ! Recuperer_mnemoDB_for_courbe( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */

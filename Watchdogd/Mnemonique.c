@@ -85,7 +85,6 @@
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MNEMO, mnemo->id );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
-    Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
     return(retour);
   }
