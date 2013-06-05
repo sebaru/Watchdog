@@ -195,12 +195,12 @@
 
     prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
 
-    printf("1 - Recherche supervision %d\n", client->num_supervision);
+    printf("1 - Recherche supervision %d\n", client->syn.id);
     if (client->bit_init_syn)
      { g_list_free( client->bit_init_syn );
        client->bit_init_syn = NULL;
      }
-    printf("2 - Recherche supervision %d\n", client->num_supervision);
+    printf("2 - Recherche supervision %d\n", client->syn.id);
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
     motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
@@ -216,7 +216,7 @@
        pthread_exit ( NULL );
      }
 
-    if ( ! Recuperer_motifDB( &db, client->num_supervision ) )
+    if ( ! Recuperer_motifDB( &db, client->syn.id ) )
      { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );

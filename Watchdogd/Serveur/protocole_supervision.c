@@ -71,7 +71,7 @@
                        { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
                                            (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                          g_free(syndb);
-                         client->num_supervision = syn->id;   /* Sauvegarde du syn voulu pour envoi motif */
+                         memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                          Client_mode( client, ENVOI_MOTIF_SUPERVISION );
                        }
                     }

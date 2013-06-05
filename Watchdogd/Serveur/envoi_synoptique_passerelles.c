@@ -156,7 +156,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiPass", 0, 0, 0 );
 
-    if ( ! Recuperer_passerelleDB( &db, client->num_supervision ) )
+    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )
      { Client_mode( client, ENVOI_PALETTE_SUPERVISION );                        /* Si pas de comments ... */
        Unref_client( client );                                        /* Déréférence la structure cliente */
        pthread_exit ( NULL );
