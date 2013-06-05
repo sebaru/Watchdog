@@ -131,7 +131,7 @@
     if ( ! strcmp ( commande, "add" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,
+       sscanf ( ligne, "%s %d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
                 (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
                 (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
                 (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
@@ -141,7 +141,7 @@
     else if ( ! strcmp ( commande, "change" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,
+       sscanf ( ligne, "%s %d,%d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
                 &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
                 (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
                 (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
@@ -196,9 +196,9 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
-       Admin_write ( connexion, "  add type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( connexion, "  add type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Ajoute un module\n" );
-       Admin_write ( connexion, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( connexion, "  change ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
        Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
        Admin_write ( connexion, "  light1 proto,housecode,unitcode,cmdnumber\n" );
