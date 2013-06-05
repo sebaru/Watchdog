@@ -177,6 +177,14 @@
        return(NULL);
      }
 
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_paletteDB: DLS %03d not found in DB", id );
+       return(NULL);
+     }
+
     palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof(struct CMD_TYPE_PALETTE) );
     if (!palette) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_paletteDB: Erreur allocation mémoire" );
     else

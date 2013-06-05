@@ -228,7 +228,8 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct HISTODB *Rechercher_histoDB( gint id )
-  { gchar requete[1024];
+  { struct HISTODB *histo;
+    gchar requete[1024];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -242,9 +243,6 @@
                 NOM_TABLE_HISTO, id
               );
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
-
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_histoDB: DB connexion failed" );
@@ -256,14 +254,8 @@
        return(NULL);
      }
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_histoDB: Histo %03d not found in DB", id );
-       return(NULL);
-     }
-
-    return( Recuperer_histoDB_suite( &db ) );
+    histo = Recuperer_histoDB_suite( &db );
+    Libere_DB_SQL( &db );
+    return(histo);
   }
 /*--------------------------------------------------------------------------------------------------------*/

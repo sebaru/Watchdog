@@ -194,6 +194,14 @@
        return(NULL);
      }
 
+    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_commentDB: Comment %03d not found in DB", id );
+       return(NULL);
+     }
+
     comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof(struct CMD_TYPE_COMMENT) );
     if (!comment) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_commentDB_suite: Erreur allocation mémoire" );
     else

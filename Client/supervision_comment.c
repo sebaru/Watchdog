@@ -56,7 +56,7 @@
     if (!comment)
      { return;
      }
-
+printf("Ajout du commentaire %d (%s)\n", comment->id, comment->libelle );
     memcpy( comment, rezo_comment, sizeof(struct CMD_TYPE_COMMENT) );
     trame_comment = Trame_ajout_commentaire ( TRUE, infos->Trame, comment );
   }
