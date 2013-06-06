@@ -72,7 +72,8 @@
 /* Sortie: une structure DB de référence                                                                  */
 /**********************************************************************************************************/
  struct DB *Init_DB_SQL ( void )
-  { struct DB *db;
+  { static gint id = 1;
+    struct DB *db;
     my_bool reconnect;
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
@@ -80,6 +81,7 @@
        return(NULL);
      }
 
+    db->id = id++;
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Mysql_init failed (%s)",
@@ -101,7 +103,8 @@
      }
     db->free = TRUE;
     Info_new( Config.log, Config.log_db, LOG_INFO,
-              "Init_DB_SQL: Database Connection OK with %s@%s", Config.db_username, Config.db_database );
+              "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d)",
+               Config.db_username, Config.db_database, db->id );
     return(db);
   }
 /**********************************************************************************************************/
@@ -118,7 +121,7 @@
        Liberer_resultat_SQL ( db );
      }
     mysql_close( db->mysql );
-    Info_new( Config.log, Config.log_db, LOG_INFO, "Libere_DB_SQL: Deconnexion effective" );
+    Info_new( Config.log, Config.log_db, LOG_INFO, "Libere_DB_SQL: Deconnexion effective (id=%05d)", db->id );
     g_free( db );
     *adr_db = NULL;
   }

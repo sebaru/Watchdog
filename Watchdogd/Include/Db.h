@@ -43,6 +43,7 @@
     gint nbr_result;
     gboolean free;                                                    /* Le resultat est-il free ou non ? */
     MYSQL_ROW row;
+    gint id;
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Normaliser_chaine( gchar *pre_comment );

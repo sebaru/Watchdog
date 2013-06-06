@@ -576,43 +576,43 @@
 
     num_ea = module->ups.ea_min;
 
-    if ( Onduleur_get_var ( module, "ups.load", &valeur )  )
+    if ( Onduleur_get_var ( module, "ups.load", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
     
     num_ea++;
-    if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "battery.charge", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "battery.charge", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "input.voltage", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "input.voltage", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "input.frequency", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "input.frequency", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "output.current", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "output.current", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "output.frequency", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "output.frequency", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "output.voltage", &valeur ) == FALSE )
+    if ( Onduleur_get_var ( module, "output.voltage", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
 
     return(TRUE);
