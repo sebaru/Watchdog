@@ -66,10 +66,13 @@
 
        g_snprintf( chaine, sizeof(chaine),
                    " UPS[%03d] -> Host=%s, UPS=%s, enable=%d, started=%d, nbr_deconnect=%d date_retente=%d\n"
-                   "             bit_comm=%d, ea_min=%d, e_min=%d, a_min=%d\n",
+                   "             username=%s, password=%s\n"
+                   "             bit_comm=%d, ea_min=%d, e_min=%d, a_min=%d\n\n",
                    module->ups.id, module->ups.host, module->ups.ups,
                    module->ups.enable, module->started,
-                   module->nbr_deconnect, (int)module->date_retente, module->ups.bit_comm,
+                   module->nbr_deconnect, (int)module->date_retente,
+                   module->ups.username, module->ups.password,
+                   module->ups.bit_comm,
                    module->ups.ea_min, module->ups.e_min, module->ups.a_min
                  );
        Admin_write ( connexion, chaine );
