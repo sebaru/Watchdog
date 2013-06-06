@@ -83,10 +83,20 @@
             return(etat_capteur);
        case MNEMO_ENTREE_ANA:
             if (EA_inrange(capteur->bit_controle))
-             { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                           "%8.2f %s", EA_ech(capteur->bit_controle),
-                           Partage->ea[capteur->bit_controle].cmd_type_eana.unite
-                         );
+             { gdouble val_ech;
+               val_ech = EA_ech(capteur->bit_controle);
+               if(-1000000.0<val_ech && val_ech<1000000.0)
+                { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
+                             "%6.2f %s", val_ech,
+                              Partage->ea[capteur->bit_controle].cmd_type_eana.unite
+                            );
+                }
+               else
+                { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
+                             "%8f %s", val_ech,
+                              Partage->ea[capteur->bit_controle].cmd_type_eana.unite
+                            );
+                }
              }
             else
              { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
