@@ -149,12 +149,6 @@
     struct DB *db;
     gint retour;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Database Connection Failed" );
-       return(-1);
-     }
-
     host = Normaliser_chaine ( ups->host );                  /* Formatage correct des chaines */
     if (!host)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation host impossible" );
@@ -194,10 +188,10 @@
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),
                    "INSERT INTO %s"
-                   "(host,ups,libelle,bit_comm,enable,ea_min,e_min,a_min) "
+                   "(host,ups,libelle,bit_comm,enable,ea_min,e_min,a_min,username,password) "
                    "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
                    NOM_TABLE_UPS, host, name, libelle, ups->bit_comm, ups->enable,
-                   ups->ea_min, ups->e_min, ups->a_min, username,password
+                   ups->ea_min, ups->e_min, ups->a_min, username, password
                  );
      }
     else
@@ -217,6 +211,12 @@
     g_free(libelle);
     g_free(username);
     g_free(password);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Database Connection Failed" );
+       return(-1);
+     }
 
     retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */

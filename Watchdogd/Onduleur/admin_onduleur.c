@@ -142,6 +142,7 @@
                 ups.ups, ups.host, ups.username, ups.password,
                 &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
               );
+       ups.enable = TRUE;
        retour = Ajouter_upsDB ( &ups );
        if (retour == -1)
         { Admin_write ( connexion, "Error, UPS not added\n" ); }
@@ -182,9 +183,9 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
-       Admin_write ( connexion, "  add name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
+       Admin_write ( connexion, "  add name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
        Admin_write ( connexion, "                                         - Ajoute un UPS\n" );
-       Admin_write ( connexion, "  change id,name,host,username,password,bit_comm,ea_min,a_min,a_min,libelle\n");
+       Admin_write ( connexion, "  change id,name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
        Admin_write ( connexion, "                                         - Change UPS id\n" );
        Admin_write ( connexion, "  del id                                 - Delete UPS id\n" );
        Admin_write ( connexion, "  start id                               - Start UPS id\n" );
