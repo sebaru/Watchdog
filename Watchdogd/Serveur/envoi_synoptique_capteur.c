@@ -169,7 +169,6 @@
                                           SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
                                           SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN );
     Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
-    pthread_exit(0);
     pthread_exit(EXIT_SUCCESS);
   }
 /**********************************************************************************************************/

@@ -175,6 +175,10 @@
 
     prctl(PR_SET_NAME, "W-EnvoiCAMERA", 0, 0, 0 );
 
+if (tag == TAG_SUPERVISION) Client_mode( client, ENVOI_IXXX_SUPERVISION );
+Unref_client( client );                                        /* Déréférence la structure cliente */
+pthread_exit( NULL );
+
 #ifdef bouh
     db = Init_DB_SQL();       
     if (!db)
