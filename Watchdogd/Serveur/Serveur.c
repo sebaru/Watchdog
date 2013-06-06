@@ -498,12 +498,12 @@
                        else { Cfg_ssrv.Ssl_ctx = NULL; }
 
     Cfg_ssrv.Socket_ecoute = Activer_ecoute();                    /* Initialisation de l'écoute via TCPIP */
-    Abonner_distribution_motif   ( Ssrv_Gerer_motif   );            /* Abonnement a la liste de diffusion */
-    Abonner_distribution_message ( Ssrv_Gerer_message );            /* Abonnement a la liste de diffusion */
     if ( Cfg_ssrv.Socket_ecoute<0 )            
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_CRIT, "Network down, foreign connexions disabled" );
        goto end;
      }
+    Abonner_distribution_motif   ( Ssrv_Gerer_motif   );            /* Abonnement a la liste de diffusion */
+    Abonner_distribution_message ( Ssrv_Gerer_message );            /* Abonnement a la liste de diffusion */
 
     while(lib->Thread_run == TRUE)                                       /* On tourne tant que necessaire */
      { struct CLIENT *client;
@@ -534,6 +534,7 @@
        g_slist_free ( Cfg_ssrv.Liste_message );
      }
 end:
+    Cfg_ssrv.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
     Ssrv_Liberer_config ();                             /* Lecture de la configuration logiciel du thread */
     Liberer_SSL ();                                                                 /* Libération mémoire */
     if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);

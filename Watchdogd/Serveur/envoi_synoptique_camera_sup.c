@@ -165,8 +165,12 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
-#ifdef bouh
+
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
+    Client_mode( client, ENVOI_IXXX_SUPERVISION );
+    Unref_client( client );                                     /* Déréférence la structure cliente */
+    pthread_exit( NULL );
+#ifdef bouh
 
     db = Init_DB_SQL();       
     if (!db)
