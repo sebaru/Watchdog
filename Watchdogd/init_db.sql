@@ -678,19 +678,18 @@ INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `typ
 -- Structure de la table `onduleurs`
 --
 
-CREATE TABLE IF NOT EXISTS `onduleurs` (
+CREATE TABLE `onduleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `enable` tinyint(1) NOT NULL,
-  `host` text NOT NULL,
-  `ups` text NOT NULL,
-  `username` text NOT NULL,
-  `password` text NOT NULL,
-  `libelle` text NOT NULL,
+  `host` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `ups` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `username` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `password` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `bit_comm` int(11) NOT NULL,
-  `ea_ups_load` int(11) NOT NULL,
-  `ea_ups_real_power` int(11) NOT NULL,
-  `ea_battery_charge` int(11) NOT NULL,
-  `ea_input_voltage` int(11) NOT NULL,
+  `ea_min` int(11) NOT NULL,
+  `e_min` int(11) NOT NULL,
+  `a_min` int(11) NOT NULL,
+  `libelle` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
