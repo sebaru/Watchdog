@@ -538,7 +538,7 @@
        module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0], TRUE, trame->data[1],
                                  FALSE, 0, FALSE, 0, FALSE, 0, FALSE, 0 );
        if (module)
-        { SEA( module->rfxcom.ea_min,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( (trame->data[2] & 0x7F)<<8 + trame->data[3])
+        { SEA( module->rfxcom.ea_min,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3])
                                            / 10.0 );                                              /* Temp */
           SEA( module->rfxcom.ea_min + 1,  trame->data[4] );                                  /* Humidity */
           SEA( module->rfxcom.ea_min + 2,  trame->data[6] >> 4);                               /* Battery */
