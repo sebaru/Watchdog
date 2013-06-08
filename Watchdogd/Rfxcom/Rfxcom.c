@@ -405,7 +405,8 @@
        if (module->rfxcom.type == 0x11 && module->rfxcom.sous_type == 0x00 && 
            module->rfxcom.a_min == num_a
           )
-        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+        { gint cpt;
+          Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
               "Rfxcom_envoyer_sortie: Envoi de A(%03d)=%d au module ids=%02d %02d %02d %02d unit %02d",
                num_a, A(num_a), module->rfxcom.id1, module->rfxcom.id2,
                module->rfxcom.id3, module->rfxcom.id4, module->rfxcom.unitcode );
@@ -421,7 +422,10 @@
           trame_send_AC[9]  = (A(num_a) ? 1 : 0);
           trame_send_AC[10] = 0x0; /* level */
           trame_send_AC[11] = 0x0; /* rssi */
-          write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
+          for ( cpt = 0; cpt < 3 ; cpt++)
+           { gint retour;
+             retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
+           }
         }
        liste_modules = liste_modules->next;
      }
