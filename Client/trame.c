@@ -735,7 +735,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass->item_texte = goo_canvas_text_new( trame_pass->item_groupe,
                                                   pass->libelle, 10.0, 0.0,
                                                   -1, GTK_ANCHOR_WEST,
-                                                  "font", "fixed bold 12",
+                                                  "font", "courier bold 14",
                                                   "fill-color", "white",
                                                   NULL);
 
