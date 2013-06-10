@@ -231,7 +231,9 @@
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
            { struct LIBRAIRIE *lib;
              lib = Charger_librairie_par_fichier( Config.librairie_dir, fichier->d_name );
+#ifdef bouh
              Start_librairie( lib );
+#endif
            }
         }
      }

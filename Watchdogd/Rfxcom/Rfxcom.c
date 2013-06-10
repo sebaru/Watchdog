@@ -127,9 +127,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(global_id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
+                "INSERT INTO %s(instance_id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
                 " VALUES ('%s','%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
-                NOM_TABLE_MODULE_RFXCOM, Config.global_id, rfxcom->type, rfxcom->sous_type,
+                NOM_TABLE_MODULE_RFXCOM, Config.instance_id, rfxcom->type, rfxcom->sous_type,
                 rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
                 libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
               );
@@ -154,8 +154,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
-                " FROM %s WHERE global_id = '%s' ORDER BY type,sstype",
-                NOM_TABLE_MODULE_RFXCOM, Config.global_id );/* Ne selectionne que le global_id spécifique */
+                " FROM %s WHERE instance_id = '%s' ORDER BY type,sstype",
+                NOM_TABLE_MODULE_RFXCOM, Config.instance_id );/* Ne selectionne que le instance_id spécifique */
 
     return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }

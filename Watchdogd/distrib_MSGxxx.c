@@ -196,7 +196,7 @@
                                                       GINT_TO_POINTER(num) );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
-               num, val, g_slist_length(Partage->com_msrv.liste_msg) );
+                 num, val, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
             if (val == 0) Gerer_arrive_MSGxxx_dls_off( num );

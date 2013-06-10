@@ -136,7 +136,7 @@
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
 
-    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL: requete %s", requete );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d):  %s", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (%s)",
                 (char *)mysql_error(db->mysql) );
@@ -156,7 +156,7 @@
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }
-    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL: requete traite %s", requete );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d): OK traite %s", db->id, requete );
     return(TRUE);
   }
 /**********************************************************************************************************/

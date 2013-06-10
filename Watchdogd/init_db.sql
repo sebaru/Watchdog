@@ -633,6 +633,7 @@ INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `comma
 
 CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` text NOT NULL,
   `enable` tinyint(1) NOT NULL,
   `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `watchdog` int(11) NOT NULL,
@@ -719,11 +720,12 @@ CREATE TABLE IF NOT EXISTS `slaves` (
 
 -- --------------------------------------------------------
 --
--- Structure de la table `rs485`
+-- Structure de la table ``
 --
 
 CREATE TABLE IF NOT EXISTS `rs485` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` text NOT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `ea_min` int(11) NOT NULL DEFAULT '-1',
@@ -762,7 +764,7 @@ CREATE TABLE IF NOT EXISTS `tempo` (
 
 CREATE TABLE IF NOT EXISTS `rfxcom` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `global_id` text NOT NULL,
+  `instance_id` text NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `sstype` int(11) NOT NULL DEFAULT '0',
   `id1` int(11) NOT NULL DEFAULT '0',

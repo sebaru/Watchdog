@@ -130,10 +130,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(global_id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
+                "INSERT INTO %s(instance_id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
                 " VALUES ('%s','%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
-                NOM_TABLE_MODULE_RS485, Config.global_id, rs485->num, rs485->bit_comm, libelle, rs485->enable,
+                NOM_TABLE_MODULE_RS485, Config.instance_id, rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
               );
@@ -198,7 +198,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "sa_min,sa_max,s_min,s_max"
-                " FROM %s WHERE global_id='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, Config.global_id );
+                " FROM %s WHERE instance_id='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, Config.instance_id );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
