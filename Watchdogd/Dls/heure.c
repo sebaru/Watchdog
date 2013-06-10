@@ -37,14 +37,14 @@
 /* Sortie: les variables globales de gestion de l'heure sont mises à jour                                 */
 /**********************************************************************************************************/
  void Prendre_heure ( void )
-  { struct tm *tm;
+  { struct tm tm;
     time_t temps;
 
     time(&temps);
-    tm = localtime( &temps );
-    nbr_heure = tm->tm_hour;
-    nbr_minute = tm->tm_min;
-    num_jour_semaine = tm->tm_wday;
+    localtime_r( &temps, &tm );
+    nbr_heure = tm.tm_hour;
+    nbr_minute = tm.tm_min;
+    num_jour_semaine = tm.tm_wday;
   }
 /**********************************************************************************************************/
 /* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
