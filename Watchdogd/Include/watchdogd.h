@@ -157,8 +157,10 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern gint Activer_ecoute ( void );                                                    /* Dans ecoute.c */
 
- extern struct PARTAGE *Shm_init ( void );                                                  /* Dans shm.c */
+ extern struct PARTAGE *_init ( void );                                                  /* Dans shm.c */
  extern gboolean Shm_stop ( struct PARTAGE *partage );
+ extern void *w_malloc0( gint size, gchar *justification );
+ extern void w_free( void *ptr, gchar *justification );
 
  extern void Gerer_jeton ( void );                                                      /* Dans process.c */
  extern void Gerer_manque_process ( void );

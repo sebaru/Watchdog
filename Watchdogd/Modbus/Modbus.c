@@ -109,12 +109,6 @@
     struct DB *db;
     gint retour;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Database Connection Failed" );
-       return(-1);
-     }
-
     libelle = Normaliser_chaine ( modbus->libelle );         /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Normalisation libelle impossible" );
@@ -125,7 +119,7 @@
     if (!ip)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Normalisation ip impossible" );
        Libere_DB_SQL( &db );
-       g_free(libelle);
+       w_free(libelle, "free libelle");
        return(-1);
      }
 
@@ -148,8 +142,14 @@
                    modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana,
                    modbus->id );
       }
-    g_free(ip);
-    g_free(libelle);
+    w_free(ip, "free ip");
+    w_free(libelle, "free libelle2");
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_modbusDB: Database Connection Failed" );
+       return(-1);
+     }
 
     retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
@@ -204,7 +204,7 @@
        return(NULL);
      }
 
-    modbus = (struct MODBUSDB *)g_try_malloc0( sizeof(struct MODBUSDB) );
+    modbus = (struct MODBUSDB *)w_malloc0( sizeof(struct MODBUSDB), "new modbus" );
     if (!modbus) Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                           "Recuperer_modbusDB_suite: Erreur allocation mémoire" );
     else
@@ -264,16 +264,16 @@
        modbus = Recuperer_modbusDB_suite( db );
        if (!modbus) break;
 
-       module = (struct MODULE_MODBUS *)g_try_malloc0( sizeof(struct MODULE_MODBUS) );
+       module = (struct MODULE_MODBUS *)w_malloc0( sizeof(struct MODULE_MODBUS), "new module" );
        if (!module)                                                   /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                    "Charger_tous_MODBUS: Erreur allocation mémoire struct MODULE_MODBUS" );
-          g_free(modbus);
+          w_free(modbus, "free modbus");
           Libere_DB_SQL( &db );
           return(FALSE);
         }
        memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
-       g_free(modbus);
+       w_free(modbus, "free modbus");
        cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
                                                                         /* Ajout dans la liste de travail */
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
@@ -362,7 +362,7 @@
     Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
              "Decharger_un_MODBUS: Dechargement module %d (%s)", module->modbus.id, module->modbus.ip );
-    g_free(module);
+    w_free(module, "free module");
   }
 /**********************************************************************************************************/
 /* Decharger_tous_modbus: Decharge l'ensemble des modules MODBUS                                          */
