@@ -279,7 +279,7 @@
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
                 "Charger_tous_MODBUS: id=%d, enable=%d", module->modbus.id, module->modbus.enable );
 
-       Cfg_modbus.Modules_MODBUS = g_slist_append ( Cfg_modbus.Modules_MODBUS, module );
+       Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "Charger_tous_MODBUS: %d modules MODBUS found  !", cpt );
