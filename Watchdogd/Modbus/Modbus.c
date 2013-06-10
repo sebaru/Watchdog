@@ -303,7 +303,8 @@
     module->date_retente = Partage->top + MODBUS_RETRY;
     for ( cpt = module->modbus.min_e_ana; cpt<module->nbr_entree_ana; cpt++)
      { SEA_range( cpt, 0 ); }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Deconnecter_module %d", module->modbus.id );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+             "Deconnecter_module : Module %d disconnected", module->modbus.id );
     SB( module->modbus.bit, 0 );                              /* Mise a zero du bit interne lié au module */
   }
 /**********************************************************************************************************/
@@ -789,8 +790,8 @@
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
        if (ntohs(module->response.transaction_id) != module->transaction_id)             /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "Processer_trame: wrong transaction_id  attendu %d, recu %d",
-                    module->transaction_id, ntohs(module->response.transaction_id) );
+                   "Processer_trame: wrong transaction_id for module %d  attendu %d, recu %d",
+                    module->modbus.id, module->transaction_id, ntohs(module->response.transaction_id) );
         }
        if ( module->response.fct >=0x80 )
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
@@ -935,10 +936,18 @@
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 100 < Partage->top)                  /* Detection attente trop longue */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Recuperer_borne: Pb reponse module %d, deconnexion",
-                 module->modbus.id );
+    if (module->date_last_reponse + 300 < Partage->top)                  /* Detection attente trop longue */
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                "Recuperer_reponse_module: Pb reponse module %d, enable=%d, started=%d, mode=%02d,"
+                "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
+                 module->modbus.id, module->modbus.enable, module->started, module->mode,
+                 module->transaction_id, module->nbr_deconnect,
+                (Partage->top - module->date_last_reponse)/10,                   
+                (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1),
+                (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
+               );
        Deconnecter_module( module );
+       module->modbus.enable = FALSE;          /* Arrete la communication (ie pas de reprise automatique) */
        return;
      }
 
