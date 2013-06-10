@@ -130,10 +130,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
+                "INSERT INTO %s(global_id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
-                " VALUES ('%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
-                NOM_TABLE_MODULE_RS485, rs485->num, rs485->bit_comm, libelle, rs485->enable,
+                " VALUES ('%s','%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
+                NOM_TABLE_MODULE_RS485, Config.global_id, rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
               );
@@ -198,7 +198,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "sa_min,sa_max,s_min,s_max"
-                " FROM %s ORDER BY num", NOM_TABLE_MODULE_RS485 );
+                " FROM %s WHERE global_id='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, Config.global_id );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
@@ -381,10 +381,16 @@
 /*    printf("crc16 calculÃ© Ã  l'envoi: %04X  %2X %2X  taille %d\n", crc16, trame->crc16_h, trame->crc16_l,
                                                                   trame->taille );*/
 
-    write( fd, trame, TAILLE_ENTETE - 2 );                                        /* Ecriture de l'entete */
-    if (trame->taille) { write( fd, &trame->donnees, trame->taille ); }          /* On envoie les données */
-    write( fd, &trame->crc16_h, sizeof(unsigned char) );
-    write( fd, &trame->crc16_l, sizeof(unsigned char) );
+    if (write( fd, trame, TAILLE_ENTETE - 2 ) == -1)                                        /* Ecriture de l'entete */
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+    if (trame->taille)                                                           /* On envoie les données */
+     { if (write( fd, &trame->donnees, trame->taille )==-1)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+     }
+    if (write( fd, &trame->crc16_h, sizeof(unsigned char) )==-1)
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+    if (write( fd, &trame->crc16_l, sizeof(unsigned char) )==-1)
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
   }
 /**********************************************************************************************************/
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
