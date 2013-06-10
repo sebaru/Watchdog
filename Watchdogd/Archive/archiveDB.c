@@ -33,7 +33,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                          */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- void Ajouter_archDB ( struct LOG *log, struct DB *db, struct ARCHDB *arch )
+ void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
