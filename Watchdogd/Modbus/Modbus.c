@@ -131,9 +131,9 @@
 
     if ( ajout == TRUE )
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO %s(enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana) "
-                  "VALUES ('%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
-                   NOM_TABLE_MODULE_MODBUS, modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
+                  "INSERT INTO %s(global_id,enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana) "
+                  "VALUES ('%s','%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
+                   NOM_TABLE_MODULE_MODBUS, Config.global_id, modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
                    modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana
                  );
      }
@@ -185,7 +185,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana "
-                " FROM %s ORDER BY libelle", NOM_TABLE_MODULE_MODBUS );
+                " FROM %s WHERE global_id='%s' ORDER BY libelle",
+                NOM_TABLE_MODULE_MODBUS, Config.global_id );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
