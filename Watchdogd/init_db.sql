@@ -762,6 +762,7 @@ CREATE TABLE IF NOT EXISTS `tempo` (
 
 CREATE TABLE IF NOT EXISTS `rfxcom` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `global_id` text NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `sstype` int(11) NOT NULL DEFAULT '0',
   `id1` int(11) NOT NULL DEFAULT '0',

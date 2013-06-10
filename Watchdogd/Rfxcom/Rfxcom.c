@@ -127,9 +127,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
-                " VALUES ('%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
-                NOM_TABLE_MODULE_RFXCOM, rfxcom->type, rfxcom->sous_type,
+                "INSERT INTO %s(global_id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
+                " VALUES ('%s','%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
+                NOM_TABLE_MODULE_RFXCOM, Config.global_id, rfxcom->type, rfxcom->sous_type,
                 rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
                 libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
               );
@@ -154,7 +154,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
-                " FROM %s ORDER BY type,sstype", NOM_TABLE_MODULE_RFXCOM );
+                " FROM %s WHERE global_id = '%s' ORDER BY type,sstype",
+                NOM_TABLE_MODULE_RFXCOM, Config.global_id );/* Ne selectionne que le global_id spécifique */
 
     return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
@@ -341,13 +342,16 @@
                  "Init_rfxcom: Ouverture port rfxcom okay %s", Cfg_rfxcom.port );
      }
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending INIT" );
-    write (fd, &trame_reset, sizeof(trame_reset) );
+    if (write (fd, &trame_reset, sizeof(trame_reset) ) == -1)
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING, "Init_rfxcom: Sending INIT failed " ); }
     sleep(2);
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending SET PROTO" );
-    write (fd, &trame_set_proto, sizeof(trame_set_proto) );
+    if (write (fd, &trame_set_proto, sizeof(trame_set_proto) ) == -1)
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING, "Init_rfxcom: Sending SET PROTO failed " ); }
     sleep(2);
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG, "Init_rfxcom: Sending GET STATUS" );
-    write (fd, &trame_get_status, sizeof(trame_get_status) );
+    if (write (fd, &trame_get_status, sizeof(trame_get_status) ) == -1)
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING, "Init_rfxcom: Sending GET STATUS failed " ); }
     return(fd);
   }
 /**********************************************************************************************************/
@@ -425,6 +429,10 @@
           for ( cpt = 0; cpt < 3 ; cpt++)
            { gint retour;
              retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
+             if (retour == -1)
+              { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+                         "Rfxcom_envoyer_sortie: Write Error for A(%03d)", num_a );
+              }
            }
         }
        liste_modules = liste_modules->next;
@@ -579,27 +587,6 @@
                    "Processer_trame unknown packet type %02d(0x%02X), sous_type=%02d(0x%02X)",
                    trame->type, trame->type, trame->sous_type, trame->sous_type );
     return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Rfxcom_send: Envoi la commande dans Partage                                                            */
-/* Entrée: le file descriptor de la connexion rfxcom                                                      */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
- static void Rfxcom_send ( void )
-  { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    trame_send_AC[0]  = 0x0B; /* Taille */
-    trame_send_AC[1]  = 0x11; /* lightning 2 */
-    trame_send_AC[2]  = 0x00; /* AC */
-    trame_send_AC[3]  = 0x01; /* Seqnbr */
-/*    trame_send_AC[4]  = liblearn.id1 << 6;
-    trame_send_AC[5]  = liblearn.id2;
-    trame_send_AC[6]  = liblearn.id3;
-    trame_send_AC[7]  = liblearn.id4;
-    trame_send_AC[8]  = liblearn.unitcode;
-    trame_send_AC[9]  = liblearn.cmd;
-    trame_send_AC[10] = liblearn.level;*/
-    trame_send_AC[11] = 0x0;
-    write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] );
   }
 /**********************************************************************************************************/
 /* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
