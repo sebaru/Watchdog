@@ -63,10 +63,10 @@
  void *w_malloc0( gint size, gchar *justification )
   { void *ptr;
     Info_new( Config.log, TRUE, LOG_DEBUG,
-              "w_malloc0: %s bytes requested for %s", size, justification );
+              "w_malloc0: %d bytes requested for %s", size, justification );
     ptr = g_try_malloc0 ( size );
     Info_new( Config.log, TRUE, LOG_DEBUG,
-              "w_malloc0: %s bytes given for %s, ptr = %p", size, justification, ptr );
+              "w_malloc0: %d bytes given for %s, ptr = %p", size, justification, ptr );
     return(ptr);
   }
 /**********************************************************************************************************/
