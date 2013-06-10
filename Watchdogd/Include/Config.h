@@ -44,6 +44,7 @@
     guchar crypto_key[TAILLE_CRYPTO_KEY+1];           /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
+    gchar global_id [ TAILLE_HOME+1 ];                       /* Global ID, unique, de l'instance Watchdog */
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_msrv;                                                            /* TRUE si log_override */
     gboolean log_dls;                                                             /* TRUE si log_override */
@@ -67,6 +68,7 @@
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
  #define DEFAUT_DB_PORT                 3306
  #define DEFAUT_HOME                    g_get_home_dir()        /* Ne pas depasser TAILLE_HOME caracteres */
+ #define DEFAUT_GLOBAL_ID               "MASTER"                /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
  #define DEFAUT_TELLSTICK_A_MIN         -1

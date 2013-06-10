@@ -62,6 +62,12 @@
        else
         { g_snprintf( Config.home, sizeof(Config.home), "%s", DEFAUT_HOME  ); }
 
+       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "global_id", NULL );
+       if (chaine)
+        { g_snprintf( Config.global_id, sizeof(Config.global_id), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.global_id, sizeof(Config.global_id), "%s", DEFAUT_GLOBAL_ID  ); }
+
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
        if (chaine)
         { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
@@ -152,6 +158,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config global_id            %s", Config.global_id );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db host              %s", Config.db_host );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
