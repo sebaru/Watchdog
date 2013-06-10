@@ -318,7 +318,7 @@
     struct hostent *host;
     int connexion;
 
-    if ( !(host = gethostbyname( module->modbus.ip )) )                           /* On veut l'adresse IP */
+ /*   if ( !(host = gethostbyname( module->modbus.ip )) )                           /* On veut l'adresse IP */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Connecter_module: DNS_Failed for %s", module->modbus.ip );
        return(FALSE);
      }
