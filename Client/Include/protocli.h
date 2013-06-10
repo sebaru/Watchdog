@@ -437,10 +437,12 @@
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id );
 
                                                                                /* Dans supervision_clic.c */
- extern  void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+ extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                                GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Clic_sur_capteur_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                            GdkEvent *event, struct TRAME_ITEM_CAPTEUR *trame_capteur );
 
                                                                             /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );

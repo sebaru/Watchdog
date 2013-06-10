@@ -197,15 +197,14 @@
           if (!dls)
            { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: out of memory" );
              g_free(plugin);
-             return;
            }
-   
-          memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-          g_free(plugin);
+          else { memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+                 g_free(plugin);
                                                                       /* Si option "compil" au demarrage" */
-          if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
-          if (Charger_un_plugin( dls )==TRUE)
-           { Info_new( Config.log, Config.log_dls, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
+                 if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
+                 if (Charger_un_plugin( dls )==TRUE)
+                  { Info_new( Config.log, Config.log_dls, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
+               }
         } while ( TRUE );
      }
     else  { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to load plugins" );

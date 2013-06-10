@@ -29,9 +29,11 @@
  #include <sys/time.h>
  
  #include "Reseaux.h"
+ #include "client.h"
  #include "Config_cli.h"
  #include "trame.h"
 
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
@@ -173,6 +175,35 @@ printf("release !\n");
            }
         }
        appui_camera_sup = NULL;               /* L'action est faite, on ne selectionne donc plus le motif */
+     }
+  }
+/**********************************************************************************************************/
+/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
+/* Entrée: une structure Event                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ void Clic_sur_capteur_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                     GdkEvent *event, struct TRAME_ITEM_CAPTEUR *trame_capteur )
+  { if (!(trame_capteur && event)) return;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
+        { gint pid;
+
+          printf( "Clic_sur_capteur_supervision : Lancement d'un firefox type=%d, num=%d\n",
+                  trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
+          pid = fork();
+          if (pid<0) return;
+          else if (!pid)                                             /* Lancement de la ligne de commande */
+           { gchar chaine[256];
+             g_snprintf( chaine, sizeof(chaine),
+                        "http://%s/watchdog/index.php?debug=1&type=%d&num=%d&period=hour",
+                         Client_en_cours.host, trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
+             execlp( "firefox", "firefox", chaine, NULL );
+             printf("Lancement de firefox failed\n");
+             _exit(0);
+           }
+        }
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

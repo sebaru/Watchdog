@@ -61,8 +61,8 @@
 
     trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
     trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
-/*    g_signal_connect( G_OBJECT(trame_capteur->item_entry), "event",
-                      G_CALLBACK(Clic_sur_capteur_supervision), trame_capteur );*/
+    g_signal_connect( G_OBJECT(trame_capteur->item_groupe), "button-press-event",
+                      G_CALLBACK(Clic_sur_capteur_supervision), trame_capteur );
   }
 /**********************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
