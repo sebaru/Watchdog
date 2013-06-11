@@ -318,7 +318,55 @@
     struct hostent *host;
     int connexion;
 
- /*   if ( !(host = gethostbyname( module->modbus.ip )) )                           /* On veut l'adresse IP */
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    int sfd, s, j;
+    size_t len;
+    ssize_t nread;
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;          /* Any protocol */
+
+    s = getaddrinfo( module->modbus.ip, "502", &hints, &result);
+    if (s != 0)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                "Connecter_module: getaddrinfo Failed for %s (%s)", module->modbus.ip, gai_strerror(s) );
+       return(FALSE);
+     }
+
+   /* getaddrinfo() returns a list of address structures.
+       Try each address until we successfully connect(2).
+       If socket(2) (or connect(2)) fails, we (close the socket
+       and) try the next address. */
+
+    for (rp = result; rp != NULL; rp = rp->ai_next)
+     {
+        connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (connexion == -1)
+         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                    "Connecter_module: Socket creation failed" );
+           continue;
+         }
+
+       if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                   "Connecter_module %d (%s)", module->modbus.id, module->modbus.ip );
+          break;                  /* Success */
+        }
+       else
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
+                   "Connecter_module: connexion refused by module %s", module->modbus.ip );
+        }
+       close(connexion);
+     }
+
+   freeaddrinfo(result);
+
+#ifdef bouh
+   if ( !(host = gethostbyname( module->modbus.ip )) )                           /* On veut l'adresse IP */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Connecter_module: DNS_Failed for %s", module->modbus.ip );
        return(FALSE);
      }
@@ -338,7 +386,7 @@
        close(connexion);
        return(FALSE);
      }
-
+#endif
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                          /* Sauvegarde du fd */
     module->date_last_reponse = Partage->top;
@@ -346,8 +394,6 @@
     module->transaction_id=1;
     module->started = TRUE;
     module->mode = MODBUS_GET_DESCRIPTION;
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "Connecter_module %d (%s)", module->modbus.id, module->modbus.ip );
 
     return(TRUE);
   }
