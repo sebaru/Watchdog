@@ -1012,6 +1012,12 @@
             { bute = TAILLE_ENTETE_MODBUS; }
        else { bute = TAILLE_ENTETE_MODBUS + ntohs(module->response.taille); }
 
+if (bute>=sizeof(struct TRAME_MODBUS_REPONSE))
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
+                "Recuperer_reponse_module: bute = %d >= %d (sizeof(module->reponse)=%d)",
+                 bute, sizeof(struct TRAME_MODBUS_REPONSE), sizeof(module->response) );
+     }
+
        cpt = read( module->connexion,
                    (unsigned char *)&module->response +
                                      module->nbr_oct_lu,
