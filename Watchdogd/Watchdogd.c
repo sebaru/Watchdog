@@ -463,9 +463,7 @@
        Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
-        {
-#ifdef bouh
-          if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
+        { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb ARCH" ); }
 
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
@@ -473,7 +471,6 @@
 
           if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb MOTION_DETECT" ); }
-#endif
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
 
