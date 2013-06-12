@@ -1116,7 +1116,7 @@
                    module->do_check_eana = TRUE;
                  }
                 switch (module->mode)
-                 { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+                 { case MODBUS_GET_DESCRIPTION: break; Interroger_description( module ); break;
                    case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
                    case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
                    case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;

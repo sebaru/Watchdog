@@ -155,12 +155,12 @@
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
        Admin_write ( connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %d\n",
+       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %p\n",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (gint)Partage->com_dls.TID
                  );
        Admin_write ( connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %d\n",
+       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %p\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
                  );
        Admin_write ( connexion, chaine );
