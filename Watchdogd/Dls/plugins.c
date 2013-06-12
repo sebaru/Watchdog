@@ -204,6 +204,7 @@
                  if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
                  if (Charger_un_plugin( dls )==TRUE)
                   { Info_new( Config.log, Config.log_dls, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
+                 else g_free(dls);                                                  /* Libération mémoire */
                }
         } while ( TRUE );
      }

@@ -87,19 +87,18 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_plugin_dlsDB: DB connexion failed" );
-       g_free(nom);
-       return(-1);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
                    "(name,actif,type,num_syn)"
                    "VALUES ('%s','%s','%d',%d);",
                    NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, dls->num_syn );
     g_free(nom);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_plugin_dlsDB: DB connexion failed" );
+       return(-1);
+     }
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     if ( retour == FALSE )
@@ -242,18 +241,17 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_plugin_dlsDB: DB connexion failed" );
-       g_free(nom);
-       return(FALSE);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "name='%s',actif='%d',type='%d',num_syn=%d WHERE id=%d",
                 NOM_TABLE_DLS, nom, dls->on, dls->type, dls->num_syn, dls->id );
     g_free(nom);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_plugin_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);

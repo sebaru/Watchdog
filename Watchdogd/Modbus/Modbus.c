@@ -928,6 +928,7 @@
                gchar cpt, taille;
                memset ( chaine, 0, sizeof(chaine) );
                taille = module->response.data[0];
+               if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
                for (cpt=0; cpt<taille/2; cpt++)
                 { chaine[cpt] = ntohs( *(gint16 *)((gchar *)&module->response.data + 2*cpt+1) ); }
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
@@ -940,6 +941,7 @@
                gchar cpt, taille;
                memset ( chaine, 0, sizeof(chaine) );
                taille = module->response.data[0];
+               if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
                for (cpt=0; cpt<taille/2; cpt++)
                 { chaine[cpt] = ntohs( *(gint16 *)((gchar *)&module->response.data + 2*cpt+1) ); }
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
