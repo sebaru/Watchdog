@@ -194,6 +194,8 @@
        val = Partage->g[num].etat;
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg,
                                                       GINT_TO_POINTER(num) );
+#warning debug
+return;
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
                  num, val, g_slist_length(Partage->com_msrv.liste_msg) );
