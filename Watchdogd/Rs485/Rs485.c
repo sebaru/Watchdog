@@ -555,7 +555,7 @@
     Rs485_Lire_config ();                               /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_rs485.lib->Thread_run = TRUE;                                               /* Le thread tourne ! */
 
     g_snprintf( Cfg_rs485.lib->admin_prompt, sizeof(Cfg_rs485.lib->admin_prompt), "rs485" );
@@ -714,7 +714,7 @@
     Decharger_tous_rs485();
     Rs485_Liberer_config ();                         /* Lecture de la configuration logiciel du thread */
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %d", pthread_self() );
+              "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_rs485.lib->TID = 0;                               /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

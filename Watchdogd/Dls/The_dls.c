@@ -606,7 +606,8 @@
     Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: Demarrage" );                /* Log Start */
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE,
+              "Run_dls: Demarrage . . . TID = %p", pthread_self() );
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     sleep(30);/* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
@@ -694,7 +695,7 @@
        sched_yield();
      }
     Decharger_plugins();                                                  /* Dechargement des modules DLS */
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: DLS Down (%d)", pthread_self() );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: DLS Down (%p)", pthread_self() );
     Partage->com_dls.TID = 0;                             /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

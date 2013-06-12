@@ -630,7 +630,7 @@
     Ups_Lire_config ();                                 /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_ups.lib->Thread_run = TRUE;                                                 /* Le thread tourne ! */
 
     g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
@@ -724,7 +724,7 @@
     Decharger_tous_UPS();
     Ups_Liberer_config ();                              /* Lecture de la configuration logiciel du thread */
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %d", pthread_self() );
+              "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_ups.lib->TID = 0;                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

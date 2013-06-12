@@ -82,7 +82,7 @@
     Lirc_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_lirc.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
 
     g_snprintf( Cfg_lirc.lib->admin_prompt, sizeof(Cfg_lirc.lib->admin_prompt), "lirc" );
@@ -90,12 +90,12 @@
 
     if (lirc_readconfig ( ".lircrc", &Cfg_lirc.config, NULL)!=0)
      { Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_WARNING,
-                "Run_lirc: Unable to read config... stopping...(%d)", pthread_self() );
+                "Run_lirc: Unable to read config... stopping...(%p)", pthread_self() );
        Cfg_lirc.lib->Thread_run = FALSE;
      }
     else if ( (Cfg_lirc.fd=lirc_init("Watchdogd",1))==-1)
      { Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_ERR,
-                "Run_lirc: Unable to open LIRCD... stopping...(%d)", pthread_self() );
+                "Run_lirc: Unable to open LIRCD... stopping...(%p)", pthread_self() );
        Cfg_lirc.lib->Thread_run = FALSE;
      }
     else { fcntl ( Cfg_lirc.fd, F_SETFL, O_NONBLOCK ); }
@@ -131,7 +131,7 @@
     lirc_deinit();
     Lirc_Liberer_config();                                    /* Liberation de la configuration du thread */
 
-    Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_lirc.lib->TID = 0;                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

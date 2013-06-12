@@ -424,14 +424,14 @@
     Http_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
 
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), "http" );
     g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage communications with Http Devices" );
 
     if (!Cfg_http.http_enable && !Cfg_http.https_enable)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread Http/Https not enable in config. Shutting Down %d", pthread_self() );
+                "Run_thread: Thread Http/Https not enable in config. Shutting Down %p", pthread_self() );
        goto end;
      }
 
@@ -447,7 +447,7 @@
                                                  MHD_OPTION_END);
        if (!Cfg_http.http_server)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: MHDServer HTTP creation error (%s). Shutting Down %d",
+                   "Run_thread: MHDServer HTTP creation error (%s). Shutting Down %p",
                     strerror(errno), pthread_self() );
         }
        else
@@ -471,7 +471,7 @@
                                                   MHD_OPTION_END);
        if (!Cfg_http.https_server)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: MHDServer HTTPS creation error (%s). Shutting Down %d",
+                   "Run_thread: MHDServer HTTPS creation error (%s). Shutting Down %p",
                     strerror(errno), pthread_self() );
         }
        else
@@ -529,7 +529,7 @@
      }
 end:
     Http_Liberer_config();                                  /* Liberation de la configuration du thread */
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_http.lib->TID = 0;                                  /* On indique au http que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

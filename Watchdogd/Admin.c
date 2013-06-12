@@ -233,7 +233,7 @@
   { prctl(PR_SET_NAME, "W-Admin", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-              "Run_admin: Demarrage . . . TID = %d", pthread_self() );
+              "Run_admin: Demarrage . . . TID = %p", pthread_self() );
 
     Fd_ecoute = Activer_ecoute_admin ();
     if ( Fd_ecoute < 0 )
@@ -286,7 +286,7 @@
 
     Desactiver_ecoute_admin ();
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-              "Run_admin: Down . . . TID = %d", pthread_self() );
+              "Run_admin: Down . . . TID = %p", pthread_self() );
     Partage->com_admin.TID = 0;                           /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

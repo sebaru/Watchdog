@@ -358,7 +358,8 @@
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                   "Connecter_module: connexion refused by module %s", module->modbus.ip );
+                   "Connecter_module: connexion refused by module %d (%s) family=%d",
+                    module->modbus.id, module->modbus.ip, rp->ai_family );
         }
        close(connexion);
      }
@@ -1044,7 +1045,7 @@
     Modbus_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_modbus.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
     g_snprintf( Cfg_modbus.lib->admin_prompt, sizeof(Cfg_modbus.lib->admin_prompt), "modbus" );
@@ -1147,11 +1148,13 @@
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */
         }
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "Run_thread: Preparing to stop . . . TID = %d", pthread_self() );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
+             "Run_thread: Preparing to stop . . . TID = %p", pthread_self() );
     Decharger_tous_MODBUS();
     Modbus_Liberer_config();                                  /* Liberation de la configuration de Modbus */
 
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
+             "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_modbus.lib->TID = 0;                              /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

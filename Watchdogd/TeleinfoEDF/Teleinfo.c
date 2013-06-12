@@ -152,7 +152,7 @@
     Teleinfo_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_teleinfo.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "teleinfo" );
@@ -208,7 +208,7 @@
 
     Teleinfo_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %d", pthread_self() );
+              "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_teleinfo.lib->TID = 0;                              /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

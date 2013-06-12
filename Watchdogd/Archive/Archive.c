@@ -77,6 +77,9 @@
     Partage->com_arch.liste_arch  = NULL;                                 /* Initialisation des variables */
     Partage->com_arch.Thread_run  = TRUE;                                           /* Le thread tourne ! */
     Partage->com_arch.taille_arch = 0;
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+              "Run_arch: Demarrage . . . TID = %p", pthread_self() );
+
     while(Partage->com_arch.Thread_run == TRUE)                          /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
@@ -123,7 +126,7 @@
         }
        Libere_DB_SQL( &db );
      }
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%d)", pthread_self() );
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%p)", pthread_self() );
     Partage->com_arch.TID = 0;                            /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

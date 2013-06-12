@@ -315,14 +315,14 @@
     Satellite_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
 
     g_snprintf( Cfg_satellite.lib->admin_prompt, sizeof(Cfg_satellite.lib->admin_prompt), "satellite" );
     g_snprintf( Cfg_satellite.lib->admin_help,   sizeof(Cfg_satellite.lib->admin_help),   "Manage communications with Master Watchdog" );
 
     if (!Cfg_satellite.enable)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread bot enable in config. Shutting Down %d",
+                "Run_thread: Thread bot enable in config. Shutting Down %p",
                  pthread_self() );
        goto end;
      }
@@ -361,7 +361,7 @@
 
 end:
     Satellite_Liberer_config();                                  /* Liberation de la configuration du thread */
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_satellite.lib->TID = 0;                              /* On indique au satellite que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

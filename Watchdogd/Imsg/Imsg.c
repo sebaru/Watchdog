@@ -619,14 +619,14 @@
     Imsg_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
 
     g_snprintf( Cfg_imsg.lib->admin_prompt, sizeof(Cfg_imsg.lib->admin_prompt), "imsg" );
     g_snprintf( Cfg_imsg.lib->admin_help,   sizeof(Cfg_imsg.lib->admin_help),   "Manage Instant Messaging system" );
 
     if (!Cfg_imsg.enable)
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread IMSG not enable in config. Shutting Down %d", pthread_self() );
+                "Run_thread: Thread IMSG not enable in config. Shutting Down %p", pthread_self() );
        goto end;
      }
 
@@ -688,7 +688,7 @@
     Imsg_Liberer_config();                        /* Liberation de la configuration de l'InstantMessaging */
     Imsg_Liberer_liste_contacts();                                     /* Liberation de la liste contacts */
 end:
-    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %d", pthread_self() );
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_imsg.lib->TID = 0;                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

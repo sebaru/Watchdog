@@ -119,7 +119,7 @@
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_handle_client: Demarrage . . . TID = %d", pthread_self() );
+              "Run_handle_client: Demarrage . . . TID = %p", pthread_self() );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(100000);
@@ -389,7 +389,7 @@
      { Deconnecter(client); }
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_handle_client: Down . . . TID = %d", pthread_self() );
+              "Run_handle_client: Down . . . TID = %p", pthread_self() );
     pthread_exit( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/

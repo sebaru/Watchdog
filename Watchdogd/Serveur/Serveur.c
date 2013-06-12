@@ -481,7 +481,7 @@
     Ssrv_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %d", pthread_self() );
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_ssrv.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
 
     g_snprintf( Cfg_ssrv.lib->admin_prompt, sizeof(Cfg_ssrv.lib->admin_prompt), "ssrv" );
@@ -540,7 +540,7 @@ end:
     if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);
     if (Cfg_ssrv.rsa) RSA_free( Cfg_ssrv.rsa );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Down . . . TID = %d", pthread_self() );
+              "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_ssrv.lib->TID = 0;                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
  }
