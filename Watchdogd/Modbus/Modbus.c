@@ -1118,11 +1118,11 @@
                  }
                 switch (module->mode)
                  { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
-                   case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
+                   case MODBUS_INIT_WATCHDOG1 : break; Init_watchdog1( module ); break;
                    case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
                    case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
                    case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
-                   case MODBUS_GET_NBR_AI     : break; Interroger_nbr_entree_ANA( module ); break;
+                   case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
                    case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
                    case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
                    case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
