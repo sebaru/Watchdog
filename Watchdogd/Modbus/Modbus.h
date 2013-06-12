@@ -85,7 +85,7 @@
     guint16 taille; /* taille, en comptant le unit_id */
     guint8 unit_id; /* 0xFF */
     guint8 fct;
-    guint8 data[32]; /* max = 64 octets description wago */
+    guint8 data[64]; /* max = 64 octets description wago */
   };
 
 /********************************************* Gestion des modbus ******************************************/
