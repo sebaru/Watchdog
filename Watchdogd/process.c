@@ -391,7 +391,7 @@
        return(FALSE);
      }
     pthread_detach( Partage->com_dls.TID );      /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Demarrer_dls: thread dls (%d) seems to be running",
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Demarrer_dls: thread dls (%p) seems to be running",
               Partage->com_dls.TID );
     return(TRUE);
   }
@@ -414,7 +414,7 @@
      }
     pthread_detach( Partage->com_admin.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-              "Demarrer_admin: thread admin (%d) seems to be running",
+              "Demarrer_admin: thread admin (%p) seems to be running",
               Partage->com_admin.TID );
     return(TRUE);
   }
@@ -435,7 +435,7 @@
        return(FALSE);
      }
     pthread_detach( Partage->com_arch.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Demarrer_arch: thread arch (%d) seems to be running",
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Demarrer_arch: thread arch (%p) seems to be running",
             Partage->com_arch.TID );
     return(TRUE);
   }

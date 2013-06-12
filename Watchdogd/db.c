@@ -102,7 +102,7 @@
        return (NULL);
      }
     db->free = TRUE;
-    Info_new( Config.log, Config.log_db, LOG_INFO,
+    Info_new( Config.log, Config.log_db, LOG_DEBUG,
               "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d)",
                Config.db_username, Config.db_database, db->id );
     return(db);
@@ -121,7 +121,7 @@
        Liberer_resultat_SQL ( db );
      }
     mysql_close( db->mysql );
-    Info_new( Config.log, Config.log_db, LOG_INFO, "Libere_DB_SQL: Deconnexion effective (id=%05d)", db->id );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Libere_DB_SQL: Deconnexion effective (id=%05d)", db->id );
     g_free( db );
     *adr_db = NULL;
   }

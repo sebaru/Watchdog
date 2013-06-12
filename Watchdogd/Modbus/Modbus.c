@@ -314,15 +314,9 @@
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
  static gboolean Connecter_module ( struct MODULE_MODBUS *module )
-  { struct sockaddr_in src;                                            /* Données locales: pas le serveur */
-    struct hostent *host;
-    int connexion;
-
+  { struct addrinfo *result, *rp;
     struct addrinfo hints;
-    struct addrinfo *result, *rp;
-    int sfd, s, j;
-    size_t len;
-    ssize_t nread;
+    gint connexion = 0, s;
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
@@ -364,32 +358,10 @@
        close(connexion);
      }
 
-   freeaddrinfo(result);
+    freeaddrinfo(result);
 
-#ifdef bouh
-   if ( !(host = gethostbyname( module->modbus.ip )) )                           /* On veut l'adresse IP */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Connecter_module: DNS_Failed for %s", module->modbus.ip );
-       return(FALSE);
-     }
-
-    src.sin_family = host->h_addrtype;
-    memcpy( (char*)&src.sin_addr, host->h_addr, host->h_length );                 /* On recopie les infos */
-    src.sin_port = htons( MODBUS_PORT_TCP );                                /* Port d'attaque des modules */
-
-    if ( (connexion = socket( AF_INET, SOCK_STREAM, 0)) == -1)                          /* Protocol = TCP */
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Connecter_module: Socket creation failed" );
-       return(FALSE);
-     }
-
-    if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                "Connecter_module: connexion refused by module %s", module->modbus.ip );
-       close(connexion);
-       return(FALSE);
-     }
-#endif
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
-    module->connexion = connexion;                                          /* Sauvegarde du fd */
+    module->connexion = connexion;                                                    /* Sauvegarde du fd */
     module->date_last_reponse = Partage->top;
     module->date_retente = 0;
     module->transaction_id=1;
@@ -930,7 +902,7 @@
                taille = module->response.data[0];
                if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
                for (cpt=0; cpt<taille/2; cpt++)
-                { chaine[cpt] = ntohs( *(gint16 *)((gchar *)&module->response.data + 2*cpt+1) ); }
+                { chaine[cpt] = ntohs( (gint16) module->response.data[2*cpt+1] ); }
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                          "Processer_trame: Get Description %s", (gchar *) chaine );
                module->mode = MODBUS_GET_FIRMWARE;
@@ -943,7 +915,7 @@
                taille = module->response.data[0];
                if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
                for (cpt=0; cpt<taille/2; cpt++)
-                { chaine[cpt] = ntohs( *(gint16 *)((gchar *)&module->response.data + 2*cpt+1) ); }
+                { chaine[cpt] = ntohs( (gint16) module->response.data[2*cpt+1] ); }
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                          "Processer_trame: Get Firmware %s", (gchar *) chaine );
                module->mode = MODBUS_INIT_WATCHDOG1;

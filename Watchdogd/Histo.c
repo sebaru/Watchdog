@@ -249,11 +249,6 @@
        return(NULL);
      }
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
     histo = Recuperer_histoDB_suite( &db );
     Libere_DB_SQL( &db );
     return(histo);

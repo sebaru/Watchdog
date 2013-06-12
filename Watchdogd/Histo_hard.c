@@ -69,6 +69,12 @@
     g_free(libelle);
     g_free(nom_ack);
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_histoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);

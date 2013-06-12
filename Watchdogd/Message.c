@@ -59,7 +59,7 @@
     return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_messageDB: Ajout ou edition d'un message                                                           */
+/* Ajouter_messageDB: Ajout ou edition d'un message                                                       */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/

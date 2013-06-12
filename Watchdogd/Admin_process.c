@@ -156,12 +156,12 @@
        Admin_write ( connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %p\n",
-                   (Partage->com_dls.Thread_run ? "YES" : " NO"), (gint)Partage->com_dls.TID
+                   (Partage->com_dls.Thread_run ? "YES" : " NO"), (void *)Partage->com_dls.TID
                  );
        Admin_write ( connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %p\n",
-                   (Partage->com_arch.Thread_run ? "YES" : " NO"), (gint)Partage->com_arch.TID
+                   (Partage->com_arch.Thread_run ? "YES" : " NO"), (void *)Partage->com_arch.TID
                  );
        Admin_write ( connexion, chaine );
 
@@ -176,7 +176,7 @@
            { memcpy ( result + 25, "-> running YES, TID = ", 22 ); }
           else
            { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
-          g_snprintf( chaine, sizeof(chaine), "%p (%s)\n", (gint) lib->TID, lib->nom_fichier );
+          g_snprintf( chaine, sizeof(chaine), "%p (%s)\n", (void *)lib->TID, lib->nom_fichier );
           memcpy( result + 47, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
           Admin_write ( connexion, result );
           liste = liste->next;
