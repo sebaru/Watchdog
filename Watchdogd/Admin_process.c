@@ -176,7 +176,7 @@
            { memcpy ( result + 25, "-> running YES, TID = ", 22 ); }
           else
            { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
-          g_snprintf( chaine, sizeof(chaine), "%d (%s)\n", (gint) lib->TID, lib->nom_fichier );
+          g_snprintf( chaine, sizeof(chaine), "%p (%s)\n", (gint) lib->TID, lib->nom_fichier );
           memcpy( result + 47, chaine, strlen(chaine) + 1 );   /* +1 pour choper le \0 de fin de chaine ! */
           Admin_write ( connexion, result );
           liste = liste->next;
