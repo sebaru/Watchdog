@@ -187,7 +187,7 @@
 /**********************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( void )
   { gint num, val;
-
+return;
     if (Partage->com_msrv.liste_msg)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg->data);         /* Recuperation du numero de msg */
