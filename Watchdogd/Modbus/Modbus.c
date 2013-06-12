@@ -833,7 +833,6 @@
      }
     else
      { int cpt_e, cpt_byte, cpt_poid, cpt;
-       gint16 chaine[17];
        module->date_last_reponse = Partage->top;                               /* Estampillage de la date */
        SB( module->modbus.bit, 1 );                              /* Mise a 1 du bit interne lié au module */
        if (ntohs(module->response.transaction_id) != module->transaction_id)             /* Mauvaise reponse */
@@ -896,6 +895,7 @@
                module->mode = MODBUS_GET_DI;
                break;
           case MODBUS_GET_DESCRIPTION:
+             { gint16 chaine[17];
                memset ( chaine, 0, sizeof(chaine) );
                chaine[0] = ntohs( *(gint16 *)((gchar *)&module->response.data +  1) );
                chaine[1] = ntohs( *(gint16 *)((gchar *)&module->response.data +  3) );
@@ -907,9 +907,10 @@
                chaine[7] = ntohs( *(gint16 *)((gchar *)&module->response.data + 15) );
 
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "Processer_trame: Get Description %s", (gchar *) chaine );
+                         "Processer_trame: Get Description %s (sizeof chaine=%d)", (gchar *) chaine, sizeof(chaine) );
                module->mode = MODBUS_INIT_WATCHDOG1;
                break;
+            }
           case MODBUS_INIT_WATCHDOG1:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
                         "Processer_trame: Watchdog1 = %d %d",

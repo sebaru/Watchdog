@@ -150,6 +150,9 @@
  static void CB_envoyer_commande_admin ( char *ligne )
   { struct CMD_TYPE_ADMIN admin;
     gchar commande_old[128];
+
+    if (strlen(ligne) == 0) return;
+
     if ( ! strcmp( "quit", ligne ) ) Arret = TRUE;
     else
      { if ( strcmp ( ligne, commande_old ) )
