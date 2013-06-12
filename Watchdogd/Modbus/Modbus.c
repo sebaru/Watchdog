@@ -470,6 +470,35 @@
      }
   }
 /**********************************************************************************************************/
+/* Interroger_description : envoie une commande d'identification au module                                */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
+/**********************************************************************************************************/
+ static void Interroger_firmware( struct MODULE_MODBUS *module )
+  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+    gint retour;
+
+    module->transaction_id++;
+    requete.transaction_id = htons(module->transaction_id);
+    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x006 );                            /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.fct            = MBUS_READ_REGISTER;
+    requete.adresse        = htons( 0x2023 );
+    requete.nbr            = htons( 16 );
+
+    retour = write ( module->connexion, &requete, 12 );
+    if ( retour != 12 )                                                            /* Envoi de la requete */
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+               "Interroger_firmware: failed for module %d (%s): error %d",
+               module->modbus.id, module->modbus.ip, retour );
+       Deconnecter_module( module );
+     }
+    else
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "Interroger_firmware: OK for %d", module->modbus.id );
+       module->request = TRUE;                                                /* Une requete a élé lancée */
+     }
+  }
+/**********************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                  */
 /* Entrée: identifiants des modules et borne                                                              */
 /* Sortie: ?                                                                                              */
@@ -895,6 +924,23 @@
                module->mode = MODBUS_GET_DI;
                break;
           case MODBUS_GET_DESCRIPTION:
+             { gint16 chaine[9];
+               memset ( chaine, 0, sizeof(chaine) );
+               chaine[0] = ntohs( *(gint16 *)((gchar *)&module->response.data +  1) );
+               chaine[1] = ntohs( *(gint16 *)((gchar *)&module->response.data +  3) );
+               chaine[2] = ntohs( *(gint16 *)((gchar *)&module->response.data +  5) );
+               chaine[3] = ntohs( *(gint16 *)((gchar *)&module->response.data +  7) );
+               chaine[4] = ntohs( *(gint16 *)((gchar *)&module->response.data +  9) );
+               chaine[5] = ntohs( *(gint16 *)((gchar *)&module->response.data + 11) );
+               chaine[6] = ntohs( *(gint16 *)((gchar *)&module->response.data + 13) );
+               chaine[7] = ntohs( *(gint16 *)((gchar *)&module->response.data + 15) );
+               chaine[8] = 0;
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                         "Processer_trame: Get Description %s", (gchar *) chaine );
+               module->mode = MODBUS_GET_FIRMWARE;
+               break;
+            }
+          case MODBUS_GET_FIRMWARE:
              { gint16 chaine[17];
                memset ( chaine, 0, sizeof(chaine) );
                chaine[0] = ntohs( *(gint16 *)((gchar *)&module->response.data +  1) );
@@ -905,9 +951,17 @@
                chaine[5] = ntohs( *(gint16 *)((gchar *)&module->response.data + 11) );
                chaine[6] = ntohs( *(gint16 *)((gchar *)&module->response.data + 13) );
                chaine[7] = ntohs( *(gint16 *)((gchar *)&module->response.data + 15) );
-
+               chaine[8] = ntohs( *(gint16 *)((gchar *)&module->response.data + 17) );
+               chaine[9] = ntohs( *(gint16 *)((gchar *)&module->response.data + 19) );
+               chaine[10] = ntohs( *(gint16 *)((gchar *)&module->response.data + 21) );
+               chaine[11] = ntohs( *(gint16 *)((gchar *)&module->response.data + 23) );
+               chaine[12] = ntohs( *(gint16 *)((gchar *)&module->response.data + 25) );
+               chaine[13] = ntohs( *(gint16 *)((gchar *)&module->response.data + 27) );
+               chaine[14] = ntohs( *(gint16 *)((gchar *)&module->response.data + 29) );
+               chaine[15] = ntohs( *(gint16 *)((gchar *)&module->response.data + 31) );
+               chaine[16] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "Processer_trame: Get Description %s (sizeof chaine=%d)", (gchar *) chaine, sizeof(chaine) );
+                         "Processer_trame: Get Firmware %s", (gchar *) chaine );
                module->mode = MODBUS_INIT_WATCHDOG1;
                break;
             }
@@ -1016,6 +1070,7 @@
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_CRIT,
                    "Recuperer_reponse_module: bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)",
                     bute, sizeof(struct TRAME_MODBUS_REPONSE), sizeof(module->response), ntohs(module->response.taille) );
+          bute = sizeof(struct TRAME_MODBUS_REPONSE) - 1;
         }
 
        cpt = read( module->connexion,
@@ -1124,7 +1179,8 @@
                  }
                 switch (module->mode)
                  { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
-                   case MODBUS_INIT_WATCHDOG1 : break; Init_watchdog1( module ); break;
+                   case MODBUS_GET_FIRMWARE   : Interroger_firmware( module ); break;
+                   case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
                    case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
                    case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
                    case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;

@@ -38,6 +38,7 @@
 
  enum
   { MODBUS_GET_DESCRIPTION,
+    MODBUS_GET_FIRMWARE,
     MODBUS_INIT_WATCHDOG1,
     MODBUS_INIT_WATCHDOG2,
     MODBUS_INIT_WATCHDOG3,
@@ -85,7 +86,7 @@
     guint16 taille; /* taille, en comptant le unit_id */
     guint8 unit_id; /* 0xFF */
     guint8 fct;
-    guint8 data[36]; /* max = 36 octets pour la description wago */
+    guint8 data[64]; /* max = 64 octets pour la description du firmware wago (registre 0x2023) */
   };
 
 /********************************************* Gestion des modbus ******************************************/
