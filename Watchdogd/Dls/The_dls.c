@@ -255,7 +255,7 @@
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
 
-    if (need_arch) { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech ); }       /* Archivage si besoin */
+    if (need_arch) { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech ); }/* Archivage si besoin */
     return(need_arch);
   }
 /**********************************************************************************************************/
