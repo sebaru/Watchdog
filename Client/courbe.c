@@ -75,7 +75,7 @@
  static gchar *Valeur_to_description_marker ( struct COURBE *courbe, guint index_posx )
   { static gchar description[80];
     float valeur;
-
+    
     switch(courbe->type)
            { case MNEMO_SORTIE:
              case MNEMO_ENTREE:
@@ -86,40 +86,7 @@
                               ( (gint)courbe->Y[index_posx] % ENTREAXE_Y_TOR == 0 ? 0 : 1) );
                   break;
              case MNEMO_ENTREE_ANA:
-                  switch ( courbe->eana.type )
-                   { case ENTREEANA_NON_INTERP:
-                          valeur = courbe->Y[index_posx];
-                          break;
-                     case ENTREEANA_4_20_MA_10BITS:
-                          if (courbe->Y[index_posx] < 204)
-                           { valeur = 0.0;                                 /* Valeur à l'echelle */ 
-                           }
-                          else
-                           { valeur = (gdouble)
-                                        ((courbe->Y[index_posx]-204)*(courbe->eana.max - courbe->eana.min))/820.0
-                                      + courbe->eana.min;                             /* Valeur à l'echelle */ 
-                           }
-                          break;
-                     case ENTREEANA_4_20_MA_12BITS:
-                          if (courbe->Y[index_posx] < 816)
-                           { valeur = 0.0;                                 /* Valeur à l'echelle */ 
-                           }
-                          else
-                           { valeur = (gdouble)
-                                        ((courbe->Y[index_posx]-816)*(courbe->eana.max - courbe->eana.min))/3280.0
-                                      + courbe->eana.min;                             /* Valeur à l'echelle */ 
-                           }
-                          break;
-                     case ENTREEANA_WAGO_750455:
-                          valeur = (gdouble)
-                                     (courbe->Y[index_posx]*(courbe->eana.max - courbe->eana.min))/4095.0
-                                    + courbe->eana.min;                             /* Valeur à l'echelle */ 
-                          break;
-                     case ENTREEANA_WAGO_750461:
-                          valeur = (gdouble)(courbe->Y[index_posx] / 10.0);         /* Valeur à l'echelle */ 
-                          break;
-                     default : valeur = -1.0;
-                   }                  
+                  valeur = courbe->Y[index_posx];
                   g_snprintf( description, sizeof(description),
                               "EA%d=%8.2f %s", courbe->eana.num, valeur, courbe->eana.unite );
                   break;
@@ -690,7 +657,7 @@
     switch(courbe->type)
      { case MNEMO_ENTREE_ANA:
                 { courbe->X[courbe->taille_donnees-1] = append_courbe->date*1.0;
-                  courbe->Y[courbe->taille_donnees-1] = append_courbe->val_avant_ech;
+                  courbe->Y[courbe->taille_donnees-1] = append_courbe->val_ech;
                   printf("2 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
@@ -698,7 +665,7 @@
        case MNEMO_ENTREE:
                 { courbe->X[courbe->taille_donnees-1] = append_courbe->date*1.0;
                   courbe->Y[courbe->taille_donnees-1] = 1.0*(append_courbe->slot_id*ENTREAXE_Y_TOR +
-                                                            (append_courbe->val_avant_ech ? HAUTEUR_Y_TOR : 0));
+                                                            (append_courbe->val_ech ? HAUTEUR_Y_TOR : 0));
                   printf("3 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
@@ -855,7 +822,7 @@
 
        for ( i=0; cpt < courbe->taille_donnees; cpt++, i++ )
         { courbe->X[cpt] = start_courbe->valeurs[i].date - COURBE_ORIGINE_TEMPS;
-          courbe->Y[cpt] = start_courbe->valeurs[i].val_avant_ech;
+          courbe->Y[cpt] = start_courbe->valeurs[i].val_ech;
         }
                                                                          /* Suppression de l'ancien graph */
           
