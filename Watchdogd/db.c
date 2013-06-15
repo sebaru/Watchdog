@@ -113,7 +113,7 @@
 /**********************************************************************************************************/
  void Libere_DB_SQL( struct DB **adr_db )
   { struct DB *db;
-    if (!adr_db || *adr_db) return;
+    if ( (!adr_db) || !(*adr_db) ) return;
 
     db = *adr_db;
     if (db->free==FALSE)

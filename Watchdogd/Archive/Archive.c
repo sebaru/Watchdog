@@ -113,7 +113,7 @@
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
                    "Run_arch: Unable to open database %s", Config.db_database );
-          return;
+          continue;
         }
        while ( Partage->com_arch.liste_arch )
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
