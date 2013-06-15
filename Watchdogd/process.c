@@ -446,12 +446,12 @@
  void Stopper_fils ( gint flag )
   { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Debut stopper_fils" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for DLS (%d) to finish", Partage->com_dls.TID );
+    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for DLS (%p) to finish", Partage->com_dls.TID );
     Partage->com_dls.Thread_run = FALSE;
     while ( Partage->com_dls.TID != 0 ) sched_yield();                                 /* Attente fin DLS */
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: ok, DLS is down" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ARCH (%d) to finish", Partage->com_arch.TID );
+    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ARCH (%p) to finish", Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;
     while ( Partage->com_arch.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: ok, ARCH is down" );
@@ -459,7 +459,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: keep MOTION (%d) running", PID_motion );
 
     if (flag)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ADMIN (%d) to finish", Partage->com_admin.TID );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ADMIN (%p) to finish", Partage->com_admin.TID );
        Partage->com_admin.Thread_run = FALSE;
        while ( Partage->com_admin.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
        Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: ok, ADMIN is down" );

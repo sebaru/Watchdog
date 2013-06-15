@@ -45,6 +45,11 @@
                 "Ajouter_arch: DROP arch (taille>150) type=%d, num=%d", type, num );
        return;
      }
+    else if (Partage->com_arch.Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
+       return;
+     }
     else
      { Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "Ajouter_arch: Add Arch a traiter type=%d, num=%d", type, num );
