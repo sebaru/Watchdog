@@ -255,7 +255,7 @@
      }
 
     histo = Recuperer_histoDB_suite( &db );
-    Libere_DB_SQL( &db );
+    if (histo) Libere_DB_SQL( &db );
     return(histo);
   }
 /*--------------------------------------------------------------------------------------------------------*/

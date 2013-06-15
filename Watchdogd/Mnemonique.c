@@ -303,7 +303,8 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( guint id )
-  { gchar requete[512];
+  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+    gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -331,7 +332,9 @@
        return(NULL);
      }
 
-    return( Recuperer_mnemoDB_suite ( &db ) );
+    mnemo = Recuperer_mnemoDB_suite( &db );
+    if (mnemo) Libere_DB_SQL ( &db );
+    return(mnemo);
   }
 /**********************************************************************************************************/
 /* Rechercher_mnemoDB: Recupération du mnemo dont l'id est en parametre                                   */
