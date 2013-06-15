@@ -77,19 +77,31 @@
     if (chaine)
      { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", chaine ); g_free(chaine); }
     else
-     { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_SERVER ); }
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Http_Lire_config : unable to load https_file_cert filename. Using default one : %s",
+                 HTTP_DEFAUT_FILE_SERVER );
+       g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_SERVER );
+     }
 
     chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_key", NULL );
     if (chaine)
      { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", chaine ); g_free(chaine); }
     else
-     { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", HTTP_DEFAUT_FILE_KEY ); }
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Http_Lire_config : unable to load https_file_key filename. Using default one : %s",
+                 HTTP_DEFAUT_FILE_KEY );
+       g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", HTTP_DEFAUT_FILE_KEY );
+     }
 
     chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_ca", NULL );
     if (chaine)
      { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", chaine ); g_free(chaine); }
     else
-     { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", HTTP_DEFAUT_FILE_CA  ); }
+     { Info_new( Config.log, TRUE, LOG_CRIT,
+                 "Http_Lire_config : unable to load https_file_ca filename. Using default one : %s",
+                 HTTP_DEFAUT_FILE_CA );
+       g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", HTTP_DEFAUT_FILE_CA  );
+     }
 
     g_key_file_free(gkf);
   }
@@ -133,7 +145,7 @@
     if ( fd == -1 || fstat (fd, &sbuf) == -1)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "Charger_certificat : Loading file key %s failed (%s)",
-                 Cfg_http.https_file_cert, strerror(errno) );
+                 Cfg_http.https_file_key, strerror(errno) );
        if (fd!=-1) close(fd);
        return(FALSE);
      }
@@ -317,6 +329,15 @@
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
      { if ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, con_cls ) == FALSE)        /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
+     }
+    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
+     { if ( Http_Traiter_request_getstatus ( connection ) == FALSE)           /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);

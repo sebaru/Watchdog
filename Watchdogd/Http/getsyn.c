@@ -63,7 +63,6 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Writer creation failed" );
        xmlBufferFree(buf);
-       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -72,7 +71,6 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Start document failed" );
        xmlBufferFree(buf);
-       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -88,8 +86,8 @@
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Failed to Start element synoptique" );
+       g_free(syndb);
        xmlBufferFree(buf);
-       Libere_DB_SQL( &db );
        return(FALSE);
      }
 

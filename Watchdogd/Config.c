@@ -158,7 +158,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance_id            %s", Config.instance_id );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance_id          %s", Config.instance_id );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db host              %s", Config.db_host );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
