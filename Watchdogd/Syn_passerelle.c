@@ -163,7 +163,8 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_PASSERELLE *Rechercher_passerelleDB ( guint id )
-  { gchar requete[512];
+  { struct CMD_TYPE_PASSERELLE *pass;
+    gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();       
@@ -188,7 +189,9 @@
        return(NULL);
      }
 
-    return ( Recuperer_passerelleDB_suite ( &db ) );
+    pass = Recuperer_passerelleDB_suite( &db );
+    if (pass) Libere_DB_SQL ( &db );
+    return(pass);
   }
 /**********************************************************************************************************/
 /* Modifier_passerelleDB: Modification d'un passerelle Watchdog                                           */

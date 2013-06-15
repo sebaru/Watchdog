@@ -134,7 +134,8 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_OPTION_TEMPO *Rechercher_tempoDB ( guint id )
-  { gchar requete[512];
+  { struct CMD_TYPE_OPTION_TEMPO *tempo;
+    gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -161,7 +162,9 @@
        return(NULL);
      }
 
-    return( Recuperer_tempoDB_suite ( &db ) );
+    tempo = Recuperer_tempoDB_suite( &db );
+    if (tempo) Libere_DB_SQL ( &db );
+    return(tempo);
   }
 /**********************************************************************************************************/
 /* Modifier_tempoDB: Modification d'une tempo Watchdog                                                    */
