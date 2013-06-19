@@ -293,7 +293,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,changepass,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpass,date_modif "
-                "FROM %s WHERE id=%d", NOM_TABLE_UTIL, id );
+                "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
     if (!db)
