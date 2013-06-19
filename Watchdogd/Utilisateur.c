@@ -307,6 +307,7 @@
      }
 
     util = Recuperer_utilisateurDB_suite( &db );
+    Libere_DB_SQL( &db );
     if (util) Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
     return( util );
   }
