@@ -117,11 +117,13 @@
 
     db = *adr_db;
     if (db->free==FALSE)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Libere_DB_SQL: Reste un result a FREEer !" );
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Libere_DB_SQL: Reste un result a FREEer (id=%05d)!", db->id );
        Liberer_resultat_SQL ( db );
      }
     mysql_close( db->mysql );
-    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Libere_DB_SQL: Deconnexion effective (id=%05d)", db->id );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+             "Libere_DB_SQL: Deconnexion effective (id=%05d)", db->id );
     g_free( db );
     *adr_db = NULL;
   }
@@ -134,12 +136,14 @@
   { if (!db) return(FALSE);
 
     if (db->free==FALSE)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: Reste un result a FREEer !" ); }
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Lancer_requete_SQL: Reste un result a FREEer (id=%05d)!", db->id );
+     }
 
     Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d):  %s", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (%s)",
-                (char *)mysql_error(db->mysql) );
+     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (id=%05d) (%s)",
+                db->id, (char *)mysql_error(db->mysql) );
        return(FALSE);
      }
 

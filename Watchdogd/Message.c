@@ -193,14 +193,14 @@
 /**********************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num )
   { struct CMD_TYPE_MESSAGE *message;
-    gchar requete[256];
+    gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND num=%d",
+                " WHERE %s.num_syn = %s.id AND num=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, num /* Where */
@@ -228,7 +228,7 @@
 /**********************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id )
   { struct CMD_TYPE_MESSAGE *message;
-    gchar requete[200];
+    gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();       
@@ -241,7 +241,7 @@
                 "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,"
                 "libelle_sms,type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.id=%d",
+                " WHERE %s.num_syn = %s.id AND %s.id=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, id /* Where */
