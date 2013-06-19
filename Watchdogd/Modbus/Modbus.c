@@ -897,12 +897,13 @@
                break;
           case MODBUS_GET_DESCRIPTION:
              { gint16 chaine[16];
-               gchar cpt, taille;
+               gchar taille;
                memset ( chaine, 0, sizeof(chaine) );
                taille = module->response.data[0];
                if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
-               for (cpt=0; cpt<taille/2; cpt++)
-                { chaine[cpt] = ntohs( (gint16)module->response.data[2*cpt+1] ); }
+               chaine[0] = ntohs( (gint16)module->response.data[1] );
+               chaine[1] = ntohs( (gint16)module->response.data[3] );
+               chaine[taille] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                          "Processer_trame: Get Description (size %d) %s", taille, (gchar *) chaine );
                module->mode = MODBUS_GET_FIRMWARE;
@@ -910,12 +911,13 @@
             }
           case MODBUS_GET_FIRMWARE:
              { gint16 chaine[32];
-               gchar cpt, taille;
+               gchar taille;
                memset ( chaine, 0, sizeof(chaine) );
                taille = module->response.data[0];
                if (taille>=sizeof(chaine)) taille=sizeof(chaine)-1;
-               for (cpt=0; cpt<taille/2; cpt++)
-                { chaine[cpt] = ntohs( (gint16)module->response.data[2*cpt+1] ); }
+               chaine[0] = ntohs( (gint16)module->response.data[1] );
+               chaine[1] = ntohs( (gint16)module->response.data[3] );
+               chaine[taille] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                          "Processer_trame: Get Firmware (size %d) %s", taille, (gchar *) chaine );
                module->mode = MODBUS_INIT_WATCHDOG1;
