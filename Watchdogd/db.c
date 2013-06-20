@@ -72,16 +72,16 @@
 /* Sortie: une structure DB de référence                                                                  */
 /**********************************************************************************************************/
  struct DB *Init_DB_SQL ( void )
-  { static gint id = 1;
+  { static gint id = 1, taille;
     struct DB *db;
     my_bool reconnect;
+
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                          /* Si probleme d'allocation mémoire */
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Memory error" );
        return(NULL);
      }
 
-    db->id = id++;
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Mysql_init failed (%s)",
@@ -102,9 +102,14 @@
        return (NULL);
      }
     db->free = TRUE;
+    pthread_mutex_lock ( &Partage->com_db.synchro );
+    db->id = id++;
+    Partage->com_db.Liste = g_slist_prepend ( Partage->com_db.Liste, db );
+    taille = g_slist_length ( Partage->com_db.Liste );
+    pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d)",
-               Config.db_username, Config.db_database, db->id );
+              "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d). Nbr_requete_en_cours=%d",
+               Config.db_username, Config.db_database, db->id, taille );
     return(db);
   }
 /**********************************************************************************************************/
@@ -112,18 +117,41 @@
 /* Entrée: La DB                                                                                          */
 /**********************************************************************************************************/
  void Libere_DB_SQL( struct DB **adr_db )
-  { struct DB *db;
+  { struct DB *db, *db_en_cours;
+    gboolean found;
+    GSList *liste;
+    gint taille;
     if ( (!adr_db) || !(*adr_db) ) return;
 
-    db = *adr_db;
+    db = *adr_db;                                                   /* Récupération de l'adresse de la db */
+    found = FALSE;
+    pthread_mutex_lock ( &Partage->com_db.synchro );
+    liste = Partage->com_db.Liste;
+    while ( liste )
+     { db_en_cours = (struct DB *)liste->data;
+       if (db_en_cours->id == db->id) found = TRUE;
+       liste = g_slist_next( liste );
+     }
+    pthread_mutex_unlock ( &Partage->com_db.synchro );
+
+    if (!found)
+     { Info_new( Config.log, Config.log_db, LOG_CRIT,
+                "Libere_DB_SQL: DB Free Request not in list ! ID=%05d, request=%s",
+                 db->id, db->requete );
+     }
+
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Libere_DB_SQL: Reste un result a FREEer (id=%05d)!", db->id );
        Liberer_resultat_SQL ( db );
      }
     mysql_close( db->mysql );
+    pthread_mutex_lock ( &Partage->com_db.synchro );
+    Partage->com_db.Liste = g_slist_remove ( Partage->com_db.Liste, db );
+    taille = g_slist_length ( Partage->com_db.Liste );
+    pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-             "Libere_DB_SQL: Deconnexion effective (id=%05d)", db->id );
+             "Libere_DB_SQL: Deconnexion effective (id=%05d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
   }
@@ -140,6 +168,7 @@
                 "Lancer_requete_SQL: Reste un result a FREEer (id=%05d)!", db->id );
      }
 
+    g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                  /* Save for later use */
     Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d):  %s", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (id=%05d) (%s)",
@@ -197,11 +226,26 @@
     return ( mysql_insert_id(db->mysql) );
   }
 /**********************************************************************************************************/
-/* SQL_ping : permet de garder la connexion ouverte                                                       */
-/* Entrée: la DB                                                                                          */
+/* Print_SQL_status : permet de logguer le statut SQL                                                     */
+/* Entrée: néant                                                                                          */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void SQL_ping ( struct LOG *log, struct DB *db )
-  { mysql_ping ( db->mysql );
+ void Print_SQL_status ( void )
+  { GSList *liste;
+    pthread_mutex_lock ( &Partage->com_db.synchro );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+             "Print_SQL_status: %03d running connexions",
+              g_slist_length(Partage->com_db.Liste) );
+
+    liste = Partage->com_db.Liste;
+    while ( liste )
+     { struct DB *db;
+       db = (struct DB *)liste->data;
+       Info_new( Config.log, Config.log_db, LOG_DEBUG,
+              "Print_SQL_status: Connexion %03d requete %s",
+               db->id, db->requete );
+       liste = g_slist_next( liste );
+     }
+    pthread_mutex_unlock ( &Partage->com_db.synchro );
   }
 /*--------------------------------------------------------------------------------------------------------*/

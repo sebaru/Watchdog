@@ -272,6 +272,7 @@
         { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
            { Checker_scenario( cpt ); }
           Gerer_message_repeat();
+          Print_SQL_status(); /* Print SQL status ! */
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
@@ -442,6 +443,7 @@
        memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
+       memset( &Partage->com_db,       0, sizeof(Partage->com_db) );
 
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -450,7 +452,8 @@
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
- 
+       pthread_mutex_init( &Partage->com_db.synchro, &attr );
+
        sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
@@ -516,6 +519,7 @@
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
+    pthread_mutex_destroy( &Partage->com_db.synchro );
 
     close(fd_lock);                       /* Fermeture du FileDescriptor correspondant au fichier de lock */
 

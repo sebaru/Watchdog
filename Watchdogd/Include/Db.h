@@ -44,6 +44,7 @@
     gboolean free;                                                    /* Le resultat est-il free ou non ? */
     MYSQL_ROW row;
     gint id;
+    gchar requete[80];
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Normaliser_chaine( gchar *pre_comment );
@@ -53,6 +54,6 @@
  extern MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db );
  extern void Liberer_resultat_SQL ( struct DB *db );
  extern guint Recuperer_last_ID_SQL ( struct DB *db );
- extern void SQL_ping ( struct LOG *log, struct DB *db );
+ extern void Print_SQL_status ( void );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/
