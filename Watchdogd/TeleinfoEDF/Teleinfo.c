@@ -88,6 +88,14 @@
   { struct termios oldtio;
     int fd;
 
+    SEA_range( Cfg_teleinfo.min_ea + 0, 0 );                                  /* Initialisation des range */
+    SEA_range( Cfg_teleinfo.min_ea + 1, 0 );
+    SEA_range( Cfg_teleinfo.min_ea + 2, 0 );
+    SEA_range( Cfg_teleinfo.min_ea + 3, 0 );
+    SEA_range( Cfg_teleinfo.min_ea + 4, 0 );
+    SEA_range( Cfg_teleinfo.min_ea + 5, 0 );
+    SEA_range( Cfg_teleinfo.min_ea + 6, 0 );
+
     fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
@@ -105,6 +113,7 @@
     tcflush(fd, TCIOFLUSH);
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
               "Init_teleinfo: Ouverture port teleinfo okay %s", Cfg_teleinfo.port );
+
     return(fd);
   }
 /**********************************************************************************************************/
@@ -116,24 +125,31 @@
   { 
     if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
      { SEA( Cfg_teleinfo.min_ea, atof( Cfg_teleinfo.buffer + 5 ) );
+       SEA_range( Cfg_teleinfo.min_ea, 1);
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
      { SEA( Cfg_teleinfo.min_ea + 1, atof( Cfg_teleinfo.buffer + 6 ) );
+       SEA_range( Cfg_teleinfo.min_ea + 1, 1);
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
      { SEA( Cfg_teleinfo.min_ea + 2, atof( Cfg_teleinfo.buffer + 5 ) );
+       SEA_range( Cfg_teleinfo.min_ea + 2, 1);
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
      { SEA( Cfg_teleinfo.min_ea + 3, atof( Cfg_teleinfo.buffer + 5 ) );
+       SEA_range( Cfg_teleinfo.min_ea + 3, 1);
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
      { SEA( Cfg_teleinfo.min_ea + 4, atof( Cfg_teleinfo.buffer + 6 ) );
+       SEA_range( Cfg_teleinfo.min_ea + 4, 1);
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
      { SEA( Cfg_teleinfo.min_ea + 5, atof( Cfg_teleinfo.buffer + 5 ) );
+       SEA_range( Cfg_teleinfo.min_ea + 5, 1);
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
      { SEA( Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5 ) );
+       SEA_range( Cfg_teleinfo.min_ea + 6, 1);
      }
     else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
                    "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
