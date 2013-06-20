@@ -323,7 +323,7 @@ encore_buffer:
            { Info_new( connexion->log, FALSE, LOG_WARNING,
                 "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
                  connexion->socket, retour );
-             return(retour);
+             break;
            }
 
           if (connexion->ssl)

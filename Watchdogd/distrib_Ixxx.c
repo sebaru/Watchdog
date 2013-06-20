@@ -78,8 +78,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_Ixxx_dls ( void )
-  { struct CMD_ETAT_BIT_CTRL *new_motif;
-    gint num, reste;
+  { gint num, reste;
 
     if (!Partage->com_msrv.liste_i) return;                                   /* Si pas de i, on se barre */
 
