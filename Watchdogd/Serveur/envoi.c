@@ -51,7 +51,12 @@
        return(0);
      }
 
-    while (Attendre_envoi_disponible( client->connexion )) sched_yield();
+    if ( Attendre_envoi_disponible( client->connexion ) )
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                "Envoi_client: Deconnexion client sur défaut d'attente envoi disponible" );
+       Client_mode ( client, DECONNECTE );
+       return(0);
+     }
                                                      /* Attente de la possibilité d'envoyer sur le reseau */
           
     retour = Envoyer_reseau( client->connexion, tag, ss_tag, buffer, taille );
