@@ -103,7 +103,7 @@
 /**********************************************************************************************************/
  gboolean Envoyer_gif( struct CLIENT *client )
   { gint taille;
-    if (Attendre_envoi_disponible(client->connexion)==-1)                 /* Attente de liberation reseau */
+    if (Attendre_envoi_disponible(client->connexion))                     /* Attente de liberation reseau */
      { return( FALSE ); }
 
     if (!client->transfert.buffer)
