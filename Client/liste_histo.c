@@ -292,13 +292,9 @@
     while ( valide )
      { gtk_tree_model_get( store, &iter, COLONNE_NUM, &id, -1 );
 /* printf("Del_histo: id = %d, cible = %d\n", id, histo->id); */
-       if ( id == histo->id ) break;
+       if ( id == histo->id ) gtk_list_store_remove( GTK_LIST_STORE(store), &iter );
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-
-    if (valide)
-     { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
-    else { printf("Del_histo: non trouvé %d\n", histo->id); }
   }
 /**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */

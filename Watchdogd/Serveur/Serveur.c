@@ -316,20 +316,22 @@
        struct CMD_TYPE_HISTO *dup_histo;
        client = (struct CLIENT *)liste->data;
 
-       dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof ( struct CMD_TYPE_HISTO ) );
-       if (!dup_histo)
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                   "Envoyer_histo_aux_threads: Memory error" );
-          break;
-        }
-       else memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO));
+       if (client->mode == VALIDE)
+        { dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof ( struct CMD_TYPE_HISTO ) );
+          if (!dup_histo)
+           { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                      "Envoyer_histo_aux_threads: Memory error" );
+             break;
+           }
+          else memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO));
 
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_histo_aux_threads: Envoi du MSG%d=%d aux thread", dup_histo->id, etat );
-       if (etat)
-        { client->Liste_new_histo = g_slist_append ( client->Liste_new_histo, dup_histo ); }
-       else
-        { client->Liste_del_histo = g_slist_append ( client->Liste_del_histo, dup_histo ); }
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Envoyer_histo_aux_threads: Envoi du MSG%d=%d au client %s", dup_histo->id, etat, client->machine );
+          if (etat)
+           { client->Liste_new_histo = g_slist_append ( client->Liste_new_histo, dup_histo ); }
+          else
+           { client->Liste_del_histo = g_slist_append ( client->Liste_del_histo, dup_histo ); }
+        }
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
