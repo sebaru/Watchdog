@@ -48,7 +48,10 @@
     connexion = client->connexion;
 
     if ( Reseau_tag(connexion) == TAG_CONNEXION && Reseau_ss_tag(connexion) == SSTAG_CLIENT_OFF )
-          { Client_mode ( client, DECONNECTE ); }
+          { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                     "Gerer_protocol: Deconnexion sur demande cliente" );
+            Client_mode ( client, DECONNECTE );
+          }
 /********************************************* Client VALIDE **********************************************/
     else if (client->mode == VALIDE )
           { 
