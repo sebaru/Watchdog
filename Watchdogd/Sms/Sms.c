@@ -140,7 +140,7 @@
 
     g_snprintf(msg->libelle_sms, sizeof(msg->libelle_sms), "%s", texte );
     msg->id  = 0;
-    msg->num = 0;
+    msg->num =-1;
     msg->enable = TRUE;
     msg->sms = MSG_SMS_SMSBOX;
 
@@ -513,7 +513,7 @@
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer apres le msg %d",
                  g_slist_length(Cfg_sms.Liste_sms), msg->num );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-       if ( Partage->g[msg->num].etat )                                 /* On n'envoie que si MSGnum == 1 */
+       if ( msg->num == -1 || Partage->g[msg->num].etat )                      /* On n'envoie que si MSGnum == 1 */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                    "Run_thread : Sending msg %d (%s)", msg->num, msg->libelle_sms );
       
