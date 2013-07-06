@@ -79,9 +79,16 @@
     taille = g_slist_length( Cfg_audio.Liste_audio );
     pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
+
     if (taille > 150)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                  "Ajouter_audio: DROP audio %d (taille = %d > 150)", msg->num, taille);
+       g_free(msg);
+       return;
+     }
+    else if (Cfg_audio.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Ajouter_audio: Thread is down. Dropping msg %d", msg->num );
        g_free(msg);
        return;
      }

@@ -131,6 +131,12 @@
        g_free(msg);
        return;
      }
+    else if (Cfg_imsg.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Imsg_Gerer_message: Thread is down. Dropping msg %d", msg->num );
+       g_free(msg);
+       return;
+     }
 
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
     Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, msg );                    /* Ajout a la liste */
