@@ -256,19 +256,20 @@
        Cfg_audio.Liste_audio = g_slist_remove ( Cfg_audio.Liste_audio, msg );
        pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                "Run_thread : Envoi du message audio %d", msg->num );
+       if ( Partage->g[msg->num].etat == 1)
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
+                   "Run_thread : Envoi du message audio %d", msg->num );
 
-       Envoyer_commande_dls( msg->bit_voc );             /* Positionnement du profil audio via monostable */
-       Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );    /* Positionné quand on envoi une diffusion audio */
+          Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
+          Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );/* Positionné quand on envoi une diffusion audio */
 
-       if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)        /* Si Pas de message depuis xx */
-        { Jouer_wav("Son/jingle.wav"); }                                        /* On balance le jingle ! */
-       Cfg_audio.last_audio = Partage->top;
+          if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)        /* Si Pas de message depuis xx */
+           { Jouer_wav("Son/jingle.wav"); }                                     /* On balance le jingle ! */
+          Cfg_audio.last_audio = Partage->top;
 
-       if ( ! Jouer_mp3 ( msg ) )                  /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
-        { Jouer_espeak ( msg ); }
-
+          if ( ! Jouer_mp3 ( msg ) )               /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+           { Jouer_espeak ( msg ); }
+        }
        g_free(msg);
      }
     Desabonner_distribution_message ( Audio_Gerer_message );/* Desabonnement de la diffusion des messages */
