@@ -367,6 +367,7 @@
      }
     else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
     setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
+    setgid ( pwd->pw_gid );                                                      /* On drop les privilèges */
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
