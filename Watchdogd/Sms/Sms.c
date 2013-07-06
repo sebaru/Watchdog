@@ -188,7 +188,12 @@
        g_free(msg);
        return;
      }
-
+    else if (Cfg_sms.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Sms_Gerer_message: Thread is down. Dropping msg %d", msg->num );
+       g_free(msg);
+       return;
+     }
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );                    /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
