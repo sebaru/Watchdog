@@ -101,12 +101,14 @@
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN:
              { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
                        sizeof( client->dls ) );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls, client );
                pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS:
-             { pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_plugin_dls_thread, client );
+             { Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_plugin_dls_thread, client );
                pthread_detach( tid );
              }
             break;

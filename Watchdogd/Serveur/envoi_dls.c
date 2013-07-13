@@ -309,8 +309,7 @@
                tag, sstag, sstag_fin );
           
     if ( ! Recuperer_plugins_dlsDB( &db ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return(NULL);
+     { return(NULL);
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
@@ -322,7 +321,6 @@
      { dls = Recuperer_plugins_dlsDB_suite( &db );
        if (!dls)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "Envoyer_plugins_dls_thread_tag: End (TAG=%d, SSTAG=%d, SSTAGFIN=%d)",
                     tag, sstag, sstag_fin );
@@ -343,6 +341,7 @@
   { Envoyer_plugins_dls_thread_tag ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
                                                       SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN
                                    );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
 /**********************************************************************************************************/
@@ -354,6 +353,7 @@
   { Envoyer_plugins_dls_thread_tag ( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
                                                              SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN
                                    );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
 /**********************************************************************************************************/
