@@ -304,9 +304,13 @@
     
     prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+              "Envoyer_plugins_dls_thread_tag: Starting (TAG=%d, SSTAG=%d, SSTAGFIN=%d)",
+               tag, sstag, sstag_fin );
+          
     if ( ! Recuperer_plugins_dlsDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
+       return(NULL);
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
@@ -319,7 +323,10 @@
        if (!dls)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Envoyer_plugins_dls_thread_tag: End (TAG=%d, SSTAG=%d, SSTAGFIN=%d)",
+                    tag, sstag, sstag_fin );
+          return(NULL);
         }
 
        Envoi_client ( client, tag, sstag,
