@@ -222,7 +222,8 @@ one_again:
         { connexion->index_entete  = 0;                                                 /* Raz des indexs */
           connexion->index_donnees = 0;
           Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Recevoir_reseau: recue %d donnees", connexion->entete.taille_donnees );
+                   "Recevoir_reseau: recue %d donnees tag=%d sstag=%d",
+                    connexion->entete.taille_donnees, connexion->entete.tag, connexion->entete.ss_tag );
           connexion->last_use = time(NULL);
           return(RECU_OK);
         }
