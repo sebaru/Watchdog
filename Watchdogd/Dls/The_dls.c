@@ -195,7 +195,7 @@
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /* Sortie : TRUE si les valeurs ont été archivées                                                         */
 /**********************************************************************************************************/
- gboolean SEA_real ( int num, float val_avant_ech )
+ gboolean SEA_real ( int num, float val_avant_ech, gboolean archive )
   { gboolean need_arch;
     if (num<0 || num>=NBR_ENTRE_ANA)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
@@ -255,15 +255,15 @@
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
 
-    if (need_arch) { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech ); }/* Archivage si besoin */
+    if (archive && need_arch) { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech ); }/* Archivage si besoin */
     return(need_arch);
   }
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA( int num, float val_avant_ech )
-  { if (SEA_real(num, val_avant_ech))
-     { Partage->ea[ num ].last_arch = Partage->top;          /* Si archive, on communique le changement ! */
+  { if (SEA_real(num, val_avant_ech, TRUE))
+     { Partage->ea[ num ].last_arch = Partage->top;/* Si archive, on communique le changement aux satellite ! */
        pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
        Partage->com_msrv.liste_ea = g_slist_prepend( Partage->com_msrv.liste_ea,
                                                      GINT_TO_POINTER(num) );
