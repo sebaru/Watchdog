@@ -92,7 +92,7 @@
                 }
                else
                 { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                             "%8f %s", capteur->val_ech,
+                             "%8.0f %s", capteur->val_ech,
                               Partage->ea[capteur->bit_controle].cmd_type_eana.unite
                             );
                 }
