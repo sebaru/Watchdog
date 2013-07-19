@@ -82,18 +82,17 @@
             capteur->val_ech = B(capteur->bit_controle);
             return(etat_capteur);
        case MNEMO_ENTREE_ANA:
+            capteur->val_ech = Partage->ea[capteur->bit_controle].val_ech;
             if (EA_inrange(capteur->bit_controle))
-             { gdouble val_ech;
-               val_ech = EA_ech(capteur->bit_controle);
-               if(-1000000.0<val_ech && val_ech<1000000.0)
+             { if(-1000000.0<capteur->val_ech && capteur->val_ech<1000000.0)
                 { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                             "%6.2f %s", val_ech,
+                             "%6.2f %s", capteur->val_ech,
                               Partage->ea[capteur->bit_controle].cmd_type_eana.unite
                             );
                 }
                else
                 { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
-                             "%8f %s", val_ech,
+                             "%8f %s", capteur->val_ech,
                               Partage->ea[capteur->bit_controle].cmd_type_eana.unite
                             );
                 }
@@ -103,7 +102,6 @@
                            " - pb comm - "
                          );
              }
-            capteur->val_ech = Partage->ea[capteur->bit_controle].val_ech;
             return(etat_capteur);
        case MNEMO_CPTH:
              { time_t valeur;
