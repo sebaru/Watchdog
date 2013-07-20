@@ -126,6 +126,7 @@
  gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[128];
     gint fd_cible, pid;
+    extern char **environ;
 
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
@@ -140,7 +141,7 @@
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: MPG123 fork failed pid=%d", pid ); }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+     { execlpe( "mpg123", "mpg123", "-q", nom_fichier, NULL, environ );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: Lancement MPG123 failed pid=%d", pid );
        _exit(0);
      }
