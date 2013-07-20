@@ -142,7 +142,8 @@
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: MPG123 fork failed pid=%d", pid ); }
     else if (!pid)
      { execle( "mpg123", "mpg123", "-q", nom_fichier, NULL, environ );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: Lancement MPG123 failed pid=%d", pid );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: Lancement MPG123 failed (%s)",
+                 strerror( errno ) );
        _exit(0);
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for MPG123 to finish pid=%d", pid );
