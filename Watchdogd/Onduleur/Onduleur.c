@@ -102,7 +102,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,host,ups,bit_comm,enable,ea_min,libelle,e_min,a_min,username,password "
-                " FROM %s WHERE instance_id='%s' ORDER BY host,ups", Config.instance_id, NOM_TABLE_UPS );
+                " FROM %s WHERE instance_id='%s' ORDER BY host,ups", NOM_TABLE_UPS, Config.instance_id );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
