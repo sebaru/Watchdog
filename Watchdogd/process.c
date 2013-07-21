@@ -427,7 +427,7 @@
   { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Demarrer_arch: Demande de demarrage %d", getpid() );
     if (Partage->com_arch.Thread_run == TRUE)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Demarrer_arch: An instance is already running",
-               Partage->com_arch.TID );
+                 Partage->com_arch.TID );
        return(FALSE);
      }
     if (pthread_create( &Partage->com_arch.TID, NULL, (void *)Run_arch, NULL ))
@@ -436,7 +436,7 @@
      }
     pthread_detach( Partage->com_arch.TID ); /* On le detache pour qu'il puisse se terminer tout seul */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Demarrer_arch: thread arch (%p) seems to be running",
-            Partage->com_arch.TID );
+              Partage->com_arch.TID );
     return(TRUE);
   }
 /**********************************************************************************************************/
