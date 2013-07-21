@@ -57,10 +57,21 @@
     unlink ( FICHIER_EXPORT );
     Partage->taille_partage = sizeof(struct PARTAGE);
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (fd>0) { write (fd, Partage, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Data Export to %s", FICHIER_EXPORT );
+    if (fd>0) { if ( write (fd, Partage, sizeof(struct PARTAGE)) != sizeof(struct PARTAGE) )
+                 { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                            "Exporter: Data Export to %s failed (%s)",
+                             FICHIER_EXPORT, strerror(errno) );
+                 }
+                else 
+                 { Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                            "Exporter: Data Export to %s successfull",
+                             FICHIER_EXPORT );
+                 }
               }
-    else      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Exporter: Could not export to %s", strerror(errno) ); }
+    else      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                         "Exporter: Open Error on %s. Could not export to %s",
+                          FICHIER_EXPORT, strerror(errno) );
+              }
     close (fd);
   }
 /**********************************************************************************************************/
@@ -444,7 +455,8 @@
      }
     fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                       /* Set close on exec flag */
     g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
-    write( fd_lock, strpid, strlen(strpid) );
+    if (write( fd_lock, strpid, strlen(strpid) )<0)
+     { printf( "Cannot write PID on %s/%s (%s)\n", Config.home, VERROU_SERVEUR, strerror(errno) ); }
 
     Config.log = Info_init( "Watchdogd", Config.log_level );                       /* Init msgs d'erreurs */
 
