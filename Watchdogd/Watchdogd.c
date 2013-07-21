@@ -69,24 +69,36 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static gint Importer ( void )
-  { int fd;
-    fd = open( FICHIER_EXPORT, O_RDONLY );
-    if (fd>0) { read (fd, Partage, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                         "Importer : Data Import %s... Checking size", FICHIER_EXPORT );
-                if (Partage->taille_partage != sizeof(struct PARTAGE) )
-                 { memset( Partage, 0, sizeof(struct PARTAGE) );
-                   Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Importer: Wrong size .. zeroing ..." );
-                 }
-                else
-                 { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK" ); }
-                close (fd);
-                return(1);
-              }
-    else      { memset( Partage, 0, sizeof(struct PARTAGE) );
-                Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import: no file .. zeroing ..." );
-              }
-   return(0);
+  { int fd, retour;
+
+    fd = open( FICHIER_EXPORT, O_RDONLY );                                        /* Ouverture du fichier */
+    if ( fd <= 0 )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "Importer : Open Errort %s (%s).", FICHIER_EXPORT, strerror(errno) );
+     }
+    else
+     { retour = read (fd, Partage, sizeof(struct PARTAGE) );
+       if (retour!=sizeof(struct PARTAGE))
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                   "Importer : Read Error on %s (%s)", FICHIER_EXPORT, strerror(errno) );
+          close(fd);
+        }
+       else
+        { close(fd);
+          if (Partage->taille_partage != sizeof(struct PARTAGE) )
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                      "Importer : Wrong size on %s", FICHIER_EXPORT );
+           }
+          else
+           { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK, import OK" ); }
+             return(1);
+           }
+     }
+
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import: Import error : zeroing working memory..." );
+    memset( Partage, 0, sizeof(struct PARTAGE) );
+
+    return(0);
   }
 /**********************************************************************************************************/
 /* Charger_config_bit_interne: Chargement des configs bit interne depius la base de données               */
@@ -362,12 +374,23 @@
 
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
-     { printf("Warning, user '%s' not found in /etc/passwd.. Could not set user run_as\n", Config.run_as);
+     { printf("Warning, user '%s' not found in /etc/passwd (%s).. Could not set user run_as\n",
+              Config.run_as, strerror(errno) );
        exit(EXIT_ERREUR);
      }
     else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
-    setuid ( pwd->pw_uid );                                                      /* On drop les privilèges */
-    setgid ( pwd->pw_gid );                                                      /* On drop les privilèges */
+
+    if (setuid ( pwd->pw_uid )==-1)                                             /* On drop les privilèges */
+     { printf("Warning, cannot setUID for user '%s' (%s)\n",
+              Config.run_as, strerror(errno) );
+       exit(EXIT_ERREUR);
+     }
+       
+    if (setgid ( pwd->pw_gid )==-1)                                             /* On drop les privilèges */
+     { printf("Warning, cannot setGID for user '%s' (%s)\n",
+              Config.run_as, strerror(errno) );
+       exit(EXIT_ERREUR);
+     }
 
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }

@@ -103,13 +103,8 @@
      {
        Info_new( Config.log, FALSE, LOG_NOTICE, "Asterisk_check_call: Call from %s (num=%s)",
                  asterisk->calleridname, asterisk->calleridnum );
-       if ( Config.asterisk_m_min <= asterisk->bit &&
-                                     asterisk->bit <= Config.asterisk_m_max )
-        { Info_new( Config.log, FALSE, LOG_INFO, "Asterisk_check_call: Mise a un du bit M%03d", asterisk->bit );
-          Envoyer_commande_dls ( asterisk->bit );
-        }
-       else
-        { Info_new( Config.log, FALSE, LOG_WARNING, "Asterisk_check_call: Numero de bit hors range M%03d", asterisk->bit ); }
+       Info_new( Config.log, FALSE, LOG_INFO, "Asterisk_check_call: Mise a un du bit M%03d", asterisk->bit );
+       Envoyer_commande_dls ( asterisk->bit );
        id = asterisk->id;
        g_free(asterisk);
      }

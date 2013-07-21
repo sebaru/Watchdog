@@ -37,17 +37,24 @@
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
 /**********************************************************************************************************/
  void Ajouter_arch( gint type, gint num, gfloat valeur )
-  { struct timeval tv;
+  { static gint last_log = 0;
+    struct timeval tv;
     struct ARCHDB *arch;
 
     if (Partage->com_arch.taille_arch > 150)
-     { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "Ajouter_arch: DROP arch (taille>150) type=%d, num=%d", type, num );
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                   "Ajouter_arch: DROP arch (taille>150) type=%d, num=%d", type, num );
+          last_log = Partage->top;
+        }
        return;
      }
     else if (Partage->com_arch.Thread_run == FALSE)
-     { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                   "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
+          last_log = Partage->top;
+        }
        return;
      }
     else

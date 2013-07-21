@@ -54,10 +54,7 @@
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
-    gint tellstick_a_min;                           /* Numéro de la sortie minimum gérée par le tellstick */
-    gint tellstick_a_max;                           /* Numéro de la sortie maximum gérée par le tellstick */
-    gint asterisk_m_min;                     /* Numéro du monostable minimum gérée par le thread ASTERISK */
-    gint asterisk_m_max;                     /* Numéro du monostable maximum gérée par le thread ASTERISK */
+    gint start_archive;                                           /* TRUE si thread archive start at boot */
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"

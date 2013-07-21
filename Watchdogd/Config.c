@@ -110,19 +110,7 @@
        else
         { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
 
-/********************************************** Partie TELLSTICK ******************************************/
-       Config.tellstick_a_min    = g_key_file_get_integer ( gkf, "TELLSTICK", "min_a", NULL );
-       if (!Config.tellstick_a_min) Config.tellstick_a_min = DEFAUT_TELLSTICK_A_MIN;
-
-       Config.tellstick_a_max    = g_key_file_get_integer ( gkf, "TELLSTICK", "max_a", NULL );
-       if (!Config.tellstick_a_max) Config.tellstick_a_max = DEFAUT_TELLSTICK_A_MAX;
-
-/********************************************** Partie ASTERISK *******************************************/
-       Config.asterisk_m_min    = g_key_file_get_integer ( gkf, "ASTERISK", "min_m", NULL );
-       if (!Config.asterisk_m_min) Config.asterisk_m_min = DEFAUT_ASTERISK_M_MIN;
-
-       Config.asterisk_m_max    = g_key_file_get_integer ( gkf, "ASTERISK", "max_m", NULL );
-       if (!Config.asterisk_m_max) Config.asterisk_m_max = DEFAUT_ASTERISK_M_MAX;
+       Config.start_archive = g_key_file_get_boolean ( gkf, "GLOBAL", "start_archive", NULL );
 
 /********************************************* Partie LOG *************************************************/
        Config.log_level = LOG_NOTICE;
@@ -168,9 +156,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config tellstick A(min)     %d", Config.tellstick_a_min );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config tellstick A(max)     %d", Config.tellstick_a_max );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config asterisk M(min)      %d", Config.asterisk_m_min );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config asterisk M(max)      %d", Config.asterisk_m_max );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config start_archive        %d", Config.start_archive );
   }
 /*--------------------------------------------------------------------------------------------------------*/
