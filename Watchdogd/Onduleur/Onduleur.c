@@ -98,11 +98,11 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  static gboolean Recuperer_upsDB ( struct DB *db )
-  { gchar requete[256];
+  { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,host,ups,bit_comm,enable,ea_min,libelle,e_min,a_min,username,password "
-                " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
+                " FROM %s WHERE instance_id='%s' ORDER BY host,ups", Config.instance_id, NOM_TABLE_UPS );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
   }
@@ -188,9 +188,9 @@
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),
                    "INSERT INTO %s"
-                   "(host,ups,libelle,bit_comm,enable,ea_min,e_min,a_min,username,password) "
-                   "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
-                   NOM_TABLE_UPS, host, name, libelle, ups->bit_comm, ups->enable,
+                   "(instance_id,host,ups,libelle,bit_comm,enable,ea_min,e_min,a_min,username,password) "
+                   "VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
+                   NOM_TABLE_UPS, Config.instance_id, host, name, libelle, ups->bit_comm, ups->enable,
                    ups->ea_min, ups->e_min, ups->a_min, username, password
                  );
      }

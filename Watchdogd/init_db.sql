@@ -681,6 +681,7 @@ INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `typ
 
 CREATE TABLE `onduleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `instance_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `enable` tinyint(1) NOT NULL,
   `host` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `ups` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
