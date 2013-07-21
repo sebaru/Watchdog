@@ -151,6 +151,18 @@
      { SEA( Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5 ) );
        SEA_range( Cfg_teleinfo.min_ea + 6, 1);
      }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
+     { 
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "MODETAT", 7 ) )
+     { 
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 ) )
+     { 
+     }
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 ) )
+     { 
+     }
     else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
                    "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
   }
