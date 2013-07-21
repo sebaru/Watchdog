@@ -50,7 +50,8 @@
        return;
      }
     else if (Partage->com_arch.Thread_run == FALSE)
-     { if ( last_log + 60 < Partage->top )
+     { if (!Config.start_archive) return;                            /* Si administratively DOWN, on sort */
+       if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
           last_log = Partage->top;

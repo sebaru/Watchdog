@@ -57,110 +57,191 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int E( int num )
-  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( ((Partage->e[ num>>3 ]) & (1<<(num%8)) ? 1 : 0) );
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "E : num %d out of range", num );
+  { static gint last_log = 0;
+    if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( ((Partage->e[ num>>3 ]) & (1<<(num%8)) ? 1 : 0) );
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "E : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                */
 /**********************************************************************************************************/
  int EA_inrange( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                       */
 /**********************************************************************************************************/
  float EA_ech( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0.0);
   }
 /**********************************************************************************************************/
 /* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_inf( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_inf_egal( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech_sup : Teste si la valeur de l'EA est sup à une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_sup( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale à une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_sup_egal( float val, int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  float CI( int num )
-  { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
-    return(0.0);
+  { static gint last_log = 0;
+    if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }    return(0.0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int A( int num )
-  { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "A : num %d out of range", num );
+  { static gint last_log = 0;
+    if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "A : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'un bistable                                                                        */
 /**********************************************************************************************************/
  int B( int num )
-  { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "B : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "B : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'un monostable                                                                      */
 /**********************************************************************************************************/
  int M( int num )
-  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "M : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "M : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
  int T( int num )
-  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
-    else Info_new( Config.log, Config.log_dls, LOG_INFO, "TR : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "TR : num %d out of range", num );
+          last_log = Partage->top;
+        }
+     }
     return(0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
  char *Tdetail( int num )
-  { static char chaine[90];
-    snprintf( chaine, sizeof(chaine), "T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
-              Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
-              Partage->Tempo_R[num].date_on,
-             (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
-              Partage->Tempo_R[num].date_off,
-             (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0)
-            );
+  { static gint last_log = 0;
+    static char chaine[90];
+    if (num>=0 && num<NBR_TEMPO)
+     { snprintf( chaine, sizeof(chaine), "T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+                 Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
+                 Partage->Tempo_R[num].date_on,
+                (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
+                 Partage->Tempo_R[num].date_off,
+                (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0)
+               );
+     }
+    else
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Tdetail : num %d out of range", num );
+          last_log = Partage->top;
+        }
+       snprintf( chaine, sizeof(chaine), "%04d out of range", num );
+     }
     return( chaine );
   }
 
@@ -168,8 +249,12 @@
 /* Met à jour l'entrée num                                                                                */
 /**********************************************************************************************************/
  void SE( int num, int etat )
-  { if (num<0 || num>=NBR_ENTRE_TOR)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SE : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num<0 || num>=NBR_ENTRE_TOR)
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SE : num %d out of range", num );
+          last_log = Partage->top;
+        }
        return;
      }
 
@@ -185,8 +270,12 @@
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
-  { if (num<0 || num>=NBR_ENTRE_ANA)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num );
+  { static gint last_log = 0;
+    if (num<0 || num>=NBR_ENTRE_ANA)
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num );
+          last_log = Partage->top;
+        }
        return;
      }
     Partage->ea[num].inrange = range;
@@ -195,11 +284,15 @@
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /* Sortie : TRUE si les valeurs ont été archivées                                                         */
 /**********************************************************************************************************/
- gboolean SEA_real ( int num, float val_avant_ech, gboolean archive )
-  { gboolean need_arch;
+ void SEA ( int num, float val_avant_ech )
+  { static gint last_log = 0;
+    gboolean need_arch;
     if (num<0 || num>=NBR_ENTRE_ANA)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
-       return(FALSE);
+     { if ( last_log + 60 < Partage->top )
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
+          last_log = Partage->top;
+        }
+       return;
      }
 
     need_arch = FALSE;
@@ -255,15 +348,9 @@
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
 
-    if (archive && need_arch) { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech ); }/* Archivage si besoin */
-    return(need_arch);
-  }
-/**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
-/**********************************************************************************************************/
- void SEA( int num, float val_avant_ech )
-  { if (SEA_real(num, val_avant_ech, TRUE))
-     { Partage->ea[ num ].last_arch = Partage->top;/* Si archive, on communique le changement aux satellite ! */
+    if (need_arch)
+     { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech );            /* Archivage si besoin */
+       Partage->ea[ num ].last_arch = Partage->top;                    /* Communications aux satellites ! */
        pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
        Partage->com_msrv.liste_ea = g_slist_prepend( Partage->com_msrv.liste_ea,
                                                      GINT_TO_POINTER(num) );

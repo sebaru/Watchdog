@@ -104,7 +104,6 @@
  extern int A( int num );
  extern char *Tdetail( int num );
  extern void SE( int num, int etat );
- extern gboolean SEA_real ( int num, float val_avant_ech, gboolean archive ); /* Used in HTTP essentially */
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
