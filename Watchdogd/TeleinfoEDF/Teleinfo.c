@@ -154,7 +154,7 @@
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
      { 
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "MODETAT", 7 ) )
+    else if ( ! strncmp ( Cfg_teleinfo.buffer, "MOTDETAT", 8 ) )
      { 
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 ) )
