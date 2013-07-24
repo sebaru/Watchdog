@@ -267,7 +267,7 @@
              { struct CMD_TYPE_CAPTEUR *capteur;
                capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire effacer le texte numéro %d: %s", capteur->id, capteur->libelle );
+                         "Le client desire effacer le capteur numéro %d", capteur->id );
                Proto_effacer_capteur_atelier( client, capteur );
              }
             break;
