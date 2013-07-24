@@ -124,33 +124,19 @@
  static void Processer_trame( void )
   { 
     if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea, atof( Cfg_teleinfo.buffer + 5 ) );
-       SEA_range( Cfg_teleinfo.min_ea, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea, atof( Cfg_teleinfo.buffer + 5 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
-     { SEA( Cfg_teleinfo.min_ea + 1, atof( Cfg_teleinfo.buffer + 6 ) );
-       SEA_range( Cfg_teleinfo.min_ea + 1, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea + 1, atof( Cfg_teleinfo.buffer + 6 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 2, atof( Cfg_teleinfo.buffer + 5 ) );
-       SEA_range( Cfg_teleinfo.min_ea + 2, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea + 2, atof( Cfg_teleinfo.buffer + 5 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 3, atof( Cfg_teleinfo.buffer + 5 ) );
-       SEA_range( Cfg_teleinfo.min_ea + 3, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea + 3, atof( Cfg_teleinfo.buffer + 5 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
-     { SEA( Cfg_teleinfo.min_ea + 4, atof( Cfg_teleinfo.buffer + 6 ) );
-       SEA_range( Cfg_teleinfo.min_ea + 4, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea + 4, atof( Cfg_teleinfo.buffer + 6 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 5, atof( Cfg_teleinfo.buffer + 5 ) );
-       SEA_range( Cfg_teleinfo.min_ea + 5, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea + 5, atof( Cfg_teleinfo.buffer + 5 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5 ) );
-       SEA_range( Cfg_teleinfo.min_ea + 6, 1);
-     }
+     { SEA( Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5 ) ); }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
      { 
      }

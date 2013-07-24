@@ -868,7 +868,6 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
                              SEA( cpt_e, reponse );
-                             SEA_range( cpt_e, 1 );
                            }
                           else SEA_range( cpt_e, 0 );
                           break;
@@ -878,12 +877,10 @@
                              reponse |= module->response.data[ 2*cpt + 2 ];
                              if (reponse < -2000.0 || reponse >= 8500.0) { SEA_range( cpt_e, 0 ); }
                              else { SEA( cpt_e, reponse );
-                                    SEA_range( cpt_e, 1 );
                                   }
                            }
                           break;
                      default : SEA_range( cpt_e, 0 );
-                               SEA( cpt_e, 0 );
                    }
                   cpt_e++;
                 }
