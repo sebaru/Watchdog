@@ -120,6 +120,11 @@
                 "Satellite_Gerer_entreeANA: DROP EANA %d (length = %d > 150)", num_ea, taille);
        return;
      }
+    else if (Cfg_satellite.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Satellite_Gerer_entreeANA: Thread is down. Dropping num_ea = %d", num_ea );
+       return;
+     }
 
     pthread_mutex_lock ( &Cfg_satellite.lib->synchro );                               /* Ajout a la liste */
     Cfg_satellite.Liste_entreeANA = g_slist_append ( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
@@ -224,6 +229,7 @@
 
        xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", num_ea );
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"in_range", "%d", Partage->ea[num_ea].inrange );
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"val_avant_ech", "%f", Partage->ea[num_ea].val_avant_ech );
        xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
      }

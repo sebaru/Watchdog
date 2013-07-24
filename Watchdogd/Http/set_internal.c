@@ -74,17 +74,20 @@
                     (value ? value : (xmlChar *)"None")
                   );
           if ( xmlStrEqual ( name, (xmlChar *)"EntreeANA" ) )    /* Avons-nous une entrée ana à traiter ? */
-           { xmlChar *num, *val_avant_ech;
+           { xmlChar *num, *val_avant_ech, *in_range;
              num           = xmlTextReaderGetAttribute (reader, (xmlChar *)"num" );
+             in_range      = xmlTextReaderGetAttribute (reader, (xmlChar *)"in_range" );
              val_avant_ech = xmlTextReaderGetAttribute (reader, (xmlChar *)"val_avant_ech" );
-             if (num && val_avant_ech)
+             if (num && val_avant_ech && in_range)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                          "Http_Traiter_XML_set_internal: setting EA%03d = %08.2f",
                           atoi( (char *)num ), atof( (char *)val_avant_ech )
                         );
                 SEA(atoi( (char *)num ), atof( (char *)val_avant_ech ));
+                SEA_range( atoi( (char *)num ), atoi( (char *)in_range ) );
               }
              if(num)           free(num);
+             if(in_range)      free(in_range);
              if(val_avant_ech) free(val_avant_ech);
            }
         }
