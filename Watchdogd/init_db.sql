@@ -832,20 +832,6 @@ CREATE TABLE IF NOT EXISTS `syns_capteurs` (
 
 -- --------------------------------------------------------
 
---
--- Structure de la table `from_asterisk`
---
-
-CREATE TABLE IF NOT EXISTS `from_asterisk` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `calleridname` text CHARACTER SET utf8 NOT NULL,
-  `calleridnum` text CHARACTER SET utf8 NOT NULL,
-  `bit` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
 
 --
 -- Structure de la table `syns_comments`

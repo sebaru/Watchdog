@@ -99,7 +99,6 @@ Watchdogd/Satellite/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
 Watchdogd/Lirc/Makefile \
-Watchdogd/Asterisk/Makefile \
 Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
