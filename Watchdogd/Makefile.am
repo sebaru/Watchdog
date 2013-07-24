@@ -21,7 +21,6 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Archive/libarchive.la \
-		    Asterisk/libasterisk.la \
 		    $(top_srcdir)/Commun/libwatchdog.la
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
