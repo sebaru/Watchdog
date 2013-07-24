@@ -103,7 +103,6 @@
     pthread_mutex_t synchro_Liste_abonne_msg;                         /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
 
-    gboolean reset_motion_detect;
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
   };
 

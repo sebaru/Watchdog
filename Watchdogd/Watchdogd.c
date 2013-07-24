@@ -299,11 +299,6 @@
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
-       if (Partage->com_msrv.reset_motion_detect)
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Reset_motion_detect" );
-          Demarrer_motion_detect();
-          Partage->com_msrv.reset_motion_detect = FALSE;
-        }
        usleep(1000);
        sched_yield();
      }
@@ -510,8 +505,6 @@
           if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
 
-          if (!Demarrer_motion_detect())                              /* Démarrage Detection de mouvement */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb MOTION_DETECT" ); }
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
 

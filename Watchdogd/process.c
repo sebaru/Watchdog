@@ -44,8 +44,6 @@
  #include "Reseaux.h"
  #include "watchdogd.h"
 
- static gint      PID_motion   = 0;                                            /* Le PID de motion detect */
-
  extern gint Socket_ecoute;                                  /* Socket de connexion (d'écoute) du serveur */
  extern SSL_CTX *Ssl_ctx;                                          /* Contexte de cryptage des connexions */
 
@@ -241,140 +239,6 @@
               g_slist_length( Partage->com_msrv.Librairies ) );
   }
 /**********************************************************************************************************/
-/* Demarrer_config_file_motion                                                                            */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- static gboolean Creer_config_file_motion ( void )
-  { gchar chaine[80];
-    struct DB *db;
-    gint id;
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Creer_config_file_motion: Connexion DB failed" );
-       return(FALSE);
-     }                                                                                  /* Si pas d'accès */
-
-    if ( !Recuperer_cameraDB( Config.log, db ) )                      /* Préparation du chargement camera */
-     { Libere_DB_SQL( &db );
-       return(FALSE);
-     }                                                                         /* Si pas d'enregistrement */
-
-    unlink("motion.conf");                                      /* Création des fichiers de configuration */
-    id = open ( "motion.conf", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (id<0) { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                          "Creer_config_file_motion: creation motion.conf pid file failed %d", id );
-                return(FALSE);
-              }
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Creer_config_file_motion: creation motion.conf %d", id );
-#ifdef bouh
-    g_snprintf(chaine, sizeof(chaine), "control_port 8080\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "control_localhost off\n");
-    write(id, chaine, strlen(chaine));
-#endif
-    g_snprintf(chaine, sizeof(chaine), "process_id_file %s/Camera/motion.pid\n", Config.home);
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "daemon on\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "framerate 25\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "netcam_http 1.1\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "despeckle EedDl\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "output_normal off\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "ffmpeg_cap_new on\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "ffmpeg_bps 500000\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "ffmpeg_video_codec mpeg4\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "text_right %%Y-%%m-%%d\\n%%T-%%q\n");
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "target_dir %s/Camera\n", Config.home);
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "mysql_db %s\n", Config.db_database);
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "mysql_host %s\n", Config.db_host);
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "mysql_user %s\n", Config.db_username);
-    write(id, chaine, strlen(chaine));
-    g_snprintf(chaine, sizeof(chaine), "mysql_password %s\n", Config.db_password);
-    write(id, chaine, strlen(chaine));
-
-    for ( ; ; )
-     { struct CMD_TYPE_CAMERA *camera;
-       gchar nom_fichier[80];
-       gint id_camera;
-       camera = Recuperer_cameraDB_suite( Config.log, db );
-       if (!camera)
-        { Libere_DB_SQL( &db );
-          break;
-        }
-       g_snprintf(nom_fichier, sizeof(nom_fichier), "Camera/camera%04d.conf", camera->id);
-
-       g_snprintf(chaine, sizeof(chaine), "thread %s/Camera/%s\n", Config.home, nom_fichier);
-       write(id, chaine, strlen(chaine));
-       
-       unlink(nom_fichier);
-       id_camera = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-       if (id<0) { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                           "Creer_config_file_motion: creation camera.conf failed %d", id );
-                   g_free(camera);
-                   close(id);
-                   return(FALSE);
-                 }
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Creer_config_file_motion: creation thread camera", camera->num );
-       g_snprintf(chaine, sizeof(chaine), "netcam_url %s\n", camera->location);
-       write(id_camera, chaine, strlen(chaine));
-       g_snprintf(chaine, sizeof(chaine), "sql_query insert into cameras_motion (id) values (%d)\n",
-                  camera->id);
-       write(id_camera, chaine, strlen(chaine));
-       g_snprintf(chaine, sizeof(chaine), "text_left CAM%04d %s\n", camera->num, camera->objet);
-       write(id_camera, chaine, strlen(chaine));
-       g_snprintf(chaine, sizeof(chaine), "movie_filename CAM%04d-%%Y%%m%%d%%H%%M%%S\n", camera->num);
-       write(id_camera, chaine, strlen(chaine));
-
-       close(id_camera);
-       g_free(camera);
-     }
-    close(id);
-    return(TRUE);          
-  }
-/**********************************************************************************************************/
-/* Demarrer_onduleur: Thread un process ONDULEUR                                                          */
-/* Entrée: rien                                                                                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Demarrer_motion_detect ( void )
-  { gchar chaine[80];
-    gint id;
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Demarrer_motion_detect: Demande de demarrage %d", getpid() );
-
-    if (!Creer_config_file_motion()) return(FALSE);
-
-    g_snprintf(chaine, sizeof(chaine), "%s/Camera/motion.pid", Config.home);
-    id = open ( chaine, O_RDONLY, 0 );
-    if (id<0) { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Demarrer_motion_detect: ouverture pid file failed %d", id );
-                return(FALSE);
-              }
-
-    if (read ( id, chaine, sizeof(chaine) )<0)
-              { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Demarrer_motion_detect: erreur lecture pid file %d", id );
-                close(id);
-                return(FALSE);
-              }
-    close(id);
-    PID_motion = atoi (chaine);
-    kill( PID_motion, SIGHUP );                                                   /* Envoie reload conf a motion */
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-           "Demarrer_motion_detect: process motion seems to be running %d", PID_motion );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Demarrer_dls: Thread un process DLS                                                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: false si probleme                                                                              */
@@ -455,8 +319,6 @@
     Partage->com_arch.Thread_run = FALSE;
     while ( Partage->com_arch.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: ok, ARCH is down" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: keep MOTION (%d) running", PID_motion );
 
     if (flag)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ADMIN (%p) to finish", Partage->com_admin.TID );
