@@ -822,7 +822,6 @@ CREATE TABLE IF NOT EXISTS `syns_capteurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL DEFAULT '0',

@@ -108,7 +108,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle"
-                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num, AND syn_id=%d",
+                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND syn_id=%d",
                 NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
                 NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
                 NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,                                               /* From */
@@ -169,7 +169,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle"
-                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num, AND id=%d",
+                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND id=%d",
                 NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
                 NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
                 NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,                                               /* From */
