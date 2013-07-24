@@ -200,6 +200,7 @@
        return;
      }
 
+    Partage->ea[num].inrange = TRUE;
     if (Partage->ea[ num ].val_avant_ech != val_avant_ech)
      { Partage->ea[ num ].val_avant_ech = val_avant_ech;        /* Archive au mieux toutes les 5 secondes */
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
