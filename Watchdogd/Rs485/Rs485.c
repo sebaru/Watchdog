@@ -454,7 +454,7 @@
     fd = open( Cfg_rs485.port, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
-               "Init_rs485: Impossible d'ouvrir le port %s, retour=%d", Cfg_rs485.port, fd );
+               "Init_rs485: Impossible d'ouvrir le port %s, retour=%d, %s", Cfg_rs485.port, fd, strerror(errno) );
      }
     else
      { memset(&oldtio, 0, sizeof(oldtio) );
