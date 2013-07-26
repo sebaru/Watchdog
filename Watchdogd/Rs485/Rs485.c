@@ -626,8 +626,8 @@
               { Cfg_rs485.fd = Init_rs485();
                 if (Cfg_rs485.fd == -1)
                  { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_CRIT,
-                            "Run_thread: Start Acces RS485 failed, stopping thread.");
-                      lib->Thread_run = FALSE;
+                            "Run_thread: Start Acces RS485 failed, sleeping 10s.");
+                   sleep(10);
                    continue;
                  }
               }
@@ -658,7 +658,7 @@
                 Fermer_rs485();                                                  /* Extinction de la comm */
                 nbr_oct_lu = 0;                                         /* RAZ des variables de reception */
                 attente_reponse = FALSE;
-                sleep(2);                                          /* Attente de 5 secondes avant relance */
+                sleep(5);                                          /* Attente de 5 secondes avant relance */
                 liste = NULL;          /* Pour sortir de la boucle (amélioration reactivité admin command */
                 continue;
               }
