@@ -313,22 +313,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static void Decharger_tous_rs485 ( void  )
-  { struct MODULE_RS485 *module;
-
-    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
-    while ( Cfg_rs485.Modules_RS485 )
-     { module = (struct MODULE_RS485 *)Cfg_rs485.Modules_RS485->data;
-       Cfg_rs485.Modules_RS485 = g_slist_remove ( Cfg_rs485.Modules_RS485, module );
-       g_free(module);
-     }
-    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
-  }
-/**********************************************************************************************************/
 /* Deconnecter_rs485: Deconnecte un module RS485 de la liste des modules interrogés                       */
 /* Entrée: le module                                                                                      */
 /* Sortie: void                                                                                           */
@@ -342,6 +326,23 @@
     for( cpt = 0; cpt<nbr_ea; cpt++)
      { SEA_range( module->rs485.ea_min + cpt, 0 ); }
     SB(module->rs485.bit_comm, 0);
+  }
+/**********************************************************************************************************/
+/* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static void Decharger_tous_rs485 ( void  )
+  { struct MODULE_RS485 *module;
+
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
+    while ( Cfg_rs485.Modules_RS485 )
+     { module = (struct MODULE_RS485 *)Cfg_rs485.Modules_RS485->data;
+       Cfg_rs485.Modules_RS485 = g_slist_remove ( Cfg_rs485.Modules_RS485, module );
+       Deconnecter_rs485 ( module );
+       g_free(module);
+     }
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Calcul_crc16: renvoie le CRC16 de la trame en parametre                                                */
