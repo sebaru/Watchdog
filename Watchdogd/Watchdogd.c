@@ -56,6 +56,7 @@
   { int fd;
     unlink ( FICHIER_EXPORT );
     Partage->taille_partage = sizeof(struct PARTAGE);
+    g_snprintf( Partage->version, sizeof(Partage->version), "%s", VERSION );
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (fd>0) { if ( write (fd, Partage, sizeof(struct PARTAGE)) != sizeof(struct PARTAGE) )
                  { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -99,6 +100,10 @@
           if (Partage->taille_partage != sizeof(struct PARTAGE) )
            { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                       "Importer : Wrong size on %s", FICHIER_EXPORT );
+           }
+          else if ( strncmp (Partage->version, VERSION, sizeof(Partage->version)) )
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                      "Importer : Wrong version number on %s", FICHIER_EXPORT );
            }
           else
            { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK, import OK" ); }
