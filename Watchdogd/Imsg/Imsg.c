@@ -637,10 +637,9 @@
      }
 
     Cfg_imsg.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
-    Cfg_imsg.date_retente = 0;
+    Cfg_imsg.date_retente = Partage->top + 100;                      /* On se connectera dans 10 secondes */
     MainLoop = g_main_context_new();
-                                                                 /* Preparation de la connexion au server */
-    if ( Imsg_Ouvrir_connexion() == FALSE ) { Cfg_imsg.lib->Thread_run = FALSE; }      /* Arret du thread */
+
 
     Abonner_distribution_message ( Imsg_Gerer_message );        /* Abonnement à la diffusion des messages */
 
