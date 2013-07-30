@@ -126,7 +126,6 @@
  gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[128];
     gint fd_cible, pid;
-    extern char **environ;
 
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
@@ -139,16 +138,16 @@
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Envoi du mp3 %s", nom_fichier );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: MPG123 fork failed pid=%d", pid ); }
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: CVLC fork failed pid=%d", pid ); }
     else if (!pid)
-     { execle( "/usr/bin/mpg123", "mpg123", "-q", nom_fichier, NULL, environ );
+     { execlp( "cvlc", "cvlc", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: Lancement MPG123 failed (%s)",
                  strerror( errno ) );
        _exit(0);
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for MPG123 to finish pid=%d", pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for CVLC to finish pid=%d", pid );
     wait4(pid, NULL, 0, NULL );
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: MPG123 finished pid=%d", pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: CVLC finished pid=%d", pid );
 
     return(TRUE);
   }
