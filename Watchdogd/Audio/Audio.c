@@ -138,11 +138,13 @@
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Envoi du mp3 %s", nom_fichier );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: CVLC fork failed pid=%d", pid ); }
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                 "Jouer_mp3: CVLC fork failed pid=%d (%s)", pid, strerror(errno) );
+     }
     else if (!pid)
      { execlp( "cvlc", "cvlc", nom_fichier, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_mp3: Lancement MPG123 failed (%s)",
-                 strerror( errno ) );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                "Jouer_mp3: Lancement MPG123 failed (%s)", strerror( errno ) );
        _exit(0);
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for CVLC to finish pid=%d", pid );
