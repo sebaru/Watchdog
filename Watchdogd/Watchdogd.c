@@ -480,7 +480,7 @@
        memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
        memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
        memset( &Partage->com_db,       0, sizeof(Partage->com_db) );
-
+       
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
