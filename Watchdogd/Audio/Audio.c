@@ -139,10 +139,10 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                 "Jouer_mp3: CVLC fork failed pid=%d (%s)", pid, strerror(errno) );
+                 "Jouer_mp3: MPG123 fork failed pid=%d (%s)", pid, strerror(errno) );
      }
     else if (!pid)
-     { execlp( "cvlc", "cvlc", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-v", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                 "Jouer_mp3: Lancement MPG123 failed (%s)", strerror( errno ) );
        _exit(0);
