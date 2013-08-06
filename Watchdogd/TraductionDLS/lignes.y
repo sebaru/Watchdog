@@ -82,7 +82,7 @@ int erreur;                                                             /* Compt
 %type  <chaine>      unite facteur expr
 %type  <action>      action une_action
 %type  <comparateur> comparateur
-%type  <chaine>      calcul_expr
+%type  <chaine>      calcul_expr calcul_expr2 calcul_expr3
 
 %%
 fichier: ligne_source_dls;
@@ -180,15 +180,40 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($3);
                 }}
                 ;
-
-calcul_expr:    calcul_expr T_FOIS calcul_expr
+/******************************************* Partie CALCUL ************************************************/
+calcul_expr:    calcul_expr ET calcul_expr2
                 {{ int taille;
-                   taille = strlen($1) + strlen($3) + 3;
+                   taille = strlen($1) + strlen($3) + 4;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "(%s+%s)", $1, $3 );
+                   g_free($1); g_free($3);
+                }}
+                | calcul_expr MOINS calcul_expr2
+                {{ int taille;
+                   taille = strlen($1) + strlen($3) + 4;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "(%s-%s)", $1, $3 );
+                   g_free($1); g_free($3);
+                }}
+                | calcul_expr2
+                ;
+calcul_expr2:   calcul_expr2 T_FOIS calcul_expr3
+                {{ int taille;
+                   taille = strlen($1) + strlen($3) + 4;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "(%s*%s)", $1, $3 );
                    g_free($1); g_free($3);
                 }}
-                | VALF
+                | calcul_expr2 BARRE calcul_expr3
+                {{ int taille;
+                   taille = strlen($1) + strlen($3) + 4;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "(%s/%s)", $1, $3 );
+                   g_free($1); g_free($3);
+                }}
+                | calcul_expr3
+                ;
+calcul_expr3:   VALF
                 {{ int taille;
                    taille = 15;
                    $$ = New_chaine( taille );
@@ -201,8 +226,7 @@ calcul_expr:    calcul_expr T_FOIS calcul_expr
                    g_snprintf( $$, taille, "EA_ech(%d)", $2 );
                 }}
                 ;
-
-
+/******************************************* Partie LOGIQUE ***********************************************/
 expr:           expr OU facteur
                 {{ int taille;
                    taille = strlen($1)+strlen($3)+7;
