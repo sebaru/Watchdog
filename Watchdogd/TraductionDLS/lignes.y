@@ -182,7 +182,11 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                 ;
 
 calcul_expr:    calcul_expr T_FOIS calcul_expr
-                {{
+                {{ int taille;
+                   taille = strlen($1) + strlen($3) + 3;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "(%s*%s)", $1, $3 );
+                   g_free($1); g_free($3);
                 }}
                 | VALF
                 {{ int taille;
@@ -190,7 +194,15 @@ calcul_expr:    calcul_expr T_FOIS calcul_expr
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%f", $1 );
                 }}
+                | EANA ENTIER
+                {{ int taille;
+                   taille = 15;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "EA_ech(%d)", $2 );
+                }}
                 ;
+
+
 expr:           expr OU facteur
                 {{ int taille;
                    taille = strlen($1)+strlen($3)+7;
