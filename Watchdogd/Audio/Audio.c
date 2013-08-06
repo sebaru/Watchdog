@@ -142,14 +142,14 @@
                  "Jouer_mp3: MPG123 fork failed pid=%d (%s)", pid, strerror(errno) );
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-v", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-v", "-o", "alsa", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                 "Jouer_mp3: Lancement MPG123 failed (%s)", strerror( errno ) );
        _exit(0);
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for CVLC to finish pid=%d", pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for MPG123 to finish pid=%d", pid );
     wait4(pid, NULL, 0, NULL );
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: CVLC finished pid=%d", pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: MPG123 finished pid=%d", pid );
 
     return(TRUE);
   }

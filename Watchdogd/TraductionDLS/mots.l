@@ -95,6 +95,7 @@ blanc         [\t ]+
 "."                        { Dls_lval.val = ET;          return ET;          }
 "+"                        { Dls_lval.val = OU;          return OU;          }
 "/"                        { Dls_lval.val = BARRE;       return BARRE;       }
+"*"                        { Dls_lval.val = T_FOIS;      return T_FOIS;      }
 "-"                        { Dls_lval.val = MOINS;       return MOINS;       }
 ";"                        { Dls_lval.val = PVIRGULE;    return PVIRGULE;    }
 ","                        { Dls_lval.val = VIRGULE;     return VIRGULE;     }

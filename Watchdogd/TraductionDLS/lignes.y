@@ -56,7 +56,7 @@ int erreur;                                                             /* Compt
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE
+%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE T_FOIS
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
@@ -82,6 +82,7 @@ int erreur;                                                             /* Compt
 %type  <chaine>      unite facteur expr
 %type  <action>      action une_action
 %type  <comparateur> comparateur
+%type  <chaine>      calcul_expr
 
 %%
 fichier: ligne_source_dls;
@@ -168,6 +169,26 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    if ($4->sinon) g_free($4->sinon); 
                    g_free($4->alors); g_free($4);
                    g_free($2);
+                }}
+                | MOINS MOINS calcul_expr MOINS DONNE EANA ENTIER PVIRGULE
+                {{ int taille;
+                   char *instr;
+                   taille = strlen($3)+20;
+                   instr = New_chaine( taille );
+                   g_snprintf( instr, taille, "SEA(%d,%s);\n", $6, $3 );
+                   Emettre( instr ); g_free(instr);
+                   g_free($3);
+                }}
+                ;
+
+calcul_expr:    calcul_expr T_FOIS calcul_expr
+                {{
+                }}
+                | VALF
+                {{ int taille;
+                   taille = 15;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "%f", $1 );
                 }}
                 ;
 expr:           expr OU facteur
