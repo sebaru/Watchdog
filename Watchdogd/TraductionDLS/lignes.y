@@ -181,7 +181,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                 }}
                 ;
 /******************************************* Partie CALCUL ************************************************/
-calcul_expr:    calcul_expr ET calcul_expr2
+calcul_expr:    calcul_expr OU calcul_expr2
                 {{ int taille;
                    taille = strlen($1) + strlen($3) + 4;
                    $$ = New_chaine( taille );
@@ -219,12 +219,20 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%f", $1 );
                 }}
+                | ENTIER
+                {{ int taille;
+                   taille = 15;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "%d", $1 );
+                }}
                 | EANA ENTIER
                 {{ int taille;
                    taille = 15;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "EA_ech(%d)", $2 );
                 }}
+                | POUV calcul_expr PFERM
+                {{ $$=$2; }}
                 ;
 /******************************************* Partie LOGIQUE ***********************************************/
 expr:           expr OU facteur
