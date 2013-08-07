@@ -115,7 +115,7 @@
        _exit(0);
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_wav: waiting for APLAY to finish pid=%d", pid );
-    wait4(pid, NULL, 0, NULL );
+    waitpid(pid, NULL, 0 );
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_wav: APLAY finished pid=%d", pid );
   }
 /**********************************************************************************************************/
@@ -148,7 +148,7 @@
        _exit(0);
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for MPG123 to finish pid=%d", pid );
-    wait4(pid, NULL, 0, NULL );
+    waitpid(pid, NULL, 0 );
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: MPG123 finished pid=%d", pid );
 
     return(TRUE);
@@ -190,7 +190,7 @@
        _exit(0);
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "waiting for espeak to finish pid=%d", pid );
-    wait4(pid, NULL, 0, NULL );
+    waitpid(pid, NULL, 0 );
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "espeak finished pid=%d", pid );
 
 /****************************************** Création du AU ************************************************/
@@ -212,7 +212,7 @@
        _exit(0);
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "waiting for mbrola to finish pid", pid );
-    wait4(pid, NULL, 0, NULL );
+    waitpid(pid, NULL, 0 );
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "mbrola finished pid", pid );
 /****************************************** Lancement de l'audio ******************************************/
     Jouer_wav(cible);

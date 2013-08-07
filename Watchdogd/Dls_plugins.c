@@ -302,7 +302,7 @@
           g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                    "THRCompilFils: Proto_compiler_source_dls: GCC start (pid %d) source %s cible %s!",
-                    pidgcc, source, cible );
+                    getpid(), source, cible );
           execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
                   "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
@@ -311,7 +311,7 @@
 
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Proto_compiler_source_dls: Waiting for gcc to finish pid %d", pidgcc );
-       wait4(pidgcc, NULL, 0, NULL );
+       waitpid( pidgcc, NULL, 0 );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Proto_compiler_source_dls: gcc is down, OK %d", pidgcc );
 
