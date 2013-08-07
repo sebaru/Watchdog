@@ -36,6 +36,8 @@
  extern int EA_ech_sup( float val, int num );
  extern int EA_ech_inf_egal( float val, int num );
  extern int EA_ech_sup_egal( float val, int num );
+ extern void SEA( int num, float val_avant_ech );
+ extern float EA_ech( int num );
  extern float CI( int num );
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
  extern void SB( int num, int etat );
