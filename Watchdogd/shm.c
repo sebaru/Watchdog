@@ -40,7 +40,7 @@
     gint taille;
 
     taille = sizeof( struct PARTAGE );                                      /* Le jeton, les comms, les I */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Shm_init: size required", taille );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Shm_init: size required = %d", taille );
 
     partage = g_try_malloc0( taille );
     return(partage);

@@ -60,13 +60,17 @@
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (fd<=0)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Exporter: Open Error on %s. Could not export to %s",
+                "Exporter: Open Error on %s. Could not export (%s)",
                  FICHIER_EXPORT, strerror(errno) );
        return;
      }
 
     if ( write (fd, Partage->version, sizeof(Partage->version)) != sizeof(Partage->version) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Version Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Top Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
     if ( write (fd, Partage->m, sizeof(Partage->m)) != sizeof(Partage->m) )
@@ -120,12 +124,16 @@
 
     if ( strncmp (Partage->version, VERSION, sizeof(Partage->version)) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                      "Importer : Wrong version number on %s (Import Version %s but Watchdog v%s)",
-                        FICHIER_EXPORT, Partage->version, VERSION );
+                "Importer : Wrong version number on %s (Import Version %s but Watchdog v%s)",
+                 FICHIER_EXPORT, Partage->version, VERSION );
        close(fd);
        return(FALSE);
      }
 
+    if ( read (fd, Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Top Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
     if ( read (fd, Partage->m, sizeof(Partage->m)) != sizeof(Partage->m) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Monostable Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );

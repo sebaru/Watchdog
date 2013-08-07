@@ -169,12 +169,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle"
-                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND id=%d",
+                " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND %s.id=%d",
                 NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
                 NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
                 NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,                                               /* From */
                 NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,
-                id );
+                NOM_TABLE_CAPTEUR, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
