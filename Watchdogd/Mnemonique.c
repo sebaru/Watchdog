@@ -372,7 +372,7 @@
      }
 
     mnemo = Recuperer_mnemoDB_suite ( &db );
-    Libere_DB_SQL( &db );
+    if (mnemo) Libere_DB_SQL( &db );
     return( mnemo );
   }
 /**********************************************************************************************************/

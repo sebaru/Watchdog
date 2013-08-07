@@ -138,6 +138,7 @@
      { Info_new( Config.log, Config.log_db, LOG_CRIT,
                 "Libere_DB_SQL: DB Free Request not in list ! ID=%05d, request=%s",
                  db->id, db->requete );
+       return;
      }
 
     if (db->free==FALSE)
