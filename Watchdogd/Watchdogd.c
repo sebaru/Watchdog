@@ -69,7 +69,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Version Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
-    if ( write (fd, (char *)&Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
+    if ( write (fd, &Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Top Export to %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
@@ -130,7 +130,7 @@
        return(FALSE);
      }
 
-    if ( read (fd, (char *)&Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
+    if ( read (fd, &Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Top Import from %s failed (%s)",
                  FICHIER_EXPORT, strerror(errno) );
      }
