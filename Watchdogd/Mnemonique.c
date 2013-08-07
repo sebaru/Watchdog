@@ -342,7 +342,8 @@
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere )
-  { gchar requete[512];
+  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+    gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -370,7 +371,9 @@
        return(NULL);
      }
 
-    return( Recuperer_mnemoDB_suite ( &db ) );
+    mnemo = Recuperer_mnemoDB_suite ( &db );
+    Libere_DB_SQL( &db );
+    return( mnemo );
   }
 /**********************************************************************************************************/
 /* Modifier_mnemoDB: Modification d'un mnemo Watchdog                                                     */
