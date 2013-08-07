@@ -58,63 +58,101 @@
     Partage->taille_partage = sizeof(struct PARTAGE);
     g_snprintf( Partage->version, sizeof(Partage->version), "%s", VERSION );
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (fd>0) { if ( write (fd, Partage, sizeof(struct PARTAGE)) != sizeof(struct PARTAGE) )
-                 { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                            "Exporter: Data Export to %s failed (%s)",
-                             FICHIER_EXPORT, strerror(errno) );
-                 }
-                else 
-                 { Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                            "Exporter: Data Export to %s successfull",
-                             FICHIER_EXPORT );
-                 }
-              }
-    else      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                         "Exporter: Open Error on %s. Could not export to %s",
-                          FICHIER_EXPORT, strerror(errno) );
-              }
+    if (fd<=0)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "Exporter: Open Error on %s. Could not export to %s",
+                 FICHIER_EXPORT, strerror(errno) );
+       return;
+     }
+
+    if ( write (fd, Partage->version, sizeof(Partage->version)) != sizeof(Partage->version) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Version Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->m, sizeof(Partage->m)) != sizeof(Partage->m) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Monostable Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->b, sizeof(Partage->b)) != sizeof(Partage->b) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Bistable Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->g, sizeof(Partage->g)) != sizeof(Partage->g) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Messages Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Icones Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->e, sizeof(Partage->e)) != sizeof(Partage->e) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Input Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( write (fd, Partage->a, sizeof(Partage->a)) != sizeof(Partage->a) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Exporter: Output Export to %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
     close (fd);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Export successfull" );
   }
 /**********************************************************************************************************/
 /* Importe : Tente d'importer les données de base Watchdog juste apres le reload                         */
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static gint Importer ( void )
-  { int fd, retour;
+ static gboolean Importer ( void )
+  { int fd;
 
     fd = open( FICHIER_EXPORT, O_RDONLY );                                        /* Ouverture du fichier */
     if ( fd <= 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Importer : Open Errort %s (%s).", FICHIER_EXPORT, strerror(errno) );
-     }
-    else
-     { retour = read (fd, Partage, sizeof(struct PARTAGE) );
-       if (retour!=sizeof(struct PARTAGE))
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                   "Importer : Read Error on %s (%s)", FICHIER_EXPORT, strerror(errno) );
-          close(fd);
-        }
-       else
-        { close(fd);
-          if (Partage->taille_partage != sizeof(struct PARTAGE) )
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                      "Importer : Wrong size on %s", FICHIER_EXPORT );
-           }
-          else if ( strncmp (Partage->version, VERSION, sizeof(Partage->version)) )
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                      "Importer : Wrong version number on %s", FICHIER_EXPORT );
-           }
-          else
-           { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK, import OK" ); }
-             return(1);
-           }
+       return(FALSE);
      }
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import: Import error : zeroing working memory..." );
-    memset( Partage, 0, sizeof(struct PARTAGE) );
+    if ( read (fd, Partage->version, sizeof(Partage->version)) != sizeof(Partage->version) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Version Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+       close(fd);
+       return(FALSE);
+     }
 
-    return(0);
+    if ( strncmp (Partage->version, VERSION, sizeof(Partage->version)) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                      "Importer : Wrong version number on %s (Import Version %s but Watchdog v%s)",
+                        FICHIER_EXPORT, Partage->version, VERSION );
+       close(fd);
+       return(FALSE);
+     }
+
+    if ( read (fd, Partage->m, sizeof(Partage->m)) != sizeof(Partage->m) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Monostable Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( read (fd, Partage->b, sizeof(Partage->b)) != sizeof(Partage->b) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Bistable Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( read (fd, Partage->g, sizeof(Partage->g)) != sizeof(Partage->g) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Messages Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( read (fd, Partage->i, sizeof(Partage->i)) != sizeof(Partage->i) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Icones Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( read (fd, Partage->e, sizeof(Partage->e)) != sizeof(Partage->e) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Input Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    if ( read (fd, Partage->a, sizeof(Partage->a)) != sizeof(Partage->a) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Importer: Output Import from %s failed (%s)",
+                 FICHIER_EXPORT, strerror(errno) );
+     }
+    close(fd);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK, import OK" );
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_config_bit_interne: Chargement des configs bit interne depius la base de données               */
@@ -475,12 +513,6 @@
        memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
        import = Importer();                         /* Tente d'importer les données juste après un reload */
 
-       memset( &Partage->com_msrv,     0, sizeof(Partage->com_msrv) );
-       memset( &Partage->com_dls,      0, sizeof(Partage->com_dls) );
-       memset( &Partage->com_arch,     0, sizeof(Partage->com_arch) );
-       memset( &Partage->com_admin,    0, sizeof(Partage->com_admin) );
-       memset( &Partage->com_db,       0, sizeof(Partage->com_db) );
-       
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );

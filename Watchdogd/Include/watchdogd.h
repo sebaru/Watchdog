@@ -43,7 +43,6 @@
  #include "Tempo_DB.h"
  #include "Scenario_DB.h"
  #include "Message_DB.h"
- #include "Asterisk_DB.h"
  #include "Camera_DB.h"
  #include "Dls.h"
  #include "Histo_DB.h"
@@ -130,8 +129,8 @@
   };
 
  struct PARTAGE                                                        /* Structure des données partagées */
-  { gint taille_partage;
-    gint shmid;
+  { gint  taille_partage;
+    gint  shmid;
     gchar version[16];
     guint top;                                                     /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                    /* Top de chien de garde des plugins DLS */
