@@ -175,7 +175,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    char *instr;
                    taille = strlen($3)+20;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "SEA(%d,%s);\n", $6, $3 );
+                   g_snprintf( instr, taille, "SEA(%d,%s);\n", $7, $3 );
                    Emettre( instr ); g_free(instr);
                    g_free($3);
                 }}
