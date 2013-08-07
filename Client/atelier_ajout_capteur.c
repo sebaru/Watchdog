@@ -40,7 +40,6 @@
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
  static GtkWidget *F_ajout_capteur = NULL;                         /* Fenetre graphique de choix de capteur */
- static GtkWidget *Entry_libelle;                                               /* Libelle proprement dit */
  static GtkWidget *Entry_bitctrl;                                               /* Libelle proprement dit */
  static GtkWidget *Spin_bitctrl;
  static GtkWidget *Combo_type;
@@ -112,8 +111,6 @@
     switch(reponse)
      { case GTK_RESPONSE_OK: if (!trame_capteur)                                        /* Ajout d'un capteur */
                               { gchar *type;
-                                g_snprintf( add_capteur.libelle, sizeof(add_capteur.libelle), "%s",
-                                            gtk_entry_get_text (GTK_ENTRY(Entry_libelle) ) );
                                 add_capteur.position_x = TAILLE_SYNOPTIQUE_X/2;
                                 add_capteur.position_y = TAILLE_SYNOPTIQUE_Y/2;                            
                                 add_capteur.syn_id  = infos->syn.id;
@@ -129,9 +126,7 @@
                                 return(TRUE);                             /* On laisse la fenetre ouverte */
                               }
                              else                                                          /* Mise a jour */
-                              { g_snprintf( trame_capteur->capteur->libelle, sizeof(trame_capteur->capteur->libelle),
-                                            "%s", gtk_entry_get_text (GTK_ENTRY(Entry_libelle) ) );
-                                type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
+                              { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
                                 trame_capteur->capteur->type = Type_bit_interne_int( type );
                                 g_free(type);
                                 trame_capteur->capteur->bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
@@ -172,15 +167,8 @@
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
 /************************************* Entrys de commande *************************************************/
-    label = gtk_label_new( _("Description") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 0, 1 );
-    Entry_libelle = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_libelle), NBR_CARAC_LIBELLE_MOTIF );
-    gtk_entry_select_region( GTK_ENTRY(Entry_libelle), 0, NBR_CARAC_LIBELLE_MOTIF );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_libelle, 1, 4, 0, 1 );
-
-    label = gtk_label_new( _("Type bit control") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 2, 1, 2 );
+    label = gtk_label_new( _("Type Control bit") );
+    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 2, 0, 1 );
     Combo_type = gtk_combo_box_new_text();
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_ENTREE_ANA) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_ENTREE) );
@@ -190,23 +178,23 @@
     gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 );
     g_signal_connect( G_OBJECT(Combo_type), "changed",
                       G_CALLBACK(Afficher_mnemo_capteur_ctrl), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 4, 0, 1 );
 
     label = gtk_label_new( _("Control bit") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 2, 1, 2 );
 
     adj = gtk_adjustment_new( 0, 0, NBR_BIT_DLS-1, 1, 100, 0 );
     Spin_bitctrl = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
     g_signal_connect( G_OBJECT(Spin_bitctrl), "changed",
                       G_CALLBACK(Afficher_mnemo_capteur_ctrl), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bitctrl, 1, 2, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bitctrl, 2, 4, 1, 2 );
 
     Entry_bitctrl = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_bitctrl), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 2, 4, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 0, 4, 2, 3 );
 
     if (trame_capteur)
-     { gtk_entry_set_text( GTK_ENTRY(Entry_libelle), trame_capteur->capteur->libelle );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_bitctrl), trame_capteur->capteur->libelle );
        switch(trame_capteur->capteur->type)
         { default:
           case MNEMO_ENTREE_ANA: gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 ); break;
