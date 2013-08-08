@@ -112,17 +112,11 @@
     struct DB *db;
     gint last_id;
 
-    db = Init_DB_SQL();       
-    if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
-                         "Ajouter_rfxcomDB: Erreur connexion Database" );
-               return(FALSE);
-             }
 
     libelle = Normaliser_chaine ( rfxcom->libelle );         /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                  "Ajouter_rfxcomDB: Normalisation libelle impossible" );
-       Libere_DB_SQL( &db );
        return(FALSE);
      }
 
@@ -134,6 +128,12 @@
                 libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
               );
     g_free(libelle);
+
+    db = Init_DB_SQL();       
+    if (!db) { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+                         "Ajouter_rfxcomDB: Erreur connexion Database" );
+               return(FALSE);
+             }
 
     retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     if (retour == FALSE)  { Libere_DB_SQL( &db );
@@ -431,7 +431,7 @@
              retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
              if (retour == -1)
               { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                         "Rfxcom_envoyer_sortie: Write Error for A(%03d)", num_a );
+                         "Rfxcom_envoyer_sortie: Write Error for A(%03d) : %s", num_a, strerror(errno) );
               }
            }
         }
