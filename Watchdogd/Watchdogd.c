@@ -35,6 +35,8 @@
  #include <sys/time.h>
  #include <sys/stat.h>
  #include <sys/file.h>
+ #include <sys/types.h>
+ #include <grp.h>
  #include <popt.h>
  #include <pthread.h>
  #include <locale.h>
@@ -436,6 +438,12 @@
        exit(EXIT_ERREUR);
      }
     else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
+
+    if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                          /* On drop les privilèges */
+     { printf("Error, cannot Initgroups for user '%s' (%s)\n",
+              Config.run_as, strerror(errno) );
+       exit(EXIT_ERREUR);
+     }
 
     if (setgid ( pwd->pw_gid )==-1)                                             /* On drop les privilèges */
      { printf("Error, cannot setGID for user '%s' (%s)\n",
