@@ -38,6 +38,7 @@
     gfloat val_en_cours1;                                 /* valeur en cours pour le calcul via les ratio */
     gfloat val_en_cours2;                     /* valeur en cours avant interprétation selon le type de CI */
     time_t last_update;                               /* date de derniere update de la valeur du compteur */
+    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
   };
 
 /*************************************** Définitions des prototypes ***************************************/

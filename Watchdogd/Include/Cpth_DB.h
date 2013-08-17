@@ -40,7 +40,8 @@
 
  struct CPT_HORAIRE
   { struct CPTH_DB cpthdb;
-    guint old_top;
+    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
+    guint old_top;                                                     /* Date de debut du comptage du CH */
     gboolean actif;
   };
 

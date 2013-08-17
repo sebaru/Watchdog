@@ -452,7 +452,8 @@
 /* Le compteur compte les MINUTES !!                                                                      */
 /**********************************************************************************************************/
  void SCH( int num, int etat )
-  { if (num<0 || num>=NBR_COMPTEUR_H)
+  { gboolean need_arch = FALSE;
+    if (num<0 || num>=NBR_COMPTEUR_H)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SCH : num %d out of range", num );
        return;
      }
@@ -468,18 +469,28 @@
           if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
            { Partage->ch[num].cpthdb.valeur ++;
              Partage->ch[num].old_top = new_top;
+             need_arch = TRUE;
            }
         }
      }
     else
      { Partage->ch[ num ].actif = FALSE; }
+
+    if ( (need_arch && Partage->ch[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top) ||
+        (!need_arch && Partage->ch[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+       )
+     { Ajouter_arch( MNEMO_CPT_IMP, num, (float)Partage->ch[num].cpthdb.valeur );
+       Partage->ch[ num ].last_arch = Partage->top;   
+     }
+
   }
 /**********************************************************************************************************/
 /* Met à jour le compteur impulsion                                                                       */
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
  void SCI( int num, int etat, int reset, int ratio )
-  { if (num<0 || num>=NBR_COMPTEUR_IMP)
+  { gboolean need_arch = FALSE;
+    if (num<0 || num>=NBR_COMPTEUR_IMP)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
        return;
      }
@@ -487,6 +498,7 @@
      { if (reset)                                                   /* Le compteur doit-il etre resetté ? */
         { Partage->ci[num].val_en_cours1 = 0.0;                /* Valeur transitoire pour gérer les ratio */
           Partage->ci[num].val_en_cours2 = 0.0;                /* Valeur transitoire pour gérer les ratio */
+          need_arch = TRUE;
         }
 
        if ( ! Partage->ci[ num ].actif )                                              /* Passage en actif */
@@ -495,6 +507,7 @@
           if (Partage->ci[num].val_en_cours1>=ratio)
            { Partage->ci[num].val_en_cours2++;
              Partage->ci[num].val_en_cours1=0.0;                          /* RAZ de la valeur de calcul 1 */
+             need_arch = TRUE;
            }
         }
      }
@@ -521,6 +534,13 @@
                                  Partage->ci[num].last_update = Partage->top;
                                }
                               break;
+     }
+
+    if ( (need_arch && Partage->ci[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top) ||
+        (!need_arch && Partage->ci[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+       )
+     { Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].cpt_impdb.valeur );
+       Partage->ci[ num ].last_arch = Partage->top;   
      }
   }
 /**********************************************************************************************************/
