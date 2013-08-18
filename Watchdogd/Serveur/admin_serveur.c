@@ -53,6 +53,7 @@
                           client->ssrv_id, client->ident.version,
                          (client->util ? client->util->nom : "unknown"), client->machine,
                           client->mode, client->defaut, ctime(&client->date_connexion) );
+          Admin_write ( connexion, chaine );
           liste = g_slist_next(liste);
         }
        pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
