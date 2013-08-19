@@ -71,8 +71,20 @@
        xmlBufferFree(buf);
        return(FALSE);
      }
+
+/*---------------------------------------------- Dumping status ------------------------------------------*/
+    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "Status");
+    if (retour < 0)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "Http_Traiter_request_getstatus : XML Failed to Start element status" );
+       xmlBufferFree(buf);
+       return(FALSE);
+     }
+
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping Status !!");
+
 /*---------------------------------------------- Dumping Identification ----------------------------------*/
-    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "identification");
+    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "Identification");
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getstatus : XML Failed to Start element ident" );
@@ -86,24 +98,21 @@
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Version",
                                        "%s", VERSION);
 
-    retour = xmlTextWriterEndElement(writer);                                               /* End status */
+    retour = xmlTextWriterEndElement(writer);                                                /* End ident */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getstatus : Failed to end element Status" );
        xmlBufferFree(buf);
        return(FALSE);
      }
-/*---------------------------------------------- Dumping status ------------------------------------------*/
-    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "status");
+/*---------------------------------------------- Dumping Running config ----------------------------------*/
+    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "Running_config");
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : XML Failed to Start element status" );
+                 "Http_Traiter_request_getstatus : XML Failed to Start element Running_config" );
        xmlBufferFree(buf);
        return(FALSE);
      }
-
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping Status !!");
-
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Bit/s",
                                        "%d", Partage->audit_bit_interne_per_sec_hold);
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Tour/s",
@@ -126,14 +135,22 @@
                                        "%d", num );
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping Status !!");
 
-    retour = xmlTextWriterEndElement(writer);                                               /* End status */
+    retour = xmlTextWriterEndElement(writer);                                       /* End running_config */
+    if (retour < 0)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "Http_Traiter_request_getstatus : Failed to end element running_config" );
+       xmlBufferFree(buf);
+       return(FALSE);
+     }
+/*--------------------------------------------------------------------------------------------------------*/
+    retour = xmlTextWriterEndElement(writer);                                               /* End Status */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getstatus : Failed to end element Status" );
        xmlBufferFree(buf);
        return(FALSE);
      }
-/*--------------------------------------------------------------------------------------------------------*/
+
     retour = xmlTextWriterEndDocument(writer);
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
