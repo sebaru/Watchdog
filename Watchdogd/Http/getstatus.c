@@ -113,25 +113,25 @@
        xmlBufferFree(buf);
        return(FALSE);
      }
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Bit par sec",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Bit_par_sec",
                                        "%d", Partage->audit_bit_interne_per_sec_hold);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Tour par sec",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Tour_par_sec",
                                        "%d", Partage->audit_tour_dls_per_sec_hold );
     pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
     num = g_slist_length( Partage->com_msrv.liste_i );                  /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Distribution des I",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"I_a_traiter",
                                        "%d", num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
     num = g_slist_length( Partage->com_msrv.liste_msg );                /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Distribution MSG",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"MSG_a_traiter",
                                        "%d", num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
     num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                    /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"MSG en repeat",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"MSG_en_repeat",
                                        "%d", num );
     retour = xmlTextWriterEndElement(writer);                                       /* End running_config */
     if (retour < 0)
