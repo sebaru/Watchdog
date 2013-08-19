@@ -369,7 +369,7 @@
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
   { gint help, log_level, max_client, fg, initrsa, single, compil;
     gchar *home, *file, *run_as;
-    struct passwd *pwd;
+    struct passwd *pwd, *old;
     struct poptOption Options[]= 
      { { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
@@ -439,22 +439,32 @@
      }
     else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
 
-    if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                          /* On drop les privilèges */
-     { printf("Error, cannot Initgroups for user '%s' (%s)\n",
-              Config.run_as, strerror(errno) );
+    old = getpwuid ( getuid() );
+    if (!old)
+     { printf("Error, user '%d' not found in /etc/passwd (%s).. Could not set user run_as\n",
+              getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
+    else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
 
-    if (setgid ( pwd->pw_gid )==-1)                                             /* On drop les privilèges */
-     { printf("Error, cannot setGID for user '%s' (%s)\n",
-              Config.run_as, strerror(errno) );
-       exit(EXIT_ERREUR);
-     }
+    if (old->pw_uid != pwd->pw_uid)                                  /* Besoin de changer d'utilisateur ? */
+     { if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                       /* On drop les privilèges */
+        { printf("Error, cannot Initgroups for user '%s' (%s)\n",
+                 Config.run_as, strerror(errno) );
+          exit(EXIT_ERREUR);
+        }
 
-    if (setuid ( pwd->pw_uid )==-1)                                             /* On drop les privilèges */
-     { printf("Error, cannot setUID for user '%s' (%s)\n",
-              Config.run_as, strerror(errno) );
-       exit(EXIT_ERREUR);
+       if (setgid ( pwd->pw_gid )==-1)                                          /* On drop les privilèges */
+        { printf("Error, cannot setGID for user '%s' (%s)\n",
+                 Config.run_as, strerror(errno) );
+          exit(EXIT_ERREUR);
+        }
+
+       if (setuid ( pwd->pw_uid )==-1)                                          /* On drop les privilèges */
+        { printf("Error, cannot setUID for user '%s' (%s)\n",
+                 Config.run_as, strerror(errno) );
+          exit(EXIT_ERREUR);
+        }
      }
        
     if (chdir(Config.home))                                         /* Positionnement à la racine du home */
