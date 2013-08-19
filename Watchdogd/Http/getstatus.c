@@ -113,6 +113,8 @@
        xmlBufferFree(buf);
        return(FALSE);
      }
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Top",
+                                       "%d", Partage->top);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Bit_par_sec",
                                        "%d", Partage->audit_bit_interne_per_sec_hold);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Tour_par_sec",
