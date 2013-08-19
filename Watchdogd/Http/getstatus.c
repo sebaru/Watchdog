@@ -93,9 +93,9 @@
      }
 
     gethostname( host, sizeof(host) );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Host",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Host",
                                        "%s", host);
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Version",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Version",
                                        "%s", VERSION);
 
     retour = xmlTextWriterEndElement(writer);                                                /* End ident */
@@ -113,28 +113,26 @@
        xmlBufferFree(buf);
        return(FALSE);
      }
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Bit/s",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Bit par sec",
                                        "%d", Partage->audit_bit_interne_per_sec_hold);
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Tour/s",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Tour par sec",
                                        "%d", Partage->audit_tour_dls_per_sec_hold );
     pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
     num = g_slist_length( Partage->com_msrv.liste_i );                  /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Distribution des I",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Distribution des I",
                                        "%d", num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
     num = g_slist_length( Partage->com_msrv.liste_msg );                /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"Distribution MSG",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Distribution MSG",
                                        "%d", num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
     num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                    /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"MSG en repeat",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"MSG en repeat",
                                        "%d", num );
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping Status !!");
-
     retour = xmlTextWriterEndElement(writer);                                       /* End running_config */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -143,6 +141,7 @@
        return(FALSE);
      }
 /*--------------------------------------------------------------------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping Status !!");
     retour = xmlTextWriterEndElement(writer);                                               /* End Status */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
