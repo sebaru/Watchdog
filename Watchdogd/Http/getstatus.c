@@ -94,10 +94,13 @@
 
     gethostname( host, sizeof(host) );
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Host",
-                                       "%s", host);
+                                    "%s", host);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Version",
-                                       "%s", VERSION);
-
+                                    "%s", VERSION);
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Licence",
+                                    "GPLv2 or newer");
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Authors",
+                                    "Sébastien LEFEVRE - lefevre.seb@gmail.com");
     retour = xmlTextWriterEndElement(writer);                                                /* End ident */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
