@@ -41,9 +41,9 @@
  gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection )
   { struct CMD_TYPE_SYNOPTIQUE *syndb;
     struct MHD_Response *response;
+    const gchar *syn_id_char;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
-    gchar *syn_id_char;
     gint retour, syn_id;
     struct DB *db;
 
@@ -120,12 +120,25 @@
     if ( Recuperer_capteurDB( &db, syn_id ) )
      { for ( ; ; )
         { struct CMD_TYPE_CAPTEUR *capteur;
+          gfloat valeur = 0.0;
+          gchar *unite= NULL;
           capteur = Recuperer_capteurDB_suite( &db );
           if (!capteur) break;                                                              /* Terminé ?? */
 
           xmlTextWriterStartElement(writer, (const unsigned char *)"capteur");           /* Start Capteur */
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", capteur->id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", capteur->libelle );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type", "%d",    capteur->type );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num", "%d",     capteur->bit_controle );
+          switch(capteur->type)
+           { case MNEMO_ENTREE_ANA:
+                  valeur = Partage->ea[capteur->bit_controle].val_ech;
+                  unite =  Partage->ea[capteur->bit_controle].cmd_type_eana.unite;
+                  break;
+             default: valeur = 0.0; unite = "?";
+           }
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"valeur", "%f", valeur );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"unite", "'%s'", unite );
           xmlTextWriterEndElement(writer);                                              /* End passerelle */
           g_free(capteur);
         }
