@@ -138,7 +138,7 @@
              default: valeur = 0.0; unite = "?";
            }
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"valeur", "%f", valeur );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"unite", "'%s'", unite );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"unite", "%s", unite );
           xmlTextWriterEndElement(writer);                                              /* End passerelle */
           g_free(capteur);
         }

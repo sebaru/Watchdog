@@ -6,7 +6,8 @@ automake
 ./configure
 make dist-gzip
 mv Watchdog*.tar.gz /mnt/Satis-storage/Partage/Distributions/Watchdog/SOURCES/
-VERSION=`date +%y%m%d%H%M`
+VERSION=`svnversion -n`
+#date +%y%m%d%H%M`
 sed s/latest/2.6.$VERSION/g Watchdog.rpm.spec > /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
 rpmbuild --target=i686-unknown-linux-gnu --buildroot /mnt/Satis-storage/Partage/Distributions/Watchdog/BUILDROOT -ba /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
 rpmbuild --target=x86_64-unknown-linux-gnu --buildroot /mnt/Satis-storage/Partage/Distributions/Watchdog/BUILDROOT -ba /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
