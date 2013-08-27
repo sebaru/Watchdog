@@ -1,10 +1,10 @@
 	
 # This is a sample spec file for wget
 
-%define _topdir	 	/mnt/Satis-storage/Partage/Distributions/Watchdog
+%define _topdir	 	/home/sebastien/Essai/Watchdog
 %define name		Watchdog
-%define release		1
-%define version 	latest
+%define version 	2.6.latest
+%define release         1
 Summary: 		Watchdog
 License: 		GPL
 Name: 			%{name}
@@ -24,10 +24,10 @@ Fichier de spécification pour la création des packages RPM server, client et p
 
 %build
 ./configure --prefix=%{buildroot} --exec-prefix=%{buildroot}/usr --includedir=%{buildroot}/usr/include --datarootdir=%{buildroot}/usr/share
-make -j 4
+make -j
 
 %install
-make -j 4 install
+make -j install
 
 #---------------------------- Package Commun ---------------------------------
 %package common

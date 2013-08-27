@@ -1,14 +1,16 @@
 #/bin/sh
+
+buildir=/home/sebastien/Essai/Watchdog
 svn update
 aclocal
 autoconf
 automake
 ./configure
 make dist-gzip
-mv Watchdog*.tar.gz /mnt/Satis-storage/Partage/Distributions/Watchdog/SOURCES/
+mv Watchdog*.tar.gz $buildir/SOURCES/
 VERSION=`svnversion -n`
 #date +%y%m%d%H%M`
-sed s/latest/2.6.$VERSION/g Watchdog.rpm.spec > /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
-rpmbuild --target=i686-unknown-linux-gnu --buildroot /mnt/Satis-storage/Partage/Distributions/Watchdog/BUILDROOT -ba /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
-rpmbuild --target=x86_64-unknown-linux-gnu --buildroot /mnt/Satis-storage/Partage/Distributions/Watchdog/BUILDROOT -ba /mnt/Satis-storage/Partage/Distributions/Watchdog/SPECS/Watchdog.rpm.spec
-genhdlist2 /mnt/Satis-storage/Partage/Distributions/Watchdog/RPMS/i586
+sed s/latest/$VERSION/g Watchdog.rpm.spec > $buildir/Watchdog.rpm.spec
+nice -19 rpmbuild --target=i686-unknown-linux-gnu --buildroot $buildir/BUILDROOT -ba $buildir/Watchdog.rpm.spec
+#rpmbuild --target=x86_64-unknown-linux-gnu --buildroot $buildir/BUILDROOT -ba $buildir/Watchdog.rpm.spec
+#genhdlist2 /mnt/Satis-storage/Partage/Distributions/Watchdog/RPMS/i586

@@ -1,9 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Watchdogd/Watchdogd.c)
-AC_CONFIG_HEADER(config.h)
-AC_CANONICAL_SYSTEM
+AC_INIT([Watchdog], [2.6.`svnversion -n`])
+AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
+AM_INIT_AUTOMAKE
 
-AM_INIT_AUTOMAKE( Watchdog, 2.6.`svnversion -n` )
+AC_CONFIG_HEADER(config.h)
+dnl AC_CANONICAL_SYSTEM
 
 dnl Checks for programs.
 AC_PROG_CXX
