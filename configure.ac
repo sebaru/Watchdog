@@ -1,13 +1,15 @@
 dnl Process this file with autoconf to produce a configure script.
 
 
+
 define([svnversion], esyscmd([sh -c "svnversion -n"]))
 AC_INIT([Watchdog], [2.6.svnversion])
+AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
 
 AC_CONFIG_HEADER(config.h)
-dnl AC_CANONICAL_SYSTEM
+
 
 dnl Checks for programs.
 AC_PROG_CXX
@@ -63,15 +65,15 @@ CFLAGS="-Wall -O -pipe -g -ggdb"
 YACC="$YACC -d -t -v"
 
 LIBW_MAJOR_VERSION=3
-LIBW_MINOR_VERSION=4
-LIBW_MICRO_VERSION=1
+LIBW_MINOR_VERSION=5
+LIBW_MICRO_VERSION=0
 
 AC_SUBST(LIBW_MAJOR_VERSION)
 AC_SUBST(LIBW_MINOR_VERSION)
 AC_SUBST(LIBW_MICRO_VERSION)
 
 LIBDLS_MAJOR_VERSION=4
-LIBDLS_MINOR_VERSION=0
+LIBDLS_MINOR_VERSION=1
 LIBDLS_MICRO_VERSION=0
 
 AC_SUBST(LIBDLS_MAJOR_VERSION)
