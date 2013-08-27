@@ -1,5 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([Watchdog], [2.6.`svnversion -n`])
+
+
+define([svnversion], esyscmd([sh -c "svnversion -n"]))
+AC_INIT([Watchdog], [2.6.svnversion])
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
 

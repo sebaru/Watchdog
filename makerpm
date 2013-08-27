@@ -3,6 +3,7 @@
 buildir=/home/sebastien/Essai/Watchdog
 svn update
 aclocal
+autoheader
 autoconf
 automake
 ./configure
