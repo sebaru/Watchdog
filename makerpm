@@ -6,7 +6,7 @@ SVNVERSION=`svnversion -n`
 ./autogen.sh
 ./configure
 make dist-gzip
-mv watchdog-2.6.$SVNVERSION.tar.gz $buildir/SOURCES/
+mv Watchdog-2.6.$SVNVERSION.tar.gz $buildir/SOURCES/
 #date +%y%m%d%H%M`
 sed s/latest/$SVNVERSION/g Watchdog.rpm.spec > $buildir/Watchdog.rpm.spec
 ulimit -t 60 -v 102400
