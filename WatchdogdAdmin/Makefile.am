@@ -11,7 +11,7 @@ WatchdogdAdmin_LDADD   = $(top_srcdir)/Commun/libwatchdog.la
 
 WatchdogdAdmin_CFLAGS = `pkg-config --cflags glib-2.0`
 
-INCLUDES=-I$(top_srcdir)/Include \
+AM_CPPFLAGS=-I$(top_srcdir)/Include \
 	 -IInclude
 
 WatchdogdAdmin_LDFLAGS = -lpopt -lreadline `pkg-config --libs glib-2.0`

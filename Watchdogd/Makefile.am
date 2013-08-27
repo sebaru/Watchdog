@@ -36,7 +36,7 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl` \
 sysconf_DATA = watchdogd.conf
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
 
-INCLUDES=-I$(top_srcdir)/Include \
+AM_CPPFLAGS=-I$(top_srcdir)/Include \
 	 -IInclude
 
 EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf

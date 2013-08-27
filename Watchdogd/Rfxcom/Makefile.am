@@ -8,7 +8,7 @@ SUBDIRS=
 lib_LTLIBRARIES                         = libwatchdog-server-rfxcom.la
 libwatchdog_server_rfxcom_la_SOURCES    = Rfxcom.c Rfxcom.h admin_rfxcom.c
 
-INCLUDES= `pkg-config --cflags glib-2.0` \
+AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
           `mysql_config --cflags` \
           -I$(top_srcdir)/Include \
           -I../Include

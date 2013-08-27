@@ -8,7 +8,7 @@ noinst_LTLIBRARIES = librezo.la
 librezo_la_SOURCES = Reseaux.c Ssl.c
 #libutil_la_LIBADD  = $(GNOMEUI_LIBS) -lmcrypt
 
-INCLUDES= -I$(top_srcdir) -I$(includedir) \
+AM_CPPFLAGS= -I$(top_srcdir) -I$(includedir) \
           $(GLIB_CFLAGS) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl

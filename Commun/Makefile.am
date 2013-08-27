@@ -14,5 +14,5 @@ libwatchdog_la_LIBADD  = Reseaux/librezo.la
 
 libwatchdog_la_LDFLAGS = `pkg-config --libs openssl` -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
 
-INCLUDES=$(GLIB_CFLAGS) -I$(top_srcdir)/Include
+AM_CPPFLAGS=$(GLIB_CFLAGS) -I$(top_srcdir)/Include
 MAINTAINERCLEANFILES = Makefile.in

@@ -8,7 +8,7 @@ SUBDIRS=
 lib_LTLIBRARIES     = libwatchdog-server-tellstick.la
 libwatchdog_server_tellstick_la_SOURCES    = Tellstick.c Tellstick.h admin_tellstick.c
 
-INCLUDES= `pkg-config --cflags glib-2.0` \
+AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
           -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           $(MYSQL_CFLAGS) \

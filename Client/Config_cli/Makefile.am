@@ -11,7 +11,7 @@ libconfig_cli_la_SOURCES = Config_cli.c
 #libconfig_cli_la_LIBADD  = @LEXLIB@
 
 
-INCLUDES= -I$(top_srcdir) -I$(includedir) \
+AM_CPPFLAGS= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
           -I../Include \

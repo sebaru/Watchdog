@@ -8,7 +8,7 @@ SUBDIRS=
 lib_LTLIBRARIES     = libwatchdog-server-lirc.la
 libwatchdog_server_lirc_la_SOURCES    = Lirc.c Lirc.h
 
-INCLUDES= -I$(top_srcdir)/Include -I../Include \
+AM_CPPFLAGS= -I$(top_srcdir)/Include -I../Include \
 	  `pkg-config --cflags glib-2.0` \
 	  `mysql_config --cflags`
 

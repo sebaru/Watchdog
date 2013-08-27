@@ -18,7 +18,7 @@ libtradDLS_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
 libtradDLS_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
                        `mysql_config --cflags`
 
-INCLUDES=-I$(top_srcdir)/Include \
+AM_CPPFLAGS=-I$(top_srcdir)/Include \
          -I../Include
 
 EXTRA_DIST = lignes.h
