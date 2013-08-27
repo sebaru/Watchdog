@@ -1,8 +1,8 @@
 #/bin/sh
 
 buildir=/home/sebastien/Essai/Watchdog
-SVNVERSION=`svnversion -n`
 svn update
+SVNVERSION=`svnversion -n`
 ./autogen.sh
 ./configure
 make dist-gzip
