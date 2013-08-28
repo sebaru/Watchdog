@@ -24,10 +24,10 @@ Fichier de spécification pour la création des packages RPM server, client et p
 
 %build
 ./configure --prefix=%{buildroot} --exec-prefix=%{buildroot}/usr --includedir=%{buildroot}/usr/include --datarootdir=%{buildroot}/usr/share
-make -j
+make -j 1
 
 %install
-make -j install
+make -j 1 install
 
 #---------------------------- Package Commun ---------------------------------
 %package common
@@ -65,7 +65,7 @@ This is the server side of Watchdog
 %files server
 %defattr(644,root,root)
 /usr/include/*
-/usr/lib/libdls*
+/usr/lib/libwatchdog-dls*
 /usr/share/Watchdog/init_db.sql
 /usr/share/Watchdog/openssl.cnf
 %attr(755,root,root) /usr/bin/Watchdogd
