@@ -11,6 +11,5 @@ mv Watchdog-2.6.$SVNVERSION.tar.gz $buildir/SOURCES/
 sed s/latest/$SVNVERSION/g Watchdog.rpm.spec > $buildir/Watchdog.rpm.spec
 ulimit -t 60 -v 102400
 ulimit -a
-nice -19 rpmbuild --target=i686-unknown-linux-gnu --buildroot $buildir/BUILDROOT -ba $buildir/Watchdog.rpm.spec
-#rpmbuild --target=x86_64-unknown-linux-gnu --buildroot $buildir/BUILDROOT -ba $buildir/Watchdog.rpm.spec
+nice -19 ionice -c 3 rpmbuild -v --clean --rmsource --buildroot $buildir/BUILDROOT -ba $buildir/Watchdog.rpm.spec
 #genhdlist2 /mnt/Satis-storage/Partage/Distributions/Watchdog/RPMS/i586

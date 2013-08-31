@@ -222,3 +222,16 @@ This is the server side of Watchdog - Satellite Thread for Sending Internal Data
 %files server-satellite
 %defattr(644,root,root)
 /usr/lib/libwatchdog-server-satellite*
+
+#----------------------------- Package Server-HTTP ----------------------------------
+%package server-http
+Summary: The Watchdogd Server - HTTP Thread for requesting and setting Internal Data
+Group:                  Development/Tools
+requires: Watchdog-http
+%description server-http
+This is the server side of Watchdog - HTTP Thread for Requesting/Setting Internal Data
+
+%files server-http
+%defattr(644,root,root)
+/usr/lib/libwatchdog-server-http*
+
