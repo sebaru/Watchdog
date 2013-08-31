@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 buildir=/home/sebastien/Essai/Watchdog
 svn update
