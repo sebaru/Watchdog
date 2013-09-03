@@ -605,7 +605,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
-  `tableau` int(11) NOT NULL DEFAULT '0',
+  `tableau` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`), FULLTEXT(`command_text`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
