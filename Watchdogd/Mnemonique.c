@@ -93,46 +93,64 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure mnemo                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo )
-  { gchar requete[1024];
-    gchar *libelle, *acro, *command_text;
+ static gint Ajouter_Modifier_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo, gboolean ajout )
+  { gchar *libelle, *acro, *command_text, *tableau;
+    gchar requete[1024];
     gint last_id;
     gboolean retour;
     struct DB *db;
 
-    libelle = Normaliser_chaine ( mnemo->libelle );                 /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( mnemo->libelle );                      /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_mnemoDB: Normalisation impossible libelle" );
+                "Ajouter_Modifier_mnemoDB: Normalisation impossible libelle" );
        return(-1);
      }
-    acro = Normaliser_chaine ( mnemo->acronyme );                   /* Formatage correct des chaines */
+    acro = Normaliser_chaine ( mnemo->acronyme );                        /* Formatage correct des chaines */
     if (!acro)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_mnemoDB: Normalisation impossible acronyme" );
+                "Ajouter_Modifier_mnemoDB: Normalisation impossible acronyme" );
        g_free(libelle);
        return(-1);
      }
-    command_text = Normaliser_chaine ( mnemo->command_text );       /* Formatage correct des chaines */
+    command_text = Normaliser_chaine ( mnemo->command_text );            /* Formatage correct des chaines */
     if (!command_text)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_mnemoDB: Normalisation impossible command_text" );
+                "Ajouter_Modifier_mnemoDB: Normalisation impossible command_text" );
        g_free(acro);
        g_free(libelle);
        return(-1);
      }
+    tableau = Normaliser_chaine ( mnemo->tableau );                      /* Formatage correct des chaines */
+    if (!tableau)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Ajouter_Modifier_mnemoDB: Normalisation impossible tableau" );
+       g_free(acro);
+       g_free(libelle);
+       g_free(command_text);
+       return(-1);
+     }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(type,num,num_plugin,acronyme,libelle,command_text) VALUES "
-                "(%d,%d,%d,'%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                mnemo->num, mnemo->num_plugin, acro, libelle, command_text );
+    if (ajout == TRUE)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                   "INSERT INTO %s(type,num,num_plugin,acronyme,libelle,command_text,tableau) VALUES "
+                   "(%d,%d,%d,'%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                   mnemo->num, mnemo->num_plugin, acro, libelle, command_text, tableau );
+     } else
+     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                   "UPDATE %s SET "             
+                   "libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' WHERE id=%d",
+                   NOM_TABLE_MNEMO, libelle, acro, command_text, 
+                   mnemo->num_plugin, mnemo->num, tableau, mnemo->id );
+     }
     g_free(libelle);
     g_free(acro);
     g_free(command_text);
+    g_free(tableau);
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_Modifier_mnemoDB: DB connexion failed" );
        return(-1);
      }
 
@@ -141,40 +159,49 @@
      { Libere_DB_SQL(&db); 
        return(-1);
      }
-    last_id = Recuperer_last_ID_SQL ( db );
-
-    switch (mnemo->type)
-     { case MNEMO_ENTREE_ANA:
-            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                        "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
-                        "('%f','%f','%d','%d')", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
-            Lancer_requete_SQL ( db, requete );
-            break;
-       case MNEMO_CPT_IMP:
-            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                        "INSERT INTO %s(val,id_mnemo,type_ci,multi,unite) VALUES "
-                        "('%d','%d','%d','%f','%s')", NOM_TABLE_CPT_IMP, 0, last_id, 0, 1.0, "n/a" );
-            Lancer_requete_SQL ( db, requete );
-            break;
-       case MNEMO_CPTH:
-            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                        "INSERT INTO %s(val,id_mnemo) VALUES "
-                        "('%d','%d')", NOM_TABLE_CPTH, 0, last_id );
-            Lancer_requete_SQL ( db, requete );
-            break;
-       case MNEMO_TEMPO:
-            g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                        "INSERT INTO %s(id_mnemo,delai_on,min_on,max_on,delai_off) VALUES "
-                        "('%d','%d','%d','%d','%d')", NOM_TABLE_TEMPO, last_id, 10, 0, 0, 0 );
-            Lancer_requete_SQL ( db, requete );
-            break;
-       default:
-            break;
+    if (ajout == TRUE)
+     { last_id = Recuperer_last_ID_SQL ( db );
+       switch (mnemo->type)
+        { case MNEMO_ENTREE_ANA:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                           "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
+                           "('%f','%f','%d','%d')", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
+               Lancer_requete_SQL ( db, requete );
+               break;
+          case MNEMO_CPT_IMP:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                           "INSERT INTO %s(val,id_mnemo,type_ci,multi,unite) VALUES "
+                           "('%d','%d','%d','%f','%s')", NOM_TABLE_CPT_IMP, 0, last_id, 0, 1.0, "n/a" );
+               Lancer_requete_SQL ( db, requete );
+               break;
+          case MNEMO_CPTH:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                           "INSERT INTO %s(val,id_mnemo) VALUES "
+                           "('%d','%d')", NOM_TABLE_CPTH, 0, last_id );
+               Lancer_requete_SQL ( db, requete );
+               break;
+          case MNEMO_TEMPO:
+               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+                           "INSERT INTO %s(id_mnemo,delai_on,min_on,max_on,delai_off) VALUES "
+                           "('%d','%d','%d','%d','%d')", NOM_TABLE_TEMPO, last_id, 10, 0, 0, 0 );
+               Lancer_requete_SQL ( db, requete );
+               break;
+          default:
+               break;
+        }
      }
 
     Libere_DB_SQL(&db);
-    return( last_id );
+    if (ajout==TRUE) return( last_id );
+    else return(0);
   }
+/**********************************************************************************************************/
+/* Ajouter_mnemoDB: Ajout ou edition d'un mnemo                                                           */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure mnemo                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo )
+  { return(Ajouter_Modifier_mnemoDB( mnemo, TRUE )); }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
 /* Entrée: un log et une database                                                                         */
@@ -207,13 +234,14 @@
     g_free(commande);
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,%s.name"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
+                "%s.name, %s.tableau"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id AND"
                 " MATCH (%s.command_text) AGAINST ('%s' IN BOOLEAN MODE) LIMIT 10",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO, commande_finale
@@ -231,7 +259,7 @@
     return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
+/* Recuperer_liste_id_mnemo    if (ajout == TRUE)DB: Recupération de la liste des ids des mnemos                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
@@ -241,13 +269,14 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,%s.name"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
+                "%s.name, %s.tableau"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS
@@ -290,6 +319,7 @@
        memcpy( &mnemo->groupe,       db->row[7], sizeof(mnemo->groupe    ) );/* Recopie dans la structure */
        memcpy( &mnemo->page,         db->row[8], sizeof(mnemo->page      ) );/* Recopie dans la structure */
        memcpy( &mnemo->plugin_dls,   db->row[9], sizeof(mnemo->plugin_dls) );/* Recopie dans la structure */
+       memcpy( &mnemo->tableau,      db->row[10], sizeof(mnemo->tableau  ) );/* Recopie dans la structure */
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);
@@ -308,13 +338,14 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,%s.name"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
+                "%s.name, %s.tableau"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.id = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS,
@@ -347,13 +378,14 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,%s.name"
+                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
+                "%s.name, %s.tableau"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.type = %d AND %s.num = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS,
@@ -381,50 +413,8 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  gboolean Modifier_mnemoDB( struct CMD_TYPE_MNEMONIQUE *mnemo )
-  { gchar requete[1024];
-    gchar *libelle, *acronyme, *command_text;
-    gboolean retour;
-    struct DB *db;
-
-    libelle = Normaliser_chaine ( mnemo->libelle );
-    if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible libelle" );
-       return(FALSE);
-     }
-
-    acronyme = Normaliser_chaine ( mnemo->acronyme );
-    if (!acronyme)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible acronyme" );
-       g_free(libelle);
-       return(FALSE);
-     }
-
-    command_text = Normaliser_chaine ( mnemo->command_text );       /* Formatage correct des chaines */
-    if (!command_text)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemoDB: Normalisation impossible" );
-       g_free(acronyme);
-       g_free(libelle);
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
-                "libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,type=%d,num=%d WHERE id=%d",
-                NOM_TABLE_MNEMO, libelle, acronyme, command_text, 
-                mnemo->num_plugin, mnemo->type, mnemo->num, mnemo->id );
-    g_free(libelle);
-    g_free(acronyme);
-    g_free(command_text);
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemoDB: DB connexion failed" );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
+  { if (Ajouter_Modifier_mnemoDB( mnemo, FALSE ) == -1) return(FALSE);
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Recuperer_mnemoDB_for_courbe: Recupération de la liste des ids des mnemos pour les courbes             */
