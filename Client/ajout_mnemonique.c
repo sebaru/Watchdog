@@ -41,6 +41,7 @@
  static GtkWidget *Entry_lib;                                                    /* Libelle du mnemonique */
  static GtkWidget *Entry_acro;                                                  /* Acronyme du mnemonique */
  static GtkWidget *Entry_command;                                          /* Commande_text du mnemonique */
+ static GtkWidget *Entry_tableau;                                 /* Tableau d'affichage pour les courbes */
  static GtkWidget *Combo_dls;                                                       /* Synoptique associé */
  static struct CMD_TYPE_MNEMONIQUE Edit_mnemo;                              /* Message en cours d'édition */
  static GList *Liste_index_dls;
@@ -58,6 +59,8 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
     g_snprintf( Edit_mnemo.command_text, sizeof(Edit_mnemo.command_text),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_command) ) );
+    g_snprintf( Edit_mnemo.tableau, sizeof(Edit_mnemo.tableau),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tableau) ) );
     index                 = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
     Edit_mnemo.num_plugin = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
     Edit_mnemo.type       = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
@@ -238,12 +241,20 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib), NBR_CARAC_LIBELLE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
+    i++;
+    texte = gtk_label_new( _("Tableau") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_tableau = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_tableau), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_tableau, 1, 4, i, i+1 );
+
     Set_max_bit();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
     if (edit_mnemo)                                                          /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     edit_mnemo->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro),    edit_mnemo->acronyme );
        gtk_entry_set_text( GTK_ENTRY(Entry_command), edit_mnemo->command_text );
+       gtk_entry_set_text( GTK_ENTRY(Entry_tableau), edit_mnemo->tableau );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_mnemo->type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)edit_mnemo->num );
      }
