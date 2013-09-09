@@ -204,7 +204,7 @@
                        "Traiter_commande_sms : Received %s from %s. Processing...", texte, from );
             }
 
-    if ( ! strcasecmp( texte, "ping" ) )                                           /* Interfacege de test */
+    if ( ! strcasecmp( texte, "ping" ) )                                           /* Interfacage de test */
      { Envoyer_sms_smsbox_text ( "Pong !" );
        return;
      }
