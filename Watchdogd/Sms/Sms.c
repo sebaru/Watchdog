@@ -99,36 +99,6 @@
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Envoyer_sms ( struct CMD_TYPE_MESSAGE *msg )
-  { struct CMD_TYPE_MESSAGE *copie;
-    gint nbr;
-
-    pthread_mutex_lock( &Cfg_sms.lib->synchro );      /* On recupere le nombre de sms en attente */
-    nbr = g_slist_length(Cfg_sms.Liste_sms);
-    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-
-    if (nbr > 50)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Envoyer_sms: liste d'attente pleine" );
-       return;
-     }
-
-    copie = (struct CMD_TYPE_MESSAGE *) g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!copie) { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                 "Envoyer_sms: pas assez de mémoire pour copie" );
-                  return;
-                }
-    memcpy ( copie, msg, sizeof(struct CMD_TYPE_MESSAGE) );
-
-    pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, copie );
-    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-  }
-/**********************************************************************************************************/
-/* Envoyer_sms: Envoi un sms                                                                              */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
  void Envoyer_sms_smsbox_text ( gchar *texte )
   { struct CMD_TYPE_MESSAGE *msg;
 
@@ -144,7 +114,9 @@
     msg->enable = TRUE;
     msg->sms = MSG_SMS_SMSBOX;
 
-    Envoyer_sms ( msg );
+    pthread_mutex_lock( &Cfg_sms.lib->synchro );
+    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );
+    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */
@@ -166,7 +138,9 @@
     msg->enable = TRUE;
     msg->sms = MSG_SMS_GSM;
 
-    Envoyer_sms ( msg );
+    pthread_mutex_lock( &Cfg_sms.lib->synchro );
+    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, msg );
+    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Sms_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                         */
@@ -225,6 +199,13 @@
     if ( Sms_recipient_authorized ( from ) == FALSE )
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
                 "Traiter_commande_sms : unknown sender %s. Dropping message %s...", from, texte );
+       return;
+     } else { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                       "Traiter_commande_sms : Received %s from %s. Processing...", texte, from );
+            }
+
+    if ( ! strcasecmp( texte, "ping" ) )                                           /* Interfacege de test */
+     { Envoyer_sms_smsbox_text ( "Pong !" );
        return;
      }
 
