@@ -548,6 +548,7 @@
      { MHD_stop_daemon (Cfg_http.https_server);
        Liberer_certificat();
      }
+    Http_free_liste_satellites ();                                     /* Libération des infos satellites */
 end:
     Http_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );

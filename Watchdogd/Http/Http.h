@@ -52,6 +52,7 @@
     struct MHD_Daemon *http_server;
     struct MHD_Daemon *https_server;
     GSList *Liste_XML_docs;                      /* Une liste de document XML recu de la part des clients */
+    GSList *Liste_satellites;                                                    /* Listes des satellites */
  } Cfg_http;
 
  enum HTTP_CONNEXION_TYPE
@@ -64,11 +65,19 @@
     gchar   *buffer;                                   /* Le buffer recu dans le corps de la requete HTTP */
     gint     buffer_size;                                                    /* La taille utile du buffer */
   };
+
+ struct SATELLITE_INFOS                          /* Informations liées aux connexions avec les Satellites */
+  { gchar instance_id[80];
+    gint  bit_state;
+    guint last_top;
+  };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
+ extern gboolean Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
                                                      size_t *upload_data_size, void **con_cls );
+ extern void Http_free_liste_satellites ( void );
  extern void Http_Traiter_XML_set_internal ( struct HTTP_CONNEXION_INFO *infos );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -34,6 +34,57 @@
  #include "watchdogd.h"
  #include "Http.h"
 /**********************************************************************************************************/
+/* Satellite_update_infos : top les infos de la liste des connexions Satellite et maj les bits internes   */
+/* Entrées: les informations du satellite                                                                 */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Satellite_update_infos ( gchar *instance_id, gint bit_state )
+  { struct SATELLITE_INFOS *sat_infos;
+    GSList *liste;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_satellites;
+    while ( liste )
+     { sat_infos = (struct SATELLITE_INFOS *)liste->data;
+       if ( ! g_strcmp0 ( sat_infos->instance_id, instance_id ) ) break;
+       liste = liste->next;
+     }
+    if (liste == NULL)                    /* Si le satellite n'est pas trouvé, nous l'ajoutons à la liste */
+     { sat_infos = (struct SATELLITE_INFOS *)g_try_malloc0( sizeof ( struct SATELLITE_INFOS ) );
+       Cfg_http.Liste_satellites = g_slist_prepend( Cfg_http.Liste_satellites, sat_infos );
+     }
+
+    if (sat_infos == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Sattellite_update_infos: mem error for %s", instance_id );
+     }
+    else
+     { g_snprintf( sat_infos->instance_id, sizeof(sat_infos->instance_id), "%s", instance_id );
+       sat_infos->bit_state = bit_state;
+       SB(sat_infos->bit_state, 1);
+       sat_infos->last_top = Partage->top;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "Sattellite_update_infos: Satellite %s, B%d=1, (last_top=%d)",
+                 sat_infos->instance_id, sat_infos->bit_state, sat_infos->last_top );
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Http_free_liste_satellites : Libere la memoire et maj des bits internes                                */
+/* Entrées: néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ void Http_free_liste_satellites ( void )
+  { struct SATELLITE_INFOS *sat_infos;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    while ( Cfg_http.Liste_satellites )
+     { sat_infos = (struct SATELLITE_INFOS *)Cfg_http.Liste_satellites->data;
+       SB(sat_infos->bit_state, 0);
+       Cfg_http.Liste_satellites = g_slist_remove ( Cfg_http.Liste_satellites, sat_infos );
+       g_free(sat_infos);
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+  }
+/**********************************************************************************************************/
 /* Http_Traiter_XML_set_internal: Traite le document XML recu de la requete MHD                           */
 /* Entrées: la structure de connexion info                                                                */
 /* Sortie : néant                                                                                         */
@@ -99,6 +150,7 @@
                          "Http_Traiter_XML_set_internal: Get infos from %s (bit_state=%s)",
                           instance_id, atoi( (char *)bit_state )
                         );
+                Satellite_update_infos( (gchar *)instance_id, atoi( (char *)bit_state ) );
               }
              if(instance_id)   free(instance_id);
              if(bit_state)     free(bit_state);
