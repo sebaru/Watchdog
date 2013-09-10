@@ -173,8 +173,6 @@
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_admin ( void );
- extern gboolean Demarrer_motion_detect ( void );
- extern gboolean Demarrer_sous_serveur ( int id );
  extern void Charger_librairies ( void );
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );

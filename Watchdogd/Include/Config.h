@@ -28,6 +28,8 @@
 #ifndef _CONFIG_H_
  #define _CONFIG_H_
 
+ #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
+
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
  #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
 
@@ -75,6 +77,8 @@
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );
+ extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *instance_id );
+ extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );
 
 #endif
   

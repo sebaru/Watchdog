@@ -158,4 +158,52 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config start_archive        %d", Config.start_archive );
   }
+/**********************************************************************************************************/
+/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */
+/* Entrée: une database de retour et le nom de l'instance_id                                              */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Recuperer_configDB ( struct DB **db_retour, gchar *instance_id )
+  { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT nom,valeur"
+                " FROM %s"
+                " WHERE instance_id = %s",
+                NOM_TABLE_CONFIG, instance_id
+              );                                                                /* order by test 25/01/06 */
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_configDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/**********************************************************************************************************/
+/* Recuperer_configDB_suite: Continue la récupération des paramètres de configuration dans la base        */
+/* Entrée: une database                                                                                   */
+/* Sortie: FALSE si plus d'enregistrement                                                                 */
+/**********************************************************************************************************/
+ gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur )
+  { struct DB *db;
+
+    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    *nom =  db->row[0];
+    *valeur = db->row[1];
+    return(TRUE);
+  }
 /*--------------------------------------------------------------------------------------------------------*/

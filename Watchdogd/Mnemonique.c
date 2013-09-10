@@ -259,7 +259,7 @@
     return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_mnemo    if (ajout == TRUE)DB: Recupération de la liste des ids des mnemos                                */
+/* Recuperer_liste_id_mnemo    if (ajout == TRUE)DB: Recupération de la liste des ids des mnemos          */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/

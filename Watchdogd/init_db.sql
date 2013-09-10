@@ -650,6 +650,18 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `config`
+--
+
+CREATE TABLE IF NOT EXISTS `config` (
+  `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
+  `nom` text COLLATE utf8_unicode_ci NOT NULL,
+  `valeur` text COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `msgs`
 --
 

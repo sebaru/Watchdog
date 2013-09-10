@@ -51,9 +51,11 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Satellite_Lire_config ( void )
-  { gchar *chaine;
+  { gchar requete[512];
+    gchar *chaine, *nom, *valeur;
     GKeyFile *gkf;
     GError *error = NULL;
+    struct DB *db;
 
     gkf = g_key_file_new();
     if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
@@ -94,6 +96,18 @@
      { g_snprintf( Cfg_satellite.https_file_ca, sizeof(Cfg_satellite.https_file_ca), "%s", SATELLITE_DEFAUT_FILE_CA ); }
 
     g_key_file_free(gkf);
+
+    
+
+    if ( ! Recuperer_configDB( &db, Config.instance_id ) )              /* Connexion a la base de données */
+     { return;
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
+                "Satellite_Lire_config: Setting Parameter %s = %s", *nom, *valeur );
+       
+     }
   }
 /**********************************************************************************************************/
 /* Satellite_Liberer_config : Libere la mémoire allouer précédemment pour lire la config satellite        */
