@@ -63,7 +63,7 @@
        SB(sat_infos->bit_state, 1);
        sat_infos->last_top = Partage->top;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Sattellite_update_infos: Satellite %s, B%d=1, (last_top=%d)",
+                "Satellite_update_infos: Satellite %s, B%d=1, (last_top=%d)",
                  sat_infos->instance_id, sat_infos->bit_state, sat_infos->last_top );
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
@@ -81,6 +81,28 @@
        SB(sat_infos->bit_state, 0);
        Cfg_http.Liste_satellites = g_slist_remove ( Cfg_http.Liste_satellites, sat_infos );
        g_free(sat_infos);
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Http_Check_satellites_states : Si pas de news d'un satellite pendant un certain temps, maj bit interne */
+/* Entrées: néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ void Http_Check_satellites_states ( void )
+  { struct SATELLITE_INFOS *sat_infos;
+    GSList *liste;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_satellites;
+    while ( liste )
+     { sat_infos = (struct SATELLITE_INFOS *)liste->data;
+       if ( sat_infos->last_top + 3000 < Partage->top )         /* Pas de news les 5 dernieres minutes ?? */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Http_Check_satellites_states: Satellite %s is down ! Setting B%d=0, (last_top=%d)",
+                    sat_infos->instance_id, sat_infos->bit_state, sat_infos->last_top );
+          SB(sat_infos->bit_state, 0);
+        }
+       liste = liste->next;
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
   }

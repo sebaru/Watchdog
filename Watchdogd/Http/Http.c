@@ -513,7 +513,8 @@
 #endif
     Cfg_http.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                              /* On tourne tant que necessaire */
-     { usleep(10000);
+     { static gint last_top = 0;
+       usleep(10000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_sigusr1)                                  /* A-t'on recu un signal USR1 ? */
@@ -530,7 +531,7 @@
 
        if (Cfg_http.Liste_XML_docs)
         { struct HTTP_CONNEXION_INFO *infos;
-          pthread_mutex_lock( &Cfg_http.lib->synchro );             /* On envoie au thread HTTP pour traitement */
+          pthread_mutex_lock( &Cfg_http.lib->synchro );       /* On envoie au thread HTTP pour traitement */
           infos = (struct HTTP_CONNEXION_INFO *)Cfg_http.Liste_XML_docs->data;
           Cfg_http.Liste_XML_docs = g_slist_remove ( Cfg_http.Liste_XML_docs, infos );
           pthread_mutex_unlock( &Cfg_http.lib->synchro );
@@ -540,6 +541,11 @@
              default : break;
            }
           Http_Liberer_infos ( infos );
+        }
+
+       if ( last_top + 600 < Partage->top )                                         /* Toutes les minutes */
+        { Http_Check_satellites_states ();
+          last_top = Partage->top;
         }
      }
 
