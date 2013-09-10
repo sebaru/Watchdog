@@ -90,6 +90,19 @@
              if(in_range)      free(in_range);
              if(val_avant_ech) free(val_avant_ech);
            }
+          else if ( xmlStrEqual ( name, (xmlChar *)"Ident" ) )             /* Identification du satellite */
+           { xmlChar *instance_id, *bit_state;
+             instance_id   = xmlTextReaderGetAttribute (reader, (xmlChar *)"instance_id" );
+             bit_state     = xmlTextReaderGetAttribute (reader, (xmlChar *)"bit_state" );
+             if (instance_id && bit_state)
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                         "Http_Traiter_XML_set_internal: Get infos from %s (bit_state=%s)",
+                          instance_id, atoi( (char *)bit_state )
+                        );
+              }
+             if(instance_id)   free(instance_id);
+             if(bit_state)     free(bit_state);
+           }
         }
      }
 end:

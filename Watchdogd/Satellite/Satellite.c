@@ -215,7 +215,11 @@
        return;
      }
 
-/*    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", syndb->id );*/
+/*------------------------------------------- Sending identification -------------------------------------*/
+    xmlTextWriterStartElement(writer, (const unsigned char *)"Ident");                     /* Start EAxxx */
+    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"instance_id", "%s", Config.instance_id );
+    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_state",   "%d", 9987 );
+    xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
 
 /*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping EAxxx !!");
