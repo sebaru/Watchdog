@@ -170,7 +170,7 @@
              if (instance_id && bit_state)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                          "Http_Traiter_XML_set_internal: Get infos from %s (bit_state=%s)",
-                          instance_id, atoi( (char *)bit_state )
+                          instance_id, bit_state
                         );
                 Satellite_update_infos( (gchar *)instance_id, atoi( (char *)bit_state ) );
               }
