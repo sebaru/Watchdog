@@ -55,7 +55,8 @@
     struct DB *db;
 
     Cfg_satellite.lib->Thread_debug = FALSE;                               /* Settings default parameters */
-    Cfg_satellite.enable = FALSE; 
+    Cfg_satellite.enable            = FALSE; 
+    Cfg_satellite.bit_state         = 0; 
     g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert),
                "%s", SATELLITE_DEFAUT_FILE_SERVER );
     g_snprintf( Cfg_satellite.https_file_key,  sizeof(Cfg_satellite.https_file_key),
@@ -64,7 +65,7 @@
                "%s", SATELLITE_DEFAUT_FILE_CA );
     g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "Unknown" );
 
-    if ( ! Recuperer_configDB( &db, Config.instance_id ) )              /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db ) )                                  /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                 "Satellite_Lire_config: Database connexion failed. Using Default Parameters" );
        return;
@@ -80,12 +81,14 @@
        else if ( ! g_ascii_strcasecmp ( nom, "satellite:send_to_url" ) )
         { g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url),     "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "satellite:enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "enable" ) ) Cfg_satellite.enable = TRUE;  }
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_satellite.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "satellite:debug" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "enable" ) ) Cfg_satellite.lib->Thread_debug = TRUE;  }
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_satellite.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite:bit_state" ) )
+        { Cfg_satellite.bit_state = atoi(valeur);  }
        else
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
-                   "Satellite_Lire_config: Unknown Parameter %s( = %s) in Database", nom, valeur );
+                   "Satellite_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
         }
      }
                                                                                           /* Print Config */
@@ -101,6 +104,8 @@
              "Satellite_Lire_config: 'satellite:https_file_ca'   = %s", Cfg_satellite.https_file_ca );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
              "Satellite_Lire_config: 'satellite:send_to_url'     = %s", Cfg_satellite.send_to_url );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:bit_state'       = %d", Cfg_satellite.bit_state );
            
   }
 /**********************************************************************************************************/
@@ -171,7 +176,7 @@
     new_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
                                  Cfg_satellite.received_size +  size*nmemb );
     if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
-     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_ERR,
                 "Satellite_Receive_response: Memory Error realloc (%s).", strerror(errno) );
        g_free(Cfg_satellite.received_buffer);
        Cfg_satellite.received_buffer = NULL;
@@ -226,7 +231,7 @@
 /*------------------------------------------- Sending identification -------------------------------------*/
     xmlTextWriterStartElement(writer, (const unsigned char *)"Ident");                     /* Start EAxxx */
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"instance_id", "%s", Config.instance_id );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_state",   "%d", 9987 );
+    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_state",   "%d", Cfg_satellite.bit_state );
     xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
 
 /*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
@@ -340,7 +345,7 @@
 
     if (!Cfg_satellite.enable)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread bot enable in config. Shutting Down %p",
+                "Run_thread: Thread is not enabled in config. Shutting Down %p",
                  pthread_self() );
        goto end;
      }

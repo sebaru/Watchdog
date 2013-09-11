@@ -39,7 +39,8 @@
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
     GSList *Liste_entretor;                                        /* liste de struct MSGDB msg a envoyer */
     GSList *Liste_entreeANA;                                       /* liste de struct MSGDB msg a envoyer */
-    gchar send_to_url[128];
+    gchar send_to_url[128];                               /* URL du master a qui envoyer les informations */
+    guint bit_state;                                                            /* Bit B de communication */
     gchar https_file_cert[80];
     gchar https_file_key[80];
     gchar https_file_ca[80];
