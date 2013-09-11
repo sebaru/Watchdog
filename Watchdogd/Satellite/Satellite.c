@@ -325,6 +325,7 @@
                  Cfg_satellite.send_to_url );
      }
     xmlBufferFree(buf);                                                       /* Libération du buffer XML */
+    Cfg_satellite.last_sent = Partage->top;                         /* Sauvegarde du top du dernier envoi */
   }
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
@@ -375,7 +376,8 @@
           Cfg_satellite.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Cfg_satellite.Liste_entreeANA)                               /* Si changement, envoi au master */
+       if ( Cfg_satellite.Liste_entreeANA ||                            /* Si changement, envoi au master */
+           (Cfg_satellite.last_sent + 3000 <= Partage->top) )    /* Ou au pire toutes les 5 minutes 'top' */
         { Envoyer_les_infos_au_master(); } 
      }
 

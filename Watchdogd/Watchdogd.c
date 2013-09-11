@@ -492,7 +492,7 @@
     fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
 
     if (fg == FALSE)                                                   /* On tourne en tant que daemon ?? */
-     { gint pid;
+     { gint pid, i;
        pid = fork();
        if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
        if (pid>0) exit(EXIT_OK);                                                       /* On kill le père */
@@ -504,6 +504,9 @@
        if (pid>0) exit(EXIT_OK);                                                       /* On kill le père */
 
        setsid();                                                             /* Indépendance du processus */
+
+       for (i=getdtablesize(); i>=0; i--)                                   /* Fermeture des descripteurs */
+        { close(i); }
     }
                                                                   /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );

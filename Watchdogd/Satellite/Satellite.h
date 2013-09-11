@@ -46,6 +46,7 @@
     gchar https_file_ca[80];
     gchar *received_buffer;                                /* Buffer de reception de la reponse du master */
     gint received_size;                                                           /* Nombre d'octet recus */
+    guint last_sent;
  } Cfg_satellite;
 
 /*************************************** Définitions des prototypes ***************************************/
