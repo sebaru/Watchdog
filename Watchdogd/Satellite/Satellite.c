@@ -51,63 +51,57 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Satellite_Lire_config ( void )
-  { gchar requete[512];
-    gchar *chaine, *nom, *valeur;
-    GKeyFile *gkf;
-    GError *error = NULL;
+  { gchar *nom, *valeur;
     struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Satellite_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);       return;
-     }
-                                                                               /* Positionnement du debug */
-    Cfg_satellite.lib->Thread_debug = g_key_file_get_boolean ( gkf, "SATELLITE", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
-    Cfg_satellite.enable        = g_key_file_get_boolean ( gkf, "SATELLITE", "enable", NULL ); 
-
-    chaine = g_key_file_get_string  ( gkf, "SATELLITE", "send_to_url", NULL );
-    if (!chaine)
-     { Info_new( Config.log, TRUE, LOG_ERR,
-                 "Satellite_Lire_config : No 'Send_to' URL in config !" );
-       g_snprintf( Cfg_satellite.send_to_url, sizeof(Cfg_satellite.send_to_url), "Unknown" );
-     }
-    else
-     { g_snprintf( Cfg_satellite.send_to_url, sizeof(Cfg_satellite.send_to_url), "%s", chaine ); g_free(chaine); }
-
-    chaine                     = g_key_file_get_string  ( gkf, "SATELLITE", "https_file_cert", NULL );
-    if (chaine)
-     { g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert), "%s", chaine ); g_free(chaine); }
-    else
-     { g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert), "%s", SATELLITE_DEFAUT_FILE_SERVER  ); }
-
-    chaine                     = g_key_file_get_string  ( gkf, "SATELLITE", "https_file_key", NULL );
-    if (chaine)
-     { g_snprintf( Cfg_satellite.https_file_key, sizeof(Cfg_satellite.https_file_key), "%s", chaine ); g_free(chaine); }
-    else
-     { g_snprintf( Cfg_satellite.https_file_key, sizeof(Cfg_satellite.https_file_key), "%s", SATELLITE_DEFAUT_FILE_KEY ); }
-
-    chaine                     = g_key_file_get_string  ( gkf, "SATELLITE", "https_file_ca", NULL );
-    if (chaine)
-     { g_snprintf( Cfg_satellite.https_file_ca, sizeof(Cfg_satellite.https_file_ca), "%s", chaine ); g_free(chaine); }
-    else
-     { g_snprintf( Cfg_satellite.https_file_ca, sizeof(Cfg_satellite.https_file_ca), "%s", SATELLITE_DEFAUT_FILE_CA ); }
-
-    g_key_file_free(gkf);
-
-    
+    Cfg_satellite.lib->Thread_debug = FALSE;                               /* Settings default parameters */
+    Cfg_satellite.enable = FALSE; 
+    g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert),
+               "%s", SATELLITE_DEFAUT_FILE_SERVER );
+    g_snprintf( Cfg_satellite.https_file_key,  sizeof(Cfg_satellite.https_file_key),
+               "%s", SATELLITE_DEFAUT_FILE_KEY );
+    g_snprintf( Cfg_satellite.https_file_ca,   sizeof(Cfg_satellite.https_file_ca),
+               "%s", SATELLITE_DEFAUT_FILE_CA );
+    g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "Unknown" );
 
     if ( ! Recuperer_configDB( &db, Config.instance_id ) )              /* Connexion a la base de données */
-     { return;
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
+                "Satellite_Lire_config: Database connexion failed. Using Default Parameters" );
+       return;
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                "Satellite_Lire_config: Setting Parameter %s = %s", *nom, *valeur );
-       
+     {      if ( ! g_ascii_strcasecmp ( nom, "satellite:https_file_cert" ) )
+        { g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite:https_file_key" ) )
+        { g_snprintf( Cfg_satellite.https_file_key,  sizeof(Cfg_satellite.https_file_key),  "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite:https_file_ca" ) )
+        { g_snprintf( Cfg_satellite.https_file_ca,   sizeof(Cfg_satellite.https_file_ca),   "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite:send_to_url" ) )
+        { g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url),     "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite:enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "enable" ) ) Cfg_satellite.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite:debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "enable" ) ) Cfg_satellite.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
+                   "Satellite_Lire_config: Unknown Parameter %s( = %s) in Database", nom, valeur );
+        }
      }
+                                                                                          /* Print Config */
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:enable'          = %d", Cfg_satellite.enable );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:debug'           = %d", Cfg_satellite.lib->Thread_debug );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:https_file_cert' = %s", Cfg_satellite.https_file_cert );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:https_file_key'  = %s", Cfg_satellite.https_file_key );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:https_file_ca'   = %s", Cfg_satellite.https_file_ca );
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+             "Satellite_Lire_config: 'satellite:send_to_url'     = %s", Cfg_satellite.send_to_url );
+           
   }
 /**********************************************************************************************************/
 /* Satellite_Liberer_config : Libere la mémoire allouer précédemment pour lire la config satellite        */

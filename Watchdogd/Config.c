@@ -171,7 +171,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT nom,valeur"
                 " FROM %s"
-                " WHERE instance_id = %s",
+                " WHERE instance_id = '%s' OR instance_id = 'ALL'",
                 NOM_TABLE_CONFIG, instance_id
               );                                                                /* order by test 25/01/06 */
 
