@@ -65,26 +65,26 @@
                "%s", SATELLITE_DEFAUT_FILE_CA );
     g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "Unknown" );
 
-    if ( ! Recuperer_configDB( &db ) )                                  /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, "satellite" ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                 "Satellite_Lire_config: Database connexion failed. Using Default Parameters" );
        return;
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "satellite:https_file_cert" ) )
+     {      if ( ! g_ascii_strcasecmp ( nom, "https_file_cert" ) )
         { g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite:https_file_key" ) )
+       else if ( ! g_ascii_strcasecmp ( nom, "https_file_key" ) )
         { g_snprintf( Cfg_satellite.https_file_key,  sizeof(Cfg_satellite.https_file_key),  "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite:https_file_ca" ) )
+       else if ( ! g_ascii_strcasecmp ( nom, "https_file_ca" ) )
         { g_snprintf( Cfg_satellite.https_file_ca,   sizeof(Cfg_satellite.https_file_ca),   "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite:send_to_url" ) )
+       else if ( ! g_ascii_strcasecmp ( nom, "send_to_url" ) )
         { g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url),     "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite:enable" ) )
+       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_satellite.enable = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite:debug" ) )
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_satellite.lib->Thread_debug = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite:bit_state" ) )
+       else if ( ! g_ascii_strcasecmp ( nom, "bit_state" ) )
         { Cfg_satellite.bit_state = atoi(valeur);  }
        else
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
@@ -93,19 +93,19 @@
      }
                                                                                           /* Print Config */
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:enable'          = %d", Cfg_satellite.enable );
+             "Satellite_Lire_config: 'enable'          = %d", Cfg_satellite.enable );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:debug'           = %d", Cfg_satellite.lib->Thread_debug );
+             "Satellite_Lire_config: 'debug'           = %d", Cfg_satellite.lib->Thread_debug );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:https_file_cert' = %s", Cfg_satellite.https_file_cert );
+             "Satellite_Lire_config: 'https_file_cert' = %s", Cfg_satellite.https_file_cert );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:https_file_key'  = %s", Cfg_satellite.https_file_key );
+             "Satellite_Lire_config: 'https_file_key'  = %s", Cfg_satellite.https_file_key );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:https_file_ca'   = %s", Cfg_satellite.https_file_ca );
+             "Satellite_Lire_config: 'https_file_ca'   = %s", Cfg_satellite.https_file_ca );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:send_to_url'     = %s", Cfg_satellite.send_to_url );
+             "Satellite_Lire_config: 'send_to_url'     = %s", Cfg_satellite.send_to_url );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'satellite:bit_state'       = %d", Cfg_satellite.bit_state );
+             "Satellite_Lire_config: 'bit_state'       = %d", Cfg_satellite.bit_state );
            
   }
 /**********************************************************************************************************/

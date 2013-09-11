@@ -163,7 +163,7 @@
 /* Entrée: une database de retour et le nom de l'instance_id                                              */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- gboolean Recuperer_configDB ( struct DB **db_retour )
+ gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
@@ -171,8 +171,8 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT nom,valeur"
                 " FROM %s"
-                " WHERE instance_id = '%s' OR instance_id = 'ALL'",
-                NOM_TABLE_CONFIG, Config.instance_id
+                " WHERE instance_id = '%s' AND nom_thread='%s'",
+                NOM_TABLE_CONFIG, Config.instance_id, nom_thread
               );                                                                /* order by test 25/01/06 */
 
     db = Init_DB_SQL();       
