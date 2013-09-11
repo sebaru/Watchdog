@@ -547,6 +547,7 @@
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_msrv.synchro_Liste_abonne_msg, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
+       pthread_mutex_init( &Partage->com_dls.synchro_ea_access, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
@@ -614,6 +615,7 @@
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_msrv.synchro_Liste_abonne_msg );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
+    pthread_mutex_destroy( &Partage->com_dls.synchro_ea_access );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );

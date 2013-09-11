@@ -96,7 +96,7 @@
     liste = Cfg_http.Liste_satellites;
     while ( liste )
      { sat_infos = (struct SATELLITE_INFOS *)liste->data;
-       if ( sat_infos->last_top + 3000 < Partage->top )         /* Pas de news les 5 dernieres minutes ?? */
+       if ( sat_infos->last_top + 3000 <= Partage->top )        /* Pas de news les 5 dernieres minutes ?? */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                    "Http_Check_satellites_states: Satellite %s is down ! Setting B%d=0, (last_top=%d)",
                     sat_infos->instance_id, sat_infos->bit_state, sat_infos->last_top );

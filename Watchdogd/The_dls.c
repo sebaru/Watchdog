@@ -65,7 +65,13 @@
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                */
 /**********************************************************************************************************/
  int EA_inrange( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
+  { float result;
+    if (num>=0 && num<NBR_ENTRE_ANA)
+     { pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
+       result = Partage->ea[ num ].in_range;
+       pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
+       return ( result );
+     }
     else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num );
     return(0);
   }
@@ -73,7 +79,13 @@
 /* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                       */
 /**********************************************************************************************************/
  float EA_ech( int num )
-  { if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
+  { float result;
+    if (num>=0 && num<NBR_ENTRE_ANA)
+     { pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
+       result = Partage->ea[ num ].val_ech;
+       pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
+       return ( result );
+     }
     else Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num );
     return(0.0);
   }
@@ -189,7 +201,9 @@
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num );
        return;
      }
+    pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
     Partage->ea[num].inrange = range;
+    pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
   }
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
@@ -200,14 +214,14 @@
        return;
      }
 
-    Partage->ea[num].inrange = TRUE;
     if (Partage->ea[ num ].val_avant_ech != val_avant_ech)
      { Partage->ea[ num ].val_avant_ech = val_avant_ech;        /* Archive au mieux toutes les 5 secondes */
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
         { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );
           Partage->ea[ num ].last_arch = Partage->top;   
         }
-       switch ( Partage->ea[num].cmd_type_eana.type )
+       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );    /* Protection ecriture de la val_ech */
+       switch ( Partage->ea[num].cmd_type_eana.type )                  /* Interpretation des resultats ?? */
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
                Partage->ea[ num ].inrange = 1;
@@ -250,12 +264,12 @@
           default:
                Partage->ea[num].val_ech = 0.0;
         }
+       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
      }
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
-     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );               /* Archive au pire toutes les 10 min */
+     { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );         /* Archive au pire toutes les 10 min */
        Partage->ea[ num ].last_arch = Partage->top;   
      }
-                                                                     /* Gestion historique interne Valana */
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
