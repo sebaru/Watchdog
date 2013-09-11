@@ -377,7 +377,7 @@
         }
 
        if ( Cfg_satellite.Liste_entreeANA ||                            /* Si changement, envoi au master */
-           (Cfg_satellite.last_sent + 3000 <= Partage->top) )    /* Ou au pire toutes les 5 minutes 'top' */
+           (Cfg_satellite.last_sent + 2400 <= Partage->top) )    /* Ou au pire toutes les 4 minutes 'top' */
         { Envoyer_les_infos_au_master(); } 
      }
 

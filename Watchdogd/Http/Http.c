@@ -543,7 +543,7 @@
           Http_Liberer_infos ( infos );
         }
 
-       if ( last_top + 600 < Partage->top )                                         /* Toutes les minutes */
+       if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
         { Http_Check_satellites_states ();
           last_top = Partage->top;
         }
