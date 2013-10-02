@@ -437,18 +437,18 @@
               Config.run_as, strerror(errno) );
        exit(EXIT_ERREUR);
      }
-    else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
+    else printf("User '%s' (uid %d) found.\n", Config.run_as, pwd->pw_uid);
 
     old = getpwuid ( getuid() );
     if (!old)
-     { printf("Error, user '%d' not found in /etc/passwd (%s).. Could not set user run_as\n",
+     { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set user run_as\n",
               getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
-    else printf("Running as user '%s' (uid %d).\n", Config.run_as, pwd->pw_uid);
-
+    
     if (old->pw_uid != pwd->pw_uid)                                  /* Besoin de changer d'utilisateur ? */
-     { if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                       /* On drop les privilèges */
+     { printf("Dropping privileges '%s' (%d) -> '%s' (%d).\n", old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
+       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                       /* On drop les privilèges */
         { printf("Error, cannot Initgroups for user '%s' (%s)\n",
                  Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
