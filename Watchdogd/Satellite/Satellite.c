@@ -144,26 +144,31 @@
     pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Satellite_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                     */
-/* Entrées: le numéro de la sortie                                                                        */
+/* Satellite_Gerer_message: Fonction d'abonné appellé lorsqu'une EANA est modifiée.                       */
+/* Entrée: le numéro de EANA                                                                              */
+/* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- void Satellite_Gerer_sortie( gint num_a )                                    /* Num_a est l'id de la sortie */
+ static void Satellite_Gerer_entree ( gint num )
   { gint taille;
-#ifdef bouh
-    pthread_mutex_lock( &Cfg_satellite.lib->synchro );              /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_satellite.Liste_sortie );
+
+    pthread_mutex_lock( &Cfg_satellite.lib->synchro );                   /* Ajout dans la liste a traiter */
+    taille = g_slist_length( Cfg_satellite.Liste_entreeTOR );
     pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
     if (taille > 150)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                "Satellite_Gerer_sortie: DROP sortie %d (length = %d > 150)", num_a, taille );
+                "Satellite_Gerer_entree: DROP E%d (length = %d > 150)", num, taille);
+       return;
+     }
+    else if (Cfg_satellite.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Satellite_Gerer_entree: Thread is down. Dropping num_e = %d", num );
        return;
      }
 
-    pthread_mutex_lock( &Cfg_satellite.lib->synchro );       /* Ajout dans la liste de tell a traiter */
-    Cfg_satellite.Liste_sortie = g_slist_prepend( Cfg_satellite.Liste_sortie, GINT_TO_POINTER(num_a) );
-    pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
-#endif
+    pthread_mutex_lock ( &Cfg_satellite.lib->synchro );                               /* Ajout a la liste */
+    Cfg_satellite.Liste_entreeTOR = g_slist_append ( Cfg_satellite.Liste_entreeTOR, GINT_TO_POINTER(num) );
+    pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
@@ -251,6 +256,22 @@
        xmlTextWriterEndElement(writer);                                                      /* End EAxxx */
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping EAxxx !!");
+/*------------------------------------------- Dumping EAxxx ----------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping Exxx !!");
+
+    while (Cfg_satellite.Liste_entreeTOR)
+     { gint num;
+       pthread_mutex_lock( &Cfg_satellite.lib->synchro );                /* Récupération de l'E a traiter */
+       num = GPOINTER_TO_INT(Cfg_satellite.Liste_entreeTOR->data);
+       Cfg_satellite.Liste_entreeTOR = g_slist_remove( Cfg_satellite.Liste_entreeTOR, GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
+
+       xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeTOR");               /* Start Exxx */
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",  "%d", num );
+       xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"etat", "%d", E(num) );
+       xmlTextWriterEndElement(writer);                                                       /* End Exxx */
+     }
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping Exxx !!");
 
 
     retour = xmlTextWriterEndElement(writer);                                       /* End SatelliteInfos */
@@ -351,9 +372,7 @@
        goto end;
      }
 
-/*  Abonner_distribution_sortie    ( Satellite_Gerer_sortie );   /* Abonnement à la diffusion des entrees */
-/*  Abonner_distribution_sortieANA ( Satellite_Gerer_sortieANA );/* Abonnement à la diffusion des entrees */
-/*  Abonner_distribution_entree    ( Satellite_Gerer_entree );   /* Abonnement à la diffusion des entrees */
+    Abonner_distribution_entree    ( Satellite_Gerer_entree );   /* Abonnement à la diffusion des entrees */
     Abonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
 
     Cfg_satellite.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
@@ -382,7 +401,7 @@
      }
 
    Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
-/* Desabonner_distribution_sortie ( Satellite_Gerer_sortie );    /* Abonnement à la diffusion des sorties */
+   Desabonner_distribution_entree    ( Satellite_Gerer_entree    );/* Abonnement à la diffusion des entrees */
 
 end:
     Satellite_Liberer_config();                                  /* Liberation de la configuration du thread */

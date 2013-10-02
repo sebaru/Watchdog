@@ -258,13 +258,18 @@
        return;
      }
 
-    if ( (E(num) && !etat) || (!E(num) && etat) )
-     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat ); } 
-
-    if (etat)
+    if (etat)                                                            /* Changement d'etat de l'entrée */
      { Partage->e[ num>>3 ] |=  (1<<(num%8)); }
     else
      { Partage->e[ num>>3 ] &= ~(1<<(num%8)); }
+
+    if ( (E(num) && !etat) || (!E(num) && etat) )
+     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );
+       pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
+       Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
+                                                    GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+     }
   }
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
@@ -350,7 +355,7 @@
 
     if (need_arch)
      { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech );            /* Archivage si besoin */
-       Partage->ea[ num ].last_arch = Partage->top;                    /* Communications aux satellites ! */
+       Partage->ea[ num ].last_arch = Partage->top;                       /* Communications aux threads ! */
        pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
        Partage->com_msrv.liste_ea = g_slist_prepend( Partage->com_msrv.liste_ea,
                                                      GINT_TO_POINTER(num) );

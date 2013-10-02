@@ -37,7 +37,7 @@
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
-    GSList *Liste_entretor;                                        /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_entreeTOR;                                       /* liste de struct MSGDB msg a envoyer */
     GSList *Liste_entreeANA;                                       /* liste de struct MSGDB msg a envoyer */
     gchar send_to_url[128];                               /* URL du master a qui envoyer les informations */
     guint bit_state;                                                            /* Bit B de communication */

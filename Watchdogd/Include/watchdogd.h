@@ -94,10 +94,12 @@
 
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     GSList *liste_msg_repeat;                                      /* liste de struct MSGDB msg a envoyer */
+                                                   /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                             /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_i;                                               /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_a;                                          /* liste de A a traiter dans la ditribution */
-    GSList *liste_ea;                                        /* liste de EA a traiter dans la ditribution */
+    GSList *liste_i;                                         /* liste de I a traiter dans la distribution */
+    GSList *liste_a;                                         /* liste de A a traiter dans la distribution */
+    GSList *liste_ea;                                       /* liste de EA a traiter dans la distribution */
+    GSList *liste_e;                                         /* liste de E a traiter dans la distribution */
 
     pthread_mutex_t synchro_Liste_abonne_msg;                         /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
@@ -196,6 +198,10 @@
  extern void Abonner_distribution_entreeANA ( void (*Gerer_EANA) (gint num) );    /* Dans distrib_EAxxx.c */
  extern void Desabonner_distribution_entreeANA ( void (*Gerer_EANA) (gint num) );
  extern void Gerer_arrive_EAxxx_dls ( void );
+
+ extern void Abonner_distribution_entree ( void (*Gerer_E) (gint num) );           /* Dans distrib_Exxx.c */
+ extern void Desabonner_distribution_entree ( void (*Gerer_E) (gint num) );
+ extern void Gerer_arrive_Exxx_dls ( void );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -538,7 +538,7 @@
                               "Processer_trame : Transceiver message : unknown packet ssous_type %d", trame->sous_type);
         }
      } 
-    else if (trame->type == 0x52 && trame->sous_type == 0x01)
+    else if (trame->type == 0x52 && trame->sous_type == 0x01)                                   /* Oregon */
      { struct MODULE_RFXCOM *module;
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
