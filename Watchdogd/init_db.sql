@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
   `date_usec` int(11) NOT NULL DEFAULT '0',
   `valeur` float NOT NULL DEFAULT '0.0',
   KEY `test` (`type`,`num`,`date_sec`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -267,7 +267,7 @@ CREATE TABLE IF NOT EXISTS `histo_hard` (
   KEY `date_create_sec` (`date_create_sec`),
   KEY `type` (`type`),
   KEY `id` (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
