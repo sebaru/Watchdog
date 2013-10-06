@@ -165,7 +165,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Charger_config_bit_interne: Chargement des configs bit interne depius la base de données               */
+/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données               */
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  static void Charger_config_bit_interne( void )
@@ -564,7 +564,7 @@
           Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo fait" );
         } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import => pas de clear histo" );
 
-       Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
+       Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
         { if (!Config.instance_is_master)
