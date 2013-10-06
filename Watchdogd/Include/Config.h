@@ -77,7 +77,9 @@
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );
- extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread );
+ extern gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom );
+ extern gint Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
+ extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread, gchar *nom_param );
  extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );
 
 #endif

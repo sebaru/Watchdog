@@ -36,7 +36,7 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Retirer_messageDB: Elimination d'un message                                                                */
+/* Retirer_messageDB: Elimination d'un message                                                            */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/

@@ -159,21 +159,87 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
   }
 /**********************************************************************************************************/
-/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */
-/* Entrée: une database de retour et le nom de l'instance_id                                              */
-/* Sortie: FALSE si erreur                                                                                */
+/* Retirer_configDB: Elimination d'un parametre de configuration                                          */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread )
+ gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT nom,valeur"
-                " FROM %s"
-                " WHERE instance_id = '%s' AND nom_thread='%s'",
-                NOM_TABLE_CONFIG, Config.instance_id, nom_thread
-              );                                                                /* order by test 25/01/06 */
+                "DELETE FROM %s WHERE instance_id = '%s' AND nom_thread='%s' AND nom = '%s'",
+                 NOM_TABLE_CONFIG, Config.instance_id, nom_thread, nom );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_configDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/**********************************************************************************************************/
+/* Ajouter_messageDB: Ajout ou edition d'un message                                                       */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
+  { gchar requete[2048];
+    gboolean retour;
+    struct DB *db;
+    gint id;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
+                "('%s','%s','%s','%s')", NOM_TABLE_CONFIG, Config.instance_id,
+                nom_thread,nom,valeur
+              );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_configDB: DB connexion failed" );
+       return(-1);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
+  }
+/**********************************************************************************************************/
+/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */
+/* Entrée: une database de retour et le nom de l'instance_id                                              */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread, gchar *nom_param )
+  { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    if (!nom_param)
+     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                   "SELECT nom,valeur"
+                   " FROM %s"
+                   " WHERE instance_id = '%s' AND nom_thread='%s' ORDER BY nom,valeur",
+                   NOM_TABLE_CONFIG, Config.instance_id, nom_thread
+                 );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                   "SELECT nom,valeur"
+                   " FROM %s"
+                   " WHERE instance_id = '%s' AND nom_thread='%s' AND nom LIKE '%s%%' ORDER BY nom,valeur",
+                   NOM_TABLE_CONFIG, Config.instance_id, nom_thread, nom_param
+                 );                                                                /* order by test 25/01/06 */
+     }
 
     db = Init_DB_SQL();       
     if (!db)

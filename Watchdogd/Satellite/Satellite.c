@@ -65,7 +65,7 @@
                "%s", SATELLITE_DEFAUT_FILE_CA );
     g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "Unknown" );
 
-    if ( ! Recuperer_configDB( &db, "satellite" ) )                     /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, "satellite", NULL ) )               /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                 "Satellite_Lire_config: Database connexion failed. Using Default Parameters" );
        return;
