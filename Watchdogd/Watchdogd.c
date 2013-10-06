@@ -259,7 +259,9 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Sauver_compteur ( void )
-  { Updater_cpthDB();                                                 /* Sauvegarde des compteurs Horaire */
+  { if (Config.instance_is_master == FALSE) return;            /* Seul le master sauvegarde les compteurs */
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Sauver_compteur: Saving CPT" );
+    Updater_cpthDB();                                                 /* Sauvegarde des compteurs Horaire */
     Updater_cpt_impDB();                                          /* Sauvegarde des compteurs d'impulsion */
   }
 /**********************************************************************************************************/
@@ -300,10 +302,12 @@
     sleep(1);
     Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
     while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
-     { Gerer_arrive_MSGxxx_dls();             /* Redistrib des messages DLS vers les clients + Historique */ 
-       Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
-       Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
-       Gerer_arrive_EAxxx_dls();              /* Distribution des changements d'etats entrees Analogiques */
+     { if (Config.instance_is_master == TRUE)
+        { Gerer_arrive_MSGxxx_dls();          /* Redistrib des messages DLS vers les clients + Historique */ 
+          Gerer_arrive_Ixxx_dls();                          /* Distribution des changements d'etats motif */
+          Gerer_arrive_Axxx_dls();                    /* Distribution des changements d'etats sorties TOR */
+          Gerer_arrive_EAxxx_dls();           /* Distribution des changements d'etats entrees Analogiques */
+        }
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: RELOAD" );
@@ -338,8 +342,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Sauvegarde des CPT" );
-          Sauver_compteur();
+        { Sauver_compteur();
           Exporter();
           cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
         }
@@ -564,16 +567,20 @@
        Charger_config_bit_interne ();       /* Chargement des configurations des bit interne depuis la DB */
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */
-        { if (!Config.start_archive)
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Arch Thread is administratively DOWN" ); }
+        { if (!Config.instance_is_master)
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Arch Thread is administratively DOWN (instance is not Master)" ); }
           else if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
 
-          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+          if (!Config.instance_is_master)
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "D.L.S Thread is administratively DOWN (instance is not Master)" ); }
+          else if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
 
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting thread (single mode=true)" ); }
 
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }

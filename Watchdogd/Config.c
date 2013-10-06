@@ -110,7 +110,7 @@
        else
         { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
 
-       Config.start_archive = g_key_file_get_boolean ( gkf, "GLOBAL", "start_archive", NULL );
+       Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
 
 /********************************************* Partie LOG *************************************************/
        Config.log_level = LOG_NOTICE;
@@ -147,6 +147,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config log_level            %d", Config.log_level );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config home                 %s", Config.home );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance_id          %s", Config.instance_id );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config instance is master   %d", Config.instance_is_master );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config librairie_dir        %s", Config.librairie_dir );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db host              %s", Config.db_host );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
@@ -156,7 +157,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config start_archive        %d", Config.start_archive );
   }
 /**********************************************************************************************************/
 /* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */

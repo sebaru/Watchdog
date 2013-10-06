@@ -46,7 +46,8 @@
     guchar crypto_key[TAILLE_CRYPTO_KEY+1];           /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
-    gchar instance_id [ TAILLE_HOME+1 ];                       /* Global ID, unique, de l'instance Watchdog */
+    gchar instance_id [ TAILLE_HOME+1 ];                     /* Global ID, unique, de l'instance Watchdog */
+    gboolean instance_is_master;                           /* TRUE si l'instance est l'instance maitresse */
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_msrv;                                                            /* TRUE si log_override */
     gboolean log_dls;                                                             /* TRUE si log_override */
@@ -56,7 +57,6 @@
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
-    gint start_archive;                                           /* TRUE si thread archive start at boot */
   };
 
  #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
