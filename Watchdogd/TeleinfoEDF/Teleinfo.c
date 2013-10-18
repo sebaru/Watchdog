@@ -216,7 +216,7 @@
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
               }
-             else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO-cpt) nbr_octet_lu += cpt;/* detection d'un caractere */
+             else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO) nbr_octet_lu += cpt;/* detection d'un caractere */
              else { nbr_octet_lu = 0;                                          /* Depassement de tampon ! */
                     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
