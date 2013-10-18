@@ -183,7 +183,8 @@
      }
     else { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,"Acces TELEINFO FD=%d", Cfg_teleinfo.fd ); }
 
-    nbr_octet_lu = 0;
+    nbr_octet_lu = 0;                                           /* Initialisation des compteurs et buffer */
+    memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
@@ -207,14 +208,18 @@
        if (retval>=0 && FD_ISSET(Cfg_teleinfo.fd, &fdselect) )
         { int cpt;
 
-          cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu, 1 );
+          cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu - 1, 1 );
           if (cpt>0)
-           { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')
+           { if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO-cpt) nbr_octet_lu += cpt;/* detection d'un caractere */
+             else { nbr_octet_lu = 0;                                          /* Depassement de tampon ! */
+                    memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
+                  }
+             
+             if (Cfg_teleinfo.buffer[nbr_octet_lu-1] == '\n')
               { Processer_trame();
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
-              } else if (nbr_octet_lu<TAILLE_BUFFER_TELEINFO-cpt) nbr_octet_lu += cpt;
-                else nbr_octet_lu = 0;
+              }
            }
         }
      }
