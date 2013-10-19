@@ -63,7 +63,7 @@
        SB(sat_infos->bit_state, 1);
        sat_infos->last_top = Partage->top;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Satellite_update_infos: Satellite %s, B%d=1, (last_top=%d)",
+                "Satellite_update_infos: Satellite %s, Setting B%d=1, (last_top=%d)",
                  sat_infos->instance_id, sat_infos->bit_state, sat_infos->last_top );
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );

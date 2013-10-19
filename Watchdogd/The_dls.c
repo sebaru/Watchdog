@@ -264,7 +264,7 @@
           default:
                Partage->ea[num].val_ech = 0.0;
         }
-       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
+       pthread_mutex_unslock( &Partage->com_dls.synchro_ea_access );
      }
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { Ajouter_arch( MNEMO_ENTREE_ANA, num, val_avant_ech );         /* Archive au pire toutes les 10 min */
