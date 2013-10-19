@@ -153,7 +153,7 @@
              val_avant_ech = xmlTextReaderGetAttribute (reader, (xmlChar *)"val_avant_ech" );
              if (num && val_avant_ech && in_range)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                         "Http_Traiter_XML_set_internal: setting EA%03d = %08.2f",
+                         "Http_Traiter_XML_set_internal: setting EA%03d = %08.2f (without interpretation)",
                           atoi( (char *)num ), atof( (char *)val_avant_ech )
                         );
                 SEA(atoi( (char *)num ), atof( (char *)val_avant_ech ));

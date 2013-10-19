@@ -138,6 +138,18 @@
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
        g_snprintf( chaine, sizeof(chaine), "          MSgs en REPEAT : reste %d\n", num );
        Admin_write ( connexion, chaine );
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
+       num = g_slist_length( Partage->com_msrv.liste_ea );                            /* liste des repeat */
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des EA     : reste %d\n", num );
+       Admin_write ( connexion, chaine );
+
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
+       num = g_slist_length( Partage->com_msrv.liste_e );                            /* liste des repeat */
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des E      : reste %d\n", num );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "log_level" ) )
      { gchar debug[128], chaine [80];

@@ -283,7 +283,9 @@
         }
        return;
      }
+    pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
     Partage->ea[num].inrange = range;
+    pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
   }
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
@@ -306,6 +308,7 @@
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
         { need_arch = TRUE; }
 
+       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );    /* Protection ecriture de la val_ech */
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
@@ -349,6 +352,7 @@
           default:
                Partage->ea[ num ].val_ech = 0.0;
         }
+       pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
      }
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
