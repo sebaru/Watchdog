@@ -208,7 +208,7 @@
        if (retval>=0 && FD_ISSET(Cfg_teleinfo.fd, &fdselect) )
         { int cpt;
 
-          cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu - 1, 1 );
+          cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu, 1 );
           if (cpt>0)
            { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')                      /* Process de la trame ? */
               { Cfg_teleinfo.buffer[nbr_octet_lu] = 0x0;                        /* Caractère fin de trame */
