@@ -217,9 +217,9 @@
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
               }
              else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)    /* Encore en dessous de la limite ? */
-              { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
+              { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
                          "Run_thread: Get one char : %d, %c (pos %d)",
-                          Cfg_teleinfo.buffer[nbr_octet_lu], Cfg_teleinfo.buffer[nbr_octet_lu], nbr_octet_lu );
+                          Cfg_teleinfo.buffer[nbr_octet_lu], Cfg_teleinfo.buffer[nbr_octet_lu], nbr_octet_lu );*/
                 nbr_octet_lu += cpt;                                 /* Preparation du prochain caractere */
               }
              else { nbr_octet_lu = 0;                                          /* Depassement de tampon ! */
