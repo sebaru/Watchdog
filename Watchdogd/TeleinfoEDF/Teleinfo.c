@@ -169,8 +169,8 @@
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_teleinfo.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "teleinfo" );
-    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFO sensor" );
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "teleinfoedf" );
+    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFOEDF sensor" );
 
     Cfg_teleinfo.fd = Init_teleinfo();
     if (Cfg_teleinfo.fd<0)                                                   /* On valide l'acces aux ports */
@@ -216,7 +216,12 @@
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
               }
-             else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO) nbr_octet_lu += cpt;/* detection d'un caractere */
+             else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)    /* Encore en dessous de la limite ? */
+              { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
+                         "Run_thread: Get one char : %d, %c (pos %d)",
+                          Cfg_teleinfo.buffer[nbr_octet_lu], Cfg_teleinfo.buffer[nbr_octet_lu], nbr_octet_lu );
+                nbr_octet_lu += cpt;                                 /* Preparation du prochain caractere */
+              }
              else { nbr_octet_lu = 0;                                          /* Depassement de tampon ! */
                     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
