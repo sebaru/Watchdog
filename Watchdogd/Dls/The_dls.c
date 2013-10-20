@@ -86,7 +86,13 @@
 /**********************************************************************************************************/
  float EA_ech( int num )
   { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA) return (Partage->ea[ num ].val_ech);
+    if (num>=0 && num<NBR_ENTRE_ANA)
+     { gfloat val_ech;
+       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );    /* Protection ecriture de la val_ech */
+       val_ech = Partage->ea[ num ].val_ech;
+       pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );  /* Protection ecriture de la val_ech */
+       return ( val_ech );
+     }
     else
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num );
@@ -283,9 +289,7 @@
         }
        return;
      }
-    pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );
     Partage->ea[num].inrange = range;
-    pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
   }
 /**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
