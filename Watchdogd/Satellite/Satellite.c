@@ -50,7 +50,7 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Satellite_Lire_config ( void )
+ gboolean Satellite_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
@@ -65,10 +65,10 @@
                "%s", SATELLITE_DEFAUT_FILE_CA );
     g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "Unknown" );
 
-    if ( ! Recuperer_configDB( &db, "satellite", NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                 "Satellite_Lire_config: Database connexion failed. Using Default Parameters" );
-       return;
+       return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
@@ -106,7 +106,7 @@
              "Satellite_Lire_config: 'send_to_url'     = %s", Cfg_satellite.send_to_url );
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
              "Satellite_Lire_config: 'bit_state'       = %d", Cfg_satellite.bit_state );
-           
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Satellite_Liberer_config : Libere la mémoire allouer précédemment pour lire la config satellite        */
@@ -362,7 +362,7 @@
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
 
-    g_snprintf( Cfg_satellite.lib->admin_prompt, sizeof(Cfg_satellite.lib->admin_prompt), "satellite" );
+    g_snprintf( Cfg_satellite.lib->admin_prompt, sizeof(Cfg_satellite.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_satellite.lib->admin_help,   sizeof(Cfg_satellite.lib->admin_help),   "Manage communications with Master Watchdog" );
 
     if (!Cfg_satellite.enable)
@@ -381,7 +381,7 @@
        sched_yield();
 
        if (Cfg_satellite.lib->Thread_sigusr1)                                /* A-t'on recu un signal USR1 ? */
-        { int nbr_msg, nbr_sortie;
+        { 
 
           Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
 #ifdef bouh

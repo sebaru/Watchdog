@@ -28,6 +28,8 @@
 #ifndef _SATELLITE_H_
  #define _SATELLITE_H_
 
+ #define NOM_THREAD                       "satellite"
+
  #define SATELLITE_DEFAUT_FILE_CA         "cacert.pem"
  #define SATELLITE_DEFAUT_FILE_SERVER     "serveursigne.pem"
  #define SATELLITE_DEFAUT_FILE_KEY        "serveurkey.pem"
@@ -50,5 +52,6 @@
  } Cfg_satellite;
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Satellite_Lire_config ( void );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

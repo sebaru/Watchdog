@@ -30,8 +30,8 @@
  #include "Satellite.h"
 
 /**********************************************************************************************************/
-/* Admin_master: Gere une commande 'admin masterdepuis une connexion admin                              */
-/* Entrée: le connexion et la ligne de commande                                                              */
+/* Admin_master: Gere une commande 'admin masterdepuis une connexion admin                                */
+/* Entrée: le connexion et la ligne de commande                                                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
@@ -40,42 +40,13 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'Satellite'\n" );
-       Admin_write ( connexion, "  param_list              - List all parameters\n" );
-       Admin_write ( connexion, "  param_set param value   - Set parameter to value\n" );
-       Admin_write ( connexion, "  param_del param         - Erase parameter\n" );
-       Admin_write ( connexion, "  param_reload            - Reload config from Database\n" );
+       Admin_write ( connexion, "  reload            - Reload config from Database\n" );
        Admin_write ( connexion, "  help                    - This help\n" );
      } else
-
-    if ( ! strcmp ( commande, "param_list" ) )
-     { gchar *nom, *valeur;
-       struct DB *db;
-
-       if ( ! Recuperer_configDB( &db, "satellite", NULL ) )            /* Connexion a la base de données */
-        { g_snprintf(chaine, sizeof(chaine), "Database connexion failed\n" );
-          Admin_write ( connexion, chaine );
-        }
-       else  while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-        { g_snprintf(chaine, sizeof(chaine), "  Instance_id %s, Thread %s -> %s = %s\n",
-                     Config.instance_id, "satellite", nom, valeur );
-          Admin_write ( connexion, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "param_set" ) )
-     { gchar param[80],valeur[80];
-       gboolean retour;
-       sscanf ( ligne, "%s %s %s", commande, param, valeur );        /* Découpage de la ligne de commande */
-       retour = Ajouter_configDB( "satellite", param, valeur );
-       g_snprintf( chaine, sizeof(chaine), " Adding %s = %s -> %s\n", param, valeur,
-                   (retour ? "Success" : "Failed") );
-       Admin_write ( connexion, chaine );
-     } else
-    if ( ! strcmp ( commande, "param_del" ) )
-     { gchar param[80];
-       gboolean retour;
-       sscanf ( ligne, "%s %s", commande, param );                   /* Découpage de la ligne de commande */
-       retour = Retirer_configDB( "satellite", param );
-       g_snprintf( chaine, sizeof(chaine), " Erasing %s -> %s\n", param,
+    if ( ! strcmp ( commande, "reload" ) )                /* Rechargement de la configuration en Database */
+     { gboolean retour;
+       retour = Satellite_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Satellite Parameters -> %s\n",
                    (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
      } else

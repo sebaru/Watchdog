@@ -45,6 +45,7 @@
        Admin_write ( connexion, "  ident                 - ID du serveur Watchdog\n" );
        Admin_write ( connexion, "  ping                  - Ping Watchdog\n" );
        Admin_write ( connexion, "  audit                 - Audit bit/s\n" );
+       Admin_write ( connexion, "  dbcfg                 - Manage Threads Parameters in Database\n" );
        Admin_write ( connexion, "  clear_histo           - Clear Histo DB\n" );
        Admin_write ( connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Admin_write ( connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
