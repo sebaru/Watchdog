@@ -359,11 +359,31 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
           return(MHD_YES);
-       }
-      response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
-      MHD_add_response_header (response, "Content-Type", "image/jpg");
-      MHD_queue_response (connection, MHD_HTTP_OK, response);
-      MHD_destroy_response (response);
+        }
+       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+       MHD_add_response_header (response, "Content-Type", "image/jpg");
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
+       MHD_destroy_response (response);
+     }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
+     { struct stat sbuf;
+       gint fd;
+       fd = open ("favicon.jpg", O_RDONLY);
+       if ( fd == -1 || fstat (fd, &sbuf) == -1)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Http_request : Error /favicon.ico %s", strerror(errno) );
+          if (fd!=-1) close(fd);
+          response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
+                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+          return(MHD_YES);
+        }
+       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+       MHD_add_response_header (response, "Content-Type", "image/jpg");
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
+       MHD_destroy_response (response);
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/xml" ) )
      { struct stat sbuf;
