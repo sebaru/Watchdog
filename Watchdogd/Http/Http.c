@@ -209,6 +209,7 @@
     void *tls_session;
     const union MHD_ConnectionInfo *info;
     gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
+    const gchar *user_agent;
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
     if (client_addr->sa_family == AF_INET)  size = sizeof(struct sockaddr_in);
@@ -244,6 +245,8 @@
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT );
     if ( info ) { client_cert = info->client_cert; }
            else { client_cert = NULL; }
+    user_agent = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
+    if (!user_agent) user_agent = "unknown";
 
     if (tls_session)
      { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
@@ -277,17 +280,18 @@
        size = sizeof(issuer_dn);
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s).",
+                "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s",
                  method, url, version, *upload_data_size,
                  client_host, client_dn, client_service,
-                 gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn
+                 gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn,
+                 user_agent
                );
        gnutls_x509_crt_deinit(client_cert);
      }
     else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                  "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s",
+                  "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s",
                    method, url, version, *upload_data_size,
-                   client_host, client_service
+                   client_host, client_service, user_agent
                 );
     return(TRUE);
   }
