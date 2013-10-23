@@ -305,10 +305,11 @@
                                const char *method, const char *version, 
                                const char *upload_data, 
                                size_t *upload_data_size, void **con_cls )
-  { const char *Wrong_method   = "<html><body>Wrong method. Sorry... </body></html>";
-    const char *Not_found      = "<html><body>URI not found on this server. Sorry... </body></html>";
-    const char *Internal_error = "<html><body>An internal server error has occured!..</body></html>";
-    const char *Authent_error  = "<html><body>Authentification error!..</body></html>";
+  { const char *Wrong_method     = "<html><body>Wrong method. Sorry... </body></html>";
+    const char *Not_found        = "<html><body>URI not found on this server. Sorry... </body></html>";
+    const char *Internal_error   = "<html><body>An internal server error has occured!..</body></html>";
+    const char *Authent_error    = "<html><body>Authentification error!..</body></html>";
+    const char *Options_response = "<html><body>This is the response to HTTP OPTIONS Method!..</body></html>";
     struct MHD_Response *response;
 
     if (Verify_request ( connection, url, method, version, upload_data_size ) == FALSE)
@@ -408,6 +409,13 @@
       MHD_add_response_header (response, "Content-Type", "application/xml");
       MHD_queue_response (connection, MHD_HTTP_OK, response);
       MHD_destroy_response (response);
+     }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_OPTIONS ) )
+     { response = MHD_create_response_from_buffer ( strlen (Options_response)+1,
+                                                   (void*) Options_response, MHD_RESPMEM_PERSISTENT);
+       if (response == NULL) return(MHD_NO);
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
+       MHD_destroy_response (response);
      }
     else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) && strcasecmp( method, MHD_HTTP_METHOD_POST ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method)+1,
