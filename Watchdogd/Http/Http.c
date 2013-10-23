@@ -200,16 +200,16 @@
 /**********************************************************************************************************/
  static gboolean Verify_request( struct MHD_Connection * connection, const char *url, 
                                  const char *method, const char *version, size_t *upload_data_size )
-  { guint listsize;
-    const gnutls_datum_t * pcert;
+  { gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
+    const gchar *user_agent;
     gnutls_certificate_status_t client_cert_status;
     gnutls_x509_crt_t client_cert;
+    const union MHD_ConnectionInfo *info;
+    const gnutls_datum_t * pcert;
     gint ssl_algo, ssl_proto, retour, size;
     struct sockaddr *client_addr;
     void *tls_session;
-    const union MHD_ConnectionInfo *info;
-    gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
-    const gchar *user_agent;
+    guint listsize;
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
     if (client_addr->sa_family == AF_INET)  size = sizeof(struct sockaddr_in);
@@ -217,7 +217,7 @@
     if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Verify_request : GetName failed, wrong family" );
+                "Verify_request :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
        return(FALSE);
      }
     memset( client_host, 0, sizeof(client_host) );
