@@ -88,9 +88,7 @@
   { static gint last_log = 0;
     if (num>=0 && num<NBR_ENTRE_ANA)
      { gfloat val_ech;
-       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );    /* Protection ecriture de la val_ech */
        val_ech = Partage->ea[ num ].val_ech;
-       pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );  /* Protection ecriture de la val_ech */
        return ( val_ech );
      }
     else
@@ -312,7 +310,6 @@
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
         { need_arch = TRUE; }
 
-       pthread_mutex_lock( &Partage->com_dls.synchro_ea_access );    /* Protection ecriture de la val_ech */
        switch ( Partage->ea[num].cmd_type_eana.type )
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
@@ -349,14 +346,16 @@
                Partage->ea[ num ].val_ech = (gfloat)
                   (val_avant_ech*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
                      + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
+               Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_WAGO_750461:
                Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur à l'echelle */ 
+               Partage->ea[ num ].inrange = 1;
                break;
           default:
                Partage->ea[ num ].val_ech = 0.0;
+               Partage->ea[ num ].inrange = 0;
         }
-       pthread_mutex_unlock( &Partage->com_dls.synchro_ea_access );
      }
     else if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
      { need_arch = TRUE; }                                           /* Archive au pire toutes les 10 min */
