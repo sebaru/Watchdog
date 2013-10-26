@@ -201,7 +201,7 @@
  static gboolean Verify_request( struct MHD_Connection * connection, const char *url, 
                                  const char *method, const char *version, size_t *upload_data_size )
   { gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
-    const gchar *user_agent;
+    const gchar *user_agent, *origine;
     gnutls_certificate_status_t client_cert_status;
     gnutls_x509_crt_t client_cert;
     const union MHD_ConnectionInfo *info;
@@ -245,8 +245,12 @@
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT );
     if ( info ) { client_cert = info->client_cert; }
            else { client_cert = NULL; }
+
     user_agent = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     if (!user_agent) user_agent = "unknown";
+
+    origine = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "Origin");
+    if (!origine) origine = "unknown";
 
     if (tls_session)
      { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
@@ -280,18 +284,18 @@
        size = sizeof(issuer_dn);
        gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s",
+                "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
                  method, url, version, *upload_data_size,
                  client_host, client_dn, client_service,
                  gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn,
-                 user_agent
+                 user_agent, origine
                );
        gnutls_x509_crt_deinit(client_cert);
      }
     else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                  "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s",
+                  "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
                    method, url, version, *upload_data_size,
-                   client_host, client_service, user_agent
+                   client_host, client_service, user_agent, origine
                 );
     return(TRUE);
   }
@@ -414,6 +418,9 @@
      { response = MHD_create_response_from_buffer ( strlen (Options_response)+1,
                                                    (void*) Options_response, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
+
+       MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
+       MHD_add_response_header ( response, "Access-Control-Allow-Methods", "GET, POST" );
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
      }
