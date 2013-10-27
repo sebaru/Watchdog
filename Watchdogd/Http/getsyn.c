@@ -44,6 +44,7 @@
     const gchar *syn_id_char;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
+    gchar *x_titanium_id;
     gint retour, syn_id;
     struct DB *db;
 
@@ -166,6 +167,12 @@
     xmlBufferFree(buf);                           /* Libération du buffer dont nous n'avons plus besoin ! */
     if (response == NULL) return(FALSE);       /* Si erreur de creation de la reponse, on sort une erreur */
     MHD_add_response_header (response, "Content-Type", "application/xml");
+
+    x_titanium_id = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "X-Titanium-Id");
+    if (!x_titanium_id) x_titanium_id = "unknown";
+    MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
+    MHD_add_response_header ( response, "X-Titanium-Id", x_titanium_id);
+
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(TRUE);
