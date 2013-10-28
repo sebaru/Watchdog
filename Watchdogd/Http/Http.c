@@ -27,15 +27,15 @@
  
  #include <sys/time.h>
  #include <sys/prctl.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
  #include <string.h>
  #include <unistd.h>
  #include <microhttpd.h>
  #include <libxml/xmlwriter.h>
- #include <sys/types.h>
  #include <sys/socket.h>
- #include <sys/stat.h>
  #include <netinet/in.h>
- #include <fcntl.h>
  #include <netdb.h>
  #include <gnutls/gnutls.h>
  #include <gnutls/x509.h>
@@ -354,25 +354,23 @@
           MHD_destroy_response (response);
         }
      }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
-     { struct stat sbuf;
-       gint fd;
-       fd = open ("anna.jpg", O_RDONLY);
-       if ( fd == -1 || fstat (fd, &sbuf) == -1)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Http_request : Error /gifile %s", strerror(errno) );
-          if (fd!=-1) close(fd);
-          response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif" ) )
+     { if ( Http_Traiter_request_getgif ( connection ) == FALSE)              /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
-          return(MHD_YES);
         }
-       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
-       MHD_add_response_header (response, "Content-Type", "image/jpg");
-       MHD_queue_response (connection, MHD_HTTP_OK, response);
-       MHD_destroy_response (response);
+     }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
+     { if ( Http_Traiter_request_gifile ( connection ) == FALSE)              /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
      { struct stat sbuf;
@@ -421,7 +419,7 @@
 
        MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
        MHD_add_response_header ( response, "Access-Control-Allow-Methods", "GET, POST" );
-       MHD_add_response_header ( response, "Access-Control-Allow-Headers", "x-titanium-id" );
+       MHD_add_response_header ( response, "Access-Control-Allow-Headers", "X-Titanium-Id" );
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
      }

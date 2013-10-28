@@ -74,6 +74,8 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
+ extern gboolean Http_Traiter_request_getgif ( struct MHD_Connection *connection );
+ extern gboolean Http_Traiter_request_gifile ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
                                                      size_t *upload_data_size, void **con_cls );

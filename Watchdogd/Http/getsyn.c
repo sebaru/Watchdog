@@ -41,10 +41,9 @@
  gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection )
   { struct CMD_TYPE_SYNOPTIQUE *syndb;
     struct MHD_Response *response;
-    const gchar *syn_id_char;
+    const gchar *syn_id_char, *x_titanium_id;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
-    gchar *x_titanium_id;
     gint retour, syn_id;
     struct DB *db;
 
