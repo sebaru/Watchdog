@@ -100,11 +100,12 @@
  static void Desactiver_ecoute_admin ( void )
   { close (Fd_ecoute);
     Fd_ecoute = 0;
+    unlink(NOM_SOCKET);                                               /* Suppression du fichier de socket */
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Desactiver_ecoute_admin: socket disabled" );
   }
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin en parametre                                                  */
-/* Entrée: le CLIENT                                                                                */
+/* Entrée: le CLIENT                                                                                      */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Deconnecter_admin ( struct CONNEXION *connexion )

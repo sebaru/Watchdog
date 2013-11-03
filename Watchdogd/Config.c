@@ -187,7 +187,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gint Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
+ gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
   { gchar requete[2048];
     gboolean retour;
     struct DB *db;
@@ -202,17 +202,12 @@
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_configDB: DB connexion failed" );
-       return(-1);
+       return(FALSE);
      }
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
-    if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
-       return(-1);
-     }
-    id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL(&db);
-    return(id);
+    return(retour);
   }
 /**********************************************************************************************************/
 /* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */

@@ -60,7 +60,8 @@
     Partage->taille_partage = sizeof(struct PARTAGE);
     g_snprintf( Partage->version, sizeof(Partage->version), "%s", VERSION );
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (fd<=0)
+
+    if ( fd < 0 )                                                               /* Traitement des erreurs */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Exporter: Open Error on %s. Could not export (%s)",
                  FICHIER_EXPORT, strerror(errno) );
