@@ -199,7 +199,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET valeur='%s' WHERE instance_id='%s',nom_thread='%s',nom='%s'"
+                "UPDATE %s SET valeur='%s' WHERE instance_id='%s',nom_thread='%s',nom='%s'",
                 NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread,nom,valeur
               );
 
