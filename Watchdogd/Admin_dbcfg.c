@@ -39,7 +39,7 @@
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'\n" );
        Admin_write ( connexion, "  list               - List all parameters for 'Thread'\n" );
-       Admin_write ( connexion, "  set name=value     - Set parameter name to value\n" );
+       Admin_write ( connexion, "  set name value     - Set parameter name to value\n" );
        Admin_write ( connexion, "  del name           - Erase parameter name\n" );
        Admin_write ( connexion, "  help               - This help\n" );
      } else
@@ -60,7 +60,7 @@
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
        gboolean retour;
-       sscanf ( ligne, "%s %s=%s", commande, param, valeur );/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s %s", commande, param, valeur );/* Découpage de la ligne de commande */
        retour = Ajouter_configDB( thread, param, valeur );
        g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Adding %s = %s -> %s\n",
                    Config.instance_id, thread, param, valeur,
