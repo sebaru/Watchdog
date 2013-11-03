@@ -38,10 +38,10 @@
     sscanf ( ligne, "%s", commande );                     /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'\n" );
-       Admin_write ( connexion, "  'thread' list           - List all parameters for 'Thread'\n" );
-       Admin_write ( connexion, "  'thread' set name=value - Set parameter name to value\n" );
-       Admin_write ( connexion, "  'thread' del name       - Erase parameter name\n" );
-       Admin_write ( connexion, "  help                    - This help\n" );
+       Admin_write ( connexion, "  list               - List all parameters for 'Thread'\n" );
+       Admin_write ( connexion, "  set name=value     - Set parameter name to value\n" );
+       Admin_write ( connexion, "  del name           - Erase parameter name\n" );
+       Admin_write ( connexion, "  help               - This help\n" );
        Admin_write ( connexion, " -- Use inthread command 'dbreload' to reload parameters\n" );
      } else
     if ( ! strcmp ( commande, "list" ) )

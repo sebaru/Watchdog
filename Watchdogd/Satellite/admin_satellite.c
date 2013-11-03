@@ -45,7 +45,7 @@
        Admin_write ( connexion, "  help               - This help\n" );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne );
+     { Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 );
      } else
     if ( ! strcmp ( commande, "reload" ) )                /* Rechargement de la configuration en Database */
      { gboolean retour;
