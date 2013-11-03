@@ -38,61 +38,44 @@
  #define PRESMS   "CDE:"
 
 /**********************************************************************************************************/
-/* Sms_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Sms_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Sms_Lire_config ( void )
-  { gchar *chaine;
-    GKeyFile *gkf;
-    GError *error = NULL;
+ gboolean Sms_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Sms_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);       return;
-     }
-                                                                               /* Positionnement du debug */
-    Cfg_sms.lib->Thread_debug = g_key_file_get_boolean ( gkf, "SMS", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
-    chaine = g_key_file_get_string ( gkf, "SMS", "smsbox_username", NULL );
-    if (!chaine)
-     { Info_new ( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                  "Sms_Lire_config: smsbox_username is missing. Using default." );
-       g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), DEFAUT_SMSBOX_USERNAME );
-     }
-    else
-     { g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), "%s", chaine );
-       g_free(chaine);
+    Cfg_sms.lib->Thread_debug = FALSE;                               /* Settings default parameters */
+    Cfg_sms.enable            = FALSE; 
+    g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username),
+               "%s", DEFAUT_SMSBOX_USERNAME );
+    g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password),
+               "%s", DEFAUT_SMSBOX_PASSWORD );
+
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
 
-    chaine = g_key_file_get_string ( gkf, "SMS", "smsbox_password", NULL );
-    if (!chaine)
-     { Info_new ( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                  "Sms_Lire_config: smsbox_password is missing. Using default." );
-       g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password), DEFAUT_SMSBOX_PASSWORD );
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+                "Sms_Lire_config: '%s' = %d", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "smsbox_username" ) )
+        { g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "smsbox_password" ) )
+        { g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password),  "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_sms.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_sms.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                   "Sms_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
      }
-    else
-     { g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password), "%s", chaine );
-       g_free(chaine);
-     }
-
-    Cfg_sms.recipients = g_key_file_get_string_list ( gkf, "SMS", "recipients", NULL, NULL );
-    if (!Cfg_sms.recipients)
-     { Info_new ( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                  "Sms_Lire_config: recipients are missing." );
-     }
-
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Sms_Liberer_config : Libere la mémoire allouer précédemment pour lire la config sms                  */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Sms_Liberer_config ( void )
-  { g_strfreev ( Cfg_sms.recipients );
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */
@@ -178,15 +161,19 @@
 /* Sortie : booléen, TRUE/FALSE                                                                           */
 /**********************************************************************************************************/
  static gboolean Sms_recipient_authorized ( const gchar *tel )
-  { gchar **liste;
-    gint cpt = 0;
-    if (!Cfg_sms.recipients) return(FALSE);                        /* Si aucun destinataire, retour FALSE */
-    liste = Cfg_sms.recipients;
-    while (liste[cpt])
-     { if ( ! strncmp ( tel, liste[cpt], strlen(liste[cpt]) ) ) return(TRUE);
-       cpt++;
+  { gboolean found = FALSE;
+    gchar *nom, *dbtel;
+    struct DB *db;
+
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, "recipient" ) )         /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Sms_recipient_authorized: Database connexion failed." );
      }
-    return(FALSE);
+    else while (Recuperer_configDB_suite( &db, &nom, &dbtel ) )   /* Récupération d'une config dans la DB */
+     { if ( ! g_ascii_strcasecmp ( dbtel, tel ) )
+        { found = TRUE; }
+     }
+    return(found);
   }
 /**********************************************************************************************************/
 /* Traiter_commande_sms: Fonction appeler pour traiter la commande sms recu par le telephone              */
@@ -463,8 +450,15 @@
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_sms.lib->Thread_run = TRUE;                                                 /* Le thread tourne ! */
 
-    g_snprintf( Cfg_sms.lib->admin_prompt, sizeof(Cfg_sms.lib->admin_prompt), "sms" );
+    g_snprintf( Cfg_sms.lib->admin_prompt, sizeof(Cfg_sms.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_sms.lib->admin_help,   sizeof(Cfg_sms.lib->admin_help),   "Manage SMS system" );
+
+    if (!Cfg_sms.enable)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread is not enabled in config. Shutting Down %p",
+                 pthread_self() );
+       goto end;
+     }
 
     Abonner_distribution_message ( Sms_Gerer_message );               /* Abonnement à la diffusion des messages */
 
@@ -509,22 +503,23 @@
            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                       "Envoi_sms_gsm: Envoi trop tot !! (%s)", msg->libelle_sms ); }
           else 
-           { gchar **liste;
-             gint cpt = 0;
-             liste = Cfg_sms.recipients;
-             while (liste[cpt])
-              { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, liste[cpt] );
-                if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, liste[cpt] );
-                cpt++;
+           { gchar *nom, *tel;
+             struct DB *db;
+             if ( ! Recuperer_configDB( &db, NOM_THREAD, "recipient" ) )/* Connexion a la base de données */
+              { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                         "Run_thread: Database connexion failed. Could not send SMS." );
+              }
+             else while (Recuperer_configDB_suite( &db, &nom, &tel ) )      /* Récupération des tel in DB */
+              { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, tel );
+                if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, tel );
               }
            }
         }
        g_free( msg );
      }
-
     Desabonner_distribution_message ( Sms_Gerer_message );  /* Desabonnement de la diffusion des messages */
-    Sms_Liberer_config();                                     /* Liberation de la configuration du thread */
 
+end:
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_sms.lib->TID = 0;                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

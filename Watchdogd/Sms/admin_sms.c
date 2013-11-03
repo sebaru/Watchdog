@@ -40,6 +40,8 @@
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
+       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  reload                - Reload config from Database\n" );
        Admin_write ( connexion, "  sms smsbox message    - Send 'message' via smsbox\n" );
        Admin_write ( connexion, "  sms gsm    message    - Send 'message' via gsm\n" );
        Admin_write ( connexion, "  help                  - This help\n" );
@@ -56,6 +58,16 @@
        sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
        Envoyer_sms_smsbox_text ( ligne + 7 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
+       Admin_write ( connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 );
+     } else
+    if ( ! strcmp ( commande, "reload" ) )                /* Rechargement de la configuration en Database */
+     { gboolean retour;
+       retour = Sms_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Sms Parameters -> %s\n",
+                   (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );

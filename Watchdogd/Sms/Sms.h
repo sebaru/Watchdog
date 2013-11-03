@@ -28,6 +28,8 @@
 #ifndef _SMS_H_
  #define _SMS_H_
 
+ #define NOM_THREAD                     "sms"
+
  #define TOP_MIN_ENVOI_SMS     1200                           /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */
  #define TAILLE_SMSBOX_PASSWORD   32                        /* Nombre de caractere du mot de passe SMSBOX */
@@ -37,13 +39,14 @@
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean enable;                                                /* Is this tread is enabled at boot ? */
     GSList *Liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
-    gchar **recipients;
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
  } Cfg_sms;
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Sms_Lire_config ( void );
  extern void Envoyer_sms_smsbox_text ( gchar *texte );                                      /* Dans Sms.c */
  extern void Envoyer_sms_gsm_text ( gchar *texte );
 #endif

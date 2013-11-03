@@ -72,7 +72,9 @@
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     {      if ( ! g_ascii_strcasecmp ( nom, "https_file_cert" ) )
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,                   /* Print Config */
+                "Satellite_Lire_config: '%s' = %d", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "https_file_cert" ) )
         { g_snprintf( Cfg_satellite.https_file_cert, sizeof(Cfg_satellite.https_file_cert), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "https_file_key" ) )
         { g_snprintf( Cfg_satellite.https_file_key,  sizeof(Cfg_satellite.https_file_key),  "%s", valeur ); }
@@ -91,30 +93,7 @@
                    "Satellite_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
         }
      }
-                                                                                          /* Print Config */
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'enable'          = %d", Cfg_satellite.enable );
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'debug'           = %d", Cfg_satellite.lib->Thread_debug );
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'https_file_cert' = %s", Cfg_satellite.https_file_cert );
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'https_file_key'  = %s", Cfg_satellite.https_file_key );
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'https_file_ca'   = %s", Cfg_satellite.https_file_ca );
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'send_to_url'     = %s", Cfg_satellite.send_to_url );
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-             "Satellite_Lire_config: 'bit_state'       = %d", Cfg_satellite.bit_state );
     return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Satellite_Liberer_config : Libere la mémoire allouer précédemment pour lire la config satellite        */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Satellite_Liberer_config ( void )
-  {
   }
 /**********************************************************************************************************/
 /* Satellite_Gerer_message: Fonction d'abonné appellé lorsqu'une EANA est modifiée.                       */
@@ -404,7 +383,6 @@
    Desabonner_distribution_entree    ( Satellite_Gerer_entree    );/* Abonnement à la diffusion des entrees */
 
 end:
-    Satellite_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_satellite.lib->TID = 0;                              /* On indique au satellite que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
