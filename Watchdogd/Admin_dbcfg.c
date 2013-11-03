@@ -32,10 +32,10 @@
 /* Entrée: le connexion et la ligne de commande                                                           */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_dbcfg ( struct CONNEXION *connexion, gchar *ligne )
-  { gchar thread[128], commande[128], chaine[128];
+ void Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne )
+  { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s %s", thread, commande );                     /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                     /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'\n" );
        Admin_write ( connexion, "  'thread' list           - List all parameters for 'Thread'\n" );
@@ -78,7 +78,7 @@
                    (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
      } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " Unknown DBCFG command : %s\n", ligne );
        Admin_write ( connexion, chaine );
      }
   }

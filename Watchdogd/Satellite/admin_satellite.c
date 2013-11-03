@@ -40,8 +40,12 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'Satellite'\n" );
-       Admin_write ( connexion, "  reload            - Reload config from Database\n" );
-       Admin_write ( connexion, "  help                    - This help\n" );
+       Admin_write ( connexion, "  dbcfg ...          - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  reload             - Reload config from Database\n" );
+       Admin_write ( connexion, "  help               - This help\n" );
+     } else
+    if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne );
      } else
     if ( ! strcmp ( commande, "reload" ) )                /* Rechargement de la configuration en Database */
      { gboolean retour;
