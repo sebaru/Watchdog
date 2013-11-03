@@ -191,13 +191,6 @@
   { gchar requete[2048];
     gboolean retour;
     struct DB *db;
-    gint id;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
-                "('%s','%s','%s','%s')", NOM_TABLE_CONFIG, Config.instance_id,
-                nom_thread,nom,valeur
-              );
 
     db = Init_DB_SQL();       
     if (!db)
@@ -205,7 +198,21 @@
        return(FALSE);
      }
 
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET valeur='%s' WHERE instance_id='%s',nom_thread='%s',nom='%s'"
+                NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread,nom,valeur
+              );
+
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    if (retour == FALSE)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                  "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
+                  "('%s','%s','%s','%s')", NOM_TABLE_CONFIG, Config.instance_id,
+                  nom_thread,nom,valeur
+                );
+
+       retour = Lancer_requete_SQL ( db, requete );                        /* Execution de la requete SQL */
+     }
     Libere_DB_SQL(&db);
     return(retour);
   }
