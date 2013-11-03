@@ -42,7 +42,6 @@
        Admin_write ( connexion, "  set name=value     - Set parameter name to value\n" );
        Admin_write ( connexion, "  del name           - Erase parameter name\n" );
        Admin_write ( connexion, "  help               - This help\n" );
-       Admin_write ( connexion, " -- Use inthread command 'dbreload' to reload parameters\n" );
      } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar *nom, *valeur;
@@ -61,7 +60,7 @@
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
        gboolean retour;
-       sscanf ( ligne, "%s %s %s=%s", thread, commande, param, valeur );/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s=%s", commande, param, valeur );/* Découpage de la ligne de commande */
        retour = Ajouter_configDB( thread, param, valeur );
        g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Adding %s = %s -> %s\n",
                    Config.instance_id, thread, param, valeur,
@@ -71,7 +70,7 @@
     if ( ! strcmp ( commande, "del" ) )
      { gchar param[80];
        gboolean retour;
-       sscanf ( ligne, "%s %s %s", thread, commande, param );        /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, param );        /* Découpage de la ligne de commande */
        retour = Retirer_configDB( thread, param );
        g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Erasing %s -> %s\n",
                    Config.instance_id, thread, param,
