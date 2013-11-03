@@ -199,8 +199,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET valeur='%s' WHERE instance_id='%s',nom_thread='%s',nom='%s'",
-                NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread,nom,valeur
+                "UPDATE %s SET valeur='%s' WHERE instance_id='%s' AND nom_thread='%s' AND nom='%s'",
+                NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread, nom
               );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
