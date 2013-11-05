@@ -45,9 +45,9 @@
  extern void Admin_dls ( struct CONNEXION *connexion, gchar *ligne );
  extern void Admin_set ( struct CONNEXION *connexion, gchar *ligne );
  extern void Admin_get ( struct CONNEXION *connexion, gchar *ligne );
- extern  void Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne );
+ extern gboolean Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne );
  extern void Admin_write ( struct CONNEXION *connexion, gchar *chaine );
- extern  void Processer_commande_admin ( struct CONNEXION *connexion, gchar *user, gchar *host, gchar *ligne );
+ extern void Processer_commande_admin ( struct CONNEXION *connexion, gchar *user, gchar *host, gchar *ligne );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

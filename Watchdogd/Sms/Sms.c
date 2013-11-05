@@ -78,6 +78,202 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
+/* Retirer_smsDB: Elimination d'un sms                                                                    */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Retirer_smsDB ( struct SMSDB *sms )
+  { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Retirer_smsDB: Database Connection Failed" );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_SMS, sms->id );
+
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( &db );
+    Cfg_sms.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
+    return(retour);
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_smsDB: Recupération de la liste des ids des smss                                    */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static gboolean Recuperer_smsDB ( struct DB *db )
+  { gchar requete[512];
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,enable,phone,name,phone_send_command,phone_receive_sms "
+                " FROM %s WHERE instance_id='%s' ORDER BY name", NOM_TABLE_SMS, Config.instance_id );
+
+    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_smsDB: Recupération de la liste des ids des smss                                    */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static struct SMSDB *Recuperer_smsDB_suite( struct DB *db )
+  { struct SMSDB *sms;
+
+    Recuperer_ligne_SQL(db);                              /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( db );
+       return(NULL);
+     }
+
+    sms = (struct SMSDB *)g_try_malloc0( sizeof(struct SMSDB) );
+    if (!sms) Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR, "Recuperer_smsDB_suite: Erreur allocation mémoire" );
+    else
+     { g_snprintf( sms->phone, sizeof(sms->phone), "%s", db->row[2] );
+       g_snprintf( sms->name,  sizeof(sms->name),  "%s", db->row[3] );
+       sms->id                 = atoi(db->row[0]);
+       sms->enable             = atoi(db->row[1]);
+       sms->phone_send_command = atoi(db->row[4]);
+       sms->phone_receive_sms  = atoi(db->row[5]);
+     }
+    return(sms);
+  }
+/**********************************************************************************************************/
+/* Modifier_smsDB: Modification d'un sms Watchdog                                                         */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ static gint Ajouter_modifier_smsDB( struct SMSDB *sms, gboolean ajout )
+  { gchar *phone, *name;
+    gboolean retour_sql;
+    gchar requete[2048];
+    struct DB *db;
+    gint retour;
+
+    phone = Normaliser_chaine ( sms->phone );                            /* Formatage correct des chaines */
+    if (!phone)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Ajouter_modifier_smsDB: Normalisation phone impossible" );
+       return(-1);
+     }
+    name = Normaliser_chaine ( sms->name );                              /* Formatage correct des chaines */
+    if (!name)
+     { g_free(phone);
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Ajouter_modifier_smsDB: Normalisation name impossible" );
+       return(-1);
+     }
+
+    if (ajout == TRUE)
+     { g_snprintf( requete, sizeof(requete),
+                   "INSERT INTO %s"
+                   "(instance_id,enable,phone,name,phone_send_command,phone_receive_sms) "
+                   "VALUES (%s,%d,'%s','%s',%d,%d)",
+                   NOM_TABLE_SMS, Config.instance_id,
+                   sms->enable, phone, name, sms->phone_send_command, sms->phone_receive_sms
+                 );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                   "UPDATE %s SET "             
+                   "enable=%d,phone='%s',name='%s',phone_send_command=%d,phone_receive_sms=%d"
+                   " WHERE id=%d",
+                   NOM_TABLE_SMS, sms->enable, phone, name, sms->phone_send_command, sms->phone_receive_sms,
+                   sms->id );
+     }
+    g_free(name);
+    g_free(phone);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Ajouter_modifier_smsDB: Database Connection Failed" );
+       return(-1);
+     }
+
+    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
+    if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );    /* Retourne le nouvel ID sms */
+       else retour = 0;
+     }
+    else retour = -1;
+    Libere_DB_SQL( &db );
+    Cfg_sms.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
+    return ( retour );                                            /* Pas d'erreur lors de la modification */
+  }
+/**********************************************************************************************************/
+/* Modifier_smsDB: Modification d'un sms Watchdog                                                         */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gint Modifier_smsDB( struct SMSDB *sms )
+  { return ( Ajouter_modifier_smsDB( sms, FALSE ) );
+  }
+/**********************************************************************************************************/
+/* Modifier_smsDB: Modification d'un sms Watchdog                                                         */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gint Ajouter_smsDB( struct SMSDB *sms )
+  { return ( Ajouter_modifier_smsDB( sms, TRUE ) );
+  }
+/**********************************************************************************************************/
+/* Charger_tous_sms: Requete la DB pour charger les modules sms                                           */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de modules trouvé                                                                    */
+/**********************************************************************************************************/
+ static gboolean Charger_tous_sms ( void  )
+  { struct SMSDB *sms;
+    struct DB *db;
+    gint cpt = 0;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Charger_tous_sms: Database Connection Failed" );
+       return(FALSE);
+     }
+
+/********************************************** Chargement des modules ************************************/
+    if ( ! Recuperer_smsDB( db ) )
+     { Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Charger_tous_sms: Recuperer_sms Failed" );
+       return(FALSE);
+     }
+
+    Cfg_sms.Liste_SMS = NULL;
+    while ( (sms = Recuperer_smsDB_suite( db )) != NULL)
+     { cpt++;
+       pthread_mutex_lock( &Cfg_sms.lib->synchro );
+       Cfg_sms.Liste_SMS = g_slist_prepend ( Cfg_sms.Liste_SMS, sms );
+       pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
+                "Charger_tous_sms: id = %03d, phone=%s, name=%s",
+                 sms->id, sms->phone, sms->name );
+     }
+    Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Charger_tous_sms: %03d SMS found  !", cpt );
+
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Decharger_tous_Decharge l'ensemble des modules SMS                                                     */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Decharger_tous_SMS ( void  )
+  { struct SMSDB *sms;
+    pthread_mutex_lock( &Cfg_sms.lib->synchro );
+    while ( Cfg_sms.Liste_SMS )
+     { sms = (struct SMSDB *)Cfg_sms.Liste_SMS->data;
+       Cfg_sms.Liste_SMS = g_slist_remove ( Cfg_sms.Liste_SMS, sms );
+       g_free(sms);
+     }
+    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+  }
+/**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
@@ -460,6 +656,7 @@
        goto end;
      }
 
+    Charger_tous_sms();
     Abonner_distribution_message ( Sms_Gerer_message );               /* Abonnement à la diffusion des messages */
 
     while(Cfg_sms.lib->Thread_run == TRUE)                               /* On tourne tant que necessaire */
@@ -477,6 +674,12 @@
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
 
+       if (Cfg_sms.reload)                   /* Prise en compte des reload conf depuis la console d'admin */
+        { Cfg_sms.reload = FALSE;
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reloading conf" );
+          Decharger_tous_sms();
+          Charger_tous_sms();
+        }          
 /********************************************** Lecture de SMS ********************************************/
        Lire_sms_gsm();
 
@@ -518,6 +721,7 @@
        g_free( msg );
      }
     Desabonner_distribution_message ( Sms_Gerer_message );  /* Desabonnement de la diffusion des messages */
+    Decharger_tous_sms();
 
 end:
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );

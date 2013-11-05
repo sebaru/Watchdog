@@ -272,6 +272,24 @@ CREATE TABLE IF NOT EXISTS `histo_hard` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `sms`
+--
+
+CREATE TABLE IF NOT EXISTS `sms` (
+  `id` int(11) NOT NULL DEFAULT '0',
+  `enable` int(1) NOT NULL,
+  `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
+  `phone` text COLLATE utf8_unicode_ci NOT NULL,
+  `name` text COLLATE utf8_unicode_ci NOT NULL,
+  `phone_send_command` int(1) NOT NULL,
+  `phone_receive_sms` int(1) NOT NULL ,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `icons`
 --
 

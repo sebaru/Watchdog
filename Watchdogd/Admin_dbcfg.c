@@ -30,15 +30,16 @@
 /**********************************************************************************************************/
 /* Admin_dbcfg: Gere une commande 'admin dbcfg' depuis une connexion admin                                */
 /* Entrée: le connexion et la ligne de commande                                                           */
-/* Sortie: Néant                                                                                          */
+/* Sortie: TRUE si un des parametres à été modifié et necessite un rechargement de la conf DB             */
 /**********************************************************************************************************/
- void Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne )
+ gboolean Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                     /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'\n" );
-       Admin_write ( connexion, "  list               - List all parameters for 'Thread'\n" );
+       Admin_write ( connexion, "  list               - List all parameters\n" );
+       Admin_write ( connexion, "  reload             - Reload all Parameters from DB\n" );
        Admin_write ( connexion, "  set name value     - Set parameter name to value\n" );
        Admin_write ( connexion, "  del name           - Erase parameter name\n" );
        Admin_write ( connexion, "  help               - This help\n" );
@@ -66,6 +67,7 @@
                    Config.instance_id, thread, param, valeur,
                   (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
+       return(TRUE);
      } else
     if ( ! strcmp ( commande, "del" ) )
      { gchar param[80];
@@ -76,9 +78,17 @@
                    Config.instance_id, thread, param,
                    (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
+       return(TRUE);
+     } else
+    if ( ! strcmp ( commande, "reload" ) )
+     { g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Reloading ...\n",
+                   Config.instance_id, thread );
+       Admin_write ( connexion, chaine );
+       return(TRUE);
      } else
      { g_snprintf( chaine, sizeof(chaine), " Unknown DBCFG command : %s\n", ligne );
        Admin_write ( connexion, chaine );
      }
+    return(FALSE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

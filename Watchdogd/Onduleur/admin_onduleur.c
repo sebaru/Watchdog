@@ -29,7 +29,7 @@
  #include "Onduleur.h"
 /**********************************************************************************************************/
 /* Admin_ups_reload: Demande le rechargement des conf ONDULEUR                                            */
-/* Entrée: le connexion                                                                                      */
+/* Entrée: le connexion                                                                                   */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_ups_reload ( struct CONNEXION *connexion )
@@ -45,7 +45,7 @@
   }
 /**********************************************************************************************************/
 /* Admin_ups_list : L'utilisateur admin lance la commande "list" en mode ups                              */
-/* Entrée: La connexion connexion ADMIN                                                                      */
+/* Entrée: La connexion connexion ADMIN                                                                   */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_ups_list ( struct CONNEXION *connexion )

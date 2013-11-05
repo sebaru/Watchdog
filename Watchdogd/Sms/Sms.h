@@ -29,6 +29,7 @@
  #define _SMS_H_
 
  #define NOM_THREAD                     "sms"
+ #define NOM_TABLE_SMS                  "sms"
 
  #define TOP_MIN_ENVOI_SMS     1200                           /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */
@@ -40,13 +41,27 @@
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                /* Is this tread is enabled at boot ? */
+    gboolean reload;                                  /* Demande rechargement des SMS en bases de données */
     GSList *Liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
- } Cfg_sms;
+    GSList *Liste_SMS;                            /* Liste de structures SMS issues de la base de données */
+  } Cfg_sms;
+
+ struct SMSDB
+  { gint id;
+    gboolean enable;
+    gchar phone[80];
+    gchar name[80];
+    gboolean phone_send_command;
+    gboolean phone_receive_sms;
+  };
 
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Sms_Lire_config ( void );
+ extern gboolean Retirer_smsDB ( struct SMSDB *sms );
+ extern gint Modifier_smsDB( struct SMSDB *sms );
+ extern gint Ajouter_smsDB( struct SMSDB *sms );
  extern void Envoyer_sms_smsbox_text ( gchar *texte );                                      /* Dans Sms.c */
  extern void Envoyer_sms_gsm_text ( gchar *texte );
 #endif
