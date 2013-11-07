@@ -40,6 +40,7 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'\n" );
        Admin_write ( connexion, "  list               - List all parameters\n" );
        Admin_write ( connexion, "  reload             - Reload all Parameters from DB\n" );
+       Admin_write ( connexion, "  add name value     - Add parameter name and set it to value\n" );
        Admin_write ( connexion, "  set name value     - Set parameter name to value\n" );
        Admin_write ( connexion, "  del name           - Erase parameter name\n" );
        Admin_write ( connexion, "  help               - This help\n" );
@@ -58,12 +59,23 @@
           Admin_write ( connexion, chaine );
         }
      } else
-    if ( ! strcmp ( commande, "set" ) )
+    if ( ! strcmp ( commande, "add" ) )
      { gchar param[80],valeur[80];
        gboolean retour;
        sscanf ( ligne, "%s %s %s", commande, param, valeur );/* Découpage de la ligne de commande */
        retour = Ajouter_configDB( thread, param, valeur );
        g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Adding %s = %s -> %s\n",
+                   Config.instance_id, thread, param, valeur,
+                  (retour ? "Success" : "Failed") );
+       Admin_write ( connexion, chaine );
+       return(TRUE);
+     } else
+    if ( ! strcmp ( commande, "set" ) )
+     { gchar param[80],valeur[80];
+       gboolean retour;
+       sscanf ( ligne, "%s %s %s", commande, param, valeur );/* Découpage de la ligne de commande */
+       retour = Modifier_configDB( thread, param, valeur );
+       g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Setting %s = %s -> %s\n",
                    Config.instance_id, thread, param, valeur,
                   (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );

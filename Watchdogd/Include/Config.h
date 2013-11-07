@@ -79,6 +79,7 @@
  extern void Print_config ( void );
  extern gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom );
  extern gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
+ extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread, gchar *nom_param );
  extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );
 

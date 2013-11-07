@@ -725,6 +725,7 @@
 
 end:
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_sms.lib->Thread_run == FALSE;
     Cfg_sms.lib->TID = 0;                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

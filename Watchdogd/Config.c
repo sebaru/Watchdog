@@ -183,11 +183,11 @@
     return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_messageDB: Ajout ou edition d'un message                                                       */
+/* Ajouter_configDB: Ajout ou edition d'un message                                                        */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
+ static gboolean Ajouter_modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur, gboolean ajout )
   { gchar requete[2048];
     gboolean retour;
     struct DB *db;
@@ -198,24 +198,37 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET valeur='%s' WHERE instance_id='%s' AND nom_thread='%s' AND nom='%s'",
-                NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread, nom
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
-    if (retour == FALSE)
+    if (ajout == FALSE)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                  "UPDATE %s SET valeur='%s' WHERE instance_id='%s' AND nom_thread='%s' AND nom='%s'",
+                   NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread, nom
+                 );
+     }
+    else
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                   "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
                   "('%s','%s','%s','%s')", NOM_TABLE_CONFIG, Config.instance_id,
                   nom_thread,nom,valeur
-                );
-
-       retour = Lancer_requete_SQL ( db, requete );                        /* Execution de la requete SQL */
+                 );
      }
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
+/**********************************************************************************************************/
+/* Modifier_configDB: Modifie un parametre de configuration en base de donnée                             */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
+  { return ( Ajouter_modifier_configDB( nom_thread, nom, valeur, TRUE ) ); }
+/**********************************************************************************************************/
+/* Modifier_configDB: Modifie un parametre de configuration en base de donnée                             */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
+  { return ( Ajouter_modifier_configDB( nom_thread, nom, valeur, FALSE ) ); }
 /**********************************************************************************************************/
 /* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */
 /* Entrée: une database de retour et le nom de l'instance_id                                              */
