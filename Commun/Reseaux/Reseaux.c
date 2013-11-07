@@ -251,7 +251,7 @@ one_again:
           perror("recevoir_reseau (taille=-1 donnees)");
           printf("Errno=%d  EAGAIN=%d EINTR=%d ESPIPE=%d entete.taille_donnes=%d index_donnees=%d\n",
                   err, EAGAIN, EINTR, ESPIPE, connexion->entete.taille_donnees, connexion->index_donnees );
-          return(RECU_RIEN);
+          return(RECU_ERREUR);
         }
        connexion->index_donnees += taille_recue;                                /* Indexage pour la suite */
      }

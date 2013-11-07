@@ -141,11 +141,13 @@
 
        Clients = g_slist_prepend( Clients, connexion );
        Info_new( Config.log, Config.log_msrv, LOG_INFO,
-                "Accueillir_un_admin: Connexion granted to ID=%d", id );
+                "Accueillir_un_admin: Connexion granted to ID=%d. Sending TAG_INTERNAL", id );
        Envoyer_reseau( connexion, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,/* Envoi des infos internes */
                        NULL, connexion->taille_bloc );
        Envoyer_reseau( connexion, TAG_INTERNAL, SSTAG_INTERNAL_END,                 /* Tag de fin */
                        NULL, 0 );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO,
+                "Accueillir_un_admin: TAG_INTERNAL sent to %d", id );
        return(TRUE);
      }
     return(FALSE);

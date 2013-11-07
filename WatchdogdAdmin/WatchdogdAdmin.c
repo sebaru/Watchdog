@@ -230,7 +230,7 @@ ecoute_encore:
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
            { }
           else if ( Reseau_tag(Connexion) == TAG_CONNEXION && Reseau_ss_tag(Connexion) == SSTAG_SERVEUR_OFF )
-           { printf( "\n You've been deconnected\n" );
+           { printf( "\n You've been disconnected\n" );
              Arret=TRUE;
              break;
            }
