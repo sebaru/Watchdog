@@ -78,9 +78,8 @@
  void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... )
   { gchar chaine[512], nom_thread[32];
     va_list ap;
-    if (!log) return;
 
-    if ( override == TRUE || priority <= log->log_level )                      /* LOG_EMERG = 0, DEBUG = 7 */
+    if ( log == NULL || override == TRUE || priority <= log->log_level )                      /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
        g_snprintf( chaine, sizeof(chaine), "%s -> ", nom_thread );
        strcat ( chaine, format );

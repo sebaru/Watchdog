@@ -44,6 +44,8 @@
 
  #define PROMPT   "#Watchdogd*CLI> "
  static struct CONNEXION *Connexion;                                              /* connexion au serveur */
+ static struct LOG *Log;
+ static gint Log_level;
  static gchar Socket_file[128];
  static gboolean Arret;
 /**********************************************************************************************************/
@@ -91,20 +93,22 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static void Lire_ligne_commande( int argc, char *argv[] )
-  { gint help;
+  { gint help, debug;
     gchar *file;
     struct poptOption Options[]= 
      { { "socket",   's', POPT_ARG_STRING,
          &file,        0, "Admin Socket", "FILE" },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
+       { "debug",      'd', POPT_ARG_NONE,
+         &debug,            0, "Debug", NULL },
        POPT_TABLEEND
      };
     poptContext context;
     int rc;
 
     file = NULL;
-    help           = 0;
+    help = debug = 0;
 
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
     while ( (rc = poptGetNextOpt( context )) != -1)                      /* Parse de la ligne de commande */
@@ -122,6 +126,8 @@
        poptFreeContext(context);
        _exit(0);
      }
+    if (!debug) Log_level = LOG_INFO;
+           else Log_level = LOG_DEBUG;
     poptFreeContext( context );                                                     /* Liberation memoire */
  }
 /**********************************************************************************************************/
@@ -179,6 +185,7 @@
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
+    Log = Info_init( argv[0], Log_level );
     sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGIO,   &sig, NULL );                               /* Accrochage du signal a son handler */
