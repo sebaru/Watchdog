@@ -61,11 +61,11 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,                         /* Print Config */
-                "Sms_Lire_config: '%s' = %d", nom, valeur );
+                "Sms_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "smsbox_username" ) )
         { g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "smsbox_password" ) )
-        { g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password),  "%s", valeur ); }
+        { g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_sms.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
