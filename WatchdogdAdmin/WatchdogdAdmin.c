@@ -43,11 +43,11 @@
  #include "config.h"
 
  #define PROMPT   "#Watchdogd*CLI> "
- static struct CONNEXION *Connexion;                                              /* connexion au serveur */
- static struct LOG *Log;
- static gint Log_level;
+ static struct CONNEXION *Connexion= NULL;                                        /* connexion au serveur */
+ static struct LOG *Log = NULL;
+ static gint Log_level = 0;
  static gchar Socket_file[128];
- static gboolean Arret;
+ static gboolean Arret = FALSE;
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin                                                               */
 /* Entrée: Néant                                                                                          */
@@ -185,7 +185,7 @@
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
     Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
 
-    Log = Info_init( argv[0], Log_level );
+    if (Log_level == LOG_DEBUG) Log = Info_init( argv[0], Log_level );
     sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
     sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
     sigaction( SIGIO,   &sig, NULL );                               /* Accrochage du signal a son handler */
@@ -205,7 +205,7 @@
 
     read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
 
-    printf("  --  WatchdogdAdmin  v%s ('quit' to end session)\n", VERSION );
+    printf("  --  WatchdogdAdmin  v%s ('quit' to end session).\n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
     rl_callback_handler_install ( PROMPT, &CB_envoyer_commande_admin );
     for (Arret=FALSE;Arret!=TRUE; )
@@ -217,7 +217,7 @@
        if (retour==-1)
         { gint err;
           err = errno;
-          printf("Erreur select %d=(%s), shuting down\n", err, strerror(errno) );
+          printf("Erreur select %d=(%s), shutting down\n", err, strerror(errno) );
           Arret = TRUE;
         }
 
