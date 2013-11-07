@@ -249,7 +249,8 @@ one_again:
              case EAGAIN    : return( RECU_RIEN );               /* Ressource temporairement indisponible */
            }
           perror("recevoir_reseau (taille=-1 donnees)");
-          printf("Errno=%d  %d %d %d\n", err, EAGAIN, EINTR, ESPIPE );
+          printf("Errno=%d  EAGAIN=%d EINTR=%d ESPIPE=%d entete.taille_donnes=%d index_donnees=%d\n",
+                  err, EAGAIN, EINTR, ESPIPE, connexion->entete.taille_donnees, connexion->index_donnees );
           return(RECU_RIEN);
         }
        connexion->index_donnees += taille_recue;                                /* Indexage pour la suite */
