@@ -263,7 +263,7 @@
 /* Entrée: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Decharger_tous_SMS ( void  )
+ static void Decharger_tous_sms ( void  )
   { struct SMSDB *sms;
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     while ( Cfg_sms.Liste_SMS )
