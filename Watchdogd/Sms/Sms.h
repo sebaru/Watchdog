@@ -45,7 +45,7 @@
     GSList *Liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
-    GSList *Liste_SMS;                            /* Liste de structures SMS issues de la base de données */
+    GSList *Liste_contact_SMS;                    /* Liste de structures SMS issues de la base de données */
   } Cfg_sms;
 
  struct SMSDB

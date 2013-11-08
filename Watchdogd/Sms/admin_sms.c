@@ -45,7 +45,7 @@
     Admin_write ( connexion, chaine );
        
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    liste_modules = Cfg_sms.Liste_SMS;
+    liste_modules = Cfg_sms.Liste_contact_SMS;
     while ( liste_modules )
      { struct SMSDB *sms;
        sms = (struct SMSDB *)liste_modules->data;
@@ -80,7 +80,7 @@
 
        Admin_write ( connexion, "  add enable,send_command,receive_sms,phone,name\n");
        Admin_write ( connexion, "                        - Add a SMS contact\n" );
-       Admin_write ( connexion, "  change id,enable,send_command,receive_sms,phone,name\n");
+       Admin_write ( connexion, "  set id,enable,send_command,receive_sms,phone,name\n");
        Admin_write ( connexion, "                        - Change SMS id\n" );
        Admin_write ( connexion, "  del id                - Delete SMS id\n" );
        Admin_write ( connexion, "  list                  - Liste les contacts SMS\n" );
@@ -105,7 +105,7 @@
           Admin_write ( connexion, chaine );
         }
      }
-    else if ( ! strcmp ( commande, "change" ) )
+    else if ( ! strcmp ( commande, "set" ) )
      { struct SMSDB sms;
        gint retour;
        sscanf ( ligne, "%s %d,%d,%d,%d,%[^,],%[^\n]", commande, /* Découpage de la ligne de commande */

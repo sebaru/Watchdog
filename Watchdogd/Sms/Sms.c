@@ -171,7 +171,7 @@
      { g_snprintf( requete, sizeof(requete),
                    "INSERT INTO %s"
                    "(instance_id,enable,phone,name,phone_send_command,phone_receive_sms) "
-                   "VALUES (%s,%d,'%s','%s',%d,%d)",
+                   "VALUES ('%s',%d,'%s','%s',%d,%d)",
                    NOM_TABLE_SMS, Config.instance_id,
                    sms->enable, phone, name, sms->phone_send_command, sms->phone_receive_sms
                  );
@@ -243,11 +243,11 @@
        return(FALSE);
      }
 
-    Cfg_sms.Liste_SMS = NULL;
+    Cfg_sms.Liste_contact_SMS = NULL;
     while ( (sms = Recuperer_smsDB_suite( db )) != NULL)
      { cpt++;
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       Cfg_sms.Liste_SMS = g_slist_prepend ( Cfg_sms.Liste_SMS, sms );
+       Cfg_sms.Liste_contact_SMS = g_slist_prepend ( Cfg_sms.Liste_contact_SMS, sms );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                 "Charger_tous_sms: id = %03d, phone=%s, name=%s",
@@ -266,9 +266,9 @@
  static void Decharger_tous_sms ( void  )
   { struct SMSDB *sms;
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    while ( Cfg_sms.Liste_SMS )
-     { sms = (struct SMSDB *)Cfg_sms.Liste_SMS->data;
-       Cfg_sms.Liste_SMS = g_slist_remove ( Cfg_sms.Liste_SMS, sms );
+    while ( Cfg_sms.Liste_contact_SMS )
+     { sms = (struct SMSDB *)Cfg_sms.Liste_contact_SMS->data;
+       Cfg_sms.Liste_contact_SMS = g_slist_remove ( Cfg_sms.Liste_contact_SMS, sms );
        g_free(sms);
      }
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
@@ -357,19 +357,18 @@
 /* Sortie : booléen, TRUE/FALSE                                                                           */
 /**********************************************************************************************************/
  static gboolean Sms_recipient_authorized ( const gchar *tel )
-  { gboolean found = FALSE;
-    gchar *nom, *dbtel;
-    struct DB *db;
+  { struct SMSDB *sms;
+    GSList *liste;
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, "recipient" ) )         /* Connexion a la base de données */
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Sms_recipient_authorized: Database connexion failed." );
+    liste = Cfg_sms.Liste_contact_SMS;
+    pthread_mutex_lock( &Cfg_sms.lib->synchro );
+    while ( liste )
+     { sms = (struct SMSDB *)Cfg_sms.Liste_contact_SMS->data;
+       if ( ! g_ascii_strcasecmp ( sms->phone, tel ) ) break;
+       liste = liste->next;
      }
-    else while (Recuperer_configDB_suite( &db, &nom, &dbtel ) )   /* Récupération d'une config dans la DB */
-     { if ( ! g_ascii_strcasecmp ( dbtel, tel ) )
-        { found = TRUE; }
-     }
-    return(found);
+    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+    return( (liste == NULL ? FALSE : TRUE) );
   }
 /**********************************************************************************************************/
 /* Traiter_commande_sms: Fonction appeler pour traiter la commande sms recu par le telephone              */
@@ -725,7 +724,7 @@
 
 end:
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_sms.lib->Thread_run == FALSE;
+    Cfg_sms.lib->Thread_run = FALSE;
     Cfg_sms.lib->TID = 0;                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
