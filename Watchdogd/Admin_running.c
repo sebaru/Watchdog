@@ -53,7 +53,7 @@
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Admin_write ( connexion, "  dls                   - D.L.S. Status\n" );
        Admin_write ( connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n" );
-       Admin_write ( connexion, "  log switch            - Switch log (list, all, none, dls, arch, db, msrv or library name)\n" );
+       Admin_write ( connexion, "  debug switch          - Toggle debug Switch (list, all, none, dls, arch, db, msrv or library name)\n" );
 
        liste = Partage->com_msrv.Librairies;                           /* Parcours de toutes les librairies */
        while(liste)
@@ -72,7 +72,9 @@
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
        gethostname( nom, sizeof(nom) );
-       g_snprintf( chaine, sizeof(chaine), " Watchdogd %s on %s\n", VERSION, nom );
+       g_snprintf( chaine, sizeof(chaine), " Watchdogd %s Instance %s (%s) on %s\n",
+                   (Config.instance_is_master ? "Master" : "Slave"),
+                   Config.instance_id, VERSION, nom,  );
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "setrootpasswd" ) )
@@ -166,10 +168,12 @@
         { Info_change_log_level ( Config.log, LOG_WARNING ); } else
        if ( ! strcmp ( debug, "error"   ) )
         { Info_change_log_level ( Config.log, LOG_ERR     ); }
-       else g_snprintf( chaine, sizeof(chaine), " -- Unknown log level %s\n", debug );
+       else g_snprintf( chaine, sizeof(chaine),
+                       " -- Unknown log level %s. Valid level are : debug, info, notice, warning, error\n",
+                        debug );
        Admin_write ( connexion, chaine );
      } else
-    if ( ! strcmp ( commande, "log" ) )
+    if ( ! strcmp ( commande, "debug" ) )
      { gchar debug[128];
 
        sscanf ( ligne, "%s %s", commande, debug );
@@ -183,7 +187,7 @@
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
              lib->Thread_debug = TRUE;
-             g_snprintf( chaine, sizeof(chaine), "  -> Log enabled for library %s (%s)\n",
+             g_snprintf( chaine, sizeof(chaine), "  -> Debug enabled for library %s (%s)\n",
                          lib->admin_prompt, lib->nom_fichier );
              Admin_write ( connexion, chaine );
              liste = liste->next;
@@ -198,7 +202,7 @@
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
              lib->Thread_debug = FALSE;
-             g_snprintf( chaine, sizeof(chaine), "  -> Log disabled for library %s (%s)\n",
+             g_snprintf( chaine, sizeof(chaine), "  -> Debug disabled for library %s (%s)\n",
                          lib->admin_prompt, lib->nom_fichier );
              Admin_write ( connexion, chaine );
              liste = liste->next;
@@ -208,50 +212,50 @@
         { liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
-             g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for library %s (%s)\n",
+             g_snprintf( chaine, sizeof(chaine), "  -> Debug is %s for library %s (%s)\n",
                          (lib->Thread_debug ? " enabled" : "disabled"),
                          lib->admin_prompt, lib->nom_fichier );
              Admin_write ( connexion, chaine );
              liste = liste->next;
            }
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for db\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for dls\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is %s for dls\n",
                       (Config.log_dls ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for arch\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is %s for arch\n",
                       (Config.log_arch ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is %s for msrv\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is %s for msrv\n",
                       (Config.log_msrv ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         } else
        if ( ! strcmp ( debug, "db"   ) )
         { if (Config.log_db == TRUE) Config.log_db = FALSE;
           else Config.log_db = TRUE;
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for db\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         }
        if ( ! strcmp ( debug, "dls"   ) )
         { if (Config.log_dls == TRUE) Config.log_dls = FALSE;
           else Config.log_dls = TRUE;
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for dls\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for dls\n",
                       (Config.log_dls ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         }
        if ( ! strcmp ( debug, "arch"   ) )
         { if (Config.log_arch == TRUE) Config.log_arch = FALSE;
           else Config.log_arch = TRUE;
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for arch\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for arch\n",
                       (Config.log_arch ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         }
        if ( ! strcmp ( debug, "msrv"   ) )
         { if (Config.log_msrv == TRUE) Config.log_msrv = FALSE;
           else Config.log_msrv = TRUE;
-          g_snprintf( chaine, sizeof(chaine), "  -> Log is now %s for msrv\n",
+          g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for msrv\n",
                       (Config.log_msrv ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
         }
@@ -262,12 +266,12 @@
              if ( ! strcmp ( debug, lib->admin_prompt ) )
               { if (lib->Thread_debug == TRUE)
                  { lib->Thread_debug = FALSE;
-                   g_snprintf( chaine, sizeof(chaine), "  -> Log disabled for library %s (%s)\n",
+                   g_snprintf( chaine, sizeof(chaine), "  -> Debug disabled for library %s (%s)\n",
                                lib->admin_prompt, lib->nom_fichier );
                  }
                 else
                  { lib->Thread_debug = TRUE;
-                   g_snprintf( chaine, sizeof(chaine), "  -> Log enabled for library %s (%s)\n",
+                   g_snprintf( chaine, sizeof(chaine), "  -> Debug enabled for library %s (%s)\n",
                                lib->admin_prompt, lib->nom_fichier );
                  } 
                 Admin_write ( connexion, chaine );
