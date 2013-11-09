@@ -170,7 +170,8 @@
      }
 
     g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                  /* Save for later use */
-    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d):  %s", db->id, requete );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+             "Lancer_requete_SQL (id=%05d): requete NEW    (%s)", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Lancer_requete_SQL (id=%05d): requete FAILED (%s)",
