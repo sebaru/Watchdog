@@ -107,6 +107,7 @@
     Partage->com_db.Liste = g_slist_prepend ( Partage->com_db.Liste, db );
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
+sleep(5);
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
               "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d). Nbr_requete_en_cours=%d",
                Config.db_username, Config.db_database, db->id, taille );
