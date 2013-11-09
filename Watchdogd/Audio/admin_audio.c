@@ -30,14 +30,28 @@
 
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
-/* Entrée: Le connexion d'admin, la ligne a traiter                                                          */
+/* Entrée: Le connexion d'admin, la ligne a traiter                                                       */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[80];
 
+    if (Cfg_audio.lib->Thread_run == FALSE)
+     { Admin_write ( connexion, "\n" );
+       Admin_write ( connexion, "  -- WARNING ----- Thread is not started -----\n");
+       Admin_write ( connexion, "  -- WARNING -- Running config is not loaded !\n" );
+       Admin_write ( connexion, "\n" );
+     }
+
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
+    if ( ! strcmp ( commande, "help" ) )
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
+       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  tell_mp3 num          - Send message num with mp3 format\n" );
+       Admin_write ( connexion, "  tell_espeak num       - Send message num with espeak format\n" );
+       Admin_write ( connexion, "  help                  - This help\n" );
+     } else
     if ( ! strcmp ( commande, "tell_mp3" ) )
      { struct CMD_TYPE_MESSAGE msg;
        sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
@@ -52,13 +66,15 @@
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent (espeak)\n", msg.num );
        Admin_write ( connexion, chaine );
      } else
-    if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
-       Admin_write ( connexion, "  tell_mp3 num          - Send message num with mp3 format\n" );
-       Admin_write ( connexion, "  tell_espeak num       - Send message num with espeak format\n" );
-       Admin_write ( connexion, "  help                  - This help\n" );
-     }
-    else
+    if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Audio_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Audio Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     } else
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );

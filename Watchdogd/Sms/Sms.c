@@ -46,7 +46,7 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_sms.lib->Thread_debug = FALSE;                               /* Settings default parameters */
+    Cfg_sms.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
     Cfg_sms.enable            = FALSE; 
     g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username),
                "%s", DEFAUT_SMSBOX_USERNAME );

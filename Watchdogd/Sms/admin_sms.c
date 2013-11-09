@@ -161,7 +161,7 @@
        Admin_write ( connexion, chaine );
      }
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)    /* Si changement de parametre */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
         { gboolean retour;
           retour = Sms_Lire_config();
           g_snprintf( chaine, sizeof(chaine), " Reloading Sms Thread Parameters from Database -> %s\n",

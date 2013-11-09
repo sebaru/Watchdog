@@ -28,6 +28,8 @@
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
+ #define NOM_THREAD                 "audio"
+
  #define AUDIO_JINGLE                3000                /* Jingle si pas de message au bout de 5 minutes */
  #define NUM_BIT_M_AUDIO_START       4                       /* M5 positionné quand arret diffusion audio */
  #define NUM_BIT_M_AUDIO_END         5                       /* M5 positionné quand arret diffusion audio */
@@ -36,9 +38,11 @@
   { struct LIBRAIRIE *lib;
     GSList *Liste_audio;                                                  /* liste de message a prononcer */
     gint last_audio;                                               /* Date de la derniere emission sonore */
+    gboolean enable;                                                  /* Is this thread enabled at boot ? */
   } Cfg_audio;
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Audio_Lire_config ( void );
  extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
  extern void Jouer_espeak ( struct CMD_TYPE_MESSAGE *msg );
 #endif
