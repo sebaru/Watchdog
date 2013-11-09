@@ -80,6 +80,7 @@
        Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
 
 /********************************************** Partie DATABASE *******************************************/
+       Config.log_db             = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
        Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
        if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
 
@@ -129,7 +130,6 @@
        Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "log_msrv", NULL );
        Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "log_dls", NULL );
        Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "log_ach", NULL );
-       Config.log_db   = g_key_file_get_boolean ( gkf, "LOG", "log_db", NULL );
      } else 
         { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
           g_error_free( error );
