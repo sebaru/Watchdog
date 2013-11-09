@@ -35,7 +35,7 @@
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_sms_list ( struct CONNEXION *connexion )
-  { GSList *liste_modules;
+  { GSList *liste_sms;
     gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS\n" );
@@ -45,10 +45,10 @@
     Admin_write ( connexion, chaine );
        
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    liste_modules = Cfg_sms.Liste_contact_SMS;
-    while ( liste_modules )
+    liste_sms = Cfg_sms.Liste_contact_SMS;
+    while ( liste_sms )
      { struct SMSDB *sms;
-       sms = (struct SMSDB *)liste_modules->data;
+       sms = (struct SMSDB *)liste_sms->data;
 
        g_snprintf( chaine, sizeof(chaine),
                    " Contact_SMS[%03d] -> enable=%d, phone=%s, name=%s\n"
@@ -57,7 +57,7 @@
                    sms->phone_send_command, sms->phone_receive_sms
                  );
        Admin_write ( connexion, chaine );
-       liste_modules = liste_modules->next;
+       liste_sms = liste_sms->next;
      }
     pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
   }
@@ -69,6 +69,13 @@
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
+
+    if (Cfg_sms.lib->Thread_run == FALSE)
+     { Admin_write ( connexion, "\n" );
+       Admin_write ( connexion, "  -- WARNING ----- Thread is not started -----\n");
+       Admin_write ( connexion, "  -- WARNING -- Running config is not loaded !\n" );
+       Admin_write ( connexion, "\n" );
+     }              
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
@@ -133,6 +140,11 @@
           g_snprintf( chaine, sizeof(chaine), " SMS %d (%s)erased\n", sms.id, sms.phone );
           Admin_write ( connexion, chaine );
         }
+     }
+    else if ( ! strcmp ( commande, "reload" ) )
+     { g_snprintf( chaine, sizeof(chaine), " Reloading Contacts List from Database\n" );
+       Admin_write ( connexion, chaine );
+       Cfg_sms.reload = TRUE;
      }
     else if ( ! strcmp ( commande, "gsm" ) )
      { gchar message[80];

@@ -98,7 +98,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_sms.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_sms.reload = TRUE;                         /* Rechargement des contacts SMS en mémoire de travail */
     return(retour);
   }
 /**********************************************************************************************************/
@@ -194,14 +194,14 @@
        return(-1);
      }
 
-    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
+    retour_sql = Lancer_requete_SQL ( db, requete );                           /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );    /* Retourne le nouvel ID sms */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );               /* Retourne le nouvel ID sms */
        else retour = 0;
      }
     else retour = -1;
     Libere_DB_SQL( &db );
-    Cfg_sms.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_sms.reload = TRUE;                         /* Rechargement des contacts SMS en mémoire de travail */
     return ( retour );                                            /* Pas d'erreur lors de la modification */
   }
 /**********************************************************************************************************/
@@ -656,7 +656,7 @@
      }
 
     Charger_tous_sms();
-    Abonner_distribution_message ( Sms_Gerer_message );               /* Abonnement à la diffusion des messages */
+    Abonner_distribution_message ( Sms_Gerer_message );         /* Abonnement à la diffusion des messages */
 
     while(Cfg_sms.lib->Thread_run == TRUE)                               /* On tourne tant que necessaire */
      { usleep(10000);
@@ -692,7 +692,8 @@
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
        msg = Cfg_sms.Liste_sms->data;
        Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, msg );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reste %d a envoyer apres le msg %d",
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
+                "Run_thread: Reste %d a envoyer apres le msg %d",
                  g_slist_length(Cfg_sms.Liste_sms), msg->num );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        if ( msg->id == 0 || Partage->g[msg->num].etat )                 /* On n'envoie que si MSGnum == 1 */
