@@ -192,7 +192,13 @@
               while(liste)
                { lib = (struct LIBRAIRIE *)liste->data;
                  if ( ! strcmp( commande, lib->admin_prompt ) )
-                  { lib->Admin_command ( connexion, ligne + strlen(lib->admin_prompt)+1 );
+                  { if (lib->Thread_run == FALSE)
+                     { Admin_write ( connexion, "\n" );
+                       Admin_write ( connexion, "  -- WARNING ----- Thread is not started -----\n");
+                       Admin_write ( connexion, "  -- WARNING -- Running config is not loaded !\n" );
+                       Admin_write ( connexion, "\n" );
+                     }    
+                    lib->Admin_command ( connexion, ligne + strlen(lib->admin_prompt)+1 ); /* Appel local */
                     found = TRUE;
                   }
                  liste = liste->next;

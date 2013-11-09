@@ -70,13 +70,6 @@
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    if (Cfg_sms.lib->Thread_run == FALSE)
-     { Admin_write ( connexion, "\n" );
-       Admin_write ( connexion, "  -- WARNING ----- Thread is not started -----\n");
-       Admin_write ( connexion, "  -- WARNING -- Running config is not loaded !\n" );
-       Admin_write ( connexion, "\n" );
-     }              
-
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
