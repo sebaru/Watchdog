@@ -166,14 +166,15 @@
 
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Lancer_requete_SQL: Reste un result a FREEer (id=%05d)!", db->id );
+                "Lancer_requete_SQL (id=%05d): Reste un result a FREEer!", db->id );
      }
 
     g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                  /* Save for later use */
     Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d):  %s", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
-     { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: requete failed (id=%05d) (%s)",
-                db->id, (char *)mysql_error(db->mysql) );
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Lancer_requete_SQL (id=%05d): requete FAILED (%s)",
+                 db->id, (char *)mysql_error(db->mysql) );
        return(FALSE);
      }
 
@@ -181,8 +182,9 @@
      { db->result = mysql_store_result ( db->mysql );
        db->free = FALSE;
        if ( ! db->result )
-        { Info_new( Config.log, Config.log_db, LOG_WARNING, "Lancer_requete_SQL: store_result failed (%s)",
-                   (char *) mysql_error(db->mysql) );
+        { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                   "Lancer_requete_SQL (id=%05d): store_result failed (%s)",
+                    db->id, (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
        else 
@@ -190,7 +192,8 @@
           db->nbr_result = mysql_num_rows ( db->result );
         }
      }
-    Info_new( Config.log, Config.log_db, LOG_DEBUG, "Lancer_requete_SQL (id=%05d): OK traite %s", db->id, requete );
+    Info_new( Config.log, Config.log_db, LOG_DEBUG,
+             "Lancer_requete_SQL (id=%05d): requete OK     (%s)", db->id, requete );
     return(TRUE);
   }
 /**********************************************************************************************************/
