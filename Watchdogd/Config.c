@@ -53,9 +53,6 @@
      {
        g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier );
 /********************************************** Partie GLOBAL *********************************************/
-       Config.db_port            = g_key_file_get_integer ( gkf, "GLOBAL", "db_port", NULL );
-       if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
-
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
        if (chaine)
         { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
@@ -80,37 +77,41 @@
        else
         { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_host", NULL );
+       Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
+
+/********************************************** Partie DATABASE *******************************************/
+       Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
+       if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
+
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "host", NULL );
        if (chaine)
         { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", DEFAUT_DB_HOST  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_database", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "database", NULL );
        if (chaine)
         { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_password", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "password", NULL );
        if (chaine)
         { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "db_username", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "username", NULL );
        if (chaine)
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "crypto_key", NULL );
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "crypto_key", NULL );
        if (chaine)
         { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
        else
         { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
-
-       Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
 
 /********************************************* Partie LOG *************************************************/
        Config.log_level = LOG_NOTICE;
