@@ -28,6 +28,8 @@
 #ifndef _TELEINFO_H_
  #define _TELEINFO_H_
 
+ #define NOM_THREAD                       "teleinfo"
+
  #define DEFAUT_PORT_TELEINFO             "/dev/watchdog_TELEINFO"
  #define TAILLE_BUFFER_TELEINFO           25
 
@@ -36,12 +38,13 @@
     gchar port[80];
     gint  min_ea;                /* Numéro de la premiere entrée analogique gérée par la TELEINFO EDF USB */
     gint  fd;                                           /* File Descriptor d'acces au module Teleinfo USB */
+    gint  last_view;                                                        /* Date du dernier echange OK */
     gboolean reload;
+    gboolean enable;                                                                  /* Enable at boot ? */
     gchar buffer[TAILLE_BUFFER_TELEINFO];
  } Cfg_teleinfo;
 
 /*************************************** Définitions des prototypes ***************************************/
-
-
+ extern gboolean Teleinfo_Lire_config ( void );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

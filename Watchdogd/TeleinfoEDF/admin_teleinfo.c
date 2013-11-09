@@ -28,188 +28,43 @@
  #include <glib.h>
  #include "watchdogd.h"
  #include "Teleinfo.h"
-#ifdef bouh
-/**********************************************************************************************************/
-/* Admin_teleinfo_list: Liste les sortieel'ensemble des capteurs teleinfo présent dans la conf            */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_teleinfo_list ( struct CONNEXION *connexion )
-  { GSList *liste_modules;
-    gchar chaine[512];
 
-
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des modules/capteurs RFXCOM\n" );
-    Admin_write ( connexion, chaine );
-
-    pthread_mutex_lock ( &Cfg_teleinfo.lib->synchro );
-    liste_modules = Cfg_teleinfo.Modules_RFXCOM;
-    while ( liste_modules )
-     { struct MODULE_RFXCOM *module;
-       module = (struct MODULE_RFXCOM *)liste_modules->data;
-
-       g_snprintf( chaine, sizeof(chaine),
-                   " RFXCOM[%02d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),ids=%02d %02d %02d %02d housecode=%02d unitcode=%02d\n"
-                   "               e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
-                   "               date_last_view=%03ds\n",
-                   module->teleinfo.id, module->teleinfo.type, module->teleinfo.type,
-                   module->teleinfo.sous_type, module->teleinfo.sous_type,
-                   module->teleinfo.id1, module->teleinfo.id2, module->teleinfo.id3, module->teleinfo.id4, 
-                   module->teleinfo.housecode, module->teleinfo.unitcode,
-                   module->teleinfo.e_min, module->teleinfo.ea_min, module->teleinfo.a_min,
-                   module->teleinfo.libelle, 
-                   (Partage->top - module->date_last_view)/10
-                 );
-       Admin_write ( connexion, chaine );
-       liste_modules = liste_modules->next;
-     }
-    pthread_mutex_unlock ( &Cfg_teleinfo.lib->synchro );
-  }
-/**********************************************************************************************************/
-/* Admin_teleinfo_del: Retire le capteur/module teleinfo dont l'id est en parametre                           */
-/* Entrée: le connexion et l'id                                                                              */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_teleinfo_del ( struct CONNEXION *connexion, gint id )
-  { gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Suppression du module teleinfo %03d\n", id );
-    Admin_write ( connexion, chaine );
-
-    if ( Retirer_teleinfoDB( id ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %03d erased.\n", id ); }
-    else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.\n", id ); }
-    Admin_write ( connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Admin_teleinfo_add: Ajoute un capteur/module RFXCOM                                                      */
-/* Entrée: le connexion et la structure de reference du capteur                                              */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_teleinfo_add ( struct CONNEXION *connexion, struct RFXCOMDB *teleinfo )
-  { gchar chaine[128];
-    gint last_id;
-
-    g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module teleinfo\n" );
-    Admin_write ( connexion, chaine );
-
-    last_id = Ajouter_teleinfoDB( teleinfo );
-    if ( last_id != -1 )
-     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%03d.\n", last_id ); }
-    else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
-    Admin_write ( connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Admin_teleinfo_change: Modifie la configuration d'un capteur RFXCOM                                      */
-/* Entrée: le connexion et la structure de reference du capteur                                              */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_teleinfo_change ( struct CONNEXION *connexion, struct RFXCOMDB *teleinfo )
-  { gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Modification du module teleinfo %03d\n", teleinfo->id );
-    Admin_write ( connexion, chaine );
-
-    if ( Modifier_teleinfoDB( teleinfo ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %03d changed.\n", teleinfo->id ); }
-    else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.\n", teleinfo->id ); }
-    Admin_write ( connexion, chaine );
-  }
-#endif
 /**********************************************************************************************************/
 /* Admin_command: Fonction gerant les différentes commandes possible pour l'administration teleinfo       */
-/* Entrée: le connexion d'admin et la ligne de commande                                                      */
+/* Entrée: le connexion d'admin et la ligne de commande                                                   */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command( struct CONNEXION *connexion, gchar *ligne )
-  { gchar commande[128];
+  { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
-#ifdef bouh
-    if ( ! strcmp ( commande, "add" ) )
-     { struct RFXCOMDB teleinfo;
-       memset( &teleinfo, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,
-                (gint *)&teleinfo.type, (gint *)&teleinfo.sous_type,
-                (gint *)&teleinfo.id1, (gint *)&teleinfo.id2, (gint *)&teleinfo.id3, (gint *)&teleinfo.id4,
-                (gint *)&teleinfo.housecode,(gint *)&teleinfo.unitcode,
-                &teleinfo.e_min, &teleinfo.ea_min, &teleinfo.a_min, teleinfo.libelle );
-       Admin_teleinfo_add ( connexion, &teleinfo );
+    if ( ! strcmp ( commande, "help" ) )
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'TELEINFO'\n" );
+       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  reload                - Reload config from Database\n" );
+       Admin_write ( connexion, "  status                - Affiche les status du device Teleinfo\n" );
      }
-    else if ( ! strcmp ( commande, "change" ) )
-     { struct RFXCOMDB teleinfo;
-       memset( &teleinfo, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,
-                &teleinfo.id, (gint *)&teleinfo.type, (gint *)&teleinfo.sous_type,
-                (gint *)&teleinfo.id1, (gint *)&teleinfo.id2, (gint *)&teleinfo.id3, (gint *)&teleinfo.id4,
-                (gint *)&teleinfo.housecode,(gint *)&teleinfo.unitcode,
-                &teleinfo.e_min, &teleinfo.ea_min, &teleinfo.a_min, teleinfo.libelle );
-       Admin_teleinfo_change ( connexion, &teleinfo );
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Teleinfo_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Teleinfo Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
      }
-    else if ( ! strcmp ( commande, "light1" ) )
-     { gchar trame_send_AC[] = { 0x07, 0x10, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-       gint proto, housecode, unitcode, cmd;
-
-       sscanf ( ligne, "%s %d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
-                &proto, &housecode, &unitcode, &cmd );
-
-       trame_send_AC[0]  = 0x07; /* Taille */
-       trame_send_AC[1]  = 0x10; /* lightning 1 */
-       trame_send_AC[2]  = proto; /* ARC */
-       trame_send_AC[3]  = 0x01; /* Seqnbr */
-       trame_send_AC[4]  = housecode;
-       trame_send_AC[5]  = unitcode;
-       trame_send_AC[6] = cmd;
-       trame_send_AC[7] = 0x0; /* rssi */
-       write ( Cfg_teleinfo.fd, &trame_send_AC, trame_send_AC[0] + 1 );
+    else if ( ! strcmp ( commande, "status" ) )
+     { g_snprintf( chaine, sizeof(chaine), " Port '%s' -> Last_view = %d (%.1ds ago)\n",
+                   Cfg_teleinfo.port, Cfg_teleinfo.last_view, (Partage->top - Cfg_teleinfo.last_view)/10
+                 );
+       Admin_write ( connexion, chaine );
      }
-    else if ( ! strcmp ( commande, "light2" ) )
-     { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-       gint id1, id2, id3, id4, unitcode, cmd, level;
-
-       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
-                &id1, &id2, &id3, &id4, &unitcode, &cmd );
-
-       trame_send_AC[0]  = 0x0B; /* Taille */
-       trame_send_AC[1]  = 0x11; /* lightning 2 */
-       trame_send_AC[2]  = 0x00; /* AC */
-       trame_send_AC[3]  = 0x01; /* Seqnbr */
-       trame_send_AC[4]  = id1 << 6;
-       trame_send_AC[5]  = id2;
-       trame_send_AC[6]  = id3;
-       trame_send_AC[7]  = id4;
-       trame_send_AC[8]  = unitcode;
-       trame_send_AC[9]  = cmd;
-       trame_send_AC[10] = level;
-       trame_send_AC[11] = 0x0; /* rssi */
-       write ( Cfg_teleinfo.fd, &trame_send_AC, trame_send_AC[0] + 1 );
-     }
-    else if ( ! strcmp ( commande, "del" ) )
-     { gint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_teleinfo_del ( connexion, num );
-     }
-    else if ( ! strcmp ( commande, "list" ) )
-     { Admin_teleinfo_list ( connexion );
-     }
-    else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
-       Admin_write ( connexion, "  add type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
-                     "                                         - Ajoute un module\n" );
-       Admin_write ( connexion, "  change ID,type,sstype,id1,id2,id3,id4,housecode,unitcode,e_min,ea_min,a_min,libelle\n"
-                     "                                         - Edite le module ID\n" );
-       Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
-       Admin_write ( connexion, "  light1 proto,housecode,unitcode,cmdnumber\n" );
-       Admin_write ( connexion, "                                         - Envoie une commande RFXCOM\n" );
-       Admin_write ( connexion, "  light2 id1,id2,id3,id4,unitcode,cmdnumber,level\n" );
-       Admin_write ( connexion, "                                         - Envoie une commande RFXCOM\n" );
-       Admin_write ( connexion, "  list                                   - Affiche les status des equipements RFXCOM\n" );
+    else if ( ! strcmp ( commande, "reload" ) )
+     { g_snprintf( chaine, sizeof(chaine), " Reloading Teleinfo from Database\n" );
+       Admin_write ( connexion, chaine );
+       Cfg_teleinfo.reload = TRUE;
      }
     else
-#endif
      { gchar chaine[128];
        g_snprintf( chaine, sizeof(chaine), " Unknown Teleinfo command : %s\n", ligne );
        Admin_write ( connexion, chaine );

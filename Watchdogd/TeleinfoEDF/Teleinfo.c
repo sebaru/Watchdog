@@ -43,42 +43,39 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Teleinfo_Lire_config ( void )
-  { gchar *chaine;
-    GKeyFile *gkf;
-    GError *error = NULL;
+ gboolean Teleinfo_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Teleinfo_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);       return;
-     }
-                                                                               /* Positionnement du debug */
-    Cfg_teleinfo.lib->Thread_debug = g_key_file_get_boolean ( gkf, "TELEINFO", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
+    Cfg_teleinfo.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_teleinfo.enable            = FALSE; 
+    Cfg_teleinfo.min_ea            = 0;
+    g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
+               "%s", DEFAUT_PORT_TELEINFO );
 
-    chaine = g_key_file_get_string ( gkf, "TELEINFO", "port", NULL );
-    if (!chaine)
-     { Info_new ( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                  "Teleinfo_Lire_config: port is missing. Using default." );
-       g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), DEFAUT_PORT_TELEINFO );
-     }
-    else
-     { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", chaine );
-       g_free(chaine);
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
+                "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
 
-    Cfg_teleinfo.min_ea = g_key_file_get_integer ( gkf, "TELEINFO", "min_ea", NULL );
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Teleinfo_Liberer_config : Libere la mémoire allouer précédemment pour lire la config teleinfo          */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Teleinfo_Liberer_config ( void )
-  { 
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+                "Teleinfo_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "port" ) )
+        { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "min_ea" ) )
+        { Cfg_teleinfo.min_ea = atoi ( valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
+                   "Sms_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
+     }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Init_teleinfo: Initialisation de la ligne TELEINFO                                                     */
@@ -149,11 +146,14 @@
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 ) )
      { 
      }
-    else Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-                   "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
+    else { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
+                     "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
+           return;
+         }
+    Cfg_teleinfo.last_view = Partage->top;
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du thread Teleinfo                                                             */
+/* Main: Fonction principale du thread Teleinfo                                                           */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { gint retval, nbr_octet_lu;
@@ -169,17 +169,21 @@
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
     Cfg_teleinfo.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
 
-    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "teleinfoedf" );
-    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFOEDF sensor" );
+    g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), NOM_THREAD );
+    g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFOEDF sensors" );
+
+    if (!Cfg_teleinfo.enable)
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread is not enabled in config. Shutting Down %p",
+                 pthread_self() );
+       goto end;
+     }
 
     Cfg_teleinfo.fd = Init_teleinfo();
     if (Cfg_teleinfo.fd<0)                                                   /* On valide l'acces aux ports */
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Init TELEINFO failed. exiting..." );
-       Teleinfo_Liberer_config ();
-       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
-       lib->TID = 0;                                      /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(-1));
+       goto end;
      }
     else { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,"Acces TELEINFO FD=%d", Cfg_teleinfo.fd ); }
 
@@ -196,6 +200,12 @@
 
        if (Cfg_teleinfo.reload == TRUE)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
+          close(Cfg_teleinfo.fd);                                               /* Fermeture de la connexion FD */
+          Cfg_teleinfo.fd = Init_teleinfo();
+          if (Cfg_teleinfo.fd<0)                                                   /* On valide l'acces aux ports */
+           { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
+                      "Run_thread: Reloading with port %s failed", Cfg_teleinfo.port );
+           }
           Cfg_teleinfo.reload = FALSE;
         }
 
@@ -230,13 +240,15 @@
              
            }
         }
+       else if (retval < 0) sleep(2);                               /* Si erreur, on attend deux secondes */
      }
-    close(Cfg_teleinfo.fd);                                                 /* Fermeture de la connexion FD */
+    close(Cfg_teleinfo.fd);                                               /* Fermeture de la connexion FD */
 
-    Teleinfo_Liberer_config();                                  /* Liberation de la configuration du thread */
+end:
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_teleinfo.lib->TID = 0;                              /* On indique au master que le thread est mort. */
+    Cfg_teleinfo.lib->Thread_run = FALSE;                                   /* Le thread ne tourne plus ! */
+    Cfg_teleinfo.lib->TID = 0;                            /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/
