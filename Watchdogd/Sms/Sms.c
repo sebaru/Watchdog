@@ -364,7 +364,7 @@
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     while ( liste )
      { sms = (struct SMSDB *)Cfg_sms.Liste_contact_SMS->data;
-       if ( ! g_ascii_strcasecmp ( sms->phone, tel ) ) break;
+       if ( (! g_ascii_strcasecmp ( sms->phone, tel )) && sms->phone_send_command ) break;
        liste = liste->next;
      }
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
@@ -629,6 +629,27 @@
     curl_formfree(formpost);
   }
 /**********************************************************************************************************/
+/* Sms_send_to_recipient_authorized : Envoi à tous les portables autorisés                                */
+/* Entrée: le message                                                                                     */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Sms_send_to_recipient_authorized ( struct CMD_TYPE_MESSAGE *msg )
+  { struct SMSDB *sms;
+    GSList *liste;
+
+    liste = Cfg_sms.Liste_contact_SMS;
+    pthread_mutex_lock( &Cfg_sms.lib->synchro );
+    while ( liste )
+     { sms = (struct SMSDB *)Cfg_sms.Liste_contact_SMS->data;
+       if ( sms->phone_receive_sms ) 
+        { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, sms->phone );
+          if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, sms->phone );
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
+  }
+/**********************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                              */
 /* Entrée: un client et un utilisateur                                                                    */
 /* Sortie: Niet                                                                                           */
@@ -706,17 +727,7 @@
            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                       "Envoi_sms_gsm: Envoi trop tot !! (%s)", msg->libelle_sms ); }
           else 
-           { gchar *nom, *tel;
-             struct DB *db;
-             if ( ! Recuperer_configDB( &db, NOM_THREAD, "recipient" ) )/* Connexion a la base de données */
-              { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                         "Run_thread: Database connexion failed. Could not send SMS." );
-              }
-             else while (Recuperer_configDB_suite( &db, &nom, &tel ) )      /* Récupération des tel in DB */
-              { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, tel );
-                if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, tel );
-              }
-           }
+           { Sms_send_to_recipient_authorized( msg ); }
         }
        g_free( msg );
      }
