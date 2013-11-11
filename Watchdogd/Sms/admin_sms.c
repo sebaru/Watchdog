@@ -51,8 +51,7 @@
        sms = (struct SMSDB *)liste_sms->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " Contact_SMS[%03d] -> enable=%d, phone=%s, name=%s\n"
-                   "                      phone_send_command=%d, phone_receive_sms=%d\n\n",
+                   " Contact_SMS[%03d] -> enable=%d, phone=%s, name=%s, phone_send_command=%d, phone_receive_sms=%d\n",
                    sms->id, sms->enable, sms->phone, sms->name,
                    sms->phone_send_command, sms->phone_receive_sms
                  );
