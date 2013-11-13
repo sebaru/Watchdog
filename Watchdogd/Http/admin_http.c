@@ -30,37 +30,35 @@
  #include "Http.h"
 
 /**********************************************************************************************************/
-/* Admin_httpmobile: Gere une commande 'admin httpmobile' depuis une connexion admin                              */
+/* Admin_command: Gere une commande liée au thread HTTP depuis une connexion admin                        */
 /* Entrée: le client et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
-#ifdef bouh
+
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( client, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
-       Admin_write ( client, "  httpmobile httpmobilebox message    - Send 'message' via httpmobilebox\n" );
-       Admin_write ( client, "  httpmobile gsm    message    - Send 'message' via gsm\n" );
-       Admin_write ( client, "  help                  - This help\n" );
-     } else
-    if ( ! strcmp ( commande, "gsm" ) )
-     { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
-       Envoyer_httpmobile_gsm_text ( ligne + 4 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
-       Admin_write ( client, chaine );
-     } else
-    if ( ! strcmp ( commande, "httpmobilebox" ) )
-     { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
-       Envoyer_httpmobile_httpmobilebox_text ( ligne + 7 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
-       Admin_write ( client, chaine );
-     } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( client, chaine );
+    if ( ! strcmp ( commande, "list" ) )
+     {
+          Admin_write ( connexion, "ToBe implemented" );
      }
-#endif
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Http_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
+    else if ( ! strcmp ( commande, "help" ) )
+     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  list satellite....\n");
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
+       Admin_write ( connexion, chaine );
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -29,8 +29,9 @@
  #define _HTTP_H_
  #include <microhttpd.h>
 
+ #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
- #define HTTP_DEFAUT_FILE_SERVER       "http_serveursigne.pem"
+ #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
  #define HTTP_DEFAUT_MAX_CONNEXION     100
 
@@ -72,6 +73,7 @@
     guint last_top;
   };
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Http_Lire_config ( void );
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_getgif ( struct MHD_Connection *connection );

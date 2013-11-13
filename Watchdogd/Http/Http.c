@@ -49,69 +49,54 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Http_Lire_config ( void )
-  { gchar *chaine;
-    GKeyFile *gkf;
-    GError *error = NULL;
+ gboolean Http_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Http_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);
-       return;
-     }
-                                                                               /* Positionnement du debug */
-    Cfg_http.lib->Thread_debug = g_key_file_get_boolean ( gkf, "HTTP", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
-    Cfg_http.nbr_max_connexion = g_key_file_get_integer ( gkf, "HTTP", "max_connexion", NULL );
-    if ( !Cfg_http.nbr_max_connexion) Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
-    Cfg_http.http_enable       = g_key_file_get_boolean ( gkf, "HTTP", "http_enable", NULL ); 
-    Cfg_http.http_port         = g_key_file_get_integer ( gkf, "HTTP", "http_port", NULL );
-    Cfg_http.https_enable      = g_key_file_get_boolean ( gkf, "HTTP", "https_enable", NULL ); 
-    Cfg_http.https_port        = g_key_file_get_integer ( gkf, "HTTP", "https_port", NULL );
+    Cfg_http.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_http.http_enable       = FALSE; 
+    Cfg_http.http_port         = 80;
+    Cfg_http.https_enable      = FALSE; 
+    Cfg_http.https_port        = 443;
+    g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_CERT );
+    g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
+    g_snprintf( Cfg_http.https_file_ca,   sizeof(Cfg_http.https_file_ca),   "%s", HTTP_DEFAUT_FILE_CA  );
 
-    Cfg_http.satellite_enable      = g_key_file_get_boolean ( gkf, "HTTP", "satellite_enable", NULL );
-
-    chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_cert", NULL );
-    if (chaine)
-     { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", chaine ); g_free(chaine); }
-    else
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Http_Lire_config : unable to load https_file_cert filename. Using default one : %s",
-                 HTTP_DEFAUT_FILE_SERVER );
-       g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_SERVER );
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Ups_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
 
-    chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_key", NULL );
-    if (chaine)
-     { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", chaine ); g_free(chaine); }
-    else
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Http_Lire_config : unable to load https_file_key filename. Using default one : %s",
-                 HTTP_DEFAUT_FILE_KEY );
-       g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", HTTP_DEFAUT_FILE_KEY );
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+                "Ups_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "https_file_cert" ) )
+        { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "https_file_ca" ) )
+        { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "https_file_key" ) )
+        { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "max_connexion" ) )
+        { Cfg_http.nbr_max_connexion = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "http_enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.http_enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "http_port" ) )
+        { Cfg_http.http_port = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "https_enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.https_enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "http_port" ) )
+        { Cfg_http.https_port = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "satellite_enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.satellite_enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                   "Ups_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
      }
-
-    chaine                     = g_key_file_get_string  ( gkf, "HTTP", "https_file_ca", NULL );
-    if (chaine)
-     { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", chaine ); g_free(chaine); }
-    else
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Http_Lire_config : unable to load https_file_ca filename. Using default one : %s",
-                 HTTP_DEFAUT_FILE_CA );
-       g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", HTTP_DEFAUT_FILE_CA  );
-     }
-
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Http_Liberer_config : Libere la mémoire allouer précédemment pour lire la config http                  */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Http_Liberer_config ( void )
-  {
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Charger_certificat : Charge les certificats en mémoire                                                 */
@@ -134,11 +119,16 @@
     if (!Cfg_http.ssl_cert)
      { close(fd);
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Charger_certificat : Loading certif %s into memory failed (%s)",
+                "Charger_certificat : Loading certif %s : memory error (%s)",
                  Cfg_http.https_file_cert, strerror(errno) );
        return(FALSE);
      }
-    read ( fd, Cfg_http.ssl_cert, sbuf.st_size );
+    if (read ( fd, Cfg_http.ssl_cert, sbuf.st_size ) < 0)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading certif %s : read error (%s)",
+                 Cfg_http.https_file_cert, strerror(errno) );
+       return(FALSE);
+     }
     close(fd);
 
     fd = open ( Cfg_http.https_file_key, O_RDONLY);                              /* Chargement de la clef */
@@ -153,11 +143,16 @@
     if (!Cfg_http.ssl_key)
      { close(fd);
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Charger_certificat : Loading key %s into memory failed (%s)",
+                "Charger_certificat : Loading key %s : memory error (%s)",
                  Cfg_http.https_file_key, strerror(errno) );
        return(FALSE);
      }
-    read ( fd, Cfg_http.ssl_key, sbuf.st_size );
+    if (read ( fd, Cfg_http.ssl_key, sbuf.st_size ) < 0)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading certif %s : read error (%s)",
+                 Cfg_http.https_file_key, strerror(errno) );
+       return(FALSE);
+     }
     close(fd);
 
     fd = open ( Cfg_http.https_file_ca, O_RDONLY);           /* Chargement du CA pour truster les clients */
@@ -172,11 +167,16 @@
     if (!Cfg_http.ssl_ca)
      { close(fd);
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Charger_certificat : Loading CA %s into memory failed (%s)",
+                "Charger_certificat : Loading CA %s : memory error (%s)",
                  Cfg_http.https_file_ca, strerror(errno) );
        return(FALSE);
      }
-    read ( fd, Cfg_http.ssl_ca, sbuf.st_size );
+    if (read ( fd, Cfg_http.ssl_ca, sbuf.st_size ) < 0)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Charger_certificat : Loading certif %s : read error (%s)",
+                 Cfg_http.https_file_ca, strerror(errno) );
+       return(FALSE);
+     }
     close(fd);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "Charger_certificat : Loading file CERT %s, KEY %s and CA %s successfull",
@@ -594,8 +594,8 @@
      }
     Http_free_liste_satellites ();                                     /* Libération des infos satellites */
 end:
-    Http_Liberer_config();                                  /* Liberation de la configuration du thread */
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_http.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                  /* On indique au http que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
