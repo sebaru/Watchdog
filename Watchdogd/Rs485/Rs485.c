@@ -45,43 +45,36 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rs485_Lire_config ( void )
-  { gchar *chaine;
-    GKeyFile *gkf;
-    GError *error = NULL;
+ gboolean Rs485_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Rs485_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);       return;
-     }
-                                                                               /* Positionnement du debug */
-    Cfg_rs485.lib->Thread_debug = g_key_file_get_boolean ( gkf, "RS485", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
+    Cfg_rs485.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_rs485.enable            = FALSE; 
+    g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", DEFAUT_PORT_RS485 );
 
-
-    chaine = g_key_file_get_string ( gkf, "RS485", "port", NULL );
-    if (!chaine)
-     { Info_new ( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
-                  "Rs485_Lire_config: port is missing. Using default." );
-       g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), DEFAUT_PORT_RS485 );
-     }
-    else
-     { g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", chaine );
-       g_free(chaine);
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
+                "Rs485_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
 
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Rs485_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                 */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Rs485_Liberer_config ( void )
-  {
-  }
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+                "Rs485_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "port" ) )
+        { g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_rs485.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_rs485.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+                   "Rs485_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
+     }
+    return(TRUE);
+  } 
 /**********************************************************************************************************/
 /* Retirer_rs485DB: Elimination d'un module rs485                                                         */
 /* Entrée: un log et une database                                                                         */
@@ -562,6 +555,13 @@
     g_snprintf( Cfg_rs485.lib->admin_prompt, sizeof(Cfg_rs485.lib->admin_prompt), "rs485" );
     g_snprintf( Cfg_rs485.lib->admin_help,   sizeof(Cfg_rs485.lib->admin_help),   "Manage RS485 Modules" );
 
+    if (!Cfg_rs485.enable)
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread is not enabled in config. Shutting Down %p",
+                 pthread_self() );
+       goto end;
+     }
+
     Cfg_rs485.Modules_RS485 = NULL;                             /* Initialisation des variables du thread */
     Cfg_rs485.fd = -1;
     Charger_tous_rs485();                                                 /* Chargement des modules rs485 */
@@ -576,13 +576,11 @@
        if (Cfg_rs485.reload == TRUE)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
                     "Run_thread: Run_rs485: Reloading...." );
-          Rs485_Liberer_config ();                      /* Lecture de la configuration logiciel du thread */
           Decharger_tous_rs485();
           Fermer_rs485();
           sleep(5);                                                /* Attente de 5 secondes avant relance */
           nbr_oct_lu = 0;
           attente_reponse = FALSE;
-          Rs485_Lire_config ();                         /* Lecture de la configuration logiciel du thread */
           Charger_tous_rs485();
           Cfg_rs485.reload = FALSE;
         }
@@ -713,9 +711,11 @@
       }                                                                    /* Fin du while partage->arret */
     Fermer_rs485();
     Decharger_tous_rs485();
-    Rs485_Liberer_config ();                         /* Lecture de la configuration logiciel du thread */
+
+end:
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_rs485.lib->Thread_run = FALSE;                                        /* Le thread ne tourne plus ! */
     Cfg_rs485.lib->TID = 0;                               /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

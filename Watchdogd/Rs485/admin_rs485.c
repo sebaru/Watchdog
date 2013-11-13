@@ -134,11 +134,11 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Admin_rs485_change: Modifie la configuration d'un capteur RS485                                        */
+/* Admin_rs485_set: Modifie la configuration d'un capteur RS485                                        */
 /* Entrée: le connexion et la structure de reference du capteur                                              */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rs485_change ( struct CONNEXION *connexion, struct RS485DB *rs485 )
+ static void Admin_rs485_set ( struct CONNEXION *connexion, struct RS485DB *rs485 )
   { gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Modification d'un module rs485\n" );
@@ -147,9 +147,9 @@
     Admin_write ( connexion, chaine );
 
     if ( Modifier_rs485DB( rs485 ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %d changed.\n", rs485->id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module %d setd.\n", rs485->id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT changed.\n" ); }
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT setd.\n" ); }
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -170,7 +170,7 @@
   }
 /**********************************************************************************************************/
 /* Admin_rs485_stop: Demande l'arret du traitement du module en paremetre                                 */
-/* Entrée: Le connexion demandeur, l'id du module                                                            */
+/* Entrée: Le connexion demandeur, l'id du module                                                         */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_rs485_stop ( struct CONNEXION *connexion, gint id )
@@ -186,11 +186,11 @@
   }
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
-/* Entrée: Le connexion d'admin, la ligne a traiter                                                          */
+/* Entrée: Le connexion d'admin, la ligne a traiter                                                       */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
-  { gchar commande[128];
+  { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
@@ -211,7 +211,7 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_rs485_del ( connexion, num );
      }
-    else if ( ! strcmp ( commande, "change" ) )
+    else if ( ! strcmp ( commande, "set" ) )
      { struct RS485DB rs485;
        memset( &rs485, 0, sizeof(struct RS485DB) );
        sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
@@ -221,7 +221,7 @@
                 &rs485.s_min, &rs485.s_max,
                 &rs485.sa_min, &rs485.sa_max,
                 rs485.libelle );
-       Admin_rs485_change ( connexion, &rs485 );
+       Admin_rs485_set ( connexion, &rs485 );
      }
     else if ( ! strcmp ( commande, "start" ) )
      { int num;
@@ -239,11 +239,21 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_rs485_reload(connexion);
      }
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Rs485_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RS485'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  add num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
        Admin_write ( connexion, "                                         - Ajoute un module RS485\n" );
-       Admin_write ( connexion, "  change id,num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
+       Admin_write ( connexion, "  set id,num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle\n" );
        Admin_write ( connexion, "                                         - Modifie le module id\n" );
        Admin_write ( connexion, "  del id                                 - Retire le module id\n" );
        Admin_write ( connexion, "  start id                               - Demarre le module id\n" );

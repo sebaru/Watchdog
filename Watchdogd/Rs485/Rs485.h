@@ -40,7 +40,8 @@
 
  #define RS485_TEMPS_SEUIL_DOWN     20                  /* Temps avant de considérer un module comme DOWN */
 
- #define NOM_TABLE_MODULE_RS485   "rs485"
+ #define NOM_THREAD                "rs485"
+ #define NOM_TABLE_MODULE_RS485    "rs485"
  #define TAILLE_ENTETE  6
  #define TAILLE_DONNEES 10
 
@@ -87,6 +88,7 @@
  struct RS485_CONFIG                                                              /* Structure de travail */
   { struct LIBRAIRIE *lib;
     GSList *Modules_RS485;
+    gboolean enable;                                                           /* Thread enable at boot ? */
     gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
@@ -94,6 +96,7 @@
     gchar port[80];                                                            /* Port d'accès a la RS485 */
   } Cfg_rs485;
 /*********************************************** Déclaration des prototypes *******************************/
+ extern gboolean Rs485_Lire_config ( void );
  extern gboolean Retirer_rs485DB ( struct RS485DB *rs485 );
  extern gint Ajouter_rs485DB ( struct RS485DB *rs485 );
  extern gboolean Modifier_rs485DB( struct RS485DB *rs485 );
