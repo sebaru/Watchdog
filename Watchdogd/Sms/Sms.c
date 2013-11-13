@@ -473,7 +473,7 @@
           gn_sms_delete (&data, state);                               /* On l'a traité, on peut l'effacer */
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;       /* On regarde toutes les places de stockage */
-       else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+       else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
                         "Lire_sms_gsm: error %s from %s (sms_index=%d)",
                         gn_error_print(error), sms.remote.number, sms_index );
                break;
