@@ -56,6 +56,7 @@
  #define MODBUS_PORT_TCP    502                           /* Port de connexion TCP pour accès aux modules */
  #define MODBUS_RETRY       100                      /* 10 secondes entre chaque retry si pb de connexion */
 
+ #define NOM_THREAD                "modbus"
  #define NOM_TABLE_MODULE_MODBUS   "modbus_modules"
 
  struct MODBUS_CONFIG                                             /* Communication entre DLS et la MODBUS */
@@ -63,6 +64,7 @@
     GSList *Modules_MODBUS;
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
+    gboolean enable;                                                           /* Thread enable at boot ? */
     gboolean reload;
   } Cfg_modbus;
 
@@ -125,6 +127,7 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
+ extern gboolean Modbus_Lire_config ( void );
  extern gint Ajouter_modbusDB ( struct MODBUSDB *modbus );
  extern gboolean Retirer_modbusDB ( struct MODBUSDB *modbus );
  extern gint Modifier_modbusDB( struct MODBUSDB *modbus );

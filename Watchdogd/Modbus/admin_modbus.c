@@ -120,7 +120,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
-  { gchar commande[128];
+  { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
@@ -158,7 +158,7 @@
           Admin_write ( connexion, chaine );
         }
      }
-    else if ( ! strcmp ( commande, "change" ) )
+    else if ( ! strcmp ( commande, "set" ) )
      { struct MODBUSDB modbus;
        gint retour;
        sscanf ( ligne, "%s %d,%d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
@@ -168,10 +168,10 @@
               );
        retour = Modifier_modbusDB ( &modbus );
        if (retour == FALSE)
-        { Admin_write ( connexion, "Error, MODBUS not changed\n" ); }
+        { Admin_write ( connexion, "Error, MODBUS not setd\n" ); }
        else
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " MODBUS %s changed\n", modbus.ip );
+          g_snprintf( chaine, sizeof(chaine), " MODBUS %s setd\n", modbus.ip );
           Admin_write ( connexion, chaine );
         }
      }
@@ -188,11 +188,21 @@
           Admin_write ( connexion, chaine );
         }
      }
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Modbus_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  add enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Admin_write ( connexion, "                                         - Ajoute un module modbus\n" );
-       Admin_write ( connexion, "  change id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Admin_write ( connexion, "  set id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Admin_write ( connexion, "                                         - Modifie le module id\n" );
        Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
        Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
