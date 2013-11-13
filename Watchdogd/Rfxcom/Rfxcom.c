@@ -43,41 +43,35 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rfxcom_Lire_config ( void )
-  { gchar *chaine;
-    GKeyFile *gkf;
-    GError *error = NULL;
+ gboolean Rfxcom_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Rfxcom_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);       return;
-     }
-                                                                               /* Positionnement du debug */
-    Cfg_rfxcom.lib->Thread_debug = g_key_file_get_boolean ( gkf, "RFXCOM", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
+    Cfg_rfxcom.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_rfxcom.enable            = FALSE; 
+    g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", DEFAUT_PORT_RFXCOM );
 
-    chaine = g_key_file_get_string ( gkf, "RFXCOM", "port", NULL );
-    if (!chaine)
-     { Info_new ( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
-                  "Rfxcom_Lire_config: port is missing. Using default." );
-       g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), DEFAUT_PORT_RFXCOM );
-     }
-    else
-     { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", chaine );
-       g_free(chaine);
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+                "Rfxcom_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
 
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Rfxcom_Liberer_config : Libere la mémoire allouer précédemment pour lire la config rfxcom              */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Rfxcom_Liberer_config ( void )
-  { 
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+                "Rfxcom_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "port" ) )
+        { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_rfxcom.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_rfxcom.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
+                   "Rfxcom_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
+     }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Retirer_rfxcomDB: Elimination d'un module rfxcom                                                       */
@@ -630,14 +624,18 @@
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), "rfxcom" );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage RFXCOM sensors" );
 
+    if (!Cfg_rfxcom.enable)
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread is not enabled in config. Shutting Down %p",
+                 pthread_self() );
+       goto end;
+     }
+
     Cfg_rfxcom.fd = Init_rfxcom();
     if (Cfg_rfxcom.fd<0)                                                   /* On valide l'acces aux ports */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
                  "Run_thread: Init RFXCOM failed. exiting..." );
-       Rfxcom_Liberer_config ();
-       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
-       lib->TID = 0;                                      /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(-1));
+       goto end;
      }
     else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,"Acces RFXCOM FD=%d", Cfg_rfxcom.fd ); }
 
@@ -701,10 +699,10 @@
     Desabonner_distribution_sortie ( Rfxcom_Gerer_sortie );  /* Desabonnement de la diffusion des sorties */
     Decharger_tous_rfxcom ();
     close(Cfg_rfxcom.fd);                                                 /* Fermeture de la connexion FD */
-
-    Rfxcom_Liberer_config();                                  /* Liberation de la configuration du thread */
+end:
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_rfxcom.lib->Thread_run = FALSE;                                     /* Le thread ne tourne plus ! */
     Cfg_rfxcom.lib->TID = 0;                              /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

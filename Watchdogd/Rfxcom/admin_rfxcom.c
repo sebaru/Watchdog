@@ -124,7 +124,7 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command( struct CONNEXION *connexion, gchar *ligne )
-  { gchar commande[128];
+  { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
@@ -138,7 +138,7 @@
                 &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
        Admin_rfxcom_add ( connexion, &rfxcom );
      }
-    else if ( ! strcmp ( commande, "change" ) )
+    else if ( ! strcmp ( commande, "set" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
        sscanf ( ligne, "%s %d,%d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
@@ -155,19 +155,19 @@
        sscanf ( ligne, "%s %d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
                 &proto, &housecode, &unitcode, &cmd );
 
-       trame_send_AC[0]  = 0x07; /* Taille */
-       trame_send_AC[1]  = 0x10; /* lightning 1 */
-       trame_send_AC[2]  = proto; /* ARC */
-       trame_send_AC[3]  = 0x01; /* Seqnbr */
-       trame_send_AC[4]  = housecode;
-       trame_send_AC[5]  = unitcode;
+       trame_send_AC[0] = 0x07; /* Taille */
+       trame_send_AC[1] = 0x10; /* lightning 1 */
+       trame_send_AC[2] = proto; /* ARC */
+       trame_send_AC[3] = 0x01; /* Seqnbr */
+       trame_send_AC[4] = housecode;
+       trame_send_AC[5] = unitcode;
        trame_send_AC[6] = cmd;
        trame_send_AC[7] = 0x0; /* rssi */
        write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
      }
     else if ( ! strcmp ( commande, "light2" ) )
      { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-       gint id1, id2, id3, id4, unitcode, cmd, level;
+       gint id1, id2, id3, id4, unitcode, cmd;
 
        sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d", commande,             /* Découpage de la ligne de commande */
                 &id1, &id2, &id3, &id4, &unitcode, &cmd );
@@ -182,7 +182,7 @@
        trame_send_AC[7]  = id4;
        trame_send_AC[8]  = unitcode;
        trame_send_AC[9]  = cmd;
-       trame_send_AC[10] = level;
+       trame_send_AC[10] = 0;/* level */
        trame_send_AC[11] = 0x0; /* rssi */
        write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
      }
@@ -194,11 +194,21 @@
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_rfxcom_list ( connexion );
      }
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Rfxcom_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  add type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Ajoute un module\n" );
-       Admin_write ( connexion, "  change ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( connexion, "  set ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
                      "                                         - Edite le module ID\n" );
        Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
        Admin_write ( connexion, "  light1 proto,housecode,unitcode,cmdnumber\n" );

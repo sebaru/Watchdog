@@ -30,9 +30,10 @@
 
  #define DEFAUT_PORT_RFXCOM             "/dev/watchdog_RFXCOM"
 
+ #define NOM_THREAD                "rfxcom"
  #define NOM_TABLE_MODULE_RFXCOM   "rfxcom"
  #define NBR_CARAC_LIBELLE_RFXCOM  128
- #define TAILLE_ENTETE_RFXCOM    1
+ #define TAILLE_ENTETE_RFXCOM      1
 
  struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
   { unsigned char taille;
@@ -65,12 +66,14 @@
   { struct LIBRAIRIE *lib;
     gchar port[80];
     gint fd;                                                /* File descripteur de la connexion au RFXCOM */
+    gboolean enable;                                                           /* Thread enable at boot ? */
     gboolean reload;
     GSList *Modules_RFXCOM;                                                  /* Listes des modules RFXCOM */
     GSList *Liste_sortie;                                              /* Liste des sorties a positionner */
  } Cfg_rfxcom;
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern gboolean Rfxcom_Lire_config ( void );
  extern gboolean Retirer_rfxcomDB ( gint id );
  extern gint Ajouter_rfxcomDB ( struct RFXCOMDB *rfxcom );
  extern gboolean Modifier_rfxcomDB( struct RFXCOMDB *rfxcom );
