@@ -545,10 +545,11 @@
 
     error = gn_sms_send(&data, state);
     if (error == GN_ERR_NONE)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Envoi_sms_gsm: Envoi SMS Ok %s", msg->libelle_sms ); }
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Envoi_sms_gsm: Envoi SMS Ok to %s (%s)",
+                 telephone, msg->libelle_sms ); }
     else
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Envoi_sms_gsm: Envoi SMS Nok (%s)", gn_error_print(error)); }
+                "Envoi_sms_gsm: Envoi SMS Nok to %s (%s)", telephone, gn_error_print(error)); }
 
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
@@ -640,8 +641,8 @@
     liste = Cfg_sms.Liste_contact_SMS;
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     while ( liste )
-     { sms = (struct SMSDB *)Cfg_sms.Liste_contact_SMS->data;
-       if ( sms->phone_receive_sms ) 
+     { sms = (struct SMSDB *)liste->data;
+       if ( sms->enable && sms->phone_receive_sms ) 
         { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, sms->phone );
           if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, sms->phone );
         }
