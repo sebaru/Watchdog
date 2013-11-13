@@ -118,7 +118,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
-  { gchar commande[128];
+  { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
@@ -155,7 +155,7 @@
           Admin_write ( connexion, chaine );
         }
      }
-    else if ( ! strcmp ( commande, "change" ) )
+    else if ( ! strcmp ( commande, "set" ) )
      { struct UPSDB ups;
        gint retour;
        sscanf ( ligne, "%s %d,%s,%s,%s,%s,%d,%d,%d,%d,%s", commande, /* Découpage de la ligne de commande */
@@ -184,11 +184,21 @@
           Admin_write ( connexion, chaine );
         }
      }
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Ups_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  add name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
        Admin_write ( connexion, "                                         - Ajoute un UPS\n" );
-       Admin_write ( connexion, "  change id,name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
+       Admin_write ( connexion, "  set id,name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
        Admin_write ( connexion, "                                         - Change UPS id\n" );
        Admin_write ( connexion, "  del id                                 - Delete UPS id\n" );
        Admin_write ( connexion, "  start id                               - Start UPS id\n" );

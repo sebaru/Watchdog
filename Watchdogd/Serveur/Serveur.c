@@ -154,9 +154,6 @@
        if (client->Liste_del_histo) { g_slist_foreach( client->Liste_del_histo, (GFunc) g_free, NULL );
                                       g_slist_free ( client->Liste_del_histo );
                                     }
-       if (client->Liste_new_histo) { g_slist_foreach( client->Liste_new_histo, (GFunc) g_free, NULL );
-                                      g_slist_free ( client->Liste_new_histo );
-                                    }
        g_free(client);
      }
   }

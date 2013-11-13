@@ -30,15 +30,17 @@
  #include <upsclient.h>
  #include "Reseaux.h"
 
+ #define NOM_THREAD      "ups"
+ #define NOM_TABLE_UPS   "onduleurs"
+
  #define UPS_PORT_TCP    3493                             /* Port de connexion TCP pour accès aux modules */
  #define UPS_RETRY       1800                          /* 3 minutes entre chaque retry si pb de connexion */
  #define UPS_POLLING      100                  /* Si tout va bien, on s'y connecte toutes les 10 secondes */
 
- #define NOM_TABLE_UPS   "onduleurs"
-
  struct UPS_CONFIG                                                    /* Communication entre DLS et l'UPS */
   { struct LIBRAIRIE *lib;
     GSList *Modules_UPS;
+    gboolean enable;                                                           /* Thread enable at boot ? */
     gboolean reload;                                       /* Pour le rechargement des modules en mémoire */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
@@ -83,6 +85,7 @@
   };
 
 /*********************************************** Déclaration des prototypes *******************************/
+ extern gboolean Ups_Lire_config ( void );
  extern gboolean Retirer_upsDB ( struct UPSDB *ups );
  extern gint Ajouter_upsDB ( struct UPSDB *ups );
  extern gboolean Modifier_upsDB( struct UPSDB *ups );

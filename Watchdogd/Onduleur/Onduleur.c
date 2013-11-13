@@ -44,29 +44,32 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Ups_Lire_config ( void )
-  { GKeyFile *gkf;
-    GError *error = NULL;
+ gboolean Ups_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, &error) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Ups_Lire_config : unable to load config file %s: %s", Config.config_file, error->message );
-       g_error_free(error);       return;
+    Cfg_ups.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_ups.enable            = FALSE; 
+
+    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
+                "Ups_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
-                                                                               /* Positionnement du debug */
-    Cfg_ups.lib->Thread_debug = g_key_file_get_boolean ( gkf, "UPS", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
 
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Ups_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                  */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Ups_Liberer_config ( void )
-  {
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+                "Ups_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ups.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+                   "Ups_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
+     }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Retirer_upsDB: Elimination d'un ups                                                                    */
@@ -636,14 +639,18 @@
     g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
     g_snprintf( Cfg_ups.lib->admin_help,   sizeof(Cfg_ups.lib->admin_help),   "Manage UPS Modules" );
 
-    Cfg_ups.Modules_UPS = NULL;                                  /* Init des variables du thread */
+    if (!Cfg_ups.enable)
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread is not enabled in config. Shutting Down %p",
+                 pthread_self() );
+       goto end;
+     }
+
+    Cfg_ups.Modules_UPS = NULL;                                           /* Init des variables du thread */
 
     if ( Charger_tous_ups() == FALSE )                                      /* Chargement des modules ups */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Run_thread: No module UPS found -> stop" );
-       Ups_Liberer_config ();                           /* Lecture de la configuration logiciel du thread */
-       lib->Thread_run = FALSE;                                             /* Le thread ne tourne plus ! */
-       lib->TID        = 0;                               /* On indique au master que le thread est mort. */
-       pthread_exit(GINT_TO_POINTER(-1));
+       goto end;
      }
 
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
@@ -722,9 +729,10 @@
      }
 
     Decharger_tous_UPS();
-    Ups_Liberer_config ();                              /* Lecture de la configuration logiciel du thread */
+end:
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_ups.lib->Thread_run = FALSE;                                        /* Le thread ne tourne plus ! */
     Cfg_ups.lib->TID = 0;                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
