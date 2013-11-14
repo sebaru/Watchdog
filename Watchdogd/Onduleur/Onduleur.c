@@ -40,7 +40,7 @@
  #include "Onduleur.h"
 
 /**********************************************************************************************************/
-/* Ups_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Ups_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -51,7 +51,7 @@
     Cfg_ups.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
     Cfg_ups.enable            = FALSE; 
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Ups_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);

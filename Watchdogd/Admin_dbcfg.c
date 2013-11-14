@@ -49,7 +49,7 @@
      { gchar *nom, *valeur;
        struct DB *db;
 
-       if ( ! Recuperer_configDB( &db, thread, NULL ) )                 /* Connexion a la base de données */
+       if ( ! Recuperer_configDB( &db, thread ) )                       /* Connexion a la base de données */
         { g_snprintf(chaine, sizeof(chaine), "Database connexion failed\n" );
           Admin_write ( connexion, chaine );
         }

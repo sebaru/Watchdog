@@ -47,18 +47,18 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_rfxcom.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_rfxcom.lib->Thread_debug = FALSE;                                  /* Settings default parameters */
     Cfg_rfxcom.enable            = FALSE; 
     g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", DEFAUT_PORT_RFXCOM );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
                 "Rfxcom_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                      /* Print Config */
                 "Rfxcom_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", valeur ); }

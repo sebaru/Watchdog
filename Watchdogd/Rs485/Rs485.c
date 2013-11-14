@@ -53,7 +53,7 @@
     Cfg_rs485.enable            = FALSE; 
     g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", DEFAUT_PORT_RS485 );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                 "Rs485_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);

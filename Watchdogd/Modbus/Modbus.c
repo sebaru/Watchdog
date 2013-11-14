@@ -57,7 +57,7 @@
     Cfg_modbus.enable            = FALSE; 
 
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                 "Modbus_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);

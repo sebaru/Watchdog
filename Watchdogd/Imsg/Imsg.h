@@ -30,13 +30,26 @@
 
  #include <loudmouth/loudmouth.h>
 
+ #define NOM_THREAD                "imsg"
+ #define NOM_TABLE_IMSG            "imsg"
+
  #define DEFAUT_USERNAME_IMSG      "defaultuser"
  #define DEFAUT_SERVER_IMSG        "defaultserver.org"
  #define DEFAUT_PASSWORD_IMSG      "defaultpassword"
- #define TIME_RECONNECT_IMSG                                600 /* 1 minute avant reconnexion si probleme */
+ #define TIME_RECONNECT_IMSG       600                          /* 1 minute avant reconnexion si probleme */
+
+ struct IMSGDB
+  { gint id;
+    gchar jabber_id[80];
+    gchar nom[80];
+    gboolean enable;
+    gboolean receive_imsg;
+    gboolean send_command;
+    guint bit_presence;
+  };
 
  struct IMSG_CONTACT
-  { gchar nom[80];
+  { struct IMSGDB imsg;
     gboolean available;
   };
 
@@ -45,16 +58,17 @@
     gchar username[80];
     gchar server  [80];
     gchar password[80];
-    gchar **recipients;
     gboolean enable;
     LmConnection *connection;
-    GSList *contacts;
+    GSList *Contacts;
     GSList *Messages;
     gboolean set_status;
+    gboolean reload;
     gchar new_status[80];
     gint date_retente;                                                 /* Date de reconnexion si probleme */
  } Cfg_imsg;
 /****************************************** Déclarations des prototypes ***********************************/
+ extern gboolean Imsg_Lire_config ( void );
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
  extern void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status );
 

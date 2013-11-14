@@ -29,8 +29,52 @@
  #include "Imsg.h"
 
 /**********************************************************************************************************/
+/* Admin_imsg_reload: Demande le rechargement des conf IMSG                                               */
+/* Entrée: le connexion                                                                                   */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Admin_imsg_reload ( struct CONNEXION *connexion )
+  { if (Cfg_imsg.lib->Thread_run == FALSE)
+     { Admin_write ( connexion, " Thread IMSG is not running\n" );
+       return;
+     }
+    
+    Cfg_imsg.reload = TRUE;
+    Admin_write ( connexion, " IMSG Reloading in progress\n" );
+    while (Cfg_imsg.reload) sched_yield();
+    Admin_write ( connexion, " IMSG Reloading done\n" );
+  }
+/**********************************************************************************************************/
+/* Admin_imsg_list : L'utilisateur admin lance la commande "list" en mode imsg                            */
+/* Entrée: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_imsg_list ( struct CONNEXION *connexion )
+  { gchar chaine[256];
+    GSList *liste;
+
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des Contacts IMSG\n" );
+    Admin_write ( connexion, chaine );
+
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    liste = Cfg_imsg.Contacts;
+    while(liste)
+     { struct IMSG_CONTACT *contact;
+       contact  =(struct IMSG_CONTACT *)liste->data;
+       g_snprintf( chaine, sizeof(chaine),
+                 " IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence = %d, Name = %s, jabberid = %s is %s\n",
+                   contact->imsg.id, contact->imsg.enable, contact->imsg.receive_imsg, contact->imsg.send_command,
+                   contact->imsg.bit_presence, contact->imsg.nom, contact->imsg.jabber_id,
+                   (contact->available ? "available" : "UNavailable") 
+                 );
+       Admin_write ( connexion, chaine );
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+  }
+/**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
-/* Entrée: Le connexion d'admin, la ligne a traiter                                                          */
+/* Entrée: Le connexion d'admin, la ligne a traiter                                                       */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command( struct CONNEXION *connexion, gchar *ligne )
@@ -46,21 +90,7 @@
        Admin_write ( connexion, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { gchar chaine[128];
-       GSList *liste;
-       pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-       liste = Cfg_imsg.contacts;
-       while(liste)
-        { struct IMSG_CONTACT *contact;
-          contact  =(struct IMSG_CONTACT *)liste->data;
-          g_snprintf( chaine, sizeof(chaine), " User %s is %s\n",
-                      contact->nom, (contact->available ? "available" : "UNavailable") 
-                    );
-          Admin_write ( connexion, chaine );
-          liste = liste->next;
-        }
-       pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-     }
+     { Admin_imsg_list ( connexion ); }
     else if ( ! strcmp ( commande, "status" ) )
      { gchar chaine[128];
        if (Cfg_imsg.connection)
@@ -98,8 +128,18 @@
        g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
        Admin_write ( connexion, chaine );
      }
+    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+        { gboolean retour;
+          retour = Imsg_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  send user@domain/resource message      - Send a message to user\n" );
        Admin_write ( connexion, "  list                                   - List contact and availability\n" );
        Admin_write ( connexion, "  presence status                        - Change Presence status\n" );

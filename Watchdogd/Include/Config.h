@@ -80,8 +80,9 @@
  extern gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom );
  extern gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
- extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread, gchar *nom_param );
+ extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread );
  extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );
+/* extern gboolean Rechercher_configDB ( gchar *nom_thread, gchar *nom_param, gchar *retour, gint size_retour );*/
 
 #endif
   

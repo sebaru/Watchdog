@@ -53,7 +53,7 @@
     g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password),
                "%s", DEFAUT_SMSBOX_PASSWORD );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);

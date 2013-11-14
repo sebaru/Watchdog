@@ -77,6 +77,9 @@
                    Config.instance_id, VERSION, nom );
        Admin_write ( connexion, chaine );
      } else
+    if ( ! strcmp ( commande, "dbcfg" ) )
+     { Admin_dbcfg_thread( connexion, "global", ligne + 7 );
+     } else
     if ( ! strcmp ( commande, "setrootpasswd" ) )
      { struct CMD_TYPE_UTILISATEUR util;
        gchar password[80];

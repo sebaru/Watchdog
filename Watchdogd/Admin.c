@@ -177,7 +177,7 @@
               user, host, ligne );
 
     Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );/* Debut de la reponse */
-    g_snprintf( chaine, sizeof(chaine), "#Watchdogd*%010.1f*CLI> %s\n",
+    g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing %s\n",
                 (gdouble)Partage->top/10.0, ligne );
     Admin_write ( connexion, chaine );
 

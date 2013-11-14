@@ -47,7 +47,7 @@
     Cfg_audio.lib->Thread_debug = FALSE;                                   /* Settings default parameters */
     Cfg_audio.enable            = FALSE; 
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )                /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                 "Audio_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);

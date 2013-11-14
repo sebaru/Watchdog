@@ -62,7 +62,7 @@
     g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_http.https_file_ca,   sizeof(Cfg_http.https_file_ca),   "%s", HTTP_DEFAUT_FILE_CA  );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "Ups_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);

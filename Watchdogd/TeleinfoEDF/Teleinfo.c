@@ -39,7 +39,7 @@
  #include "Teleinfo.h"
 
 /**********************************************************************************************************/
-/* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
+/* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                           */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
@@ -47,20 +47,20 @@
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_teleinfo.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_teleinfo.lib->Thread_debug = FALSE;                                /* Settings default parameters */
     Cfg_teleinfo.enable            = FALSE; 
     Cfg_teleinfo.min_ea            = 0;
     g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
                "%s", DEFAUT_PORT_TELEINFO );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD, NULL ) )               /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
                 "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                    /* Print Config */
                 "Teleinfo_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }

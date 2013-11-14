@@ -235,27 +235,17 @@
 /* Entrée: une database de retour et le nom de l'instance_id                                              */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread, gchar *nom_param )
+ gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
 
-    if (!nom_param)
-     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                   "SELECT nom,valeur"
-                   " FROM %s"
-                   " WHERE instance_id = '%s' AND nom_thread='%s' ORDER BY nom,valeur",
-                   NOM_TABLE_CONFIG, Config.instance_id, nom_thread
-                 );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                   "SELECT nom,valeur"
-                   " FROM %s"
-                   " WHERE instance_id = '%s' AND nom_thread='%s' AND nom LIKE '%s%%' ORDER BY nom,valeur",
-                   NOM_TABLE_CONFIG, Config.instance_id, nom_thread, nom_param
-                 );                                                                /* order by test 25/01/06 */
-     }
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT nom,valeur"
+                " FROM %s"
+                " WHERE instance_id = '%s' AND nom_thread='%s' ORDER BY nom,valeur",
+                NOM_TABLE_CONFIG, Config.instance_id, nom_thread
+              );
 
     db = Init_DB_SQL();       
     if (!db)
