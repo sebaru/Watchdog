@@ -443,14 +443,14 @@
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)               /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Lire_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
-       SB ( Cfg_sms.bit_comm, 0 );
+       if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        return;
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Lire_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
-       SB ( Cfg_sms.bit_comm, 0 );
+       if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
        gn_lib_library_free();
@@ -487,7 +487,7 @@
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
     gn_lib_library_free();
-    SB ( Cfg_sms.bit_comm, 1 );                                                       /* Communication OK */
+    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 1 );                                 /* Communication OK */
   }
 /**********************************************************************************************************/
 /* Envoi_sms_gsm: Envoi un sms par le gsm                                                                 */
@@ -741,6 +741,7 @@
     Decharger_tous_sms();
 
 end:
+    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                /* Communication NOK */
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_sms.lib->Thread_run = FALSE;
     Cfg_sms.lib->TID = 0;                                 /* On indique au master que le thread est mort. */

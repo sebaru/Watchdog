@@ -363,7 +363,7 @@
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Deconnecter_module %d", module->ups.id );
-    SB( module->ups.bit_comm, 0 );                       /* Mise a zero du bit interne lié au module */
+    if (module->ups.bit_comm) SB( module->ups.bit_comm, 0 );  /* Mise a zero du bit interne lié au module */
 
     num_ea = module->ups.ea_min;
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
@@ -459,7 +459,7 @@
 
     module->date_retente = 0;
     module->started = TRUE;
-    SB( module->ups.bit_comm, 1 );                         /* Mise a un du bit interne lié au module */
+    if (module->ups.bit_comm) SB( module->ups.bit_comm, 1 );    /* Mise a un du bit interne lié au module */
     num_ea = module->ups.ea_min;
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
