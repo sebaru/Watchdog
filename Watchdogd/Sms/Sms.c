@@ -66,6 +66,8 @@
         { g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "smsbox_password" ) )
         { g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "bit_comm" ) )
+        { Cfg_sms.bit_comm = atoi ( valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_sms.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -441,12 +443,14 @@
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)               /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Lire_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
+       SB ( Cfg_sms.bit_comm, 0 );
        return;
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Lire_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
+       SB ( Cfg_sms.bit_comm, 0 );
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
        gn_lib_library_free();
@@ -483,6 +487,7 @@
     gn_lib_phone_close(state);
     gn_lib_phoneprofile_free(&state);
     gn_lib_library_free();
+    SB ( Cfg_sms.bit_comm, 1 );                                                       /* Communication OK */
   }
 /**********************************************************************************************************/
 /* Envoi_sms_gsm: Envoi un sms par le gsm                                                                 */

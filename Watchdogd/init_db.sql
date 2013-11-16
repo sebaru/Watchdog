@@ -277,8 +277,8 @@ CREATE TABLE IF NOT EXISTS `histo_hard` (
 
 CREATE TABLE IF NOT EXISTS `sms` (
   `id` int(11) NOT NULL DEFAULT '1' AUTO_INCREMENT,
-  `enable` int(1) NOT NULL,
   `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
+  `enable` int(1) NOT NULL,
   `phone` text COLLATE utf8_unicode_ci NOT NULL,
   `name` text COLLATE utf8_unicode_ci NOT NULL,
   `phone_send_command` int(1) NOT NULL,
