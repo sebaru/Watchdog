@@ -45,6 +45,22 @@
     Admin_write ( connexion, " IMSG Reloading done\n" );
   }
 /**********************************************************************************************************/
+/* Admin_print_contact : Affiche le parametre sur la console d'admin CLI                                     */
+/* Entrée: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_print_contact ( struct CONNEXION *connexion, struct IMSG_CONTACT *contact )
+  { gchar chaine[256];
+
+    g_snprintf( chaine, sizeof(chaine),
+              " Contact_IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence = %d, Name = %s, jabberid = %s is %s\n",
+                contact->imsg.id, contact->imsg.enable, contact->imsg.receive_imsg, contact->imsg.send_command,
+                contact->imsg.bit_presence, contact->imsg.nom, contact->imsg.jabber_id,
+                (contact->available ? "available" : "UNavailable") 
+                 );
+    Admin_write ( connexion, chaine );
+  }
+/**********************************************************************************************************/
 /* Admin_imsg_list : L'utilisateur admin lance la commande "list" en mode imsg                            */
 /* Entrée: La connexion connexion ADMIN                                                                   */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
@@ -61,14 +77,38 @@
     while(liste)
      { struct IMSG_CONTACT *contact;
        contact  =(struct IMSG_CONTACT *)liste->data;
-       g_snprintf( chaine, sizeof(chaine),
-                 " IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence = %d, Name = %s, jabberid = %s is %s\n",
-                   contact->imsg.id, contact->imsg.enable, contact->imsg.receive_imsg, contact->imsg.send_command,
-                   contact->imsg.bit_presence, contact->imsg.nom, contact->imsg.jabber_id,
-                   (contact->available ? "available" : "UNavailable") 
-                 );
-       Admin_write ( connexion, chaine );
+       Admin_print_contact ( connexion, contact );
        liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Admin_Imsg_Modifier_enable : Modifie le flag "enable" du contact IMSG passé en parametre               */
+/* Entrée: La connexion connexion ADMIN, le IMSG Contact et le nouveau status                             */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_Imsg_Modifier_enable ( struct CONNEXION *connexion, struct IMSG_CONTACT *orig_contact, 
+                                          gboolean new_status )
+  { struct IMSG_CONTACT *contact;
+    GSList *liste_contact;
+    gchar chaine[256];
+    
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    liste_contact = Cfg_imsg.Contacts;
+    while ( liste_contact )
+     { contact = (struct IMSG_CONTACT *)liste_contact->data;
+       if ( orig_contact->imsg.id == contact->imsg.id ) break;
+       liste_contact = liste_contact->next;
+     }
+
+    if (liste_contact)
+     { contact->imsg.enable = new_status;
+       Admin_print_contact( connexion, contact );
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine),
+                   " Contact_IMSG[%03d] -> Not found\n", orig_contact->imsg.id );
+       Admin_write ( connexion, chaine );
      }
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
@@ -91,6 +131,8 @@
      }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_imsg_list ( connexion ); }
+    else if ( ! strcmp ( commande, "reload" ) )
+     { Admin_imsg_reload ( connexion ); }
     else if ( ! strcmp ( commande, "status" ) )
      { gchar chaine[128];
        if (Cfg_imsg.connection)
@@ -128,6 +170,16 @@
        g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
        Admin_write ( connexion, chaine );
      }
+    else if ( ! strcmp ( commande, "enable" ) )
+     { struct IMSG_CONTACT contact;
+       sscanf ( ligne, "%s %d", commande, &contact.imsg.id );        /* Découpage de la ligne de commande */
+       Admin_Imsg_Modifier_enable( connexion, &contact, TRUE );
+     }
+    else if ( ! strcmp ( commande, "disable" ) )
+     { struct IMSG_CONTACT contact;
+       sscanf ( ligne, "%s %d", commande, &contact.imsg.id );        /* Découpage de la ligne de commande */
+       Admin_Imsg_Modifier_enable( connexion, &contact, FALSE );
+     }
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
      { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
         { gboolean retour;
@@ -141,6 +193,7 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  send user@domain/resource message      - Send a message to user\n" );
+       Admin_write ( connexion, "  reload                                 - Reload contacts from Database\n" );
        Admin_write ( connexion, "  list                                   - List contact and availability\n" );
        Admin_write ( connexion, "  presence status                        - Change Presence status\n" );
        Admin_write ( connexion, "  status                                 - See connexion status\n" );
