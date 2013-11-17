@@ -71,6 +71,8 @@
  extern gboolean Imsg_Lire_config ( void );
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
  extern void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status );
-
+ extern gboolean Retirer_imsgDB ( struct IMSGDB *imsg );
+ extern gint Modifier_imsgDB( struct IMSGDB *imsg );
+ extern gint Ajouter_imsgDB( struct IMSGDB *imsg );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

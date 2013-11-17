@@ -170,6 +170,51 @@
        g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
        Admin_write ( connexion, chaine );
      }
+    else if ( ! strcmp ( commande, "add" ) )
+     { struct IMSGDB imsg;
+       gint retour;
+       sscanf ( ligne, "%s %d,%d,%d,%[^,],%[^\n]", commande,    /* Découpage de la ligne de commande */
+                &imsg.enable, &imsg.send_command, &imsg.receive_imsg,
+                imsg.jabber_id, imsg.nom
+              );
+       retour = Ajouter_imsgDB ( &imsg );
+       if (retour == -1)
+        { Admin_write ( connexion, "Error, IMSG not added\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " IMSG %s added. New ID=%d\n", imsg.jabber_id, retour );
+          Admin_write ( connexion, chaine );
+        }
+     }
+    else if ( ! strcmp ( commande, "set" ) )
+     { struct IMSGDB imsg;
+       gint retour;
+       sscanf ( ligne, "%s %d,%d,%d,%d,%[^,],%[^\n]", commande, /* Découpage de la ligne de commande */
+                &imsg.id, &imsg.enable, &imsg.send_command, &imsg.receive_imsg,
+                imsg.jabber_id, imsg.nom
+              );
+       retour = Modifier_imsgDB ( &imsg );
+       if (retour == FALSE)
+        { Admin_write ( connexion, "Error, IMSG not changed\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " IMSG %s changed\n", imsg.jabber_id );
+          Admin_write ( connexion, chaine );
+        }
+     }
+    else if ( ! strcmp ( commande, "del" ) )
+     { struct IMSGDB imsg;
+       gboolean retour;
+       sscanf ( ligne, "%s %d", commande, &imsg.id );                 /* Découpage de la ligne de commande */
+       retour = Retirer_imsgDB ( &imsg );
+       if (retour == FALSE)
+        { Admin_write ( connexion, "Error, IMSG not erased\n" ); }
+       else
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), " IMSG %d erased\n", imsg.id );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "enable" ) )
      { struct IMSG_CONTACT contact;
        sscanf ( ligne, "%s %d", commande, &contact.imsg.id );        /* Découpage de la ligne de commande */
@@ -195,7 +240,14 @@
        Admin_write ( connexion, "  send user@domain/resource message      - Send a message to user\n" );
        Admin_write ( connexion, "  reload                                 - Reload contacts from Database\n" );
        Admin_write ( connexion, "  list                                   - List contact and availability\n" );
-       Admin_write ( connexion, "  presence status                        - Change Presence status\n" );
+       Admin_write ( connexion, "  add enable,send_command,receive_imsg,jabber_id,nom\n");
+       Admin_write ( connexion, "                                         - Add a IMSG contact\n" );
+       Admin_write ( connexion, "  set id,enable,send_command,receive_imsg,jabber_id,nom\n" );
+       Admin_write ( connexion, "                                         - Change IMSG id\n" );
+       Admin_write ( connexion, "  del id                                 - Delete IMSG id\n" );
+       Admin_write ( connexion, "  enable id                              - Enable IMSG Contact id\n" );
+       Admin_write ( connexion, "  disable id                             - Disable IMSG Contact id\n" );
+       Admin_write ( connexion, "  presence new_status                    - Change Presence to 'new_status'\n" );
        Admin_write ( connexion, "  status                                 - See connexion status\n" );
      }
     else

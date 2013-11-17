@@ -191,7 +191,7 @@
         { Admin_write ( connexion, "Error, SMS not erased\n" ); }
        else
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " SMS %d (%s)erased\n", sms.id, sms.phone );
+          g_snprintf( chaine, sizeof(chaine), " SMS %d erased\n", sms.id );
           Admin_write ( connexion, chaine );
         }
      }
