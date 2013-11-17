@@ -53,9 +53,9 @@
   { gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine),
-              " Contact_IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence=B%03d, Name=%s, jabberid=%s is %s\n",
+              " Contact_IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence=B%03d, jabberid=%s, Name=%s is %s\n",
                 contact->imsg.id, contact->imsg.enable, contact->imsg.receive_imsg, contact->imsg.send_command,
-                contact->imsg.bit_presence, contact->imsg.nom, contact->imsg.jabber_id,
+                contact->imsg.bit_presence, contact->imsg.jabber_id, contact->imsg.nom,
                 (contact->available ? "available" : "UNavailable") 
                  );
     Admin_write ( connexion, chaine );
