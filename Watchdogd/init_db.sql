@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS `histo_hard` (
 --
 
 CREATE TABLE IF NOT EXISTS `sms` (
-  `id` int(11) NOT NULL DEFAULT '1' AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
   `enable` int(1) NOT NULL,
   `phone` text COLLATE utf8_unicode_ci NOT NULL,
@@ -286,6 +286,23 @@ CREATE TABLE IF NOT EXISTS `sms` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `imsg`
+--
+
+CREATE TABLE IF NOT EXISTS `imsg` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `enable` int(1) NOT NULL,
+  `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
+  `jabber_id` text COLLATE utf8_unicode_ci NOT NULL,
+  `nom` text COLLATE utf8_unicode_ci NOT NULL,
+  `send_command` int(1) NOT NULL,
+  `receive_imsg` int(1) NOT NULL,
+  `bit_presence` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 

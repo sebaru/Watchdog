@@ -69,9 +69,9 @@
                 "Imsg_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "username" ) )
         { g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
-        { g_snprintf( Cfg_imsg.server, sizeof(Cfg_imsg.server), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "server" ) )
+        { g_snprintf( Cfg_imsg.server, sizeof(Cfg_imsg.server), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
         { g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsg.enable = TRUE;  }
