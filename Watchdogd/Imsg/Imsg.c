@@ -139,8 +139,8 @@
     imsg = (struct IMSGDB *)g_try_malloc0( sizeof(struct IMSGDB) );
     if (!imsg) Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR, "Recuperer_imsgDB_suite: Erreur allocation mémoire" );
     else
-     { g_snprintf( imsg->nom, sizeof(imsg->jabber_id), "%s", db->row[4] );
-       g_snprintf( imsg->nom, sizeof(imsg->nom), "%s", db->row[5] );
+     { g_snprintf( imsg->jabber_id, sizeof(imsg->jabber_id), "%s", db->row[4] );
+       g_snprintf( imsg->nom,       sizeof(imsg->nom),       "%s", db->row[5] );
        imsg->id                = atoi(db->row[0]);
        imsg->enable            = atoi(db->row[1]);
        imsg->receive_imsg      = atoi(db->row[2]);
@@ -347,7 +347,7 @@
     liste = Cfg_imsg.Contacts;
     while(liste)
      { contact  = (struct IMSG_CONTACT *)liste->data;
-       if ( ! strcmp( contact->imsg.jabber_id, jabber_id ) )
+       if ( ! g_ascii_strncasecmp( contact->imsg.jabber_id, jabber_id, strlen(contact->imsg.jabber_id) ) )
         { found = TRUE;
           break;
         }
