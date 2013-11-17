@@ -366,16 +366,6 @@
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
               "Imsg_Sauvegarder_statut_contact : user %s(availability=%d) not found in list. Dropping...",
               jabber_id, available );
-#ifdef bouh
-                                       /* Si on arrive la, c'est que le contact n'est pas dans la liste ! */
-    contact = (struct IMSG_CONTACT *)g_try_malloc0( sizeof(struct IMSG_CONTACT) );
-    if (!contact) return;
-    g_snprintf( contact->nom, sizeof(contact->nom), "%s", nom );
-    contact->available = available;
-    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    Cfg_imsg.Contacts = g_slist_prepend ( Cfg_imsg.Contacts, contact );               /* Ajout a la liste */
-    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-#endif
   }
 /**********************************************************************************************************/
 /* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */

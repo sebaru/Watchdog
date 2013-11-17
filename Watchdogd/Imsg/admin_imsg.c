@@ -53,7 +53,7 @@
   { gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine),
-              " Contact_IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence = %d, Name = %s, jabberid = %s is %s\n",
+              " Contact_IMSG[%03d] -> enable=%d, receive_imsg=%d, send_command=%d, bit_presence=B%03d, Name=%s, jabberid=%s is %s\n",
                 contact->imsg.id, contact->imsg.enable, contact->imsg.receive_imsg, contact->imsg.send_command,
                 contact->imsg.bit_presence, contact->imsg.nom, contact->imsg.jabber_id,
                 (contact->available ? "available" : "UNavailable") 
@@ -173,8 +173,8 @@
     else if ( ! strcmp ( commande, "add" ) )
      { struct IMSGDB imsg;
        gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%[^,],%[^\n]", commande,    /* Découpage de la ligne de commande */
-                &imsg.enable, &imsg.send_command, &imsg.receive_imsg,
+       sscanf ( ligne, "%s %d,%d,%d,%d,%[^,],%[^\n]", commande,    /* Découpage de la ligne de commande */
+                &imsg.enable, &imsg.send_command, &imsg.receive_imsg, &imsg.bit_presence,
                 imsg.jabber_id, imsg.nom
               );
        retour = Ajouter_imsgDB ( &imsg );
@@ -189,8 +189,8 @@
     else if ( ! strcmp ( commande, "set" ) )
      { struct IMSGDB imsg;
        gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%d,%[^,],%[^\n]", commande, /* Découpage de la ligne de commande */
-                &imsg.id, &imsg.enable, &imsg.send_command, &imsg.receive_imsg,
+       sscanf ( ligne, "%s %d,%d,%d,%d,%d,%[^,],%[^\n]", commande, /* Découpage de la ligne de commande */
+                &imsg.id, &imsg.enable, &imsg.send_command, &imsg.receive_imsg, &imsg.bit_presence,
                 imsg.jabber_id, imsg.nom
               );
        retour = Modifier_imsgDB ( &imsg );
@@ -240,9 +240,9 @@
        Admin_write ( connexion, "  send user@domain/resource message      - Send a message to user\n" );
        Admin_write ( connexion, "  reload                                 - Reload contacts from Database\n" );
        Admin_write ( connexion, "  list                                   - List contact and availability\n" );
-       Admin_write ( connexion, "  add enable,send_command,receive_imsg,jabber_id,nom\n");
+       Admin_write ( connexion, "  add enable,send_command,receive_imsg,bit_presence,jabber_id,nom\n");
        Admin_write ( connexion, "                                         - Add a IMSG contact\n" );
-       Admin_write ( connexion, "  set id,enable,send_command,receive_imsg,jabber_id,nom\n" );
+       Admin_write ( connexion, "  set id,enable,send_command,receive_imsg,bit_presence,jabber_id,nom\n" );
        Admin_write ( connexion, "                                         - Change IMSG id\n" );
        Admin_write ( connexion, "  del id                                 - Delete IMSG id\n" );
        Admin_write ( connexion, "  enable id                              - Enable IMSG Contact id\n" );
