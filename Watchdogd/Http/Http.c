@@ -345,6 +345,15 @@
           MHD_destroy_response (response);
         }
      }
+    else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/set_m" ) )
+     { if ( Http_Traiter_request_set_m ( connection ) == FALSE )              /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
+     }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
      { if ( Http_Traiter_request_getstatus ( connection ) == FALSE)           /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,

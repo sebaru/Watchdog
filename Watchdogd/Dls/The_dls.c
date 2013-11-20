@@ -38,11 +38,7 @@
 
  #include "watchdogd.h"
 
- static GList *Cde_exterieure=NULL;                      /* Numero des monostables mis à 1 via le serveur */
- struct BIT_A_CHANGER
-  { gint num;
-    gint actif;
-  };
+ static GSList *Cde_exterieure=NULL;                     /* Numero des monostables mis à 1 via le serveur */
 /**********************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
 /* Entrée: le temps avant, et le temps apres l'action                                                     */
@@ -269,7 +265,7 @@
 
     if ( (E(num) && !etat) || (!E(num) && etat) )
      { Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );
-       pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
+       pthread_mutex_lock( &Partage->com_msrv.synchro );  /* Ajout dans la liste de E a envoyer au master */
        Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
                                                     GINT_TO_POINTER(num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
@@ -670,7 +666,7 @@
 /**********************************************************************************************************/
  void Envoyer_commande_dls ( int num )
   { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.liste_m = g_list_append ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
+    Partage->com_dls.liste_m_activer = g_slist_append ( Partage->com_dls.liste_m_activer, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
@@ -679,17 +675,15 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Raz_cde_exterieure ( void )
-  { GList *liste;
-    liste = Cde_exterieure;
-    while( liste )                                                               /* Reset des monostables */
-     { gint num;
-       num = GPOINTER_TO_INT(liste->data);
+  { gint num;
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    while( Cde_exterieure )                                                      /* Reset des monostables */
+     { num = GPOINTER_TO_INT(Cde_exterieure->data);
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Raz_cde_exterieure : Mise a zero du bit M%03d", num );
        SM( num, 0 );
-       liste = liste->next;
+       Cde_exterieure = g_slist_remove ( Cde_exterieure, GINT_TO_POINTER(num) );
      }
-    g_list_free( Cde_exterieure );
-    Cde_exterieure = NULL;
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /*--------------------------------------------------------------------------------------------------------*/
 /**********************************************************************************************************/
@@ -700,7 +694,7 @@
     GList *plugins;
 
     Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
-    Partage->com_dls.liste_m            = NULL;
+    Partage->com_dls.liste_m_activer    = NULL;
     Partage->com_dls.liste_plugin_reset = NULL;
     Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
 
@@ -732,15 +726,15 @@
           Update_heure=Partage->top;
         }
 
-       if (Partage->com_dls.liste_m)                                 /* A-t-on un monostable a allumer ?? */
+       if (Partage->com_dls.liste_m_activer)                         /* A-t-on un monostable a allumer ?? */
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_dls.liste_m->data );
+          num = GPOINTER_TO_INT( Partage->com_dls.liste_m_activer->data );
           Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: Mise a un du bit M%03d", num );
-          Partage->com_dls.liste_m = g_list_remove ( Partage->com_dls.liste_m, GINT_TO_POINTER(num) );
+          Partage->com_dls.liste_m_activer = g_slist_remove ( Partage->com_dls.liste_m_activer, GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           SM( num, 1 );                                                    /* Mise a un du bit monostable */
-          Cde_exterieure = g_list_append( Cde_exterieure, GINT_TO_POINTER( num ) ); 
+          Cde_exterieure = g_slist_append( Cde_exterieure, GINT_TO_POINTER( num ) ); 
         }
 
        if (Partage->com_dls.admin_start)                                  /* A-t-on un plugin a allumer ? */

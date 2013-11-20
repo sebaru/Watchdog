@@ -74,7 +74,7 @@
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
     pthread_mutex_t synchro_ea_access;                /* Bit de synchro pour read/write les bits internes */
     GList *Plugins;                                                   /* Liste des plugins chargés de DLS */
-    GList *liste_m;                                                           /* liste des Mxxx a activer */
+    GSList *liste_m_activer;                                /* liste des Mxxx a activer au debut tour prg */
     GList *liste_plugin_reset;                                            /* liste des plugins a resetter */
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */

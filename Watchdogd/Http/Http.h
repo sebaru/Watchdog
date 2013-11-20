@@ -81,6 +81,7 @@
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
                                                      size_t *upload_data_size, void **con_cls );
+ extern gboolean Http_Traiter_request_setm ( struct MHD_Connection *connection );
  extern void Http_free_liste_satellites ( void );
  extern void Http_Check_satellites_states ( void );
  extern void Http_Traiter_XML_set_internal ( struct HTTP_CONNEXION_INFO *infos );
