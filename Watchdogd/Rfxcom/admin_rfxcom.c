@@ -49,7 +49,7 @@
        module = (struct MODULE_RFXCOM *)liste_modules->data;
 
        g_snprintf( chaine, sizeof(chaine),
-                   " RFXCOM[%03d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),ids=%03d %03d %03d %023 housecode=%03d unitcode=%03d\n"
+                   " RFXCOM[%03d] -> type=%02d(0x%02X),sous_type=%02d(0x%02X),ids=%03d %03d %03d %03d housecode=%03d unitcode=%03d\n"
                    "                e_min=%03d,ea_min=%03d,a_min=%03d,libelle=%s\n"
                    "                date_last_view=%03ds\n",
                    module->rfxcom.id, module->rfxcom.type, module->rfxcom.type,
