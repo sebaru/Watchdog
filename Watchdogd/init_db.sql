@@ -689,10 +689,11 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
 --
 
 CREATE TABLE IF NOT EXISTS `config` (
-  `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
-  `nom_thread` text COLLATE utf8_unicode_ci NOT NULL,
-  `nom` text COLLATE utf8_unicode_ci NOT NULL,
-  `valeur` text COLLATE utf8_unicode_ci NOT NULL
+  `instance_id` varchar[80] COLLATE utf8_unicode_ci NOT NULL,
+  `nom_thread` varchar[80] COLLATE utf8_unicode_ci NOT NULL,
+  `nom` varchar[80] COLLATE utf8_unicode_ci NOT NULL,
+  `valeur` varchar[128] COLLATE utf8_unicode_ci NOT NULL,
+  UNIQUE KEY `instance_id` (`instance_id`,`nom_thread`,`nom`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------

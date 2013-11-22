@@ -68,7 +68,7 @@
                    Config.instance_id, thread, param, valeur,
                   (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
-       return(TRUE);
+       return(retour);
      } else
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
@@ -79,7 +79,7 @@
                    Config.instance_id, thread, param, valeur,
                   (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
-       return(TRUE);
+       return(retour);
      } else
     if ( ! strcmp ( commande, "del" ) )
      { gchar param[80];
@@ -90,7 +90,7 @@
                    Config.instance_id, thread, param,
                    (retour ? "Success" : "Failed") );
        Admin_write ( connexion, chaine );
-       return(TRUE);
+       return(retour);
      } else
     if ( ! strcmp ( commande, "reload" ) )
      { g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Reloading ...\n",
