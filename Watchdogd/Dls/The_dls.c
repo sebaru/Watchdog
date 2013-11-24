@@ -258,13 +258,13 @@
        return;
      }
 
-    if (etat)                                                            /* Changement d'etat de l'entrée */
-     { Partage->e[ num>>3 ] |=  (1<<(num%8)); }
-    else
-     { Partage->e[ num>>3 ] &= ~(1<<(num%8)); }
-
     if ( (E(num) && !etat) || (!E(num) && etat) )
-     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );
+     { if (etat)                                                         /* Changement d'etat de l'entrée */
+        { Partage->e[ num>>3 ] |=  (1<<(num%8)); }
+       else
+        { Partage->e[ num>>3 ] &= ~(1<<(num%8)); }
+
+       Ajouter_arch( MNEMO_ENTREE, num, (etat ? 1.0 : 0.0) );                                /* Archivage */
        pthread_mutex_lock( &Partage->com_msrv.synchro );  /* Ajout dans la liste de E a envoyer au master */
        Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
                                                     GINT_TO_POINTER(num) );
