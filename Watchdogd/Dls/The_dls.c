@@ -420,17 +420,11 @@
        return;
      }
 
-    if (Partage->i[num].etat   != etat || Partage->i[num].rouge!=rouge || 
-        Partage->i[num].vert   != vert || Partage->i[num].bleu!=bleu ||
+    if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge || 
+        Partage->i[num].vert   != vert || Partage->i[num].bleu  != bleu  ||
         Partage->i[num].cligno != cligno
        )
-     { Partage->i[num].etat   = etat;
-       Partage->i[num].rouge  = rouge;
-       Partage->i[num].vert   = vert;
-       Partage->i[num].bleu   = bleu;
-       Partage->i[num].cligno = cligno;
-
-       if ( Partage->i[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+     { if ( Partage->i[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
         { Partage->i[num].changes = 0; }
 
        if ( Partage->i[num].changes <= 5 )                           /* Si moins de 5 changes par seconde */
@@ -442,6 +436,12 @@
              Partage->i[num].bleu   = 0;
              Partage->i[num].cligno = 1;
            }
+          else { Partage->i[num].etat   = etat;  /* Sinon on recopie ce qui est demandé par le plugin DLS */
+                 Partage->i[num].rouge  = rouge;
+                 Partage->i[num].vert   = vert;
+                 Partage->i[num].bleu   = bleu;
+                 Partage->i[num].cligno = cligno;
+               }
 
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
@@ -449,7 +449,7 @@
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->i[num].changes++;                             /* Un change de plus ! */
         }
-       Partage->i[num].last_change = Partage->top;                                    /* Date de la photo ! */
+       Partage->i[num].last_change = Partage->top;                                  /* Date de la photo ! */
        Partage->audit_bit_interne_per_sec++;
      }
   }
