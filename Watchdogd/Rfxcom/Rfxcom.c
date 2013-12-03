@@ -661,8 +661,8 @@
 /******************************************* Reception trame RFXCOM ***************************************/
        FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
        FD_SET(Cfg_rfxcom.fd, &fdselect );
-       tv.tv_sec = 1;
-       tv.tv_usec= 0;
+       tv.tv_sec = 0;
+       tv.tv_usec= 100000;
        retval = select(Cfg_rfxcom.fd+1, &fdselect, NULL, NULL, &tv );               /* Attente d'un caractere */
        if (retval>=0 && FD_ISSET(Cfg_rfxcom.fd, &fdselect) )
         { int bute, cpt;
