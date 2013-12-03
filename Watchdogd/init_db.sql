@@ -661,6 +661,7 @@ INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `comma
 (7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
 (1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
 (1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', '');
+(1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', '');
 -- --------------------------------------------------------
 
 --

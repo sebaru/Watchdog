@@ -274,14 +274,19 @@
        Cfg_audio.Liste_audio = g_slist_remove ( Cfg_audio.Liste_audio, msg );
        pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
-       if ( Partage->g[msg->num].etat == 1)
+       if ( Partage->g[msg->num].etat == 1 &&                                   /* Si le message apparait */
+            (M(NUM_BIT_M_AUDIO_INHIB) == 0 || msg->type == MSG_ALERTE
+                                           || msg->type == MSG_DANGER 
+                                           || msg->type == MSG_ALARME
+            )
+          )                                                 /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
                    "Run_thread : Envoi du message audio %d", msg->num );
 
           Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
-          Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );/* Positionné quand on envoi une diffusion audio */
+          Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
 
-          if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)        /* Si Pas de message depuis xx */
+          if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)          /* Si Pas de message depuis xx */
            { Jouer_wav("Son/jingle.wav"); }                                     /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 

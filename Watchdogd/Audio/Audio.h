@@ -31,8 +31,9 @@
  #define NOM_THREAD                 "audio"
 
  #define AUDIO_JINGLE                3000                /* Jingle si pas de message au bout de 5 minutes */
- #define NUM_BIT_M_AUDIO_START       4                       /* M5 positionné quand arret diffusion audio */
- #define NUM_BIT_M_AUDIO_END         5                       /* M5 positionné quand arret diffusion audio */
+ #define NUM_BIT_M_AUDIO_START       4                      /* bit positionné quand start diffusion audio */
+ #define NUM_BIT_M_AUDIO_END         5                      /* Bit positionné quand arret diffusion audio */
+ #define NUM_BIT_M_AUDIO_INHIB       6                /* Bit positionné si inhibition des messages vocaux */
 
  struct AUDIO_CONFIG
   { struct LIBRAIRIE *lib;
