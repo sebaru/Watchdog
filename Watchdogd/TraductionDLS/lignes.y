@@ -41,6 +41,7 @@ int erreur;                                                             /* Compt
 #define  INTERDIT_BARRE_DROITE       "Ligne %d: /%s interdit en position droite\n"
 #define  INTERDIT_REL_ORDRE          "Ligne %d: %s interdit dans la relation d'ordre\n"
 #define  INTERDIT_COMPARAISON        "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
+#define  INTERDIT_CALCUL             "Ligne %d: %s ne peut s'utiliser dans un calcul\n"
 #define  MANQUE_COMPARAISON          "Ligne %d: %s doit s'utiliser dans une comparaison\n"
 #define  ERR_SYNTAXE                 "Ligne %d: Erreur de syntaxe -> %s\n"
 
@@ -59,7 +60,7 @@ int erreur;                                                             /* Compt
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE T_FOIS
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
 
-%token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL 
+%token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
 
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
@@ -170,14 +171,15 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($4->alors); g_free($4);
                    g_free($2);
                 }}
-                | MOINS MOINS calcul_expr MOINS DONNE EANA ENTIER PVIRGULE
+                | MOINS expr MOINS calcul_expr DONNE EANA ENTIER PVIRGULE
                 {{ int taille;
                    char *instr;
-                   taille = strlen($3)+20;
+                   taille = strlen($4)+strlen($2)+35;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "SEA(%d,%s);\n", $7, $3 );
+                   g_snprintf( instr, taille, "if(%s) { SEA(%d,%s); }\n", $2, $8, $4 );
                    Emettre( instr ); g_free(instr);
-                   g_free($3);
+                   g_free($2);
+                   g_free($4);
                 }}
                 ;
 /******************************************* Partie CALCUL ************************************************/
@@ -233,6 +235,38 @@ calcul_expr3:   VALF
                 }}
                 | POUV calcul_expr PFERM
                 {{ $$=$2; }}
+                | ID
+                {{ struct ALIAS *alias;
+                   char *chaine;
+                   int taille;
+                   alias = Get_alias_par_nom($1);                                  /* On recupere l'alias */
+                   if (alias)
+                    { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
+                       { case EANA  : { taille = 50;
+                                        $$ = New_chaine( taille ); /* 10 caractères max */
+                                        g_snprintf( $$, taille, "EA_ech(%d)", alias->num ); break;
+                                      }
+                                      break;
+                         default:     taille = strlen($1) + strlen(INTERDIT_CALCUL) + 1;
+                                      chaine = New_chaine(taille);
+                                      g_snprintf(chaine, taille, INTERDIT_CALCUL, ligne_source_dls, $1 );
+                                      Emettre_erreur(chaine); g_free(chaine);
+                                      erreur++;
+                                      $$=New_chaine(2);
+                                      g_snprintf( $$, 2, "0" );
+                       }
+                    }
+                   else { taille = strlen($1) + strlen(NON_DEFINI) + 1;
+                          chaine = New_chaine(taille);
+                          g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $1 );
+                          Emettre_erreur(chaine); g_free(chaine);
+                          erreur++;
+                          
+                          $$=New_chaine(2);
+                          g_snprintf( $$, 2, "0" );
+                        }
+                   g_free($1);                                     /* On n'a plus besoin de l'identifiant */
+                }}
                 ;
 /******************************************* Partie LOGIQUE ***********************************************/
 expr:           expr OU facteur
@@ -281,6 +315,18 @@ unite:          modulateur ENTIER HEURE ENTIER
                    taille = 18;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(start)" );
+                }}
+                | T_TRUE
+                {{ int taille;
+                   taille = 18;
+                   $$ = New_chaine(taille);
+                   g_snprintf( $$, taille, "(TRUE)" );
+                }}
+                | T_FALSE
+                {{ int taille;
+                   taille = 18;
+                   $$ = New_chaine(taille);
+                   g_snprintf( $$, taille, "(FALSE)" );
                 }}
                 | barre BI ENTIER
                 {{ int taille;
