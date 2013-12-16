@@ -42,6 +42,7 @@ int erreur;                                                             /* Compt
 #define  INTERDIT_REL_ORDRE          "Ligne %d: %s interdit dans la relation d'ordre\n"
 #define  INTERDIT_COMPARAISON        "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
 #define  INTERDIT_CALCUL             "Ligne %d: %s ne peut s'utiliser dans un calcul\n"
+#define  INTERDIT_CALCUL_RESULT      "Ligne %d: %s ne peut s'utiliser dans un résultat de calcul\n"
 #define  MANQUE_COMPARAISON          "Ligne %d: %s doit s'utiliser dans une comparaison\n"
 #define  ERR_SYNTAXE                 "Ligne %d: Erreur de syntaxe -> %s\n"
 
@@ -77,7 +78,7 @@ int erreur;                                                             /* Compt
 %token <val>    ENTIER
 %token <valf>   VALF
 
-%type  <val>         barre
+%type  <val>         barre calcul_ea_result
 %type  <gliste>      liste_options options
 %type  <option>      une_option
 %type  <chaine>      unite facteur expr
@@ -171,12 +172,12 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($4->alors); g_free($4);
                    g_free($2);
                 }}
-                | MOINS expr MOINS calcul_expr DONNE EANA ENTIER PVIRGULE
+                | MOINS expr MOINS calcul_expr DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    char *instr;
                    taille = strlen($4)+strlen($2)+35;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(%s) { SEA(%d,%s); }\n", $2, $8, $4 );
+                   g_snprintf( instr, taille, "if(%s) { SEA(%d,%s); }\n", $2, $7, $4 );
                    Emettre( instr ); g_free(instr);
                    g_free($2);
                    g_free($4);
@@ -264,6 +265,38 @@ calcul_expr3:   VALF
                           
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
+                        }
+                   g_free($1);                                     /* On n'a plus besoin de l'identifiant */
+                }}
+                ;
+
+calcul_ea_result: EANA ENTIER
+                {{ $$ = $2;
+                }}
+                | ID
+                {{ struct ALIAS *alias;
+                   char *chaine;
+                   int taille;
+                   alias = Get_alias_par_nom($1);                                  /* On recupere l'alias */
+                   if (alias)
+                    { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
+                       { case EANA  : $$ = alias->num;
+                                      break;
+                         default:     taille = strlen($1) + strlen(INTERDIT_CALCUL_RESULT) + 1;
+                                      chaine = New_chaine(taille);
+                                      g_snprintf(chaine, taille, INTERDIT_CALCUL_RESULT, ligne_source_dls, $1 );
+                                      Emettre_erreur(chaine); g_free(chaine);
+                                      erreur++;
+                                      $$=0;
+                       }
+                    }
+                   else { taille = strlen($1) + strlen(NON_DEFINI) + 1;
+                          chaine = New_chaine(taille);
+                          g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $1 );
+                          Emettre_erreur(chaine); g_free(chaine);
+                          erreur++;
+                          
+                          $$=0;
                         }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */
                 }}
