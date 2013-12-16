@@ -177,7 +177,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    char *instr;
                    taille = strlen($4)+strlen($2)+35;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(%s) { SEA(%d,%s); }\n", $2, $7, $4 );
+                   g_snprintf( instr, taille, "if(%s) { SEA(%d,%s); }\n", $2, $6, $4 );
                    Emettre( instr ); g_free(instr);
                    g_free($2);
                    g_free($4);
@@ -295,7 +295,6 @@ calcul_ea_result: EANA ENTIER
                           g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $1 );
                           Emettre_erreur(chaine); g_free(chaine);
                           erreur++;
-                          
                           $$=0;
                         }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */
