@@ -1,0 +1,876 @@
+/**********************************************************************************************************/
+/* Watchdogd/Imsg/Imsg.c  Gestion des Instant Messaging IMSG Watchdog 2.0                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   sam. 28 juil. 2012 16:37:38 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+/*
+ * Imsg.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010 - Sebastien Lefevre
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ #include <sys/time.h>
+ #include <sys/prctl.h>
+ #include <termios.h>
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <loudmouth/loudmouth.h>
+
+ #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "Imsg.h"
+
+ static GMainContext *MainLoop;                             /* Contexte pour attendre les evenements xmpp */
+ static void Imsg_Fermer_connexion ( void );
+ static gboolean Imsg_Ouvrir_connexion ( void );
+ static void Imsg_Connexion_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data);
+
+/**********************************************************************************************************/
+/* Imsg_Lire_config : Lit la config Watchdog et rempli la structure mémoire                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ gboolean Imsg_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
+
+    Cfg_imsg.lib->Thread_debug = FALSE;                                    /* Settings default parameters */
+    Cfg_imsg.enable            = FALSE; 
+    g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), DEFAUT_USERNAME_IMSG );
+    g_snprintf( Cfg_imsg.server,   sizeof(Cfg_imsg.username), DEFAUT_SERVER_IMSG );
+    g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), DEFAUT_PASSWORD_IMSG );
+
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,                        /* Print Config */
+                "Imsg_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "username" ) )
+        { g_snprintf( Cfg_imsg.username, sizeof(Cfg_imsg.username), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "server" ) )
+        { g_snprintf( Cfg_imsg.server, sizeof(Cfg_imsg.server), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
+        { g_snprintf( Cfg_imsg.password, sizeof(Cfg_imsg.password), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsg.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_imsg.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                   "Imsg_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
+     }
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Retirer_imsgDB: Elimination d'un imsg                                                                  */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: false si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Retirer_imsgDB ( struct IMSGDB *imsg )
+  { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Retirer_imsgDB: Database Connection Failed" );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_IMSG, imsg->id );
+
+    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
+    Libere_DB_SQL( &db );
+    Cfg_imsg.reload = TRUE;                         /* Rechargement des contacts RS en mémoire de travaille */
+    return(retour);
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static gboolean Recuperer_imsgDB ( struct DB *db )
+  { gchar requete[512];
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,enable,receive_imsg,send_command,jabber_id,nom,bit_presence"
+                " FROM %s WHERE instance_id='%s' ORDER BY nom", NOM_TABLE_IMSG, Config.instance_id );
+
+    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
+  }
+/**********************************************************************************************************/
+/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                    */
+/* Entrée: un log et une database                                                                         */
+/* Sortie: une GList                                                                                      */
+/**********************************************************************************************************/
+ static struct IMSGDB *Recuperer_imsgDB_suite( struct DB *db )
+  { struct IMSGDB *imsg;
+
+    Recuperer_ligne_SQL(db);                              /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL ( db );
+       return(NULL);
+     }
+
+    imsg = (struct IMSGDB *)g_try_malloc0( sizeof(struct IMSGDB) );
+    if (!imsg) Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR, "Recuperer_imsgDB_suite: Erreur allocation mémoire" );
+    else
+     { g_snprintf( imsg->jabber_id, sizeof(imsg->jabber_id), "%s", db->row[4] );
+       g_snprintf( imsg->nom,       sizeof(imsg->nom),       "%s", db->row[5] );
+       imsg->id                = atoi(db->row[0]);
+       imsg->enable            = atoi(db->row[1]);
+       imsg->receive_imsg      = atoi(db->row[2]);
+       imsg->send_command      = atoi(db->row[3]);
+       imsg->bit_presence      = atoi(db->row[6]);
+     }
+    return(imsg);
+  }
+/**********************************************************************************************************/
+/* Modifier_imsgDB: Modification d'un imsg Watchdog                                                       */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ static gint Ajouter_modifier_imsgDB( struct IMSGDB *imsg, gboolean ajout )
+  { gchar *jabber_id, *name;
+    gboolean retour_sql;
+    gchar requete[2048];
+    struct DB *db;
+    gint retour;
+
+    jabber_id = Normaliser_chaine ( imsg->jabber_id );                    /* Formatage correct des chaines */
+    if (!jabber_id)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_imsgDB: Normalisation jabber_id impossible" );
+       return(-1);
+     }
+    name = Normaliser_chaine ( imsg->nom );                              /* Formatage correct des chaines */
+    if (!name)
+     { g_free(jabber_id);
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Ajouter_modifier_imsgDB: Normalisation nom impossible" );
+       return(-1);
+     }
+
+    if (ajout == TRUE)
+     { g_snprintf( requete, sizeof(requete),
+                   "INSERT INTO %s"
+                   "(instance_id,enable,receive_imsg,send_command,jabber_id,nom,bit_presence) "
+                   "VALUES ('%s',%d,%d,%d,'%s','%s',%d)",
+                   NOM_TABLE_IMSG, Config.instance_id,
+                   imsg->enable, imsg->receive_imsg, imsg->send_command,
+                   jabber_id, name, imsg->bit_presence
+                 );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                   "UPDATE %s SET "             
+                   "enable=%d, receive_imsg=%d, send_command=%d,"
+                   "jabber_id='%s', nom='%s', bit_presence=%d "
+                   "WHERE id=%d",
+                   NOM_TABLE_IMSG,
+                   imsg->enable, imsg->receive_imsg, imsg->send_command,
+                   jabber_id, name, imsg->bit_presence,
+                   imsg->id );
+     }
+    g_free(jabber_id);
+    g_free(name);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Ajouter_modifier_imsgDB: Database Connection Failed" );
+       return(-1);
+     }
+
+    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
+    if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );    /* Retourne le nouvel ID imsg */
+       else retour = 0;
+     }
+    else retour = -1;
+    Libere_DB_SQL( &db );
+    Cfg_imsg.reload = TRUE;                         /* Rechargement des contacts RS en mémoire de travaille */
+    return ( retour );                                            /* Pas d'erreur lors de la modification */
+  }
+/**********************************************************************************************************/
+/* Modifier_imsgDB: Modification d'un imsg Watchdog                                                       */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gint Modifier_imsgDB( struct IMSGDB *imsg )
+  { return ( Ajouter_modifier_imsgDB( imsg, FALSE ) );
+  }
+/**********************************************************************************************************/
+/* Modifier_imsgDB: Modification d'un imsg Watchdog                                                       */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
+/* Sortie: -1 si pb, id sinon                                                                             */
+/**********************************************************************************************************/
+ gint Ajouter_imsgDB( struct IMSGDB *imsg )
+  { return ( Ajouter_modifier_imsgDB( imsg, TRUE ) );
+  }
+/**********************************************************************************************************/
+/* Charger_tous_imsg: Requete la DB pour charger les contacts imsg                                         */
+/* Entrée: rien                                                                                           */
+/* Sortie: le nombre de contacts trouvé                                                                    */
+/**********************************************************************************************************/
+ static gboolean Charger_tous_IMSG ( void  )
+  { struct DB *db;
+    gint cpt;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING, "Charger_tous_imsg: Database Connection Failed" );
+       return(FALSE);
+     }
+
+/********************************************** Chargement des contacts ************************************/
+    if ( ! Recuperer_imsgDB( db ) )
+     { Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING, "Charger_tous_imsg: Recuperer_imsg Failed" );
+       return(FALSE);
+     }
+
+    Cfg_imsg.Contacts = NULL;
+    cpt = 0;
+    for ( ; ; )
+     { struct IMSG_CONTACT *contact;
+       struct IMSGDB *imsg;
+
+       imsg = Recuperer_imsgDB_suite( db );
+       if (!imsg) break;
+
+       contact = (struct IMSG_CONTACT *)g_try_malloc0( sizeof(struct IMSG_CONTACT) );
+       if (!contact)                                                   /* Si probleme d'allocation mémoire */
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
+                   "Charger_tous_imsg : Erreur allocation mémoire struct IMSG_CONTACT" );
+          g_free(imsg);
+          Libere_DB_SQL( &db );
+          return(FALSE);
+        }
+       memcpy( &contact->imsg, imsg, sizeof(struct IMSGDB) );
+       g_free(imsg);
+       cpt++;                                             /* Nous avons ajouté un contact dans la liste ! */
+                                                                        /* Ajout dans la liste de travail */
+       pthread_mutex_lock( &Cfg_imsg.lib->synchro );
+       Cfg_imsg.Contacts = g_slist_prepend ( Cfg_imsg.Contacts, contact );
+       pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+                "Charger_tous_imsg: id = %03d, nom=%s, jabber_id=%s",
+                 contact->imsg.id, contact->imsg.nom, contact->imsg.jabber_id );
+     }
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO, "Charger_tous_imsg: %03d IMSG found  !", cpt );
+
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Decharger_tous_Decharge l'ensemble des contacts IMSG                                                   */
+/* Entrée: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Decharger_tous_IMSG ( void  )
+  { struct IMSG_CONTACT *contact;
+    pthread_mutex_lock( &Cfg_imsg.lib->synchro );
+    while ( Cfg_imsg.Contacts )
+     { contact = (struct IMSG_CONTACT *)Cfg_imsg.Contacts->data;
+       Cfg_imsg.Contacts = g_slist_remove ( Cfg_imsg.Contacts, contact );
+       g_free(contact);
+     }
+    pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Imsg_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                        */
+/* Entrée: une structure CMD_TYPE_HISTO                                                                   */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Imsg_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
+  { gint taille;
+
+    pthread_mutex_lock( &Cfg_imsg.lib->synchro );                        /* Ajout dans la liste a traiter */
+    taille = g_slist_length( Cfg_imsg.Messages );
+    pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
+       g_free(msg);
+       return;
+     }
+    else if (Cfg_imsg.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                "Imsg_Gerer_message: Thread is down. Dropping msg %d", msg->num );
+       g_free(msg);
+       return;
+     }
+
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, msg );                    /* Ajout a la liste */
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Imsg_Sauvegarder_statut_contact : Sauvegarde en mémoire le statut du contact en paremetre              */
+/* Entrée: le contact et le statut                                                                        */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Imsg_Sauvegarder_statut_contact ( const gchar *jabber_id, gboolean available )
+  { struct IMSG_CONTACT *contact;
+    gboolean found;
+    GSList *liste;
+
+    found = FALSE;
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : searching for user %s", jabber_id );
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    liste = Cfg_imsg.Contacts;
+    while(liste)
+     { contact  = (struct IMSG_CONTACT *)liste->data;
+       if ( ! g_ascii_strncasecmp( contact->imsg.jabber_id, jabber_id, strlen(contact->imsg.jabber_id) ) )
+        { found = TRUE;
+          break;
+        }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+    if (found==TRUE)
+     { contact->available = available; 
+          Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+                    "Imsg_Sauvegarder_statut_contact : user %s found in list. Availability updated to %d.",
+                    jabber_id, available );
+          if (contact->imsg.bit_presence) SB(contact->imsg.bit_presence, available);
+       return;
+     }
+
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Sauvegarder_statut_contact : user %s(availability=%d) not found in list. Dropping...",
+              jabber_id, available );
+  }
+/**********************************************************************************************************/
+/* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */
+/* Entrée: le nom du destinataire                                                                         */
+/* Sortie : booléen, TRUE/FALSE                                                                           */
+/**********************************************************************************************************/
+ static gboolean Imsg_recipient_send_command_authorized ( const gchar *jabber_id )
+  { struct IMSG_CONTACT *contact;
+    gboolean found;
+    GSList *liste;
+
+    found = FALSE;
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    liste = Cfg_imsg.Contacts;
+    while (liste)
+     { contact  = (struct IMSG_CONTACT *)liste->data;
+       if ( contact->imsg.enable && contact->imsg.send_command &&
+            (! g_ascii_strncasecmp ( jabber_id, contact->imsg.jabber_id, strlen(contact->imsg.jabber_id) ) )
+          )
+        { found = TRUE; break; }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+    return(found);
+  }
+/**********************************************************************************************************/
+/* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
+/* Entrée: la connexion xmpp                                                                              */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status )
+  { LmMessage *m;
+    GError *error = NULL;
+
+    if ( lm_connection_get_state ( Cfg_imsg.connection ) != LM_CONNECTION_STATE_AUTHENTICATED )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Mode_presence: Not connected .. cannot send presence %s / %s / %s -> %s",
+                 type, show, status, error->message );
+       return;
+     }
+
+    m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
+    if (type)   lm_message_node_set_attribute (m->node, "type", type );
+    if (show)   lm_message_node_add_child (m->node, "show", show );
+    if (status) lm_message_node_add_child (m->node, "status", status );
+    if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Mode_presence: Unable to send presence %s / %s / %s -> %s",
+                 type, show, status, error->message );
+     }
+    lm_message_unref (m);
+  }
+/**********************************************************************************************************/
+/* Imsg_Envoi_message_to : Envoi un message a un contact xmpp                                             */
+/* Entrée: le nom du destinataire et le message                                                           */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Imsg_Envoi_message_to ( const gchar *dest, gchar *message )
+  { GError *error= NULL;
+    LmMessage *m;
+
+    if ( lm_connection_get_state ( Cfg_imsg.connection ) != LM_CONNECTION_STATE_AUTHENTICATED )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Envoi_message_to: Not connected .. cannot send %s to %s",
+                 message, dest );
+       return;
+     }
+
+    m = lm_message_new ( dest, LM_MESSAGE_TYPE_MESSAGE );
+    lm_message_node_add_child (m->node, "body", message );
+    if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
+     { if (error)
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                   "Imsg_Envoi_message_to: Unable to send message %s to %s -> %s", message, dest, error->message );
+        }
+       else
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                   "Imsg_Envoi_message_to: Unable to send message %s to %s -> Unknown error", message, dest );
+        }
+     }
+    lm_message_unref (m);
+  }
+/**********************************************************************************************************/
+/* Imsg_Envoi_message_to_all_available : Envoi un message aux contacts disponibles                        */
+/* Entrée: le message                                                                                     */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Imsg_Envoi_message_to_all_available ( gchar *message )
+  { GSList *liste;
+    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+    liste = Cfg_imsg.Contacts;
+    while(liste)
+     { struct IMSG_CONTACT *contact;
+       contact = (struct IMSG_CONTACT *)liste->data;
+       if ( contact->imsg.enable && contact->imsg.receive_imsg && contact->available == TRUE )
+        { Imsg_Envoi_message_to ( contact->imsg.jabber_id, message ); }
+       liste = liste->next;
+     }
+    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Imsg_Reception_message : CB appellé lorsque l'on recoit un message xmpp                                */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static LmHandlerResult Imsg_Reception_message ( LmMessageHandler *handler, LmConnection *connection,
+                                                 LmMessage *message, gpointer data )
+  { LmMessageNode *node, *body;
+    const gchar *from;
+    struct DB *db;
+
+    node = lm_message_get_node ( message );
+
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Reception_message : recu un msg xmpp : value = %s attr = %s", 
+              lm_message_node_get_value ( node ),
+              lm_message_node_to_string ( node )
+            );
+
+    body = lm_message_node_find_child ( node, "body" );
+    if (!body) return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+
+    from = lm_message_node_get_attribute ( node, "from" );
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+              "Imsg_Reception_message : recu un msg xmpp de %s : %s", 
+              from, lm_message_node_get_value ( body )
+            );
+
+                                 /* On drop les messages du serveur jabber et des interlocuteurs inconnus */
+    if ( (!from) || (!strncmp ( from, Cfg_imsg.username, strlen(Cfg_imsg.username) )) )
+     { return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS); }
+
+    if ( Imsg_recipient_send_command_authorized ( from ) == FALSE )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Reception_message : unknown sender %s. Dropping message...", from );
+       return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+     }
+
+    if ( ! strcasecmp( (gchar *)lm_message_node_get_value ( body ), "ping" ) )     /* Interfacage de test */
+     { Imsg_Envoi_message_to( from, "Pong !" ); }   
+    else if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)lm_message_node_get_value ( body ) ) )
+     { Imsg_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
+    else 
+     { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo;
+          
+       if ( db->nbr_result == 0 )                         /* Si pas d'enregistrement, demande de préciser */
+        { Imsg_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }   
+       if ( db->nbr_result > 1 )                         /* Si trop d'enregistrement, demande de préciser */
+        { Imsg_Envoi_message_to( from, " Need to choose ... :" ); }
+
+       for ( result_mnemo = NULL ; ; )
+        { mnemo = Recuperer_mnemoDB_suite( &db );
+          if (!mnemo) break;
+
+          if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->command_text );
+          if (db->nbr_result!=1) g_free(mnemo);
+                            else result_mnemo = mnemo;
+        }
+       if (result_mnemo)
+        { gchar chaine[80];
+          switch ( result_mnemo->type )
+           { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
+                  g_snprintf( chaine, sizeof(chaine), "Mise a un du bit M%03d", result_mnemo->num );
+                  Imsg_Envoi_message_to( from, chaine );
+                  Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                             "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
+                  Envoyer_commande_dls(result_mnemo->num); 
+                  break;
+             case MNEMO_ENTREE:
+                  g_snprintf( chaine, sizeof(chaine), " Result = %d", E(result_mnemo->num) );
+                  Imsg_Envoi_message_to( from, chaine );
+                  break;
+             case MNEMO_ENTREE_ANA:
+                  g_snprintf( chaine, sizeof(chaine), " Result = %f", EA_ech(result_mnemo->num) );
+                  Imsg_Envoi_message_to( from, chaine );
+                  break;
+             default: g_snprintf( chaine, sizeof(chaine), "Cannot handle command... Check Mnemo !" );
+                      Imsg_Envoi_message_to( from, chaine );
+                      Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                               "Imsg_Reception_message: Cannot handle commande type %d (num=%03d)",
+                                result_mnemo->type, result_mnemo->num );
+                      break;
+           }
+          g_free(result_mnemo);
+        }
+     }
+    return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+  }
+/**********************************************************************************************************/
+/* Imsg_Reception_message : CB appellé lorsque l'on recoit un message de type presence                    */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static LmHandlerResult Imsg_Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
+                                                  LmMessage *message, gpointer data )
+  { LmMessageNode *node_presence, *node_show, *node_status;
+    const gchar *type, *from, *show, *status;
+    GError *error = NULL;
+    LmMessage *m;
+
+    node_presence = lm_message_get_node ( message );
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Reception_presence : recu un msg presence : string= %s", 
+              lm_message_node_to_string (node_presence)
+            );
+
+    type = lm_message_node_get_attribute ( node_presence, "type" );
+    from = lm_message_node_get_attribute ( node_presence, "from" );
+
+    node_show = lm_message_node_get_child( node_presence, "show" );
+    if (node_show) show = lm_message_node_get_value( node_show );
+              else show = NULL;
+
+    node_status = lm_message_node_get_child( node_presence, "status" );
+    if (node_status) status = lm_message_node_get_value( node_status );
+                else status = NULL;
+
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+              "Imsg_Reception_presence: Recu type=%s, show=%s, status=%s from %s", type, show, status, from );
+
+    if ( type &&  ( ! strcmp ( type, "subscribe" ) ) ) /* Demande de subscription à notre status presence */
+     { m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
+       lm_message_node_set_attribute ( m->node, "type", "subscribed" );
+       if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                    "Imsg_Reception_presence: Unable send subscribed to %s -> %s", from, error->message );
+        }
+       else
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+                    "Imsg_Reception_presence: Sending Subscribed OK to %s", from );
+        }
+       lm_message_unref (m);
+                                                       /* Demande de subscription au status du partenaire */
+       m = lm_message_new ( from, LM_MESSAGE_TYPE_PRESENCE );
+       lm_message_node_set_attribute (m->node, "type", "subscribe" );
+       if (!lm_connection_send (Cfg_imsg.connection, m, &error)) 
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                    "Imsg_Reception_presence: Unable send subscribe to %s -> %s", from, error->message );
+        }
+       else
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+                    "Imsg_Reception_presence: Sending Subscribe OK to %s", from );
+        }
+       lm_message_unref (m);
+
+       Imsg_Sauvegarder_statut_contact ( from, FALSE );         /* Par défaut, le contact est unavailable */
+       return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
+     }
+    else if ( type && ( ! strcmp ( type, "unavailable" ) ) )    /* Gestion de la deconnexion des contacts */
+     { Imsg_Sauvegarder_statut_contact ( from, FALSE );                     /* Le contact est unavailable */
+     }
+    else if ( ! type )                                            /* Gestion de la connexion des contacts */
+     { Imsg_Sauvegarder_statut_contact ( from, TRUE );                      /* Le contact est unavailable */
+     }
+    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+  }
+/**********************************************************************************************************/
+/* Imsg_Reception_message : CB appellé lorsque l'on recoit un message xmpp de type IQ                     */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static LmHandlerResult Imsg_Reception_contact ( LmMessageHandler *handler, LmConnection *connection,
+                                                 LmMessage *message, gpointer data )
+  { LmMessageNode *node_iq;
+    node_iq = lm_message_get_node ( message );
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Reception_contact : recu un msg xmpp : iq = %s", 
+              lm_message_node_to_string (node_iq)
+            );
+    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
+  }
+/**********************************************************************************************************/
+/* Imsg_Fermer_connexion : Ferme une connexion avec le serveur Jabber                                     */
+/* Entrée : Void                                                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Imsg_Fermer_connexion ( void )
+  { if ( ! lm_connection_is_authenticated  ( Cfg_imsg.connection ) )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                 "Imsg_Fermer_connexion: Strange, connexion is not authenticated...");
+     }
+    else                                                           /* Fermeture de la Cfg_imsg.connection */
+     { Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
+       lm_connection_close (Cfg_imsg.connection, NULL);
+     }
+    sleep(2);
+                                                                  /* Destruction de la structure associée */
+    lm_connection_unref (Cfg_imsg.connection);
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+              "Imsg_Fermer_connexion: Connexion is closed.");
+  }
+/**********************************************************************************************************/
+/* Imsg_Ouvrir_connexion : Ouvre une connexion avec le serveur Jabber                                     */
+/* Entrée : Void                                                                                          */
+/* Sortie : TRUE ou FALSE si probleme                                                                     */
+/**********************************************************************************************************/
+ static gboolean Imsg_Ouvrir_connexion ( void )
+  { LmMessageHandler *lmMsgHandler;
+    GError       *error = NULL;
+
+    Cfg_imsg.connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
+    if ( Cfg_imsg.connection == NULL )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Ouvrir_connexion: Error creating connection" );
+       return(FALSE);
+     }
+
+    if ( Cfg_imsg.connection && (lm_ssl_is_supported () == TRUE) )
+     { LmSSL *ssl;
+       ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
+       lm_ssl_use_starttls ( ssl, TRUE, TRUE );
+       lm_connection_set_ssl ( Cfg_imsg.connection, ssl );
+       lm_ssl_unref ( ssl );
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                 "Imsg_Ouvrir_connexion: SSL is available" );
+     }
+    else { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                     "Imsg_Ouvrir_connexion: SSL is _Not_ available" );
+         }
+                                                                             /* Connexion au serveur XMPP */
+    if ( lm_connection_open_and_block (Cfg_imsg.connection, &error) == FALSE )
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                 "Imsg_Ouvrir_connexion: Unable to connect to xmpp server %s -> %s", Cfg_imsg.server, error->message );
+       lm_connection_unref (Cfg_imsg.connection);
+       return(FALSE);
+     }
+
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+              "Imsg_Ouvrir_connexion: Connexion to xmpp server %s OK", Cfg_imsg.server );
+    if ( lm_connection_authenticate_and_block ( Cfg_imsg.connection, Cfg_imsg.username, Cfg_imsg.password,
+                                                "server", &error) == FALSE )
+    { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_CRIT,
+                "Imsg_Ouvrir_connexion: Unable to authenticate to xmpp server -> %s", error->message );
+      lm_connection_close (Cfg_imsg.connection, NULL);
+      lm_connection_unref (Cfg_imsg.connection);
+      return(FALSE);
+    }
+
+     
+   Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
+             "Imsg_Ouvrir_connexion: Authentication to xmpp server OK (%s@%s)",
+             Cfg_imsg.username, Cfg_imsg.server );
+
+   lm_connection_set_disconnect_function ( Cfg_imsg.connection,                /* Fonction de deconnexion */
+                                           (LmDisconnectFunction)Imsg_Connexion_close,
+                                           NULL, NULL );
+
+   lm_connection_set_keep_alive_rate ( Cfg_imsg.connection, 60 );       /* Ping toutes les minutes */
+                                               /* Set up message handler to handle incoming text messages */
+   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_message, NULL, NULL );
+   lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
+                                           LM_MESSAGE_TYPE_MESSAGE, LM_HANDLER_PRIORITY_NORMAL);
+   lm_message_handler_unref(lmMsgHandler);
+
+                                           /* Set up message handler to handle incoming presence messages */
+   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_presence, NULL, NULL );
+   lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
+                                           LM_MESSAGE_TYPE_PRESENCE, LM_HANDLER_PRIORITY_NORMAL);
+   lm_message_handler_unref(lmMsgHandler);
+
+                                                /* Set up message handler to handle incoming contact list */
+   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsg_Reception_contact, NULL, NULL );
+   lm_connection_register_message_handler( Cfg_imsg.connection, lmMsgHandler, 
+                                           LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
+   lm_message_handler_unref(lmMsgHandler);
+   Imsg_Mode_presence ( NULL, "chat", "Waiting for commands" );
+   return(TRUE);
+ }
+/**********************************************************************************************************/
+/* Imsg_Connexion_close : Appellé lorsque la connexion est fortuitement close..                           */
+/* Entrée : Le Handler, la connexion, le message                                                          */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Imsg_Connexion_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data)
+  { switch (reason)
+     { case LM_DISCONNECT_REASON_OK:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = User requested disconnect."
+                    );
+            return;                          /* Dans ce cas la, il ne faut pas tenter de se reconnecter ! */
+            break;
+       case LM_DISCONNECT_REASON_PING_TIME_OUT:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = Connexion to the server timed out."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_HUP:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = The socket emitted that the connection was hung up."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_ERROR:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = A generic error somewhere in the transport layer."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_RESOURCE_CONFLICT:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = Another connection was made to the server with the same resource."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_INVALID_XML:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = Invalid XML was sent from the client."
+                    );
+            break;
+       case LM_DISCONNECT_REASON_UNKNOWN:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = An unknown error."
+                    );
+            break;
+       default:
+            Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                     "Imsg_Connexion_close : Connexion lost = A very unknown error."
+                    );
+            break;
+    }
+   Imsg_Fermer_connexion();
+   Cfg_imsg.date_retente = Partage->top + TIME_RECONNECT_IMSG;
+  }
+/**********************************************************************************************************/
+/* Main: Fonction principale du thread Imsg                                                               */
+/**********************************************************************************************************/
+ void Run_thread ( struct LIBRAIRIE *lib )
+  { prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
+    memset( &Cfg_imsg, 0, sizeof(Cfg_imsg) );                   /* Mise a zero de la structure de travail */
+    Cfg_imsg.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Imsg_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
+
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+
+    g_snprintf( Cfg_imsg.lib->admin_prompt, sizeof(Cfg_imsg.lib->admin_prompt), "imsg" );
+    g_snprintf( Cfg_imsg.lib->admin_help,   sizeof(Cfg_imsg.lib->admin_help),   "Manage Instant Messaging system" );
+
+    if (!Cfg_imsg.enable)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                "Run_thread: Thread is not enabled in config. Shutting Down %p", pthread_self() );
+       goto end;
+     }
+
+    Cfg_imsg.lib->Thread_run = TRUE;                                                /* Le thread tourne ! */
+    Cfg_imsg.date_retente = Partage->top + 100;                      /* On se connectera dans 10 secondes */
+    MainLoop = g_main_context_new();
+
+    Abonner_distribution_message ( Imsg_Gerer_message );        /* Abonnement à la diffusion des messages */
+    Charger_tous_IMSG();
+    while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
+     { usleep(10000);
+       sched_yield();
+
+       if (Cfg_imsg.lib->Thread_sigusr1 == TRUE)
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
+          pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+          Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: USR1 -> Nbr of IMSG to send=%d, Number of contacts=%d",
+                    g_slist_length ( Cfg_imsg.Messages ),
+                    g_slist_length ( Cfg_imsg.Contacts )
+                  );
+          pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+          Cfg_imsg.lib->Thread_sigusr1 = FALSE;
+        }
+
+       if (Cfg_imsg.reload == TRUE)
+        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading conf" );
+          Decharger_tous_IMSG();
+          Charger_tous_IMSG();
+          Cfg_imsg.reload = FALSE;
+        }
+
+       if ( Cfg_imsg.Messages )                            /* Gestion de la listes des messages a traiter */
+        { struct CMD_TYPE_MESSAGE *msg;
+          pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
+          msg = Cfg_imsg.Messages->data;
+          Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, msg );           /* Retrait de la liste */
+          pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+          if (Partage->g[msg->num].etat) Imsg_Envoi_message_to_all_available ( msg->libelle );
+          g_free(msg);                       /* Fin d'utilisation de la structure donc liberation memoire */
+        }
+
+       if (Cfg_imsg.set_status)
+        { Cfg_imsg.set_status = FALSE;
+          Imsg_Mode_presence( NULL, "chat", Cfg_imsg.new_status );
+        }
+
+       if (Cfg_imsg.date_retente && Partage->top >= Cfg_imsg.date_retente)
+        { Cfg_imsg.date_retente = 0;
+          Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
+                   "Run_thread : Trying to reconnect..."
+                  );
+          if ( Imsg_Ouvrir_connexion() == FALSE )
+           { Cfg_imsg.date_retente = Partage->top + TIME_RECONNECT_IMSG; }        /* Si probleme, retente */
+        }
+
+       g_main_context_iteration ( MainLoop, FALSE );
+
+     }                                                                     /* Fin du while partage->arret */
+    Decharger_tous_IMSG();
+    Desabonner_distribution_message ( Imsg_Gerer_message ); /* Desabonnement de la diffusion des messages */
+    Imsg_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
+    g_main_context_unref (MainLoop);
+end:
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_imsg.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
+    Cfg_imsg.lib->TID = 0;                                /* On indique au master que le thread est mort. */
+    pthread_exit(GINT_TO_POINTER(0));
+  }
+/*--------------------------------------------------------------------------------------------------------*/
