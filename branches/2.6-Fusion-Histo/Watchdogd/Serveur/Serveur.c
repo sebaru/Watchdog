@@ -147,11 +147,8 @@
        if (client->courbes)         { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
                                       g_list_free(client->courbes);
                                     }
-       if (client->Liste_new_histo) { g_slist_foreach( client->Liste_new_histo, (GFunc) g_free, NULL );
-                                      g_slist_free ( client->Liste_new_histo );
-                                    }
-       if (client->Liste_del_histo) { g_slist_foreach( client->Liste_del_histo, (GFunc) g_free, NULL );
-                                      g_slist_free ( client->Liste_del_histo );
+       if (client->Liste_histo)     { g_slist_foreach( client->Liste_histo, (GFunc) g_free, NULL );
+                                      g_slist_free ( client->Liste_histo );
                                     }
        g_free(client);
      }
@@ -306,10 +303,7 @@
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "Envoyer_histo_aux_threads: Envoi du MSG%d=%d au client %s",
                    dup_histo->id, dup_histo->alive, client->machine );
-          if (histo->alive)
-           { client->Liste_new_histo = g_slist_append ( client->Liste_new_histo, dup_histo ); }
-          else
-           { client->Liste_del_histo = g_slist_append ( client->Liste_del_histo, dup_histo ); }
+          client->Liste_histo = g_slist_append ( client->Liste_histo, dup_histo );
         }
        liste = g_slist_next( liste );
      }

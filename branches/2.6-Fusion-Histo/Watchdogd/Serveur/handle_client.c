@@ -64,45 +64,22 @@
 /* Entrée : le client a gerer                                                                             */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- static void Envoyer_new_histo_au_client ( struct CLIENT *client )
+ static void Envoyer_histo_au_client ( struct CLIENT *client )
   { struct CMD_TYPE_HISTO *histo;
     
-    if ( client->Liste_new_histo == NULL ) return;
+    if ( client->Liste_histo == NULL ) return;
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    histo = (struct CMD_TYPE_HISTO *) client->Liste_new_histo->data;
-    client->Liste_new_histo = g_slist_remove ( client->Liste_new_histo, histo );
+    histo = (struct CMD_TYPE_HISTO *) client->Liste_histo->data;
+    client->Liste_histo = g_slist_remove ( client->Liste_histo, histo );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
              "Envoyer_new_histo: Histo traite : id = %06d, msg=%04d, libelle=%s",
               histo->id, histo->msg.num, histo->msg.libelle );
 
-    Envoi_client( client, TAG_HISTO, SSTAG_SERVEUR_SHOW_HISTO,
+    Envoi_client( client, TAG_HISTO, (histo->alive ? SSTAG_SERVEUR_SHOW_HISTO : SSTAG_SERVEUR_DEL_HISTO),
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-    g_free(histo);
-  }
-/**********************************************************************************************************/
-/* Envoyer_del_histo_au_client: Parcours la liste des histo et les envoi                                  */
-/* Entrée : le client a gerer                                                                             */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- static void Envoyer_del_histo_au_client ( struct CLIENT *client )
-  { struct CMD_TYPE_HISTO *histo;
-    
-    if ( client->Liste_del_histo == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    histo = (struct CMD_TYPE_HISTO *) client->Liste_del_histo->data;
-    client->Liste_del_histo = g_slist_remove ( client->Liste_del_histo, histo );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Envoyer_del_histo: Histo traite : msg=%05d",
-              histo->msg.num );
-
-    Envoi_client( client, TAG_HISTO, SSTAG_SERVEUR_DEL_HISTO,
-                 (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
     g_free(histo);
   }
 /**********************************************************************************************************/
@@ -372,8 +349,7 @@
         }
 /****************************************** Envoi des histos et des motifs ********************************/
        if (client->mode == VALIDE)                            /* Envoi au suppression des histo au client */
-        { Envoyer_new_histo_au_client (client);
-          Envoyer_del_histo_au_client (client);
+        { Envoyer_histo_au_client (client);
           Envoyer_new_motif_au_client (client);
         }
 /****************************************** Ecoute du client  *********************************************/
