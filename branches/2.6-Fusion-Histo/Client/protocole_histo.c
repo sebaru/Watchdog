@@ -63,14 +63,14 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD:
-             { struct CMD_TYPE_HISTO_HARD *histo;
+             { struct CMD_RESPONSE_HISTO_MSGS *response;
                Set_progress_plusun();
 
-               histo = (struct CMD_TYPE_HISTO_HARD *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO_HARD ) );
-               if (!histo) return; 
-               memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO_HARD ) );
-               Arrivee_histo_hard = g_list_append( Arrivee_histo_hard, histo );
-               page_id = histo->page_id;                        /* Sauvegarde de la page pour futur clear */
+               response = (struct CMD_RESPONSE_HISTO_MSGS *)g_try_malloc0( sizeof( struct CMD_RESPONSE_HISTO_MSGS ) );
+               if (!response) return; 
+               memcpy( response, connexion->donnees, sizeof(struct CMD_RESPONSE_HISTO_MSGS ) );
+               Arrivee_histo_hard = g_list_append( Arrivee_histo_hard, response );
+               page_id = response->page_id;                     /* Sauvegarde de la page pour futur clear */
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN:

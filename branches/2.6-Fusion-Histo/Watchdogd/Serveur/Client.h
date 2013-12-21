@@ -129,7 +129,7 @@
     gint classe_icone;                                        /* Classe d'icone en cours de visualisation */
     gint date_next_send_capteur;                         /* Date du prochain envoi des capteurs au client */
     struct CMD_WANT_SCENARIO_MOTIF sce;                     /* numéro du monostable du scenario a envoyer */
-    struct CMD_REQUETE_HISTO_HARD requete;                   /* Pour la sauvegarde de la requete en cours */
+    struct CMD_CRITERE_HISTO_MSGS requete;                   /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
 
     struct CMD_TYPE_SYNOPTIQUE syn;  /* Structure du synoptique en cours d'envoi (atelier ou supervision) */

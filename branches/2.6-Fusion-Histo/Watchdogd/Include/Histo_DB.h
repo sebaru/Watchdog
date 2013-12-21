@@ -37,19 +37,12 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Clear_histoDB ( void );
- extern gboolean Retirer_histoDB ( guint id );
- extern gboolean Ajouter_histoDB ( struct CMD_TYPE_HISTO *histo );
- extern gboolean Recuperer_histoDB ( struct DB **db );
- extern struct CMD_TYPE_HISTO *Recuperer_histoDB_suite( struct DB **db );
- extern gboolean Modifier_histoDB ( struct CMD_TYPE_HISTO *histo );
- extern struct CMD_TYPE_HISTO *Rechercher_histoDB( gint id );
-
  extern gboolean Ajouter_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern gboolean Modifier_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id );
  extern gboolean Recuperer_histo_msgsDB_alive ( struct DB **db );
  extern gboolean Recuperer_histo_msgsDB ( struct DB **db,
-                                           struct CMD_REQUETE_HISTO_HARD *critere );
+                                           struct CMD_CRITERE_HISTO_MSGS *critere );
  extern struct CMD_TYPE_HISTO *Recuperer_histo_msgsDB_suite( struct DB **db );
 
 #endif

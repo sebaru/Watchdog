@@ -218,24 +218,6 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `histo`
---
-
-CREATE TABLE IF NOT EXISTS `histo` (
-  `id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `type` int(11) NOT NULL DEFAULT '0',
-  `num_syn` int(11) NOT NULL DEFAULT '0',
-  `nom_ack` text COLLATE utf8_unicode_ci,
-  `date_create_sec` int(11) NOT NULL DEFAULT '0',
-  `date_create_usec` int(11) NOT NULL DEFAULT '0',
-  `date_fixe` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `histo_bit`
 --
 

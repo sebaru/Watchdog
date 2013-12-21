@@ -142,8 +142,8 @@
  struct TYPE_INFO_HISTO_HARD
   { GtkListStore *Liste_histo_hard;                  /* GtkTreeView pour la gestion des messages Watchdog */
     GtkWidget *F_histo_hard;
-    GtkWidget *Check_ID;
-    GtkWidget *Spin_ID;
+    GtkWidget *Check_num;
+    GtkWidget *Spin_num;
     GtkWidget *Check_type;
     GtkWidget *Option_type;
     GtkWidget *Check_nom_ack;
@@ -427,7 +427,7 @@
 
  extern void Creer_page_liste_histo_hard( void );                              /* Dans liste_histo_hard.c */
  extern void Proto_effacer_liste_histo_hard( gint page_id );
- extern void Proto_afficher_un_histo_hard( struct CMD_TYPE_HISTO_HARD *histo );
+ extern void Proto_afficher_un_histo_hard( struct CMD_RESPONSE_HISTO_MSGS *response );
  
                                                                                     /* Dans supervision.c */
  extern void Creer_page_supervision( gchar *libelle, guint syn_id );

@@ -142,7 +142,7 @@
 /* Entrée: un log et une database, et des champs de requete                                               */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_histo_msgsDB ( struct DB **db_retour, struct CMD_REQUETE_HISTO_HARD *critere )
+ gboolean Recuperer_histo_msgsDB ( struct DB **db_retour, struct CMD_CRITERE_HISTO_MSGS *critere )
   { gchar requete[1024];
     gchar critereSQL[1024];
     gboolean retour;
@@ -161,8 +161,8 @@
               );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
-    if (critere->id != -1)
-     { g_snprintf( critereSQL, sizeof(critereSQL), " AND num=%d", critere->id );
+    if (critere->num != -1)
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND num=%d", critere->num );
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if (critere->type != -1)
@@ -194,10 +194,10 @@
         }
      }
 #ifdef bouh
-    if ( *(critere->objet) )
+    if ( *(critere->histo->objet) )
      { gchar *norm;
-       critere->objet[sizeof(critere->objet)-1] = 0;                              /* Anti buffer overflow */
-       norm = Normaliser_chaine( critere->objet);
+       critere->histo->objet[sizeof(critere->histo->objet)-1] = 0;                              /* Anti buffer overflow */
+       norm = Normaliser_chaine( critere->histo->objet);
        if (norm)
         { g_snprintf( critereSQL, sizeof(critereSQL), " AND objet LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );

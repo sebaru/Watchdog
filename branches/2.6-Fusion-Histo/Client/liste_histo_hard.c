@@ -41,6 +41,7 @@
 
  enum
   { COLONNE_ID,
+    COLONNE_NUM,
     COLONNE_TYPE,
     COLONNE_DATE_CREATE,
     COLONNE_ACK,
@@ -74,13 +75,13 @@
 /**********************************************************************************************************/
  static void Envoi_requete_histo_hard ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_HISTO_HARD *infos;
-    struct CMD_REQUETE_HISTO_HARD requete;
+    struct CMD_CRITERE_HISTO_MSGS requete;
     infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
 
-    if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_ID) ) )               /* Tri par ID */
-     { requete.id = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(infos->Spin_ID) ); }
+    if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_num) ) )               /* Tri par ID */
+     { requete.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(infos->Spin_num) ); }
     else
-     { requete.id = -1; }
+     { requete.num = -1; }
     
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_type) ) )             /* Tri par ID */
      { requete.type = gtk_option_menu_get_history( GTK_OPTION_MENU(infos->Option_type) ); }
@@ -133,7 +134,7 @@
     requete.page_id = infos->page_id;    /* On indique au serveur que l'on veut la reponse sur cette page */ 
     printf("Envoi requete: page_id= %d\n", requete.page_id );
     Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_REQUETE_HISTO_HARD, (gchar *)&requete,
-                   sizeof(struct CMD_REQUETE_HISTO_HARD) );
+                   sizeof(struct CMD_CRITERE_HISTO_MSGS) );
  }
 /**********************************************************************************************************/
 /* Rafraichir_sensibilite: Grise ou non les champs de recherche de l'historique hard                      */
@@ -145,8 +146,8 @@
     gboolean actif;
     infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
 
-    actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_ID) );             /* Tri par ID */
-    gtk_widget_set_sensitive( infos->Spin_ID, actif );
+    actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_num) );             /* Tri par ID */
+    gtk_widget_set_sensitive( infos->Spin_num, actif );
 
     actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_nom_ack) );   /* Tri par nom ack */
     gtk_widget_set_sensitive( infos->Entry_nom_ack, actif );
@@ -218,13 +219,13 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
-    infos->Check_ID = gtk_check_button_new_with_label( _("By ID") );
-    gtk_table_attach_defaults( GTK_TABLE(table), infos->Check_ID, 0, 1, 0, 1 );
-    g_signal_connect_swapped( G_OBJECT(infos->Check_ID), "toggled",
+    infos->Check_num = gtk_check_button_new_with_label( _("By num") );
+    gtk_table_attach_defaults( GTK_TABLE(table), infos->Check_num, 0, 1, 0, 1 );
+    g_signal_connect_swapped( G_OBJECT(infos->Check_num), "toggled",
                               G_CALLBACK(Rafraichir_sensibilite), page );
     
-    infos->Spin_ID = gtk_spin_button_new_with_range( 0.0, NBR_BIT_DLS, 1.0 );
-    gtk_table_attach_defaults( GTK_TABLE(table), infos->Spin_ID, 1, 4, 0, 1 );
+    infos->Spin_num = gtk_spin_button_new_with_range( 0.0, NBR_BIT_DLS, 1.0 );
+    gtk_table_attach_defaults( GTK_TABLE(table), infos->Spin_num, 1, 4, 0, 1 );
     
     infos->Check_type = gtk_check_button_new_with_label( _("By type") );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Check_type, 0, 1, 1, 2 );
@@ -310,7 +311,7 @@
 /* Entrée: une reference sur le histo_hard a afficherb                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_histo_hard( struct CMD_TYPE_HISTO_HARD *histo )
+ void Proto_afficher_un_histo_hard( struct CMD_RESPONSE_HISTO_MSGS *response )
   { gchar chaine[50], date[128], ack[128], *date_create, *date_fin, *duree, groupe_page[512];
     struct TYPE_INFO_HISTO_HARD *infos;
     struct PAGE_NOTEBOOK *page;
@@ -320,7 +321,7 @@
     time_t chrono;
     time_t time;
 
-    page = Chercher_page_notebook( TYPE_PAGE_HISTO_HARD, histo->page_id, FALSE );
+    page = Chercher_page_notebook( TYPE_PAGE_HISTO_HARD, response->page_id, FALSE );
     if (!page) return;
 
     infos = page->infos;
@@ -330,54 +331,55 @@ printf("Proto_afficher_histo_hard 1\n");
     store = GTK_LIST_STORE( infos->Liste_histo_hard );
     gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
     
-    time = histo->date_create_sec;
+    time = response->histo.date_create_sec;
     temps = localtime( (time_t *)&time );
     if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
     else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
     date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( date, sizeof(date), "%s.%03d", date_create, (histo->date_create_usec/1000) );
+    g_snprintf( date, sizeof(date), "%s.%03d", date_create, (response->histo.date_create_usec/1000) );
     g_free( date_create );
 
-    if (histo->date_fixe)
+    if (response->histo.date_fixe)
      { gchar *date_fixe;
 
-       time = histo->date_fixe;
+       time = response->histo.date_fixe;
        temps = localtime( (time_t *)&time );
        if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
        else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
        date_fixe = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-       g_snprintf( ack, sizeof(ack), "%s (%s)", date_fixe, histo->nom_ack );
+       g_snprintf( ack, sizeof(ack), "%s (%s)", date_fixe, response->histo.nom_ack );
        g_free( date_fixe );
      }
     else
      { g_snprintf( ack, sizeof(ack), _("no") ); }
 
-    time = histo->date_fin;
+    time = response->histo.date_fin;
     temps = localtime( (time_t *)&time );
     if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
     else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
     date_fin = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
 
-    chrono = (time_t)histo->date_fin - (time_t)histo->date_create_sec;
+    chrono = (time_t)response->histo.date_fin - (time_t)response->histo.date_create_sec;
     temps = gmtime( &chrono );
     snprintf( chaine, sizeof(chaine), _("%2d day%c %02d:%02d:%02d"),
               temps->tm_yday, (temps->tm_yday>1 ? 's' : ' '),
               temps->tm_hour, temps->tm_min, temps->tm_sec );
     duree = g_strdup( chaine );
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->groupe, histo->page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", response->histo.msg.groupe, response->histo.msg.page );
 
     gtk_list_store_set ( store, &iter,
-                         COLONNE_ID, histo->num,
-                         COLONNE_TYPE, Type_vers_string(histo->type),
+                         COLONNE_ID, response->histo.id,
+                         COLONNE_NUM, response->histo.msg.num,
+                         COLONNE_TYPE, Type_vers_string(response->histo.msg.type),
                          COLONNE_DATE_CREATE, date,
                          COLONNE_DATE_FIN, date_fin,
                          COLONNE_DUREE, duree,
                          COLONNE_ACK, ack,
                          COLONNE_GROUPE_PAGE, groupe_page,
-                         COLONNE_LIBELLE, histo->libelle,
-                         COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->type],
-                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->type],
+                         COLONNE_LIBELLE, response->histo.msg.libelle,
+                         COLONNE_COULEUR_FOND, &COULEUR_FOND[response->histo.msg.type],
+                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[response->histo.msg.type],
                          -1
                        );
     g_free( date_fin );
