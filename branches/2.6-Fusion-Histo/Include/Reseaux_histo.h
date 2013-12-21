@@ -33,10 +33,10 @@
     gboolean alive;                                             /* Le message est-il encore d'actualité ? */
     struct CMD_TYPE_MESSAGE msg;
     gchar nom_ack [ NBR_CARAC_LOGIN_UTF8 + 1 ];
-    time_t date_create_sec;
-    time_t date_create_usec;
-    time_t date_fixe;
-    time_t date_fin;
+    guint date_create_sec;
+    guint date_create_usec;
+    guint date_fixe;
+    guint date_fin;
   };
 
  struct CMD_TYPE_HISTO_HARD

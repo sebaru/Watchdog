@@ -156,7 +156,7 @@
 
     histo.alive   = FALSE;
     histo.msg.num = num;
-    time ( &histo.date_fin );
+    time ( (time_t *)&histo.date_fin );
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Retrait de la liste des messages en REPEAT */
     liste = Partage->com_msrv.liste_msg_repeat;

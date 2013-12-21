@@ -71,31 +71,31 @@
 /* Ajouter_audio: Ajoute un message audio a prononcer                                                     */
 /* Entrées: le numéro du message a prononcer                                                              */
 /**********************************************************************************************************/
- void Audio_Gerer_message( struct CMD_TYPE_MESSAGE *msg )
+ void Audio_Gerer_histo( struct CMD_TYPE_HISTO *histo )
   { gint taille;
 
-    if ( ! msg->bit_voc ) { g_free(msg); return; }                       /* Si flag = 0; on return direct */
+    if ( ! histo->msg.bit_voc ) { g_free(histo); return; }               /* Si flag = 0; on return direct */
 
-    pthread_mutex_lock( &Cfg_audio.lib->synchro );          /* Ajout dans la liste de audio a traiter */
-    taille = g_slist_length( Cfg_audio.Liste_audio );
+    pthread_mutex_lock( &Cfg_audio.lib->synchro );              /* Ajout dans la liste de audio a traiter */
+    taille = g_slist_length( Cfg_audio.Liste_histos );
     pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
 
     if (taille > 150)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                 "Ajouter_audio: DROP audio %d (taille = %d > 150)", msg->num, taille);
-       g_free(msg);
+                 "Ajouter_audio: DROP audio %d (taille = %d > 150)", histo->msg.num, taille);
+       g_free(histo);
        return;
      }
     else if (Cfg_audio.lib->Thread_run == FALSE)
      { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "Ajouter_audio: Thread is down. Dropping msg %d", msg->num );
-       g_free(msg);
+                "Ajouter_audio: Thread is down. Dropping msg %d", histo->msg.num );
+       g_free(histo);
        return;
      }
 
     pthread_mutex_lock( &Cfg_audio.lib->synchro );           /* Ajout dans la liste de audio a traiter */
-    Cfg_audio.Liste_audio = g_slist_append( Cfg_audio.Liste_audio, msg );
+    Cfg_audio.Liste_histos = g_slist_append( Cfg_audio.Liste_histos, histo );
     pthread_mutex_unlock( &Cfg_audio.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -222,7 +222,7 @@
 /* Main: Fonction principale du RS485                                                                     */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_MESSAGE *msg;
+  { struct CMD_TYPE_HISTO *histo;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -245,7 +245,7 @@
        goto end;
      }
 
-    Abonner_distribution_message ( Audio_Gerer_message );      /* Abonnement de la diffusion des messages */
+    Abonner_distribution_histo ( Audio_Gerer_histo );          /* Abonnement de la diffusion des messages */
     while(Cfg_audio.lib->Thread_run == TRUE)                             /* On tourne tant que necessaire */
      {
        if (Cfg_audio.lib->Thread_sigusr1)                                         /* On a recu sigusr1 ?? */
@@ -253,12 +253,12 @@
           pthread_mutex_lock( &Cfg_audio.lib->synchro );                                 /* lockage futex */
           Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                     "Run_audio: Reste %03d a traiter",
-                    g_slist_length(Cfg_audio.Liste_audio) );
+                    g_slist_length(Cfg_audio.Liste_histos) );
           pthread_mutex_unlock( &Cfg_audio.lib->synchro );
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (!Cfg_audio.Liste_audio)                                        /* Si pas de message, on tourne */
+       if (!Cfg_audio.Liste_histos)                                        /* Si pas de message, on tourne */
         { if (Cfg_audio.last_audio + 100 < Partage->top)         /* Au bout de 10 secondes sans diffusion */
            { if (audio_stop == TRUE)        /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ?? */
               { audio_stop = FALSE;
@@ -271,32 +271,32 @@
         }
 
        pthread_mutex_lock( &Cfg_audio.lib->synchro );                                    /* lockage futex */
-       msg = Cfg_audio.Liste_audio->data;                                   /* Recuperation du audio */
-       Cfg_audio.Liste_audio = g_slist_remove ( Cfg_audio.Liste_audio, msg );
+       histo = Cfg_audio.Liste_histos->data;                                     /* Recuperation du audio */
+       Cfg_audio.Liste_histos = g_slist_remove ( Cfg_audio.Liste_histos, histo );
        pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
-       if ( Partage->g[msg->num].etat == 1 &&                                   /* Si le message apparait */
-            (M(NUM_BIT_M_AUDIO_INHIB) == 0 || msg->type == MSG_ALERTE
-                                           || msg->type == MSG_DANGER 
-                                           || msg->type == MSG_ALARME
+       if ( histo->alive == 1 &&                                                /* Si le message apparait */
+            (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
+                                           || histo->msg.type == MSG_DANGER 
+                                           || histo->msg.type == MSG_ALARME
             )
           )                                                 /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "Run_thread : Envoi du message audio %d", msg->num );
+                   "Run_thread : Envoi du message audio %d", histo->msg.num );
 
-          Envoyer_commande_dls( msg->bit_voc );          /* Positionnement du profil audio via monostable */
+          Envoyer_commande_dls( histo->msg.bit_voc );    /* Positionnement du profil audio via monostable */
           Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)          /* Si Pas de message depuis xx */
            { Jouer_wav("Son/jingle.wav"); }                                     /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          if ( ! Jouer_mp3 ( msg ) )               /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
-           { Jouer_espeak ( msg ); }
+          if ( ! Jouer_mp3 ( &histo->msg ) )       /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+           { Jouer_espeak ( &histo->msg ); }
         }
-       g_free(msg);
+       g_free(histo);
      }
-    Desabonner_distribution_message ( Audio_Gerer_message );/* Desabonnement de la diffusion des messages */
+    Desabonner_distribution_histo ( Audio_Gerer_histo );    /* Desabonnement de la diffusion des messages */
 
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
