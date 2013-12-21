@@ -53,7 +53,7 @@
                        sizeof( client->requete ) );
                Ref_client( client );  /* Indique que la structure est utilisée */
 /*               pthread_create( &tid, NULL, (void *)Proto_envoyer_histo_hard_thread, client );*/
-               pthread_detach( tid );
+/*               pthread_detach( tid );*/
                Client_mode( client, VALIDE );
              }
             break;
