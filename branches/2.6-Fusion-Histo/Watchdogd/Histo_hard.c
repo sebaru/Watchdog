@@ -41,8 +41,8 @@
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
  static gboolean Modifier_Ajouter_histo_msgsDB ( gboolean ajout, struct CMD_TYPE_HISTO *histo )
-  { gchar requete[1024];
-    gchar *libelle, *nom_ack;
+  { gchar *libelle, *nom_ack;
+    gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
@@ -53,13 +53,20 @@
           return(FALSE);
         }
 
+       nom_ack = Normaliser_chaine ( histo->nom_ack );                   /* Formatage correct des chaines */
+       if (!nom_ack)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histo_msgsDB: Normalisation impossible" );
+          g_free(libelle);
+          return(FALSE);
+        }
+          
        g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "INSERT INTO %s(alive,num,libelle,type,num_syn,nom_ack,date_create_sec,date_create_usec)"
                    " VALUES "
                    "('%d','%d','%s','%d','%d','%s','%d','%d')", NOM_TABLE_HISTO_MSGS, TRUE,
                    histo->msg.num, libelle,
                    histo->msg.type, histo->msg.num_syn, 
-                   "None", (int)histo->date_create_sec, (int)histo->date_create_usec );
+                   nom_ack, (int)histo->date_create_sec, (int)histo->date_create_usec );
        g_free(libelle);
      }
     else

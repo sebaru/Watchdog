@@ -241,19 +241,19 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint num;
+    guint id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &num, -1 );
-       if ( num == histo->msg.num ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == histo->id )
+        { Rafraichir_visu_histo( &iter, histo );
+          break;
+        }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-
-    if (valide)
-     { Rafraichir_visu_histo( &iter, histo ); }
   }
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */

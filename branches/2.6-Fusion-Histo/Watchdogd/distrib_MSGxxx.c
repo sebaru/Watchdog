@@ -127,6 +127,7 @@
     histo.alive            = TRUE;
     histo.date_create_sec  = tv.tv_sec;
     histo.date_create_usec = tv.tv_usec;
+    g_snprintf( histo.nom_ack, sizeof(histo.nom_ack), "None" );
     Ajouter_histo_msgsDB( &histo );                                                /* Si ajout dans DB OK */
 
 /********************************************* Envoi du message aux librairies abonnées *******************/

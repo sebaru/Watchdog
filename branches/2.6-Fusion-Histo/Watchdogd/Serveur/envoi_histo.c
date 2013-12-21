@@ -58,7 +58,7 @@
     else { result = Rechercher_histo_msgsDB_by_id( rezo_histo->id );
            if (result)
             { Envoi_client( client, TAG_HISTO, SSTAG_SERVEUR_ACK_HISTO,
-                           (gchar *)&result, sizeof(struct CMD_TYPE_HISTO) );
+                           (gchar *)result, sizeof(struct CMD_TYPE_HISTO) );
               g_free(result);
             }
            else
