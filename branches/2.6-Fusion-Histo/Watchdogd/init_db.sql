@@ -251,11 +251,13 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `histo_hard`
+-- Structure de la table `histo_msgs`
 --
 
-CREATE TABLE IF NOT EXISTS `histo_hard` (
-  `id` int(11) NOT NULL DEFAULT '0',
+CREATE TABLE IF NOT EXISTS `histo_msgs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0',
+  `alive` tinyint(1) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `num_syn` int(11) NOT NULL DEFAULT '0',
@@ -264,10 +266,11 @@ CREATE TABLE IF NOT EXISTS `histo_hard` (
   `date_create_usec` int(11) DEFAULT '0',
   `date_fixe` int(11) NOT NULL DEFAULT '0',
   `date_fin` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
   KEY `type` (`type`),
-  KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  KEY `alive` (`alive`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
