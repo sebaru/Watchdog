@@ -12,7 +12,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
                     db.c Mnemonique.c Message.c \
 		    Compteur_horaire.c Compteur_impulsion.c \
 		    Icones.c classe.c Scenario.c \
-		    EntreeANA.c Tempo.c Histo.c Histo_hard.c Camera.c \
+		    EntreeANA.c Tempo.c Histo.c Histo_msgs.c Camera.c \
                     distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c distrib_EAxxx.c distrib_Exxx.c \
                     Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c Admin_dbcfg.c \
                     Utilisateur.c Util_groupe.c Util_login_failed.c Util_clef.c Util_actif.c \
