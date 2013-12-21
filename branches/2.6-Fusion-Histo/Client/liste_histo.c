@@ -215,7 +215,7 @@
        g_free( date_fixe );
      }
     else
-     { g_snprintf( ack, sizeof(ack), _("no") ); }
+     { g_snprintf( ack, sizeof(ack), "(%s)", histo->nom_ack ); }
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
@@ -241,14 +241,14 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint id;
+    guint num;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &id, -1 );
-       if ( id == histo->id ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &num, -1 );
+       if ( num == histo->msg.num ) break;
        valide = gtk_tree_model_iter_next( store, &iter );
      }
 
@@ -287,15 +287,16 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint id;
+    guint num;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &id, -1 );
+     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &num, -1 );
 /* printf("Del_histo: id = %d, cible = %d\n", id, histo->id); */
-       if ( id == histo->id ) gtk_list_store_remove( GTK_LIST_STORE(store), &iter );
+       if ( num == histo->msg.num ) 
+        { if (gtk_list_store_remove( GTK_LIST_STORE(store), &iter )) continue; }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }

@@ -487,9 +487,10 @@
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
-    memset( &Cfg_http, 0, sizeof(Cfg_http) );               /* Mise a zero de la structure de travail */
-    Cfg_http.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
-    Http_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_http, 0, sizeof(Cfg_http) );                   /* Mise a zero de la structure de travail */
+    Cfg_http.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_http.lib->TID = pthread_self();                                 /* Sauvegarde du TID pour le pere */
+    Http_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );

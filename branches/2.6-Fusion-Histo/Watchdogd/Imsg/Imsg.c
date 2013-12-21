@@ -306,28 +306,28 @@
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
- static void Imsg_Gerer_message ( struct CMD_TYPE_MESSAGE *msg )
+ static void Imsg_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
   { gint taille;
 
     pthread_mutex_lock( &Cfg_imsg.lib->synchro );                        /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_imsg.Messages );
+    taille = g_slist_length( Cfg_imsg.Liste_histos );
     pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
 
     if (taille > 150)
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
-                "Imsg_Gerer_message: DROP message %d (length = %d > 150)", msg->num, taille);
-       g_free(msg);
+                "Imsg_Gerer_histo: DROP message %d (length = %d > 150)", histo->msg.num, taille);
+       g_free(histo);
        return;
      }
     else if (Cfg_imsg.lib->Thread_run == FALSE)
      { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "Imsg_Gerer_message: Thread is down. Dropping msg %d", msg->num );
-       g_free(msg);
+                "Imsg_Gerer_histo: Thread is down. Dropping msg %d", histo->msg.num );
+       g_free(histo);
        return;
      }
 
     pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    Cfg_imsg.Messages = g_slist_append ( Cfg_imsg.Messages, msg );                    /* Ajout a la liste */
+    Cfg_imsg.Liste_histos = g_slist_append ( Cfg_imsg.Liste_histos, histo );          /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -793,6 +793,7 @@
   { prctl(PR_SET_NAME, "W-IMSG", 0, 0, 0 );
     memset( &Cfg_imsg, 0, sizeof(Cfg_imsg) );                   /* Mise a zero de la structure de travail */
     Cfg_imsg.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_imsg.lib->TID = pthread_self();                                 /* Sauvegarde du TID pour le pere */
     Imsg_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
@@ -811,7 +812,7 @@
     Cfg_imsg.date_retente = Partage->top + 100;                      /* On se connectera dans 10 secondes */
     MainLoop = g_main_context_new();
 
-    Abonner_distribution_message ( Imsg_Gerer_message );        /* Abonnement à la diffusion des messages */
+    Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
     Charger_tous_IMSG();
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(10000);
@@ -822,7 +823,7 @@
           pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
           Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
                     "Run_thread: USR1 -> Nbr of IMSG to send=%d, Number of contacts=%d",
-                    g_slist_length ( Cfg_imsg.Messages ),
+                    g_slist_length ( Cfg_imsg.Liste_histos ),
                     g_slist_length ( Cfg_imsg.Contacts )
                   );
           pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
@@ -836,14 +837,14 @@
           Cfg_imsg.reload = FALSE;
         }
 
-       if ( Cfg_imsg.Messages )                            /* Gestion de la listes des messages a traiter */
-        { struct CMD_TYPE_MESSAGE *msg;
+       if ( Cfg_imsg.Liste_histos )                        /* Gestion de la listes des messages a traiter */
+        { struct CMD_TYPE_HISTO *histo;
           pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-          msg = Cfg_imsg.Messages->data;
-          Cfg_imsg.Messages = g_slist_remove ( Cfg_imsg.Messages, msg );           /* Retrait de la liste */
+          histo = Cfg_imsg.Liste_histos->data;
+          Cfg_imsg.Liste_histos = g_slist_remove ( Cfg_imsg.Liste_histos, histo ); /* Retrait de la liste */
           pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-          if (Partage->g[msg->num].etat) Imsg_Envoi_message_to_all_available ( msg->libelle );
-          g_free(msg);                       /* Fin d'utilisation de la structure donc liberation memoire */
+          if (histo->alive) Imsg_Envoi_message_to_all_available ( histo->msg.libelle );
+          g_free(histo);                     /* Fin d'utilisation de la structure donc liberation memoire */
         }
 
        if (Cfg_imsg.set_status)
@@ -864,7 +865,7 @@
 
      }                                                                     /* Fin du while partage->arret */
     Decharger_tous_IMSG();
-    Desabonner_distribution_message ( Imsg_Gerer_message ); /* Desabonnement de la diffusion des messages */
+    Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
     Imsg_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
     g_main_context_unref (MainLoop);
 end:

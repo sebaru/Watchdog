@@ -262,7 +262,7 @@
      }
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Ssrv_Gerer_message: Message a traiter : msg=%d", histo->msg.num );
+             "Ssrv_Gerer_histo: Message a traiter : msg=%d", histo->msg.num );
        
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                /* Ajout dans la liste de tell a traiter */
     Cfg_ssrv.Liste_histo = g_slist_append( Cfg_ssrv.Liste_histo, histo ); /* Append pour l'ordre d'arrive ! */
@@ -298,11 +298,11 @@
                       "Envoyer_histo_aux_threads: Memory error" );
              break;
            }
-          else memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO) );
+          else memcpy ( dup_histo, histo, sizeof(struct CMD_TYPE_HISTO) );
 
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "Envoyer_histo_aux_threads: Envoi du MSG%d=%d au client %s",
-                   dup_histo->id, dup_histo->alive, client->machine );
+                   dup_histo->msg.num, dup_histo->alive, client->machine );
           client->Liste_histo = g_slist_append ( client->Liste_histo, dup_histo );
         }
        liste = g_slist_next( liste );
@@ -454,6 +454,7 @@
                                                   /* Initialisation de la zone interne et comm du serveur */
     memset( &Cfg_ssrv, 0, sizeof(Cfg_ssrv) );                   /* Mise a zero de la structure de travail */
     Cfg_ssrv.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_ssrv.lib->TID = pthread_self();                                 /* Sauvegarde du TID pour le pere */
     Ssrv_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,

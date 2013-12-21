@@ -46,6 +46,7 @@
 
  extern gboolean Ajouter_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
  extern gboolean Modifier_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
+ extern struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id );
  extern gboolean Recuperer_histo_msgsDB_alive ( struct DB **db );
  extern gboolean Recuperer_histo_msgsDB ( struct DB **db,
                                            struct CMD_REQUETE_HISTO_HARD *critere );

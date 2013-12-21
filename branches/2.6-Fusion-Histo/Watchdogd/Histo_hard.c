@@ -224,6 +224,44 @@
     return ( retour );
   }
 /**********************************************************************************************************/
+/* Rechercher_histo_msgsDB_by_id: Recupération du l'histo by id dans la BDD                               */
+/* Entrée: La base de données de travail                                                                  */
+/* Sortie: False si probleme                                                                              */
+/**********************************************************************************************************/
+ struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id )
+  { struct CMD_TYPE_HISTO *histo;
+    gchar requete[1024];
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT %s.id,alive,%s.num,%s.libelle,type,num_syn,%s.groupe,%s.page,"
+                "nom_ack,date_create_sec,date_create_usec,"
+                "date_fixe,date_fin"
+                " FROM %s,%s"
+                " WHERE %s.num_syn = %s.id AND %s.id =%d",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS,
+                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, /* Where */
+                NOM_TABLE_HISTO_MSGS, id
+              );
+ 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_histo_msgsDB_by_id: DB connexion failed" );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    histo = Recuperer_histo_msgsDB_suite( &db );
+    if (histo) Libere_DB_SQL ( &db );
+    return(histo);
+  }
+/**********************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */

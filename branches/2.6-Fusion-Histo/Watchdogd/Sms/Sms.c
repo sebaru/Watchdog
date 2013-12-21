@@ -297,7 +297,7 @@
     histo->msg.sms    = MSG_SMS_SMSBOX;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, histo );
+    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -322,7 +322,7 @@
     histo->msg.sms    = MSG_SMS_GSM;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, histo );
+    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -336,7 +336,7 @@
     if ( ! histo->msg.sms ) { g_free(histo); return; }                   /* Si flag = 0; on return direct */
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );                         /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_sms.Liste_sms );
+    taille = g_slist_length( Cfg_sms.Liste_histos );
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
 
     if (taille > 150)
@@ -352,7 +352,7 @@
        return;
      }
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_sms = g_slist_append ( Cfg_sms.Liste_sms, histo );                  /* Ajout a la liste */
+    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );                  /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
   }
 /**********************************************************************************************************/
@@ -668,6 +668,7 @@
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     memset( &Cfg_sms, 0, sizeof(Cfg_sms) );                     /* Mise a zero de la structure de travail */
     Cfg_sms.lib = lib;                         /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_sms.lib->TID = pthread_self();                                  /* Sauvegarde du TID pour le pere */
     Sms_Lire_config ();                                 /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
@@ -696,7 +697,7 @@
 
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
           pthread_mutex_lock( &Cfg_sms.lib->synchro );         /* On recupere le nombre de sms en attente */
-          nbr = g_slist_length(Cfg_sms.Liste_sms);
+          nbr = g_slist_length(Cfg_sms.Liste_histos);
           pthread_mutex_unlock( &Cfg_sms.lib->synchro );
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Nbr SMS a envoyer = %d", nbr );
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
@@ -712,18 +713,18 @@
        Lire_sms_gsm();
 
 /************************************************ Envoi de SMS ********************************************/
-       if ( !Cfg_sms.Liste_sms )                                        /* Attente de demande d'envoi SMS */
+       if ( !Cfg_sms.Liste_histos )                                        /* Attente de demande d'envoi SMS */
         { sleep(5);
           sched_yield();
           continue;
         }
 
        pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       histo = Cfg_sms.Liste_sms->data;
-       Cfg_sms.Liste_sms = g_slist_remove ( Cfg_sms.Liste_sms, histo );
+       histo = Cfg_sms.Liste_histos->data;
+       Cfg_sms.Liste_histos = g_slist_remove ( Cfg_sms.Liste_histos, histo );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                 "Run_thread: Reste %d a envoyer apres le msg %d",
-                 g_slist_length(Cfg_sms.Liste_sms), histo->msg.num );
+                 g_slist_length(Cfg_sms.Liste_histos), histo->msg.num );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        if ( histo->alive == TRUE )                                      /* On n'envoie que si MSGnum == 1 */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,

@@ -228,6 +228,7 @@
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
     memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                 /* Mise a zero de la structure de travail */
     Cfg_audio.lib = lib;                       /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_audio.lib->TID = pthread_self();                                /* Sauvegarde du TID pour le pere */
     Audio_Lire_config ();                               /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,

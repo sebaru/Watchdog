@@ -61,7 +61,7 @@
     gboolean enable;
     LmConnection *connection;
     GSList *Contacts;
-    GSList *Messages;
+    GSList *Liste_histos;
     gboolean set_status;
     gboolean reload;
     gchar new_status[80];

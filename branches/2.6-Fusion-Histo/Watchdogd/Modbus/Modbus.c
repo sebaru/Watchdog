@@ -1063,6 +1063,7 @@
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );               /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_modbus.lib->TID = pthread_self();                               /* Sauvegarde du TID pour le pere */
     Modbus_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,

@@ -153,7 +153,7 @@
   { struct CMD_TYPE_HISTO histo;
     GSList *liste;
 
-    histo.alive = FALSE;
+    histo.alive   = FALSE;
     histo.msg.num = num;
     time ( &histo.date_fin );
 
