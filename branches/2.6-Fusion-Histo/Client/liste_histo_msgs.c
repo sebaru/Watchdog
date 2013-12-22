@@ -422,7 +422,8 @@ printf("Proto_afficher_histo_hard 1\n");
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* id */
+                                              G_TYPE_UINT,                                         /* num */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,

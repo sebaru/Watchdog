@@ -170,7 +170,11 @@
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if (critere->date_create_min!=-1)
-     { g_snprintf( critereSQL, sizeof(critereSQL), " AND date_create_sec>%d", (int)critere->date_create_min );
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND date_create_sec>=%d", (int)critere->date_create_min );
+       g_strlcat( requete, critereSQL, sizeof(requete) );
+     }
+    if (critere->date_create_max!=-1)
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND date_create_sec<=%d", (int)critere->date_create_max );
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if ( *(critere->nom_ack) )
@@ -186,25 +190,23 @@
     if ( *(critere->libelle) )
      { gchar *norm;
        critere->libelle[sizeof(critere->libelle)-1] = 0;                          /* Anti buffer overflow */
-       norm = Normaliser_chaine( critere->libelle);
+       norm = Normaliser_chaine( critere->libelle );
        if (norm)
         { g_snprintf( critereSQL, sizeof(critereSQL), " AND libelle LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
           g_free(norm);
         }
      }
-#ifdef bouh
-    if ( *(critere->histo->objet) )
+    if ( *(critere->objet) )
      { gchar *norm;
-       critere->histo->objet[sizeof(critere->histo->objet)-1] = 0;                              /* Anti buffer overflow */
-       norm = Normaliser_chaine( critere->histo->objet);
+       critere->objet[sizeof(critere->objet)-1] = 0;                              /* Anti buffer overflow */
+       norm = Normaliser_chaine( critere->objet );
        if (norm)
         { g_snprintf( critereSQL, sizeof(critereSQL), " AND objet LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
           g_free(norm);
         }
      }
-#endif
     g_strlcat( requete, " ORDER BY date_create_sec,date_create_usec LIMIT 500;", sizeof(requete) );
  
     db = Init_DB_SQL();       

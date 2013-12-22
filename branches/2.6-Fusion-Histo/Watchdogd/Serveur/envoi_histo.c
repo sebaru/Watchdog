@@ -75,6 +75,47 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
+ void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client )
+  { struct CMD_RESPONSE_HISTO_MSGS rezo_histo;
+    struct CMD_CRITERE_HISTO_MSGS requete;
+    struct CMD_TYPE_HISTO *histo;
+    struct CMD_ENREG nbr;
+    struct DB *db;
+
+    memcpy ( &requete, &client->requete, sizeof( requete ) );                  /* Recopie en local thread */
+
+    prctl(PR_SET_NAME, "W-EnvoiHISTOMSGS", 0, 0, 0 );
+
+    if ( ! Recuperer_histo_msgsDB( &db, &requete ) )
+     { Unref_client( client );                                        /* Déréférence la structure cliente */
+       pthread_exit( NULL );
+     }
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d histo_msgs", nbr.num );
+    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                   (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+
+    rezo_histo.page_id = requete.page_id;  /* Prepare le numéro de page d'accueil sur l'interface cliente */
+    for ( ; ; )
+     { histo = Recuperer_histo_msgsDB_suite( &db );
+       if (!histo)
+        { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN, NULL, 0 );
+          Unref_client( client );                                     /* Déréférence la structure cliente */
+          pthread_exit ( NULL );
+        }
+
+       memcpy ( &rezo_histo.histo, histo, sizeof(struct CMD_TYPE_HISTO) );          /* Prepare la reponse */
+       g_free(histo);
+       Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,
+                      (gchar *)&rezo_histo, sizeof(struct CMD_RESPONSE_HISTO_MSGS) );
+     }
+  }
+/**********************************************************************************************************/
+/* Envoyer_histos: Envoi des histos au client GID_USERS                                                   */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
  void *Envoyer_histo_thread ( struct CLIENT *client )
   { struct CMD_TYPE_HISTO *histo;
     struct CMD_ENREG nbr;
