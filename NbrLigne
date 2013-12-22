@@ -1,1 +1,0 @@
-wc `find ./ -name "*.ac" -or -name "*.c" -or -name "*.h" -or -name "*.y" -or -name "*.l" -or -name "*.am" -or -name "*.sql"`
