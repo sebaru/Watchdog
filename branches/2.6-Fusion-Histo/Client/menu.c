@@ -108,14 +108,14 @@
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
-/* Menu_want_histo_hard: l'utilisateur desire voir l'historique                                           */
+/* Menu_want_histo_msgs: l'utilisateur desire voir l'historique                                           */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Menu_want_histo_hard ( void )
-  { Creer_page_liste_histo_hard();
+ void Menu_want_histo_msgs ( void )
+  { Creer_page_liste_histo_msgs();
   }
 /**********************************************************************************************************/
-/* Menu_want_histo_hard: l'utilisateur desire voir l'historique                                           */
+/* Menu_want_courbe: l'utilisateur desire voir l'historique par courbes                                   */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Menu_want_courbe ( void )

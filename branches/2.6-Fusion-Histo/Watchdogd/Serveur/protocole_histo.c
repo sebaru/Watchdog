@@ -48,8 +48,8 @@
      }
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_CLIENT_REQUETE_HISTO_HARD:
-             { memcpy( &client->requete, (struct CMD_REQUETE_HISTO_HARD *)connexion->donnees,
+     { case SSTAG_CLIENT_REQUETE_HISTO_MSGS:
+             { memcpy( &client->requete, (struct CMD_REQUETE_HISTO_MSGS *)connexion->donnees,
                        sizeof( client->requete ) );
                Ref_client( client );  /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Proto_envoyer_histo_msgs_thread, client );

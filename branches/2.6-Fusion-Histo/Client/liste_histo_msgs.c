@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Client/liste_histo_hard.c        Gestion de la page d'affichage des messages au fil de l'eau           */
+/* Client/liste_histo_msgs.c        Gestion de la page d'affichage des messages au fil de l'eau           */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mer 24 mar 2004 10:06:06 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * liste_histo_hard.c
+ * liste_histo_msgs.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sébastien Lefevre
@@ -69,14 +69,14 @@
   };*/
 
 /**********************************************************************************************************/
-/* Chercher_histo_hard: Envoie d'une requete au serveur                                                   */
+/* Chercher_histo_msgs: Envoie d'une requete au serveur                                                   */
 /* Entrée: un pointeur sur la page en cours                                                               */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- static void Envoi_requete_histo_hard ( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_HISTO_HARD *infos;
+ static void Envoi_requete_histo_msgs ( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_HISTO_MSGS *infos;
     struct CMD_CRITERE_HISTO_MSGS requete;
-    infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
+    infos = (struct TYPE_INFO_HISTO_MSGS *)page->infos;
 
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_num) ) )               /* Tri par ID */
      { requete.num = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(infos->Spin_num) ); }
@@ -102,14 +102,13 @@
     else
      { memset( requete.libelle, 0, sizeof(requete.libelle) ); }
   
-#ifdef bouh
+
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_objet) ) )         /* Tri par objet */
      { g_snprintf( requete.objet, sizeof(requete.objet), "%s",
                    gtk_entry_get_text( GTK_ENTRY(infos->Entry_objet) ) );
      }
     else
      { memset( requete.objet, 0, sizeof(requete.objet) ); }
-#endif
 
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_debut) ) )         /* Tri par debut */
      { requete.date_create_min = gnome_date_edit_get_time( GNOME_DATE_EDIT(infos->Date_debut) ); }
@@ -121,30 +120,20 @@
     else
      { requete.date_create_max=-1; }
 
-#ifdef bouh
-    guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    time_t date_create_min;
-    time_t date_create_max;
-    time_t date_fixe_min;
-    time_t date_fixe_max;
-    time_t date_fin_min;
-    time_t date_fin_max;
-    gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
-#endif
     requete.page_id = infos->page_id;    /* On indique au serveur que l'on veut la reponse sur cette page */ 
     printf("Envoi requete: page_id= %d\n", requete.page_id );
-    Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_REQUETE_HISTO_HARD, (gchar *)&requete,
+    Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_REQUETE_HISTO_MSGS, (gchar *)&requete,
                    sizeof(struct CMD_CRITERE_HISTO_MSGS) );
  }
 /**********************************************************************************************************/
-/* Rafraichir_sensibilite: Grise ou non les champs de recherche de l'historique hard                      */
+/* Rafraichir_sensibilite: Grise ou non les champs de recherche de l'historique msgs                      */
 /* Entrée: un pointeur sur la page en cours                                                               */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
  static void Rafraichir_sensibilite ( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_HISTO_HARD *infos;
+  { struct TYPE_INFO_HISTO_MSGS *infos;
     gboolean actif;
-    infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
+    infos = (struct TYPE_INFO_HISTO_MSGS *)page->infos;
 
     actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_num) );             /* Tri par ID */
     gtk_widget_set_sensitive( infos->Spin_num, actif );
@@ -168,47 +157,47 @@
     gtk_widget_set_sensitive( infos->Date_fin, actif );
  }
 /**********************************************************************************************************/
-/* Preparer_requete_histo_hard: Creation d'un fenetre de choix des criteres de recherches                 */
-/* Entrée: un "infos" de type histo_hard                                                                  */
+/* Preparer_requete_histo_msgs: Creation d'un fenetre de choix des criteres de recherches                 */
+/* Entrée: un "infos" de type histo_msgs                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static gboolean CB_preparer_requete_histo_hard( GtkDialog *dialog, gint reponse, struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_HISTO_HARD *infos;
-    infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
+ static gboolean CB_preparer_requete_histo_msgs( GtkDialog *dialog, gint reponse, struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_HISTO_MSGS *infos;
+    infos = (struct TYPE_INFO_HISTO_MSGS *)page->infos;
 
     switch(reponse)
-     { case GTK_RESPONSE_OK: Envoi_requete_histo_hard ( page );
+     { case GTK_RESPONSE_OK: Envoi_requete_histo_msgs ( page );
                              break;
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }
-    gtk_widget_destroy(infos->F_histo_hard);
+    gtk_widget_destroy(infos->F_histo_msgs);
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Preparer_requete_histo_hard: Creation d'un fenetre de choix des criteres de recherches                 */
-/* Entrée: un "infos" de type histo_hard                                                                  */
+/* Preparer_requete_histo_msgs: Creation d'un fenetre de choix des criteres de recherches                 */
+/* Entrée: un "infos" de type histo_msgs                                                                  */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Preparer_requete_histo_hard( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_HISTO_HARD *infos;
+ static void Preparer_requete_histo_msgs( struct PAGE_NOTEBOOK *page )
+  { struct TYPE_INFO_HISTO_MSGS *infos;
     GtkWidget *frame, *hboite, *table, *menu;
     gint cpt;
-    infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
+    infos = (struct TYPE_INFO_HISTO_MSGS *)page->infos;
 
-    infos->F_histo_hard = gtk_dialog_new_with_buttons( _("Lookin for histo"),
+    infos->F_histo_msgs = gtk_dialog_new_with_buttons( _("Lookin for histo"),
                                                        GTK_WINDOW(F_client),
                                                        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                                        GTK_STOCK_OK, GTK_RESPONSE_OK,
                                                        NULL);
-    g_signal_connect( infos->F_histo_hard, "response",
-                      G_CALLBACK(CB_preparer_requete_histo_hard), page );
+    g_signal_connect( infos->F_histo_msgs, "response",
+                      G_CALLBACK(CB_preparer_requete_histo_msgs), page );
 
     frame = gtk_frame_new("Settings");                               /* Création de l'interface graphique */
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(infos->F_histo_hard)->vbox ), frame, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(infos->F_histo_msgs)->vbox ), frame, TRUE, TRUE, 0 );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
@@ -285,35 +274,35 @@
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Date_fin, 1, 4, 6, 7 );
 
     Rafraichir_sensibilite ( page );           /* Simule un evenement pour mettre a jour les sensibilites */
-    gtk_widget_show_all( infos->F_histo_hard );
+    gtk_widget_show_all( infos->F_histo_msgs );
   }
 /**********************************************************************************************************/
-/* Proto_effacer_histo_hard: Efface la liste de l'historique hard                                         */
-/* Entrée: un histo_hard pour referencer la page à effacer                                                */
+/* Proto_effacer_histo_msgs: Efface la liste de l'historique msgs                                         */
+/* Entrée: un histo_msgs pour referencer la page à effacer                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_effacer_liste_histo_hard( gint page_id )
+ void Proto_effacer_liste_histo_msgs( gint page_id )
   { struct PAGE_NOTEBOOK *page;
     GList *liste;
     
     liste = Liste_pages;                                /* Recherche de la page source dls correspondante */
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if (page->type == TYPE_PAGE_HISTO_HARD &&
-           ((struct TYPE_INFO_HISTO_HARD *)page->infos)->page_id == page_id) break;
+       if (page->type == TYPE_PAGE_HISTO_MSGS &&
+           ((struct TYPE_INFO_HISTO_MSGS *)page->infos)->page_id == page_id) break;
        liste = liste->next;
      }
     if (!liste) return;                                                      /* Si pas trouvé, on s'en va */
-    gtk_list_store_clear( GTK_LIST_STORE(((struct TYPE_INFO_HISTO_HARD *)page->infos)->Liste_histo_hard) );
+    gtk_list_store_clear( GTK_LIST_STORE(((struct TYPE_INFO_HISTO_MSGS *)page->infos)->Liste_histo_msgs) );
   }
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */
-/* Entrée: une reference sur le histo_hard a afficherb                                                     */
+/* Entrée: une reference sur le histo_msgs a afficherb                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_histo_hard( struct CMD_RESPONSE_HISTO_MSGS *response )
+ void Proto_afficher_un_histo_msgs( struct CMD_RESPONSE_HISTO_MSGS *response )
   { gchar chaine[50], date[128], ack[128], *date_create, *date_fin, *duree, groupe_page[512];
-    struct TYPE_INFO_HISTO_HARD *infos;
+    struct TYPE_INFO_HISTO_MSGS *infos;
     struct PAGE_NOTEBOOK *page;
     GtkListStore *store;
     GtkTreeIter iter;
@@ -321,14 +310,14 @@
     time_t chrono;
     time_t time;
 
-    page = Chercher_page_notebook( TYPE_PAGE_HISTO_HARD, response->page_id, FALSE );
+    page = Chercher_page_notebook( TYPE_PAGE_HISTO_MSGS, response->page_id, FALSE );
     if (!page) return;
 
     infos = page->infos;
     if (!infos) return;
 
-printf("Proto_afficher_histo_hard 1\n");
-    store = GTK_LIST_STORE( infos->Liste_histo_hard );
+printf("Proto_afficher_histo_msgs 1\n");
+    store = GTK_LIST_STORE( infos->Liste_histo_msgs );
     gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
     
     time = response->histo.date_create_sec;
@@ -391,26 +380,26 @@ printf("Proto_afficher_histo_hard 1\n");
 /* Entrée: rien                                                                                           */
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
- void Creer_page_liste_histo_hard( void )
+ void Creer_page_liste_histo_msgs( void )
   { GtkWidget *boite, *scroll, *hboite, *bouton;
-    GtkWidget *Liste_histo_hard;
+    GtkWidget *Liste_histo_msgs;
     GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
     GtkListStore *store;
     struct PAGE_NOTEBOOK *page;
-    struct TYPE_INFO_HISTO_HARD *infos;
+    struct TYPE_INFO_HISTO_MSGS *infos;
     static gint page_id = 0;
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
-    page->infos = (struct TYPE_INFO_HISTO_HARD *)g_try_malloc0( sizeof(struct TYPE_INFO_HISTO_HARD) );
+    page->infos = (struct TYPE_INFO_HISTO_MSGS *)g_try_malloc0( sizeof(struct TYPE_INFO_HISTO_MSGS) );
     if (!page->infos) { g_free(page); return; }
-    infos = (struct TYPE_INFO_HISTO_HARD *)page->infos;
+    infos = (struct TYPE_INFO_HISTO_MSGS *)page->infos;
     infos->page_id = page_id++;
 
-    page->type  = TYPE_PAGE_HISTO_HARD;
+    page->type  = TYPE_PAGE_HISTO_MSGS;
     Liste_pages = g_list_append( Liste_pages, page );
 
     hboite = gtk_hbox_new( FALSE, 6 );
@@ -434,11 +423,11 @@ printf("Proto_afficher_histo_hard 1\n");
                                               GDK_TYPE_COLOR,      /* Couleur de fond de l'enregistrement */
                                               GDK_TYPE_COLOR      /* Couleur de fond de l'enregistrement */
                                );
-    ((struct TYPE_INFO_HISTO_HARD *)page->infos)->Liste_histo_hard = store;
-    Liste_histo_hard = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );      /* Creation de la vue */
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo_hard) );
+    ((struct TYPE_INFO_HISTO_MSGS *)page->infos)->Liste_histo_msgs = store;
+    Liste_histo_msgs = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );      /* Creation de la vue */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_histo_msgs) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
-    gtk_container_add( GTK_CONTAINER(scroll), Liste_histo_hard );
+    gtk_container_add( GTK_CONTAINER(scroll), Liste_histo_msgs );
 
     renderer = gtk_cell_renderer_text_new();                                    /* Colonne de l'id du msg */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -446,7 +435,7 @@ printf("Proto_afficher_histo_hard 1\n");
                                                          "text", COLONNE_ID,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                     /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -456,7 +445,7 @@ printf("Proto_afficher_histo_hard 1\n");
                                                          "foreground-gdk", COLONNE_COULEUR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -464,35 +453,35 @@ printf("Proto_afficher_histo_hard 1\n");
                                                          "text", COLONNE_DATE_CREATE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DATE_CREATE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("End"), renderer,
                                                          "text", COLONNE_DATE_FIN,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DATE_FIN);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Duration"), renderer,
                                                          "text", COLONNE_DUREE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DUREE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE);            /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Message"), renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
@@ -500,10 +489,10 @@ printf("Proto_afficher_histo_hard 1\n");
                                                          "text", COLONNE_ACK,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_hard), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo_msgs), colonne );
 
 #ifdef bouh
-    g_signal_connect( G_OBJECT(Liste_histo_hard), "button_press_event",               /* Gestion du menu popup */
+    g_signal_connect( G_OBJECT(Liste_histo_msgs), "button_press_event",               /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_histo), NULL );
 #endif
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
@@ -520,7 +509,7 @@ printf("Proto_afficher_histo_hard 1\n");
     bouton = Bobouton( Verte, Vmask, _("Find") );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Preparer_requete_histo_hard), page );
+                              G_CALLBACK(Preparer_requete_histo_msgs), page );
 
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Historique") ) );

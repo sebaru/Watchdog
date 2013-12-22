@@ -100,14 +100,14 @@
     for ( ; ; )
      { histo = Recuperer_histo_msgsDB_suite( &db );
        if (!histo)
-        { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN, NULL, 0 );
+        { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
 
        memcpy ( &rezo_histo.histo, histo, sizeof(struct CMD_TYPE_HISTO) );          /* Prepare la reponse */
        g_free(histo);
-       Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,
+       Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS,
                       (gchar *)&rezo_histo, sizeof(struct CMD_RESPONSE_HISTO_MSGS) );
      }
   }

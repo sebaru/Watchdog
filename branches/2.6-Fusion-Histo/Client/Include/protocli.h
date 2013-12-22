@@ -53,7 +53,7 @@
     TYPE_PAGE_MNEMONIQUE,                                        /* Page de visualisation des mnemoniques */
     TYPE_PAGE_ICONE,                                /* Ajout/retrait/modif des icones et classes d'icones */
     TYPE_PAGE_SOURCE_DLS,                                                   /* Edition d'une source D.L.S */
-    TYPE_PAGE_HISTO_HARD,                                                     /* Parcours de l'historique */
+    TYPE_PAGE_HISTO_MSGS,                                                     /* Parcours de l'historique */
     TYPE_PAGE_ATELIER,                                               /* Il s'agit d'un atelier synoptique */
     TYPE_PAGE_SUPERVISION,                                            /* Supervision graphique synoptique */
     TYPE_PAGE_COURBE,                                              /* Affichage des courbes en temps reel */
@@ -139,9 +139,9 @@
     GtkWidget *Spin_num;
   };
 
- struct TYPE_INFO_HISTO_HARD
-  { GtkListStore *Liste_histo_hard;                  /* GtkTreeView pour la gestion des messages Watchdog */
-    GtkWidget *F_histo_hard;
+ struct TYPE_INFO_HISTO_MSGS
+  { GtkListStore *Liste_histo_msgs;                  /* GtkTreeView pour la gestion des messages Watchdog */
+    GtkWidget *F_histo_msgs;
     GtkWidget *Check_num;
     GtkWidget *Spin_num;
     GtkWidget *Check_type;
@@ -328,7 +328,7 @@
  extern void Menu_want_synoptique ( void );
  extern void Menu_want_mnemonique ( void );
  extern void Menu_want_camera ( void );
- extern void Menu_want_histo_hard ( void );
+ extern void Menu_want_histo_msgs ( void );
  extern void Menu_want_supervision( void );
  extern void Menu_want_courbe ( void );
  extern void Menu_want_histo_courbe ( void );
@@ -425,9 +425,9 @@
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );
 
- extern void Creer_page_liste_histo_hard( void );                              /* Dans liste_histo_hard.c */
- extern void Proto_effacer_liste_histo_hard( gint page_id );
- extern void Proto_afficher_un_histo_hard( struct CMD_RESPONSE_HISTO_MSGS *response );
+ extern void Creer_page_liste_histo_msgs( void );                              /* Dans liste_histo_msgs.c */
+ extern void Proto_effacer_liste_histo_msgs( gint page_id );
+ extern void Proto_afficher_un_histo_msgs( struct CMD_RESPONSE_HISTO_MSGS *response );
  
                                                                                     /* Dans supervision.c */
  extern void Creer_page_supervision( gchar *libelle, guint syn_id );

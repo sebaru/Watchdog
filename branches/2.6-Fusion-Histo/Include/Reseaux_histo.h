@@ -64,9 +64,9 @@
     SSTAG_CLIENT_ACK_HISTO,
     SSTAG_SERVEUR_ACK_HISTO,
     
-    SSTAG_CLIENT_REQUETE_HISTO_HARD,          /* Le client fait une requete sur l'historique de smessages */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,                     /* Reponse à une requete histo_hard */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN,
+    SSTAG_CLIENT_REQUETE_HISTO_MSGS,          /* Le client fait une requete sur l'historique de smessages */
+    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS,                     /* Reponse à une requete histo_hard */
+    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN,
   };
 
 #endif
